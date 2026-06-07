@@ -43,6 +43,9 @@ if (!getHostWindow()[LISTENER_KEY]) {
       case 'HIDE_SIDEBAR':
         void host.hide();
         break;
+      case 'ENSURE_SIDEBAR':
+        void host.ensure();
+        break;
     }
   });
 }

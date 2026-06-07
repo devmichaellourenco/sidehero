@@ -4,25 +4,40 @@ import {
   sendToContentScript,
 } from '../../infrastructure/messaging/ContentScriptBridge';
 import { createGameApplication } from '../../infrastructure/di/createGameApplication';
+import { SidebarPreferencesStore } from '../../infrastructure/storage/SidebarPreferences';
 
 const TICK_ALARM = 'taskbar-hero-tick';
 const TICK_INTERVAL_MINUTES = 0.1;
 
 const app = createGameApplication();
+const sidebarPrefsStore = new SidebarPreferencesStore();
+
+async function ensureSidebarOnTab(tabId: number, url?: string): Promise<void> {
+  if (!isInjectableUrl(url)) return;
+
+  const prefs = await sidebarPrefsStore.load();
+  if (!prefs.visible) return;
+
+  try {
+    await sendToContentScript(tabId, { type: 'ENSURE_SIDEBAR' });
+  } catch {
+    // Aba pode estar em carregamento ou restrita
+  }
+}
 
 chrome.runtime.onInstalled.addListener(async () => {
   chrome.alarms.create(TICK_ALARM, { periodInMinutes: TICK_INTERVAL_MINUTES });
 
   const tabs = await chrome.tabs.query({});
   for (const tab of tabs) {
-    if (!tab.id || !isInjectableUrl(tab.url)) continue;
-
-    try {
-      await sendToContentScript(tab.id, { type: 'SHOW_SIDEBAR' });
-    } catch {
-      // Aba pode estar em carregamento
-    }
+    if (!tab.id) continue;
+    await ensureSidebarOnTab(tab.id, tab.url);
   }
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status !== 'complete') return;
+  void ensureSidebarOnTab(tabId, tab.url);
 });
 
 chrome.action.onClicked.addListener(async (tab) => {

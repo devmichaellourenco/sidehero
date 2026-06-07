@@ -4,7 +4,8 @@ import {
   SIDEBAR_WIDTH_VAR,
 } from '../../infrastructure/storage/SidebarPreferences';
 import { FixedLayoutPatcher } from './layout/FixedLayoutPatcher';
-import { buildLayoutCss, shouldUseFixedPatcher } from './layout/SiteLayoutRules';
+import { buildLayoutCss, isYouTubeHost, shouldUseFixedPatcher } from './layout/SiteLayoutRules';
+import { YouTubeLayoutPatcher } from './layout/YouTubeLayoutPatcher';
 
 const PAGE_LAYOUT_STYLE_ID = 'taskbar-hero-page-layout-styles';
 
@@ -12,6 +13,7 @@ export class PageLayoutAdjuster {
   private observer: MutationObserver | null = null;
   private currentWidth = 0;
   private readonly fixedPatcher = new FixedLayoutPatcher();
+  private readonly youtubePatcher = new YouTubeLayoutPatcher();
 
   apply(widthPx: number): void {
     this.currentWidth = widthPx;
@@ -27,6 +29,9 @@ export class PageLayoutAdjuster {
     if (shouldUseFixedPatcher()) {
       this.fixedPatcher.reset();
       this.fixedPatcher.patch(widthPx);
+    } else if (isYouTubeHost()) {
+      this.youtubePatcher.reset();
+      this.youtubePatcher.patch(widthPx);
     }
 
     this.startObserver();
@@ -35,6 +40,7 @@ export class PageLayoutAdjuster {
   reset(): void {
     this.stopObserver();
     this.fixedPatcher.reset();
+    this.youtubePatcher.reset();
     this.currentWidth = 0;
 
     const html = document.documentElement;
@@ -88,6 +94,8 @@ export class PageLayoutAdjuster {
 
       if (shouldUseFixedPatcher()) {
         this.fixedPatcher.schedulePatch(this.currentWidth);
+      } else if (isYouTubeHost()) {
+        this.youtubePatcher.schedulePatch(this.currentWidth);
       }
     });
 

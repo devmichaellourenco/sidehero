@@ -10,7 +10,8 @@ export type ContentMessage =
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'TOGGLE_COLLAPSE' }
   | { type: 'SHOW_SIDEBAR' }
-  | { type: 'HIDE_SIDEBAR' };
+  | { type: 'HIDE_SIDEBAR' }
+  | { type: 'ENSURE_SIDEBAR' };
 
 export class SidebarHost {
   private prefs: SidebarPreferences;
@@ -22,9 +23,15 @@ export class SidebarHost {
   }
 
   async init(): Promise<void> {
+    await this.ensure();
+  }
+
+  async ensure(): Promise<void> {
     this.prefs = await this.prefsStore.load();
     if (this.prefs.visible) {
       this.mount();
+    } else {
+      this.unmount();
     }
   }
 

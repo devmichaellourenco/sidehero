@@ -2,7 +2,8 @@ export type ContentScriptMessage =
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'TOGGLE_COLLAPSE' }
   | { type: 'SHOW_SIDEBAR' }
-  | { type: 'HIDE_SIDEBAR' };
+  | { type: 'HIDE_SIDEBAR' }
+  | { type: 'ENSURE_SIDEBAR' };
 
 const CONTENT_SCRIPT_FILE = 'content/sidebar-host.js';
 
