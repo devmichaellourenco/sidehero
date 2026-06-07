@@ -4,6 +4,7 @@ import {
   SidebarPreferences,
   SidebarPreferencesStore,
 } from '../../infrastructure/storage/SidebarPreferences';
+import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
 import { PageLayoutAdjuster } from './PageLayoutAdjuster';
 
 export type ContentMessage =
@@ -93,10 +94,15 @@ export class SidebarHost {
 
     const panelUrl = chrome.runtime.getURL('panel/panel.html');
 
+    const brandUrl = getAssetUrl(ASSETS.ui.brand);
+
     root.innerHTML = `
       <div class="th-toolbar">
         <button class="th-toolbar-btn th-collapse-btn" title="Recolher painel">◀</button>
-        <span class="th-toolbar-title">⚔️ Side Hero</span>
+        <span class="th-toolbar-title">
+          <img class="th-toolbar-brand" src="${brandUrl}" alt="" aria-hidden="true" />
+          Side Hero
+        </span>
         <button class="th-toolbar-btn th-close-btn" title="Ocultar painel">✕</button>
       </div>
       <iframe class="th-game-frame" src="${panelUrl}" title="Side Hero"></iframe>
@@ -143,12 +149,36 @@ export class SidebarHost {
   }
 
   private injectStyles(): void {
-    if (document.getElementById('taskbar-hero-sidebar-styles')) return;
+    if (!document.getElementById('taskbar-hero-sidebar-styles')) {
+      const link = document.createElement('link');
+      link.id = 'taskbar-hero-sidebar-styles';
+      link.rel = 'stylesheet';
+      link.href = chrome.runtime.getURL('content/sidebar-host.css');
+      document.head.appendChild(link);
+    }
 
-    const link = document.createElement('link');
-    link.id = 'taskbar-hero-sidebar-styles';
-    link.rel = 'stylesheet';
-    link.href = chrome.runtime.getURL('content/sidebar-host.css');
-    document.head.appendChild(link);
+    if (document.getElementById('taskbar-hero-sidebar-fonts')) return;
+
+    const bodyFont = getAssetUrl(ASSETS.fonts.body);
+    const headingFont = getAssetUrl(ASSETS.fonts.heading);
+    const fontStyle = document.createElement('style');
+    fontStyle.id = 'taskbar-hero-sidebar-fonts';
+    fontStyle.textContent = `
+      @font-face {
+        font-family: 'Alata';
+        src: url('${bodyFont}') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Josefin Sans';
+        src: url('${headingFont}') format('truetype');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+    `;
+    document.head.appendChild(fontStyle);
   }
 }

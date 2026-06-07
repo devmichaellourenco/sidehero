@@ -10,16 +10,21 @@
     <div id="app">
       <header class="header">
         <div class="brand">
-          <span class="brand-icon">⚔️</span>
+          <img
+            id="brand-icon"
+            class="brand-icon"
+            src="assets/ui/brand.png"
+            alt="Side Hero"
+          />
           <div>
             <h1>Side Hero</h1>
             <p class="subtitle">Idle RPG no painel lateral</p>
           </div>
         </div>
         <div class="stats-bar">
-          <span id="stage-label">Stage 1</span>
-          <span id="gold-label">🪙 0</span>
-          <span id="chest-label">📦 0</span>
+          <span id="stage-label" class="stat-pill">Stage 1</span>
+          <span id="gold-label" class="stat-pill">0</span>
+          <span id="chest-label" class="stat-pill">0</span>
         </div>
       </header>
 
@@ -48,8 +53,14 @@
       </section>
 
       <footer class="actions">
-        <button id="tick-btn" class="btn primary">⚡ Avançar Batalha</button>
-        <button id="open-chest-btn" class="btn secondary" disabled>📦 Abrir Baú</button>
+        <button id="tick-btn" class="btn primary">
+          <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />
+          Avançar Batalha
+        </button>
+        <button id="open-chest-btn" class="btn secondary" disabled>
+          <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" />
+          Abrir Baú
+        </button>
       </footer>
     </div>
 

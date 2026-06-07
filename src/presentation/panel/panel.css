@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Alata';
+  src: url('assets/fonts/Alata-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Josefin Sans';
+  src: url('assets/fonts/JosefinSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #1a1a2e;
   --surface: #16213e;
@@ -10,6 +26,8 @@
   --common: #9e9e9e;
   --rare: #42a5f5;
   --epic: #ab47bc;
+  --font-body: 'Alata', system-ui, sans-serif;
+  --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
 }
 
 * {
@@ -26,8 +44,8 @@ body {
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  background: var(--bg);
+  font-family: var(--font-body);
+  background: var(--bg) url('assets/backgrounds/app.png') center / cover no-repeat;
   color: var(--text);
 }
 
@@ -38,6 +56,7 @@ body {
   padding: 12px;
   height: 100%;
   overflow-y: auto;
+  background: linear-gradient(180deg, rgba(15, 20, 40, 0.72), rgba(26, 26, 46, 0.92));
 }
 
 .header {
@@ -54,18 +73,24 @@ body {
 }
 
 .brand-icon {
-  font-size: 28px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
 }
 
 h1 {
-  font-size: 18px;
+  font-family: var(--font-heading);
+  font-size: 20px;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 h2 {
+  font-family: var(--font-heading);
   font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--muted);
   margin-bottom: 8px;
 }
@@ -77,25 +102,46 @@ h2 {
 
 .stats-bar {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(15, 52, 96, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 .battle-strip {
   position: relative;
-  height: 90px;
-  border-radius: 8px;
+  height: 96px;
+  border-radius: 10px;
   overflow: hidden;
-  border: 2px solid #2a2a4a;
+  border: 2px solid rgba(255, 255, 255, 0.08);
   background: var(--strip);
   flex-shrink: 0;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
 }
 
 .strip-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #1a3a5c 0%, var(--strip) 60%, var(--floor) 100%);
+  background:
+    url('assets/backgrounds/battle.png') center / cover no-repeat,
+    linear-gradient(180deg, #1a3a5c 0%, var(--strip) 60%, var(--floor) 100%);
 }
 
 .strip-floor {
@@ -115,17 +161,21 @@ h2 {
 
 .heroes-row {
   position: absolute;
-  bottom: 18px;
+  bottom: 16px;
   left: 12px;
   display: flex;
-  gap: 16px;
+  gap: 12px;
   z-index: 2;
 }
 
 .hero-sprite {
-  font-size: 24px;
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: march 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
 }
 
 .hero-sprite:nth-child(2) {
@@ -134,6 +184,24 @@ h2 {
 
 .hero-sprite:nth-child(3) {
   animation-delay: 0.4s;
+}
+
+.hero-glow {
+  position: absolute;
+  inset: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  object-fit: contain;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.hero-image,
+.enemy-image {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
 }
 
 @keyframes march {
@@ -148,14 +216,18 @@ h2 {
 
 .enemy-slot {
   position: absolute;
-  bottom: 18px;
-  right: 20px;
+  bottom: 14px;
+  right: 16px;
   z-index: 2;
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.enemy-sprite {
-  font-size: 28px;
+.enemy-image {
+  width: 40px;
+  height: 40px;
   animation: shake 0.5s ease-in-out infinite;
 }
 
@@ -176,22 +248,28 @@ h2 {
 }
 
 .health-bar {
-  width: 64px;
-  height: 5px;
-  background: #333;
-  border-radius: 3px;
-  overflow: hidden;
+  position: relative;
+  width: 72px;
+  height: 10px;
   margin-top: 4px;
+  background: url('assets/sliders/frame.png') center / 100% 100% no-repeat;
+  overflow: hidden;
 }
 
 .health-fill {
   height: 100%;
-  background: var(--accent);
   transition: width 0.3s ease;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: left center;
 }
 
 .health-fill.hero {
-  background: #4caf50;
+  background-image: url('assets/sliders/fill-hero.png');
+}
+
+.health-fill.enemy {
+  background-image: url('assets/sliders/fill-enemy.png');
 }
 
 .panels {
@@ -202,27 +280,53 @@ h2 {
 }
 
 .panel {
-  background: var(--surface);
-  border-radius: 8px;
+  background:
+    url('assets/frames/card.png') center / 100% 100% no-repeat,
+    rgba(22, 33, 62, 0.88);
+  border-radius: 10px;
   padding: 10px;
-  border: 1px solid #2a2a4a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .hero-card {
-  background: #1f2b47;
-  border-radius: 6px;
+  background: rgba(31, 43, 71, 0.82);
+  border-radius: 8px;
   padding: 8px;
   margin-bottom: 6px;
   font-size: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .hero-card-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 4px;
 }
 
+.hero-card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+}
+
+.hero-card-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.hero-level {
+  color: var(--gold);
+  font-family: var(--font-heading);
+}
+
 .hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
   color: var(--muted);
   font-size: 10px;
 }
@@ -238,11 +342,49 @@ h2 {
 .gear-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  background: #1f2b47;
-  border-radius: 6px;
+  gap: 6px;
+  background: rgba(31, 43, 71, 0.9);
+  border-radius: 8px;
   padding: 6px;
   font-size: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-image: var(--gear-frame);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.gear-item-main {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gear-icon-wrap {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.gear-slot-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.gear-rarity-icon {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.gear-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .gear-item.common {
@@ -264,17 +406,24 @@ h2 {
 }
 
 .gear-actions button {
-  font-size: 9px;
-  padding: 2px 6px;
+  width: 28px;
+  height: 28px;
+  padding: 2px;
   border: none;
-  border-radius: 4px;
-  background: #2a3f5f;
-  color: var(--text);
+  border-radius: 6px;
+  background: rgba(42, 63, 95, 0.9);
   cursor: pointer;
 }
 
 .gear-actions button:hover {
   background: var(--accent);
+}
+
+.equip-hero-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
 }
 
 .log-panel ul {
@@ -287,7 +436,7 @@ h2 {
 
 .log-panel li {
   padding: 3px 0;
-  border-bottom: 1px solid #2a2a4a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .actions {
@@ -299,17 +448,33 @@ h2 {
 
 .btn {
   flex: 1;
-  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 10px;
+  font-family: var(--font-heading);
+  font-weight: 700;
   font-size: 12px;
+  letter-spacing: 0.03em;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
+  transition: transform 0.1s, opacity 0.2s, filter 0.2s;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .btn:hover:not(:disabled) {
   transform: translateY(-1px);
+  filter: brightness(1.08);
 }
 
 .btn:disabled {
@@ -318,13 +483,12 @@ h2 {
 }
 
 .btn.primary {
-  background: var(--accent);
-  color: white;
+  background: url('assets/buttons/primary.png') center / 100% 100% no-repeat;
 }
 
 .btn.secondary {
-  background: var(--gold);
-  color: #1a1a2e;
+  background: url('assets/buttons/secondary.png') center / 100% 100% no-repeat;
+  color: #fff8e7;
 }
 
 .empty-state {

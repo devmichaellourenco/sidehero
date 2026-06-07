@@ -2,6 +2,7 @@ import * as esbuild from 'esbuild';
 import { mkdir, copyFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { copyAssets } from './copy-assets.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
@@ -59,6 +60,7 @@ async function build() {
 
   if (watch) {
     await copyStaticAssets();
+    await copyAssets();
     await moduleCtx.watch();
     await contentCtx.watch();
     console.log('Watching for changes...');
@@ -66,6 +68,7 @@ async function build() {
     await moduleCtx.rebuild();
     await contentCtx.rebuild();
     await copyStaticAssets();
+    await copyAssets();
     await moduleCtx.dispose();
     await contentCtx.dispose();
     console.log('Build concluído em dist/');

@@ -1,5 +1,6 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { sendGameMessage } from '../../infrastructure/messaging/GameMessageBus';
+import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { HeroPanelRenderer } from './HeroPanelRenderer';
 import { InventoryRenderer } from './InventoryRenderer';
@@ -73,9 +74,9 @@ export class GameViewController {
   private render(state: GameStateDto): void {
     this.state = state;
 
-    this.stageLabel.textContent = `Stage ${state.stage}`;
-    this.goldLabel.textContent = `🪙 ${state.gold}`;
-    this.chestLabel.textContent = `📦 ${state.pendingChestCount}`;
+    this.stageLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.stage), 'Stage', 'stat-icon')} Stage ${state.stage}`;
+    this.goldLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'stat-icon')} ${state.gold}`;
+    this.chestLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.chest), 'Baús', 'stat-icon')} ${state.pendingChestCount}`;
 
     this.battleStrip.render(state);
     this.heroPanel.render(state);
