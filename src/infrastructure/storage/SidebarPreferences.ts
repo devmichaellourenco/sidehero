@@ -1,3 +1,5 @@
+import { isExtensionContextValid, isContextInvalidatedError } from '../messaging/ExtensionContext';
+
 export interface SidebarPreferences {
   visible: boolean;
   collapsed: boolean;
@@ -14,13 +16,30 @@ const DEFAULT_PREFS: SidebarPreferences = {
 
 export class SidebarPreferencesStore {
   async load(): Promise<SidebarPreferences> {
-    const result = await chrome.storage.local.get(STORAGE_KEY);
-    const raw = result[STORAGE_KEY] as Partial<SidebarPreferences> | undefined;
-    return { ...DEFAULT_PREFS, ...raw };
+    if (!isExtensionContextValid()) {
+      return { ...DEFAULT_PREFS };
+    }
+
+    try {
+      const result = await chrome.storage.local.get(STORAGE_KEY);
+      const raw = result[STORAGE_KEY] as Partial<SidebarPreferences> | undefined;
+      return { ...DEFAULT_PREFS, ...raw };
+    } catch (error) {
+      if (isContextInvalidatedError(error)) {
+        return { ...DEFAULT_PREFS };
+      }
+      throw error;
+    }
   }
 
   async save(prefs: SidebarPreferences): Promise<void> {
-    await chrome.storage.local.set({ [STORAGE_KEY]: prefs });
+    if (!isExtensionContextValid()) return;
+
+    try {
+      await chrome.storage.local.set({ [STORAGE_KEY]: prefs });
+    } catch (error) {
+      if (!isContextInvalidatedError(error)) throw error;
+    }
   }
 
   async update(partial: Partial<SidebarPreferences>): Promise<SidebarPreferences> {

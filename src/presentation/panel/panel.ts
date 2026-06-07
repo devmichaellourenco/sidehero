@@ -1,9 +1,8 @@
 import { GameViewController } from '../components/GameViewController';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const appRoot = document.getElementById('app');
-  if (!appRoot) return;
+  if (!document.getElementById('app')) return;
 
-  const controller = new GameViewController(appRoot);
+  const controller = new GameViewController(document.body);
   controller.init();
 });

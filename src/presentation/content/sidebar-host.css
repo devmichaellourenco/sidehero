@@ -106,3 +106,19 @@
 #taskbar-hero-sidebar-root .th-expand-label {
   display: none;
 }
+
+#taskbar-hero-sidebar-root .th-reconnect-hint {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 3;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(233, 69, 96, 0.92);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}

@@ -60,8 +60,22 @@ export class SidebarHost {
 
   async toggleCollapse(): Promise<void> {
     if (!this.root) return;
-    this.prefs = await this.prefsStore.update({ collapsed: !this.prefs.collapsed });
-    this.applyLayout();
+
+    try {
+      this.prefs = await this.prefsStore.update({ collapsed: !this.prefs.collapsed });
+      this.applyLayout();
+    } catch {
+      this.showReconnectHint();
+    }
+  }
+
+  private showReconnectHint(): void {
+    if (!this.root || this.root.querySelector('.th-reconnect-hint')) return;
+
+    const hint = document.createElement('div');
+    hint.className = 'th-reconnect-hint';
+    hint.textContent = 'Recarregue a página (F5) para reconectar a extensão.';
+    this.root.appendChild(hint);
   }
 
   private mount(): void {
@@ -98,7 +112,7 @@ export class SidebarHost {
 
     root.innerHTML = `
       <div class="th-toolbar">
-        <button class="th-toolbar-btn th-collapse-btn" title="Recolher painel">◀</button>
+        <button class="th-toolbar-btn th-collapse-btn" type="button" title="Recolher painel" aria-label="Recolher painel">▶</button>
         <span class="th-toolbar-title">
           <img class="th-toolbar-brand" src="${brandUrl}" alt="" aria-hidden="true" />
           Side Hero
@@ -141,7 +155,26 @@ export class SidebarHost {
       this.root.classList.remove('th-collapsed');
     }
 
+    this.updateCollapseButton();
     this.pageLayout.apply(width);
+  }
+
+  private updateCollapseButton(): void {
+    if (!this.root) return;
+
+    const button = this.root.querySelector('.th-collapse-btn');
+    if (!button) return;
+
+    if (this.prefs.collapsed) {
+      button.textContent = '◀';
+      button.setAttribute('title', 'Expandir painel');
+      button.setAttribute('aria-label', 'Expandir painel');
+      return;
+    }
+
+    button.textContent = '▶';
+    button.setAttribute('title', 'Recolher painel');
+    button.setAttribute('aria-label', 'Recolher painel');
   }
 
   private resetPageLayout(): void {

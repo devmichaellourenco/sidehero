@@ -35,16 +35,9 @@
         <div class="strip-floor"></div>
       </section>
 
-      <section class="panels">
-        <div class="panel">
-          <h2>Heróis</h2>
-          <div id="hero-panels" class="game-scroll"></div>
-        </div>
-
-        <div class="panel">
-          <h2>Inventário</h2>
-          <div id="inventory-list" class="inventory-list game-scroll"></div>
-        </div>
+      <section class="panel heroes-panel">
+        <h2>Heróis</h2>
+        <div id="hero-panels" class="game-scroll"></div>
       </section>
 
       <section class="panel log-panel">
@@ -53,7 +46,7 @@
       </section>
 
       <footer class="actions">
-        <button id="tick-btn" class="btn primary">
+        <button id="tick-btn" class="btn primary actions-full">
           <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />
           Avançar Batalha
         </button>
@@ -61,7 +54,23 @@
           <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" />
           Abrir Baú
         </button>
+        <button id="open-inventory-btn" class="btn secondary" type="button">
+          <img class="btn-icon" src="assets/ui/inventory.png" alt="" aria-hidden="true" />
+          Inventário
+        </button>
       </footer>
+    </div>
+
+    <div id="modal-root" class="modal-root hidden" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <header class="modal-header">
+          <button type="button" class="modal-back hidden" data-modal-back aria-label="Voltar">←</button>
+          <h2 id="modal-title" class="modal-title"></h2>
+          <button type="button" class="modal-close" data-modal-close aria-label="Fechar">×</button>
+        </header>
+        <div id="modal-body" class="modal-body game-scroll"></div>
+      </div>
     </div>
 
     <script type="module" src="panel.js"></script>

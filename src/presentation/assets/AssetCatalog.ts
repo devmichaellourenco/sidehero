@@ -1,4 +1,5 @@
 import type { EnemyType } from '../../domain/entities/EnemyType';
+import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
 
 export type HeroClassKey = 'knight' | 'sorcerer' | 'priest';
 export type EnemyTypeKey = EnemyType;
@@ -75,7 +76,15 @@ export const ASSETS = {
 } as const;
 
 export function getAssetUrl(relativePath: string): string {
-  return chrome.runtime.getURL(`panel/assets/${relativePath}`);
+  if (!isExtensionContextValid()) {
+    return '';
+  }
+
+  try {
+    return chrome.runtime.getURL(`panel/assets/${relativePath}`);
+  } catch {
+    return '';
+  }
 }
 
 export function getHeroSprite(heroClass: string): string {
