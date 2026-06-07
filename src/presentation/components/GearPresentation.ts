@@ -127,6 +127,8 @@ export function renderGearCard(
     actionClassName?: string;
     actionDataAttrs?: Record<string, string>;
     showAction?: boolean;
+    upgradeBadge?: string;
+    extraContent?: string;
   } = {},
 ): string {
   const frameUrl = getGearFrameSprite(gear.rarity);
@@ -146,9 +148,13 @@ export function renderGearCard(
           ${imgTag(getGearRaritySprite(gear.rarity), gear.rarity, 'gear-rarity-icon')}
         </div>
         <div class="gear-item-info">
-          <strong>${gear.name}</strong>
+          <div class="gear-item-title-row">
+            <strong>${gear.name}</strong>
+            ${options.upgradeBadge ?? ''}
+          </div>
           <span class="gear-slot-tag">${GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot}</span>
           <span>+${gear.attackBonus} ATK · +${gear.defenseBonus} DEF · +${gear.healthBonus} HP</span>
+          ${options.extraContent ?? ''}
         </div>
       </div>
       ${

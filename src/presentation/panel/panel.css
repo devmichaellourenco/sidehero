@@ -546,6 +546,64 @@ h2 {
   object-fit: contain;
 }
 
+.gear-item-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gear-upgrade-badge {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-family: var(--font-heading);
+  letter-spacing: 0.02em;
+}
+
+.gear-upgrade-upgrade {
+  color: #0f1f12;
+  background: #7ee787;
+}
+
+.gear-upgrade-downgrade {
+  color: #fff;
+  background: rgba(255, 107, 107, 0.85);
+}
+
+.gear-upgrade-equal {
+  color: #fff8e7;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.gear-inline-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+  font-size: 9px;
+}
+
+.modal-sort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.modal-sort-label {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.equip-hero-card-comparison {
+  width: 100%;
+  margin-top: 6px;
+  text-align: left;
+}
+
 .gear-item-info {
   display: flex;
   flex-direction: column;
@@ -668,6 +726,59 @@ h2 {
 
 .actions-full {
   flex: 1 1 100%;
+}
+
+.battle-controls {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.battle-main-btn {
+  flex: 1;
+}
+
+.auto-battle-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 64px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(18, 28, 48, 0.92);
+  cursor: pointer;
+  user-select: none;
+}
+
+.auto-battle-toggle input {
+  accent-color: var(--gold);
+}
+
+.auto-battle-label {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff8e7;
+}
+
+.btn.auto-battle-active {
+  opacity: 0.72;
+  animation: auto-battle-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes auto-battle-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
+}
+
+#open-chest-btn.chest-available:not(:disabled) {
+  box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.45);
 }
 
 .btn {
@@ -1017,6 +1128,9 @@ body.modal-open {
 }
 
 .game-toast {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 11px;
@@ -1029,6 +1143,20 @@ body.modal-open {
   opacity: 0;
   transform: translateY(-8px);
   transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto;
+}
+
+.game-toast-clickable {
+  cursor: pointer;
+}
+
+.game-toast-clickable:hover {
+  filter: brightness(1.08);
+}
+
+.game-toast-hint {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .game-toast.visible {
@@ -1051,6 +1179,11 @@ body.modal-open {
 
 .game-toast-loot {
   border-color: rgba(171, 71, 188, 0.55);
+}
+
+.game-toast-idle {
+  border-color: rgba(129, 199, 132, 0.55);
+  background: linear-gradient(90deg, rgba(24, 48, 28, 0.95), rgba(20, 32, 58, 0.96));
 }
 
 .loot-reveal-intro {

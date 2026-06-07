@@ -1,16 +1,27 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ToastController } from './ToastController';
 
+export interface StateChangeHandlers {
+  onChestAvailable?: () => void;
+}
+
 export class GameStateChangeDetector {
   constructor(private readonly toasts: ToastController) {}
 
-  detect(previous: GameStateDto | null, next: GameStateDto): void {
+  detect(
+    previous: GameStateDto | null,
+    next: GameStateDto,
+    handlers: StateChangeHandlers = {},
+  ): void {
     if (!previous) return;
 
     if (next.pendingChestCount > previous.pendingChestCount) {
       const count = next.pendingChestCount - previous.pendingChestCount;
       const label = count === 1 ? 'Baú disponível!' : `${count} baús disponíveis!`;
-      this.toasts.show(label, 'chest');
+      this.toasts.show(label, 'chest', {
+        hint: 'Clique para abrir',
+        onClick: handlers.onChestAvailable,
+      });
     }
 
     if (next.stage > previous.stage) {
@@ -27,5 +38,9 @@ export class GameStateChangeDetector {
 
   showLootReceived(gearName: string): void {
     this.toasts.show(`Loot: ${gearName}`, 'loot');
+  }
+
+  showIdleSummary(message: string): void {
+    this.toasts.show(message, 'idle', { durationMs: 6500 });
   }
 }

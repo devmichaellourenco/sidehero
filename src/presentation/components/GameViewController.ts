@@ -11,6 +11,12 @@ import { HeroPanelRenderer } from './HeroPanelRenderer';
 import { InventoryModalRenderer } from './InventoryModalRenderer';
 import { LootModalRenderer } from './LootModalRenderer';
 import { ModalController } from './ModalController';
+import {
+  buildIdleSummary,
+  loadPanelSnapshot,
+  seedPanelSnapshotIfMissing,
+  touchPanelSnapshot,
+} from './PanelStateSnapshot';
 import { ToastController } from './ToastController';
 
 type ModalView =
@@ -19,18 +25,30 @@ type ModalView =
   | { type: 'equip-picker'; mode: EquipPickerMode }
   | { type: 'loot-reveal'; gearId: string };
 
+const AUTO_BATTLE_STORAGE_KEY = 'sidehero_auto_battle';
+const AUTO_BATTLE_INTERVAL_MS = 2500;
+
 export class GameViewController {
   private state: GameStateDto | null = null;
   private readonly modalStack: ModalView[] = [];
+  private readonly lootQueue: string[] = [];
+  private lootTotal = 0;
   private refreshTimer: number | null = null;
+  private autoBattleTimer: number | null = null;
+  private autoBattleEnabled = false;
   private contextInvalidated = false;
+  private idleSummaryShown = false;
+  private openingChests = false;
 
   private readonly stageLabel: HTMLElement;
   private readonly goldLabel: HTMLElement;
   private readonly chestLabel: HTMLElement;
   private readonly battleLog: HTMLElement;
+  private readonly tickBtn: HTMLButtonElement;
   private readonly openChestBtn: HTMLButtonElement;
+  private readonly openAllChestsBtn: HTMLButtonElement;
   private readonly openInventoryBtn: HTMLButtonElement;
+  private readonly autoBattleToggle: HTMLInputElement;
 
   private readonly battleStrip: BattleStripRenderer;
   private readonly heroPanel: HeroPanelRenderer;
@@ -47,8 +65,11 @@ export class GameViewController {
     this.goldLabel = root.querySelector('#gold-label')!;
     this.chestLabel = root.querySelector('#chest-label')!;
     this.battleLog = root.querySelector('#battle-log')!;
+    this.tickBtn = root.querySelector('#tick-btn') as HTMLButtonElement;
     this.openChestBtn = root.querySelector('#open-chest-btn') as HTMLButtonElement;
+    this.openAllChestsBtn = root.querySelector('#open-all-chests-btn') as HTMLButtonElement;
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
+    this.autoBattleToggle = root.querySelector('#auto-battle-toggle') as HTMLInputElement;
 
     this.battleStrip = new BattleStripRenderer(
       root.querySelector('#heroes-container')!,
@@ -70,14 +91,32 @@ export class GameViewController {
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.stateChanges = new GameStateChangeDetector(this.toasts);
 
-    root.querySelector('#tick-btn')!.addEventListener('click', () => this.tick());
+    this.autoBattleEnabled = this.loadAutoBattlePreference();
+    this.autoBattleToggle.checked = this.autoBattleEnabled;
+    this.updateAutoBattleUi();
+
+    this.tickBtn.addEventListener('click', () => this.tick());
     this.openChestBtn.addEventListener('click', () => this.openNextChest());
+    this.openAllChestsBtn.addEventListener('click', () => this.openAllChests());
     this.openInventoryBtn.addEventListener('click', () => this.openInventoryModal());
+    this.autoBattleToggle.addEventListener('change', () => this.setAutoBattle(this.autoBattleToggle.checked));
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this.state) {
+        touchPanelSnapshot(this.state);
+        this.idleSummaryShown = false;
+        return;
+      }
+
+      if (!document.hidden && this.state) {
+        this.maybeShowIdleSummary(this.state);
+      }
+    });
   }
 
   async init(): Promise<void> {
     try {
-      await this.refresh();
+      await this.refresh({ checkIdleSummary: true });
     } catch {
       this.handleContextInvalidated();
       return;
@@ -85,12 +124,64 @@ export class GameViewController {
 
     if (this.contextInvalidated) return;
 
+    if (this.autoBattleEnabled) {
+      this.startAutoBattle();
+    }
+
     this.refreshTimer = window.setInterval(() => {
       void this.refresh();
     }, 5000);
   }
 
-  private async refresh(): Promise<void> {
+  private loadAutoBattlePreference(): boolean {
+    try {
+      return sessionStorage.getItem(AUTO_BATTLE_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private saveAutoBattlePreference(enabled: boolean): void {
+    try {
+      sessionStorage.setItem(AUTO_BATTLE_STORAGE_KEY, enabled ? '1' : '0');
+    } catch {
+      // sessionStorage indisponível
+    }
+  }
+
+  private setAutoBattle(enabled: boolean): void {
+    this.autoBattleEnabled = enabled;
+    this.saveAutoBattlePreference(enabled);
+    this.updateAutoBattleUi();
+
+    if (enabled) {
+      this.startAutoBattle();
+      return;
+    }
+
+    this.stopAutoBattle();
+  }
+
+  private startAutoBattle(): void {
+    if (this.autoBattleTimer !== null || this.contextInvalidated) return;
+
+    this.autoBattleTimer = window.setInterval(() => {
+      void this.tick();
+    }, AUTO_BATTLE_INTERVAL_MS);
+  }
+
+  private stopAutoBattle(): void {
+    if (this.autoBattleTimer === null) return;
+    window.clearInterval(this.autoBattleTimer);
+    this.autoBattleTimer = null;
+  }
+
+  private updateAutoBattleUi(): void {
+    this.tickBtn.classList.toggle('auto-battle-active', this.autoBattleEnabled);
+    this.tickBtn.disabled = this.autoBattleEnabled;
+  }
+
+  private async refresh(options: { checkIdleSummary?: boolean } = {}): Promise<void> {
     if (this.contextInvalidated) return;
 
     const response = await sendGameMessage({ type: 'GET_STATE' });
@@ -98,7 +189,8 @@ export class GameViewController {
       this.handleFailedResponse(response.error);
       return;
     }
-    this.render(response.state);
+
+    this.render(response.state, { checkIdleSummary: options.checkIdleSummary });
   }
 
   private handleFailedResponse(error?: string): void {
@@ -111,11 +203,14 @@ export class GameViewController {
     if (this.contextInvalidated) return;
     this.contextInvalidated = true;
     this.modalStack.length = 0;
+    this.lootQueue.length = 0;
 
     if (this.refreshTimer !== null) {
       window.clearInterval(this.refreshTimer);
       this.refreshTimer = null;
     }
+
+    this.stopAutoBattle();
 
     try {
       this.modal.close('action');
@@ -140,6 +235,8 @@ export class GameViewController {
   }
 
   private async tick(): Promise<void> {
+    if (this.openingChests) return;
+
     const response = await sendGameMessage({ type: 'TICK', ticks: 1 });
     if (!response.ok) {
       this.handleFailedResponse(response.error);
@@ -149,22 +246,81 @@ export class GameViewController {
   }
 
   private async openNextChest(): Promise<void> {
-    if (!this.state) return;
+    if (!this.state || this.openingChests) return;
     const pending = this.state.chests.find((c) => !c.opened);
     if (!pending) return;
 
-    const response = await sendGameMessage({ type: 'OPEN_CHEST', chestId: pending.id });
-    if (!response.ok) {
-      this.handleFailedResponse(response.error);
+    this.openingChests = true;
+
+    try {
+      const response = await sendGameMessage({ type: 'OPEN_CHEST', chestId: pending.id });
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
+
+      this.render(response.state, { skipChestToast: true });
+
+      if (response.openedGear) {
+        this.stateChanges.showLootReceived(response.openedGear.name);
+        this.lootQueue.length = 0;
+        this.enqueueLootModals([response.openedGear.id]);
+      }
+    } finally {
+      this.openingChests = false;
+    }
+  }
+
+  private async openAllChests(): Promise<void> {
+    if (!this.state || this.openingChests || this.state.pendingChestCount === 0) return;
+
+    this.openingChests = true;
+
+    try {
+      const response = await sendGameMessage({ type: 'OPEN_ALL_CHESTS' });
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
+
+      const openedGears = response.openedGears ?? [];
+      this.render(response.state, { skipChestToast: true });
+
+      if (openedGears.length > 0) {
+        this.toasts.show(`${openedGears.length} itens recebidos dos baús`, 'loot');
+        this.enqueueLootModals(openedGears.map((gear) => gear.id));
+      }
+    } finally {
+      this.openingChests = false;
+    }
+  }
+
+  private enqueueLootModals(gearIds: string[]): void {
+    this.lootTotal = gearIds.length;
+    this.lootQueue.push(...gearIds);
+    this.showNextLootModal();
+  }
+
+  private showNextLootModal(): void {
+    const gearId = this.lootQueue[0];
+    if (!gearId) return;
+
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'loot-reveal', gearId });
+  }
+
+  private advanceLootQueue(): void {
+    if (this.lootQueue.length > 0) {
+      this.lootQueue.shift();
+    }
+
+    if (this.lootQueue.length > 0) {
+      this.showNextLootModal();
       return;
     }
 
-    this.render(response.state, { skipChestToast: true });
-
-    if (response.openedGear) {
-      this.stateChanges.showLootReceived(response.openedGear.name);
-      this.modalStack.length = 0;
-      this.pushModal({ type: 'loot-reveal', gearId: response.openedGear.id });
+    if (this.modalStack.length === 0) {
+      this.modal.close('action');
     }
   }
 
@@ -199,6 +355,11 @@ export class GameViewController {
 
     this.render(state);
 
+    if (topView?.type === 'loot-reveal' && this.lootQueue.length > 0) {
+      this.advanceLootQueue();
+      return;
+    }
+
     if (this.modalStack.length === 0) {
       this.modal.close('action');
     }
@@ -209,6 +370,12 @@ export class GameViewController {
     if (topView?.type !== 'loot-reveal') return;
 
     this.modalStack.pop();
+
+    if (this.lootQueue.length > 0) {
+      this.advanceLootQueue();
+      return;
+    }
+
     if (this.modalStack.length === 0) {
       this.modal.close('action');
       return;
@@ -274,6 +441,7 @@ export class GameViewController {
     const container = this.modal.open(title, (reason) => {
       if (reason !== 'action') {
         this.modalStack.length = 0;
+        this.lootQueue.length = 0;
       }
     });
 
@@ -285,6 +453,7 @@ export class GameViewController {
         this.inventoryModal.render(container, this.state, {
           onEquipGear: (gearId) => this.openEquipPickerFromGear(gearId),
           onFilterChange: () => this.renderModalTop(),
+          onSortChange: () => this.renderModalTop(),
         });
         break;
       case 'hero-detail':
@@ -318,8 +487,11 @@ export class GameViewController {
         const hero = this.state.heroes.find((entry) => entry.id === view.heroId);
         return hero ? hero.name : 'Herói';
       }
-      case 'loot-reveal':
-        return 'Loot do baú';
+      case 'loot-reveal': {
+        const current = this.lootTotal - this.lootQueue.length + 1;
+        const queueLabel = this.lootTotal > 1 ? ` (${current} de ${this.lootTotal})` : '';
+        return `Loot do baú${queueLabel}`;
+      }
       case 'equip-picker':
         if (view.mode.type === 'gear') {
           const gear = this.state.inventory.find((entry) => entry.id === view.mode.gearId);
@@ -338,18 +510,41 @@ export class GameViewController {
     }
   }
 
+  private maybeShowIdleSummary(state: GameStateDto): void {
+    if (this.idleSummaryShown) return;
+
+    const snapshot = loadPanelSnapshot();
+    if (!snapshot) return;
+
+    const summary = buildIdleSummary(snapshot, state);
+    if (!summary) return;
+
+    this.stateChanges.showIdleSummary(summary);
+    this.idleSummaryShown = true;
+    touchPanelSnapshot(state);
+  }
+
   private render(
     state: GameStateDto,
-    options: { skipChestToast?: boolean } = {},
+    options: { skipChestToast?: boolean; checkIdleSummary?: boolean } = {},
   ): void {
     if (this.contextInvalidated || !isExtensionContextValid()) {
       this.handleContextInvalidated();
       return;
     }
 
+    if (options.checkIdleSummary) {
+      seedPanelSnapshotIfMissing(state);
+      this.maybeShowIdleSummary(state);
+    }
+
     const previous = this.state;
     if (previous && !options.skipChestToast) {
-      this.stateChanges.detect(previous, state);
+      this.stateChanges.detect(previous, state, {
+        onChestAvailable: () => {
+          void this.openNextChest();
+        },
+      });
     }
 
     this.state = state;
@@ -374,7 +569,11 @@ export class GameViewController {
       .map((entry) => `<li>${entry.message}</li>`)
       .join('');
 
-    this.openChestBtn.disabled = state.pendingChestCount === 0;
+    const hasChests = state.pendingChestCount > 0;
+    this.openChestBtn.disabled = !hasChests || this.openingChests;
+    this.openAllChestsBtn.disabled = state.pendingChestCount < 2 || this.openingChests;
+    this.openChestBtn.classList.toggle('chest-available', hasChests);
+    this.openAllChestsBtn.classList.toggle('hidden', state.pendingChestCount < 2);
 
     if (this.modal.isOpen() && this.modalStack.length > 0) {
       this.renderModalTop();

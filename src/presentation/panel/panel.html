@@ -46,13 +46,23 @@
       </section>
 
       <footer class="actions">
-        <button id="tick-btn" class="btn primary actions-full">
-          <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />
-          Avançar Batalha
-        </button>
+        <div class="battle-controls actions-full">
+          <button id="tick-btn" class="btn primary battle-main-btn" type="button">
+            <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />
+            Avançar Batalha
+          </button>
+          <label class="auto-battle-toggle" title="Avança batalhas automaticamente">
+            <input id="auto-battle-toggle" type="checkbox" />
+            <span class="auto-battle-label">Auto</span>
+          </label>
+        </div>
         <button id="open-chest-btn" class="btn secondary" disabled>
           <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" />
           Abrir Baú
+        </button>
+        <button id="open-all-chests-btn" class="btn secondary hidden" type="button">
+          <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" />
+          Abrir Todos
         </button>
         <button id="open-inventory-btn" class="btn secondary" type="button">
           <img class="btn-icon" src="assets/ui/inventory.png" alt="" aria-hidden="true" />

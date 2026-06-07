@@ -7,6 +7,7 @@ import {
   renderGearCard,
 } from './GearPresentation';
 import { getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { renderInlineComparison } from './GearComparison';
 
 export type EquipPickerMode =
   | { type: 'slot'; heroId: string; slot: GearSlotKey }
@@ -72,6 +73,7 @@ export class EquipPickerModalRenderer {
                     'data-pick-gear': gear.id,
                     'data-pick-hero': heroId,
                   },
+                  extraContent: renderInlineComparison(gear, equipped),
                 }),
               )
               .join('')}
@@ -133,15 +135,19 @@ export class EquipPickerModalRenderer {
       <p class="equip-picker-context">Em qual herói deseja equipar?</p>
       <div class="equip-hero-picker">
         ${state.heroes
-          .map(
-            (hero) => `
+          .map((hero) => {
+            const equipped = getHeroEquipment(hero, gear.slot as GearSlotKey);
+            const comparison = renderInlineComparison(gear, equipped);
+
+            return `
               <button type="button" class="equip-hero-card" data-pick-hero="${hero.id}" data-pick-gear="${gearId}">
                 ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'equip-hero-card-icon')}
                 <span class="equip-hero-card-name">${hero.name}</span>
                 <span class="equip-hero-card-level">Lv.${hero.level}</span>
+                <div class="equip-hero-card-comparison">${comparison}</div>
               </button>
-            `,
-          )
+            `;
+          })
           .join('')}
       </div>
     `;

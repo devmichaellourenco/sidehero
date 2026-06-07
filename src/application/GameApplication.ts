@@ -4,6 +4,7 @@ import { IGameStateRepository } from '../domain/repositories/IGameStateRepositor
 import { EquipGearUseCase } from './use-cases/EquipGearUseCase';
 import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
 import { GetGameStateUseCase } from './use-cases/GetGameStateUseCase';
+import { OpenAllChestsUseCase } from './use-cases/OpenAllChestsUseCase';
 import { OpenChestUseCase } from './use-cases/OpenChestUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
 
@@ -11,6 +12,7 @@ export class GameApplication {
   readonly getState: GetGameStateUseCase;
   readonly tick: TickGameUseCase;
   readonly openChest: OpenChestUseCase;
+  readonly openAllChests: OpenAllChestsUseCase;
   readonly equipGear: EquipGearUseCase;
   readonly unequipGear: UnequipGearUseCase;
 
@@ -21,6 +23,7 @@ export class GameApplication {
     this.getState = new GetGameStateUseCase(repository);
     this.tick = new TickGameUseCase(repository, combatService);
     this.openChest = new OpenChestUseCase(repository, lootService);
+    this.openAllChests = new OpenAllChestsUseCase(repository, lootService);
     this.equipGear = new EquipGearUseCase(repository);
     this.unequipGear = new UnequipGearUseCase(repository);
   }
