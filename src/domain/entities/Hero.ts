@@ -136,6 +136,26 @@ export class Hero {
     return new Hero({ ...updated.toProps(), currentHealth: updated.maxHealth });
   }
 
+  unequip(slot: GearSlot): { hero: Hero; removed: Gear | null } {
+    const removed = this.equipment[slot] ?? null;
+    if (!removed) {
+      return { hero: this, removed: null };
+    }
+
+    const updated = new Hero({
+      ...this.toProps(),
+      equipment: { ...this.equipment, [slot]: null },
+    });
+
+    return {
+      hero: new Hero({
+        ...updated.toProps(),
+        currentHealth: Math.min(this.currentHealth, updated.maxHealth),
+      }),
+      removed,
+    };
+  }
+
   toProps(): HeroProps {
     return {
       id: this.id,

@@ -158,9 +158,30 @@ export class GameViewController {
       return;
     }
 
-    this.render(response.state);
-    this.modalStack.length = 0;
-    this.modal.close('action');
+    this.afterGearMutation(response.state);
+  }
+
+  private async unequipGear(heroId: string, slot: GearSlotKey): Promise<void> {
+    const response = await sendGameMessage({ type: 'UNEQUIP_GEAR', heroId, slot });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    this.afterGearMutation(response.state);
+  }
+
+  private afterGearMutation(state: GameStateDto): void {
+    const topView = this.modalStack[this.modalStack.length - 1];
+    if (topView?.type === 'equip-picker') {
+      this.modalStack.pop();
+    }
+
+    this.render(state);
+
+    if (this.modalStack.length === 0) {
+      this.modal.close('action');
+    }
   }
 
   private openInventoryModal(): void {
@@ -242,6 +263,7 @@ export class GameViewController {
         this.equipPickerModal.render(container, this.state, view.mode, {
           onSelectGear: (heroId, gearId) => this.equipGear(heroId, gearId),
           onSelectHero: (heroId, gearId) => this.equipGear(heroId, gearId),
+          onUnequip: (heroId, slot) => this.unequipGear(heroId, slot),
         });
         break;
     }

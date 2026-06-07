@@ -93,6 +93,13 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.equipGear.execute(message.heroId, message.gearId);
       return { ok: true, state };
     }
+    case 'UNEQUIP_GEAR': {
+      const state = await app.unequipGear.execute(
+        message.heroId,
+        message.slot as 'weapon' | 'armor' | 'accessory',
+      );
+      return { ok: true, state };
+    }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
   }

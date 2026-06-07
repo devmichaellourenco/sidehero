@@ -2,6 +2,8 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import {
   GEAR_SLOT_LABELS,
   GearSlotKey,
+  getHeroEquipment,
+  renderEquippedGearCard,
   renderGearCard,
 } from './GearPresentation';
 import { getHeroSprite, imgTag } from '../assets/AssetCatalog';
@@ -13,6 +15,7 @@ export type EquipPickerMode =
 export type EquipPickerHandlers = {
   onSelectGear: (heroId: string, gearId: string) => void;
   onSelectHero: (heroId: string, gearId: string) => void;
+  onUnequip: (heroId: string, slot: GearSlotKey) => void;
 };
 
 export class EquipPickerModalRenderer {
@@ -39,39 +42,54 @@ export class EquipPickerModalRenderer {
   ): void {
     const hero = state.heroes.find((entry) => entry.id === heroId);
     const compatible = state.inventory.filter((gear) => gear.slot === slot);
+    const equipped = hero ? getHeroEquipment(hero, slot) : null;
 
     if (!hero) {
       container.innerHTML = '<p class="empty-state">Herói não encontrado.</p>';
       return;
     }
 
-    if (compatible.length === 0) {
-      container.innerHTML = `
-        <p class="empty-state modal-empty">
-          Nenhum ${GEAR_SLOT_LABELS[slot].toLowerCase()} disponível no inventário.
-          Derrote inimigos e abra baús para obter itens.
+    const equippedSection = equipped
+      ? `
+        <section class="equip-picker-equipped">
+          <h4 class="equip-picker-section-title">Equipado agora</h4>
+          ${renderEquippedGearCard(equipped, { heroId, slot })}
+        </section>
+      `
+      : '';
+
+    const inventorySection =
+      compatible.length > 0
+        ? `
+        <section class="equip-picker-inventory">
+          <h4 class="equip-picker-section-title">Trocar por</h4>
+          <div class="modal-gear-list">
+            ${compatible
+              .map((gear) =>
+                renderGearCard(gear, {
+                  actionLabel: 'Equipar',
+                  actionDataAttrs: {
+                    'data-pick-gear': gear.id,
+                    'data-pick-hero': heroId,
+                  },
+                }),
+              )
+              .join('')}
+          </div>
+        </section>
+      `
+        : `
+        <p class="empty-state modal-empty equip-picker-empty">
+          Nenhum ${GEAR_SLOT_LABELS[slot].toLowerCase()} disponível no inventário para trocar.
         </p>
       `;
-      return;
-    }
 
     container.innerHTML = `
       <p class="equip-picker-context">
-        Escolha um item para <strong>${hero.name}</strong>
+        ${GEAR_SLOT_LABELS[slot]} de <strong>${hero.name}</strong>
       </p>
-      <div class="modal-gear-list">
-        ${compatible
-          .map((gear) =>
-            renderGearCard(gear, {
-              actionLabel: 'Equipar',
-              actionDataAttrs: {
-                'data-pick-gear': gear.id,
-                'data-pick-hero': heroId,
-              },
-            }),
-          )
-          .join('')}
-      </div>
+      ${equippedSection}
+      ${inventorySection}
     `;
 
     container.querySelectorAll('[data-pick-gear]').forEach((button) => {
@@ -80,6 +98,16 @@ export class EquipPickerModalRenderer {
         const targetHeroId = button.getAttribute('data-pick-hero');
         if (gearId && targetHeroId) {
           handlers.onSelectGear(targetHeroId, gearId);
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-unequip-hero]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const targetHeroId = button.getAttribute('data-unequip-hero');
+        const unequipSlot = button.getAttribute('data-unequip-slot') as GearSlotKey | null;
+        if (targetHeroId && unequipSlot) {
+          handlers.onUnequip(targetHeroId, unequipSlot);
         }
       });
     });

@@ -2,6 +2,7 @@ import { CombatService } from '../domain/services/CombatService';
 import { LootService } from '../domain/services/LootService';
 import { IGameStateRepository } from '../domain/repositories/IGameStateRepository';
 import { EquipGearUseCase } from './use-cases/EquipGearUseCase';
+import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
 import { GetGameStateUseCase } from './use-cases/GetGameStateUseCase';
 import { OpenChestUseCase } from './use-cases/OpenChestUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
@@ -11,6 +12,7 @@ export class GameApplication {
   readonly tick: TickGameUseCase;
   readonly openChest: OpenChestUseCase;
   readonly equipGear: EquipGearUseCase;
+  readonly unequipGear: UnequipGearUseCase;
 
   constructor(repository: IGameStateRepository) {
     const combatService = new CombatService();
@@ -20,5 +22,6 @@ export class GameApplication {
     this.tick = new TickGameUseCase(repository, combatService);
     this.openChest = new OpenChestUseCase(repository, lootService);
     this.equipGear = new EquipGearUseCase(repository);
+    this.unequipGear = new UnequipGearUseCase(repository);
   }
 }

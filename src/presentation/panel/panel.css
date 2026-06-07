@@ -604,6 +604,47 @@ h2 {
   transform: translateY(-1px);
 }
 
+.gear-unequip-btn {
+  align-self: flex-start;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(62, 48, 38, 0.95);
+  color: #fff8e7;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.gear-unequip-btn:hover {
+  background: rgba(233, 69, 96, 0.85);
+  transform: translateY(-1px);
+}
+
+.equip-picker-section-title {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.equip-picker-equipped {
+  margin-bottom: 14px;
+}
+
+.equip-picker-inventory {
+  margin-top: 4px;
+}
+
+.equip-picker-empty {
+  margin-top: 0;
+}
+
 .log-panel ul {
   list-style: none;
   max-height: 80px;

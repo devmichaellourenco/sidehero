@@ -5,7 +5,8 @@ export type GameMessage =
   | { type: 'GET_STATE' }
   | { type: 'TICK'; ticks?: number }
   | { type: 'OPEN_CHEST'; chestId: string }
-  | { type: 'EQUIP_GEAR'; heroId: string; gearId: string };
+  | { type: 'EQUIP_GEAR'; heroId: string; gearId: string }
+  | { type: 'UNEQUIP_GEAR'; heroId: string; slot: string };
 
 export type GameResponse =
   | { ok: true; state: GameStateDto }

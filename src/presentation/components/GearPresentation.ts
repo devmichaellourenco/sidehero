@@ -124,12 +124,14 @@ export function renderGearCard(
   gear: GearDto,
   options: {
     actionLabel?: string;
+    actionClassName?: string;
     actionDataAttrs?: Record<string, string>;
     showAction?: boolean;
   } = {},
 ): string {
   const frameUrl = getGearFrameSprite(gear.rarity);
   const actionLabel = options.actionLabel ?? 'Equipar';
+  const actionClassName = options.actionClassName ?? 'gear-equip-btn';
   const showAction = options.showAction !== false;
 
   const dataAttrs = Object.entries(options.actionDataAttrs ?? { 'data-gear': gear.id })
@@ -151,10 +153,35 @@ export function renderGearCard(
       </div>
       ${
         showAction
-          ? `<button type="button" class="gear-equip-btn" ${dataAttrs}>${actionLabel}</button>`
+          ? `<button type="button" class="${actionClassName}" ${dataAttrs}>${actionLabel}</button>`
           : ''
       }
     </div>
   `;
+}
+
+export function renderEquippedGearCard(
+  gear: EquippedGearDto,
+  options: { heroId: string; slot: GearSlotKey },
+): string {
+  return renderGearCard(
+    {
+      id: gear.id,
+      name: gear.name,
+      slot: gear.slot,
+      rarity: gear.rarity,
+      attackBonus: gear.attackBonus,
+      defenseBonus: gear.defenseBonus,
+      healthBonus: gear.healthBonus,
+    },
+    {
+      actionLabel: 'Desequipar',
+      actionClassName: 'gear-unequip-btn',
+      actionDataAttrs: {
+        'data-unequip-hero': options.heroId,
+        'data-unequip-slot': options.slot,
+      },
+    },
+  );
 }
 
