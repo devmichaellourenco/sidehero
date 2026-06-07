@@ -1,5 +1,8 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getEnemySprite, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { bindBarTooltips } from './BarTooltipBinder';
+import { renderEnemyBattleCard } from './EnemyBattlePresentation';
+import { bindEnemyTooltips } from './EnemyTooltipBinder';
 
 export class BattleStripRenderer {
   constructor(
@@ -26,14 +29,19 @@ export class BattleStripRenderer {
       return;
     }
 
-    const healthPercent = Math.max(0, (state.enemy.health / state.enemy.maxHealth) * 100);
+    const spriteHtml = imgTag(
+      getEnemySprite(state.enemy.enemyType),
+      state.enemy.name,
+      'enemy-image',
+    );
 
-    this.enemyContainer.innerHTML = `
-      ${imgTag(getEnemySprite(state.enemy.enemyType), state.enemy.name, 'enemy-image')}
-      <div class="enemy-name">${state.enemy.name}</div>
-      <div class="health-bar enemy">
-        <div class="health-fill enemy" style="width: ${healthPercent}%"></div>
-      </div>
-    `;
+    this.enemyContainer.innerHTML = renderEnemyBattleCard(
+      state.enemy,
+      state.stage,
+      spriteHtml,
+    );
+
+    bindBarTooltips(this.enemyContainer);
+    bindEnemyTooltips(this.enemyContainer);
   }
 }

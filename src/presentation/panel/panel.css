@@ -228,17 +228,32 @@ h2 {
 .enemy-image {
   width: 40px;
   height: 40px;
-  animation: shake 0.5s ease-in-out infinite;
+  transform: scaleX(-1);
+  animation: enemy-shake 0.5s ease-in-out infinite;
 }
 
-@keyframes shake {
+@keyframes enemy-shake {
   0%,
   100% {
-    transform: translateX(0);
+    transform: scaleX(-1) translateX(0);
   }
   50% {
-    transform: translateX(-3px);
+    transform: scaleX(-1) translateX(3px);
   }
+}
+
+.enemy-battle-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  cursor: default;
+}
+
+.enemy-battle-hitbox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  cursor: default;
 }
 
 .enemy-name {
@@ -247,13 +262,58 @@ h2 {
   margin-top: 2px;
 }
 
+.enemy-tooltip-content {
+  display: none;
+}
+
+.enemy-tooltip-portal {
+  position: fixed;
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 120px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(12, 18, 36, 0.96);
+  border: 1px solid rgba(233, 69, 96, 0.45);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.enemy-tooltip-portal.hidden {
+  display: none;
+}
+
+.enemy-tooltip-name {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  color: var(--gold);
+}
+
+.enemy-tooltip-line {
+  font-size: 10px;
+  color: #fff8e7;
+  line-height: 1.35;
+}
+
 .health-bar {
   position: relative;
   width: 72px;
   height: 10px;
   margin-top: 4px;
-  background: url('assets/sliders/frame.png') center / 100% 100% no-repeat;
   overflow: hidden;
+}
+
+.health-bar.strip-bar {
+  height: 12px;
+  padding: 2px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(22, 32, 56, 0.98), rgba(12, 18, 34, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  overflow: visible;
+  cursor: default;
 }
 
 .health-fill {

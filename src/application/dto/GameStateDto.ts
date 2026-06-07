@@ -35,6 +35,10 @@ export interface EnemyDto {
   enemyType: string;
   health: number;
   maxHealth: number;
+  attack: number;
+  defense: number;
+  goldReward: number;
+  xpReward: number;
 }
 
 export interface GearDto {
@@ -133,6 +137,10 @@ export function mapGameStateToDto(state: GameState): GameStateDto {
           enemyType: state.currentEnemy.enemyType,
           health: state.currentEnemy.stats.currentHealth,
           maxHealth: state.currentEnemy.stats.maxHealth,
+          attack: state.currentEnemy.stats.attack,
+          defense: state.currentEnemy.stats.defense,
+          goldReward: state.currentEnemy.goldReward,
+          xpReward: state.currentEnemy.xpReward,
         }
       : null,
     stage: state.stage,
