@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="panel.css" />
   </head>
   <body>
-    <div id="app">
+    <div id="app" class="game-scroll">
       <header class="header">
         <div class="brand">
           <img
@@ -38,18 +38,18 @@
       <section class="panels">
         <div class="panel">
           <h2>Heróis</h2>
-          <div id="hero-panels"></div>
+          <div id="hero-panels" class="game-scroll"></div>
         </div>
 
         <div class="panel">
           <h2>Inventário</h2>
-          <div id="inventory-list" class="inventory-list"></div>
+          <div id="inventory-list" class="inventory-list game-scroll"></div>
         </div>
       </section>
 
       <section class="panel log-panel">
         <h2>Log de Batalha</h2>
-        <ul id="battle-log"></ul>
+        <ul id="battle-log" class="game-scroll"></ul>
       </section>
 
       <footer class="actions">
