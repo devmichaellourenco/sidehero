@@ -3,6 +3,8 @@ import { ASSETS, getAssetUrl, getEnemySprite, getHeroSprite, imgTag } from '../a
 import { bindBarTooltips } from './BarTooltipBinder';
 import { renderEnemyBattleCard } from './EnemyBattlePresentation';
 import { bindEnemyTooltips } from './EnemyTooltipBinder';
+import { renderHeroBattleSprite } from './HeroBattlePresentation';
+import { bindHeroTooltips } from './HeroTooltipBinder';
 
 export class BattleStripRenderer {
   constructor(
@@ -14,15 +16,14 @@ export class BattleStripRenderer {
     const glowUrl = getAssetUrl(ASSETS.characters.glow);
 
     this.heroesContainer.innerHTML = state.heroes
-      .map(
-        (hero) => `
-        <div class="hero-sprite" title="${hero.name} Lv.${hero.level}">
-          <img class="hero-glow" src="${glowUrl}" alt="" aria-hidden="true" />
-          ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'hero-image')}
-        </div>
-      `,
-      )
+      .map((hero) => {
+        const glowHtml = `<img class="hero-glow" src="${glowUrl}" alt="" aria-hidden="true" />`;
+        const spriteHtml = imgTag(getHeroSprite(hero.heroClass), hero.name, 'hero-image');
+        return renderHeroBattleSprite(hero, glowHtml, spriteHtml);
+      })
       .join('');
+
+    bindHeroTooltips(this.heroesContainer);
 
     if (!state.enemy) {
       this.enemyContainer.innerHTML = '<span class="empty-state">...</span>';

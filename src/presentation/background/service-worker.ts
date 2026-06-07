@@ -97,6 +97,10 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.equipGear.execute(message.heroId, message.gearId);
       return { ok: true, state };
     }
+    case 'EQUIP_BEST_LOADOUT': {
+      const result = await app.equipBestLoadout.execute(message.gearIds);
+      return { ok: true, state: result.state, equippedCount: result.equippedCount };
+    }
     case 'UNEQUIP_GEAR': {
       const state = await app.unequipGear.execute(
         message.heroId,

@@ -1,0 +1,33 @@
+import { HeroDto } from '../../application/dto/GameStateDto';
+import { formatExperienceLabel, formatHealthLabel } from './HeroBarsPresentation';
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+export function renderHeroTooltipContent(hero: HeroDto): string {
+  const healthLabel = formatHealthLabel(hero);
+  const xpLabel = formatExperienceLabel(hero);
+
+  return `
+    <strong class="hero-tooltip-name">${escapeHtml(hero.name)}</strong>
+    <span class="hero-tooltip-line">Lv.${hero.level}</span>
+    <span class="hero-tooltip-line">${healthLabel}</span>
+    <span class="hero-tooltip-line">${xpLabel}</span>
+    <span class="hero-tooltip-line">ATK ${hero.attack} · DEF ${hero.defense}</span>
+  `;
+}
+
+export function renderHeroBattleSprite(hero: HeroDto, glowHtml: string, spriteHtml: string): string {
+  return `
+    <div class="hero-sprite" data-hero-tooltip tabindex="0" aria-label="${escapeHtml(hero.name)}">
+      ${glowHtml}
+      ${spriteHtml}
+      <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
+    </div>
+  `;
+}

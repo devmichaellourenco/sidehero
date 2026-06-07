@@ -55,6 +55,14 @@
             <input id="auto-battle-toggle" type="checkbox" />
             <span class="auto-battle-label">Auto</span>
           </label>
+          <label class="auto-battle-toggle" title="Abre baús automaticamente">
+            <input id="auto-chest-toggle" type="checkbox" />
+            <span class="auto-battle-label">Baús</span>
+          </label>
+          <select id="auto-battle-speed" class="auto-battle-speed" title="Velocidade da auto-batalha" aria-label="Velocidade da auto-batalha">
+            <option value="1">1x</option>
+            <option value="2">2x</option>
+          </select>
         </div>
         <button id="open-chest-btn" class="btn secondary" disabled>
           <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" />
@@ -67,6 +75,9 @@
         <button id="open-inventory-btn" class="btn secondary" type="button">
           <img class="btn-icon" src="assets/ui/inventory.png" alt="" aria-hidden="true" />
           Inventário
+        </button>
+        <button id="optimize-loadout-btn" class="btn secondary" type="button">
+          Otimizar equipe
         </button>
       </footer>
     </div>

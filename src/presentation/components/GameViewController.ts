@@ -5,7 +5,9 @@ import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer, EquipPickerMode } from './EquipPickerModalRenderer';
 import { GameStateChangeDetector } from './GameStateChangeDetector';
+import { countUpgradeItems } from './GearComparison';
 import { GearSlotKey } from './GearPresentation';
+import { LootBatchModalRenderer } from './LootBatchModalRenderer';
 import { HeroDetailModalRenderer } from './HeroDetailModalRenderer';
 import { HeroPanelRenderer } from './HeroPanelRenderer';
 import { InventoryModalRenderer } from './InventoryModalRenderer';
@@ -23,10 +25,13 @@ type ModalView =
   | { type: 'inventory' }
   | { type: 'hero-detail'; heroId: string }
   | { type: 'equip-picker'; mode: EquipPickerMode }
-  | { type: 'loot-reveal'; gearId: string };
+  | { type: 'loot-reveal'; gearId: string }
+  | { type: 'loot-batch'; gearIds: string[] };
 
 const AUTO_BATTLE_STORAGE_KEY = 'sidehero_auto_battle';
-const AUTO_BATTLE_INTERVAL_MS = 2500;
+const AUTO_OPEN_CHEST_STORAGE_KEY = 'sidehero_auto_open_chest';
+const AUTO_BATTLE_SPEED_STORAGE_KEY = 'sidehero_auto_battle_speed';
+const AUTO_BATTLE_BASE_INTERVAL_MS = 2500;
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -36,9 +41,12 @@ export class GameViewController {
   private refreshTimer: number | null = null;
   private autoBattleTimer: number | null = null;
   private autoBattleEnabled = false;
+  private autoOpenChests = false;
+  private autoBattleSpeed = 1;
   private contextInvalidated = false;
   private idleSummaryShown = false;
   private openingChests = false;
+  private autoOpenChestPending = false;
 
   private readonly stageLabel: HTMLElement;
   private readonly goldLabel: HTMLElement;
@@ -48,7 +56,10 @@ export class GameViewController {
   private readonly openChestBtn: HTMLButtonElement;
   private readonly openAllChestsBtn: HTMLButtonElement;
   private readonly openInventoryBtn: HTMLButtonElement;
+  private readonly optimizeLoadoutBtn: HTMLButtonElement;
   private readonly autoBattleToggle: HTMLInputElement;
+  private readonly autoChestToggle: HTMLInputElement;
+  private readonly autoBattleSpeedSelect: HTMLSelectElement;
 
   private readonly battleStrip: BattleStripRenderer;
   private readonly heroPanel: HeroPanelRenderer;
@@ -57,6 +68,7 @@ export class GameViewController {
   private readonly heroDetailModal: HeroDetailModalRenderer;
   private readonly equipPickerModal: EquipPickerModalRenderer;
   private readonly lootModal: LootModalRenderer;
+  private readonly lootBatchModal: LootBatchModalRenderer;
   private readonly toasts: ToastController;
   private readonly stateChanges: GameStateChangeDetector;
 
@@ -69,7 +81,10 @@ export class GameViewController {
     this.openChestBtn = root.querySelector('#open-chest-btn') as HTMLButtonElement;
     this.openAllChestsBtn = root.querySelector('#open-all-chests-btn') as HTMLButtonElement;
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
+    this.optimizeLoadoutBtn = root.querySelector('#optimize-loadout-btn') as HTMLButtonElement;
     this.autoBattleToggle = root.querySelector('#auto-battle-toggle') as HTMLInputElement;
+    this.autoChestToggle = root.querySelector('#auto-chest-toggle') as HTMLInputElement;
+    this.autoBattleSpeedSelect = root.querySelector('#auto-battle-speed') as HTMLSelectElement;
 
     this.battleStrip = new BattleStripRenderer(
       root.querySelector('#heroes-container')!,
@@ -88,18 +103,28 @@ export class GameViewController {
     this.heroDetailModal = new HeroDetailModalRenderer();
     this.equipPickerModal = new EquipPickerModalRenderer();
     this.lootModal = new LootModalRenderer();
+    this.lootBatchModal = new LootBatchModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.stateChanges = new GameStateChangeDetector(this.toasts);
 
     this.autoBattleEnabled = this.loadAutoBattlePreference();
+    this.autoOpenChests = this.loadAutoOpenChestPreference();
+    this.autoBattleSpeed = this.loadAutoBattleSpeedPreference();
     this.autoBattleToggle.checked = this.autoBattleEnabled;
+    this.autoChestToggle.checked = this.autoOpenChests;
+    this.autoBattleSpeedSelect.value = String(this.autoBattleSpeed);
     this.updateAutoBattleUi();
 
     this.tickBtn.addEventListener('click', () => this.tick());
     this.openChestBtn.addEventListener('click', () => this.openNextChest());
     this.openAllChestsBtn.addEventListener('click', () => this.openAllChests());
     this.openInventoryBtn.addEventListener('click', () => this.openInventoryModal());
+    this.optimizeLoadoutBtn.addEventListener('click', () => this.optimizeLoadout());
     this.autoBattleToggle.addEventListener('change', () => this.setAutoBattle(this.autoBattleToggle.checked));
+    this.autoChestToggle.addEventListener('change', () => this.setAutoOpenChests(this.autoChestToggle.checked));
+    this.autoBattleSpeedSelect.addEventListener('change', () => {
+      this.setAutoBattleSpeed(Number(this.autoBattleSpeedSelect.value));
+    });
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && this.state) {
@@ -149,6 +174,62 @@ export class GameViewController {
     }
   }
 
+  private loadAutoOpenChestPreference(): boolean {
+    try {
+      return sessionStorage.getItem(AUTO_OPEN_CHEST_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private saveAutoOpenChestPreference(enabled: boolean): void {
+    try {
+      sessionStorage.setItem(AUTO_OPEN_CHEST_STORAGE_KEY, enabled ? '1' : '0');
+    } catch {
+      // sessionStorage indisponível
+    }
+  }
+
+  private loadAutoBattleSpeedPreference(): number {
+    try {
+      const raw = sessionStorage.getItem(AUTO_BATTLE_SPEED_STORAGE_KEY);
+      return raw === '2' ? 2 : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  private saveAutoBattleSpeedPreference(speed: number): void {
+    try {
+      sessionStorage.setItem(AUTO_BATTLE_SPEED_STORAGE_KEY, String(speed));
+    } catch {
+      // sessionStorage indisponível
+    }
+  }
+
+  private getAutoBattleIntervalMs(): number {
+    return Math.floor(AUTO_BATTLE_BASE_INTERVAL_MS / this.autoBattleSpeed);
+  }
+
+  private setAutoOpenChests(enabled: boolean): void {
+    this.autoOpenChests = enabled;
+    this.saveAutoOpenChestPreference(enabled);
+    if (enabled) {
+      this.scheduleAutoOpenChests();
+    }
+  }
+
+  private setAutoBattleSpeed(speed: number): void {
+    this.autoBattleSpeed = speed === 2 ? 2 : 1;
+    this.autoBattleSpeedSelect.value = String(this.autoBattleSpeed);
+    this.saveAutoBattleSpeedPreference(this.autoBattleSpeed);
+
+    if (this.autoBattleEnabled) {
+      this.stopAutoBattle();
+      this.startAutoBattle();
+    }
+  }
+
   private setAutoBattle(enabled: boolean): void {
     this.autoBattleEnabled = enabled;
     this.saveAutoBattlePreference(enabled);
@@ -167,7 +248,7 @@ export class GameViewController {
 
     this.autoBattleTimer = window.setInterval(() => {
       void this.tick();
-    }, AUTO_BATTLE_INTERVAL_MS);
+    }, this.getAutoBattleIntervalMs());
   }
 
   private stopAutoBattle(): void {
@@ -297,8 +378,18 @@ export class GameViewController {
 
   private enqueueLootModals(gearIds: string[]): void {
     this.lootTotal = gearIds.length;
-    this.lootQueue.push(...gearIds);
-    this.showNextLootModal();
+    this.lootQueue.length = 0;
+    this.modalStack.length = 0;
+
+    if (gearIds.length > 1) {
+      this.pushModal({ type: 'loot-batch', gearIds: [...gearIds] });
+      return;
+    }
+
+    if (gearIds.length === 1) {
+      this.lootQueue.push(gearIds[0]);
+      this.pushModal({ type: 'loot-reveal', gearId: gearIds[0] });
+    }
   }
 
   private showNextLootModal(): void {
@@ -334,6 +425,67 @@ export class GameViewController {
     this.afterGearMutation(response.state);
   }
 
+  private async optimizeLoadout(gearIds?: string[]): Promise<void> {
+    const response = await sendGameMessage({
+      type: 'EQUIP_BEST_LOADOUT',
+      gearIds,
+    });
+
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    const equippedCount = response.equippedCount ?? 0;
+    this.render(response.state);
+
+    if (equippedCount > 0) {
+      const label = equippedCount === 1 ? '1 item equipado' : `${equippedCount} itens equipados`;
+      this.toasts.show(`Equipe otimizada: ${label}`, 'info');
+    } else {
+      this.toasts.show('Nenhum upgrade disponível no momento', 'info');
+    }
+
+    if (this.modal.isOpen() && this.modalStack.length > 0) {
+      this.renderModalTop();
+    }
+  }
+
+  private async equipRecommendedLoot(gearIds: string[]): Promise<void> {
+    await this.optimizeLoadout(gearIds);
+    this.closeLootBatchModal();
+  }
+
+  private closeLootBatchModal(): void {
+    const topView = this.modalStack[this.modalStack.length - 1];
+    if (topView?.type !== 'loot-batch') return;
+
+    this.modalStack.pop();
+    this.lootQueue.length = 0;
+    this.modal.close('action');
+  }
+
+  private scheduleAutoOpenChests(): void {
+    if (this.autoOpenChestPending) return;
+    if (!this.autoOpenChests || !this.state || this.openingChests) return;
+    if (this.modal.isOpen() || this.state.pendingChestCount === 0) return;
+
+    this.autoOpenChestPending = true;
+    window.setTimeout(() => {
+      this.autoOpenChestPending = false;
+
+      if (!this.autoOpenChests || this.openingChests || this.modal.isOpen()) return;
+      if (!this.state || this.state.pendingChestCount === 0) return;
+
+      if (this.state.pendingChestCount >= 2) {
+        void this.openAllChests();
+        return;
+      }
+
+      void this.openNextChest();
+    }, 450);
+  }
+
   private async unequipGear(heroId: string, slot: GearSlotKey): Promise<void> {
     const response = await sendGameMessage({ type: 'UNEQUIP_GEAR', heroId, slot });
     if (!response.ok) {
@@ -348,7 +500,8 @@ export class GameViewController {
     const topView = this.modalStack[this.modalStack.length - 1];
     if (
       topView?.type === 'equip-picker' ||
-      topView?.type === 'loot-reveal'
+      topView?.type === 'loot-reveal' ||
+      topView?.type === 'loot-batch'
     ) {
       this.modalStack.pop();
     }
@@ -454,6 +607,7 @@ export class GameViewController {
           onEquipGear: (gearId) => this.openEquipPickerFromGear(gearId),
           onFilterChange: () => this.renderModalTop(),
           onSortChange: () => this.renderModalTop(),
+          onOptimizeLoadout: () => this.optimizeLoadout(),
         });
         break;
       case 'hero-detail':
@@ -474,6 +628,14 @@ export class GameViewController {
           onKeepInInventory: () => this.closeLootModal(),
         });
         break;
+      case 'loot-batch':
+        this.lootBatchModal.render(container, this.state, view.gearIds, {
+          onEquipRecommended: () => {
+            void this.equipRecommendedLoot(view.gearIds);
+          },
+          onKeepAll: () => this.closeLootBatchModal(),
+        });
+        break;
     }
   }
 
@@ -487,6 +649,8 @@ export class GameViewController {
         const hero = this.state.heroes.find((entry) => entry.id === view.heroId);
         return hero ? hero.name : 'Herói';
       }
+      case 'loot-batch':
+        return `Loot dos baús (${view.gearIds.length})`;
       case 'loot-reveal': {
         const current = this.lootTotal - this.lootQueue.length + 1;
         const queueLabel = this.lootTotal > 1 ? ` (${current} de ${this.lootTotal})` : '';
@@ -559,10 +723,22 @@ export class GameViewController {
       onSlotClick: (heroId, slot) => this.openEquipPickerFromSlot(heroId, slot),
     });
 
+    const upgradeCount = countUpgradeItems(state);
+    const upgradeBadge =
+      upgradeCount > 0
+        ? `<span class="inventory-upgrade-badge">↑${upgradeCount}</span>`
+        : '';
+
     this.openInventoryBtn.innerHTML = `
       ${imgTag(getAssetUrl(ASSETS.ui.inventory), 'Inventário', 'btn-icon')}
       Inventário (${state.inventory.length})
+      ${upgradeBadge}
     `;
+
+    this.optimizeLoadoutBtn.disabled = upgradeCount === 0;
+    this.optimizeLoadoutBtn.innerHTML = upgradeCount > 0
+      ? `Otimizar (↑${upgradeCount})`
+      : 'Otimizar equipe';
 
     this.battleLog.innerHTML = [...state.battleLog]
       .reverse()
@@ -578,5 +754,7 @@ export class GameViewController {
     if (this.modal.isOpen() && this.modalStack.length > 0) {
       this.renderModalTop();
     }
+
+    this.scheduleAutoOpenChests();
   }
 }

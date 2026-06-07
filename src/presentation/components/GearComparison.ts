@@ -53,6 +53,18 @@ export function renderUpgradeBadge(status: GearUpgradeStatus): string {
   return `<span class="gear-upgrade-badge gear-upgrade-${status}">${labels[status]}</span>`;
 }
 
+export function countUpgradeItems(state: GameStateDto): number {
+  return state.inventory.filter((gear) => getGearUpgradeInfo(state, gear).status === 'upgrade').length;
+}
+
+export function countRecommendedFromLoot(state: GameStateDto, gearIds: string[]): number {
+  return gearIds.filter((gearId) => {
+    const gear = state.inventory.find((entry) => entry.id === gearId);
+    if (!gear) return false;
+    return getGearUpgradeInfo(state, gear).gain > 0;
+  }).length;
+}
+
 export function sortGearByBestGain(state: GameStateDto, gears: GearDto[]): GearDto[] {
   return [...gears].sort((left, right) => {
     const leftGain = getGearUpgradeInfo(state, left).gain;

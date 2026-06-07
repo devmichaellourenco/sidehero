@@ -1,6 +1,7 @@
 import { CombatService } from '../domain/services/CombatService';
 import { LootService } from '../domain/services/LootService';
 import { IGameStateRepository } from '../domain/repositories/IGameStateRepository';
+import { EquipBestLoadoutUseCase } from './use-cases/EquipBestLoadoutUseCase';
 import { EquipGearUseCase } from './use-cases/EquipGearUseCase';
 import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
 import { GetGameStateUseCase } from './use-cases/GetGameStateUseCase';
@@ -14,6 +15,7 @@ export class GameApplication {
   readonly openChest: OpenChestUseCase;
   readonly openAllChests: OpenAllChestsUseCase;
   readonly equipGear: EquipGearUseCase;
+  readonly equipBestLoadout: EquipBestLoadoutUseCase;
   readonly unequipGear: UnequipGearUseCase;
 
   constructor(repository: IGameStateRepository) {
@@ -25,6 +27,7 @@ export class GameApplication {
     this.openChest = new OpenChestUseCase(repository, lootService);
     this.openAllChests = new OpenAllChestsUseCase(repository, lootService);
     this.equipGear = new EquipGearUseCase(repository);
+    this.equipBestLoadout = new EquipBestLoadoutUseCase(repository);
     this.unequipGear = new UnequipGearUseCase(repository);
   }
 }

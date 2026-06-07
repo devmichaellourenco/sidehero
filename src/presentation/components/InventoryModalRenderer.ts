@@ -1,6 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import {
+  countUpgradeItems,
   getGearUpgradeInfo,
   renderUpgradeBadge,
   sortGearByBestGain,
@@ -13,6 +14,7 @@ export type InventoryModalHandlers = {
   onEquipGear: (gearId: string) => void;
   onFilterChange: (slot: GearSlotKey | 'all') => void;
   onSortChange: (mode: InventorySortMode) => void;
+  onOptimizeLoadout: () => void;
 };
 
 export class InventoryModalRenderer {
@@ -34,6 +36,20 @@ export class InventoryModalRenderer {
       this.sortMode === 'gain'
         ? sortGearByBestGain(state, filtered)
         : [...filtered].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR'));
+
+    const upgradeCount = countUpgradeItems(state);
+    const optimizeButton = `
+      <div class="inventory-optimize-row">
+        <button
+          type="button"
+          class="gear-equip-btn inventory-optimize-btn"
+          data-optimize-loadout
+          ${upgradeCount === 0 ? 'disabled' : ''}
+        >
+          Otimizar equipe${upgradeCount > 0 ? ` (↑${upgradeCount})` : ''}
+        </button>
+      </div>
+    `;
 
     const filterButtons = `
       <div class="modal-filters">
@@ -58,6 +74,7 @@ export class InventoryModalRenderer {
 
     if (state.inventory.length === 0) {
       container.innerHTML = `
+        ${optimizeButton}
         ${filterButtons}
         ${sortButtons}
         <p class="empty-state modal-empty">
@@ -67,21 +84,25 @@ export class InventoryModalRenderer {
       `;
       this.bindFilters(container, handlers);
       this.bindSort(container, handlers);
+      this.bindOptimize(container, handlers);
       return;
     }
 
     if (filtered.length === 0) {
       container.innerHTML = `
+        ${optimizeButton}
         ${filterButtons}
         ${sortButtons}
         <p class="empty-state modal-empty">Nenhum item nesta categoria.</p>
       `;
       this.bindFilters(container, handlers);
       this.bindSort(container, handlers);
+      this.bindOptimize(container, handlers);
       return;
     }
 
     container.innerHTML = `
+      ${optimizeButton}
       ${filterButtons}
       ${sortButtons}
       <div class="modal-gear-list">
@@ -100,6 +121,7 @@ export class InventoryModalRenderer {
 
     this.bindFilters(container, handlers);
     this.bindSort(container, handlers);
+    this.bindOptimize(container, handlers);
 
     container.querySelectorAll('[data-equip-gear]').forEach((button) => {
       button.addEventListener('click', () => {
@@ -116,6 +138,14 @@ export class InventoryModalRenderer {
         this.activeFilter = filter;
         handlers.onFilterChange(filter);
       });
+    });
+  }
+
+  private bindOptimize(container: HTMLElement, handlers: InventoryModalHandlers): void {
+    const button = container.querySelector('[data-optimize-loadout]') as HTMLButtonElement | null;
+    button?.addEventListener('click', () => {
+      if (button.disabled) return;
+      handlers.onOptimizeLoadout();
     });
   }
 

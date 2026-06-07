@@ -7,10 +7,11 @@ export type GameMessage =
   | { type: 'OPEN_CHEST'; chestId: string }
   | { type: 'OPEN_ALL_CHESTS' }
   | { type: 'EQUIP_GEAR'; heroId: string; gearId: string }
+  | { type: 'EQUIP_BEST_LOADOUT'; gearIds?: string[] }
   | { type: 'UNEQUIP_GEAR'; heroId: string; slot: string };
 
 export type GameResponse =
-  | { ok: true; state: GameStateDto; openedGear?: GearDto; openedGears?: GearDto[] }
+  | { ok: true; state: GameStateDto; openedGear?: GearDto; openedGears?: GearDto[]; equippedCount?: number }
   | { ok: false; error: string };
 
 export async function sendGameMessage(message: GameMessage): Promise<GameResponse> {
