@@ -1,6 +1,8 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
+import { renderHeroBars } from './HeroBarsPresentation';
 import { renderHeroEquipmentRow } from './GearPresentation';
 
 export type HeroPanelHandlers = {
@@ -18,8 +20,6 @@ export class HeroPanelRenderer {
 
     this.container.innerHTML = state.heroes
       .map((hero) => {
-        const healthPercent = Math.max(0, (hero.health / hero.maxHealth) * 100);
-
         return `
           <article class="hero-card" data-hero-card="${hero.id}">
             <button type="button" class="hero-card-main" data-hero-open="${hero.id}">
@@ -35,9 +35,7 @@ export class HeroPanelRenderer {
                 ${imgTag(defenseIcon, 'Defesa', 'stat-icon')} ${hero.defense}
                 ${imgTag(healthIcon, 'Vida', 'stat-icon')} ${hero.health}/${hero.maxHealth}
               </div>
-              <div class="health-bar hero">
-                <div class="health-fill hero" style="width: ${healthPercent}%"></div>
-              </div>
+              ${renderHeroBars(hero, { compact: true })}
             </button>
             ${renderHeroEquipmentRow(hero, true)}
           </article>
@@ -61,6 +59,7 @@ export class HeroPanelRenderer {
       });
     });
 
+    bindBarTooltips(this.container);
     bindEquipmentTooltips(this.container);
   }
 }

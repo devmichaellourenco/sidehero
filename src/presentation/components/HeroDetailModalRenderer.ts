@@ -1,6 +1,8 @@
 import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
+import { renderHeroBars } from './HeroBarsPresentation';
 import { renderHeroEquipmentRow } from './GearPresentation';
 
 export type HeroDetailModalHandlers = {
@@ -24,8 +26,6 @@ export class HeroDetailModalRenderer {
     const attackIcon = getAssetUrl(ASSETS.ui.attack);
     const defenseIcon = getAssetUrl(ASSETS.ui.defense);
     const healthIcon = getAssetUrl(ASSETS.ui.health);
-    const healthPercent = Math.max(0, (hero.health / hero.maxHealth) * 100);
-
     container.innerHTML = `
       <div class="hero-detail">
         <div class="hero-detail-portrait">
@@ -42,9 +42,7 @@ export class HeroDetailModalRenderer {
             ${imgTag(defenseIcon, 'Defesa', 'stat-icon')} ${hero.defense}
             ${imgTag(healthIcon, 'Vida', 'stat-icon')} ${hero.health}/${hero.maxHealth}
           </div>
-          <div class="health-bar hero hero-detail-health">
-            <div class="health-fill hero" style="width: ${healthPercent}%"></div>
-          </div>
+          ${renderHeroBars(hero)}
         </div>
       </div>
       <section class="hero-detail-equipment">
@@ -55,6 +53,7 @@ export class HeroDetailModalRenderer {
     `;
 
     this.bindSlots(container, hero, handlers);
+    bindBarTooltips(container);
     bindEquipmentTooltips(container);
   }
 

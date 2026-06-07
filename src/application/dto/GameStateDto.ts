@@ -9,6 +9,8 @@ export interface HeroDto {
   heroClass: string;
   emoji: string;
   level: number;
+  experience: number;
+  experienceToNextLevel: number;
   attack: number;
   defense: number;
   health: number;
@@ -83,12 +85,16 @@ export function mapHeroToDto(hero: Hero): HeroDto {
       : null;
   }
 
+  const { experience } = hero.toProps();
+
   return {
     id: hero.id,
     name: hero.name,
     heroClass: hero.heroClass,
     emoji: hero.emoji,
     level: hero.level,
+    experience: experience.current,
+    experienceToNextLevel: experience.toNextLevel,
     attack: hero.attack,
     defense: hero.defense,
     health: hero.currentHealth,
