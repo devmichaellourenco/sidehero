@@ -1,0 +1,96 @@
+#taskbar-hero-sidebar-root {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
+  width: var(--taskbar-hero-sidebar-width, 380px);
+  height: 100vh;
+  z-index: 2147483646;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a2e;
+  border-left: 2px solid #2a2a4a;
+  box-shadow: none;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  transition: width 0.2s ease;
+  flex-shrink: 0;
+}
+
+#taskbar-hero-sidebar-root.th-collapsed {
+  width: 44px;
+}
+
+#taskbar-hero-sidebar-root .th-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #16213e;
+  border-bottom: 1px solid #2a2a4a;
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+#taskbar-hero-sidebar-root.th-collapsed .th-toolbar {
+  flex-direction: column;
+  padding: 8px 4px;
+}
+
+#taskbar-hero-sidebar-root .th-toolbar-title {
+  color: #eaeaea;
+  font-size: 12px;
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#taskbar-hero-sidebar-root.th-collapsed .th-toolbar-title {
+  display: none;
+}
+
+#taskbar-hero-sidebar-root .th-toolbar-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: #2a3f5f;
+  color: #eaeaea;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+#taskbar-hero-sidebar-root .th-toolbar-btn:hover {
+  background: #e94560;
+}
+
+#taskbar-hero-sidebar-root .th-game-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #1a1a2e;
+}
+
+#taskbar-hero-sidebar-root.th-collapsed .th-game-frame {
+  display: none;
+}
+
+#taskbar-hero-sidebar-root.th-collapsed .th-expand-label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: #8d99ae;
+  font-size: 10px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  user-select: none;
+}
+
+#taskbar-hero-sidebar-root .th-expand-label {
+  display: none;
+}

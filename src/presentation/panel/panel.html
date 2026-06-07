@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Side Hero</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-icon">⚔️</span>
+          <div>
+            <h1>Side Hero</h1>
+            <p class="subtitle">Idle RPG no painel lateral</p>
+          </div>
+        </div>
+        <div class="stats-bar">
+          <span id="stage-label">Stage 1</span>
+          <span id="gold-label">🪙 0</span>
+          <span id="chest-label">📦 0</span>
+        </div>
+      </header>
+
+      <section class="battle-strip" aria-label="Campo de batalha">
+        <div class="strip-bg"></div>
+        <div id="heroes-container" class="heroes-row"></div>
+        <div id="enemy-container" class="enemy-slot"></div>
+        <div class="strip-floor"></div>
+      </section>
+
+      <section class="panels">
+        <div class="panel">
+          <h2>Heróis</h2>
+          <div id="hero-panels"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Inventário</h2>
+          <div id="inventory-list" class="inventory-list"></div>
+        </div>
+      </section>
+
+      <section class="panel log-panel">
+        <h2>Log de Batalha</h2>
+        <ul id="battle-log"></ul>
+      </section>
+
+      <footer class="actions">
+        <button id="tick-btn" class="btn primary">⚡ Avançar Batalha</button>
+        <button id="open-chest-btn" class="btn secondary" disabled>📦 Abrir Baú</button>
+      </footer>
+    </div>
+
+    <script type="module" src="panel.js"></script>
+  </body>
+</html>
