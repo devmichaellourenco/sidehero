@@ -1,5 +1,6 @@
 import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import { renderHeroEquipmentRow } from './GearPresentation';
 
 export type HeroDetailModalHandlers = {
@@ -54,6 +55,7 @@ export class HeroDetailModalRenderer {
     `;
 
     this.bindSlots(container, hero, handlers);
+    bindEquipmentTooltips(container);
   }
 
   private bindSlots(

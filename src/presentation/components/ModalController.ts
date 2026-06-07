@@ -1,3 +1,5 @@
+import { hideEquipmentTooltip } from './EquipmentTooltipBinder';
+
 export type ModalCloseReason = 'backdrop' | 'button' | 'escape' | 'action';
 
 export class ModalController {
@@ -39,6 +41,7 @@ export class ModalController {
   close(reason: ModalCloseReason = 'action'): void {
     if (!this.isOpen()) return;
 
+    hideEquipmentTooltip();
     this.root.classList.add('hidden');
     this.root.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');

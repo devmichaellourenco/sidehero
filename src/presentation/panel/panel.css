@@ -357,6 +357,7 @@ h2 {
 
 .equipment-slot {
   --slot-frame-size: 8px;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -370,6 +371,7 @@ h2 {
   font: inherit;
   font-size: 9px;
   cursor: default;
+  overflow: visible;
 }
 
 .equipment-slot-clickable {
@@ -432,6 +434,65 @@ h2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.equipment-slot > .equipment-slot-tooltip {
+  display: none;
+}
+
+.equipment-slot-tooltip-name {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  color: var(--gold);
+}
+
+.equipment-slot-tooltip-meta {
+  color: var(--muted);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.equipment-slot-tooltip-stats {
+  color: var(--text);
+  font-size: 10px;
+}
+
+.gear-tooltip-portal {
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 148px;
+  max-width: 220px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 197, 66, 0.35);
+  background: rgba(10, 16, 32, 0.98);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  font-size: 10px;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+}
+
+.gear-tooltip-portal.hidden {
+  display: none !important;
+}
+
+.gear-tooltip-portal.epic {
+  border-color: rgba(171, 71, 188, 0.55);
+}
+
+.gear-tooltip-portal.rare {
+  border-color: rgba(66, 165, 245, 0.55);
+}
+
+.gear-tooltip-portal.common {
+  border-color: rgba(158, 158, 158, 0.45);
 }
 
 .modal-gear-list {

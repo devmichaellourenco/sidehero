@@ -13,7 +13,18 @@ export interface HeroDto {
   defense: number;
   health: number;
   maxHealth: number;
-  equipment: Record<string, { id: string; name: string; slot: string; rarity: string } | null>;
+  equipment: Record<
+    string,
+    {
+      id: string;
+      name: string;
+      slot: string;
+      rarity: string;
+      attackBonus: number;
+      defenseBonus: number;
+      healthBonus: number;
+    } | null
+  >;
 }
 
 export interface EnemyDto {
@@ -60,7 +71,15 @@ export function mapHeroToDto(hero: Hero): HeroDto {
   for (const slot of slots) {
     const gear = heroEquipment[slot];
     equipment[slot] = gear
-      ? { id: gear.id, name: gear.name, slot: gear.slot, rarity: gear.rarity }
+      ? {
+          id: gear.id,
+          name: gear.name,
+          slot: gear.slot,
+          rarity: gear.rarity,
+          attackBonus: gear.attackBonus,
+          defenseBonus: gear.defenseBonus,
+          healthBonus: gear.healthBonus,
+        }
       : null;
   }
 

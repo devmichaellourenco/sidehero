@@ -15,11 +15,45 @@ export const GEAR_SLOT_LABELS: Record<GearSlotKey, string> = {
   accessory: 'Acessório',
 };
 
+export const GEAR_RARITY_LABELS: Record<string, string> = {
+  common: 'Comum',
+  rare: 'Raro',
+  epic: 'Épico',
+};
+
 export interface EquippedGearDto {
   id: string;
   name: string;
   slot: string;
   rarity: string;
+  attackBonus: number;
+  defenseBonus: number;
+  healthBonus: number;
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+export function formatGearBonuses(gear: Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>): string {
+  return `+${gear.attackBonus} ATK · +${gear.defenseBonus} DEF · +${gear.healthBonus} HP`;
+}
+
+function renderEquippedGearTooltip(gear: EquippedGearDto): string {
+  const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
+  const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
+
+  return `
+    <span class="equipment-slot-tooltip" role="tooltip">
+      <strong class="equipment-slot-tooltip-name">${escapeHtml(gear.name)}</strong>
+      <span class="equipment-slot-tooltip-meta">${slotLabel} · ${rarityLabel}</span>
+      <span class="equipment-slot-tooltip-stats">${formatGearBonuses(gear)}</span>
+    </span>
+  `;
 }
 
 export function getHeroEquipment(
@@ -51,7 +85,7 @@ export function renderEquipmentSlot(
     ? imgTag(getGearRaritySprite(gear.rarity), gear.rarity, 'equipment-slot-rarity')
     : '';
 
-  const title = gear ? `${label}: ${gear.name}` : `${label}: vazio`;
+  const emptyTitle = `${label}: vazio — clique para equipar`;
 
   return `
     <button
@@ -59,7 +93,7 @@ export function renderEquipmentSlot(
       class="equipment-slot${compactClass}${clickableClass} ${gear?.rarity ?? 'empty'}"
       data-hero="${options.heroId}"
       data-slot="${slot}"
-      title="${title}"
+      ${gear ? '' : `title="${emptyTitle}"`}
       style="--slot-frame: url('${frameUrl}')"
     >
       <span class="equipment-slot-label">${label}</span>
@@ -67,7 +101,8 @@ export function renderEquipmentSlot(
         ${icon}
         ${rarityIcon}
       </span>
-      ${gear ? `<span class="equipment-slot-name">${gear.name}</span>` : ''}
+      ${gear ? `<span class="equipment-slot-name">${escapeHtml(gear.name)}</span>` : ''}
+      ${gear ? renderEquippedGearTooltip(gear) : ''}
     </button>
   `;
 }
@@ -123,6 +158,3 @@ export function renderGearCard(
   `;
 }
 
-export function formatGearBonuses(gear: GearDto): string {
-  return `+${gear.attackBonus} ATK · +${gear.defenseBonus} DEF · +${gear.healthBonus} HP`;
-}

@@ -1,5 +1,6 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import { renderHeroEquipmentRow } from './GearPresentation';
 
 export type HeroPanelHandlers = {
@@ -59,5 +60,7 @@ export class HeroPanelRenderer {
         if (heroId && slot) handlers.onSlotClick(heroId, slot);
       });
     });
+
+    bindEquipmentTooltips(this.container);
   }
 }
