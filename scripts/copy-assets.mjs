@@ -14,7 +14,11 @@ const ASSET_MAP = [
   ['Sprites/Demo/Demo_Character/character_sample_01.png', 'characters/knight.png'],
   ['Sprites/Demo/Demo_Character/character_sample_02.png', 'characters/sorcerer.png'],
   ['Sprites/Demo/Demo_Character/character_sample_03.png', 'characters/priest.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_04.png', 'characters/enemy.png'],
+  ['Sprites/Demo/Demo_Character/character_sample_04.png', 'characters/slime.png'],
+  ['Sprites/Demo/Demo_Character/character_sample_05.png', 'characters/goblin.png'],
+  ['Sprites/Demo/Demo_Character/character_sample_06.png', 'characters/orc.png'],
+  ['Sprites/Demo/Demo_Character/character_sample_08.png', 'characters/wraith.png'],
+  ['Sprites/Demo/Demo_Character/character_sample_07.png', 'characters/dragon.png'],
   ['Sprites/Demo/Demo_Character/character_back_glow_small.png', 'characters/glow.png'],
 
   ['Sprites/Demo/Demo_Image/group_image_swordmark3.png', 'ui/brand.png'],

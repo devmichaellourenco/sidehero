@@ -1,5 +1,5 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { ASSETS, getAssetUrl, getEnemySprite, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 
 export class BattleStripRenderer {
   constructor(
@@ -29,7 +29,7 @@ export class BattleStripRenderer {
     const healthPercent = Math.max(0, (state.enemy.health / state.enemy.maxHealth) * 100);
 
     this.enemyContainer.innerHTML = `
-      ${imgTag(getAssetUrl(ASSETS.characters.enemy), state.enemy.name, 'enemy-image')}
+      ${imgTag(getEnemySprite(state.enemy.enemyType), state.enemy.name, 'enemy-image')}
       <div class="enemy-name">${state.enemy.name}</div>
       <div class="health-bar enemy">
         <div class="health-fill enemy" style="width: ${healthPercent}%"></div>

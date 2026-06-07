@@ -1,4 +1,7 @@
+import type { EnemyType } from '../../domain/entities/EnemyType';
+
 export type HeroClassKey = 'knight' | 'sorcerer' | 'priest';
+export type EnemyTypeKey = EnemyType;
 export type GearSlotKey = 'weapon' | 'armor' | 'accessory';
 export type GearRarityKey = 'common' | 'rare' | 'epic';
 
@@ -6,6 +9,14 @@ const HERO_SPRITES: Record<HeroClassKey, string> = {
   knight: 'characters/knight.png',
   sorcerer: 'characters/sorcerer.png',
   priest: 'characters/priest.png',
+};
+
+const ENEMY_SPRITES: Record<EnemyTypeKey, string> = {
+  slime: 'characters/slime.png',
+  goblin: 'characters/goblin.png',
+  orc: 'characters/orc.png',
+  wraith: 'characters/wraith.png',
+  dragon: 'characters/dragon.png',
 };
 
 const GEAR_SLOT_SPRITES: Record<GearSlotKey, string> = {
@@ -32,7 +43,6 @@ export const ASSETS = {
     heading: 'fonts/JosefinSans-Bold.ttf',
   },
   characters: {
-    enemy: 'characters/enemy.png',
     glow: 'characters/glow.png',
   },
   ui: {
@@ -70,6 +80,10 @@ export function getAssetUrl(relativePath: string): string {
 
 export function getHeroSprite(heroClass: string): string {
   return getAssetUrl(HERO_SPRITES[heroClass as HeroClassKey] ?? HERO_SPRITES.knight);
+}
+
+export function getEnemySprite(enemyType: string): string {
+  return getAssetUrl(ENEMY_SPRITES[enemyType as EnemyTypeKey] ?? ENEMY_SPRITES.slime);
 }
 
 export function getGearSlotSprite(slot: string): string {

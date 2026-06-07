@@ -1,8 +1,10 @@
 import { Stats } from '../value-objects/Stats';
+import { EnemyType, enemyNameForStage, enemyTypeForStage } from './EnemyType';
 
 export interface EnemyProps {
   id: string;
   name: string;
+  enemyType: EnemyType;
   stage: number;
   stats: Stats;
   goldReward: number;
@@ -12,6 +14,7 @@ export interface EnemyProps {
 export class Enemy {
   readonly id: string;
   readonly name: string;
+  readonly enemyType: EnemyType;
   readonly stage: number;
   readonly stats: Stats;
   readonly goldReward: number;
@@ -20,6 +23,7 @@ export class Enemy {
   private constructor(props: EnemyProps) {
     this.id = props.id;
     this.name = props.name;
+    this.enemyType = props.enemyType;
     this.stage = props.stage;
     this.stats = props.stats;
     this.goldReward = props.goldReward;
@@ -32,12 +36,11 @@ export class Enemy {
 
   static forStage(stage: number): Enemy {
     const scale = 1 + (stage - 1) * 0.15;
-    const names = ['Slime', 'Goblin', 'Orc', 'Wraith', 'Dragon'];
-    const name = names[(stage - 1) % names.length];
 
     return new Enemy({
       id: `enemy-${stage}-${Date.now()}`,
-      name: `${name} Lv.${stage}`,
+      name: enemyNameForStage(stage),
+      enemyType: enemyTypeForStage(stage),
       stage,
       stats: Stats.fromBase(
         Math.floor(10 * scale),
@@ -64,6 +67,7 @@ export class Enemy {
     return {
       id: this.id,
       name: this.name,
+      enemyType: this.enemyType,
       stage: this.stage,
       stats: this.stats,
       goldReward: this.goldReward,

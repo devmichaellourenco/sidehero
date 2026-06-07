@@ -19,6 +19,7 @@ export interface HeroDto {
 export interface EnemyDto {
   id: string;
   name: string;
+  enemyType: string;
   health: number;
   maxHealth: number;
 }
@@ -99,6 +100,7 @@ export function mapGameStateToDto(state: GameState): GameStateDto {
       ? {
           id: state.currentEnemy.id,
           name: state.currentEnemy.name,
+          enemyType: state.currentEnemy.enemyType,
           health: state.currentEnemy.stats.currentHealth,
           maxHealth: state.currentEnemy.stats.maxHealth,
         }

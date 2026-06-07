@@ -3,6 +3,7 @@ import { Stats } from '../../domain/value-objects/Stats';
 import { Gear, GearSlot } from '../../domain/entities/Gear';
 import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
+import { inferEnemyType } from '../../domain/entities/EnemyType';
 import { Chest, ChestProps } from '../../domain/entities/Chest';
 
 type RawRecord = Record<string, unknown>;
@@ -79,10 +80,17 @@ export function migrateEnemy(raw: unknown): Enemy | null {
   const e = raw as EnemyProps;
   const statsRaw = asRecord(e.stats);
 
+  const stage = typeof e.stage === 'number' ? e.stage : 1;
+  const name = typeof e.name === 'string' ? e.name : `Slime Lv.${stage}`;
+
   return Enemy.restore({
     id: e.id,
-    name: e.name,
-    stage: e.stage,
+    name,
+    enemyType:
+      typeof e.enemyType === 'string'
+        ? (e.enemyType as EnemyProps['enemyType'])
+        : inferEnemyType(name, stage),
+    stage,
     stats: Stats.create({
       attack: typeof statsRaw.attack === 'number' ? statsRaw.attack : 10,
       defense: typeof statsRaw.defense === 'number' ? statsRaw.defense : 4,
