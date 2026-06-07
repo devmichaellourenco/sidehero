@@ -86,8 +86,8 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       return { ok: true, state };
     }
     case 'OPEN_CHEST': {
-      const state = await app.openChest.execute(message.chestId);
-      return { ok: true, state };
+      const result = await app.openChest.execute(message.chestId);
+      return { ok: true, state: result.state, openedGear: result.openedGear };
     }
     case 'EQUIP_GEAR': {
       const state = await app.equipGear.execute(message.heroId, message.gearId);

@@ -1,6 +1,11 @@
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { LootService } from '../../domain/services/LootService';
-import { mapGameStateToDto, GameStateDto } from '../dto/GameStateDto';
+import { mapGameStateToDto, mapGearToDto, GameStateDto, GearDto } from '../dto/GameStateDto';
+
+export interface OpenChestResult {
+  state: GameStateDto;
+  openedGear: GearDto;
+}
 
 export class OpenChestUseCase {
   constructor(
@@ -8,7 +13,7 @@ export class OpenChestUseCase {
     private readonly lootService: LootService,
   ) {}
 
-  async execute(chestId: string): Promise<GameStateDto> {
+  async execute(chestId: string): Promise<OpenChestResult> {
     const state = await this.repository.load();
     const chest = state.chests.find((c) => c.id === chestId);
 
@@ -31,6 +36,9 @@ export class OpenChestUseCase {
       .addLog(`Abriu baú: ${loot.name}`);
 
     await this.repository.save(nextState);
-    return mapGameStateToDto(nextState);
+    return {
+      state: mapGameStateToDto(nextState),
+      openedGear: mapGearToDto(loot),
+    };
   }
 }

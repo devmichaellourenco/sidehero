@@ -1,4 +1,4 @@
-import { GameStateDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { isExtensionContextValid, isContextInvalidatedError } from './ExtensionContext';
 
 export type GameMessage =
@@ -9,7 +9,7 @@ export type GameMessage =
   | { type: 'UNEQUIP_GEAR'; heroId: string; slot: string };
 
 export type GameResponse =
-  | { ok: true; state: GameStateDto }
+  | { ok: true; state: GameStateDto; openedGear?: GearDto }
   | { ok: false; error: string };
 
 export async function sendGameMessage(message: GameMessage): Promise<GameResponse> {

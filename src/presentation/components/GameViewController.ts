@@ -4,16 +4,20 @@ import { sendGameMessage } from '../../infrastructure/messaging/GameMessageBus';
 import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer, EquipPickerMode } from './EquipPickerModalRenderer';
+import { GameStateChangeDetector } from './GameStateChangeDetector';
 import { GearSlotKey } from './GearPresentation';
 import { HeroDetailModalRenderer } from './HeroDetailModalRenderer';
 import { HeroPanelRenderer } from './HeroPanelRenderer';
 import { InventoryModalRenderer } from './InventoryModalRenderer';
+import { LootModalRenderer } from './LootModalRenderer';
 import { ModalController } from './ModalController';
+import { ToastController } from './ToastController';
 
 type ModalView =
   | { type: 'inventory' }
   | { type: 'hero-detail'; heroId: string }
-  | { type: 'equip-picker'; mode: EquipPickerMode };
+  | { type: 'equip-picker'; mode: EquipPickerMode }
+  | { type: 'loot-reveal'; gearId: string };
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -34,6 +38,9 @@ export class GameViewController {
   private readonly inventoryModal: InventoryModalRenderer;
   private readonly heroDetailModal: HeroDetailModalRenderer;
   private readonly equipPickerModal: EquipPickerModalRenderer;
+  private readonly lootModal: LootModalRenderer;
+  private readonly toasts: ToastController;
+  private readonly stateChanges: GameStateChangeDetector;
 
   constructor(root: HTMLElement) {
     this.stageLabel = root.querySelector('#stage-label')!;
@@ -59,6 +66,9 @@ export class GameViewController {
     this.inventoryModal = new InventoryModalRenderer();
     this.heroDetailModal = new HeroDetailModalRenderer();
     this.equipPickerModal = new EquipPickerModalRenderer();
+    this.lootModal = new LootModalRenderer();
+    this.toasts = new ToastController(root.querySelector('#toast-root')!);
+    this.stateChanges = new GameStateChangeDetector(this.toasts);
 
     root.querySelector('#tick-btn')!.addEventListener('click', () => this.tick());
     this.openChestBtn.addEventListener('click', () => this.openNextChest());
@@ -148,7 +158,14 @@ export class GameViewController {
       this.handleFailedResponse(response.error);
       return;
     }
-    this.render(response.state);
+
+    this.render(response.state, { skipChestToast: true });
+
+    if (response.openedGear) {
+      this.stateChanges.showLootReceived(response.openedGear.name);
+      this.modalStack.length = 0;
+      this.pushModal({ type: 'loot-reveal', gearId: response.openedGear.id });
+    }
   }
 
   private async equipGear(heroId: string, gearId: string): Promise<void> {
@@ -173,7 +190,10 @@ export class GameViewController {
 
   private afterGearMutation(state: GameStateDto): void {
     const topView = this.modalStack[this.modalStack.length - 1];
-    if (topView?.type === 'equip-picker') {
+    if (
+      topView?.type === 'equip-picker' ||
+      topView?.type === 'loot-reveal'
+    ) {
       this.modalStack.pop();
     }
 
@@ -182,6 +202,19 @@ export class GameViewController {
     if (this.modalStack.length === 0) {
       this.modal.close('action');
     }
+  }
+
+  private closeLootModal(): void {
+    const topView = this.modalStack[this.modalStack.length - 1];
+    if (topView?.type !== 'loot-reveal') return;
+
+    this.modalStack.pop();
+    if (this.modalStack.length === 0) {
+      this.modal.close('action');
+      return;
+    }
+
+    this.renderModalTop();
   }
 
   private openInventoryModal(): void {
@@ -266,6 +299,12 @@ export class GameViewController {
           onUnequip: (heroId, slot) => this.unequipGear(heroId, slot),
         });
         break;
+      case 'loot-reveal':
+        this.lootModal.render(container, this.state, view.gearId, {
+          onEquipBest: (heroId, gearId) => this.equipGear(heroId, gearId),
+          onKeepInInventory: () => this.closeLootModal(),
+        });
+        break;
     }
   }
 
@@ -279,6 +318,8 @@ export class GameViewController {
         const hero = this.state.heroes.find((entry) => entry.id === view.heroId);
         return hero ? hero.name : 'Herói';
       }
+      case 'loot-reveal':
+        return 'Loot do baú';
       case 'equip-picker':
         if (view.mode.type === 'gear') {
           const gear = this.state.inventory.find((entry) => entry.id === view.mode.gearId);
@@ -297,10 +338,18 @@ export class GameViewController {
     }
   }
 
-  private render(state: GameStateDto): void {
+  private render(
+    state: GameStateDto,
+    options: { skipChestToast?: boolean } = {},
+  ): void {
     if (this.contextInvalidated || !isExtensionContextValid()) {
       this.handleContextInvalidated();
       return;
+    }
+
+    const previous = this.state;
+    if (previous && !options.skipChestToast) {
+      this.stateChanges.detect(previous, state);
     }
 
     this.state = state;

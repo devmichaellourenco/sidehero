@@ -1,0 +1,70 @@
+import { GameStateDto } from '../../application/dto/GameStateDto';
+import { findBestHeroForGear, renderComparisonBlock } from './GearComparison';
+import { renderGearCard } from './GearPresentation';
+
+export type LootModalHandlers = {
+  onEquipBest: (heroId: string, gearId: string) => void;
+  onKeepInInventory: () => void;
+};
+
+export class LootModalRenderer {
+  render(
+    container: HTMLElement,
+    state: GameStateDto,
+    gearId: string,
+    handlers: LootModalHandlers,
+  ): void {
+    const gear = state.inventory.find((entry) => entry.id === gearId);
+    if (!gear) {
+      container.innerHTML = '<p class="empty-state">Item não encontrado.</p>';
+      return;
+    }
+
+    const recommendation = findBestHeroForGear(state, gear);
+    const hero = recommendation
+      ? state.heroes.find((entry) => entry.id === recommendation.heroId)
+      : null;
+
+    const comparisonSection =
+      hero && recommendation
+        ? renderComparisonBlock(gear, hero, recommendation.equipped)
+        : '';
+
+    const equipLabel = recommendation
+      ? `Equipar em ${recommendation.heroName}`
+      : 'Equipar';
+
+    const equipDataAttrs = recommendation
+      ? `data-loot-equip-hero="${recommendation.heroId}" data-loot-equip-gear="${gear.id}"`
+      : '';
+
+    container.innerHTML = `
+      <p class="loot-reveal-intro">Você recebeu um novo item do baú!</p>
+      <div class="loot-reveal-item">
+        ${renderGearCard(gear, { showAction: false })}
+      </div>
+      ${comparisonSection}
+      <div class="loot-reveal-actions">
+        ${
+          recommendation
+            ? `<button type="button" class="gear-equip-btn" ${equipDataAttrs}>${equipLabel}</button>`
+            : ''
+        }
+        <button type="button" class="gear-unequip-btn" data-loot-keep>Guardar no inventário</button>
+      </div>
+    `;
+
+    const equipButton = container.querySelector('[data-loot-equip-hero]');
+    equipButton?.addEventListener('click', () => {
+      const heroId = equipButton.getAttribute('data-loot-equip-hero');
+      const selectedGearId = equipButton.getAttribute('data-loot-equip-gear');
+      if (heroId && selectedGearId) {
+        handlers.onEquipBest(heroId, selectedGearId);
+      }
+    });
+
+    container.querySelector('[data-loot-keep]')?.addEventListener('click', () => {
+      handlers.onKeepInInventory();
+    });
+  }
+}
