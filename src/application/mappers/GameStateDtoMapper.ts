@@ -1,12 +1,11 @@
 import { GameState } from '../../domain/entities/GameState';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
-import { GameStateDto, mapGameStateToDto } from '../dto/GameStateDto';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
+import { GameStateDto } from '../dto/GameStateDto';
 
+/** @deprecated Prefer GameStatePresenter.present() directly */
 export function mapPersistedGameState(
   state: GameState,
-  upgradeService: UpgradeService,
+  presenter: GameStatePresenter,
 ): GameStateDto {
-  return mapGameStateToDto(state, {
-    purchasableUpgradeCount: upgradeService.countAvailable(state),
-  });
+  return presenter.present(state);
 }

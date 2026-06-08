@@ -1,14 +1,13 @@
+import { ICombatService } from '../../domain/services/ICombatService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { CombatService } from '../../domain/services/CombatService';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
 
 export class TickGameUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
-    private readonly combatService: CombatService,
-    private readonly upgradeService: UpgradeService,
+    private readonly combatService: ICombatService,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(ticks = 1): Promise<GameStateDto> {
@@ -20,6 +19,6 @@ export class TickGameUseCase {
     }
 
     await this.repository.save(state);
-    return mapPersistedGameState(state, this.upgradeService);
+    return this.presenter.present(state);
   }
 }

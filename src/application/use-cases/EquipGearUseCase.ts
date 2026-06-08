@@ -1,16 +1,15 @@
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
-import { GameStateDto } from '../dto/GameStateDto';
 import {
   addReplacedGearToInventory,
   equipHeroWithGear,
-} from '../services/GearEquipService';
+} from '../../domain/services/GearEquipService';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
+import { GameStateDto } from '../dto/GameStateDto';
 
 export class EquipGearUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
-    private readonly upgradeService: UpgradeService,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(heroId: string, gearId: string): Promise<GameStateDto> {
@@ -36,6 +35,6 @@ export class EquipGearUseCase {
       .addLog(`${gear.name} equipado!`);
 
     await this.repository.save(nextState);
-    return mapPersistedGameState(nextState, this.upgradeService);
+    return this.presenter.present(nextState);
   }
 }

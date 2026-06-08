@@ -1,12 +1,10 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import {
   UPGRADE_BRANCH_LABELS,
-  UpgradeNodeDto,
-} from '../../application/dto/UpgradeNodeDto';
-import { UpgradeBranch } from '../../domain/upgrades/UpgradeDefinition';
+  UPGRADE_BRANCH_ORDER,
+} from '../../application/dto/UpgradeBranchDto';
+import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
-
-const BRANCH_ORDER: UpgradeBranch[] = ['combat', 'chests', 'equipment', 'qol', 'economy'];
 
 export type UpgradeTreeHandlers = {
   onPurchase: (upgradeId: string) => void;
@@ -20,7 +18,7 @@ export class UpgradeTreeModalRenderer {
     handlers: UpgradeTreeHandlers,
   ): void {
     const goldIcon = imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'shop-gold-icon');
-    const sections = BRANCH_ORDER.map((branch) => {
+    const sections = UPGRADE_BRANCH_ORDER.map((branch) => {
       const branchNodes = nodes.filter((node) => node.branch === branch);
       if (branchNodes.length === 0) return '';
 

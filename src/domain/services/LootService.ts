@@ -1,4 +1,5 @@
 import { Gear, GearRarity, GearSlot } from '../entities/Gear';
+import { GearRequirementChecker } from './GearRequirementChecker';
 
 const SLOT_NAMES: Record<GearSlot, string[]> = {
   weapon: ['Espada Enferrujada', 'Machado Pixel', 'Cajado Arcano', 'Lâmina Side'],
@@ -12,7 +13,9 @@ const RARITY_MULTIPLIER: Record<GearRarity, number> = {
   epic: 2.5,
 };
 
-export class LootService {
+import { ILootService } from './ILootService';
+
+export class LootService implements ILootService {
   generateGear(stage: number): Gear {
     const slots: GearSlot[] = ['weapon', 'armor', 'accessory'];
     const slot = slots[Math.floor(Math.random() * slots.length)];
@@ -72,6 +75,7 @@ export class LootService {
       attackBonus: slot === 'weapon' ? Math.floor(base * multiplier) : Math.floor(base * 0.3),
       defenseBonus: slot === 'armor' ? Math.floor(base * multiplier) : Math.floor(base * 0.2),
       healthBonus: slot === 'accessory' ? Math.floor(base * multiplier * 3) : Math.floor(base),
+      requirements: GearRequirementChecker.inferRequirements(stage, slot, rarity),
     });
   }
 

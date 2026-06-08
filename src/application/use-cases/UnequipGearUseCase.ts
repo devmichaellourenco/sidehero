@@ -1,13 +1,12 @@
 import { Gear, GearSlot } from '../../domain/entities/Gear';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
 
 export class UnequipGearUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
-    private readonly upgradeService: UpgradeService,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(heroId: string, slot: GearSlot): Promise<GameStateDto> {
@@ -31,6 +30,6 @@ export class UnequipGearUseCase {
       .addLog(`${removedGear.name} desequipado e enviado ao inventário!`);
 
     await this.repository.save(nextState);
-    return mapPersistedGameState(nextState, this.upgradeService);
+    return this.presenter.present(nextState);
   }
 }

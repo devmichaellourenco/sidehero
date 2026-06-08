@@ -1,5 +1,4 @@
-import { UpgradeBranch } from '../../domain/upgrades/UpgradeDefinition';
-import { UpgradeNodeStatus } from '../../domain/upgrades/UpgradeService';
+import { UpgradeBranchDto, UpgradeNodeStatusDto } from './UpgradeBranchDto';
 
 export interface UpgradeRequirementDto {
   label: string;
@@ -10,19 +9,11 @@ export interface UpgradeNodeDto {
   id: string;
   feature: string;
   level: number;
-  branch: UpgradeBranch;
+  branch: UpgradeBranchDto;
   name: string;
   description: string;
   cost: number;
-  status: UpgradeNodeStatus;
+  status: UpgradeNodeStatusDto;
   canAfford: boolean;
   requirements: UpgradeRequirementDto[];
 }
-
-export const UPGRADE_BRANCH_LABELS: Record<UpgradeBranch, string> = {
-  combat: 'Combate',
-  chests: 'Baús',
-  equipment: 'Equipamento',
-  qol: 'Qualidade de vida',
-  economy: 'Economia',
-};

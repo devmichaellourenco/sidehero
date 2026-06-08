@@ -5,11 +5,13 @@
   "description": "Side Hero — idle RPG no painel lateral do navegador",
   "scripts": {
     "build": "node scripts/generate-icons.mjs && node scripts/build.mjs",
-    "watch": "node scripts/build.mjs --watch"
+    "watch": "node scripts/build.mjs --watch",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
     "esbuild": "^0.25.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
   }
 }

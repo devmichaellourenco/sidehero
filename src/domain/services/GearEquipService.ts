@@ -1,5 +1,5 @@
-import { Gear } from '../../domain/entities/Gear';
-import { Hero } from '../../domain/entities/Hero';
+import { Gear } from '../entities/Gear';
+import { Hero } from '../entities/Hero';
 
 export function equipHeroWithGear(
   hero: Hero,

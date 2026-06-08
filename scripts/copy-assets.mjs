@@ -11,9 +11,9 @@ const ASSET_MAP = [
   ['Fonts/Alata-Regular.ttf', 'fonts/Alata-Regular.ttf'],
   ['Fonts/JosefinSans-Bold.ttf', 'fonts/JosefinSans-Bold.ttf'],
 
-  ['Sprites/Demo/Demo_Character/character_sample_01.png', 'characters/knight.png'],
+  ['Sprites/Demo/Demo_Character/character_sample_03.png', 'characters/knight.png'],
   ['Sprites/Demo/Demo_Character/character_sample_02.png', 'characters/sorcerer.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_03.png', 'characters/priest.png'],
+  ['Sprites/Demo/Demo_Character/character_sample_01.png', 'characters/priest.png'],
   ['Sprites/Demo/Demo_Character/character_sample_04.png', 'characters/slime.png'],
   ['Sprites/Demo/Demo_Character/character_sample_05.png', 'characters/goblin.png'],
   ['Sprites/Demo/Demo_Character/character_sample_06.png', 'characters/orc.png'],

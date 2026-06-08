@@ -1,8 +1,7 @@
-import type { EnemyType } from '../../domain/entities/EnemyType';
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
 
 export type HeroClassKey = 'knight' | 'sorcerer' | 'priest';
-export type EnemyTypeKey = EnemyType;
+export type EnemyTypeKey = 'slime' | 'goblin' | 'orc' | 'wraith' | 'dragon';
 export type GearSlotKey = 'weapon' | 'armor' | 'accessory';
 export type GearRarityKey = 'common' | 'rare' | 'epic';
 

@@ -1,9 +1,7 @@
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { LootService } from '../../domain/services/LootService';
-import { getFeatureLevel } from '../../domain/upgrades/FeatureKey';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
-import { mapGearToDto, GameStateDto, GearDto } from '../dto/GameStateDto';
+import { ChestService } from '../../domain/services/ChestService';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
+import { GameStateDto, GearDto } from '../dto/GameStateDto';
 
 export interface OpenAllChestsResult {
   state: GameStateDto;
@@ -13,51 +11,20 @@ export interface OpenAllChestsResult {
 export class OpenAllChestsUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
-    private readonly lootService: LootService,
-    private readonly upgradeService: UpgradeService,
+    private readonly chestService: ChestService,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(): Promise<OpenAllChestsResult> {
-    let state = await this.repository.load();
+    const state = await this.repository.load();
+    const { state: nextState, loots } = this.chestService.openAll(state);
 
-    if (getFeatureLevel(state.upgradeLevels, 'open_all_chests') < 1) {
-      throw new Error('Abrir todos os baús não desbloqueado');
-    }
+    await this.repository.save(nextState);
 
-    const pendingChests = state.chests.filter((chest) => !chest.opened);
+    const dto = this.presenter.present(nextState);
+    const lootIds = new Set(loots.map((loot) => loot.id));
+    const openedGears = dto.inventory.filter((gear) => lootIds.has(gear.id));
 
-    if (pendingChests.length === 0) {
-      return {
-        state: mapPersistedGameState(state, this.upgradeService),
-        openedGears: [],
-      };
-    }
-
-    const openedGears: GearDto[] = [];
-    let updatedChests = [...state.chests];
-    let inventory = [...state.inventory];
-    const logs: string[] = [];
-
-    for (const chest of pendingChests) {
-      const loot = this.lootService.generateGear(chest.stageEarned);
-      updatedChests = updatedChests.map((entry) =>
-        entry.id === chest.id ? entry.open(loot) : entry,
-      );
-      inventory = [...inventory, loot];
-      openedGears.push(mapGearToDto(loot));
-      logs.push(loot.name);
-    }
-
-    state = state
-      .withChests(updatedChests)
-      .withInventory(inventory)
-      .addLog(`Abriu ${openedGears.length} baús: ${logs.join(', ')}`);
-
-    await this.repository.save(state);
-
-    return {
-      state: mapPersistedGameState(state, this.upgradeService),
-      openedGears,
-    };
+    return { state: dto, openedGears };
   }
 }

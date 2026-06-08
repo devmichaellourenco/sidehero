@@ -1,7 +1,12 @@
 import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
+import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { isExtensionContextValid, isContextInvalidatedError } from './ExtensionContext';
+
+export type SpendTargetMessage =
+  | { type: 'attribute'; key: 'str' | 'dex' | 'int' }
+  | { type: 'skill'; skillId: string };
 
 export type GameMessage =
   | { type: 'GET_STATE' }
@@ -15,7 +20,11 @@ export type GameMessage =
   | { type: 'BUY_SHOP_OFFER'; offerId: string }
   | { type: 'REFRESH_SHOP' }
   | { type: 'GET_UPGRADE_TREE' }
-  | { type: 'PURCHASE_UPGRADE'; upgradeId: string };
+  | { type: 'PURCHASE_UPGRADE'; upgradeId: string }
+  | { type: 'SPEND_IMPROVEMENT_POINT'; heroId: string; target: SpendTargetMessage }
+  | { type: 'GET_HERO_SKILL_TREE'; heroId: string }
+  | { type: 'ACTIVATE_SKILL'; heroId: string; skillId: string }
+  | { type: 'DEACTIVATE_SKILL'; heroId: string; skillId: string };
 
 export type GameResponse =
   | {
@@ -31,6 +40,7 @@ export type GameResponse =
       shopRefreshUnlocked?: boolean;
       shopRefreshRemaining?: number;
       upgradeNodes?: UpgradeNodeDto[];
+      skillNodes?: SkillNodeDto[];
       purchasableUpgradeCount?: number;
       purchasedUpgradeId?: string;
     }

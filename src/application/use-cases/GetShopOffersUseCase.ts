@@ -1,15 +1,15 @@
+import { FeatureAccessPolicy } from '../../domain/policies/FeatureAccessPolicy';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { getFeatureLevel } from '../../domain/upgrades/FeatureKey';
 import {
   calculateShopRefreshCost,
   canRefreshShop,
   getShopRefreshLimit,
 } from '../../domain/upgrades/ShopRefreshRules';
 import { ShopService } from '../../domain/services/ShopService';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { ShopOfferDto } from '../dto/ShopOfferDto';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
-import { mapGearToDto, GameStateDto } from '../dto/GameStateDto';
+import { mapGearToDto } from '../mappers/GearDtoMapper';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
+import { GameStateDto } from '../dto/GameStateDto';
 
 export interface GetShopOffersResult {
   state: GameStateDto;
@@ -24,7 +24,7 @@ export class GetShopOffersUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly shopService: ShopService,
-    private readonly upgradeService: UpgradeService,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(): Promise<GetShopOffersResult> {
@@ -40,10 +40,10 @@ export class GetShopOffersUseCase {
 
     const refreshCost = calculateShopRefreshCost(state.stage, state.upgradeLevels);
     const limit = getShopRefreshLimit(state.upgradeLevels);
-    const shopRefreshUnlocked = getFeatureLevel(state.upgradeLevels, 'shop_refresh') >= 1;
+    const shopRefreshUnlocked = FeatureAccessPolicy.resolve(state.upgradeLevels).shopRefresh;
 
     return {
-      state: mapPersistedGameState(state, this.upgradeService),
+      state: this.presenter.present(state),
       offers,
       refreshCost,
       canAffordRefresh: canRefreshShop(state),

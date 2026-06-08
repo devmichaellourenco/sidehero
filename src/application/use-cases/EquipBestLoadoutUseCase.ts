@@ -1,9 +1,8 @@
+import { FeatureAccessPolicy } from '../../domain/policies/FeatureAccessPolicy';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { getFeatureLevel } from '../../domain/upgrades/FeatureKey';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
+import { LoadoutOptimizer } from '../../domain/services/LoadoutOptimizer';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
-import { applyEquipActions, planBestLoadout } from '../services/LoadoutPlanner';
 
 export interface EquipBestLoadoutResult {
   state: GameStateDto;
@@ -13,23 +12,27 @@ export interface EquipBestLoadoutResult {
 export class EquipBestLoadoutUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
-    private readonly upgradeService: UpgradeService,
+    private readonly loadoutOptimizer: LoadoutOptimizer,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(gearIds?: string[]): Promise<EquipBestLoadoutResult> {
     const state = await this.repository.load();
 
-    if (getFeatureLevel(state.upgradeLevels, 'optimize_loadout') < 1) {
+    if (!FeatureAccessPolicy.resolve(state.upgradeLevels).optimizeLoadout) {
       throw new Error('Otimizar equipe não desbloqueado');
     }
 
-    const actions = planBestLoadout(state, gearIds);
-    const { state: nextState, equippedCount } = applyEquipActions(state, actions);
+    const actions = this.loadoutOptimizer.planBestLoadout(state, gearIds);
+    const { state: nextState, equippedCount } = this.loadoutOptimizer.applyEquipActions(
+      state,
+      actions,
+    );
 
     await this.repository.save(nextState);
 
     return {
-      state: mapPersistedGameState(nextState, this.upgradeService),
+      state: this.presenter.present(nextState),
       equippedCount,
     };
   }

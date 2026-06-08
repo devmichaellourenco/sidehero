@@ -1,13 +1,17 @@
-import { chestProgress } from '../../domain/constants/CombatRules';
 import { GameStateDto } from '../../application/dto/GameStateDto';
+import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
+import { HeroDetailTab } from './HeroDetailModalRenderer';
+import { AutoBattleController } from '../controllers/AutoBattleController';
+import { GameHudController } from '../controllers/GameHudController';
+import { GamePreferencesController } from '../controllers/GamePreferencesController';
+import { LootFlowController } from '../controllers/LootFlowController';
+import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
 import { sendGameMessage } from '../../infrastructure/messaging/GameMessageBus';
-import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer, EquipPickerMode } from './EquipPickerModalRenderer';
 import { GameStateChangeDetector } from './GameStateChangeDetector';
-import { countUpgradeItems } from './GearComparison';
 import { GearSlotKey } from './GearPresentation';
 import { LootBatchModalRenderer } from './LootBatchModalRenderer';
 import { HeroDetailModalRenderer } from './HeroDetailModalRenderer';
@@ -23,16 +27,10 @@ import {
   seedPanelSnapshotIfMissing,
   touchPanelSnapshot,
 } from './PanelStateSnapshot';
-import {
-  GamePreferences,
-  loadGamePreferences,
-  saveGamePreferences,
-  updateGamePreference,
-} from './GamePreferences';
+import { GamePreferences } from './GamePreferences';
 import { SettingsModalRenderer } from './SettingsModalRenderer';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
-import { FeatureGate } from './FeatureGate';
 import { ToastController } from './ToastController';
 
 type ModalView =
@@ -45,21 +43,14 @@ type ModalView =
   | { type: 'shop' }
   | { type: 'upgrades' };
 
-const AUTO_BATTLE_BASE_INTERVAL_MS = 2500;
-
 export class GameViewController {
   private state: GameStateDto | null = null;
   private readonly modalStack: ModalView[] = [];
-  private readonly lootQueue: string[] = [];
-  private lootTotal = 0;
+  private readonly lootFlow = new LootFlowController();
+  private readonly prefsController = new GamePreferencesController();
+  private readonly autoBattleController = new AutoBattleController();
   private refreshTimer: number | null = null;
-  private autoBattleTimer: number | null = null;
-  private preferences: GamePreferences = loadGamePreferences();
-  private autoBattleEnabled = false;
-  private autoOpenChests = false;
-  private autoEquipLoot = false;
-  private autoBattleSpeed = 1;
-  private logFilterImportant = false;
+  private heroSkillNodes: SkillNodeDto[] = [];
   private contextInvalidated = false;
   private idleSummaryShown = false;
   private openingChests = false;
@@ -98,6 +89,7 @@ export class GameViewController {
   private readonly upgradeTreeModal: UpgradeTreeModalRenderer;
   private readonly toasts: ToastController;
   private readonly stateChanges: GameStateChangeDetector;
+  private readonly hud: GameHudController;
 
   constructor(root: HTMLElement) {
     this.stageLabel = root.querySelector('#stage-label')!;
@@ -137,8 +129,20 @@ export class GameViewController {
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.stateChanges = new GameStateChangeDetector(this.toasts);
+    this.hud = new GameHudController(
+      this.stageLabel,
+      this.goldLabel,
+      this.chestLabel,
+      this.chestProgressLabel,
+      this.openInventoryBtn,
+      this.optimizeLoadoutBtn,
+      this.openAllChestsBtn,
+      this.openUpgradesBtn,
+      this.openChestBtn,
+      this.tickBtn,
+    );
 
-    this.applyPreferences(loadGamePreferences());
+    this.prefsController.apply(this.state);
 
     this.tickBtn.addEventListener('click', () => this.tick());
     this.openChestBtn.addEventListener('click', () => this.openNextChest());
@@ -183,7 +187,7 @@ export class GameViewController {
 
     if (this.contextInvalidated) return;
 
-    if (this.autoBattleEnabled) {
+    if (this.prefsController.autoBattleEnabled) {
       this.startAutoBattle();
     }
 
@@ -192,31 +196,11 @@ export class GameViewController {
     }, 5000);
   }
 
-  private applyPreferences(preferences: GamePreferences): void {
-    const clamped = this.clampPreferencesToGates(preferences);
-    const wasAutoBattle = this.autoBattleEnabled;
-    const wasSpeed = this.autoBattleSpeed;
-
-    this.preferences = clamped;
-    this.autoBattleEnabled =
-      clamped.autoBattle && FeatureGate.canUseAutoBattle(this.state);
-    this.autoOpenChests =
-      clamped.autoOpenChests && FeatureGate.canUseAutoOpenChests(this.state);
-    this.autoEquipLoot =
-      clamped.autoEquipLoot && FeatureGate.canUseAutoEquipLoot(this.state);
-    this.autoBattleSpeed = Math.min(
-      clamped.autoBattleSpeed,
-      FeatureGate.maxAutoBattleSpeed(this.state),
-    ) as GamePreferences['autoBattleSpeed'];
-    this.logFilterImportant =
-      clamped.logFilterImportant && FeatureGate.canUseLogFilter(this.state);
-    this.updateAutoBattleUi();
-
-    const autoBattleChanged =
-      wasAutoBattle !== this.autoBattleEnabled || wasSpeed !== this.autoBattleSpeed;
+  private applyPreferences(): void {
+    const { autoBattleChanged } = this.prefsController.apply(this.state);
 
     if (autoBattleChanged) {
-      if (this.autoBattleEnabled) {
+      if (this.prefsController.autoBattleEnabled) {
         this.stopAutoBattle();
         this.startAutoBattle();
       } else {
@@ -225,35 +209,16 @@ export class GameViewController {
     }
   }
 
-  private clampPreferencesToGates(preferences: GamePreferences): GamePreferences {
-    const maxSpeed = FeatureGate.maxAutoBattleSpeed(this.state);
-    return {
-      autoBattle: FeatureGate.canUseAutoBattle(this.state) ? preferences.autoBattle : false,
-      autoOpenChests: FeatureGate.canUseAutoOpenChests(this.state)
-        ? preferences.autoOpenChests
-        : false,
-      autoEquipLoot: FeatureGate.canUseAutoEquipLoot(this.state)
-        ? preferences.autoEquipLoot
-        : false,
-      autoBattleSpeed: Math.min(preferences.autoBattleSpeed, maxSpeed) as 1 | 2 | 3,
-      logFilterImportant: FeatureGate.canUseLogFilter(this.state)
-        ? preferences.logFilterImportant
-        : false,
-    };
-  }
-
   private enforceUpgradeGates(): void {
-    const clamped = this.clampPreferencesToGates(this.preferences);
-    if (JSON.stringify(clamped) === JSON.stringify(this.preferences)) return;
-    saveGamePreferences(clamped);
-    this.applyPreferences(clamped);
+    this.prefsController.enforceGates(this.state);
   }
 
   private handlePreferenceChange<K extends keyof GamePreferences>(
     key: K,
     value: GamePreferences[K],
   ): void {
-    if (!this.canChangePreference(key)) {
+    const result = this.prefsController.update(key, value, this.state);
+    if (!result.applied) {
       this.toasts.show('Desbloqueie esta automação em Melhorias', 'info');
       if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'settings') {
         this.renderModalTop();
@@ -261,15 +226,11 @@ export class GameViewController {
       return;
     }
 
-    const wasAutoBattle = this.autoBattleEnabled;
-    const next = updateGamePreference(key, value);
-    this.applyPreferences(next);
-
     if (key === 'autoOpenChests' && value === true) {
       this.scheduleAutoOpenChests();
     }
 
-    if (key === 'autoBattleSpeed' && wasAutoBattle && this.autoBattleEnabled) {
+    if (key === 'autoBattleSpeed' && result.autoBattleChanged && this.prefsController.autoBattleEnabled) {
       this.stopAutoBattle();
       this.startAutoBattle();
     }
@@ -283,33 +244,10 @@ export class GameViewController {
     }
   }
 
-  private canChangePreference(key: keyof GamePreferences): boolean {
-    switch (key) {
-      case 'autoBattle':
-        return FeatureGate.canUseAutoBattle(this.state);
-      case 'autoOpenChests':
-        return FeatureGate.canUseAutoOpenChests(this.state);
-      case 'autoEquipLoot':
-        return FeatureGate.canUseAutoEquipLoot(this.state);
-      case 'logFilterImportant':
-        return FeatureGate.canUseLogFilter(this.state);
-      case 'autoBattleSpeed':
-        return FeatureGate.canUseAutoBattle(this.state);
-      default:
-        return true;
-    }
-  }
-
-  private getAutoBattleIntervalMs(): number {
-    const speed = Math.min(
-      this.autoBattleSpeed,
-      FeatureGate.maxAutoBattleSpeed(this.state),
-    );
-    return Math.floor(AUTO_BATTLE_BASE_INTERVAL_MS / speed);
-  }
-
   private shouldIgnoreKeyboardShortcut(): boolean {
-    if (this.contextInvalidated || this.autoBattleEnabled || this.openingChests) return true;
+    if (this.contextInvalidated || this.prefsController.autoBattleEnabled || this.openingChests) {
+      return true;
+    }
     if (this.modal.isOpen()) return true;
 
     const target = document.activeElement;
@@ -446,22 +384,14 @@ export class GameViewController {
   }
 
   private startAutoBattle(): void {
-    if (this.autoBattleTimer !== null || this.contextInvalidated) return;
-
-    this.autoBattleTimer = window.setInterval(() => {
+    if (this.autoBattleController.isRunning() || this.contextInvalidated) return;
+    this.autoBattleController.start(this.prefsController.getAutoBattleIntervalMs(this.state), () => {
       void this.tick();
-    }, this.getAutoBattleIntervalMs());
+    });
   }
 
   private stopAutoBattle(): void {
-    if (this.autoBattleTimer === null) return;
-    window.clearInterval(this.autoBattleTimer);
-    this.autoBattleTimer = null;
-  }
-
-  private updateAutoBattleUi(): void {
-    this.tickBtn.classList.toggle('auto-battle-active', this.autoBattleEnabled);
-    this.tickBtn.disabled = this.autoBattleEnabled;
+    this.autoBattleController.stop();
   }
 
   private async refresh(options: { checkIdleSummary?: boolean } = {}): Promise<void> {
@@ -486,7 +416,7 @@ export class GameViewController {
     if (this.contextInvalidated) return;
     this.contextInvalidated = true;
     this.modalStack.length = 0;
-    this.lootQueue.length = 0;
+    this.lootFlow.reset();
 
     if (this.refreshTimer !== null) {
       window.clearInterval(this.refreshTimer);
@@ -553,7 +483,7 @@ export class GameViewController {
   }
 
   private async openAllChests(): Promise<void> {
-    if (!FeatureGate.canUseOpenAllChests(this.state)) return;
+    if (!getFeatureFlags(this.state).openAllChests) return;
     if (!this.state || this.openingChests || this.state.pendingChestCount === 0) return;
 
     this.openingChests = true;
@@ -577,23 +507,15 @@ export class GameViewController {
   }
 
   private enqueueLootModals(gearIds: string[]): void {
-    this.lootTotal = gearIds.length;
-    this.lootQueue.length = 0;
     this.modalStack.length = 0;
-
-    if (gearIds.length > 1) {
-      this.pushModal({ type: 'loot-batch', gearIds: [...gearIds] });
-      return;
-    }
-
-    if (gearIds.length === 1) {
-      this.lootQueue.push(gearIds[0]);
-      this.pushModal({ type: 'loot-reveal', gearId: gearIds[0] });
+    const view = this.lootFlow.enqueue(gearIds);
+    if (view) {
+      this.pushModal(view);
     }
   }
 
   private showNextLootModal(): void {
-    const gearId = this.lootQueue[0];
+    const gearId = this.lootFlow.queue[0];
     if (!gearId) return;
 
     this.modalStack.length = 0;
@@ -601,11 +523,9 @@ export class GameViewController {
   }
 
   private advanceLootQueue(): void {
-    if (this.lootQueue.length > 0) {
-      this.lootQueue.shift();
-    }
+    this.lootFlow.shift();
 
-    if (this.lootQueue.length > 0) {
+    if (this.lootFlow.hasQueued()) {
       this.showNextLootModal();
       return;
     }
@@ -632,15 +552,16 @@ export class GameViewController {
       this.toasts.show(`${gearIds.length} itens recebidos dos baús`, 'loot');
     }
 
-    if (this.autoEquipLoot && FeatureGate.canUseAutoEquipLoot(this.state)) {
+    const flags = getFeatureFlags(this.state);
+    if (this.prefsController.autoEquipLoot && flags.autoEquipLoot) {
       await this.optimizeLoadout(gearIds, {
         fromLoot: true,
-        silent: FeatureGate.isAutoEquipSilent(this.state),
+        silent: flags.autoEquipSilent,
       });
       return;
     }
 
-    this.lootQueue.length = 0;
+    this.lootFlow.reset();
     this.enqueueLootModals(gearIds);
   }
 
@@ -648,7 +569,7 @@ export class GameViewController {
     gearIds?: string[],
     options: { fromLoot?: boolean; silent?: boolean } = {},
   ): Promise<void> {
-    if (!FeatureGate.canUseOptimizeLoadout(this.state)) {
+    if (!getFeatureFlags(this.state).optimizeLoadout) {
       this.toasts.show('Desbloqueie Otimizar equipe em Melhorias', 'info');
       return;
     }
@@ -689,13 +610,13 @@ export class GameViewController {
     if (topView?.type !== 'loot-batch') return;
 
     this.modalStack.pop();
-    this.lootQueue.length = 0;
+    this.lootFlow.reset();
     this.modal.close('action');
   }
 
   private scheduleAutoOpenChests(): void {
     if (this.autoOpenChestPending) return;
-    if (!this.autoOpenChests || !FeatureGate.canUseAutoOpenChests(this.state)) return;
+    if (!this.prefsController.autoOpenChests || !getFeatureFlags(this.state).autoOpenChests) return;
     if (!this.state || this.openingChests) return;
     if (this.modal.isOpen() || this.state.pendingChestCount === 0) return;
 
@@ -703,13 +624,13 @@ export class GameViewController {
     window.setTimeout(() => {
       this.autoOpenChestPending = false;
 
-      if (!this.autoOpenChests || this.openingChests || this.modal.isOpen()) return;
+      if (!this.prefsController.autoOpenChests || this.openingChests || this.modal.isOpen()) return;
       if (!this.state || this.state.pendingChestCount === 0) return;
 
       if (
         this.state.pendingChestCount >= 2 &&
-        FeatureGate.canUseOpenAllChests(this.state) &&
-        FeatureGate.shouldAutoOpenAllChests(this.state)
+        getFeatureFlags(this.state).openAllChests &&
+        getFeatureFlags(this.state).autoOpenAllChests
       ) {
         void this.openAllChests();
         return;
@@ -741,7 +662,7 @@ export class GameViewController {
 
     this.render(state);
 
-    if (topView?.type === 'loot-reveal' && this.lootQueue.length > 0) {
+    if (topView?.type === 'loot-reveal' && this.lootFlow.hasQueued()) {
       this.advanceLootQueue();
       return;
     }
@@ -757,7 +678,7 @@ export class GameViewController {
 
     this.modalStack.pop();
 
-    if (this.lootQueue.length > 0) {
+    if (this.lootFlow.hasQueued()) {
       this.advanceLootQueue();
       return;
     }
@@ -778,7 +699,73 @@ export class GameViewController {
 
   private openHeroDetailModal(heroId: string): void {
     this.modalStack.length = 0;
-    this.pushModal({ type: 'hero-detail', heroId });
+    this.heroDetailModal.setActiveTab('sheet');
+    void this.loadHeroSkillTree(heroId).then(() => {
+      this.pushModal({ type: 'hero-detail', heroId });
+    });
+  }
+
+  private async loadHeroSkillTree(heroId: string): Promise<void> {
+    const response = await sendGameMessage({ type: 'GET_HERO_SKILL_TREE', heroId });
+    if (response.ok && response.skillNodes) {
+      this.heroSkillNodes = response.skillNodes;
+    }
+  }
+
+  private async changeHeroDetailTab(heroId: string, tab: HeroDetailTab): Promise<void> {
+    this.heroDetailModal.setActiveTab(tab);
+    if (tab === 'skills') {
+      await this.loadHeroSkillTree(heroId);
+    }
+    this.renderModalTop();
+  }
+
+  private async spendAttributePoint(heroId: string, attr: 'str' | 'dex' | 'int'): Promise<void> {
+    const response = await sendGameMessage({
+      type: 'SPEND_IMPROVEMENT_POINT',
+      heroId,
+      target: { type: 'attribute', key: attr },
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha ao investir ponto', 'info');
+      return;
+    }
+    this.render(response.state);
+    this.toasts.show(`+1 ${attr.toUpperCase()}`, 'info');
+  }
+
+  private async allocateSkillPoint(heroId: string, skillId: string): Promise<void> {
+    const response = await sendGameMessage({
+      type: 'SPEND_IMPROVEMENT_POINT',
+      heroId,
+      target: { type: 'skill', skillId },
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha na skill', 'info');
+      return;
+    }
+    await this.loadHeroSkillTree(heroId);
+    this.render(response.state);
+  }
+
+  private async activateSkill(heroId: string, skillId: string): Promise<void> {
+    const response = await sendGameMessage({ type: 'ACTIVATE_SKILL', heroId, skillId });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha ao ativar', 'info');
+      return;
+    }
+    await this.loadHeroSkillTree(heroId);
+    this.render(response.state);
+  }
+
+  private async deactivateSkill(heroId: string, skillId: string): Promise<void> {
+    const response = await sendGameMessage({ type: 'DEACTIVATE_SKILL', heroId, skillId });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha ao desativar', 'info');
+      return;
+    }
+    await this.loadHeroSkillTree(heroId);
+    this.render(response.state);
   }
 
   private openEquipPickerFromSlot(heroId: string, slot: string): void {
@@ -827,7 +814,7 @@ export class GameViewController {
     const container = this.modal.open(title, (reason) => {
       if (reason !== 'action') {
         this.modalStack.length = 0;
-        this.lootQueue.length = 0;
+        this.lootFlow.reset();
       }
     });
 
@@ -845,12 +832,28 @@ export class GameViewController {
             onSortChange: () => this.renderModalTop(),
             onOptimizeLoadout: () => this.optimizeLoadout(),
           },
-          { showOptimize: FeatureGate.canUseOptimizeLoadout(this.state) },
+          { showOptimize: this.state.featureFlags.optimizeLoadout },
         );
         break;
       case 'hero-detail':
+        this.heroDetailModal.setSkillNodes(this.heroSkillNodes);
         this.heroDetailModal.render(container, this.state, view.heroId, {
           onSlotClick: (heroId, slot) => this.openEquipPickerFromSlot(heroId, slot),
+          onSpendAttribute: (heroId, attr) => {
+            void this.spendAttributePoint(heroId, attr);
+          },
+          onAllocateSkill: (heroId, skillId) => {
+            void this.allocateSkillPoint(heroId, skillId);
+          },
+          onActivateSkill: (heroId, skillId) => {
+            void this.activateSkill(heroId, skillId);
+          },
+          onDeactivateSkill: (heroId, skillId) => {
+            void this.deactivateSkill(heroId, skillId);
+          },
+          onTabChange: (heroId, tab) => {
+            void this.changeHeroDetailTab(heroId, tab);
+          },
         });
         break;
       case 'equip-picker':
@@ -877,11 +880,11 @@ export class GameViewController {
             },
             onKeepAll: () => this.closeLootBatchModal(),
           },
-          { canOptimize: FeatureGate.canUseOptimizeInLootBatch(this.state) },
+          { canOptimize: this.state.featureFlags.optimizeInLootBatch },
         );
         break;
       case 'settings':
-        this.settingsModal.render(container, this.state, this.preferences, {
+        this.settingsModal.render(container, this.state, this.prefsController.preferences, {
           onPreferenceChange: (key, value) => this.handlePreferenceChange(key, value),
           onOpenUpgrades: () => {
             void this.openUpgradesModal();
@@ -938,8 +941,8 @@ export class GameViewController {
       case 'loot-batch':
         return `Loot dos baús (${view.gearIds.length})`;
       case 'loot-reveal': {
-        const current = this.lootTotal - this.lootQueue.length + 1;
-        const queueLabel = this.lootTotal > 1 ? ` (${current} de ${this.lootTotal})` : '';
+        const current = this.lootFlow.total - this.lootFlow.queue.length + 1;
+        const queueLabel = this.lootFlow.total > 1 ? ` (${current} de ${this.lootFlow.total})` : '';
         return `Loot do baú${queueLabel}`;
       }
       case 'equip-picker':
@@ -999,13 +1002,10 @@ export class GameViewController {
 
     this.state = state;
 
-    this.stageLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.stage), 'Stage', 'stat-icon')} Stage ${state.stage}`;
-    this.goldLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'stat-icon')} ${state.gold}`;
-    this.chestLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.chest), 'Baús', 'stat-icon')} ${state.pendingChestCount}`;
-
-    const progress = chestProgress(state.totalBattlesWon);
-    this.chestProgressLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.chest), 'Próximo baú', 'stat-icon')} ${progress.current}/${progress.target}`;
-    this.chestProgressLabel.title = 'Vitórias até o próximo baú';
+    this.hud.render(state, {
+      openingChests: this.openingChests,
+      autoBattleEnabled: this.prefsController.autoBattleEnabled,
+    });
 
     this.battleStrip.render(state);
     this.heroPanel.render(state, {
@@ -1013,52 +1013,18 @@ export class GameViewController {
       onSlotClick: (heroId, slot) => this.openEquipPickerFromSlot(heroId, slot),
     });
 
-    const upgradeCount = countUpgradeItems(state);
-    const upgradeBadge =
-      upgradeCount > 0
-        ? `<span class="inventory-upgrade-badge">↑${upgradeCount}</span>`
-        : '';
-
-    this.openInventoryBtn.innerHTML = `
-      ${imgTag(getAssetUrl(ASSETS.ui.inventory), 'Inventário', 'btn-icon')}
-      Inventário (${state.inventory.length})
-      ${upgradeBadge}
-    `;
-
-    const canOptimize = FeatureGate.canUseOptimizeLoadout(state);
-    this.optimizeLoadoutBtn.classList.toggle('hidden', !canOptimize);
-    this.optimizeLoadoutBtn.disabled = !canOptimize || upgradeCount === 0;
-    this.optimizeLoadoutBtn.innerHTML = upgradeCount > 0
-      ? `Otimizar (↑${upgradeCount})`
-      : 'Otimizar equipe';
-
-    const canOpenAll = FeatureGate.canUseOpenAllChests(state);
-    this.openAllChestsBtn.classList.toggle('hidden', !canOpenAll || state.pendingChestCount < 2);
-
-    const purchasableBadge =
-      state.purchasableUpgradeCount > 0
-        ? `<span class="inventory-upgrade-badge">↑${state.purchasableUpgradeCount}</span>`
-        : '';
-    this.openUpgradesBtn.innerHTML = `Melhorias${purchasableBadge}`;
-
-    this.shopRefreshUnlocked = FeatureGate.canUseShopRefresh(state);
+    this.shopRefreshUnlocked = state.featureFlags.shopRefresh;
     this.shopRefreshRemaining = Math.max(0, state.shopRefreshLimit - state.shopRefreshUses);
 
     const logMessages = filterBattleLogMessages(
       state.battleLog.map((entry) => entry.message),
-      this.logFilterImportant,
+      this.prefsController.logFilterImportant,
     );
 
     this.battleLog.innerHTML = [...logMessages]
       .reverse()
       .map((message) => `<li>${message}</li>`)
       .join('');
-
-    const hasChests = state.pendingChestCount > 0;
-    this.openChestBtn.disabled = !hasChests || this.openingChests;
-    this.openAllChestsBtn.disabled =
-      !canOpenAll || state.pendingChestCount < 2 || this.openingChests;
-    this.openChestBtn.classList.toggle('chest-available', hasChests);
 
     this.enforceUpgradeGates();
 

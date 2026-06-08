@@ -1,7 +1,8 @@
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { UpgradeNodeDto } from '../dto/UpgradeNodeDto';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
+import { mapUpgradeTree } from '../mappers/UpgradeTreeMapper';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
 
 export interface GetUpgradeTreeResult {
@@ -14,28 +15,15 @@ export class GetUpgradeTreeUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly upgradeService: UpgradeService,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(): Promise<GetUpgradeTreeResult> {
     const state = await this.repository.load();
-    const tree = this.upgradeService.buildTree(state);
-
-    const nodes: UpgradeNodeDto[] = tree.map((node) => ({
-      id: node.definition.id,
-      feature: node.definition.feature,
-      level: node.definition.level,
-      branch: node.definition.branch,
-      name: node.definition.name,
-      description: node.definition.description,
-      cost: node.definition.cost,
-      status: node.status,
-      canAfford: node.canAfford,
-      requirements: node.requirements,
-    }));
 
     return {
-      state: mapPersistedGameState(state, this.upgradeService),
-      nodes,
+      state: this.presenter.present(state),
+      nodes: mapUpgradeTree(this.upgradeService.buildTree(state)),
       purchasableCount: this.upgradeService.countAvailable(state),
     };
   }

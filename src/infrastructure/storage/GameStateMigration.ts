@@ -1,3 +1,5 @@
+import { createAttributes } from '../../domain/progression/Attributes';
+import { AscensionId, SkillId } from '../../domain/progression/SkillId';
 import { Experience } from '../../domain/value-objects/Experience';
 import { Stats } from '../../domain/value-objects/Stats';
 import { Gear, GearSlot } from '../../domain/entities/Gear';
@@ -22,6 +24,51 @@ function migrateEquipment(raw: unknown): HeroProps['equipment'] {
   );
 }
 
+function migrateAttributes(raw: unknown): HeroProps['allocatedAttributes'] {
+  const attrs = asRecord(raw);
+  return createAttributes(
+    typeof attrs.str === 'number' ? attrs.str : 0,
+    typeof attrs.dex === 'number' ? attrs.dex : 0,
+    typeof attrs.int === 'number' ? attrs.int : 0,
+  );
+}
+
+function migrateSkillRanks(raw: unknown): Record<SkillId, number> {
+  const ranks = asRecord(raw);
+  return Object.fromEntries(
+    Object.entries(ranks)
+      .filter(([, value]) => typeof value === 'number' && value > 0)
+      .map(([id, value]) => [id, value as number]),
+  );
+}
+
+function migrateEquippedSkillIds(raw: unknown): SkillId[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((id): id is SkillId => typeof id === 'string');
+}
+
+function migrateProgression(raw: RawRecord): Pick<
+  HeroProps,
+  | 'allocatedAttributes'
+  | 'unspentImprovementPoints'
+  | 'unspentAscensionPoints'
+  | 'skillRanks'
+  | 'equippedSkillIds'
+  | 'ascensionId'
+> {
+  return {
+    allocatedAttributes: migrateAttributes(raw.allocatedAttributes),
+    unspentImprovementPoints:
+      typeof raw.unspentImprovementPoints === 'number' ? raw.unspentImprovementPoints : 0,
+    unspentAscensionPoints:
+      typeof raw.unspentAscensionPoints === 'number' ? raw.unspentAscensionPoints : 0,
+    skillRanks: migrateSkillRanks(raw.skillRanks),
+    equippedSkillIds: migrateEquippedSkillIds(raw.equippedSkillIds),
+    ascensionId:
+      typeof raw.ascensionId === 'string' ? (raw.ascensionId as AscensionId) : null,
+  };
+}
+
 function migrateExperience(raw: unknown): Experience {
   const exp = asRecord(raw);
   return Experience.restore(
@@ -41,6 +88,8 @@ export function migrateHero(raw: unknown): Hero {
   const experience = migrateExperience(h.experience);
   const equipment = migrateEquipment(h.equipment);
 
+  const progression = migrateProgression(h);
+
   if (typeof h.baseAttack === 'number') {
     return Hero.restore({
       id: h.id,
@@ -52,6 +101,7 @@ export function migrateHero(raw: unknown): Hero {
       currentHealth: typeof h.currentHealth === 'number' ? h.currentHealth : 100,
       experience,
       equipment,
+      ...progression,
     });
   }
 
@@ -71,6 +121,7 @@ export function migrateHero(raw: unknown): Hero {
           : 100,
     experience,
     equipment,
+    ...progression,
   });
 }
 

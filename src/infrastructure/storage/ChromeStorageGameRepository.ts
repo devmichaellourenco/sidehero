@@ -58,6 +58,12 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
               gear ? gear.toProps() : null,
             ]),
           ),
+          allocatedAttributes: heroProps.allocatedAttributes,
+          unspentImprovementPoints: heroProps.unspentImprovementPoints,
+          unspentAscensionPoints: heroProps.unspentAscensionPoints,
+          skillRanks: heroProps.skillRanks,
+          equippedSkillIds: heroProps.equippedSkillIds,
+          ascensionId: heroProps.ascensionId,
         };
       }),
       currentEnemy: props.currentEnemy?.toProps() ?? null,

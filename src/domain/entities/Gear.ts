@@ -1,6 +1,13 @@
 export type GearSlot = 'weapon' | 'armor' | 'accessory';
 export type GearRarity = 'common' | 'rare' | 'epic';
 
+export interface GearRequirements {
+  minLevel: number;
+  str?: number;
+  dex?: number;
+  int?: number;
+}
+
 export interface GearProps {
   id: string;
   name: string;
@@ -9,7 +16,10 @@ export interface GearProps {
   attackBonus: number;
   defenseBonus: number;
   healthBonus: number;
+  requirements?: GearRequirements;
 }
+
+const DEFAULT_REQUIREMENTS: GearRequirements = { minLevel: 1 };
 
 export class Gear {
   readonly id: string;
@@ -19,6 +29,7 @@ export class Gear {
   readonly attackBonus: number;
   readonly defenseBonus: number;
   readonly healthBonus: number;
+  readonly requirements: GearRequirements;
 
   private constructor(props: GearProps) {
     this.id = props.id;
@@ -28,6 +39,7 @@ export class Gear {
     this.attackBonus = props.attackBonus;
     this.defenseBonus = props.defenseBonus;
     this.healthBonus = props.healthBonus;
+    this.requirements = props.requirements ?? DEFAULT_REQUIREMENTS;
   }
 
   static create(props: GearProps): Gear {
@@ -43,6 +55,7 @@ export class Gear {
       attackBonus: this.attackBonus,
       defenseBonus: this.defenseBonus,
       healthBonus: this.healthBonus,
+      requirements: this.requirements,
     };
   }
 }

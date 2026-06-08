@@ -1,15 +1,15 @@
+import { FeatureAccessPolicy } from '../../domain/policies/FeatureAccessPolicy';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { getFeatureLevel } from '../../domain/upgrades/FeatureKey';
 import {
   calculateShopRefreshCost,
   canRefreshShop,
   getShopRefreshLimit,
 } from '../../domain/upgrades/ShopRefreshRules';
 import { ShopService } from '../../domain/services/ShopService';
-import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { ShopOfferDto } from '../dto/ShopOfferDto';
-import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
-import { mapGearToDto, GameStateDto } from '../dto/GameStateDto';
+import { mapGearToDto } from '../mappers/GearDtoMapper';
+import { GameStatePresenter } from '../presenters/GameStatePresenter';
+import { GameStateDto } from '../dto/GameStateDto';
 
 export interface RefreshShopResult {
   state: GameStateDto;
@@ -23,13 +23,13 @@ export class RefreshShopUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly shopService: ShopService,
-    private readonly upgradeService: UpgradeService,
+    private readonly presenter: GameStatePresenter,
   ) {}
 
   async execute(): Promise<RefreshShopResult> {
     const state = await this.repository.load();
 
-    if (getFeatureLevel(state.upgradeLevels, 'shop_refresh') < 1) {
+    if (!FeatureAccessPolicy.resolve(state.upgradeLevels).shopRefresh) {
       throw new Error('Renovar loja não desbloqueado');
     }
 
@@ -64,7 +64,7 @@ export class RefreshShopUseCase {
     const nextRefreshCost = calculateShopRefreshCost(nextState.stage, nextState.upgradeLevels);
 
     return {
-      state: mapPersistedGameState(nextState, this.upgradeService),
+      state: this.presenter.present(nextState),
       offers,
       refreshCost: nextRefreshCost,
       canAffordRefresh: canRefreshShop(nextState),

@@ -1,6 +1,5 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { GamePreferences } from './GamePreferences';
-import { FeatureGate } from './FeatureGate';
 
 export type SettingsModalHandlers = {
   onPreferenceChange: <K extends keyof GamePreferences>(
@@ -24,28 +23,28 @@ export class SettingsModalRenderer {
           key: 'autoBattle',
           title: 'Auto-batalha',
           hint: 'Avança batalhas automaticamente',
-          unlocked: FeatureGate.canUseAutoBattle(state),
+          unlocked: state.featureFlags.autoBattle,
           checked: preferences.autoBattle,
         })}
         ${this.renderToggle({
           key: 'autoOpenChests',
           title: 'Auto-abrir baús',
           hint: 'Abre baús assim que estiverem disponíveis',
-          unlocked: FeatureGate.canUseAutoOpenChests(state),
+          unlocked: state.featureFlags.autoOpenChests,
           checked: preferences.autoOpenChests,
         })}
         ${this.renderToggle({
           key: 'autoEquipLoot',
           title: 'Auto-equipar loot',
           hint: 'Equipa itens recomendados sem abrir modal',
-          unlocked: FeatureGate.canUseAutoEquipLoot(state),
+          unlocked: state.featureFlags.autoEquipLoot,
           checked: preferences.autoEquipLoot,
         })}
         ${this.renderToggle({
           key: 'logFilterImportant',
           title: 'Log resumido',
           hint: 'Mostra só vitórias, baús e equipamentos',
-          unlocked: FeatureGate.canUseLogFilter(state),
+          unlocked: state.featureFlags.logFilter,
           checked: preferences.logFilterImportant,
         })}
         ${this.renderSpeedSelect(state, preferences)}
@@ -109,8 +108,8 @@ export class SettingsModalRenderer {
   }
 
   private renderSpeedSelect(state: GameStateDto, preferences: GamePreferences): string {
-    const maxSpeed = FeatureGate.maxAutoBattleSpeed(state);
-    if (!FeatureGate.canUseAutoBattle(state)) {
+    const maxSpeed = state.featureFlags.autoBattleMaxSpeed;
+    if (!state.featureFlags.autoBattle) {
       return `
         <div class="settings-item settings-item-locked settings-item-select">
           <span class="settings-item-text">

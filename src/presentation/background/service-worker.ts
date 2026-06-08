@@ -173,6 +173,22 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         purchasedUpgradeId: result.purchasedUpgradeId,
       };
     }
+    case 'SPEND_IMPROVEMENT_POINT': {
+      const state = await app.spendImprovementPoint.execute(message.heroId, message.target);
+      return { ok: true, state };
+    }
+    case 'GET_HERO_SKILL_TREE': {
+      const result = await app.getHeroSkillTree.execute(message.heroId);
+      return { ok: true, state: result.state, skillNodes: result.nodes };
+    }
+    case 'ACTIVATE_SKILL': {
+      const state = await app.activateSkill.execute(message.heroId, message.skillId);
+      return { ok: true, state };
+    }
+    case 'DEACTIVATE_SKILL': {
+      const state = await app.deactivateSkill.execute(message.heroId, message.skillId);
+      return { ok: true, state };
+    }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
   }
