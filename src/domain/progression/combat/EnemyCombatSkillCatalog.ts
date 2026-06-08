@@ -47,10 +47,9 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
       usePriority: 70,
       initialCooldown: 1,
       cooldownTurns: 2,
-      basePower: 0,
+      basePower: 8,
       powerPerRank: 0,
       attributeFactor: 0,
-      usesAttackStat: true,
     },
   ],
   wraith: [
@@ -64,10 +63,9 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
       usePriority: 75,
       initialCooldown: 0,
       cooldownTurns: 2,
-      basePower: 0,
+      basePower: 6,
       powerPerRank: 0,
       attributeFactor: 0,
-      usesAttackStat: true,
     },
     {
       skillId: 'wraith_curse',

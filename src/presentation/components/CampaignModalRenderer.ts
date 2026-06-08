@@ -27,16 +27,21 @@ function parseMapIndex(mapId: string, phases: CampaignPhaseDto[]): number {
   return Number.parseInt(mapPart, 10) || 1;
 }
 
+export function isMapUnlocked(map: CampaignMapDto): boolean {
+  return map.unlocked;
+}
+
 export function resolveInitialMapId(campaign: CampaignOverviewDto): string {
   const selectedMap = campaign.maps.find((map) => map.phases.some((phase) => phase.selected));
-  if (selectedMap) return selectedMap.id;
+  if (selectedMap && isMapUnlocked(selectedMap)) return selectedMap.id;
 
-  const progressMap = campaign.maps.find((map) =>
-    map.phases.some((phase) => phase.unlocked && !phase.cleared),
+  const progressMap = campaign.maps.find(
+    (map) => isMapUnlocked(map) && map.phases.some((phase) => phase.unlocked && !phase.cleared),
   );
   if (progressMap) return progressMap.id;
 
-  return campaign.maps[0]?.id ?? 'stendra';
+  const firstUnlocked = campaign.maps.find((map) => isMapUnlocked(map));
+  return firstUnlocked?.id ?? campaign.maps[0]?.id ?? 'stendra';
 }
 
 function renderPhaseButton(phase: CampaignPhaseDto): string {
@@ -56,8 +61,8 @@ function renderPhaseButton(phase: CampaignPhaseDto): string {
       ${disabled}
     >
       <span class="campaign-phase-status">${status}</span>
-      <span class="campaign-phase-name">Fase ${escapeHtml(phaseNumber)}</span>
-      <span class="campaign-phase-meta">${phase.waveCount} waves · T${phase.difficultyTier}${badge}</span>
+      <span class="campaign-phase-name">${escapeHtml(phase.displayName)}</span>
+      <span class="campaign-phase-meta">Fase ${escapeHtml(phaseNumber)} · ${phase.waveCount} waves · T${phase.difficultyTier}${badge}</span>
     </button>
   `;
 }
@@ -69,17 +74,21 @@ export class CampaignModalRenderer {
         const active = map.id === activeMapId ? ' campaign-map-tab--active' : '';
         const progress = mapProgress(map);
         const mapIndex = parseMapIndex(map.id, map.phases);
-        const locked = progress.unlocked === 0;
+        const locked = !isMapUnlocked(map);
         const tabState = locked ? ' campaign-map-tab--locked' : '';
+        const disabled = locked ? ' disabled' : '';
 
         return `
           <button
             type="button"
             class="campaign-map-tab${active}${tabState}"
             data-campaign-map-tab="${escapeHtml(map.id)}"
+            data-map-unlocked="${map.unlocked}"
             aria-selected="${map.id === activeMapId}"
+            ${disabled}
+            title="${locked ? 'Conclua o boss do mapa anterior para desbloquear' : escapeHtml(map.name)}"
           >
-            <span class="campaign-map-tab-name">${escapeHtml(map.name)}</span>
+            <span class="campaign-map-tab-name">${locked ? '🔒 ' : ''}${escapeHtml(map.name)}</span>
             <span class="campaign-map-tab-meta">${tierRangeForMap(mapIndex)} · ${progress.cleared}/${progress.total}</span>
           </button>
         `;
@@ -88,6 +97,15 @@ export class CampaignModalRenderer {
   }
 
   renderMapPanel(map: CampaignMapDto): string {
+    if (!isMapUnlocked(map)) {
+      return `
+        <div class="campaign-map-locked">
+          <p class="campaign-map-locked-title">Mapa bloqueado</p>
+          <p class="campaign-map-locked-hint">Derrote o boss da fase 50 do mapa anterior para desbloquear ${escapeHtml(map.name)}.</p>
+        </div>
+      `;
+    }
+
     const progress = mapProgress(map);
     const mapIndex = parseMapIndex(map.id, map.phases);
     const phases = map.phases.map(renderPhaseButton).join('');
@@ -108,7 +126,7 @@ export class CampaignModalRenderer {
 
     return `
       <div class="campaign-modal">
-        <p class="campaign-modal-hint">Selecione uma fase desbloqueada ou concluída. XP só no boss.</p>
+        <p class="campaign-modal-hint">Selecione uma fase desbloqueada ou concluída. Marcos 👑 a cada 50 fases.</p>
         <div class="campaign-map-tabs" data-campaign-map-tabs role="tablist" aria-label="Mapas">
           ${this.renderTabs(campaign, activeMapId)}
         </div>

@@ -14,6 +14,7 @@ export interface CampaignPhaseDto {
 export interface CampaignMapDto {
   id: string;
   name: string;
+  unlocked: boolean;
   phases: CampaignPhaseDto[];
 }
 

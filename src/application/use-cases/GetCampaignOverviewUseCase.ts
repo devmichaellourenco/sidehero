@@ -19,10 +19,8 @@ export class GetCampaignOverviewUseCase {
   async execute(): Promise<GetCampaignOverviewResult> {
     const state = await this.repository.load();
     const info = getCampaignInfo();
-    const maps = info.maps.map((map) => ({
-      id: map.id,
-      name: map.name,
-      phases: listPhasesForMap(map.id).map((phase) => {
+    const maps = info.maps.map((map) => {
+      const phases = listPhasesForMap(map.id).map((phase) => {
         const definition = resolvePhase(phase.id)!;
         return {
           id: phase.id,
@@ -36,8 +34,17 @@ export class GetCampaignOverviewUseCase {
           milestoneBoss: definition.milestoneBoss ?? false,
           seasonFinale: definition.seasonFinale ?? false,
         };
-      }),
-    }));
+      });
+
+      const unlocked = phases.some((phase) => phase.unlocked || phase.cleared);
+
+      return {
+        id: map.id,
+        name: map.name,
+        unlocked,
+        phases,
+      };
+    });
 
     return {
       state: this.presenter.present(state),

@@ -3,6 +3,7 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import {
   CampaignModalRenderer,
+  isMapUnlocked,
   resolveInitialMapId,
 } from '../components/CampaignModalRenderer';
 import { ModalController } from '../components/ModalController';
@@ -38,8 +39,13 @@ export class CampaignFlow {
   private bindMapTabs(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
     modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-map-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
+        if (tab.disabled) return;
+
         const mapId = tab.dataset.campaignMapTab;
         if (!mapId || mapId === this.activeMapId || !this.campaign) return;
+
+        const map = this.campaign.maps.find((entry) => entry.id === mapId);
+        if (!map || !isMapUnlocked(map)) return;
 
         this.activeMapId = mapId;
         this.refreshMapView(modalBody, onState);

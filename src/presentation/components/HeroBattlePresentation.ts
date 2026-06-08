@@ -49,7 +49,7 @@ export function renderHeroBattleSprite(
         ${spriteHtml}
         <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
       </div>
-      ${renderCombatSkillIntent(hero.combatIntent)}
+      ${renderCombatSkillIntent(options.isActiveTurn ? hero.combatIntent : null)}
       ${renderCombatStatusEffects(hero.statusEffects)}
       ${renderHeroStripHealthBar(hero)}
     </div>

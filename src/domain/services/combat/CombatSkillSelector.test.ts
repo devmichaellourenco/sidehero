@@ -126,6 +126,38 @@ describe('CombatSkillSelector', () => {
     expect(selected?.action.power).toBe(7);
   });
 
+  it('orc prioriza Pancada com poder fixo acima do ataque básico', () => {
+    const orc = Enemy.restore({
+      ...Enemy.forStage(4).toProps(),
+      id: 'orc-1',
+      enemyType: 'orc',
+      name: 'Orc Lv.4',
+    });
+    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+
+    const selected = selector.selectEnemyAction(orc, [hero], [orc], emptyCooldowns);
+
+    expect(selected?.skillId).toBe('orc_smash');
+    expect(selected?.action.skillName).toBe('Pancada');
+    expect(selected?.action.power).toBe(12);
+  });
+
+  it('wraith prioriza Drenar Vida com poder fixo', () => {
+    const wraith = Enemy.restore({
+      ...Enemy.forStage(6).toProps(),
+      id: 'wraith-1',
+      enemyType: 'wraith',
+      name: 'Wraith Lv.6',
+    });
+    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+
+    const selected = selector.selectEnemyAction(wraith, [hero], [wraith], emptyCooldowns);
+
+    expect(selected?.skillId).toBe('wraith_drain');
+    expect(selected?.action.skillName).toBe('Drenar Vida');
+    expect(selected?.action.power).toBe(12);
+  });
+
   it('dragão prioriza Baforada em área quando fora de cooldown inicial', () => {
     const dragon = Enemy.restore({
       ...Enemy.forStage(5).toProps(),

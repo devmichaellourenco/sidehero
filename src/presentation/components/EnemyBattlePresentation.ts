@@ -63,7 +63,7 @@ export function renderEnemyBattleCard(
         <div class="enemy-name">${escapeHtml(enemy.name)}</div>
         <span class="enemy-tooltip-content hidden">${renderEnemyTooltipContent(enemy, stage)}</span>
       </div>
-      ${renderCombatSkillIntent(enemy.combatIntent)}
+      ${renderCombatSkillIntent(options.isActiveTurn ? enemy.combatIntent : null)}
       ${renderCombatStatusEffects(enemy.statusEffects)}
       <div
         class="stat-bar health-bar enemy strip-bar"

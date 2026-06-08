@@ -6,6 +6,7 @@ import {
   isMilestonePhase,
   isSeasonFinalePhase,
 } from './CampaignIds';
+import { applyMilestoneBlueprint, getMilestoneBlueprint } from './MilestonePhaseBlueprints';
 import { PhaseDefinition } from './PhaseDefinition';
 import { EnemySlot, WaveDefinition } from './WaveDefinition';
 
@@ -113,7 +114,7 @@ function buildPhase(mapIndex: number, phaseNumber: number): PhaseDefinition {
   else if (phaseNumber > 35) statMultiplier = 1.12;
   else if (phaseNumber > 20) statMultiplier = 1.06;
 
-  return {
+  let phase: PhaseDefinition = {
     id: phaseId,
     campaignId: 'apprentice',
     mapId: map.id,
@@ -125,6 +126,15 @@ function buildPhase(mapIndex: number, phaseNumber: number): PhaseDefinition {
     seasonFinale,
     statMultiplier,
   };
+
+  if (milestoneBoss) {
+    const blueprint = getMilestoneBlueprint(phaseId);
+    if (blueprint) {
+      phase = applyMilestoneBlueprint(phase, blueprint);
+    }
+  }
+
+  return phase;
 }
 
 function buildHandcraftedCatalog(): PhaseDefinition[] {
