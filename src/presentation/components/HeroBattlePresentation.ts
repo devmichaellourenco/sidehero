@@ -4,6 +4,7 @@ import {
   formatHealthLabel,
   renderHeroStripHealthBar,
 } from './HeroBarsPresentation';
+import { renderCombatSkillIntent } from './CombatSkillIntentPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -47,6 +48,7 @@ export function renderHeroBattleSprite(
         ${spriteHtml}
         <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
       </div>
+      ${renderCombatSkillIntent(hero.combatIntent)}
       ${renderHeroStripHealthBar(hero)}
     </div>
   `;

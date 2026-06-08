@@ -92,4 +92,61 @@ describe('CombatSkillSelector', () => {
     expect(heroSelected?.skillId).toBe('inquisitor_judgment');
     expect(heroSelected?.action.targetEnemyId).toBe('tough-enemy');
   });
+
+  it('goblin prioriza Facada com poder fixo acima do ataque básico', () => {
+    const goblin = Enemy.restore({
+      ...Enemy.forStage(2).toProps(),
+      id: 'goblin-1',
+      enemyType: 'goblin',
+      name: 'Goblin Lv.2',
+    });
+    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+
+    const selected = selector.selectEnemyAction(goblin, [hero], [goblin], emptyCooldowns);
+
+    expect(selected?.skillId).toBe('goblin_stab');
+    expect(selected?.action.skillName).toBe('Facada');
+    expect(selected?.action.power).toBe(8);
+    expect(selected?.action.targetHeroId).toBe('h1');
+  });
+
+  it('slime usa Ácido quando pronto em vez do ataque básico', () => {
+    const slime = Enemy.restore({
+      ...Enemy.forStage(3).toProps(),
+      id: 'slime-1',
+      enemyType: 'slime',
+      name: 'Slime Lv.3',
+    });
+    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+
+    const selected = selector.selectEnemyAction(slime, [hero], [slime], emptyCooldowns);
+
+    expect(selected?.skillId).toBe('slime_acid');
+    expect(selected?.action.skillName).toBe('Ácido');
+    expect(selected?.action.power).toBe(7);
+  });
+
+  it('dragão prioriza Baforada em área quando fora de cooldown inicial', () => {
+    const dragon = Enemy.restore({
+      ...Enemy.forStage(5).toProps(),
+      id: 'dragon-1',
+      enemyType: 'dragon',
+      name: 'Dragon Lv.5',
+    });
+    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const ready = SkillCooldownTracker.fromMap({});
+    const charging = SkillCooldownTracker.fromMap({
+      'enemy:dragon-1': { dragon_breath: 2 },
+    });
+
+    const readyPick = selector.selectEnemyAction(dragon, [hero], [dragon], ready);
+    expect(readyPick?.skillId).toBe('dragon_breath');
+    expect(readyPick?.action.skillName).toBe('Baforada');
+    expect(readyPick?.action.targeting).toBe('all_allies');
+    expect(readyPick?.action.power).toBe(17);
+
+    const chargingPick = selector.selectEnemyAction(dragon, [hero], [dragon], charging);
+    expect(chargingPick?.skillId).toBe('dragon_bite');
+    expect(chargingPick?.action.skillName).toBe('Mordida');
+  });
 });

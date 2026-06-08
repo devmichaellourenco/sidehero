@@ -40,7 +40,11 @@ export class SkillCooldownTracker {
   }
 
   isReady(key: string, skillId: string): boolean {
-    return (this.cooldowns[key]?.[skillId] ?? 0) <= 0;
+    return this.getRemaining(key, skillId) <= 0;
+  }
+
+  getRemaining(key: string, skillId: string): number {
+    return Math.max(0, this.cooldowns[key]?.[skillId] ?? 0);
   }
 
   toMap(): SkillCooldownMap {

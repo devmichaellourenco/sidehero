@@ -5,22 +5,36 @@ import { Chest } from '../../domain/entities/Chest';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { mapChestProgress } from '../mappers/ChestProgressMapper';
 import { mapFeatureFlags } from '../mappers/FeatureFlagsMapper';
-import { mapHeroToDto } from '../mappers/HeroDtoMapper';
+import { mapHeroToDto as mapHeroBaseToDto } from '../mappers/HeroDtoMapper';
+import { Hero } from '../../domain/entities/Hero';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
 import { buildInventoryUpgradeHints } from '../mappers/GearUpgradePreviewMapper';
 import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
+import { listEnemyCombatSkillsByType } from '../../domain/progression/combat/EnemyCombatSkillCatalog';
+import { getEnemySkillDisplay } from '../../domain/progression/combat/EnemySkillDisplayCatalog';
+import {
+  mapEnemyCombatIntent,
+  mapHeroCombatIntent,
+} from '../mappers/CombatSkillIntentMapper';
 
 export class GameStatePresenter {
   constructor(private readonly upgradeService: UpgradeService) {}
 
   present(state: GameState): GameStateDto {
     const upgradeLevels = { ...state.upgradeLevels };
-    const enemies = (state.combat?.enemies ?? []).map(mapEnemyToDto);
-    const activeActor = state.combat?.currentActor() ?? null;
+    const combat = state.combat;
+    const combatEnemies = combat?.enemies ?? [];
+    const skillCooldowns = combat?.skillCooldowns;
+    const enemies = combatEnemies.map((enemy) =>
+      mapEnemyToDto(enemy, state.heroes, combatEnemies, skillCooldowns),
+    );
+    const activeActor = combat?.currentActor() ?? null;
 
     return {
-      heroes: state.heroes.map(mapHeroToDto),
+      heroes: state.heroes.map((hero) =>
+        mapHeroToDtoWithCombatIntent(hero, state.heroes, combatEnemies, skillCooldowns),
+      ),
       enemies,
       enemy: enemies[0] ?? null,
       activeTurn: activeActor ? { side: activeActor.side, id: activeActor.id } : null,
@@ -43,7 +57,24 @@ export class GameStatePresenter {
   }
 }
 
-function mapEnemyToDto(enemy: Enemy): EnemyDto {
+function mapHeroToDtoWithCombatIntent(
+  hero: Hero,
+  party: Hero[],
+  enemies: Enemy[],
+  skillCooldowns: Parameters<typeof mapHeroCombatIntent>[3],
+) {
+  return {
+    ...mapHeroBaseToDto(hero),
+    combatIntent: mapHeroCombatIntent(hero, party, enemies, skillCooldowns),
+  };
+}
+
+function mapEnemyToDto(
+  enemy: Enemy,
+  party: Parameters<typeof mapEnemyCombatIntent>[1],
+  enemies: Parameters<typeof mapEnemyCombatIntent>[2],
+  skillCooldowns: Parameters<typeof mapEnemyCombatIntent>[3],
+): EnemyDto {
   return {
     id: enemy.id,
     name: enemy.name,
@@ -54,6 +85,12 @@ function mapEnemyToDto(enemy: Enemy): EnemyDto {
     defense: enemy.stats.defense,
     goldReward: enemy.goldReward,
     xpReward: enemy.xpReward,
+    signatureSkills: listEnemyCombatSkillsByType(enemy.enemyType)
+      .filter((skill) => skill.skillId !== 'basic_attack')
+      .map((skill) => getEnemySkillDisplay(skill.skillId))
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+      .map((entry) => ({ name: entry.name, description: entry.description })),
+    combatIntent: mapEnemyCombatIntent(enemy, party, enemies, skillCooldowns),
   };
 }
 

@@ -4,7 +4,22 @@ import { CombatSkillDefinition } from './CombatSkillDefinition';
 import { ENEMY_BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 
 const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
-  slime: [ENEMY_BASIC_ATTACK_SKILL],
+  slime: [
+    ENEMY_BASIC_ATTACK_SKILL,
+    {
+      skillId: 'slime_acid',
+      kind: 'damage_magic',
+      targetPool: 'heroes',
+      targetScope: 'single',
+      targetPriority: 'lowest_hp_percent',
+      usePriority: 40,
+      initialCooldown: 0,
+      cooldownTurns: 2,
+      basePower: 4,
+      powerPerRank: 0,
+      attributeFactor: 0,
+    },
+  ],
   goblin: [
     ENEMY_BASIC_ATTACK_SKILL,
     {
@@ -16,10 +31,9 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
       usePriority: 55,
       initialCooldown: 0,
       cooldownTurns: 2,
-      basePower: 0,
+      basePower: 6,
       powerPerRank: 0,
       attributeFactor: 0,
-      usesAttackStat: true,
     },
   ],
   orc: [
@@ -67,10 +81,9 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
       usePriority: 85,
       initialCooldown: 2,
       cooldownTurns: 3,
-      basePower: 0,
+      basePower: 12,
       powerPerRank: 0,
       attributeFactor: 0,
-      usesAttackStat: true,
     },
     {
       skillId: 'dragon_bite',
@@ -81,14 +94,17 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
       usePriority: 80,
       initialCooldown: 0,
       cooldownTurns: 2,
-      basePower: 0,
+      basePower: 8,
       powerPerRank: 0,
       attributeFactor: 0,
-      usesAttackStat: true,
     },
   ],
 };
 
+export function listEnemyCombatSkillsByType(enemyType: EnemyType): CombatSkillDefinition[] {
+  return ENEMY_SKILL_SETS[enemyType] ?? [ENEMY_BASIC_ATTACK_SKILL];
+}
+
 export function listEnemyCombatSkills(enemy: Enemy): CombatSkillDefinition[] {
-  return ENEMY_SKILL_SETS[enemy.enemyType] ?? [ENEMY_BASIC_ATTACK_SKILL];
+  return listEnemyCombatSkillsByType(enemy.enemyType);
 }

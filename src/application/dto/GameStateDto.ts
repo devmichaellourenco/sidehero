@@ -65,6 +65,20 @@ export interface HeroDto {
       requirements: GearRequirementsDto;
     } | null
   >;
+  combatIntent: CombatSkillIntentDto | null;
+}
+
+export interface CombatSkillIntentDto {
+  nextSkillName: string;
+  nextSkillId: string;
+  status: 'ready' | 'cooldown';
+  turnsRemaining: number;
+  chargingSkills: Array<{ skillName: string; turnsRemaining: number }>;
+}
+
+export interface EnemySignatureSkillDto {
+  name: string;
+  description: string;
 }
 
 export interface EnemyDto {
@@ -77,6 +91,8 @@ export interface EnemyDto {
   defense: number;
   goldReward: number;
   xpReward: number;
+  signatureSkills: EnemySignatureSkillDto[];
+  combatIntent: CombatSkillIntentDto | null;
 }
 
 export interface GearDto {

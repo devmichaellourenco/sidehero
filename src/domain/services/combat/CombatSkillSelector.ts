@@ -1,4 +1,4 @@
-import { getSkillById } from '../../progression/SkillCatalog';
+import { resolveCombatSkillName } from '../../progression/combat/CombatSkillNaming';
 import {
   CombatSkillDefinition,
   toSkillTargeting,
@@ -83,7 +83,7 @@ export class CombatSkillSelector {
     party: Hero[],
     enemies: Enemy[],
   ): CombatAction | null {
-    const skillName = this.resolveSkillName(skill);
+    const skillName = resolveCombatSkillName(skill);
     const targeting = toSkillTargeting(skill);
 
     if (skill.kind === 'heal_ally' || skill.targetPool === 'heroes') {
@@ -141,12 +141,4 @@ export class CombatSkillSelector {
     };
   }
 
-  private resolveSkillName(skill: CombatSkillDefinition): string {
-    if (skill.skillId === 'goblin_stab') return 'Facada';
-    if (skill.skillId === 'orc_smash') return 'Pancada';
-    if (skill.skillId === 'wraith_drain') return 'Drenar Vida';
-    if (skill.skillId === 'dragon_breath') return 'Baforada';
-    if (skill.skillId === 'dragon_bite') return 'Mordida';
-    return getSkillById(skill.skillId)?.name ?? skill.skillId;
-  }
 }

@@ -363,6 +363,54 @@ h2 {
   margin-top: 2px;
 }
 
+.combat-skill-intent {
+  margin-top: 2px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 8px;
+  line-height: 1.2;
+  max-width: 72px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combat-skill-intent--ready {
+  color: #c8f7a5;
+  background: rgba(72, 120, 48, 0.35);
+  border: 1px solid rgba(120, 180, 80, 0.45);
+}
+
+.combat-skill-intent--cooldown {
+  color: #f5d07a;
+  background: rgba(120, 90, 24, 0.35);
+  border: 1px solid rgba(180, 140, 40, 0.45);
+}
+
+.combat-skill-charging {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  margin-top: 1px;
+}
+
+.combat-skill-charge {
+  font-size: 7px;
+  color: var(--muted);
+  line-height: 1.1;
+}
+
+.enemy-battle-card .combat-skill-intent,
+.enemy-battle-card .combat-skill-charging {
+  align-self: flex-end;
+}
+
+.enemy-tooltip-skill {
+  color: #d4b8ff;
+}
+
 .enemy-tooltip-content {
   display: none;
 }

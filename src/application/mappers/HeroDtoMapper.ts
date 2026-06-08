@@ -61,5 +61,6 @@ export function mapHeroToDto(hero: Hero): HeroDto {
     ascensionId: props.ascensionId,
     hasUnspentPoints: hero.hasUnspentPoints,
     equipment,
+    combatIntent: null,
   };
 }

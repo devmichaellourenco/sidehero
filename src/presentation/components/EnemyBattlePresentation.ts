@@ -1,4 +1,5 @@
 import { EnemyDto } from '../../application/dto/GameStateDto';
+import { renderCombatSkillIntent } from './CombatSkillIntentPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -12,8 +13,20 @@ export function formatEnemyHealthLabel(enemy: Pick<EnemyDto, 'health' | 'maxHeal
   return `${enemy.health}/${enemy.maxHealth}`;
 }
 
+function renderEnemySkillLines(enemy: EnemyDto): string {
+  if (enemy.signatureSkills.length === 0) return '';
+
+  return enemy.signatureSkills
+    .map(
+      (skill) =>
+        `<span class="enemy-tooltip-line enemy-tooltip-skill">${escapeHtml(skill.name)} — ${escapeHtml(skill.description)}</span>`,
+    )
+    .join('');
+}
+
 export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): string {
   const healthLabel = formatEnemyHealthLabel(enemy);
+  const skillLines = renderEnemySkillLines(enemy);
 
   return `
     <strong class="enemy-tooltip-name">${escapeHtml(enemy.name)}</strong>
@@ -21,6 +34,7 @@ export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): strin
     <span class="enemy-tooltip-line">${healthLabel}</span>
     <span class="enemy-tooltip-line">ATK ${enemy.attack} · DEF ${enemy.defense}</span>
     <span class="enemy-tooltip-line">+${enemy.goldReward} ouro · +${enemy.xpReward} XP</span>
+    ${skillLines}
   `;
 }
 
@@ -47,6 +61,7 @@ export function renderEnemyBattleCard(
         <div class="enemy-name">${escapeHtml(enemy.name)}</div>
         <span class="enemy-tooltip-content hidden">${renderEnemyTooltipContent(enemy, stage)}</span>
       </div>
+      ${renderCombatSkillIntent(enemy.combatIntent)}
       <div
         class="stat-bar health-bar enemy strip-bar"
         data-bar-label="${healthLabel}"
