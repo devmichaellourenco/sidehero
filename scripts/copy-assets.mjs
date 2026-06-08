@@ -5,15 +5,20 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const resourcesRoot = join(root, 'public', 'ResourcesData');
+const heroesSpritesRoot = join(root, 'public', 'sprites', 'heroes');
 const outRoot = join(root, 'dist', 'panel', 'assets');
+
+/** Sprites de heróis em public/sprites/heroes. */
+const HERO_SPRITE_MAP = [
+  ['fighter.png', 'characters/knight.png'],
+  ['feiticeira.png', 'characters/sorcerer.png'],
+  ['priest.png', 'characters/priest.png'],
+];
 
 const ASSET_MAP = [
   ['Fonts/Alata-Regular.ttf', 'fonts/Alata-Regular.ttf'],
   ['Fonts/JosefinSans-Bold.ttf', 'fonts/JosefinSans-Bold.ttf'],
 
-  ['Sprites/Demo/Demo_Character/character_sample_03.png', 'characters/knight.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_02.png', 'characters/sorcerer.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_01.png', 'characters/priest.png'],
   ['Sprites/Demo/Demo_Character/character_sample_04.png', 'characters/slime.png'],
   ['Sprites/Demo/Demo_Character/character_sample_05.png', 'characters/goblin.png'],
   ['Sprites/Demo/Demo_Character/character_sample_06.png', 'characters/orc.png'],
@@ -54,15 +59,21 @@ const ASSET_MAP = [
   ['Sprites/Component/Icon_EquipmentIcons_(Original)/equip_cyristal.png', 'gear/epic.png'],
 ];
 
-export async function copyAssets() {
-  for (const [source, dest] of ASSET_MAP) {
-    const sourcePath = join(resourcesRoot, source);
+async function copyAssetBatch(sourceRoot, entries) {
+  for (const [source, dest] of entries) {
+    const sourcePath = join(sourceRoot, source);
     const destPath = join(outRoot, dest);
     await mkdir(dirname(destPath), { recursive: true });
     await copyFile(sourcePath, destPath);
   }
+}
 
-  console.log(`Assets copiados: ${ASSET_MAP.length} arquivos em dist/panel/assets/`);
+export async function copyAssets() {
+  await copyAssetBatch(resourcesRoot, ASSET_MAP);
+  await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
+
+  const total = ASSET_MAP.length + HERO_SPRITE_MAP.length;
+  console.log(`Assets copiados: ${total} arquivos em dist/panel/assets/`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
