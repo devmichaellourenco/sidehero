@@ -7,6 +7,8 @@ import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
 import { inferEnemyType } from '../../domain/entities/EnemyType';
 import { Chest, ChestProps } from '../../domain/entities/Chest';
+import { CombatState } from '../../domain/entities/CombatState';
+import { TurnOrderService } from '../../domain/services/combat/TurnOrderService';
 
 type RawRecord = Record<string, unknown>;
 
@@ -156,6 +158,40 @@ export function migrateEnemy(raw: unknown): Enemy | null {
     goldReward: e.goldReward,
     xpReward: e.xpReward,
   });
+}
+
+export function migrateCombat(
+  raw: unknown,
+  heroes: Hero[],
+  legacyEnemy: Enemy | null,
+): CombatState | null {
+  if (raw && typeof raw === 'object') {
+    const combat = asRecord(raw);
+    const enemiesRaw = Array.isArray(combat.enemies) ? combat.enemies : [];
+    const enemies = enemiesRaw
+      .map((enemy) => migrateEnemy(enemy))
+      .filter((enemy): enemy is Enemy => enemy !== null);
+
+    if (enemies.length > 0) {
+      return CombatState.restore({
+        enemies: enemies.map((enemy) => enemy.toProps()),
+        turnQueue: Array.isArray(combat.turnQueue)
+          ? (combat.turnQueue as CombatState['turnQueue'])
+          : [],
+        turnIndex: typeof combat.turnIndex === 'number' ? combat.turnIndex : 0,
+        round: typeof combat.round === 'number' ? combat.round : 1,
+        skillCooldowns:
+          combat.skillCooldowns && typeof combat.skillCooldowns === 'object'
+            ? (combat.skillCooldowns as CombatState['skillCooldowns'])
+            : {},
+      });
+    }
+  }
+
+  if (!legacyEnemy) return null;
+
+  const turnOrder = new TurnOrderService();
+  return CombatState.fromLegacyEnemy(legacyEnemy, heroes, turnOrder);
 }
 
 export function migrateChest(raw: unknown): Chest {

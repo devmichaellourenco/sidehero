@@ -74,9 +74,17 @@ export interface ChestDto {
   opened: boolean;
 }
 
+export interface ActiveTurnDto {
+  side: 'hero' | 'enemy';
+  id: string;
+}
+
 export interface GameStateDto {
   heroes: HeroDto[];
+  enemies: EnemyDto[];
   enemy: EnemyDto | null;
+  activeTurn: ActiveTurnDto | null;
+  combatRound: number;
   stage: number;
   gold: number;
   chests: ChestDto[];

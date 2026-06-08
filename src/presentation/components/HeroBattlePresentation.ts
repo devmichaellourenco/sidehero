@@ -26,9 +26,16 @@ export function renderHeroTooltipContent(hero: HeroDto): string {
   `;
 }
 
-export function renderHeroBattleSprite(hero: HeroDto, glowHtml: string, spriteHtml: string): string {
+export function renderHeroBattleSprite(
+  hero: HeroDto,
+  glowHtml: string,
+  spriteHtml: string,
+  options: { isActiveTurn?: boolean } = {},
+): string {
+  const activeClass = options.isActiveTurn ? ' hero-battle-card--active-turn' : '';
+
   return `
-    <div class="hero-battle-card" data-hero-id="${escapeHtml(hero.id)}">
+    <div class="hero-battle-card${activeClass}" data-hero-id="${escapeHtml(hero.id)}">
       <div
         class="hero-sprite"
         data-float-anchor="hero"

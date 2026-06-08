@@ -24,12 +24,18 @@ export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): strin
   `;
 }
 
-export function renderEnemyBattleCard(enemy: EnemyDto, stage: number, spriteHtml: string): string {
+export function renderEnemyBattleCard(
+  enemy: EnemyDto,
+  stage: number,
+  spriteHtml: string,
+  options: { isActiveTurn?: boolean } = {},
+): string {
   const healthPercent = Math.max(0, (enemy.health / enemy.maxHealth) * 100);
   const healthLabel = formatEnemyHealthLabel(enemy);
+  const activeClass = options.isActiveTurn ? ' enemy-battle-card--active-turn' : '';
 
   return `
-    <div class="enemy-battle-card" data-enemy-id="${escapeHtml(enemy.id)}">
+    <div class="enemy-battle-card${activeClass}" data-enemy-id="${escapeHtml(enemy.id)}">
       <div
         class="enemy-battle-hitbox"
         data-float-anchor="enemy"

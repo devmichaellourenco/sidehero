@@ -1,22 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { Hero } from '../../entities/Hero';
-import { getSkillCombatProfile } from './SkillCombatCatalog';
+import { getHeroCombatSkill } from './HeroCombatSkillCatalog';
 import { SkillPowerCalculator } from './SkillPowerCalculator';
 
 describe('SkillPowerCalculator', () => {
   const calculator = new SkillPowerCalculator();
 
-  it('escala poder com atributo INT da sorcerer', () => {
-    const hero = Hero.createStarter('s1', 'sorcerer', 'Lyra');
-    const profile = getSkillCombatProfile('fireball')!;
-
-    const rank1 = calculator.calculate(profile, 1, hero);
-    const boosted = Hero.restore({
-      ...hero.toProps(),
-      allocatedAttributes: { str: 0, dex: 0, int: 5 },
+  it('calcula poder de magia com scaling de INT', () => {
+    let sorcerer = Hero.createStarter('s1', 'sorcerer', 'Lyra');
+    sorcerer = Hero.restore({
+      ...sorcerer.toProps(),
+      skillRanks: { fireball: 1 },
     });
-    const rank1Boosted = calculator.calculate(profile, 1, boosted);
 
-    expect(rank1Boosted).toBeGreaterThan(rank1);
+    const profile = getHeroCombatSkill('fireball')!;
+    const power = calculator.calculateForHero(profile, sorcerer);
+
+    expect(power).toBeGreaterThan(profile.basePower);
   });
 });

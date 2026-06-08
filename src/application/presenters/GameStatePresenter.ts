@@ -1,4 +1,5 @@
 import { GameState } from '../../domain/entities/GameState';
+import { Enemy } from '../../domain/entities/Enemy';
 import { Gear } from '../../domain/entities/Gear';
 import { Chest } from '../../domain/entities/Chest';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
@@ -6,7 +7,7 @@ import { mapChestProgress } from '../mappers/ChestProgressMapper';
 import { mapFeatureFlags } from '../mappers/FeatureFlagsMapper';
 import { mapHeroToDto } from '../mappers/HeroDtoMapper';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
-import { ChestDto, GameStateDto } from '../dto/GameStateDto';
+import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
 
 export class GameStatePresenter {
@@ -14,22 +15,15 @@ export class GameStatePresenter {
 
   present(state: GameState): GameStateDto {
     const upgradeLevels = { ...state.upgradeLevels };
+    const enemies = (state.combat?.enemies ?? []).map(mapEnemyToDto);
+    const activeActor = state.combat?.currentActor() ?? null;
 
     return {
       heroes: state.heroes.map(mapHeroToDto),
-      enemy: state.currentEnemy
-        ? {
-            id: state.currentEnemy.id,
-            name: state.currentEnemy.name,
-            enemyType: state.currentEnemy.enemyType,
-            health: state.currentEnemy.stats.currentHealth,
-            maxHealth: state.currentEnemy.stats.maxHealth,
-            attack: state.currentEnemy.stats.attack,
-            defense: state.currentEnemy.stats.defense,
-            goldReward: state.currentEnemy.goldReward,
-            xpReward: state.currentEnemy.xpReward,
-          }
-        : null,
+      enemies,
+      enemy: enemies[0] ?? null,
+      activeTurn: activeActor ? { side: activeActor.side, id: activeActor.id } : null,
+      combatRound: state.combat?.round ?? 1,
       stage: state.stage,
       gold: state.gold.value(),
       chests: state.chests.map(mapChestToDto),
@@ -45,6 +39,20 @@ export class GameStatePresenter {
       chestProgress: mapChestProgress(state.totalBattlesWon),
     };
   }
+}
+
+function mapEnemyToDto(enemy: Enemy): EnemyDto {
+  return {
+    id: enemy.id,
+    name: enemy.name,
+    enemyType: enemy.enemyType,
+    health: enemy.stats.currentHealth,
+    maxHealth: enemy.stats.maxHealth,
+    attack: enemy.stats.attack,
+    defense: enemy.stats.defense,
+    goldReward: enemy.goldReward,
+    xpReward: enemy.xpReward,
+  };
 }
 
 function mapChestToDto(chest: Chest): ChestDto {

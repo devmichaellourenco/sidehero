@@ -2,6 +2,7 @@ import { GameState } from '../../domain/entities/GameState';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import {
   migrateChest,
+  migrateCombat,
   migrateEnemy,
   migrateGear,
   migrateHero,
@@ -66,7 +67,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
           ascensionId: heroProps.ascensionId,
         };
       }),
-      currentEnemy: props.currentEnemy?.toProps() ?? null,
+      combat: props.combat?.toProps() ?? null,
       stage: props.stage,
       gold: props.gold,
       chests: props.chests.map((c) => c.toProps()),
@@ -87,9 +88,12 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       throw new Error('Estado sem heróis');
     }
 
+    const heroes = heroesRaw.map((hero) => migrateHero(hero));
+    const legacyEnemy = migrateEnemy(raw.currentEnemy);
+
     return GameState.restore({
-      heroes: heroesRaw.map((hero) => migrateHero(hero)),
-      currentEnemy: migrateEnemy(raw.currentEnemy),
+      heroes,
+      combat: migrateCombat(raw.combat, heroes, legacyEnemy),
       stage: typeof raw.stage === 'number' ? raw.stage : 1,
       gold: typeof raw.gold === 'number' ? raw.gold : 0,
       chests: Array.isArray(raw.chests) ? raw.chests.map((c) => migrateChest(c)) : [],

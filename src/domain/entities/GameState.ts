@@ -1,9 +1,12 @@
 import { Gold } from '../value-objects/Gold';
 import { UpgradeLevels } from '../upgrades/FeatureKey';
 import { Chest } from './Chest';
+import { CombatState } from './CombatState';
 import { Enemy } from './Enemy';
 import { Gear } from './Gear';
 import { Hero } from './Hero';
+import { TurnOrderService } from '../services/combat/TurnOrderService';
+import { spawnEncounterForStage } from '../services/combat/EncounterSpawner';
 
 export interface BattleLogEntry {
   message: string;
@@ -12,7 +15,9 @@ export interface BattleLogEntry {
 
 export interface GameStateProps {
   heroes: Hero[];
-  currentEnemy: Enemy | null;
+  combat: CombatState | null;
+  /** Legado — migrado para `combat` no load. */
+  currentEnemy?: Enemy | null;
   stage: number;
   gold: number;
   chests: Chest[];
@@ -27,7 +32,7 @@ export interface GameStateProps {
 
 export class GameState {
   readonly heroes: Hero[];
-  readonly currentEnemy: Enemy | null;
+  readonly combat: CombatState | null;
   readonly stage: number;
   readonly gold: Gold;
   readonly chests: Chest[];
@@ -41,7 +46,7 @@ export class GameState {
 
   private constructor(props: GameStateProps) {
     this.heroes = props.heroes;
-    this.currentEnemy = props.currentEnemy;
+    this.combat = props.combat;
     this.stage = props.stage;
     this.gold = Gold.of(props.gold);
     this.chests = props.chests;
@@ -60,10 +65,13 @@ export class GameState {
       Hero.createStarter('hero-2', 'sorcerer', 'Lyra'),
       Hero.createStarter('hero-3', 'priest', 'Elara'),
     ];
+    const turnOrder = new TurnOrderService();
+    const enemies = spawnEncounterForStage(1);
+    const combat = CombatState.start(heroes, enemies, turnOrder);
 
     return new GameState({
       heroes,
-      currentEnemy: Enemy.forStage(1),
+      combat,
       stage: 1,
       gold: 0,
       chests: [],
@@ -81,8 +89,21 @@ export class GameState {
     return new GameState(props);
   }
 
+  get currentEnemy(): Enemy | null {
+    return this.combat?.enemies[0] ?? null;
+  }
+
+  withCombat(combat: CombatState | null): GameState {
+    return this.clone({ combat });
+  }
+
   withEnemy(enemy: Enemy | null): GameState {
-    return this.clone({ currentEnemy: enemy });
+    if (!enemy) {
+      return this.withCombat(null);
+    }
+
+    const turnOrder = new TurnOrderService();
+    return this.withCombat(CombatState.fromLegacyEnemy(enemy, this.heroes, turnOrder));
   }
 
   withHeroes(heroes: Hero[]): GameState {
@@ -141,7 +162,7 @@ export class GameState {
   toProps(): GameStateProps {
     return {
       heroes: this.heroes,
-      currentEnemy: this.currentEnemy,
+      combat: this.combat,
       stage: this.stage,
       gold: this.gold.value(),
       chests: this.chests,
