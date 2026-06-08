@@ -1,5 +1,9 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
-import { formatExperienceLabel, formatHealthLabel } from './HeroBarsPresentation';
+import {
+  formatExperienceLabel,
+  formatHealthLabel,
+  renderHeroStripHealthBar,
+} from './HeroBarsPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -24,10 +28,13 @@ export function renderHeroTooltipContent(hero: HeroDto): string {
 
 export function renderHeroBattleSprite(hero: HeroDto, glowHtml: string, spriteHtml: string): string {
   return `
-    <div class="hero-sprite" data-hero-tooltip tabindex="0" aria-label="${escapeHtml(hero.name)}">
-      ${glowHtml}
-      ${spriteHtml}
-      <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
+    <div class="hero-battle-card">
+      <div class="hero-sprite" data-hero-tooltip tabindex="0" aria-label="${escapeHtml(hero.name)}">
+        ${glowHtml}
+        ${spriteHtml}
+        <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
+      </div>
+      ${renderHeroStripHealthBar(hero)}
     </div>
   `;
 }

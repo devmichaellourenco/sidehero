@@ -6,6 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const resourcesRoot = join(root, 'public', 'ResourcesData');
 const heroesSpritesRoot = join(root, 'public', 'sprites', 'heroes');
+const publicRoot = join(root, 'public');
 const outRoot = join(root, 'dist', 'panel', 'assets');
 
 /** Sprites de heróis em public/sprites/heroes. */
@@ -14,6 +15,9 @@ const HERO_SPRITE_MAP = [
   ['feiticeira.png', 'characters/sorcerer.png'],
   ['priest.png', 'characters/priest.png'],
 ];
+
+/** Logo e demais assets estáticos em public/. */
+const PUBLIC_ASSET_MAP = [['logo.png', 'ui/brand.png']];
 
 const ASSET_MAP = [
   ['Fonts/Alata-Regular.ttf', 'fonts/Alata-Regular.ttf'],
@@ -26,7 +30,6 @@ const ASSET_MAP = [
   ['Sprites/Demo/Demo_Character/character_sample_07.png', 'characters/dragon.png'],
   ['Sprites/Demo/Demo_Character/character_back_glow_small.png', 'characters/glow.png'],
 
-  ['Sprites/Demo/Demo_Image/group_image_swordmark3.png', 'ui/brand.png'],
   ['Sprites/Demo/Demo_Icon_Chest/set_icon_gold_0.png', 'ui/gold.png'],
   ['Sprites/Demo/Demo_Icon_Chest/shop_img_chest_close_s_00.png', 'ui/chest.png'],
   ['Sprites/Demo/Demo_Icon/icon_color_energy.png', 'ui/energy.png'],
@@ -71,8 +74,9 @@ async function copyAssetBatch(sourceRoot, entries) {
 export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
+  await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
 
-  const total = ASSET_MAP.length + HERO_SPRITE_MAP.length;
+  const total = ASSET_MAP.length + HERO_SPRITE_MAP.length + PUBLIC_ASSET_MAP.length;
   console.log(`Assets copiados: ${total} arquivos em dist/panel/assets/`);
 }
 

@@ -15,6 +15,24 @@ export function formatExperienceLabel(
   return `${hero.experience}/${hero.experienceToNextLevel}`;
 }
 
+export function renderHeroStripHealthBar(hero: HeroDto): string {
+  const healthPercent = clampPercent(hero.health, hero.maxHealth);
+  const healthLabel = formatHealthLabel(hero);
+
+  return `
+    <div
+      class="stat-bar health-bar hero strip-bar"
+      data-bar-label="${healthLabel}"
+      tabindex="0"
+      aria-label="Vida ${healthLabel}"
+    >
+      <div class="stat-bar-track">
+        <div class="health-fill hero" style="width: ${healthPercent}%"></div>
+      </div>
+    </div>
+  `;
+}
+
 export function renderHeroBars(hero: HeroDto, options: { compact?: boolean } = {}): string {
   const healthPercent = clampPercent(hero.health, hero.maxHealth);
   const xpPercent = clampPercent(hero.experience, hero.experienceToNextLevel);

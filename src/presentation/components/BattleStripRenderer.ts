@@ -23,6 +23,7 @@ export class BattleStripRenderer {
       })
       .join('');
 
+    bindBarTooltips(this.heroesContainer);
     bindHeroTooltips(this.heroesContainer);
 
     if (!state.enemy) {
