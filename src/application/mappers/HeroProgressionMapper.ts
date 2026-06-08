@@ -12,6 +12,8 @@ export function mapSkillTree(nodes: SkillNodeView[]): SkillNodeDto[] {
     currentRank: node.currentRank,
     status: node.status,
     isEquipped: node.isEquipped,
+    canActivate: node.canActivate,
+    canDeactivate: node.canDeactivate,
     activationCost: node.activationCost,
     scaling: node.definition.scaling,
     requirements: node.requirements,

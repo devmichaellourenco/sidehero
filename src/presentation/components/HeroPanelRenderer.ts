@@ -2,6 +2,7 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
+import { renderHeroActiveSkills } from './HeroActiveSkillsPresentation';
 import { renderHeroBars } from './HeroBarsPresentation';
 import { renderHeroEquipmentRow } from './GearPresentation';
 
@@ -36,6 +37,7 @@ export class HeroPanelRenderer {
                 ${imgTag(healthIcon, 'Vida', 'stat-icon')} ${hero.health}/${hero.maxHealth}
               </div>
               ${renderHeroBars(hero, { compact: true })}
+              ${renderHeroActiveSkills(hero)}
             </button>
             ${renderHeroEquipmentRow(hero, true)}
           </article>

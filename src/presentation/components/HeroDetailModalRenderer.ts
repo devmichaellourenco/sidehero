@@ -82,7 +82,12 @@ export class HeroDetailModalRenderer {
       case 'attributes':
         return renderHeroAttributesTab(hero);
       case 'skills':
-        return renderHeroSkillsTab(this.skillNodes, hero.unspentImprovementPoints);
+        return renderHeroSkillsTab(
+          this.skillNodes,
+          hero.unspentImprovementPoints,
+          hero.activeSkills.length,
+          hero.maxActiveSkills,
+        );
       case 'class':
         return renderHeroClassTab({
           hero,

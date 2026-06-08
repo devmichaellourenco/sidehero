@@ -15,7 +15,7 @@ describe('CombatTurnPhase', () => {
     sorcerer = Hero.restore({
       ...sorcerer.toProps(),
       skillRanks: { arcane_bolt: 1 },
-      equippedSkillIds: ['arcane_bolt'],
+      equippedSkillIds: ['basic_attack', 'arcane_bolt'],
     });
 
     const enemy = Enemy.forStage(1);

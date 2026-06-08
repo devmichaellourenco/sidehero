@@ -818,6 +818,11 @@ export class GameViewController {
     this.renderModalTop();
   }
 
+  private afterHeroProgressionMutation(state: GameStateDto): void {
+    this.render(state);
+    this.refreshModalIfOpen();
+  }
+
   private async spendAttributePoint(heroId: string, attr: 'str' | 'dex' | 'int'): Promise<void> {
     const response = await sendGameMessage({
       type: 'SPEND_IMPROVEMENT_POINT',
@@ -828,7 +833,7 @@ export class GameViewController {
       this.toasts.show(response.error ?? 'Falha ao investir ponto', 'info');
       return;
     }
-    this.render(response.state);
+    this.afterHeroProgressionMutation(response.state);
     this.toasts.show(`+1 ${attr.toUpperCase()}`, 'info');
   }
 
@@ -843,7 +848,7 @@ export class GameViewController {
       return;
     }
     await this.loadHeroSkillTree(heroId);
-    this.render(response.state);
+    this.afterHeroProgressionMutation(response.state);
   }
 
   private async activateSkill(heroId: string, skillId: string): Promise<void> {
@@ -853,7 +858,7 @@ export class GameViewController {
       return;
     }
     await Promise.all([this.loadHeroSkillTree(heroId), this.loadHeroAscensionTree(heroId)]);
-    this.render(response.state);
+    this.afterHeroProgressionMutation(response.state);
   }
 
   private async deactivateSkill(heroId: string, skillId: string): Promise<void> {
@@ -863,7 +868,7 @@ export class GameViewController {
       return;
     }
     await Promise.all([this.loadHeroSkillTree(heroId), this.loadHeroAscensionTree(heroId)]);
-    this.render(response.state);
+    this.afterHeroProgressionMutation(response.state);
   }
 
   private async ascendClass(heroId: string, ascensionId: string): Promise<void> {
@@ -874,7 +879,7 @@ export class GameViewController {
     }
     await this.loadHeroAscensionTree(heroId);
     this.heroDetailModal.setActiveTab('class');
-    this.render(response.state);
+    this.afterHeroProgressionMutation(response.state);
     this.toasts.show('Ascensão realizada!', 'info');
   }
 
@@ -889,7 +894,7 @@ export class GameViewController {
       return;
     }
     await this.loadHeroAscensionTree(heroId);
-    this.render(response.state);
+    this.afterHeroProgressionMutation(response.state);
   }
 
   private openEquipPickerFromSlot(heroId: string, slot: string): void {

@@ -3,6 +3,17 @@ import { SkillDefinition } from './SkillDefinition';
 export const SKILL_CATALOG: SkillDefinition[] = [
   // Universais
   {
+    id: 'basic_attack',
+    scope: 'universal',
+    branch: 'offense',
+    name: 'Ataque Básico',
+    description: 'Golpe padrão usando o ATK do herói. Sempre ativo na batalha.',
+    maxRank: 1,
+    requirements: [],
+    scaling: 'str',
+    pointType: 'improvement',
+  },
+  {
     id: 'power_attack',
     scope: 'universal',
     branch: 'offense',

@@ -142,7 +142,6 @@ export class CombatSkillSelector {
   }
 
   private resolveSkillName(skill: CombatSkillDefinition): string {
-    if (skill.skillId === 'basic_attack') return 'Ataque Básico';
     if (skill.skillId === 'goblin_stab') return 'Facada';
     if (skill.skillId === 'orc_smash') return 'Pancada';
     if (skill.skillId === 'wraith_drain') return 'Drenar Vida';

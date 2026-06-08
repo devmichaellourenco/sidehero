@@ -10,10 +10,11 @@ describe('CombatSkillSelector', () => {
   const enemies = [Enemy.forStage(1)];
   const emptyCooldowns = SkillCooldownTracker.fromMap({});
 
-  it('usa ataque básico quando nenhuma outra skill está pronta', () => {
+  it('usa ataque básico equipado quando nenhuma outra skill está pronta', () => {
     const hero = Hero.createStarter('h1', 'sorcerer', 'Lyra');
     const selected = selector.selectHeroAction(hero, [hero], enemies, emptyCooldowns);
 
+    expect(hero.toProps().equippedSkillIds).toContain('basic_attack');
     expect(selected?.skillId).toBe('basic_attack');
     expect(selected?.action.targeting).toBe('single_enemy');
     expect(selected?.action.power).toBe(hero.attack);
@@ -24,7 +25,7 @@ describe('CombatSkillSelector', () => {
     priest = Hero.restore({
       ...priest.toProps(),
       skillRanks: { minor_heal: 1 },
-      equippedSkillIds: ['minor_heal'],
+      equippedSkillIds: ['basic_attack', 'minor_heal'],
     });
 
     let knight = Hero.createStarter('k1', 'knight', 'Arthos');
@@ -44,7 +45,7 @@ describe('CombatSkillSelector', () => {
     sorcerer = Hero.restore({
       ...sorcerer.toProps(),
       skillRanks: { fireball: 1, arcane_bolt: 1 },
-      equippedSkillIds: ['fireball', 'arcane_bolt'],
+      equippedSkillIds: ['basic_attack', 'fireball', 'arcane_bolt'],
     });
 
     const charging = SkillCooldownTracker.fromMap({
@@ -63,7 +64,7 @@ describe('CombatSkillSelector', () => {
     priest = Hero.restore({
       ...priest.toProps(),
       skillRanks: { inquisitor_judgment: 1 },
-      equippedSkillIds: ['inquisitor_judgment'],
+      equippedSkillIds: ['basic_attack', 'inquisitor_judgment'],
     });
 
     const weak = Enemy.restore({

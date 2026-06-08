@@ -1,6 +1,8 @@
 import { Experience } from '../value-objects/Experience';
 import { addAttributes, Attributes, AttributeKey, createAttributes } from '../progression/Attributes';
 import { getBaseAttributes } from '../progression/BaseAttributes';
+import { BASIC_ATTACK_SKILL_ID } from '../progression/combat/BasicAttackSkill';
+import { MAX_ACTIVE_BATTLE_SKILLS } from '../progression/SkillBattleSlots';
 import { AscensionId, SkillId } from '../progression/SkillId';
 import { GearRequirementChecker } from '../services/GearRequirementChecker';
 import { Gear, GearSlot } from './Gear';
@@ -38,12 +40,12 @@ const HERO_EMOJI: Record<HeroClass, string> = {
   priest: '✨',
 };
 
-const EMPTY_PROGRESSION = {
+const STARTER_PROGRESSION = {
   allocatedAttributes: createAttributes(),
   unspentImprovementPoints: 0,
   unspentAscensionPoints: 0,
-  skillRanks: {} as Record<SkillId, number>,
-  equippedSkillIds: [] as SkillId[],
+  skillRanks: { [BASIC_ATTACK_SKILL_ID]: 1 } as Record<SkillId, number>,
+  equippedSkillIds: [BASIC_ATTACK_SKILL_ID] as SkillId[],
   ascensionId: null as AscensionId | null,
 };
 
@@ -94,7 +96,7 @@ export class Hero {
       currentHealth: base.health,
       experience: Experience.initial(),
       equipment: {},
-      ...EMPTY_PROGRESSION,
+      ...STARTER_PROGRESSION,
     });
   }
 
@@ -208,6 +210,9 @@ export class Hero {
     if (this.equippedSkillIds.includes(skillId)) {
       return this;
     }
+    if (this.equippedSkillIds.length >= MAX_ACTIVE_BATTLE_SKILLS) {
+      throw new Error(`Limite de ${MAX_ACTIVE_BATTLE_SKILLS} skills ativas na batalha`);
+    }
 
     return new Hero({
       ...this.toProps(),
@@ -216,6 +221,10 @@ export class Hero {
   }
 
   deactivateSkill(skillId: SkillId): Hero {
+    if (skillId === BASIC_ATTACK_SKILL_ID) {
+      throw new Error('Ataque Básico não pode ser desativado');
+    }
+
     return new Hero({
       ...this.toProps(),
       equippedSkillIds: this.equippedSkillIds.filter((id) => id !== skillId),

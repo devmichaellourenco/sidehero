@@ -9,6 +9,12 @@ export interface GearRequirementsDto {
   int?: number;
 }
 
+export interface HeroActiveSkillDto {
+  id: string;
+  name: string;
+  branch: 'offense' | 'defense' | 'utility';
+}
+
 export interface HeroDto {
   id: string;
   name: string;
@@ -28,6 +34,8 @@ export interface HeroDto {
   unspentAscensionPoints: number;
   skillRanks: Record<string, number>;
   equippedSkillIds: string[];
+  activeSkills: HeroActiveSkillDto[];
+  maxActiveSkills: number;
   ascensionId: string | null;
   hasUnspentPoints: boolean;
   equipment: Record<

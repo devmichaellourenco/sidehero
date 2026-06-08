@@ -1,18 +1,12 @@
 import { Enemy } from '../../entities/Enemy';
 import { EnemyType } from '../../entities/EnemyType';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
-import { BASIC_ATTACK_SKILL } from './HeroCombatSkillCatalog';
-
-const ENEMY_BASIC_ATTACK: CombatSkillDefinition = {
-  ...BASIC_ATTACK_SKILL,
-  targetPool: 'heroes',
-  targetPriority: 'lowest_hp_percent',
-};
+import { ENEMY_BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 
 const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
-  slime: [ENEMY_BASIC_ATTACK],
+  slime: [ENEMY_BASIC_ATTACK_SKILL],
   goblin: [
-    ENEMY_BASIC_ATTACK,
+    ENEMY_BASIC_ATTACK_SKILL,
     {
       skillId: 'goblin_stab',
       kind: 'damage_physical',
@@ -29,7 +23,7 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
     },
   ],
   orc: [
-    ENEMY_BASIC_ATTACK,
+    ENEMY_BASIC_ATTACK_SKILL,
     {
       skillId: 'orc_smash',
       kind: 'damage_physical',
@@ -46,7 +40,7 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
     },
   ],
   wraith: [
-    ENEMY_BASIC_ATTACK,
+    ENEMY_BASIC_ATTACK_SKILL,
     {
       skillId: 'wraith_drain',
       kind: 'damage_magic',
@@ -63,7 +57,7 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
     },
   ],
   dragon: [
-    ENEMY_BASIC_ATTACK,
+    ENEMY_BASIC_ATTACK_SKILL,
     {
       skillId: 'dragon_breath',
       kind: 'damage_magic',
@@ -96,5 +90,5 @@ const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
 };
 
 export function listEnemyCombatSkills(enemy: Enemy): CombatSkillDefinition[] {
-  return ENEMY_SKILL_SETS[enemy.enemyType] ?? [ENEMY_BASIC_ATTACK];
+  return ENEMY_SKILL_SETS[enemy.enemyType] ?? [ENEMY_BASIC_ATTACK_SKILL];
 }

@@ -1,22 +1,11 @@
 import { Hero } from '../../entities/Hero';
+import { BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
 
-export const BASIC_ATTACK_SKILL: CombatSkillDefinition = {
-  skillId: 'basic_attack',
-  kind: 'damage_physical',
-  targetPool: 'enemies',
-  targetScope: 'single',
-  targetPriority: 'lowest_hp_percent',
-  usePriority: 0,
-  initialCooldown: 0,
-  cooldownTurns: 0,
-  basePower: 0,
-  powerPerRank: 0,
-  attributeFactor: 0,
-  usesAttackStat: true,
-};
+export { BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 
 export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
+  BASIC_ATTACK_SKILL,
   {
     skillId: 'minor_heal',
     kind: 'heal_ally',
@@ -273,16 +262,14 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
 const heroSkillMap = new Map(HERO_COMBAT_SKILL_CATALOG.map((skill) => [skill.skillId, skill]));
 
 export function getHeroCombatSkill(skillId: string): CombatSkillDefinition | undefined {
-  if (skillId === 'basic_attack') return BASIC_ATTACK_SKILL;
   return heroSkillMap.get(skillId);
 }
 
 export function listHeroCombatSkills(hero: Hero): CombatSkillDefinition[] {
   const props = hero.toProps();
-  const equipped = props.equippedSkillIds
+
+  return props.equippedSkillIds
     .filter((skillId) => (props.skillRanks[skillId] ?? 0) >= 1)
     .map((skillId) => heroSkillMap.get(skillId))
     .filter((skill): skill is CombatSkillDefinition => skill !== undefined);
-
-  return [BASIC_ATTACK_SKILL, ...equipped];
 }

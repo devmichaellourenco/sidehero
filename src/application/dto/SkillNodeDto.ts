@@ -17,6 +17,8 @@ export interface SkillNodeDto {
   currentRank: number;
   status: SkillNodeStatusDto;
   isEquipped: boolean;
+  canActivate: boolean;
+  canDeactivate: boolean;
   activationCost: number;
   scaling: string;
   requirements: SkillRequirementDto[];

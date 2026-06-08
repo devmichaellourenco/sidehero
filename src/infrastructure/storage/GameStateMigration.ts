@@ -1,4 +1,6 @@
 import { createAttributes } from '../../domain/progression/Attributes';
+import { BASIC_ATTACK_SKILL_ID } from '../../domain/progression/combat/BasicAttackSkill';
+import { MAX_ACTIVE_BATTLE_SKILLS } from '../../domain/progression/SkillBattleSlots';
 import { AscensionId, SkillId } from '../../domain/progression/SkillId';
 import { Experience } from '../../domain/value-objects/Experience';
 import { Stats } from '../../domain/value-objects/Stats';
@@ -46,7 +48,24 @@ function migrateSkillRanks(raw: unknown): Record<SkillId, number> {
 
 function migrateEquippedSkillIds(raw: unknown): SkillId[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((id): id is SkillId => typeof id === 'string');
+  return raw
+    .filter((id): id is SkillId => typeof id === 'string')
+    .slice(0, MAX_ACTIVE_BATTLE_SKILLS);
+}
+
+function migrateStarterBattleSkill(
+  skillRanks: Record<SkillId, number>,
+  equippedSkillIds: SkillId[],
+): { skillRanks: Record<SkillId, number>; equippedSkillIds: SkillId[] } {
+  const ranks = { ...skillRanks };
+  if ((ranks[BASIC_ATTACK_SKILL_ID] ?? 0) < 1) {
+    ranks[BASIC_ATTACK_SKILL_ID] = 1;
+  }
+
+  const withoutBasic = equippedSkillIds.filter((id) => id !== BASIC_ATTACK_SKILL_ID);
+  const equipped = [BASIC_ATTACK_SKILL_ID, ...withoutBasic].slice(0, MAX_ACTIVE_BATTLE_SKILLS);
+
+  return { skillRanks: ranks, equippedSkillIds: equipped };
 }
 
 function migrateProgression(raw: RawRecord): Pick<
@@ -58,14 +77,19 @@ function migrateProgression(raw: RawRecord): Pick<
   | 'equippedSkillIds'
   | 'ascensionId'
 > {
+  const starter = migrateStarterBattleSkill(
+    migrateSkillRanks(raw.skillRanks),
+    migrateEquippedSkillIds(raw.equippedSkillIds),
+  );
+
   return {
     allocatedAttributes: migrateAttributes(raw.allocatedAttributes),
     unspentImprovementPoints:
       typeof raw.unspentImprovementPoints === 'number' ? raw.unspentImprovementPoints : 0,
     unspentAscensionPoints:
       typeof raw.unspentAscensionPoints === 'number' ? raw.unspentAscensionPoints : 0,
-    skillRanks: migrateSkillRanks(raw.skillRanks),
-    equippedSkillIds: migrateEquippedSkillIds(raw.equippedSkillIds),
+    skillRanks: starter.skillRanks,
+    equippedSkillIds: starter.equippedSkillIds,
     ascensionId:
       typeof raw.ascensionId === 'string' ? (raw.ascensionId as AscensionId) : null,
   };

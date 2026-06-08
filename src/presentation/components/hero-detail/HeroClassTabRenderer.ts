@@ -66,7 +66,12 @@ function renderAscendedView(
   const label = ascensionName ?? hero.ascensionId ?? 'Ascendido';
   const skillSection =
     nodes.length > 0
-      ? renderAscensionSkillNodes(nodes, hero.unspentAscensionPoints)
+      ? renderAscensionSkillNodes(
+          nodes,
+          hero.unspentAscensionPoints,
+          hero.activeSkills.length,
+          hero.maxActiveSkills,
+        )
       : '<p class="empty-state">Nenhuma skill de ascensão disponível.</p>';
 
   return `
@@ -82,14 +87,19 @@ function renderAscendedView(
   `;
 }
 
-function renderAscensionSkillNodes(nodes: SkillNodeDto[], unspentPoints: number): string {
+function renderAscensionSkillNodes(
+  nodes: SkillNodeDto[],
+  unspentPoints: number,
+  activeSkillCount: number,
+  maxActiveSkills: number,
+): string {
   const cards = nodes
     .map((node) => {
       const rankLabel = `${node.currentRank}/${node.maxRank}`;
       const equipLabel = node.isEquipped ? 'Ativa' : 'Inativa';
       const canAllocate = node.status === 'ready' && unspentPoints > 0;
-      const canActivate = node.currentRank > 0 && !node.isEquipped;
-      const canDeactivate = node.isEquipped;
+      const canActivate = node.canActivate;
+      const canDeactivate = node.canDeactivate;
 
       return `
         <article class="skill-card skill-card-${node.status}">
@@ -114,7 +124,10 @@ function renderAscensionSkillNodes(nodes: SkillNodeDto[], unspentPoints: number)
     .join('');
 
   return `
-    <p class="hero-detail-hint">Pontos de ascensão: <strong>${unspentPoints}</strong></p>
+    <p class="hero-detail-hint">
+      Pontos de ascensão: <strong>${unspentPoints}</strong>
+      · Slots de batalha: <strong>${activeSkillCount}/${maxActiveSkills}</strong>
+    </p>
     <div class="skill-list">${cards}</div>
   `;
 }

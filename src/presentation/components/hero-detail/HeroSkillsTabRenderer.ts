@@ -1,6 +1,11 @@
 import { SkillNodeDto } from '../../../application/dto/SkillNodeDto';
 
-export function renderHeroSkillsTab(nodes: SkillNodeDto[], unspentPoints: number): string {
+export function renderHeroSkillsTab(
+  nodes: SkillNodeDto[],
+  unspentPoints: number,
+  activeSkillCount = 0,
+  maxActiveSkills = 3,
+): string {
   if (nodes.length === 0) {
     return '<p class="empty-state">Carregando árvore de skills...</p>';
   }
@@ -10,8 +15,8 @@ export function renderHeroSkillsTab(nodes: SkillNodeDto[], unspentPoints: number
       const rankLabel = `${node.currentRank}/${node.maxRank}`;
       const equipLabel = node.isEquipped ? 'Ativa' : 'Inativa';
       const canAllocate = node.status === 'ready' && unspentPoints > 0;
-      const canActivate = node.currentRank > 0 && !node.isEquipped;
-      const canDeactivate = node.isEquipped;
+      const canActivate = node.canActivate;
+      const canDeactivate = node.canDeactivate;
 
       return `
         <article class="skill-card skill-card-${node.status}">
@@ -37,7 +42,10 @@ export function renderHeroSkillsTab(nodes: SkillNodeDto[], unspentPoints: number
 
   return `
     <section class="hero-skills-tab">
-      <p class="hero-detail-hint">Pontos disponíveis: <strong>${unspentPoints}</strong></p>
+      <p class="hero-detail-hint">
+        Pontos disponíveis: <strong>${unspentPoints}</strong>
+        · Slots de batalha: <strong>${activeSkillCount}/${maxActiveSkills}</strong>
+      </p>
       <div class="skill-list">${cards}</div>
     </section>
   `;

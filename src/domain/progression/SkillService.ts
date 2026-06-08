@@ -1,6 +1,8 @@
 import { Hero } from '../entities/Hero';
 import { calculateSkillActivationCost } from './SkillActivationRules';
 import { ProgressionRequirementEvaluator } from './ProgressionRequirementEvaluator';
+import { BASIC_ATTACK_SKILL_ID } from './combat/BasicAttackSkill';
+import { hasFreeBattleSkillSlot } from './SkillBattleSlots';
 import { getSkillById, getSkillsForHero, SKILL_CATALOG } from './SkillCatalog';
 import { SkillDefinition } from './SkillDefinition';
 import { SkillId } from './SkillId';
@@ -12,6 +14,8 @@ export interface SkillNodeView {
   currentRank: number;
   status: SkillNodeStatus;
   isEquipped: boolean;
+  canActivate: boolean;
+  canDeactivate: boolean;
   activationCost: number;
   requirements: { label: string; met: boolean }[];
 }
@@ -50,11 +54,19 @@ export class SkillService {
         status = 'ready';
       }
 
+      const isEquipped = props.equippedSkillIds.includes(definition.id);
+
       return {
         definition,
         currentRank,
         status,
-        isEquipped: props.equippedSkillIds.includes(definition.id),
+        isEquipped,
+        canActivate:
+          definition.id !== BASIC_ATTACK_SKILL_ID &&
+          currentRank > 0 &&
+          !isEquipped &&
+          hasFreeBattleSkillSlot(props.equippedSkillIds),
+        canDeactivate: isEquipped && definition.id !== BASIC_ATTACK_SKILL_ID,
         activationCost: calculateSkillActivationCost(Math.max(1, currentRank + 1)),
         requirements,
       };
@@ -103,7 +115,17 @@ export class SkillService {
   }
 
   canActivate(hero: Hero, skillId: SkillId): boolean {
-    return (hero.toProps().skillRanks[skillId] ?? 0) >= 1;
+    if (skillId === BASIC_ATTACK_SKILL_ID) return false;
+
+    const props = hero.toProps();
+    if ((props.skillRanks[skillId] ?? 0) < 1) return false;
+    if (props.equippedSkillIds.includes(skillId)) return false;
+    return hasFreeBattleSkillSlot(props.equippedSkillIds);
+  }
+
+  canDeactivate(hero: Hero, skillId: SkillId): boolean {
+    if (skillId === BASIC_ATTACK_SKILL_ID) return false;
+    return hero.toProps().equippedSkillIds.includes(skillId);
   }
 
   activate(hero: Hero, skillId: SkillId): Hero {
@@ -114,6 +136,9 @@ export class SkillService {
   }
 
   deactivate(hero: Hero, skillId: SkillId): Hero {
+    if (!this.canDeactivate(hero, skillId)) {
+      throw new Error('Esta skill não pode ser desativada');
+    }
     return hero.deactivateSkill(skillId);
   }
 
