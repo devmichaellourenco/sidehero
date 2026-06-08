@@ -127,12 +127,7 @@ export class InventoryModalRenderer {
     this.bindSort(container, handlers);
     this.bindOptimize(container, handlers);
 
-    container.querySelectorAll('[data-equip-gear]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const gearId = button.getAttribute('data-equip-gear');
-        if (gearId) handlers.onEquipGear(gearId);
-      });
-    });
+    void handlers;
   }
 
   private bindFilters(container: HTMLElement, handlers: InventoryModalHandlers): void {

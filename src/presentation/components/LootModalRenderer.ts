@@ -54,15 +54,6 @@ export class LootModalRenderer {
       </div>
     `;
 
-    const equipButton = container.querySelector('[data-loot-equip-hero]');
-    equipButton?.addEventListener('click', () => {
-      const heroId = equipButton.getAttribute('data-loot-equip-hero');
-      const selectedGearId = equipButton.getAttribute('data-loot-equip-gear');
-      if (heroId && selectedGearId) {
-        handlers.onEquipBest(heroId, selectedGearId);
-      }
-    });
-
     container.querySelector('[data-loot-keep]')?.addEventListener('click', () => {
       handlers.onKeepInInventory();
     });

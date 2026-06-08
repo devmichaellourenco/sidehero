@@ -94,25 +94,7 @@ export class EquipPickerModalRenderer {
       ${inventorySection}
     `;
 
-    container.querySelectorAll('[data-pick-gear]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const gearId = button.getAttribute('data-pick-gear');
-        const targetHeroId = button.getAttribute('data-pick-hero');
-        if (gearId && targetHeroId) {
-          handlers.onSelectGear(targetHeroId, gearId);
-        }
-      });
-    });
-
-    container.querySelectorAll('[data-unequip-hero]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const targetHeroId = button.getAttribute('data-unequip-hero');
-        const unequipSlot = button.getAttribute('data-unequip-slot') as GearSlotKey | null;
-        if (targetHeroId && unequipSlot) {
-          handlers.onUnequip(targetHeroId, unequipSlot);
-        }
-      });
-    });
+    void handlers;
   }
 
   private renderHeroPicker(
@@ -152,14 +134,6 @@ export class EquipPickerModalRenderer {
       </div>
     `;
 
-    container.querySelectorAll('[data-pick-hero]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const heroId = button.getAttribute('data-pick-hero');
-        const selectedGearId = button.getAttribute('data-pick-gear');
-        if (heroId && selectedGearId) {
-          handlers.onSelectHero(heroId, selectedGearId);
-        }
-      });
-    });
+    void handlers;
   }
 }

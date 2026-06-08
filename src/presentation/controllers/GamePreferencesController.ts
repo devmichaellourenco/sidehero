@@ -18,7 +18,7 @@ export class GamePreferencesController {
 
   apply(state: GameStateDto | null): { autoBattleChanged: boolean } {
     const flags = getFeatureFlags(state);
-    const clamped = this.clampToFlags(this.preferences, flags);
+    const clamped = this.clampToFlags(loadGamePreferences(), flags);
     const wasAutoBattle = this.autoBattleEnabled;
     const wasSpeed = this.autoBattleSpeed;
 
@@ -72,6 +72,7 @@ export class GamePreferencesController {
     }
 
     const next = updateGamePreference(key, value);
+    this.preferences = next;
     const result = this.apply(state);
     return { applied: true, autoBattleChanged: result.autoBattleChanged };
   }

@@ -27,14 +27,42 @@ export class ModalController {
     return !this.root.classList.contains('hidden');
   }
 
+  getBody(): HTMLElement {
+    return this.bodyEl;
+  }
+
   open(title: string, onClose?: (reason: ModalCloseReason) => void): HTMLElement {
-    this.onCloseCallback = onClose ?? null;
+    return this.renderShell(title, onClose, { resetBody: true });
+  }
+
+  /** Atualiza modal aberto sem limpar o body — evita interromper cliques em re-render. */
+  prepare(title: string, onClose?: (reason: ModalCloseReason) => void): HTMLElement {
+    return this.renderShell(title, onClose, { resetBody: false });
+  }
+
+  private renderShell(
+    title: string,
+    onClose: ((reason: ModalCloseReason) => void) | undefined,
+    options: { resetBody: boolean },
+  ): HTMLElement {
+    if (onClose) {
+      this.onCloseCallback = onClose;
+    }
+
     this.titleEl.textContent = title;
-    this.bodyEl.innerHTML = '';
-    this.root.classList.remove('hidden');
-    this.root.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('modal-open');
-    this.bindEscape();
+
+    const wasOpen = this.isOpen();
+    if (!wasOpen) {
+      this.root.classList.remove('hidden');
+      this.root.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      this.bindEscape();
+    }
+
+    if (options.resetBody || !wasOpen) {
+      this.bodyEl.innerHTML = '';
+    }
+
     return this.bodyEl;
   }
 

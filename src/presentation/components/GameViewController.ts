@@ -147,6 +147,7 @@ export class GameViewController {
     );
 
     this.prefsController.apply(this.state);
+    this.bindModalActionDelegation();
 
     this.tickBtn.addEventListener('click', () => this.tick());
     this.openChestBtn.addEventListener('click', () => this.openNextChest());
@@ -191,30 +192,19 @@ export class GameViewController {
 
     if (this.contextInvalidated) return;
 
-    if (this.prefsController.autoBattleEnabled) {
-      this.startAutoBattle();
-    }
+    this.syncAutoBattleTimer();
 
     this.refreshTimer = window.setInterval(() => {
       void this.refresh();
     }, 5000);
   }
 
-  private applyPreferences(): void {
-    const { autoBattleChanged } = this.prefsController.apply(this.state);
-
-    if (autoBattleChanged) {
-      if (this.prefsController.autoBattleEnabled) {
-        this.stopAutoBattle();
-        this.startAutoBattle();
-      } else {
-        this.stopAutoBattle();
-      }
-    }
-  }
-
   private enforceUpgradeGates(): void {
+    const wasAutoBattle = this.prefsController.autoBattleEnabled;
     this.prefsController.enforceGates(this.state);
+    if (wasAutoBattle !== this.prefsController.autoBattleEnabled) {
+      this.syncAutoBattleTimer();
+    }
   }
 
   private handlePreferenceChange<K extends keyof GamePreferences>(
@@ -234,9 +224,8 @@ export class GameViewController {
       this.scheduleAutoOpenChests();
     }
 
-    if (key === 'autoBattleSpeed' && result.autoBattleChanged && this.prefsController.autoBattleEnabled) {
-      this.stopAutoBattle();
-      this.startAutoBattle();
+    if (result.autoBattleChanged) {
+      this.syncAutoBattleTimer();
     }
 
     if (this.state) {
@@ -387,11 +376,23 @@ export class GameViewController {
     }
   }
 
+  private syncAutoBattleTimer(): void {
+    if (this.prefsController.autoBattleEnabled) {
+      this.stopAutoBattle();
+      this.startAutoBattle();
+      return;
+    }
+    this.stopAutoBattle();
+  }
+
   private startAutoBattle(): void {
-    if (this.autoBattleController.isRunning() || this.contextInvalidated) return;
-    this.autoBattleController.start(this.prefsController.getAutoBattleIntervalMs(this.state), () => {
-      void this.tick();
-    });
+    if (this.contextInvalidated) return;
+    this.autoBattleController.restart(
+      this.prefsController.getAutoBattleIntervalMs(this.state),
+      () => {
+        void this.tick();
+      },
+    );
   }
 
   private stopAutoBattle(): void {
@@ -413,6 +414,11 @@ export class GameViewController {
   private handleFailedResponse(error?: string): void {
     if (error?.includes('Extension context invalidated') || !isExtensionContextValid()) {
       this.handleContextInvalidated();
+      return;
+    }
+
+    if (error) {
+      this.toasts.show(error, 'info');
     }
   }
 
@@ -539,14 +545,27 @@ export class GameViewController {
     }
   }
 
-  private async equipGear(heroId: string, gearId: string): Promise<void> {
-    const response = await sendGameMessage({ type: 'EQUIP_GEAR', heroId, gearId });
-    if (!response.ok) {
-      this.handleFailedResponse(response.error);
-      return;
-    }
+  private equippingGear = false;
 
-    this.afterGearMutation(response.state);
+  private async equipGear(heroId: string, gearId: string): Promise<void> {
+    if (this.equippingGear) return;
+
+    this.equippingGear = true;
+    try {
+      const response = await sendGameMessage({ type: 'EQUIP_GEAR', heroId, gearId });
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
+
+      const gearName = this.state?.inventory.find((entry) => entry.id === gearId)?.name;
+      this.afterGearMutation(response.state);
+      if (gearName) {
+        this.toasts.show(`${gearName} equipado!`, 'loot');
+      }
+    } finally {
+      this.equippingGear = false;
+    }
   }
 
   private async handleLootReceived(gearIds: string[], gearNames: string[] = []): Promise<void> {
@@ -665,6 +684,7 @@ export class GameViewController {
     }
 
     this.render(state);
+    this.refreshModalIfOpen();
 
     if (topView?.type === 'loot-reveal' && this.lootFlow.hasQueued()) {
       this.advanceLootQueue();
@@ -673,6 +693,53 @@ export class GameViewController {
 
     if (this.modalStack.length === 0) {
       this.modal.close('action');
+    }
+  }
+
+  /** Delegação no body do modal — sobrevive a re-renders e não quebra com ticks. */
+  private bindModalActionDelegation(): void {
+    this.modal.getBody().addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest(
+        '[data-equip-gear], [data-pick-gear], [data-pick-hero], [data-unequip-hero], [data-loot-equip-hero]',
+      ) as HTMLElement | null;
+
+      if (!target || !this.modal.isOpen()) return;
+
+      const equipFromInventory = target.getAttribute('data-equip-gear');
+      if (equipFromInventory) {
+        event.preventDefault();
+        this.openEquipPickerFromGear(equipFromInventory);
+        return;
+      }
+
+      const unequipHeroId = target.getAttribute('data-unequip-hero');
+      const unequipSlot = target.getAttribute('data-unequip-slot') as GearSlotKey | null;
+      if (unequipHeroId && unequipSlot) {
+        event.preventDefault();
+        void this.unequipGear(unequipHeroId, unequipSlot);
+        return;
+      }
+
+      const lootHeroId = target.getAttribute('data-loot-equip-hero');
+      const lootGearId = target.getAttribute('data-loot-equip-gear');
+      if (lootHeroId && lootGearId) {
+        event.preventDefault();
+        void this.equipGear(lootHeroId, lootGearId);
+        return;
+      }
+
+      const heroId = target.getAttribute('data-pick-hero');
+      const gearId = target.getAttribute('data-pick-gear');
+      if (heroId && gearId) {
+        event.preventDefault();
+        void this.equipGear(heroId, gearId);
+      }
+    });
+  }
+
+  private refreshModalIfOpen(): void {
+    if (this.modal.isOpen() && this.modalStack.length > 0) {
+      this.renderModalTop();
     }
   }
 
@@ -853,7 +920,7 @@ export class GameViewController {
 
     const view = this.modalStack[this.modalStack.length - 1];
     const title = this.getModalTitle(view);
-    const container = this.modal.open(title, (reason) => {
+    const container = this.modal.prepare(title, (reason) => {
       if (reason !== 'action') {
         this.modalStack.length = 0;
         this.lootFlow.reset();
@@ -1080,11 +1147,6 @@ export class GameViewController {
       .join('');
 
     this.enforceUpgradeGates();
-
-    if (this.modal.isOpen() && this.modalStack.length > 0) {
-      this.renderModalTop();
-    }
-
     this.scheduleAutoOpenChests();
   }
 }

@@ -1287,7 +1287,7 @@ body.modal-open {
 .modal-root {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 1400;
   display: flex;
   align-items: stretch;
   justify-content: center;
