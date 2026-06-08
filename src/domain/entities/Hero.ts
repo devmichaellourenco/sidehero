@@ -214,7 +214,10 @@ export class Hero {
       ...this.toProps(),
       equipment: { ...this.equipment, [gear.slot]: gear },
     });
-    return new Hero({ ...updated.toProps(), currentHealth: updated.maxHealth });
+    return new Hero({
+      ...updated.toProps(),
+      currentHealth: Math.min(this.currentHealth, updated.maxHealth),
+    });
   }
 
   unequip(slot: GearSlot): { hero: Hero; removed: Gear | null } {
