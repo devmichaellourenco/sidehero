@@ -1,7 +1,7 @@
 import { HeroClass } from '../entities/HeroClass';
 import { AttributeKey } from './Attributes';
 import { ProgressionRequirement } from './ProgressionRequirement';
-import { SkillId } from './SkillId';
+import { AscensionId, SkillId } from './SkillId';
 
 export type SkillScope = 'universal' | 'class';
 export type SkillBranch = 'offense' | 'defense' | 'utility';
@@ -18,4 +18,5 @@ export interface SkillDefinition {
   requirements: ProgressionRequirement[];
   scaling: AttributeKey;
   pointType: SkillPointType;
+  ascensionId?: AscensionId;
 }

@@ -189,6 +189,24 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.deactivateSkill.execute(message.heroId, message.skillId);
       return { ok: true, state };
     }
+    case 'ASCEND_CLASS': {
+      const state = await app.ascendClass.execute(message.heroId, message.ascensionId);
+      return { ok: true, state };
+    }
+    case 'GET_HERO_ASCENSION_TREE': {
+      const result = await app.getHeroAscensionTree.execute(message.heroId);
+      return {
+        ok: true,
+        state: result.state,
+        ascensionOptions: result.options,
+        ascensionName: result.ascensionName,
+        ascensionSkillNodes: result.ascensionSkillNodes,
+      };
+    }
+    case 'SPEND_ASCENSION_POINT': {
+      const state = await app.spendAscensionPoint.execute(message.heroId, message.skillId);
+      return { ok: true, state };
+    }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
   }

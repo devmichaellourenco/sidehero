@@ -222,6 +222,32 @@ export class Hero {
     });
   }
 
+  ascend(ascensionId: AscensionId, pointsGranted: number): Hero {
+    if (this.ascensionId !== null) {
+      throw new Error('Herói já ascendeu — ascensão é irreversível');
+    }
+
+    return new Hero({
+      ...this.toProps(),
+      ascensionId,
+      unspentAscensionPoints: this.unspentAscensionPoints + pointsGranted,
+    });
+  }
+
+  spendAscensionPointOnSkill(skillId: SkillId): Hero {
+    if (this.unspentAscensionPoints < 1) {
+      throw new Error('Sem pontos de ascensão disponíveis');
+    }
+
+    const currentRank = this.skillRanks[skillId] ?? 0;
+
+    return new Hero({
+      ...this.toProps(),
+      skillRanks: { ...this.skillRanks, [skillId]: currentRank + 1 },
+      unspentAscensionPoints: this.unspentAscensionPoints - 1,
+    });
+  }
+
   canEquip(gear: Gear): boolean {
     return new GearRequirementChecker().meets(this, gear);
   }

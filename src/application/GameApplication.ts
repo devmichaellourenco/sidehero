@@ -5,16 +5,19 @@ import { ILootService } from '../domain/services/ILootService';
 import { LoadoutOptimizer } from '../domain/services/LoadoutOptimizer';
 import { LootService } from '../domain/services/LootService';
 import { IGameStateRepository } from '../domain/repositories/IGameStateRepository';
+import { ClassAscensionService } from '../domain/progression/ClassAscensionService';
 import { SkillService } from '../domain/progression/SkillService';
 import { ShopService } from '../domain/services/ShopService';
 import { UpgradeService } from '../domain/upgrades/UpgradeService';
 import { GameStatePresenter } from './presenters/GameStatePresenter';
 import { ActivateSkillUseCase } from './use-cases/ActivateSkillUseCase';
+import { AscendClassUseCase } from './use-cases/AscendClassUseCase';
 import { BuyShopOfferUseCase } from './use-cases/BuyShopOfferUseCase';
 import { DeactivateSkillUseCase } from './use-cases/DeactivateSkillUseCase';
 import { EquipBestLoadoutUseCase } from './use-cases/EquipBestLoadoutUseCase';
 import { EquipGearUseCase } from './use-cases/EquipGearUseCase';
 import { GetGameStateUseCase } from './use-cases/GetGameStateUseCase';
+import { GetHeroAscensionTreeUseCase } from './use-cases/GetHeroAscensionTreeUseCase';
 import { GetHeroSkillTreeUseCase } from './use-cases/GetHeroSkillTreeUseCase';
 import { GetShopOffersUseCase } from './use-cases/GetShopOffersUseCase';
 import { GetUpgradeTreeUseCase } from './use-cases/GetUpgradeTreeUseCase';
@@ -22,6 +25,7 @@ import { OpenAllChestsUseCase } from './use-cases/OpenAllChestsUseCase';
 import { OpenChestUseCase } from './use-cases/OpenChestUseCase';
 import { PurchaseUpgradeUseCase } from './use-cases/PurchaseUpgradeUseCase';
 import { RefreshShopUseCase } from './use-cases/RefreshShopUseCase';
+import { SpendAscensionPointUseCase } from './use-cases/SpendAscensionPointUseCase';
 import { SpendImprovementPointUseCase } from './use-cases/SpendImprovementPointUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
 import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
@@ -43,6 +47,9 @@ export class GameApplication {
   readonly getHeroSkillTree: GetHeroSkillTreeUseCase;
   readonly activateSkill: ActivateSkillUseCase;
   readonly deactivateSkill: DeactivateSkillUseCase;
+  readonly ascendClass: AscendClassUseCase;
+  readonly getHeroAscensionTree: GetHeroAscensionTreeUseCase;
+  readonly spendAscensionPoint: SpendAscensionPointUseCase;
 
   constructor(repository: IGameStateRepository) {
     const combatService: ICombatService = new CombatService();
@@ -51,6 +58,7 @@ export class GameApplication {
     const shopService = new ShopService(lootService);
     const upgradeService = new UpgradeService();
     const skillService = new SkillService();
+    const ascensionService = new ClassAscensionService();
     const loadoutOptimizer = new LoadoutOptimizer();
     const presenter = new GameStatePresenter(upgradeService);
 
@@ -74,5 +82,13 @@ export class GameApplication {
     this.getHeroSkillTree = new GetHeroSkillTreeUseCase(repository, presenter, skillService);
     this.activateSkill = new ActivateSkillUseCase(repository, presenter, skillService);
     this.deactivateSkill = new DeactivateSkillUseCase(repository, presenter, skillService);
+    this.ascendClass = new AscendClassUseCase(repository, presenter, ascensionService);
+    this.getHeroAscensionTree = new GetHeroAscensionTreeUseCase(
+      repository,
+      presenter,
+      ascensionService,
+      skillService,
+    );
+    this.spendAscensionPoint = new SpendAscensionPointUseCase(repository, presenter, skillService);
   }
 }

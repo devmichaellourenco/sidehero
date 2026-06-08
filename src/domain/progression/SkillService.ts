@@ -20,8 +20,21 @@ export class SkillService {
   private readonly evaluator = new ProgressionRequirementEvaluator();
 
   buildTree(hero: Hero): SkillNodeView[] {
+    return this.buildTreeForPointType(hero, 'improvement');
+  }
+
+  buildAscensionTree(hero: Hero): SkillNodeView[] {
     const props = hero.toProps();
-    const skills = getSkillsForHero(hero.heroClass, props.ascensionId);
+    if (!props.ascensionId) return [];
+
+    return this.buildTreeForPointType(hero, 'ascension');
+  }
+
+  private buildTreeForPointType(hero: Hero, pointType: 'improvement' | 'ascension'): SkillNodeView[] {
+    const props = hero.toProps();
+    const skills = getSkillsForHero(hero.heroClass, props.ascensionId).filter(
+      (skill) => skill.pointType === pointType,
+    );
 
     return skills.map((definition) => {
       const currentRank = props.skillRanks[definition.id] ?? 0;
@@ -49,12 +62,28 @@ export class SkillService {
   }
 
   canAllocate(hero: Hero, skillId: SkillId): boolean {
-    const definition = getSkillById(skillId);
-    if (!definition) return false;
+    return this.canAllocateWithPointType(hero, skillId, 'improvement');
+  }
 
-    const currentRank = hero.toProps().skillRanks[skillId] ?? 0;
+  canAllocateAscension(hero: Hero, skillId: SkillId): boolean {
+    return this.canAllocateWithPointType(hero, skillId, 'ascension');
+  }
+
+  private canAllocateWithPointType(
+    hero: Hero,
+    skillId: SkillId,
+    pointType: 'improvement' | 'ascension',
+  ): boolean {
+    const definition = getSkillById(skillId);
+    if (!definition || definition.pointType !== pointType) return false;
+
+    const props = hero.toProps();
+    const currentRank = props.skillRanks[skillId] ?? 0;
     if (currentRank >= definition.maxRank) return false;
-    if (hero.toProps().unspentImprovementPoints < 1) return false;
+
+    const availablePoints =
+      pointType === 'improvement' ? props.unspentImprovementPoints : props.unspentAscensionPoints;
+    if (availablePoints < 1) return false;
 
     return this.evaluator.allMet(hero, definition.requirements);
   }
@@ -64,6 +93,13 @@ export class SkillService {
       throw new Error('Não é possível investir nesta skill');
     }
     return hero.spendImprovementPointOnSkill(skillId);
+  }
+
+  allocateAscension(hero: Hero, skillId: SkillId): Hero {
+    if (!this.canAllocateAscension(hero, skillId)) {
+      throw new Error('Não é possível investir nesta skill de ascensão');
+    }
+    return hero.spendAscensionPointOnSkill(skillId);
   }
 
   canActivate(hero: Hero, skillId: SkillId): boolean {

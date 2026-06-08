@@ -1,5 +1,6 @@
 import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
+import { AscensionOptionDto } from '../../application/dto/AscensionOptionDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { isExtensionContextValid, isContextInvalidatedError } from './ExtensionContext';
@@ -24,7 +25,10 @@ export type GameMessage =
   | { type: 'SPEND_IMPROVEMENT_POINT'; heroId: string; target: SpendTargetMessage }
   | { type: 'GET_HERO_SKILL_TREE'; heroId: string }
   | { type: 'ACTIVATE_SKILL'; heroId: string; skillId: string }
-  | { type: 'DEACTIVATE_SKILL'; heroId: string; skillId: string };
+  | { type: 'DEACTIVATE_SKILL'; heroId: string; skillId: string }
+  | { type: 'ASCEND_CLASS'; heroId: string; ascensionId: string }
+  | { type: 'GET_HERO_ASCENSION_TREE'; heroId: string }
+  | { type: 'SPEND_ASCENSION_POINT'; heroId: string; skillId: string };
 
 export type GameResponse =
   | {
@@ -41,6 +45,9 @@ export type GameResponse =
       shopRefreshRemaining?: number;
       upgradeNodes?: UpgradeNodeDto[];
       skillNodes?: SkillNodeDto[];
+      ascensionOptions?: AscensionOptionDto[];
+      ascensionName?: string | null;
+      ascensionSkillNodes?: SkillNodeDto[];
       purchasableUpgradeCount?: number;
       purchasedUpgradeId?: string;
     }

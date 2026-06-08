@@ -1932,3 +1932,69 @@ body.modal-open {
   gap: 4px;
   align-items: center;
 }
+
+.ascension-list {
+  display: grid;
+  gap: 10px;
+}
+
+.ascension-card {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 200, 87, 0.25);
+  background: rgba(24, 18, 8, 0.45);
+}
+
+.ascension-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ascension-card h4 {
+  margin: 0;
+  font-size: 13px;
+  color: #ffe8b0;
+}
+
+.ascension-points-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 200, 87, 0.2);
+  color: #fff3d0;
+}
+
+.ascension-desc {
+  margin: 6px 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ascension-btn {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 160, 60, 0.5);
+  background: rgba(180, 90, 20, 0.35);
+  color: #ffe8c8;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ascension-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hero-detail-warning {
+  margin: 8px 0;
+  font-size: 10px;
+  color: #e8a86a;
+}
+
+.hero-class-subtitle {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  color: #d8e4ff;
+}

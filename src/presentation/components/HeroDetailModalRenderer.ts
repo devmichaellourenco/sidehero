@@ -1,3 +1,4 @@
+import { AscensionOptionDto } from '../../application/dto/AscensionOptionDto';
 import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { bindBarTooltips } from './BarTooltipBinder';
@@ -15,15 +16,30 @@ export type HeroDetailModalHandlers = {
   onAllocateSkill: (heroId: string, skillId: string) => void;
   onActivateSkill: (heroId: string, skillId: string) => void;
   onDeactivateSkill: (heroId: string, skillId: string) => void;
+  onAscendClass: (heroId: string, ascensionId: string) => void;
+  onAllocateAscensionSkill: (heroId: string, skillId: string) => void;
   onTabChange: (heroId: string, tab: HeroDetailTab) => void;
 };
 
 export class HeroDetailModalRenderer {
   private activeTab: HeroDetailTab = 'sheet';
   private skillNodes: SkillNodeDto[] = [];
+  private ascensionOptions: AscensionOptionDto[] = [];
+  private ascensionName: string | null = null;
+  private ascensionSkillNodes: SkillNodeDto[] = [];
 
   setSkillNodes(nodes: SkillNodeDto[]): void {
     this.skillNodes = nodes;
+  }
+
+  setAscensionData(
+    options: AscensionOptionDto[],
+    ascensionName: string | null,
+    ascensionSkillNodes: SkillNodeDto[],
+  ): void {
+    this.ascensionOptions = options;
+    this.ascensionName = ascensionName;
+    this.ascensionSkillNodes = ascensionSkillNodes;
   }
 
   setActiveTab(tab: HeroDetailTab): void {
@@ -68,7 +84,12 @@ export class HeroDetailModalRenderer {
       case 'skills':
         return renderHeroSkillsTab(this.skillNodes, hero.unspentImprovementPoints);
       case 'class':
-        return renderHeroClassTab(hero);
+        return renderHeroClassTab({
+          hero,
+          options: this.ascensionOptions,
+          ascensionName: this.ascensionName,
+          ascensionSkillNodes: this.ascensionSkillNodes,
+        });
       default:
         return renderHeroSheetTab(hero);
     }
@@ -125,6 +146,24 @@ export class HeroDetailModalRenderer {
         const skillId = button.getAttribute('data-skill-deactivate');
         if (skillId && !(button as HTMLButtonElement).disabled) {
           handlers.onDeactivateSkill(hero.id, skillId);
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-ascend]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const ascensionId = button.getAttribute('data-ascend');
+        if (ascensionId && !(button as HTMLButtonElement).disabled) {
+          handlers.onAscendClass(hero.id, ascensionId);
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-ascension-allocate]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const skillId = button.getAttribute('data-ascension-allocate');
+        if (skillId && !(button as HTMLButtonElement).disabled) {
+          handlers.onAllocateAscensionSkill(hero.id, skillId);
         }
       });
     });

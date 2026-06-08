@@ -1,3 +1,4 @@
+import { AscensionOptionDto } from '../../application/dto/AscensionOptionDto';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { HeroDetailTab } from './HeroDetailModalRenderer';
@@ -51,6 +52,9 @@ export class GameViewController {
   private readonly autoBattleController = new AutoBattleController();
   private refreshTimer: number | null = null;
   private heroSkillNodes: SkillNodeDto[] = [];
+  private heroAscensionOptions: AscensionOptionDto[] = [];
+  private heroAscensionName: string | null = null;
+  private heroAscensionSkillNodes: SkillNodeDto[] = [];
   private contextInvalidated = false;
   private idleSummaryShown = false;
   private openingChests = false;
@@ -712,10 +716,22 @@ export class GameViewController {
     }
   }
 
+  private async loadHeroAscensionTree(heroId: string): Promise<void> {
+    const response = await sendGameMessage({ type: 'GET_HERO_ASCENSION_TREE', heroId });
+    if (!response.ok) return;
+
+    this.heroAscensionOptions = response.ascensionOptions ?? [];
+    this.heroAscensionName = response.ascensionName ?? null;
+    this.heroAscensionSkillNodes = response.ascensionSkillNodes ?? [];
+  }
+
   private async changeHeroDetailTab(heroId: string, tab: HeroDetailTab): Promise<void> {
     this.heroDetailModal.setActiveTab(tab);
     if (tab === 'skills') {
       await this.loadHeroSkillTree(heroId);
+    }
+    if (tab === 'class') {
+      await this.loadHeroAscensionTree(heroId);
     }
     this.renderModalTop();
   }
@@ -754,7 +770,7 @@ export class GameViewController {
       this.toasts.show(response.error ?? 'Falha ao ativar', 'info');
       return;
     }
-    await this.loadHeroSkillTree(heroId);
+    await Promise.all([this.loadHeroSkillTree(heroId), this.loadHeroAscensionTree(heroId)]);
     this.render(response.state);
   }
 
@@ -764,7 +780,33 @@ export class GameViewController {
       this.toasts.show(response.error ?? 'Falha ao desativar', 'info');
       return;
     }
-    await this.loadHeroSkillTree(heroId);
+    await Promise.all([this.loadHeroSkillTree(heroId), this.loadHeroAscensionTree(heroId)]);
+    this.render(response.state);
+  }
+
+  private async ascendClass(heroId: string, ascensionId: string): Promise<void> {
+    const response = await sendGameMessage({ type: 'ASCEND_CLASS', heroId, ascensionId });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha na ascensão', 'info');
+      return;
+    }
+    await this.loadHeroAscensionTree(heroId);
+    this.heroDetailModal.setActiveTab('class');
+    this.render(response.state);
+    this.toasts.show('Ascensão realizada!', 'info');
+  }
+
+  private async allocateAscensionSkill(heroId: string, skillId: string): Promise<void> {
+    const response = await sendGameMessage({
+      type: 'SPEND_ASCENSION_POINT',
+      heroId,
+      skillId,
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha na skill de ascensão', 'info');
+      return;
+    }
+    await this.loadHeroAscensionTree(heroId);
     this.render(response.state);
   }
 
@@ -837,6 +879,11 @@ export class GameViewController {
         break;
       case 'hero-detail':
         this.heroDetailModal.setSkillNodes(this.heroSkillNodes);
+        this.heroDetailModal.setAscensionData(
+          this.heroAscensionOptions,
+          this.heroAscensionName,
+          this.heroAscensionSkillNodes,
+        );
         this.heroDetailModal.render(container, this.state, view.heroId, {
           onSlotClick: (heroId, slot) => this.openEquipPickerFromSlot(heroId, slot),
           onSpendAttribute: (heroId, attr) => {
@@ -850,6 +897,12 @@ export class GameViewController {
           },
           onDeactivateSkill: (heroId, skillId) => {
             void this.deactivateSkill(heroId, skillId);
+          },
+          onAscendClass: (heroId, ascensionId) => {
+            void this.ascendClass(heroId, ascensionId);
+          },
+          onAllocateAscensionSkill: (heroId, skillId) => {
+            void this.allocateAscensionSkill(heroId, skillId);
           },
           onTabChange: (heroId, tab) => {
             void this.changeHeroDetailTab(heroId, tab);

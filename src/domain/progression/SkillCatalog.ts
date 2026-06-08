@@ -161,6 +161,186 @@ export const SKILL_CATALOG: SkillDefinition[] = [
     scaling: 'int',
     pointType: 'improvement',
   },
+  // Ascensão — Knight Guardião
+  {
+    id: 'guardian_strike',
+    scope: 'class',
+    heroClass: 'knight',
+    branch: 'offense',
+    name: 'Golpe do Guardião',
+    description: 'Ataque pesado da especialização defensiva.',
+    maxRank: 3,
+    requirements: [{ type: 'ascension', ascensionId: 'knight_guardian' }],
+    scaling: 'str',
+    pointType: 'ascension',
+    ascensionId: 'knight_guardian',
+  },
+  {
+    id: 'guardian_resolve',
+    scope: 'class',
+    heroClass: 'knight',
+    branch: 'utility',
+    name: 'Determinação',
+    description: 'Cura aliado ferido com força interior.',
+    maxRank: 2,
+    requirements: [
+      { type: 'ascension', ascensionId: 'knight_guardian' },
+      { type: 'skill_rank', skillId: 'guardian_strike', minRank: 1 },
+    ],
+    scaling: 'str',
+    pointType: 'ascension',
+    ascensionId: 'knight_guardian',
+  },
+  // Ascensão — Knight Devastador
+  {
+    id: 'reaver_cleave',
+    scope: 'class',
+    heroClass: 'knight',
+    branch: 'offense',
+    name: 'Fender',
+    description: 'Golpe amplo de alta pressão.',
+    maxRank: 3,
+    requirements: [{ type: 'ascension', ascensionId: 'knight_reaver' }],
+    scaling: 'str',
+    pointType: 'ascension',
+    ascensionId: 'knight_reaver',
+  },
+  {
+    id: 'reaver_fury',
+    scope: 'class',
+    heroClass: 'knight',
+    branch: 'offense',
+    name: 'Fúria',
+    description: 'Golpe brutal quando a batalha esquenta.',
+    maxRank: 2,
+    requirements: [
+      { type: 'ascension', ascensionId: 'knight_reaver' },
+      { type: 'skill_rank', skillId: 'reaver_cleave', minRank: 1 },
+    ],
+    scaling: 'str',
+    pointType: 'ascension',
+    ascensionId: 'knight_reaver',
+  },
+  // Ascensão — Sorcerer Piromante
+  {
+    id: 'pyro_inferno',
+    scope: 'class',
+    heroClass: 'sorcerer',
+    branch: 'offense',
+    name: 'Inferno',
+    description: 'Chamas concentradas devastadoras.',
+    maxRank: 3,
+    requirements: [{ type: 'ascension', ascensionId: 'sorcerer_pyromancer' }],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'sorcerer_pyromancer',
+  },
+  {
+    id: 'pyro_ember',
+    scope: 'class',
+    heroClass: 'sorcerer',
+    branch: 'offense',
+    name: 'Brasa',
+    description: 'Faíscas ardentes de suporte ofensivo.',
+    maxRank: 2,
+    requirements: [
+      { type: 'ascension', ascensionId: 'sorcerer_pyromancer' },
+      { type: 'skill_rank', skillId: 'pyro_inferno', minRank: 1 },
+    ],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'sorcerer_pyromancer',
+  },
+  // Ascensão — Sorcerer Arcanista
+  {
+    id: 'arcane_surge',
+    scope: 'class',
+    heroClass: 'sorcerer',
+    branch: 'offense',
+    name: 'Surto Arcano',
+    description: 'Rajada de energia arcana pura.',
+    maxRank: 3,
+    requirements: [{ type: 'ascension', ascensionId: 'sorcerer_arcanist' }],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'sorcerer_arcanist',
+  },
+  {
+    id: 'arcane_focus',
+    scope: 'class',
+    heroClass: 'sorcerer',
+    branch: 'offense',
+    name: 'Foco Arcano',
+    description: 'Feixe concentrado de poder mágico.',
+    maxRank: 2,
+    requirements: [
+      { type: 'ascension', ascensionId: 'sorcerer_arcanist' },
+      { type: 'skill_rank', skillId: 'arcane_surge', minRank: 1 },
+    ],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'sorcerer_arcanist',
+  },
+  // Ascensão — Priest Oráculo
+  {
+    id: 'oracle_mend',
+    scope: 'class',
+    heroClass: 'priest',
+    branch: 'utility',
+    name: 'Restauração',
+    description: 'Cura sagrada avançada.',
+    maxRank: 3,
+    requirements: [{ type: 'ascension', ascensionId: 'priest_oracle' }],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'priest_oracle',
+  },
+  {
+    id: 'oracle_sanctuary',
+    scope: 'class',
+    heroClass: 'priest',
+    branch: 'utility',
+    name: 'Santuário',
+    description: 'Proteção curativa intensa.',
+    maxRank: 2,
+    requirements: [
+      { type: 'ascension', ascensionId: 'priest_oracle' },
+      { type: 'skill_rank', skillId: 'oracle_mend', minRank: 1 },
+    ],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'priest_oracle',
+  },
+  // Ascensão — Priest Inquisidor
+  {
+    id: 'inquisitor_judgment',
+    scope: 'class',
+    heroClass: 'priest',
+    branch: 'offense',
+    name: 'Julgamento',
+    description: 'Castigo divino devastador.',
+    maxRank: 3,
+    requirements: [{ type: 'ascension', ascensionId: 'priest_inquisitor' }],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'priest_inquisitor',
+  },
+  {
+    id: 'inquisitor_flame',
+    scope: 'class',
+    heroClass: 'priest',
+    branch: 'offense',
+    name: 'Chama Sagrada',
+    description: 'Fogo sagrado contra o inimigo.',
+    maxRank: 2,
+    requirements: [
+      { type: 'ascension', ascensionId: 'priest_inquisitor' },
+      { type: 'skill_rank', skillId: 'inquisitor_judgment', minRank: 1 },
+    ],
+    scaling: 'int',
+    pointType: 'ascension',
+    ascensionId: 'priest_inquisitor',
+  },
 ];
 
 export function getSkillById(skillId: string): SkillDefinition | undefined {
@@ -169,9 +349,11 @@ export function getSkillById(skillId: string): SkillDefinition | undefined {
 
 export function getSkillsForHero(heroClass: string, ascensionId: string | null): SkillDefinition[] {
   return SKILL_CATALOG.filter((skill) => {
+    if (skill.pointType === 'ascension') {
+      return ascensionId !== null && skill.ascensionId === ascensionId;
+    }
     if (skill.scope === 'universal') return true;
     if (skill.scope === 'class' && skill.heroClass === heroClass) return true;
-    if (skill.pointType === 'ascension' && ascensionId) return true;
     return false;
   });
 }
