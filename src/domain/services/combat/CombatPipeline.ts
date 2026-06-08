@@ -2,13 +2,15 @@ import { GameState } from '../../entities/GameState';
 import { Enemy } from '../../entities/Enemy';
 import { CombatTickResult, ICombatService } from '../ICombatService';
 import { EnemyCounterPhase } from './EnemyCounterPhase';
-import { HeroAttackPhase } from './HeroAttackPhase';
+import { HeroActionPhase } from './HeroActionPhase';
 import { VictoryRewardPhase } from './VictoryRewardPhase';
 
 export class CombatPipeline implements ICombatService {
-  private readonly heroAttack = new HeroAttackPhase();
-  private readonly enemyCounter = new EnemyCounterPhase();
-  private readonly victoryReward = new VictoryRewardPhase();
+  constructor(
+    private readonly heroAction = new HeroActionPhase(),
+    private readonly enemyCounter = new EnemyCounterPhase(),
+    private readonly victoryReward = new VictoryRewardPhase(),
+  ) {}
 
   executeTick(state: GameState): CombatTickResult {
     if (!state.currentEnemy) {
@@ -18,19 +20,27 @@ export class CombatPipeline implements ICombatService {
       };
     }
 
-    const heroes = [...state.heroes];
-    const attackResult = this.heroAttack.execute(heroes, state.currentEnemy);
-    const events = [...attackResult.events];
+    const actionResult = this.heroAction.execute(state.heroes, state.currentEnemy);
+    const events = [...actionResult.events];
 
-    if (attackResult.enemy.isAlive()) {
-      const counterResult = this.enemyCounter.execute(state, attackResult.enemy, heroes);
+    if (actionResult.enemy.isAlive()) {
+      const counterResult = this.enemyCounter.execute(
+        state,
+        actionResult.enemy,
+        actionResult.heroes,
+      );
       return {
         state: counterResult.state,
         events: [...events, ...counterResult.events],
       };
     }
 
-    const victoryResult = this.victoryReward.execute(state, state.currentEnemy, heroes);
+    const victoryResult = this.victoryReward.execute(
+      state,
+      state.currentEnemy,
+      actionResult.heroes,
+    );
+
     return {
       state: victoryResult.state,
       events: [...events, ...victoryResult.events],
