@@ -1,6 +1,9 @@
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { LootService } from '../../domain/services/LootService';
-import { mapGameStateToDto, mapGearToDto, GameStateDto, GearDto } from '../dto/GameStateDto';
+import { getFeatureLevel } from '../../domain/upgrades/FeatureKey';
+import { UpgradeService } from '../../domain/upgrades/UpgradeService';
+import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
+import { mapGearToDto, GameStateDto, GearDto } from '../dto/GameStateDto';
 
 export interface OpenAllChestsResult {
   state: GameStateDto;
@@ -11,15 +14,21 @@ export class OpenAllChestsUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly lootService: LootService,
+    private readonly upgradeService: UpgradeService,
   ) {}
 
   async execute(): Promise<OpenAllChestsResult> {
     let state = await this.repository.load();
+
+    if (getFeatureLevel(state.upgradeLevels, 'open_all_chests') < 1) {
+      throw new Error('Abrir todos os baús não desbloqueado');
+    }
+
     const pendingChests = state.chests.filter((chest) => !chest.opened);
 
     if (pendingChests.length === 0) {
       return {
-        state: mapGameStateToDto(state),
+        state: mapPersistedGameState(state, this.upgradeService),
         openedGears: [],
       };
     }
@@ -47,7 +56,7 @@ export class OpenAllChestsUseCase {
     await this.repository.save(state);
 
     return {
-      state: mapGameStateToDto(state),
+      state: mapPersistedGameState(state, this.upgradeService),
       openedGears,
     };
   }

@@ -13,6 +13,7 @@ export class LootBatchModalRenderer {
     state: GameStateDto,
     gearIds: string[],
     handlers: LootBatchModalHandlers,
+    options: { canOptimize?: boolean } = {},
   ): void {
     const items = gearIds
       .map((gearId) => state.inventory.find((entry) => entry.id === gearId))
@@ -29,6 +30,18 @@ export class LootBatchModalRenderer {
         ? `Equipar recomendados (${recommendedCount})`
         : 'Equipar recomendados';
 
+    const optimizeAction =
+      options.canOptimize === false
+        ? ''
+        : `
+      <div class="loot-reveal-actions">
+        <button type="button" class="gear-equip-btn" data-loot-batch-equip ${recommendedCount === 0 ? 'disabled' : ''}>
+          ${equipLabel}
+        </button>
+        <button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button>
+      </div>
+    `;
+
     container.innerHTML = `
       <p class="loot-reveal-intro">Você recebeu ${items.length} itens dos baús!</p>
       <div class="loot-batch-list modal-gear-list">
@@ -42,12 +55,10 @@ export class LootBatchModalRenderer {
           })
           .join('')}
       </div>
-      <div class="loot-reveal-actions">
-        <button type="button" class="gear-equip-btn" data-loot-batch-equip ${recommendedCount === 0 ? 'disabled' : ''}>
-          ${equipLabel}
-        </button>
-        <button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button>
-      </div>
+      ${
+        optimizeAction ||
+        '<p class="loot-batch-locked">Otimizar loot em lote: desbloqueie em Melhorias.</p><div class="loot-reveal-actions"><button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button></div>'
+      }
     `;
 
     const equipButton = container.querySelector('[data-loot-batch-equip]') as HTMLButtonElement | null;

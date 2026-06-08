@@ -26,9 +26,13 @@ import {
 import {
   GamePreferences,
   loadGamePreferences,
+  saveGamePreferences,
   updateGamePreference,
 } from './GamePreferences';
 import { SettingsModalRenderer } from './SettingsModalRenderer';
+import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
+import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
+import { FeatureGate } from './FeatureGate';
 import { ToastController } from './ToastController';
 
 type ModalView =
@@ -38,7 +42,8 @@ type ModalView =
   | { type: 'loot-reveal'; gearId: string }
   | { type: 'loot-batch'; gearIds: string[] }
   | { type: 'settings' }
-  | { type: 'shop' };
+  | { type: 'shop' }
+  | { type: 'upgrades' };
 
 const AUTO_BATTLE_BASE_INTERVAL_MS = 2500;
 
@@ -72,9 +77,13 @@ export class GameViewController {
   private readonly optimizeLoadoutBtn: HTMLButtonElement;
   private readonly openSettingsBtn: HTMLButtonElement;
   private readonly openShopBtn: HTMLButtonElement;
+  private readonly openUpgradesBtn: HTMLButtonElement;
   private shopOffers: ShopOfferDto[] = [];
   private shopRefreshCost = 0;
   private canAffordShopRefresh = false;
+  private shopRefreshUnlocked = false;
+  private shopRefreshRemaining = 0;
+  private upgradeNodes: UpgradeNodeDto[] = [];
 
   private readonly battleStrip: BattleStripRenderer;
   private readonly heroPanel: HeroPanelRenderer;
@@ -86,6 +95,7 @@ export class GameViewController {
   private readonly lootBatchModal: LootBatchModalRenderer;
   private readonly settingsModal: SettingsModalRenderer;
   private readonly shopModal: ShopModalRenderer;
+  private readonly upgradeTreeModal: UpgradeTreeModalRenderer;
   private readonly toasts: ToastController;
   private readonly stateChanges: GameStateChangeDetector;
 
@@ -102,6 +112,7 @@ export class GameViewController {
     this.optimizeLoadoutBtn = root.querySelector('#optimize-loadout-btn') as HTMLButtonElement;
     this.openSettingsBtn = root.querySelector('#open-settings-btn') as HTMLButtonElement;
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
+    this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
 
     this.battleStrip = new BattleStripRenderer(
       root.querySelector('#heroes-container')!,
@@ -123,6 +134,7 @@ export class GameViewController {
     this.lootBatchModal = new LootBatchModalRenderer();
     this.settingsModal = new SettingsModalRenderer();
     this.shopModal = new ShopModalRenderer();
+    this.upgradeTreeModal = new UpgradeTreeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.stateChanges = new GameStateChangeDetector(this.toasts);
 
@@ -136,6 +148,9 @@ export class GameViewController {
     this.openSettingsBtn.addEventListener('click', () => this.openSettingsModal());
     this.openShopBtn.addEventListener('click', () => {
       void this.openShopModal();
+    });
+    this.openUpgradesBtn.addEventListener('click', () => {
+      void this.openUpgradesModal();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -178,25 +193,74 @@ export class GameViewController {
   }
 
   private applyPreferences(preferences: GamePreferences): void {
-    this.preferences = preferences;
-    this.autoBattleEnabled = preferences.autoBattle;
-    this.autoOpenChests = preferences.autoOpenChests;
-    this.autoEquipLoot = preferences.autoEquipLoot;
-    this.autoBattleSpeed = preferences.autoBattleSpeed;
-    this.logFilterImportant = preferences.logFilterImportant;
+    const clamped = this.clampPreferencesToGates(preferences);
+    const wasAutoBattle = this.autoBattleEnabled;
+    const wasSpeed = this.autoBattleSpeed;
+
+    this.preferences = clamped;
+    this.autoBattleEnabled =
+      clamped.autoBattle && FeatureGate.canUseAutoBattle(this.state);
+    this.autoOpenChests =
+      clamped.autoOpenChests && FeatureGate.canUseAutoOpenChests(this.state);
+    this.autoEquipLoot =
+      clamped.autoEquipLoot && FeatureGate.canUseAutoEquipLoot(this.state);
+    this.autoBattleSpeed = Math.min(
+      clamped.autoBattleSpeed,
+      FeatureGate.maxAutoBattleSpeed(this.state),
+    ) as GamePreferences['autoBattleSpeed'];
+    this.logFilterImportant =
+      clamped.logFilterImportant && FeatureGate.canUseLogFilter(this.state);
     this.updateAutoBattleUi();
 
-    if (this.autoBattleEnabled) {
-      this.startAutoBattle();
-    } else {
-      this.stopAutoBattle();
+    const autoBattleChanged =
+      wasAutoBattle !== this.autoBattleEnabled || wasSpeed !== this.autoBattleSpeed;
+
+    if (autoBattleChanged) {
+      if (this.autoBattleEnabled) {
+        this.stopAutoBattle();
+        this.startAutoBattle();
+      } else {
+        this.stopAutoBattle();
+      }
     }
+  }
+
+  private clampPreferencesToGates(preferences: GamePreferences): GamePreferences {
+    const maxSpeed = FeatureGate.maxAutoBattleSpeed(this.state);
+    return {
+      autoBattle: FeatureGate.canUseAutoBattle(this.state) ? preferences.autoBattle : false,
+      autoOpenChests: FeatureGate.canUseAutoOpenChests(this.state)
+        ? preferences.autoOpenChests
+        : false,
+      autoEquipLoot: FeatureGate.canUseAutoEquipLoot(this.state)
+        ? preferences.autoEquipLoot
+        : false,
+      autoBattleSpeed: Math.min(preferences.autoBattleSpeed, maxSpeed) as 1 | 2 | 3,
+      logFilterImportant: FeatureGate.canUseLogFilter(this.state)
+        ? preferences.logFilterImportant
+        : false,
+    };
+  }
+
+  private enforceUpgradeGates(): void {
+    const clamped = this.clampPreferencesToGates(this.preferences);
+    if (JSON.stringify(clamped) === JSON.stringify(this.preferences)) return;
+    saveGamePreferences(clamped);
+    this.applyPreferences(clamped);
   }
 
   private handlePreferenceChange<K extends keyof GamePreferences>(
     key: K,
     value: GamePreferences[K],
   ): void {
+    if (!this.canChangePreference(key)) {
+      this.toasts.show('Desbloqueie esta automação em Melhorias', 'info');
+      if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'settings') {
+        this.renderModalTop();
+      }
+      return;
+    }
+
     const wasAutoBattle = this.autoBattleEnabled;
     const next = updateGamePreference(key, value);
     this.applyPreferences(next);
@@ -219,8 +283,29 @@ export class GameViewController {
     }
   }
 
+  private canChangePreference(key: keyof GamePreferences): boolean {
+    switch (key) {
+      case 'autoBattle':
+        return FeatureGate.canUseAutoBattle(this.state);
+      case 'autoOpenChests':
+        return FeatureGate.canUseAutoOpenChests(this.state);
+      case 'autoEquipLoot':
+        return FeatureGate.canUseAutoEquipLoot(this.state);
+      case 'logFilterImportant':
+        return FeatureGate.canUseLogFilter(this.state);
+      case 'autoBattleSpeed':
+        return FeatureGate.canUseAutoBattle(this.state);
+      default:
+        return true;
+    }
+  }
+
   private getAutoBattleIntervalMs(): number {
-    return Math.floor(AUTO_BATTLE_BASE_INTERVAL_MS / this.autoBattleSpeed);
+    const speed = Math.min(
+      this.autoBattleSpeed,
+      FeatureGate.maxAutoBattleSpeed(this.state),
+    );
+    return Math.floor(AUTO_BATTLE_BASE_INTERVAL_MS / speed);
   }
 
   private shouldIgnoreKeyboardShortcut(): boolean {
@@ -260,10 +345,44 @@ export class GameViewController {
     this.pushModal({ type: 'shop' });
   }
 
+  private async openUpgradesModal(): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    const response = await sendGameMessage({ type: 'GET_UPGRADE_TREE' });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    this.upgradeNodes = response.upgradeNodes ?? [];
+    this.state = response.state;
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'upgrades' });
+  }
+
+  private async purchaseUpgrade(upgradeId: string): Promise<void> {
+    const response = await sendGameMessage({ type: 'PURCHASE_UPGRADE', upgradeId });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha na compra', 'info');
+      return;
+    }
+
+    this.upgradeNodes = response.upgradeNodes ?? [];
+    this.render(response.state);
+    this.enforceUpgradeGates();
+    this.toasts.show('Melhoria desbloqueada!', 'loot');
+
+    if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'upgrades') {
+      this.renderModalTop();
+    }
+  }
+
   private applyShopPayload(response: {
     shopOffers?: ShopOfferDto[];
     shopRefreshCost?: number;
     canAffordShopRefresh?: boolean;
+    shopRefreshUnlocked?: boolean;
+    shopRefreshRemaining?: number;
   }): void {
     if (response.shopOffers) {
       this.shopOffers = response.shopOffers;
@@ -273,6 +392,12 @@ export class GameViewController {
     }
     if (typeof response.canAffordShopRefresh === 'boolean') {
       this.canAffordShopRefresh = response.canAffordShopRefresh;
+    }
+    if (typeof response.shopRefreshUnlocked === 'boolean') {
+      this.shopRefreshUnlocked = response.shopRefreshUnlocked;
+    }
+    if (typeof response.shopRefreshRemaining === 'number') {
+      this.shopRefreshRemaining = response.shopRefreshRemaining;
     }
   }
 
@@ -304,6 +429,10 @@ export class GameViewController {
       canAfford: response.state.gold >= offer.price,
     }));
     this.canAffordShopRefresh = response.state.gold >= this.shopRefreshCost;
+    this.shopRefreshRemaining = Math.max(
+      0,
+      response.state.shopRefreshLimit - response.state.shopRefreshUses,
+    );
 
     this.render(response.state);
 
@@ -424,6 +553,7 @@ export class GameViewController {
   }
 
   private async openAllChests(): Promise<void> {
+    if (!FeatureGate.canUseOpenAllChests(this.state)) return;
     if (!this.state || this.openingChests || this.state.pendingChestCount === 0) return;
 
     this.openingChests = true;
@@ -502,8 +632,11 @@ export class GameViewController {
       this.toasts.show(`${gearIds.length} itens recebidos dos baús`, 'loot');
     }
 
-    if (this.autoEquipLoot) {
-      await this.optimizeLoadout(gearIds, { fromLoot: true });
+    if (this.autoEquipLoot && FeatureGate.canUseAutoEquipLoot(this.state)) {
+      await this.optimizeLoadout(gearIds, {
+        fromLoot: true,
+        silent: FeatureGate.isAutoEquipSilent(this.state),
+      });
       return;
     }
 
@@ -513,8 +646,13 @@ export class GameViewController {
 
   private async optimizeLoadout(
     gearIds?: string[],
-    options: { fromLoot?: boolean } = {},
+    options: { fromLoot?: boolean; silent?: boolean } = {},
   ): Promise<void> {
+    if (!FeatureGate.canUseOptimizeLoadout(this.state)) {
+      this.toasts.show('Desbloqueie Otimizar equipe em Melhorias', 'info');
+      return;
+    }
+
     const response = await sendGameMessage({
       type: 'EQUIP_BEST_LOADOUT',
       gearIds,
@@ -528,11 +666,11 @@ export class GameViewController {
     const equippedCount = response.equippedCount ?? 0;
     this.render(response.state);
 
-    if (equippedCount > 0) {
+    if (equippedCount > 0 && !options.silent) {
       const label = equippedCount === 1 ? '1 item equipado' : `${equippedCount} itens equipados`;
       const message = options.fromLoot ? `Loot auto-equipado: ${label}` : `Equipe otimizada: ${label}`;
       this.toasts.show(message, options.fromLoot ? 'loot' : 'info');
-    } else if (!options.fromLoot) {
+    } else if (!options.fromLoot && !options.silent) {
       this.toasts.show('Nenhum upgrade disponível no momento', 'info');
     }
 
@@ -557,7 +695,8 @@ export class GameViewController {
 
   private scheduleAutoOpenChests(): void {
     if (this.autoOpenChestPending) return;
-    if (!this.autoOpenChests || !this.state || this.openingChests) return;
+    if (!this.autoOpenChests || !FeatureGate.canUseAutoOpenChests(this.state)) return;
+    if (!this.state || this.openingChests) return;
     if (this.modal.isOpen() || this.state.pendingChestCount === 0) return;
 
     this.autoOpenChestPending = true;
@@ -567,7 +706,11 @@ export class GameViewController {
       if (!this.autoOpenChests || this.openingChests || this.modal.isOpen()) return;
       if (!this.state || this.state.pendingChestCount === 0) return;
 
-      if (this.state.pendingChestCount >= 2) {
+      if (
+        this.state.pendingChestCount >= 2 &&
+        FeatureGate.canUseOpenAllChests(this.state) &&
+        FeatureGate.shouldAutoOpenAllChests(this.state)
+      ) {
         void this.openAllChests();
         return;
       }
@@ -693,12 +836,17 @@ export class GameViewController {
 
     switch (view.type) {
       case 'inventory':
-        this.inventoryModal.render(container, this.state, {
-          onEquipGear: (gearId) => this.openEquipPickerFromGear(gearId),
-          onFilterChange: () => this.renderModalTop(),
-          onSortChange: () => this.renderModalTop(),
-          onOptimizeLoadout: () => this.optimizeLoadout(),
-        });
+        this.inventoryModal.render(
+          container,
+          this.state,
+          {
+            onEquipGear: (gearId) => this.openEquipPickerFromGear(gearId),
+            onFilterChange: () => this.renderModalTop(),
+            onSortChange: () => this.renderModalTop(),
+            onOptimizeLoadout: () => this.optimizeLoadout(),
+          },
+          { showOptimize: FeatureGate.canUseOptimizeLoadout(this.state) },
+        );
         break;
       case 'hero-detail':
         this.heroDetailModal.render(container, this.state, view.heroId, {
@@ -719,16 +867,32 @@ export class GameViewController {
         });
         break;
       case 'loot-batch':
-        this.lootBatchModal.render(container, this.state, view.gearIds, {
-          onEquipRecommended: () => {
-            void this.equipRecommendedLoot(view.gearIds);
+        this.lootBatchModal.render(
+          container,
+          this.state,
+          view.gearIds,
+          {
+            onEquipRecommended: () => {
+              void this.equipRecommendedLoot(view.gearIds);
+            },
+            onKeepAll: () => this.closeLootBatchModal(),
           },
-          onKeepAll: () => this.closeLootBatchModal(),
-        });
+          { canOptimize: FeatureGate.canUseOptimizeInLootBatch(this.state) },
+        );
         break;
       case 'settings':
-        this.settingsModal.render(container, this.preferences, {
+        this.settingsModal.render(container, this.state, this.preferences, {
           onPreferenceChange: (key, value) => this.handlePreferenceChange(key, value),
+          onOpenUpgrades: () => {
+            void this.openUpgradesModal();
+          },
+        });
+        break;
+      case 'upgrades':
+        this.upgradeTreeModal.render(container, this.state, this.upgradeNodes, {
+          onPurchase: (upgradeId) => {
+            void this.purchaseUpgrade(upgradeId);
+          },
         });
         break;
       case 'shop':
@@ -739,6 +903,8 @@ export class GameViewController {
             offers: this.shopOffers,
             refreshCost: this.shopRefreshCost,
             canAffordRefresh: this.canAffordShopRefresh,
+            shopRefreshUnlocked: this.shopRefreshUnlocked,
+            shopRefreshRemaining: this.shopRefreshRemaining,
           },
           {
             onBuyOffer: (offerId) => {
@@ -767,6 +933,8 @@ export class GameViewController {
         return 'Configurações';
       case 'shop':
         return 'Loja';
+      case 'upgrades':
+        return 'Melhorias';
       case 'loot-batch':
         return `Loot dos baús (${view.gearIds.length})`;
       case 'loot-reveal': {
@@ -857,10 +1025,24 @@ export class GameViewController {
       ${upgradeBadge}
     `;
 
-    this.optimizeLoadoutBtn.disabled = upgradeCount === 0;
+    const canOptimize = FeatureGate.canUseOptimizeLoadout(state);
+    this.optimizeLoadoutBtn.classList.toggle('hidden', !canOptimize);
+    this.optimizeLoadoutBtn.disabled = !canOptimize || upgradeCount === 0;
     this.optimizeLoadoutBtn.innerHTML = upgradeCount > 0
       ? `Otimizar (↑${upgradeCount})`
       : 'Otimizar equipe';
+
+    const canOpenAll = FeatureGate.canUseOpenAllChests(state);
+    this.openAllChestsBtn.classList.toggle('hidden', !canOpenAll || state.pendingChestCount < 2);
+
+    const purchasableBadge =
+      state.purchasableUpgradeCount > 0
+        ? `<span class="inventory-upgrade-badge">↑${state.purchasableUpgradeCount}</span>`
+        : '';
+    this.openUpgradesBtn.innerHTML = `Melhorias${purchasableBadge}`;
+
+    this.shopRefreshUnlocked = FeatureGate.canUseShopRefresh(state);
+    this.shopRefreshRemaining = Math.max(0, state.shopRefreshLimit - state.shopRefreshUses);
 
     const logMessages = filterBattleLogMessages(
       state.battleLog.map((entry) => entry.message),
@@ -874,9 +1056,11 @@ export class GameViewController {
 
     const hasChests = state.pendingChestCount > 0;
     this.openChestBtn.disabled = !hasChests || this.openingChests;
-    this.openAllChestsBtn.disabled = state.pendingChestCount < 2 || this.openingChests;
+    this.openAllChestsBtn.disabled =
+      !canOpenAll || state.pendingChestCount < 2 || this.openingChests;
     this.openChestBtn.classList.toggle('chest-available', hasChests);
-    this.openAllChestsBtn.classList.toggle('hidden', state.pendingChestCount < 2);
+
+    this.enforceUpgradeGates();
 
     if (this.modal.isOpen() && this.modalStack.length > 0) {
       this.renderModalTop();

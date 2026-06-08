@@ -1,4 +1,5 @@
 import { Gold } from '../value-objects/Gold';
+import { UpgradeLevels } from '../upgrades/FeatureKey';
 import { Chest } from './Chest';
 import { Enemy } from './Enemy';
 import { Gear } from './Gear';
@@ -20,6 +21,8 @@ export interface GameStateProps {
   totalBattlesWon: number;
   lastTickAt: number;
   shopRefreshSeed: number;
+  upgradeLevels: UpgradeLevels;
+  shopRefreshUses: number;
 }
 
 export class GameState {
@@ -33,6 +36,8 @@ export class GameState {
   readonly totalBattlesWon: number;
   readonly lastTickAt: number;
   readonly shopRefreshSeed: number;
+  readonly upgradeLevels: UpgradeLevels;
+  readonly shopRefreshUses: number;
 
   private constructor(props: GameStateProps) {
     this.heroes = props.heroes;
@@ -45,6 +50,8 @@ export class GameState {
     this.totalBattlesWon = props.totalBattlesWon;
     this.lastTickAt = props.lastTickAt;
     this.shopRefreshSeed = Math.max(0, props.shopRefreshSeed ?? 0);
+    this.upgradeLevels = props.upgradeLevels ?? {};
+    this.shopRefreshUses = Math.max(0, props.shopRefreshUses ?? 0);
   }
 
   static initial(): GameState {
@@ -65,6 +72,8 @@ export class GameState {
       totalBattlesWon: 0,
       lastTickAt: Date.now(),
       shopRefreshSeed: 0,
+      upgradeLevels: {},
+      shopRefreshUses: 0,
     });
   }
 
@@ -85,11 +94,23 @@ export class GameState {
   }
 
   withStage(stage: number): GameState {
-    return this.clone({ stage, shopRefreshSeed: 0 });
+    return this.clone({ stage, shopRefreshSeed: 0, shopRefreshUses: 0 });
   }
 
   withShopRefreshSeed(shopRefreshSeed: number): GameState {
     return this.clone({ shopRefreshSeed: Math.max(0, shopRefreshSeed) });
+  }
+
+  withShopRefreshUses(shopRefreshUses: number): GameState {
+    return this.clone({ shopRefreshUses: Math.max(0, shopRefreshUses) });
+  }
+
+  withUpgradeLevels(upgradeLevels: UpgradeLevels): GameState {
+    return this.clone({ upgradeLevels: { ...upgradeLevels } });
+  }
+
+  chestsOpenedCount(): number {
+    return this.chests.filter((chest) => chest.opened).length;
   }
 
   withChests(chests: Chest[]): GameState {
@@ -129,6 +150,8 @@ export class GameState {
       totalBattlesWon: this.totalBattlesWon,
       lastTickAt: this.lastTickAt,
       shopRefreshSeed: this.shopRefreshSeed,
+      upgradeLevels: this.upgradeLevels,
+      shopRefreshUses: this.shopRefreshUses,
     };
   }
 

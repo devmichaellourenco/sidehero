@@ -5,12 +5,18 @@ import {
 } from '../../infrastructure/messaging/ContentScriptBridge';
 import { createGameApplication } from '../../infrastructure/di/createGameApplication';
 import { SidebarPreferencesStore } from '../../infrastructure/storage/SidebarPreferences';
-
-const TICK_ALARM = 'taskbar-hero-tick';
-const TICK_INTERVAL_MINUTES = 0.1;
+import {
+  syncBackgroundTickAlarm,
+  TICK_ALARM,
+} from '../../infrastructure/background/BackgroundTickScheduler';
 
 const app = createGameApplication();
 const sidebarPrefsStore = new SidebarPreferencesStore();
+
+async function syncTickAlarmFromState(): Promise<void> {
+  const state = await app.getState.execute();
+  await syncBackgroundTickAlarm(state.upgradeLevels);
+}
 
 async function ensureSidebarOnTab(tabId: number, url?: string): Promise<void> {
   if (!isInjectableUrl(url)) return;
@@ -26,13 +32,17 @@ async function ensureSidebarOnTab(tabId: number, url?: string): Promise<void> {
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
-  chrome.alarms.create(TICK_ALARM, { periodInMinutes: TICK_INTERVAL_MINUTES });
+  await syncTickAlarmFromState();
 
   const tabs = await chrome.tabs.query({});
   for (const tab of tabs) {
     if (!tab.id) continue;
     await ensureSidebarOnTab(tab.id, tab.url);
   }
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  void syncTickAlarmFromState();
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -54,6 +64,12 @@ chrome.alarms.onAlarm.addListener(async (alarm: chrome.alarms.Alarm) => {
   if (alarm.name !== TICK_ALARM) return;
 
   try {
+    const state = await app.getState.execute();
+    await syncBackgroundTickAlarm(state.upgradeLevels);
+
+    const tickLevel = state.upgradeLevels.background_tick ?? 0;
+    if (tickLevel < 1) return;
+
     await app.tick.execute(1);
   } catch (error) {
     console.error('[Side Hero] Erro no tick idle:', error);
@@ -83,6 +99,7 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
     }
     case 'TICK': {
       const state = await app.tick.execute(message.ticks ?? 1);
+      await syncBackgroundTickAlarm(state.upgradeLevels);
       return { ok: true, state };
     }
     case 'OPEN_CHEST': {
@@ -116,6 +133,8 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         shopOffers: result.offers,
         shopRefreshCost: result.refreshCost,
         canAffordShopRefresh: result.canAffordRefresh,
+        shopRefreshUnlocked: result.shopRefreshUnlocked,
+        shopRefreshRemaining: result.shopRefreshRemaining,
       };
     }
     case 'BUY_SHOP_OFFER': {
@@ -130,6 +149,28 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         shopOffers: result.offers,
         shopRefreshCost: result.refreshCost,
         canAffordShopRefresh: result.canAffordRefresh,
+        shopRefreshRemaining: result.shopRefreshRemaining,
+        shopRefreshUnlocked: true,
+      };
+    }
+    case 'GET_UPGRADE_TREE': {
+      const result = await app.getUpgradeTree.execute();
+      return {
+        ok: true,
+        state: result.state,
+        upgradeNodes: result.nodes,
+        purchasableUpgradeCount: result.purchasableCount,
+      };
+    }
+    case 'PURCHASE_UPGRADE': {
+      const result = await app.purchaseUpgrade.execute(message.upgradeId);
+      await syncBackgroundTickAlarm(result.state.upgradeLevels);
+      return {
+        ok: true,
+        state: result.state,
+        upgradeNodes: result.nodes,
+        purchasableUpgradeCount: result.purchasableCount,
+        purchasedUpgradeId: result.purchasedUpgradeId,
       };
     }
     default:

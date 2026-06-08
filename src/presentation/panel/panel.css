@@ -948,6 +948,12 @@ h2 {
   width: 100%;
 }
 
+.inventory-optimize-locked {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
 .shop-intro {
   margin: 0 0 10px;
   font-size: 12px;
@@ -1023,6 +1029,135 @@ h2 {
 
 .shop-buy-btn {
   flex-shrink: 0;
+}
+
+.shop-refresh-locked {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.shop-refresh-remaining {
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.upgrade-intro,
+.upgrade-balance {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.upgrade-balance strong {
+  color: var(--gold);
+}
+
+.upgrade-branch {
+  margin-bottom: 14px;
+}
+
+.upgrade-branch-title {
+  margin: 0 0 8px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  color: #fff8e7;
+}
+
+.upgrade-branch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upgrade-card {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 20, 38, 0.72);
+}
+
+.upgrade-card-available {
+  border-color: rgba(126, 231, 135, 0.45);
+}
+
+.upgrade-card-ready {
+  border-color: rgba(255, 214, 102, 0.45);
+}
+
+.upgrade-card-owned {
+  opacity: 0.78;
+}
+
+.upgrade-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.upgrade-card-cost {
+  color: var(--gold);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.upgrade-card-desc {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.upgrade-card-reqs {
+  margin: 0 0 8px;
+  padding-left: 16px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.upgrade-card-reqs .met {
+  color: #7ee787;
+}
+
+.upgrade-card-reqs .unmet {
+  color: #f28b82;
+}
+
+.upgrade-buy-btn {
+  width: 100%;
+}
+
+.upgrade-owned-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7ee787;
+}
+
+.upgrade-locked-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.settings-item-locked {
+  opacity: 0.72;
+  padding: 8px 0;
+}
+
+.settings-link-btn {
+  border: none;
+  background: none;
+  color: var(--gold);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.loot-batch-locked {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--muted);
 }
 
 .hero-sprite {

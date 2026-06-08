@@ -1,5 +1,6 @@
 import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
+import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { isExtensionContextValid, isContextInvalidatedError } from './ExtensionContext';
 
 export type GameMessage =
@@ -12,7 +13,9 @@ export type GameMessage =
   | { type: 'UNEQUIP_GEAR'; heroId: string; slot: string }
   | { type: 'GET_SHOP_OFFERS' }
   | { type: 'BUY_SHOP_OFFER'; offerId: string }
-  | { type: 'REFRESH_SHOP' };
+  | { type: 'REFRESH_SHOP' }
+  | { type: 'GET_UPGRADE_TREE' }
+  | { type: 'PURCHASE_UPGRADE'; upgradeId: string };
 
 export type GameResponse =
   | {
@@ -25,6 +28,11 @@ export type GameResponse =
       purchasedGear?: GearDto;
       shopRefreshCost?: number;
       canAffordShopRefresh?: boolean;
+      shopRefreshUnlocked?: boolean;
+      shopRefreshRemaining?: number;
+      upgradeNodes?: UpgradeNodeDto[];
+      purchasableUpgradeCount?: number;
+      purchasedUpgradeId?: string;
     }
   | { ok: false; error: string };
 

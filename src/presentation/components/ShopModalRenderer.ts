@@ -12,6 +12,8 @@ export interface ShopModalViewModel {
   offers: ShopOfferDto[];
   refreshCost: number;
   canAffordRefresh: boolean;
+  shopRefreshUnlocked: boolean;
+  shopRefreshRemaining: number;
 }
 
 export class ShopModalRenderer {
@@ -48,20 +50,29 @@ export class ShopModalRenderer {
       })
       .join('');
 
-    container.innerHTML = `
-      <p class="shop-intro">
-        Ofertas do Stage ${state.stage}. Gaste ouro para renovar o estoque sem avançar de stage.
-      </p>
-      <div class="shop-toolbar">
-        <p class="shop-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
+    const refreshSection = viewModel.shopRefreshUnlocked
+      ? `
         <button
           type="button"
           class="gear-equip-btn shop-refresh-btn"
           data-shop-refresh
           ${refreshDisabled}
         >
-          Renovar loja ${goldIcon} ${viewModel.refreshCost}
+          Renovar ${goldIcon} ${viewModel.refreshCost}
+          <span class="shop-refresh-remaining">(${viewModel.shopRefreshRemaining} restantes)</span>
         </button>
+      `
+      : `
+        <p class="shop-refresh-locked">Renovar loja: desbloqueie em <strong>Melhorias</strong></p>
+      `;
+
+    container.innerHTML = `
+      <p class="shop-intro">
+        Ofertas do Stage ${state.stage}. Comprar itens é grátis; renovar estoque exige melhoria.
+      </p>
+      <div class="shop-toolbar">
+        <p class="shop-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
+        ${refreshSection}
       </div>
       <div class="shop-offers-grid">
         ${offerCards || '<p class="empty-state">Nenhuma oferta disponível.</p>'}

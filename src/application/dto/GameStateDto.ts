@@ -1,4 +1,6 @@
 import { GameState } from '../../domain/entities/GameState';
+import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
+import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
 import { Hero } from '../../domain/entities/Hero';
 import { Gear } from '../../domain/entities/Gear';
 import { Chest } from '../../domain/entities/Chest';
@@ -67,6 +69,10 @@ export interface GameStateDto {
   battleLog: { message: string; timestamp: number }[];
   totalBattlesWon: number;
   pendingChestCount: number;
+  upgradeLevels: UpgradeLevels;
+  shopRefreshUses: number;
+  shopRefreshLimit: number;
+  purchasableUpgradeCount: number;
 }
 
 export function mapHeroToDto(hero: Hero): HeroDto {
@@ -127,7 +133,10 @@ export function mapChestToDto(chest: Chest): ChestDto {
   };
 }
 
-export function mapGameStateToDto(state: GameState): GameStateDto {
+export function mapGameStateToDto(
+  state: GameState,
+  options: { purchasableUpgradeCount?: number } = {},
+): GameStateDto {
   return {
     heroes: state.heroes.map(mapHeroToDto),
     enemy: state.currentEnemy
@@ -150,5 +159,9 @@ export function mapGameStateToDto(state: GameState): GameStateDto {
     battleLog: state.battleLog,
     totalBattlesWon: state.totalBattlesWon,
     pendingChestCount: state.pendingChests().length,
+    upgradeLevels: { ...state.upgradeLevels },
+    shopRefreshUses: state.shopRefreshUses,
+    shopRefreshLimit: getShopRefreshLimit(state.upgradeLevels),
+    purchasableUpgradeCount: options.purchasableUpgradeCount ?? 0,
   };
 }

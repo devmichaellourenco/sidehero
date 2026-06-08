@@ -10,7 +10,8 @@ export function isImportantLogEntry(message: string): boolean {
     normalized.includes('abriu') ||
     normalized.includes('itens recebidos') ||
     normalized.includes('comprou') ||
-    normalized.includes('renovou a loja')
+    normalized.includes('renovou a loja') ||
+    normalized.includes('comprou melhoria')
   );
 }
 

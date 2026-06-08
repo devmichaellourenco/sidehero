@@ -1,7 +1,9 @@
 import { Gear } from '../../domain/entities/Gear';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { ShopService } from '../../domain/services/ShopService';
-import { mapGameStateToDto, mapGearToDto, GameStateDto, GearDto } from '../dto/GameStateDto';
+import { UpgradeService } from '../../domain/upgrades/UpgradeService';
+import { mapPersistedGameState } from '../mappers/GameStateDtoMapper';
+import { mapGearToDto, GameStateDto, GearDto } from '../dto/GameStateDto';
 
 export interface BuyShopOfferResult {
   state: GameStateDto;
@@ -12,6 +14,7 @@ export class BuyShopOfferUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly shopService: ShopService,
+    private readonly upgradeService: UpgradeService,
   ) {}
 
   async execute(offerId: string): Promise<BuyShopOfferResult> {
@@ -38,7 +41,7 @@ export class BuyShopOfferUseCase {
     await this.repository.save(nextState);
 
     return {
-      state: mapGameStateToDto(nextState),
+      state: mapPersistedGameState(nextState, this.upgradeService),
       purchasedGear: mapGearToDto(purchasedGear),
     };
   }

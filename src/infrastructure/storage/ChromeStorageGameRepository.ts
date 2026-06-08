@@ -69,6 +69,8 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       totalBattlesWon: props.totalBattlesWon,
       lastTickAt: props.lastTickAt,
       shopRefreshSeed: props.shopRefreshSeed,
+      upgradeLevels: props.upgradeLevels,
+      shopRefreshUses: props.shopRefreshUses,
     };
   }
 
@@ -92,6 +94,11 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       totalBattlesWon: typeof raw.totalBattlesWon === 'number' ? raw.totalBattlesWon : 0,
       lastTickAt: typeof raw.lastTickAt === 'number' ? raw.lastTickAt : Date.now(),
       shopRefreshSeed: typeof raw.shopRefreshSeed === 'number' ? raw.shopRefreshSeed : 0,
+      upgradeLevels:
+        raw.upgradeLevels && typeof raw.upgradeLevels === 'object'
+          ? (raw.upgradeLevels as Record<string, number>)
+          : {},
+      shopRefreshUses: typeof raw.shopRefreshUses === 'number' ? raw.shopRefreshUses : 0,
     });
   }
 }

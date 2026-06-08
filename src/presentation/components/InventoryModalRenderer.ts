@@ -25,6 +25,7 @@ export class InventoryModalRenderer {
     container: HTMLElement,
     state: GameStateDto,
     handlers: InventoryModalHandlers,
+    options: { showOptimize?: boolean } = {},
   ): void {
     const inventoryIcon = getAssetUrl(ASSETS.ui.inventory);
     const filtered =
@@ -38,7 +39,10 @@ export class InventoryModalRenderer {
         : [...filtered].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR'));
 
     const upgradeCount = countUpgradeItems(state);
-    const optimizeButton = `
+    const optimizeButton =
+      options.showOptimize === false
+        ? '<p class="inventory-optimize-locked">Otimizar equipe: desbloqueie em Melhorias.</p>'
+        : `
       <div class="inventory-optimize-row">
         <button
           type="button"

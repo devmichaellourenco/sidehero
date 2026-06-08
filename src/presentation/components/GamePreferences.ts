@@ -2,7 +2,7 @@ export interface GamePreferences {
   autoBattle: boolean;
   autoOpenChests: boolean;
   autoEquipLoot: boolean;
-  autoBattleSpeed: 1 | 2;
+  autoBattleSpeed: 1 | 2 | 3;
   logFilterImportant: boolean;
 }
 
@@ -45,7 +45,7 @@ export function loadGamePreferences(): GamePreferences {
       autoBattle: readFlag(STORAGE_KEYS.autoBattle),
       autoOpenChests: readFlag(STORAGE_KEYS.autoOpenChests),
       autoEquipLoot: readFlag(STORAGE_KEYS.autoEquipLoot),
-      autoBattleSpeed: speedRaw === '2' ? 2 : 1,
+      autoBattleSpeed: speedRaw === '3' ? 3 : speedRaw === '2' ? 2 : 1,
       logFilterImportant: readFlag(STORAGE_KEYS.logFilterImportant),
     };
   } catch {
