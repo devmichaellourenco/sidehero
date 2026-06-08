@@ -2426,23 +2426,87 @@ body.modal-open {
 .campaign-modal-hint {
   font-size: 11px;
   color: var(--muted);
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 
-.campaign-map {
-  margin-bottom: 14px;
+.campaign-map-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.campaign-map-tab {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 88px;
+  max-width: 120px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.campaign-map-tab--active {
+  border-color: rgba(245, 197, 66, 0.65);
+  background: rgba(70, 52, 12, 0.45);
+  box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.25);
+}
+
+.campaign-map-tab--locked {
+  opacity: 0.55;
+}
+
+.campaign-map-tab-name {
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.campaign-map-tab-meta {
+  font-size: 8px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.campaign-map-panel {
+  min-height: 0;
+}
+
+.campaign-map-header {
+  margin-bottom: 8px;
 }
 
 .campaign-map-title {
   font-size: 13px;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   color: #d8e4ff;
+}
+
+.campaign-map-summary {
+  margin: 0;
+  font-size: 10px;
+  color: var(--muted);
 }
 
 .campaign-phase-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 6px;
+  max-height: 42vh;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .campaign-phase {
@@ -2489,6 +2553,11 @@ body.modal-open {
 
 .campaign-phase--milestone {
   border-color: rgba(255, 184, 108, 0.45);
+}
+
+.campaign-phase--finale {
+  border-color: rgba(245, 197, 66, 0.75);
+  background: rgba(80, 56, 10, 0.35);
 }
 
 .season-complete-banner {
