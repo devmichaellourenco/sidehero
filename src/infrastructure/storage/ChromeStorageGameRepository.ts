@@ -1,3 +1,4 @@
+import { CampaignProgressProps } from '../../domain/campaign/CampaignProgress';
 import { GameState } from '../../domain/entities/GameState';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import {
@@ -68,6 +69,8 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
         };
       }),
       combat: props.combat?.toProps() ?? null,
+      campaignProgress: props.campaignProgress,
+      phaseRun: props.phaseRun,
       stage: props.stage,
       gold: props.gold,
       chests: props.chests.map((c) => c.toProps()),
@@ -94,6 +97,14 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
     return GameState.restore({
       heroes,
       combat: migrateCombat(raw.combat, heroes, legacyEnemy),
+      campaignProgress:
+        raw.campaignProgress && typeof raw.campaignProgress === 'object'
+          ? (raw.campaignProgress as CampaignProgressProps)
+          : undefined,
+      phaseRun:
+        raw.phaseRun && typeof raw.phaseRun === 'object'
+          ? (raw.phaseRun as { phaseId: string; waveIndex: number })
+          : null,
       stage: typeof raw.stage === 'number' ? raw.stage : 1,
       gold: typeof raw.gold === 'number' ? raw.gold : 0,
       chests: Array.isArray(raw.chests) ? raw.chests.map((c) => migrateChest(c)) : [],

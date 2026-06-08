@@ -1,12 +1,14 @@
 import { Gold } from '../value-objects/Gold';
 import { UpgradeLevels } from '../upgrades/FeatureKey';
+import { CampaignProgress, CampaignProgressProps } from '../campaign/CampaignProgress';
+import { PhaseRun, PhaseRunProps } from '../campaign/PhaseRun';
+import { resolvePhase } from '../campaign/CampaignCatalog';
 import { Chest } from './Chest';
 import { CombatState } from './CombatState';
 import { Enemy } from './Enemy';
 import { Gear } from './Gear';
 import { Hero } from './Hero';
 import { TurnOrderService } from '../services/combat/TurnOrderService';
-import { spawnEncounterForStage } from '../services/combat/EncounterSpawner';
 
 export interface BattleLogEntry {
   message: string;
@@ -18,6 +20,9 @@ export interface GameStateProps {
   combat: CombatState | null;
   /** Legado — migrado para `combat` no load. */
   currentEnemy?: Enemy | null;
+  campaignProgress: CampaignProgressProps;
+  phaseRun: PhaseRunProps | null;
+  /** Tier de dificuldade máximo alcançado (gates de loja/upgrades). */
   stage: number;
   gold: number;
   chests: Chest[];
@@ -33,6 +38,8 @@ export interface GameStateProps {
 export class GameState {
   readonly heroes: Hero[];
   readonly combat: CombatState | null;
+  readonly campaignProgress: CampaignProgress;
+  readonly phaseRun: PhaseRun | null;
   readonly stage: number;
   readonly gold: Gold;
   readonly chests: Chest[];
@@ -47,6 +54,8 @@ export class GameState {
   private constructor(props: GameStateProps) {
     this.heroes = props.heroes;
     this.combat = props.combat;
+    this.campaignProgress = CampaignProgress.restore(props.campaignProgress);
+    this.phaseRun = props.phaseRun ? PhaseRun.restore(props.phaseRun) : null;
     this.stage = props.stage;
     this.gold = Gold.of(props.gold);
     this.chests = props.chests;
@@ -65,14 +74,14 @@ export class GameState {
       Hero.createStarter('hero-2', 'sorcerer', 'Lyra'),
       Hero.createStarter('hero-3', 'priest', 'Elara'),
     ];
-    const turnOrder = new TurnOrderService();
-    const enemies = spawnEncounterForStage(1);
-    const combat = CombatState.start(heroes, enemies, turnOrder);
+    const progress = CampaignProgress.initial();
 
     return new GameState({
       heroes,
-      combat,
-      stage: 1,
+      combat: null,
+      campaignProgress: progress.toProps(),
+      phaseRun: null,
+      stage: progress.highestTierReached,
       gold: 0,
       chests: [],
       inventory: [],
@@ -86,11 +95,23 @@ export class GameState {
   }
 
   static restore(props: GameStateProps): GameState {
-    return new GameState(props);
+    return new GameState({
+      ...props,
+      campaignProgress: props.campaignProgress ?? CampaignProgress.initial().toProps(),
+      phaseRun: props.phaseRun ?? null,
+    });
   }
 
   get currentEnemy(): Enemy | null {
     return this.combat?.enemies[0] ?? null;
+  }
+
+  currentDifficultyTier(): number {
+    const phaseId =
+      this.combat?.encounterMeta?.phaseId ??
+      this.phaseRun?.phaseId ??
+      this.campaignProgress.selectedPhaseId;
+    return resolvePhase(phaseId)?.difficultyTier ?? this.stage;
   }
 
   withCombat(combat: CombatState | null): GameState {
@@ -112,6 +133,14 @@ export class GameState {
 
   withGold(gold: Gold): GameState {
     return this.clone({ gold: gold.value() });
+  }
+
+  withCampaignProgress(progress: CampaignProgress): GameState {
+    return this.clone({ campaignProgress: progress.toProps() });
+  }
+
+  withPhaseRun(phaseRun: PhaseRun | null): GameState {
+    return this.clone({ phaseRun: phaseRun?.toProps() ?? null });
   }
 
   withStage(stage: number): GameState {
@@ -163,6 +192,8 @@ export class GameState {
     return {
       heroes: this.heroes,
       combat: this.combat,
+      campaignProgress: this.campaignProgress.toProps(),
+      phaseRun: this.phaseRun?.toProps() ?? null,
       stage: this.stage,
       gold: this.gold.value(),
       chests: this.chests,

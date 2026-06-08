@@ -32,6 +32,14 @@
         </div>
       </header>
 
+      <section id="season-complete-banner" class="season-complete-banner hidden" aria-live="polite">
+        <div class="season-complete-copy">
+          <strong>🏆 Temporada concluída!</strong>
+          <span>Você derrotou o boss final. Inicie um novo jogo para recomeçar do zero.</span>
+        </div>
+        <button id="new-game-btn" class="btn primary" type="button">Novo Jogo</button>
+      </section>
+
       <section class="battle-strip" aria-label="Campo de batalha">
         <div class="strip-bg"></div>
         <div id="heroes-container" class="heroes-row"></div>
@@ -51,6 +59,9 @@
       </section>
 
       <footer class="actions">
+        <button id="open-campaign-btn" class="btn secondary actions-full" type="button">
+          Campanha
+        </button>
         <button id="tick-btn" class="btn primary actions-full" type="button" title="Avançar batalha (Espaço)">
           <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />
           Avançar Batalha

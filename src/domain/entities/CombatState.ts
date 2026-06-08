@@ -6,6 +6,7 @@ import {
   SkillCooldownTracker,
 } from '../services/combat/SkillCooldownTracker';
 import { StatusEffectMap } from '../services/combat/CombatStatusEffect';
+import { EncounterMeta } from '../campaign/EncounterResolver';
 
 export interface CombatStateProps {
   enemies: EnemyProps[];
@@ -14,6 +15,7 @@ export interface CombatStateProps {
   round: number;
   skillCooldowns: SkillCooldownMap;
   statusEffects: StatusEffectMap;
+  encounterMeta: EncounterMeta | null;
 }
 
 export class CombatState {
@@ -23,6 +25,7 @@ export class CombatState {
   readonly round: number;
   readonly skillCooldowns: SkillCooldownMap;
   readonly statusEffects: StatusEffectMap;
+  readonly encounterMeta: EncounterMeta | null;
 
   private constructor(props: CombatStateProps) {
     this.enemies = props.enemies.map((enemy) => Enemy.restore(enemy));
@@ -31,6 +34,7 @@ export class CombatState {
     this.round = Math.max(1, props.round);
     this.skillCooldowns = props.skillCooldowns ?? {};
     this.statusEffects = props.statusEffects ?? {};
+    this.encounterMeta = props.encounterMeta ?? null;
   }
 
   static restore(props: CombatStateProps): CombatState {
@@ -38,10 +42,16 @@ export class CombatState {
       ...props,
       skillCooldowns: props.skillCooldowns ?? {},
       statusEffects: props.statusEffects ?? {},
+      encounterMeta: props.encounterMeta ?? null,
     });
   }
 
-  static start(heroes: Hero[], enemies: Enemy[], turnOrder: TurnOrderService): CombatState {
+  static start(
+    heroes: Hero[],
+    enemies: Enemy[],
+    turnOrder: TurnOrderService,
+    encounterMeta: EncounterMeta | null = null,
+  ): CombatState {
     return new CombatState({
       enemies: enemies.map((enemy) => enemy.toProps()),
       turnQueue: turnOrder.buildRoundOrder(heroes, enemies),
@@ -49,6 +59,7 @@ export class CombatState {
       round: 1,
       skillCooldowns: SkillCooldownTracker.createInitial(heroes, enemies),
       statusEffects: {},
+      encounterMeta,
     });
   }
 
@@ -100,6 +111,7 @@ export class CombatState {
       round: this.round,
       skillCooldowns: structuredClone(this.skillCooldowns),
       statusEffects: structuredClone(this.statusEffects),
+      encounterMeta: this.encounterMeta ? { ...this.encounterMeta } : null,
     };
   }
 

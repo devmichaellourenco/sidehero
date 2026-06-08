@@ -1,3 +1,4 @@
+import { PhaseRunDto } from './CampaignDto';
 import { AttributesDto } from './AttributesDto';
 import { ChestProgressDto } from '../mappers/ChestProgressMapper';
 import { FeatureFlagsDto } from './FeatureFlagsDto';
@@ -125,13 +126,27 @@ export interface ActiveTurnDto {
   id: string;
 }
 
+export interface CampaignProgressDto {
+  selectedPhaseId: string;
+  unlockedPhaseIds: string[];
+  clearedPhaseIds: string[];
+  highestTierReached: number;
+  seasonCompleted: boolean;
+}
+
 export interface GameStateDto {
   heroes: HeroDto[];
   enemies: EnemyDto[];
   enemy: EnemyDto | null;
   activeTurn: ActiveTurnDto | null;
   combatRound: number;
+  campaignName: string;
+  mapName: string;
+  phaseLabel: string;
+  phaseRun: PhaseRunDto | null;
+  campaignProgress: CampaignProgressDto;
   stage: number;
+  difficultyTier: number;
   gold: number;
   chests: ChestDto[];
   inventory: GearDto[];
@@ -145,4 +160,5 @@ export interface GameStateDto {
   featureFlags: FeatureFlagsDto;
   chestProgress: ChestProgressDto;
   gearUpgradeHints: Record<string, GearUpgradeHintDto>;
+  seasonCompleted: boolean;
 }

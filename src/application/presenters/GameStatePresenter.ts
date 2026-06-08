@@ -9,6 +9,9 @@ import { mapHeroToDto as mapHeroBaseToDto } from '../mappers/HeroDtoMapper';
 import { Hero } from '../../domain/entities/Hero';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
 import { buildInventoryUpgradeHints } from '../mappers/GearUpgradePreviewMapper';
+import { getCampaignInfo, resolvePhase } from '../../domain/campaign/CampaignCatalog';
+import { parsePhaseId } from '../../domain/campaign/CampaignIds';
+import { mapDefinitionByIndex } from '../../domain/campaign/CampaignMaps';
 import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
 import { listEnemyCombatSkillsByType } from '../../domain/progression/combat/EnemyCombatSkillCatalog';
@@ -32,6 +35,8 @@ export class GameStatePresenter {
       mapEnemyToDto(enemy, state.heroes, combatEnemies, skillCooldowns, statusEffects),
     );
     const activeActor = combat?.currentActor() ?? null;
+    const campaignLabels = mapCampaignLabels(state);
+    const phaseRun = mapPhaseRunDto(state);
 
     return {
       heroes: state.heroes.map((hero) =>
@@ -47,7 +52,20 @@ export class GameStatePresenter {
       enemy: enemies[0] ?? null,
       activeTurn: activeActor ? { side: activeActor.side, id: activeActor.id } : null,
       combatRound: state.combat?.round ?? 1,
+      campaignName: campaignLabels.campaignName,
+      mapName: campaignLabels.mapName,
+      phaseLabel: campaignLabels.phaseLabel,
+      phaseRun,
+      campaignProgress: {
+        selectedPhaseId: state.campaignProgress.selectedPhaseId,
+        unlockedPhaseIds: [...state.campaignProgress.unlockedPhaseIds],
+        clearedPhaseIds: [...state.campaignProgress.clearedPhaseIds],
+        highestTierReached: state.campaignProgress.highestTierReached,
+        seasonCompleted: state.campaignProgress.seasonCompleted,
+      },
+      seasonCompleted: state.campaignProgress.seasonCompleted,
       stage: state.stage,
+      difficultyTier: state.currentDifficultyTier(),
       gold: state.gold.value(),
       chests: state.chests.map(mapChestToDto),
       inventory: state.inventory.map(mapGearToDto),
@@ -103,6 +121,45 @@ function mapEnemyToDto(
       .map((entry) => ({ name: entry.name, description: entry.description })),
     combatIntent: mapEnemyCombatIntent(enemy, party, enemies, skillCooldowns),
     statusEffects: mapCombatantStatusEffects('enemy', enemy.id, combatStatusEffects),
+  };
+}
+
+function mapCampaignLabels(state: GameState): {
+  campaignName: string;
+  mapName: string;
+  phaseLabel: string;
+} {
+  const campaign = getCampaignInfo();
+  const phaseId =
+    state.combat?.encounterMeta?.phaseId ??
+    state.phaseRun?.phaseId ??
+    state.campaignProgress.selectedPhaseId;
+  const phase = resolvePhase(phaseId);
+  const { mapIndex } = parsePhaseId(phaseId);
+  const map = mapDefinitionByIndex(mapIndex) ?? campaign.maps[0];
+
+  return {
+    campaignName: campaign.name,
+    mapName: map?.name ?? 'Estrenda',
+    phaseLabel: phase?.displayName ?? phaseId,
+  };
+}
+
+function mapPhaseRunDto(state: GameState): GameStateDto['phaseRun'] {
+  const phaseId = state.combat?.encounterMeta?.phaseId ?? state.phaseRun?.phaseId;
+  if (!phaseId) return null;
+
+  const phase = resolvePhase(phaseId);
+  const meta = state.combat?.encounterMeta;
+  const waveIndex = meta?.waveIndex ?? state.phaseRun?.waveIndex ?? 0;
+  const waveCount = meta?.waveCount ?? phase?.waves.length ?? 1;
+
+  return {
+    phaseId,
+    displayName: phase?.displayName ?? phaseId,
+    waveIndex,
+    waveCount,
+    isBossWave: meta?.isBossWave ?? waveIndex === waveCount - 1,
   };
 }
 

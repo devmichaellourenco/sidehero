@@ -1,3 +1,4 @@
+import { CampaignOverviewDto } from '../dto/CampaignDto';
 import { CombatFloatingEventDto } from '../dto/CombatFloatingEventDto';
 import { GameStateDto, GearDto } from '../dto/GameStateDto';
 import { ShopOfferDto } from '../dto/ShopOfferDto';
@@ -11,6 +12,9 @@ export type SpendTargetMessage =
 
 export type GameMessage =
   | { type: 'GET_STATE' }
+  | { type: 'GET_CAMPAIGN_OVERVIEW' }
+  | { type: 'SELECT_PHASE'; phaseId: string }
+  | { type: 'NEW_GAME' }
   | { type: 'TICK'; ticks?: number }
   | { type: 'OPEN_CHEST'; chestId: string }
   | { type: 'OPEN_ALL_CHESTS' }
@@ -51,5 +55,6 @@ export type GameResponse =
       ascensionSkillNodes?: SkillNodeDto[];
       purchasableUpgradeCount?: number;
       purchasedUpgradeId?: string;
+      campaign?: CampaignOverviewDto;
     }
   | { ok: false; error: string };

@@ -1,16 +1,16 @@
 import { GameState } from '../../entities/GameState';
 import { CombatState } from '../../entities/CombatState';
 import { Hero } from '../../entities/Hero';
+import { PhaseRun } from '../../campaign/PhaseRun';
+import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { listEnemyCombatSkills } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCatalog';
 import { CombatActionExecutor } from './CombatActionExecutor';
 import { CombatFloatingEvent } from './CombatFloatingEvent';
 import { CombatSkillSelector } from './CombatSkillSelector';
-import { spawnEncounterForStage } from './EncounterSpawner';
-import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
+import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { CombatantRef, TurnOrderService } from './TurnOrderService';
-import { VictoryRewardPhase } from './VictoryRewardPhase';
 
 export interface CombatTurnPhaseResult {
   state: GameState;
@@ -23,32 +23,37 @@ export class CombatTurnPhase {
     private readonly skillSelector = new CombatSkillSelector(),
     private readonly actionExecutor = new CombatActionExecutor(),
     private readonly turnOrder = new TurnOrderService(),
-    private readonly victoryReward = new VictoryRewardPhase(),
+    private readonly phaseHandlers = new PhaseCombatHandlers(),
   ) {}
 
   execute(state: GameState): CombatTurnPhaseResult {
-    let combat = state.combat;
+    let workingState = state;
+
+    if (!workingState.phaseRun) {
+      const phaseRun = PhaseRun.start(workingState.campaignProgress.selectedPhaseId);
+      const started = this.phaseHandlers.startPhaseRun(workingState, phaseRun);
+      workingState = started.state;
+      if (started.events.length > 0) {
+        return this.finish(workingState, started.events, []);
+      }
+    }
+
+    let combat = workingState.combat;
     if (!combat || combat.livingEnemies().length === 0) {
-      const enemies = spawnEncounterForStage(state.stage);
-      combat = CombatState.start(state.heroes, enemies, this.turnOrder);
-      return {
-        state: state.withCombat(combat).addLog('Novo inimigo apareceu no painel!'),
-        events: ['Novo inimigo apareceu no painel!'],
-        floatingEvents: [],
-      };
+      if (!workingState.phaseRun) {
+        return { state: workingState.touchTick(), events: [], floatingEvents: [] };
+      }
+      const started = this.phaseHandlers.startPhaseRun(workingState, workingState.phaseRun);
+      return this.finish(started.state, started.events, []);
     }
 
-    combat = this.ensureTurnQueue(state.heroes, combat);
-    const active = this.getNextLivingActor(state.heroes, combat);
+    combat = this.ensureTurnQueue(workingState.heroes, combat);
+    const active = this.getNextLivingActor(workingState.heroes, combat);
     if (!active) {
-      return {
-        state: state.withCombat(combat).touchTick(),
-        events: [],
-        floatingEvents: [],
-      };
+      return { state: workingState.withCombat(combat).touchTick(), events: [], floatingEvents: [] };
     }
 
-    const turnResult = this.executeActorTurn(state, active.combat, active.actor);
+    const turnResult = this.executeActorTurn(workingState, active.combat, active.actor);
     let nextState = turnResult.state;
     const events = turnResult.events;
     const floatingEvents = turnResult.floatingEvents;
@@ -56,42 +61,51 @@ export class CombatTurnPhase {
 
     const livingHeroes = nextState.heroes.filter((hero) => hero.isAlive());
     const livingEnemies = nextCombat.livingEnemies();
+    const phaseRun = nextState.phaseRun;
+    const encounterMeta = nextCombat.encounterMeta;
 
-    if (livingHeroes.length === 0) {
-      const recovered = nextState.heroes.map((hero) => hero.healFull());
-      const enemies = spawnEncounterForStage(nextState.stage);
-      const freshCombat = CombatState.start(recovered, enemies, this.turnOrder);
-      const wipeMessage = [...events, 'Party derrotada! Recuperando no painel...'].join(' · ');
-      return {
-        state: nextState
-          .withHeroes(recovered)
-          .withCombat(freshCombat)
-          .addLog(wipeMessage),
-        events: [...events, 'Party derrotada! Recuperando no painel...'],
-        floatingEvents,
-      };
+    if (livingHeroes.length === 0 && phaseRun) {
+      const wiped = this.phaseHandlers.onPhaseWipe(nextState, phaseRun);
+      return this.finish(wiped.state, [...events, ...wiped.events], floatingEvents);
     }
 
-    if (livingEnemies.length === 0) {
-      const defeated = nextCombat.enemies;
-      const victory = this.victoryReward.execute(nextState, defeated, nextState.heroes);
-      return {
-        state: victory.state,
-        events: [...events, ...victory.events],
-        floatingEvents,
-      };
+    if (livingEnemies.length === 0 && phaseRun && encounterMeta) {
+      if (encounterMeta.isBossWave) {
+        const victory = this.phaseHandlers.onBossDefeated(
+          nextState,
+          nextCombat.enemies,
+          nextState.heroes,
+          encounterMeta,
+        );
+        return this.finish(victory.state, [...events, ...victory.events], floatingEvents);
+      }
+
+      const waveCleared = this.phaseHandlers.onWaveCleared(
+        nextState,
+        nextCombat.enemies,
+        nextState.heroes,
+        encounterMeta,
+        phaseRun,
+      );
+      return this.finish(waveCleared.state, [...events, ...waveCleared.events], floatingEvents);
     }
 
     nextCombat = this.ensureTurnQueue(nextState.heroes, nextCombat);
     const logMessage = events.join(' · ');
 
-    return {
-      state: (logMessage ? nextState.addLog(logMessage) : nextState)
-        .withCombat(nextCombat)
-        .touchTick(),
+    return this.finish(
+      (logMessage ? nextState.addLog(logMessage) : nextState).withCombat(nextCombat).touchTick(),
       events,
       floatingEvents,
-    };
+    );
+  }
+
+  private finish(
+    state: GameState,
+    events: string[],
+    floatingEvents: CombatFloatingEvent[],
+  ): CombatTurnPhaseResult {
+    return { state, events, floatingEvents };
   }
 
   private ensureTurnQueue(heroes: Hero[], combat: CombatState): CombatState {
@@ -152,9 +166,7 @@ export class CombatTurnPhase {
     const actorKey = combatantKey(actor.side, actor.id);
     let usedSkillId: string | null = null;
     let skillList = [] as ReturnType<typeof listHeroCombatSkills>;
-    let statusApplications: ReturnType<
-      typeof this.actionExecutor.execute
-    >['statusApplications'] = [];
+    let statusApplications: ReturnType<typeof this.actionExecutor.execute>['statusApplications'] = [];
 
     if (actor.side === 'hero') {
       const hero = heroes.find((entry) => entry.id === actor.id);

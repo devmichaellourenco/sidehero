@@ -30,7 +30,7 @@ export class GetShopOffersUseCase {
   async execute(): Promise<GetShopOffersResult> {
     const state = await this.repository.load();
     const offers = this.shopService
-      .generateOffers(state.stage, state.shopRefreshSeed)
+      .generateOffers(state.currentDifficultyTier(), state.shopRefreshSeed)
       .map((offer) => ({
         id: offer.id,
         price: offer.price,
@@ -38,7 +38,7 @@ export class GetShopOffersUseCase {
         canAfford: state.gold.canAfford(offer.price),
       }));
 
-    const refreshCost = calculateShopRefreshCost(state.stage, state.upgradeLevels);
+    const refreshCost = calculateShopRefreshCost(state.currentDifficultyTier(), state.upgradeLevels);
     const limit = getShopRefreshLimit(state.upgradeLevels);
     const shopRefreshUnlocked = FeatureAccessPolicy.resolve(state.upgradeLevels).shopRefresh;
 

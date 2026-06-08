@@ -2331,3 +2331,101 @@ body.modal-open {
   font-size: 12px;
   color: #d8e4ff;
 }
+
+.campaign-modal-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.campaign-map {
+  margin-bottom: 14px;
+}
+
+.campaign-map-title {
+  font-size: 13px;
+  margin: 0 0 8px;
+  color: #d8e4ff;
+}
+
+.campaign-phase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.campaign-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.campaign-phase:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.campaign-phase--selected {
+  border-color: rgba(245, 197, 66, 0.7);
+  box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.35);
+}
+
+.campaign-phase-name {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.campaign-phase-meta {
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.enemy-battle-card--boss .enemy-name {
+  color: #ffb86c;
+}
+
+.enemy-battle-card--boss .enemy-image {
+  filter: drop-shadow(0 0 6px rgba(255, 120, 60, 0.75));
+}
+
+.campaign-phase--milestone {
+  border-color: rgba(255, 184, 108, 0.45);
+}
+
+.season-complete-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 197, 66, 0.55);
+  background: linear-gradient(135deg, rgba(80, 52, 10, 0.65), rgba(30, 24, 8, 0.85));
+}
+
+.season-complete-banner.hidden {
+  display: none;
+}
+
+.season-complete-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: #f5e6b8;
+}
+
+.season-complete-copy strong {
+  font-size: 13px;
+  color: #ffd86a;
+}

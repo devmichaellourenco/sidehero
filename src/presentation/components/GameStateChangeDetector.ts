@@ -25,7 +25,20 @@ export class GameStateChangeDetector {
     }
 
     if (next.stage > previous.stage) {
-      this.toasts.show(`Vitória! Stage ${next.stage}`, 'victory');
+      this.toasts.show(`Boss derrotado! Tier ${next.stage}`, 'victory');
+    }
+
+    const clearedNow = next.campaignProgress.clearedPhaseIds.filter(
+      (phaseId) => !previous.campaignProgress.clearedPhaseIds.includes(phaseId),
+    );
+    if (!previous.seasonCompleted && next.seasonCompleted) {
+      this.toasts.show('🏆 Temporada concluída!', 'victory', {
+        hint: 'Inicie um novo jogo quando quiser',
+        durationMs: 12000,
+      });
+    } else if (clearedNow.length > 0) {
+      const phase = clearedNow[clearedNow.length - 1];
+      this.toasts.show(`Fase ${phase} concluída!`, 'victory');
     }
 
     for (const hero of next.heroes) {

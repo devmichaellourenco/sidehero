@@ -100,6 +100,18 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.getState.execute();
       return { ok: true, state };
     }
+    case 'GET_CAMPAIGN_OVERVIEW': {
+      const result = await app.getCampaignOverview.execute();
+      return { ok: true, state: result.state, campaign: result.campaign };
+    }
+    case 'SELECT_PHASE': {
+      const state = await app.selectPhase.execute(message.phaseId);
+      return { ok: true, state };
+    }
+    case 'NEW_GAME': {
+      const state = await app.newGame.execute();
+      return { ok: true, state };
+    }
     case 'TICK': {
       const result = await app.tick.execute(message.ticks ?? 1);
       await syncBackgroundTickAlarm(result.state.upgradeLevels);

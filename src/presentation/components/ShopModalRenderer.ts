@@ -68,7 +68,7 @@ export class ShopModalRenderer {
 
     container.innerHTML = `
       <p class="shop-intro">
-        Ofertas do Stage ${state.stage}. Comprar itens é grátis; renovar estoque exige melhoria.
+        Ofertas do tier ${state.difficultyTier}. Comprar itens é grátis; renovar estoque exige melhoria.
       </p>
       <div class="shop-toolbar">
         <p class="shop-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>

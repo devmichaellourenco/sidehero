@@ -1,98 +1,50 @@
 import { describe, expect, it } from 'vitest';
+import { buildPhaseId } from '../../campaign/CampaignIds';
+import { PhaseRun } from '../../campaign/PhaseRun';
 import { GameState } from '../../entities/GameState';
 import { Hero } from '../../entities/Hero';
-import { Enemy } from '../../entities/Enemy';
-import { CombatState } from '../../entities/CombatState';
-import { TurnOrderService } from './TurnOrderService';
 import { CombatTurnPhase } from './CombatTurnPhase';
+
+function stateWithPhase(phaseId: string, heroes: Hero[]): GameState {
+  return GameState.restore({
+    ...GameState.initial().toProps(),
+    heroes,
+    campaignProgress: {
+      ...GameState.initial().campaignProgress.toProps(),
+      selectedPhaseId: phaseId,
+    },
+    phaseRun: PhaseRun.start(phaseId).toProps(),
+    combat: null,
+  });
+}
 
 describe('CombatTurnPhase', () => {
   const phase = new CombatTurnPhase();
-  const turnOrder = new TurnOrderService();
 
-  it('executa um turno de herói com dano em alvo único', () => {
-    let sorcerer = Hero.createStarter('s1', 'sorcerer', 'Lyra');
-    sorcerer = Hero.restore({
-      ...sorcerer.toProps(),
-      skillRanks: { arcane_bolt: 1 },
-      equippedSkillIds: ['basic_attack', 'arcane_bolt'],
-    });
-
-    const enemy = Enemy.forStage(1);
-    const combat = CombatState.start([sorcerer], [enemy], turnOrder);
-    const state = GameState.restore({
-      ...GameState.initial().toProps(),
-      heroes: [sorcerer],
-      combat,
-      stage: 1,
-    });
+  it('inicia fase 1-1 no primeiro tick', () => {
+    const sorcerer = Hero.createStarter('s1', 'sorcerer', 'Lyra');
+    const state = stateWithPhase(buildPhaseId(1, 1), [sorcerer]);
 
     const result = phase.execute(state);
-    const nextEnemy = result.state.combat?.enemies[0];
 
-    expect(nextEnemy?.stats.currentHealth).toBeLessThan(enemy.stats.currentHealth);
-    expect(result.floatingEvents).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ target: 'enemy', kind: 'damage', amount: expect.any(Number) }),
-      ]),
-    );
+    expect(result.state.combat?.enemies.length).toBeGreaterThan(0);
+    expect(result.state.combat?.encounterMeta?.phaseId).toBe(buildPhaseId(1, 1));
+    expect(result.state.phaseRun?.waveIndex).toBe(0);
   });
 
-  it('inimigo usa skill single-target em um herói', () => {
-    const knight = Hero.createStarter('k1', 'knight', 'Arthos');
-    const enemy = Enemy.forStage(1);
-    const combat = CombatState.restore({
-      enemies: [enemy.toProps()],
-      turnQueue: [{ side: 'enemy', id: enemy.id }],
-      turnIndex: 0,
-      round: 1,
-      skillCooldowns: {},
-      statusEffects: {},
-    });
-    const state = GameState.restore({
-      ...GameState.initial().toProps(),
-      heroes: [knight],
-      combat,
-      stage: 1,
-    });
+  it('reinicia fase com cura completa ao perder', () => {
+    let knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    knight = Hero.restore({ ...knight.toProps(), currentHealth: 1 });
 
-    const result = phase.execute(state);
-    const damagedKnight = result.state.heroes[0];
+    let state = stateWithPhase(buildPhaseId(1, 1), [knight]);
 
-    expect(damagedKnight.currentHealth).toBeLessThan(knight.currentHealth);
-    expect(result.floatingEvents).toEqual([
-      expect.objectContaining({ target: 'hero', targetId: 'k1', kind: 'damage', amount: expect.any(Number) }),
-    ]);
-  });
+    for (let tick = 0; tick < 40; tick++) {
+      const result = phase.execute(state);
+      state = result.state;
+      if (result.events.some((event) => event.includes('Reiniciando'))) break;
+    }
 
-  it('sacerdotisa aplica Bênção com efeito persistido no combate', () => {
-    let priest = Hero.createStarter('p1', 'priest', 'Elara');
-    priest = Hero.restore({
-      ...priest.toProps(),
-      skillRanks: { blessing: 1 },
-      equippedSkillIds: ['basic_attack', 'blessing'],
-    });
-
-    const enemy = Enemy.forStage(2);
-    const combat = CombatState.restore({
-      ...CombatState.start([priest], [enemy], turnOrder).toProps(),
-      skillCooldowns: {},
-    });
-    const state = GameState.restore({
-      ...GameState.initial().toProps(),
-      heroes: [priest],
-      combat,
-      stage: 2,
-    });
-
-    const result = phase.execute(state);
-    const effects = result.state.combat?.statusEffects['hero:p1'] ?? [];
-
-    expect(result.events.join(' ')).toContain('Bênção');
-    expect(effects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ kind: 'buff_attack', skillId: 'blessing' }),
-      ]),
-    );
+    expect(state.heroes[0].currentHealth).toBe(state.heroes[0].maxHealth);
+    expect(state.phaseRun?.waveIndex).toBe(0);
   });
 });

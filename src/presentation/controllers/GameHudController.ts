@@ -17,7 +17,11 @@ export class GameHudController {
   ) {}
 
   render(state: GameStateDto, options: { openingChests: boolean; autoBattleEnabled: boolean }): void {
-    this.stageLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.stage), 'Stage', 'stat-icon')} Stage ${state.stage}`;
+    const waveLabel = state.phaseRun
+      ? ` · Wave ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
+      : '';
+    this.stageLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.stage), 'Fase', 'stat-icon')} ${state.phaseLabel}${waveLabel}`;
+    this.stageLabel.title = `${state.campaignName} · ${state.mapName} · Tier ${state.stage}`;
     this.goldLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'stat-icon')} ${state.gold}`;
     this.chestLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.chest), 'Baús', 'stat-icon')} ${state.pendingChestCount}`;
 

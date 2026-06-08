@@ -7,6 +7,7 @@ import { GearMutationQueue } from '../controllers/GearMutationQueue';
 import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
 import { LootFlowController } from '../controllers/LootFlowController';
+import { CampaignFlow } from '../flows/CampaignFlow';
 import { ChestLootFlow } from '../flows/ChestLootFlow';
 import { GearEquipFlow } from '../flows/GearEquipFlow';
 import { HeroDetailFlow } from '../flows/HeroDetailFlow';
@@ -61,8 +62,11 @@ export class GameViewController {
   private readonly openInventoryBtn: HTMLButtonElement;
   private readonly optimizeLoadoutBtn: HTMLButtonElement;
   private readonly openSettingsBtn: HTMLButtonElement;
+  private readonly openCampaignBtn: HTMLButtonElement;
   private readonly openShopBtn: HTMLButtonElement;
   private readonly openUpgradesBtn: HTMLButtonElement;
+  private readonly seasonCompleteBanner: HTMLElement;
+  private readonly newGameBtn: HTMLButtonElement;
 
   private readonly battleStrip: BattleStripRenderer;
   private readonly battleFloats: BattleFloatingTextController;
@@ -85,6 +89,7 @@ export class GameViewController {
   private readonly shopFlow: ShopFlow;
   private readonly gearEquipFlow: GearEquipFlow;
   private readonly chestLootFlow: ChestLootFlow;
+  private readonly campaignFlow: CampaignFlow;
   private readonly modalStackController: ModalStackController;
 
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
@@ -101,8 +106,11 @@ export class GameViewController {
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
     this.optimizeLoadoutBtn = root.querySelector('#optimize-loadout-btn') as HTMLButtonElement;
     this.openSettingsBtn = root.querySelector('#open-settings-btn') as HTMLButtonElement;
+    this.openCampaignBtn = root.querySelector('#open-campaign-btn') as HTMLButtonElement;
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
+    this.seasonCompleteBanner = root.querySelector('#season-complete-banner') as HTMLElement;
+    this.newGameBtn = root.querySelector('#new-game-btn') as HTMLButtonElement;
 
     const battleStripEl = root.querySelector('.battle-strip') as HTMLElement;
 
@@ -172,6 +180,8 @@ export class GameViewController {
       (error) => this.handleFailedResponse(error),
     );
 
+    this.campaignFlow = new CampaignFlow(this.client, this.modal);
+
     this.chestLootFlow = new ChestLootFlow(
       this.client,
       this.lootFlow,
@@ -230,11 +240,17 @@ export class GameViewController {
       void this.gearEquipFlow.optimizeLoadout();
     });
     this.openSettingsBtn.addEventListener('click', () => this.openSettingsModal());
+    this.openCampaignBtn.addEventListener('click', () => {
+      void this.openCampaignModal();
+    });
     this.openShopBtn.addEventListener('click', () => {
       void this.openShopModal();
     });
     this.openUpgradesBtn.addEventListener('click', () => {
       void this.openUpgradesModal();
+    });
+    this.newGameBtn.addEventListener('click', () => {
+      void this.startNewGame();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -338,6 +354,32 @@ export class GameViewController {
     if (this.contextInvalidated) return;
     this.modalStack.length = 0;
     this.pushModal({ type: 'settings' });
+  }
+
+  private async startNewGame(): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    const confirmed = window.confirm(
+      'Iniciar um novo jogo? Todo o progresso atual será apagado.',
+    );
+    if (!confirmed) return;
+
+    const response = await this.client.send({ type: 'NEW_GAME' });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha ao iniciar novo jogo', 'idle');
+      return;
+    }
+
+    this.modal.close('action');
+    this.render(response.state);
+    this.toasts.show('Novo jogo iniciado!', 'victory');
+  }
+
+  private async openCampaignModal(): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    const modalBody = this.modal.open('Campanha');
+    await this.campaignFlow.open((state) => this.render(state), modalBody);
   }
 
   private async openShopModal(): Promise<void> {
@@ -750,6 +792,8 @@ export class GameViewController {
     }
 
     this.state = state;
+
+    this.seasonCompleteBanner.classList.toggle('hidden', !state.seasonCompleted);
 
     this.hud.render(state, {
       openingChests: this.chestLootFlow.openingChests,

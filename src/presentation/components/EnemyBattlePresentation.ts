@@ -43,14 +43,15 @@ export function renderEnemyBattleCard(
   enemy: EnemyDto,
   stage: number,
   spriteHtml: string,
-  options: { isActiveTurn?: boolean } = {},
+  options: { isActiveTurn?: boolean; isBossWave?: boolean } = {},
 ): string {
   const healthPercent = Math.max(0, (enemy.health / enemy.maxHealth) * 100);
   const healthLabel = formatEnemyHealthLabel(enemy);
   const activeClass = options.isActiveTurn ? ' enemy-battle-card--active-turn' : '';
+  const bossClass = options.isBossWave ? ' enemy-battle-card--boss' : '';
 
   return `
-    <div class="enemy-battle-card${activeClass}" data-enemy-id="${escapeHtml(enemy.id)}">
+    <div class="enemy-battle-card${activeClass}${bossClass}" data-enemy-id="${escapeHtml(enemy.id)}">
       <div
         class="enemy-battle-hitbox"
         data-float-anchor="enemy"

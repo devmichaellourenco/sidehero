@@ -38,7 +38,7 @@ export class RefreshShopUseCase {
       throw new Error('Limite de renovações deste stage atingido');
     }
 
-    const refreshCost = calculateShopRefreshCost(state.stage, state.upgradeLevels);
+    const refreshCost = calculateShopRefreshCost(state.currentDifficultyTier(), state.upgradeLevels);
 
     if (!state.gold.canAfford(refreshCost)) {
       throw new Error('Ouro insuficiente para renovar a loja');
@@ -53,7 +53,7 @@ export class RefreshShopUseCase {
     await this.repository.save(nextState);
 
     const offers = this.shopService
-      .generateOffers(nextState.stage, nextState.shopRefreshSeed)
+      .generateOffers(nextState.currentDifficultyTier(), nextState.shopRefreshSeed)
       .map((offer) => ({
         id: offer.id,
         price: offer.price,
@@ -61,7 +61,10 @@ export class RefreshShopUseCase {
         canAfford: nextState.gold.canAfford(offer.price),
       }));
 
-    const nextRefreshCost = calculateShopRefreshCost(nextState.stage, nextState.upgradeLevels);
+    const nextRefreshCost = calculateShopRefreshCost(
+      nextState.currentDifficultyTier(),
+      nextState.upgradeLevels,
+    );
 
     return {
       state: this.presenter.present(nextState),

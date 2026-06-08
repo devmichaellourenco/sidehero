@@ -212,6 +212,10 @@ export function migrateCombat(
           combat.statusEffects && typeof combat.statusEffects === 'object'
             ? (combat.statusEffects as CombatState['statusEffects'])
             : {},
+        encounterMeta:
+          combat.encounterMeta && typeof combat.encounterMeta === 'object'
+            ? (combat.encounterMeta as CombatState['encounterMeta'])
+            : null,
       });
     }
   }

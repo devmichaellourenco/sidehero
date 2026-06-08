@@ -5,7 +5,10 @@ import { BuyShopOfferUseCase } from './use-cases/BuyShopOfferUseCase';
 import { DeactivateSkillUseCase } from './use-cases/DeactivateSkillUseCase';
 import { EquipBestLoadoutUseCase } from './use-cases/EquipBestLoadoutUseCase';
 import { EquipGearUseCase } from './use-cases/EquipGearUseCase';
+import { GetCampaignOverviewUseCase } from './use-cases/GetCampaignOverviewUseCase';
+import { NewGameUseCase } from './use-cases/NewGameUseCase';
 import { GetGameStateUseCase } from './use-cases/GetGameStateUseCase';
+import { SelectPhaseUseCase } from './use-cases/SelectPhaseUseCase';
 import { GetHeroAscensionTreeUseCase } from './use-cases/GetHeroAscensionTreeUseCase';
 import { GetHeroSkillTreeUseCase } from './use-cases/GetHeroSkillTreeUseCase';
 import { GetShopOffersUseCase } from './use-cases/GetShopOffersUseCase';
@@ -22,6 +25,9 @@ import { GameApplicationDependencies } from './GameApplicationDependencies';
 
 export class GameApplication {
   readonly getState: GetGameStateUseCase;
+  readonly getCampaignOverview: GetCampaignOverviewUseCase;
+  readonly selectPhase: SelectPhaseUseCase;
+  readonly newGame: NewGameUseCase;
   readonly tick: TickGameUseCase;
   readonly openChest: OpenChestUseCase;
   readonly openAllChests: OpenAllChestsUseCase;
@@ -54,6 +60,9 @@ export class GameApplication {
     } = deps;
 
     this.getState = new GetGameStateUseCase(repository, presenter);
+    this.getCampaignOverview = new GetCampaignOverviewUseCase(repository, presenter);
+    this.selectPhase = new SelectPhaseUseCase(repository, presenter);
+    this.newGame = new NewGameUseCase(repository, presenter);
     this.tick = new TickGameUseCase(repository, combatService, presenter);
     this.openChest = new OpenChestUseCase(repository, chestService, presenter);
     this.openAllChests = new OpenAllChestsUseCase(repository, chestService, presenter);
