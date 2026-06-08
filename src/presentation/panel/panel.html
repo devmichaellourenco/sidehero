@@ -25,12 +25,20 @@
           </button>
         </div>
         <div class="stats-bar">
-          <span id="stage-label" class="stat-pill">Stage 1</span>
           <span id="gold-label" class="stat-pill">0</span>
           <span id="chest-label" class="stat-pill">0</span>
           <span id="chest-progress-label" class="stat-pill">0/3</span>
         </div>
       </header>
+
+      <section id="campaign-context-bar" class="campaign-context-bar" aria-label="Campanha">
+        <span
+          id="campaign-context-label"
+          class="stat-pill campaign-context-pill"
+          data-campaign-tooltip
+          tabindex="0"
+        ></span>
+      </section>
 
       <section id="season-complete-banner" class="season-complete-banner hidden" aria-live="polite">
         <div class="season-complete-copy">

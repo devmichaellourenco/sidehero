@@ -74,10 +74,11 @@ export class CombatSkillIntentResolver {
     skills: CombatSkillDefinition[],
     cooldowns: SkillCooldownTracker,
     nextSkillId: string,
-  ): Array<{ skillName: string; turnsRemaining: number }> {
+  ): Array<{ skillId: string; skillName: string; turnsRemaining: number }> {
     return skills
       .filter((skill) => skill.skillId !== nextSkillId)
       .map((skill) => ({
+        skillId: skill.skillId,
         skillName: resolveCombatSkillName(skill),
         turnsRemaining: cooldowns.getRemaining(key, skill.skillId),
       }))

@@ -17,6 +17,7 @@ import { ShopFlow } from '../flows/ShopFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
+import { bindCampaignTooltip } from './CampaignTooltipBinder';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
 import { GameStateChangeDetector } from './GameStateChangeDetector';
@@ -51,7 +52,7 @@ export class GameViewController {
   private contextInvalidated = false;
   private idleSummaryShown = false;
 
-  private readonly stageLabel: HTMLElement;
+  private readonly campaignContextLabel: HTMLElement;
   private readonly goldLabel: HTMLElement;
   private readonly chestLabel: HTMLElement;
   private readonly chestProgressLabel: HTMLElement;
@@ -95,7 +96,7 @@ export class GameViewController {
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
     this.client = client;
 
-    this.stageLabel = root.querySelector('#stage-label')!;
+    this.campaignContextLabel = root.querySelector('#campaign-context-label')!;
     this.goldLabel = root.querySelector('#gold-label')!;
     this.chestLabel = root.querySelector('#chest-label')!;
     this.chestProgressLabel = root.querySelector('#chest-progress-label')!;
@@ -142,8 +143,10 @@ export class GameViewController {
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.stateChanges = new GameStateChangeDetector(this.toasts);
+    bindCampaignTooltip(this.campaignContextLabel);
+
     this.hud = new GameHudController(
-      this.stageLabel,
+      this.campaignContextLabel,
       this.goldLabel,
       this.chestLabel,
       this.chestProgressLabel,

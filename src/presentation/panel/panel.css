@@ -146,9 +146,64 @@ h2 {
   vertical-align: middle;
 }
 
+.campaign-context-bar {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.campaign-context-pill {
+  cursor: default;
+  max-width: 100%;
+}
+
+.campaign-context-compact {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  font-size: 12px;
+}
+
+.campaign-tooltip-content {
+  display: none;
+}
+
+.campaign-tooltip-portal {
+  position: fixed;
+  z-index: 10050;
+  min-width: 160px;
+  max-width: 240px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 20, 38, 0.96);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.campaign-tooltip-portal.hidden {
+  display: none;
+}
+
+.campaign-tooltip-title {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  color: #d8e4ff;
+  margin-bottom: 2px;
+}
+
+.campaign-tooltip-line {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .battle-strip {
   position: relative;
-  height: 96px;
+  height: 122px;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.08);
@@ -364,42 +419,77 @@ h2 {
 }
 
 .combat-skill-intent {
-  margin-top: 2px;
-  padding: 1px 4px;
-  border-radius: 3px;
-  font-size: 8px;
-  line-height: 1.2;
-  max-width: 72px;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  padding: 1px;
+  border-radius: 4px;
+  line-height: 0;
 }
 
 .combat-skill-intent--ready {
-  color: #c8f7a5;
   background: rgba(72, 120, 48, 0.35);
   border: 1px solid rgba(120, 180, 80, 0.45);
 }
 
 .combat-skill-intent--cooldown {
-  color: #f5d07a;
   background: rgba(120, 90, 24, 0.35);
   border: 1px solid rgba(180, 140, 40, 0.45);
 }
 
-.combat-skill-charging {
-  display: flex;
-  flex-direction: column;
+.combat-skill-icon-wrap {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 1px;
-  margin-top: 1px;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
 }
 
-.combat-skill-charge {
-  font-size: 7px;
-  color: var(--muted);
-  line-height: 1.1;
+.combat-skill-icon-wrap--compact {
+  width: 14px;
+  height: 14px;
+  opacity: 0.72;
+}
+
+.combat-skill-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
+}
+
+.combat-skill-icon-wrap--compact .combat-skill-icon {
+  width: 11px;
+  height: 11px;
+}
+
+.combat-skill-turns {
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  min-width: 10px;
+  padding: 0 2px;
+  border-radius: 3px;
+  font-size: 6px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: #fff2c2;
+  background: rgba(30, 22, 8, 0.92);
+  border: 1px solid rgba(180, 140, 40, 0.55);
+}
+
+.combat-skill-charging {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 1px;
+  max-width: 56px;
 }
 
 .enemy-battle-card .combat-skill-intent,
@@ -755,8 +845,9 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 }
 
 .heroes-panel {
-  flex: 1;
-  min-height: 0;
+  flex: 0.72;
+  min-height: 110px;
+  max-height: 38vh;
   display: flex;
   flex-direction: column;
 }

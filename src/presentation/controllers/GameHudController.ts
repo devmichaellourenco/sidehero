@@ -2,9 +2,32 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import { countUpgradeItems } from '../components/GearComparison';
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function renderCampaignTooltipContent(state: GameStateDto): string {
+  const waveLine = state.phaseRun
+    ? `Wave ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' (Boss)' : ''}`
+    : 'Wave —';
+
+  return `
+    <strong class="campaign-tooltip-title">Progresso</strong>
+    <span class="campaign-tooltip-line">Campanha: ${escapeHtml(state.campaignName)}</span>
+    <span class="campaign-tooltip-line">Mapa: ${escapeHtml(state.mapName)}</span>
+    <span class="campaign-tooltip-line">Fase: ${escapeHtml(state.phaseLabel)}</span>
+    <span class="campaign-tooltip-line">${escapeHtml(waveLine)}</span>
+    <span class="campaign-tooltip-line">Tier ${state.stage}</span>
+  `;
+}
+
 export class GameHudController {
   constructor(
-    private readonly stageLabel: HTMLElement,
+    private readonly campaignContextLabel: HTMLElement,
     private readonly goldLabel: HTMLElement,
     private readonly chestLabel: HTMLElement,
     private readonly chestProgressLabel: HTMLElement,
@@ -17,11 +40,21 @@ export class GameHudController {
   ) {}
 
   render(state: GameStateDto, options: { openingChests: boolean; autoBattleEnabled: boolean }): void {
-    const waveLabel = state.phaseRun
-      ? ` · Wave ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
+    const phaseId = state.phaseRun?.phaseId ?? state.campaignProgress.selectedPhaseId;
+    const waveSuffix = state.phaseRun
+      ? ` · ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
       : '';
-    this.stageLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.stage), 'Fase', 'stat-icon')} ${state.phaseLabel}${waveLabel}`;
-    this.stageLabel.title = `${state.campaignName} · ${state.mapName} · Tier ${state.stage}`;
+
+    this.campaignContextLabel.innerHTML = `
+      ${imgTag(getAssetUrl(ASSETS.ui.stage), 'Campanha', 'stat-icon')}
+      <span class="campaign-context-compact">${escapeHtml(phaseId)}${escapeHtml(waveSuffix)}</span>
+      <span class="campaign-tooltip-content hidden">${renderCampaignTooltipContent(state)}</span>
+    `;
+    this.campaignContextLabel.setAttribute(
+      'aria-label',
+      `${state.campaignName}, ${state.mapName}, ${state.phaseLabel}`,
+    );
+
     this.goldLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'stat-icon')} ${state.gold}`;
     this.chestLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.chest), 'Baús', 'stat-icon')} ${state.pendingChestCount}`;
 

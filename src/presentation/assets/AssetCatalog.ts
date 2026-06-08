@@ -56,6 +56,17 @@ export const ASSETS = {
     health: 'ui/health.png',
     inventory: 'ui/inventory.png',
   },
+  /** Ícones reutilizados para telegrafia de skills no battle strip (placeholders até arte exclusiva). */
+  skills: {
+    attack: 'ui/attack.png',
+    magic: 'ui/energy.png',
+    heal: 'ui/health.png',
+    buff: 'ui/defense.png',
+    debuff: 'ui/defense.png',
+    physical: 'ui/attack.png',
+    weapon: 'gear/weapon.png',
+    chest: 'ui/chest.png',
+  },
   backgrounds: {
     battle: 'backgrounds/battle.png',
     app: 'backgrounds/app.png',

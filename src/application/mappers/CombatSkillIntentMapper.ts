@@ -47,7 +47,7 @@ function mapIntentToDto(intent: {
   nextSkillId: string;
   status: 'ready' | 'cooldown';
   turnsRemaining: number;
-  chargingSkills: Array<{ skillName: string; turnsRemaining: number }>;
+  chargingSkills: Array<{ skillId: string; skillName: string; turnsRemaining: number }>;
 }): CombatSkillIntentDto {
   return {
     nextSkillName: intent.nextSkillName,
@@ -55,6 +55,7 @@ function mapIntentToDto(intent: {
     status: intent.status,
     turnsRemaining: intent.turnsRemaining,
     chargingSkills: intent.chargingSkills.map((entry) => ({
+      skillId: entry.skillId,
       skillName: entry.skillName,
       turnsRemaining: entry.turnsRemaining,
     })),
