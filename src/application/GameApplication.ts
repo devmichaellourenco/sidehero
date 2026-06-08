@@ -1,15 +1,4 @@
-import { CombatService } from '../domain/services/CombatService';
-import { ChestService } from '../domain/services/ChestService';
-import { ICombatService } from '../domain/services/ICombatService';
-import { ILootService } from '../domain/services/ILootService';
-import { LoadoutOptimizer } from '../domain/services/LoadoutOptimizer';
-import { LootService } from '../domain/services/LootService';
 import { IGameStateRepository } from '../domain/repositories/IGameStateRepository';
-import { ClassAscensionService } from '../domain/progression/ClassAscensionService';
-import { SkillService } from '../domain/progression/SkillService';
-import { ShopService } from '../domain/services/ShopService';
-import { UpgradeService } from '../domain/upgrades/UpgradeService';
-import { GameStatePresenter } from './presenters/GameStatePresenter';
 import { ActivateSkillUseCase } from './use-cases/ActivateSkillUseCase';
 import { AscendClassUseCase } from './use-cases/AscendClassUseCase';
 import { BuyShopOfferUseCase } from './use-cases/BuyShopOfferUseCase';
@@ -29,6 +18,7 @@ import { SpendAscensionPointUseCase } from './use-cases/SpendAscensionPointUseCa
 import { SpendImprovementPointUseCase } from './use-cases/SpendImprovementPointUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
 import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
+import { GameApplicationDependencies } from './GameApplicationDependencies';
 
 export class GameApplication {
   readonly getState: GetGameStateUseCase;
@@ -51,16 +41,17 @@ export class GameApplication {
   readonly getHeroAscensionTree: GetHeroAscensionTreeUseCase;
   readonly spendAscensionPoint: SpendAscensionPointUseCase;
 
-  constructor(repository: IGameStateRepository) {
-    const combatService: ICombatService = new CombatService();
-    const lootService: ILootService = new LootService();
-    const chestService = new ChestService(lootService);
-    const shopService = new ShopService(lootService);
-    const upgradeService = new UpgradeService();
-    const skillService = new SkillService();
-    const ascensionService = new ClassAscensionService();
-    const loadoutOptimizer = new LoadoutOptimizer();
-    const presenter = new GameStatePresenter(upgradeService);
+  constructor(repository: IGameStateRepository, deps: GameApplicationDependencies) {
+    const {
+      combatService,
+      chestService,
+      shopService,
+      upgradeService,
+      skillService,
+      ascensionService,
+      loadoutOptimizer,
+      presenter,
+    } = deps;
 
     this.getState = new GetGameStateUseCase(repository, presenter);
     this.tick = new TickGameUseCase(repository, combatService, presenter);

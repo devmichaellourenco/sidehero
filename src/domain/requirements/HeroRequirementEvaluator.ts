@@ -1,13 +1,9 @@
 import { Hero } from '../entities/Hero';
-import { ProgressionRequirement } from './ProgressionRequirement';
+import { ProgressionRequirement } from '../progression/ProgressionRequirement';
+import { EvaluatedRequirement } from './EvaluatedRequirement';
 
-export interface EvaluatedProgressionRequirement {
-  label: string;
-  met: boolean;
-}
-
-export class ProgressionRequirementEvaluator {
-  evaluateAll(hero: Hero, requirements: ProgressionRequirement[]): EvaluatedProgressionRequirement[] {
+export class HeroRequirementEvaluator {
+  evaluateAll(hero: Hero, requirements: ProgressionRequirement[]): EvaluatedRequirement[] {
     return requirements.map((req) => ({
       label: this.describe(req),
       met: this.isMet(hero, req),

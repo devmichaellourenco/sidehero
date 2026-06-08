@@ -1,6 +1,6 @@
 import { GameState } from '../entities/GameState';
 import { getFeatureLevel, UpgradeLevels } from './FeatureKey';
-import { RequirementEvaluator } from './RequirementEvaluator';
+import { UpgradeRequirementEvaluator } from '../requirements/UpgradeRequirementEvaluator';
 import { getUpgradeById, UPGRADE_CATALOG } from './UpgradeCatalog';
 import { UpgradeDefinition } from './UpgradeDefinition';
 
@@ -14,7 +14,7 @@ export interface UpgradeNodeView {
 }
 
 export class UpgradeService {
-  private readonly evaluator = new RequirementEvaluator();
+  private readonly evaluator = new UpgradeRequirementEvaluator();
 
   getLevel(levels: UpgradeLevels, feature: UpgradeDefinition['feature']): number {
     return getFeatureLevel(levels, feature);

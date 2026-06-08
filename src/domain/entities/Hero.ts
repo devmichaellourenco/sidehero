@@ -1,12 +1,11 @@
 import { Experience } from '../value-objects/Experience';
-import { addAttributes, Attributes, AttributeKey, createAttributes } from '../progression/Attributes';
+import { Attributes, AttributeKey } from '../progression/Attributes';
 import { getBaseAttributes } from '../progression/BaseAttributes';
-import { BASIC_ATTACK_SKILL_ID } from '../progression/combat/BasicAttackSkill';
-import { MAX_ACTIVE_BATTLE_SKILLS } from '../progression/SkillBattleSlots';
 import { AscensionId, SkillId } from '../progression/SkillId';
-import { GearRequirementChecker } from '../services/GearRequirementChecker';
+import { canHeroEquip } from '../services/GearEquipService';
 import { Gear, GearSlot } from './Gear';
 import { HeroClass } from './HeroClass';
+import { HeroProgression, STARTER_HERO_PROGRESSION } from './HeroProgression';
 
 export type { HeroClass };
 
@@ -40,15 +39,6 @@ const HERO_EMOJI: Record<HeroClass, string> = {
   priest: '✨',
 };
 
-const STARTER_PROGRESSION = {
-  allocatedAttributes: createAttributes(),
-  unspentImprovementPoints: 0,
-  unspentAscensionPoints: 0,
-  skillRanks: { [BASIC_ATTACK_SKILL_ID]: 1 } as Record<SkillId, number>,
-  equippedSkillIds: [BASIC_ATTACK_SKILL_ID] as SkillId[],
-  ascensionId: null as AscensionId | null,
-};
-
 export class Hero {
   readonly id: string;
   readonly name: string;
@@ -59,12 +49,7 @@ export class Hero {
   readonly currentHealth: number;
   private readonly experience: Experience;
   private readonly equipment: Partial<Record<GearSlot, Gear | null>>;
-  private readonly allocatedAttributes: Attributes;
-  private readonly unspentImprovementPoints: number;
-  private readonly unspentAscensionPoints: number;
-  private readonly skillRanks: Record<SkillId, number>;
-  private readonly equippedSkillIds: SkillId[];
-  private readonly ascensionId: AscensionId | null;
+  private readonly progression: HeroProgression;
 
   private constructor(props: HeroProps) {
     this.id = props.id;
@@ -75,12 +60,14 @@ export class Hero {
     this.baseMaxHealth = props.baseMaxHealth;
     this.experience = props.experience;
     this.equipment = { ...(props.equipment ?? {}) };
-    this.allocatedAttributes = { ...props.allocatedAttributes };
-    this.unspentImprovementPoints = Math.max(0, props.unspentImprovementPoints);
-    this.unspentAscensionPoints = Math.max(0, props.unspentAscensionPoints);
-    this.skillRanks = { ...props.skillRanks };
-    this.equippedSkillIds = [...props.equippedSkillIds];
-    this.ascensionId = props.ascensionId;
+    this.progression = HeroProgression.restore({
+      allocatedAttributes: props.allocatedAttributes,
+      unspentImprovementPoints: props.unspentImprovementPoints,
+      unspentAscensionPoints: props.unspentAscensionPoints,
+      skillRanks: props.skillRanks,
+      equippedSkillIds: props.equippedSkillIds,
+      ascensionId: props.ascensionId,
+    });
     this.currentHealth = Math.min(props.currentHealth, this.maxHealth);
   }
 
@@ -96,14 +83,14 @@ export class Hero {
       currentHealth: base.health,
       experience: Experience.initial(),
       equipment: {},
-      ...STARTER_PROGRESSION,
+      ...STARTER_HERO_PROGRESSION,
     });
   }
 
   static restore(props: HeroProps): Hero {
     return new Hero({
       ...props,
-      allocatedAttributes: props.allocatedAttributes ?? createAttributes(),
+      allocatedAttributes: props.allocatedAttributes ?? STARTER_HERO_PROGRESSION.allocatedAttributes,
       unspentImprovementPoints: props.unspentImprovementPoints ?? 0,
       unspentAscensionPoints: props.unspentAscensionPoints ?? 0,
       skillRanks: props.skillRanks ?? {},
@@ -125,11 +112,11 @@ export class Hero {
   }
 
   get totalAttributes(): Attributes {
-    return addAttributes(this.baseAttributes, this.allocatedAttributes);
+    return this.progression.addAllocatedAttributes(this.baseAttributes);
   }
 
   get hasUnspentPoints(): boolean {
-    return this.unspentImprovementPoints > 0 || this.unspentAscensionPoints > 0;
+    return this.progression.hasUnspentPoints;
   }
 
   get attack(): number {
@@ -168,7 +155,7 @@ export class Hero {
         baseDefense: hero.baseDefense + 2,
         baseMaxHealth: hero.baseMaxHealth + 10,
         currentHealth: hero.maxHealth,
-        unspentImprovementPoints: hero.unspentImprovementPoints + 1,
+        ...hero.progression.withImprovementPointGranted().toProps(),
       });
     }
 
@@ -176,89 +163,27 @@ export class Hero {
   }
 
   spendImprovementPointOnAttribute(key: AttributeKey): Hero {
-    if (this.unspentImprovementPoints < 1) {
-      throw new Error('Sem pontos de aprimoramento disponíveis');
-    }
-
-    const allocated = { ...this.allocatedAttributes, [key]: this.allocatedAttributes[key] + 1 };
-
-    return new Hero({
-      ...this.toProps(),
-      allocatedAttributes: allocated,
-      unspentImprovementPoints: this.unspentImprovementPoints - 1,
-    });
+    return this.withProgression(this.progression.spendImprovementPointOnAttribute(key));
   }
 
   spendImprovementPointOnSkill(skillId: SkillId): Hero {
-    if (this.unspentImprovementPoints < 1) {
-      throw new Error('Sem pontos de aprimoramento disponíveis');
-    }
-
-    const currentRank = this.skillRanks[skillId] ?? 0;
-
-    return new Hero({
-      ...this.toProps(),
-      skillRanks: { ...this.skillRanks, [skillId]: currentRank + 1 },
-      unspentImprovementPoints: this.unspentImprovementPoints - 1,
-    });
+    return this.withProgression(this.progression.spendImprovementPointOnSkill(skillId));
   }
 
   activateSkill(skillId: SkillId): Hero {
-    if ((this.skillRanks[skillId] ?? 0) < 1) {
-      throw new Error('Skill não desbloqueada');
-    }
-    if (this.equippedSkillIds.includes(skillId)) {
-      return this;
-    }
-    if (this.equippedSkillIds.length >= MAX_ACTIVE_BATTLE_SKILLS) {
-      throw new Error(`Limite de ${MAX_ACTIVE_BATTLE_SKILLS} skills ativas na batalha`);
-    }
-
-    return new Hero({
-      ...this.toProps(),
-      equippedSkillIds: [...this.equippedSkillIds, skillId],
-    });
+    return this.withProgression(this.progression.activateSkill(skillId));
   }
 
   deactivateSkill(skillId: SkillId): Hero {
-    if (skillId === BASIC_ATTACK_SKILL_ID) {
-      throw new Error('Ataque Básico não pode ser desativado');
-    }
-
-    return new Hero({
-      ...this.toProps(),
-      equippedSkillIds: this.equippedSkillIds.filter((id) => id !== skillId),
-    });
+    return this.withProgression(this.progression.deactivateSkill(skillId));
   }
 
   ascend(ascensionId: AscensionId, pointsGranted: number): Hero {
-    if (this.ascensionId !== null) {
-      throw new Error('Herói já ascendeu — ascensão é irreversível');
-    }
-
-    return new Hero({
-      ...this.toProps(),
-      ascensionId,
-      unspentAscensionPoints: this.unspentAscensionPoints + pointsGranted,
-    });
+    return this.withProgression(this.progression.ascend(ascensionId, pointsGranted));
   }
 
   spendAscensionPointOnSkill(skillId: SkillId): Hero {
-    if (this.unspentAscensionPoints < 1) {
-      throw new Error('Sem pontos de ascensão disponíveis');
-    }
-
-    const currentRank = this.skillRanks[skillId] ?? 0;
-
-    return new Hero({
-      ...this.toProps(),
-      skillRanks: { ...this.skillRanks, [skillId]: currentRank + 1 },
-      unspentAscensionPoints: this.unspentAscensionPoints - 1,
-    });
-  }
-
-  canEquip(gear: Gear): boolean {
-    return new GearRequirementChecker().meets(this, gear);
+    return this.withProgression(this.progression.spendAscensionPointOnSkill(skillId));
   }
 
   takeDamage(rawDamage: number): Hero {
@@ -281,7 +206,7 @@ export class Hero {
   }
 
   equip(gear: Gear): Hero {
-    if (!this.canEquip(gear)) {
+    if (!canHeroEquip(this, gear)) {
       throw new Error('Requisitos de equipamento não atendidos');
     }
 
@@ -323,13 +248,15 @@ export class Hero {
       currentHealth: this.currentHealth,
       experience: this.experience,
       equipment: this.equipment,
-      allocatedAttributes: this.allocatedAttributes,
-      unspentImprovementPoints: this.unspentImprovementPoints,
-      unspentAscensionPoints: this.unspentAscensionPoints,
-      skillRanks: this.skillRanks,
-      equippedSkillIds: this.equippedSkillIds,
-      ascensionId: this.ascensionId,
+      ...this.progression.toProps(),
     };
+  }
+
+  private withProgression(progression: HeroProgression): Hero {
+    return new Hero({
+      ...this.toProps(),
+      ...progression.toProps(),
+    });
   }
 
   private sumGear(selector: (gear: Gear) => number): number {

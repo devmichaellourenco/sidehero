@@ -1,15 +1,15 @@
-import { GameMessage, GameResponse } from '../../infrastructure/messaging/GameMessageBus';
+import { GameMessage, GameResponse } from '../../application/ports/GameClientTypes';
 import {
   isInjectableUrl,
   sendToContentScript,
-} from '../../infrastructure/messaging/ContentScriptBridge';
-import { createGameApplication } from '../../infrastructure/di/createGameApplication';
-import { SidebarPreferencesStore } from '../../infrastructure/storage/SidebarPreferences';
+} from '../messaging/ContentScriptBridge';
+import { createGameApplication } from '../di/createGameApplication';
+import { SidebarPreferencesStore } from '../storage/SidebarPreferences';
 import {
   syncBackgroundTickAlarm,
   TICK_ALARM,
-} from '../../infrastructure/background/BackgroundTickScheduler';
-import { SerialTaskRunner } from '../../infrastructure/background/SerialTaskRunner';
+} from '../background/BackgroundTickScheduler';
+import { SerialTaskRunner } from '../background/SerialTaskRunner';
 
 const app = createGameApplication();
 const sidebarPrefsStore = new SidebarPreferencesStore();

@@ -1,5 +1,5 @@
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { SkillService } from '../../domain/progression/SkillService';
+import { ISkillService } from '../../domain/progression/ISkillService';
 import { mapSkillTree } from '../mappers/HeroProgressionMapper';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
@@ -14,7 +14,7 @@ export class GetHeroSkillTreeUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly presenter: GameStatePresenter,
-    private readonly skillService: SkillService,
+    private readonly skillService: ISkillService,
   ) {}
 
   async execute(heroId: string): Promise<GetHeroSkillTreeResult> {

@@ -1,5 +1,5 @@
 import { getAscensionById } from '../../domain/progression/ClassAscensionCatalog';
-import { ClassAscensionService } from '../../domain/progression/ClassAscensionService';
+import { IClassAscensionService } from '../../domain/progression/IClassAscensionService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
@@ -8,7 +8,7 @@ export class AscendClassUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly presenter: GameStatePresenter,
-    private readonly ascensionService: ClassAscensionService,
+    private readonly ascensionService: IClassAscensionService,
   ) {}
 
   async execute(heroId: string, ascensionId: string): Promise<GameStateDto> {

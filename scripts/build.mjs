@@ -11,7 +11,7 @@ const dist = join(root, 'dist');
 const watch = process.argv.includes('--watch');
 
 const moduleEntryPoints = {
-  'background/service-worker': join(root, 'src/presentation/background/service-worker.ts'),
+  'background/service-worker': join(root, 'src/infrastructure/entry/service-worker.ts'),
   'panel/panel': join(root, 'src/presentation/panel/panel.ts'),
 };
 

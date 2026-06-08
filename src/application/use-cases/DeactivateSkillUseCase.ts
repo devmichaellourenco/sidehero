@@ -1,5 +1,5 @@
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
-import { SkillService } from '../../domain/progression/SkillService';
+import { ISkillService } from '../../domain/progression/ISkillService';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
 
@@ -7,7 +7,7 @@ export class DeactivateSkillUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly presenter: GameStatePresenter,
-    private readonly skillService: SkillService,
+    private readonly skillService: ISkillService,
   ) {}
 
   async execute(heroId: string, skillId: string): Promise<GameStateDto> {

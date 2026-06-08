@@ -4,7 +4,8 @@ import {
   getAscensionById,
   getAscensionsForClass,
 } from './ClassAscensionCatalog';
-import { ProgressionRequirementEvaluator } from './ProgressionRequirementEvaluator';
+import { HeroRequirementEvaluator } from '../requirements/HeroRequirementEvaluator';
+import { IClassAscensionService } from './IClassAscensionService';
 import { AscensionId } from './SkillId';
 
 export interface AscensionOptionView {
@@ -13,8 +14,8 @@ export interface AscensionOptionView {
   canAscend: boolean;
 }
 
-export class ClassAscensionService {
-  private readonly evaluator = new ProgressionRequirementEvaluator();
+export class ClassAscensionService implements IClassAscensionService {
+  private readonly evaluator = new HeroRequirementEvaluator();
 
   listOptions(hero: Hero): AscensionOptionView[] {
     const alreadyAscended = hero.toProps().ascensionId !== null;

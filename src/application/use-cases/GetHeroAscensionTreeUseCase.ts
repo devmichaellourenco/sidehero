@@ -1,6 +1,6 @@
-import { ClassAscensionService } from '../../domain/progression/ClassAscensionService';
 import { getAscensionById } from '../../domain/progression/ClassAscensionCatalog';
-import { SkillService } from '../../domain/progression/SkillService';
+import { IClassAscensionService } from '../../domain/progression/IClassAscensionService';
+import { ISkillService } from '../../domain/progression/ISkillService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { mapAscensionOptions } from '../mappers/AscensionMapper';
 import { mapSkillTree } from '../mappers/HeroProgressionMapper';
@@ -20,8 +20,8 @@ export class GetHeroAscensionTreeUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly presenter: GameStatePresenter,
-    private readonly ascensionService: ClassAscensionService,
-    private readonly skillService: SkillService,
+    private readonly ascensionService: IClassAscensionService,
+    private readonly skillService: ISkillService,
   ) {}
 
   async execute(heroId: string): Promise<GetHeroAscensionTreeResult> {

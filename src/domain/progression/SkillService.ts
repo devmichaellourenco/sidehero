@@ -1,6 +1,7 @@
 import { Hero } from '../entities/Hero';
 import { calculateSkillActivationCost } from './SkillActivationRules';
-import { ProgressionRequirementEvaluator } from './ProgressionRequirementEvaluator';
+import { HeroRequirementEvaluator } from '../requirements/HeroRequirementEvaluator';
+import { ISkillService } from './ISkillService';
 import { BASIC_ATTACK_SKILL_ID } from './combat/BasicAttackSkill';
 import { hasFreeBattleSkillSlot } from './SkillBattleSlots';
 import { getSkillById, getSkillsForHero, SKILL_CATALOG } from './SkillCatalog';
@@ -20,8 +21,8 @@ export interface SkillNodeView {
   requirements: { label: string; met: boolean }[];
 }
 
-export class SkillService {
-  private readonly evaluator = new ProgressionRequirementEvaluator();
+export class SkillService implements ISkillService {
+  private readonly evaluator = new HeroRequirementEvaluator();
 
   buildTree(hero: Hero): SkillNodeView[] {
     return this.buildTreeForPointType(hero, 'improvement');

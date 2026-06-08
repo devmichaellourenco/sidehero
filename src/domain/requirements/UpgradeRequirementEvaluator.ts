@@ -1,13 +1,9 @@
 import { GameState } from '../entities/GameState';
-import { FeatureKey, getFeatureLevel } from './FeatureKey';
-import { UpgradeRequirement } from './UpgradeRequirement';
+import { FeatureKey, getFeatureLevel } from '../upgrades/FeatureKey';
+import { UpgradeRequirement } from '../upgrades/UpgradeRequirement';
+import { EvaluatedRequirement } from './EvaluatedRequirement';
 
-export interface EvaluatedRequirement {
-  label: string;
-  met: boolean;
-}
-
-export class RequirementEvaluator {
+export class UpgradeRequirementEvaluator {
   evaluateAll(state: GameState, requirements: UpgradeRequirement[]): EvaluatedRequirement[] {
     return requirements.map((requirement) => this.evaluate(state, requirement));
   }
@@ -17,8 +13,7 @@ export class RequirementEvaluator {
   }
 
   private evaluate(state: GameState, requirement: UpgradeRequirement): EvaluatedRequirement {
-    const met = this.isMet(state, requirement);
-    return { label: this.describe(requirement), met };
+    return { label: this.describe(requirement), met: this.isMet(state, requirement) };
   }
 
   private isMet(state: GameState, requirement: UpgradeRequirement): boolean {
