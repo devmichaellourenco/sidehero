@@ -1,34 +1,25 @@
 {
   "manifest_version": 3,
   "name": "Side Hero — Idle RPG",
-  "version": "0.2.0",
-  "description": "Heróis batalham no painel lateral direito enquanto você navega normalmente.",
-  "permissions": ["storage", "alarms", "tabs", "scripting", "activeTab"],
+  "version": "0.3.0",
+  "description": "Heróis batalham no painel lateral do Chrome enquanto você navega normalmente.",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "alarms", "tabs", "sidePanel"],
   "action": {
     "default_icon": {
       "16": "icons/icon-16.png",
       "48": "icons/icon-48.png",
       "128": "icons/icon-128.png"
     },
-    "default_title": "Side Hero — mostrar/ocultar painel"
+    "default_title": "Side Hero — abrir painel lateral"
   },
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content/sidebar-host.js"],
-      "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["panel/*", "content/sidebar-host.css"],
-      "matches": ["<all_urls>"]
-    }
-  ],
+  "side_panel": {
+    "default_path": "panel/panel.html"
+  },
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",

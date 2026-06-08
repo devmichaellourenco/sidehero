@@ -1,10 +1,10 @@
 import { GameMessage, GameResponse } from '../../application/ports/GameClientTypes';
-import {
-  isInjectableUrl,
-  sendToContentScript,
-} from '../messaging/ContentScriptBridge';
 import { createGameApplication } from '../di/createGameApplication';
-import { SidebarPreferencesStore } from '../storage/SidebarPreferences';
+import {
+  configureSidePanelBehavior,
+  enableSidePanelForAllTabs,
+  registerSidePanelLifecycle,
+} from '../background/SidePanelLifecycle';
 import {
   syncBackgroundTickAlarm,
   TICK_ALARM,
@@ -12,7 +12,6 @@ import {
 import { SerialTaskRunner } from '../background/SerialTaskRunner';
 
 const app = createGameApplication();
-const sidebarPrefsStore = new SidebarPreferencesStore();
 const stateMutations = new SerialTaskRunner();
 
 async function syncTickAlarmFromState(): Promise<void> {
@@ -20,46 +19,16 @@ async function syncTickAlarmFromState(): Promise<void> {
   await syncBackgroundTickAlarm(state.upgradeLevels);
 }
 
-async function ensureSidebarOnTab(tabId: number, url?: string): Promise<void> {
-  if (!isInjectableUrl(url)) return;
-
-  const prefs = await sidebarPrefsStore.load();
-  if (!prefs.visible) return;
-
-  try {
-    await sendToContentScript(tabId, { type: 'ENSURE_SIDEBAR' });
-  } catch {
-    // Aba pode estar em carregamento ou restrita
-  }
-}
+void configureSidePanelBehavior();
+registerSidePanelLifecycle();
 
 chrome.runtime.onInstalled.addListener(async () => {
   await syncTickAlarmFromState();
-
-  const tabs = await chrome.tabs.query({});
-  for (const tab of tabs) {
-    if (!tab.id) continue;
-    await ensureSidebarOnTab(tab.id, tab.url);
-  }
+  await enableSidePanelForAllTabs();
 });
 
 chrome.runtime.onStartup.addListener(() => {
   void syncTickAlarmFromState();
-});
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status !== 'complete') return;
-  void ensureSidebarOnTab(tabId, tab.url);
-});
-
-chrome.action.onClicked.addListener(async (tab) => {
-  if (!tab?.id || !isInjectableUrl(tab.url)) return;
-
-  try {
-    await sendToContentScript(tab.id, { type: 'TOGGLE_SIDEBAR' });
-  } catch (error) {
-    console.error('[Side Hero] Falha ao alternar painel:', error);
-  }
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm: chrome.alarms.Alarm) => {
