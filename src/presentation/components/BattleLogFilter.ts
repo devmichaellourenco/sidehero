@@ -8,7 +8,8 @@ export function isImportantLogEntry(message: string): boolean {
     normalized.includes('equipado') ||
     normalized.includes('party derrotada') ||
     normalized.includes('abriu') ||
-    normalized.includes('itens recebidos')
+    normalized.includes('itens recebidos') ||
+    normalized.includes('comprou')
   );
 }
 

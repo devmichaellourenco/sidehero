@@ -14,6 +14,8 @@ import { HeroDetailModalRenderer } from './HeroDetailModalRenderer';
 import { HeroPanelRenderer } from './HeroPanelRenderer';
 import { InventoryModalRenderer } from './InventoryModalRenderer';
 import { LootModalRenderer } from './LootModalRenderer';
+import { ShopModalRenderer } from './ShopModalRenderer';
+import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
 import { ModalController } from './ModalController';
 import {
   buildIdleSummary,
@@ -35,7 +37,8 @@ type ModalView =
   | { type: 'equip-picker'; mode: EquipPickerMode }
   | { type: 'loot-reveal'; gearId: string }
   | { type: 'loot-batch'; gearIds: string[] }
-  | { type: 'settings' };
+  | { type: 'settings' }
+  | { type: 'shop' };
 
 const AUTO_BATTLE_BASE_INTERVAL_MS = 2500;
 
@@ -68,6 +71,8 @@ export class GameViewController {
   private readonly openInventoryBtn: HTMLButtonElement;
   private readonly optimizeLoadoutBtn: HTMLButtonElement;
   private readonly openSettingsBtn: HTMLButtonElement;
+  private readonly openShopBtn: HTMLButtonElement;
+  private shopOffers: ShopOfferDto[] = [];
 
   private readonly battleStrip: BattleStripRenderer;
   private readonly heroPanel: HeroPanelRenderer;
@@ -78,6 +83,7 @@ export class GameViewController {
   private readonly lootModal: LootModalRenderer;
   private readonly lootBatchModal: LootBatchModalRenderer;
   private readonly settingsModal: SettingsModalRenderer;
+  private readonly shopModal: ShopModalRenderer;
   private readonly toasts: ToastController;
   private readonly stateChanges: GameStateChangeDetector;
 
@@ -93,6 +99,7 @@ export class GameViewController {
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
     this.optimizeLoadoutBtn = root.querySelector('#optimize-loadout-btn') as HTMLButtonElement;
     this.openSettingsBtn = root.querySelector('#open-settings-btn') as HTMLButtonElement;
+    this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
 
     this.battleStrip = new BattleStripRenderer(
       root.querySelector('#heroes-container')!,
@@ -113,6 +120,7 @@ export class GameViewController {
     this.lootModal = new LootModalRenderer();
     this.lootBatchModal = new LootBatchModalRenderer();
     this.settingsModal = new SettingsModalRenderer();
+    this.shopModal = new ShopModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.stateChanges = new GameStateChangeDetector(this.toasts);
 
@@ -124,6 +132,9 @@ export class GameViewController {
     this.openInventoryBtn.addEventListener('click', () => this.openInventoryModal());
     this.optimizeLoadoutBtn.addEventListener('click', () => this.optimizeLoadout());
     this.openSettingsBtn.addEventListener('click', () => this.openSettingsModal());
+    this.openShopBtn.addEventListener('click', () => {
+      void this.openShopModal();
+    });
 
     document.addEventListener('keydown', (event) => {
       if (event.code !== 'Space' || event.repeat) return;
@@ -230,6 +241,44 @@ export class GameViewController {
     if (this.contextInvalidated) return;
     this.modalStack.length = 0;
     this.pushModal({ type: 'settings' });
+  }
+
+  private async openShopModal(): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    const response = await sendGameMessage({ type: 'GET_SHOP_OFFERS' });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    this.shopOffers = response.shopOffers ?? [];
+    this.state = response.state;
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'shop' });
+  }
+
+  private async buyShopOffer(offerId: string): Promise<void> {
+    const response = await sendGameMessage({ type: 'BUY_SHOP_OFFER', offerId });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha na compra', 'info');
+      return;
+    }
+
+    this.shopOffers = this.shopOffers.map((offer) => ({
+      ...offer,
+      canAfford: response.state.gold >= offer.price,
+    }));
+
+    this.render(response.state);
+
+    if (response.purchasedGear) {
+      this.toasts.show(`Comprou ${response.purchasedGear.name}`, 'loot');
+    }
+
+    if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'shop') {
+      this.renderModalTop();
+    }
   }
 
   private startAutoBattle(): void {
@@ -647,6 +696,13 @@ export class GameViewController {
           onPreferenceChange: (key, value) => this.handlePreferenceChange(key, value),
         });
         break;
+      case 'shop':
+        this.shopModal.render(container, this.state, this.shopOffers, {
+          onBuyOffer: (offerId) => {
+            void this.buyShopOffer(offerId);
+          },
+        });
+        break;
     }
   }
 
@@ -662,6 +718,8 @@ export class GameViewController {
       }
       case 'settings':
         return 'Configurações';
+      case 'shop':
+        return 'Loja';
       case 'loot-batch':
         return `Loot dos baús (${view.gearIds.length})`;
       case 'loot-reveal': {

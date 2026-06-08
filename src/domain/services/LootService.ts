@@ -17,14 +17,39 @@ export class LootService {
     const slots: GearSlot[] = ['weapon', 'armor', 'accessory'];
     const slot = slots[Math.floor(Math.random() * slots.length)];
     const rarity = this.rollRarity(stage);
+    return this.generateGearForSlot(stage, slot, rarity);
+  }
+
+  generateGearForSlot(stage: number, slot: GearSlot, rarity: GearRarity): Gear {
     const multiplier = RARITY_MULTIPLIER[rarity];
     const names = SLOT_NAMES[slot];
     const name = names[Math.floor(Math.random() * names.length)];
+    const base = 2 + Math.floor(stage / 2);
 
+    return this.createGear(stage, slot, rarity, multiplier, name);
+  }
+
+  generateDeterministicGearForSlot(stage: number, slot: GearSlot, rarity: GearRarity): Gear {
+    const multiplier = RARITY_MULTIPLIER[rarity];
+    const names = SLOT_NAMES[slot];
+    const slotSeed = slot === 'weapon' ? 1 : slot === 'armor' ? 2 : 3;
+    const name = names[(stage * 3 + slotSeed) % names.length];
+
+    return this.createGear(stage, slot, rarity, multiplier, name, `shop-gear-${stage}-${slot}`);
+  }
+
+  private createGear(
+    stage: number,
+    slot: GearSlot,
+    rarity: GearRarity,
+    multiplier: number,
+    name: string,
+    id?: string,
+  ): Gear {
     const base = 2 + Math.floor(stage / 2);
 
     return Gear.create({
-      id: `gear-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: id ?? `gear-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: `${name} (${rarity})`,
       slot,
       rarity,

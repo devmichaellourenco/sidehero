@@ -108,6 +108,14 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       );
       return { ok: true, state };
     }
+    case 'GET_SHOP_OFFERS': {
+      const result = await app.getShopOffers.execute();
+      return { ok: true, state: result.state, shopOffers: result.offers };
+    }
+    case 'BUY_SHOP_OFFER': {
+      const result = await app.buyShopOffer.execute(message.offerId);
+      return { ok: true, state: result.state, purchasedGear: result.purchasedGear };
+    }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
   }
