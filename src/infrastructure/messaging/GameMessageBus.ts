@@ -11,7 +11,8 @@ export type GameMessage =
   | { type: 'EQUIP_BEST_LOADOUT'; gearIds?: string[] }
   | { type: 'UNEQUIP_GEAR'; heroId: string; slot: string }
   | { type: 'GET_SHOP_OFFERS' }
-  | { type: 'BUY_SHOP_OFFER'; offerId: string };
+  | { type: 'BUY_SHOP_OFFER'; offerId: string }
+  | { type: 'REFRESH_SHOP' };
 
 export type GameResponse =
   | {
@@ -22,6 +23,8 @@ export type GameResponse =
       equippedCount?: number;
       shopOffers?: ShopOfferDto[];
       purchasedGear?: GearDto;
+      shopRefreshCost?: number;
+      canAffordShopRefresh?: boolean;
     }
   | { ok: false; error: string };
 

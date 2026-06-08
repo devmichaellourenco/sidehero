@@ -19,6 +19,7 @@ export interface GameStateProps {
   battleLog: BattleLogEntry[];
   totalBattlesWon: number;
   lastTickAt: number;
+  shopRefreshSeed: number;
 }
 
 export class GameState {
@@ -31,6 +32,7 @@ export class GameState {
   readonly battleLog: BattleLogEntry[];
   readonly totalBattlesWon: number;
   readonly lastTickAt: number;
+  readonly shopRefreshSeed: number;
 
   private constructor(props: GameStateProps) {
     this.heroes = props.heroes;
@@ -42,6 +44,7 @@ export class GameState {
     this.battleLog = props.battleLog.slice(-20);
     this.totalBattlesWon = props.totalBattlesWon;
     this.lastTickAt = props.lastTickAt;
+    this.shopRefreshSeed = Math.max(0, props.shopRefreshSeed ?? 0);
   }
 
   static initial(): GameState {
@@ -61,6 +64,7 @@ export class GameState {
       battleLog: [{ message: 'A aventura começou no Side Hero!', timestamp: Date.now() }],
       totalBattlesWon: 0,
       lastTickAt: Date.now(),
+      shopRefreshSeed: 0,
     });
   }
 
@@ -81,7 +85,11 @@ export class GameState {
   }
 
   withStage(stage: number): GameState {
-    return this.clone({ stage });
+    return this.clone({ stage, shopRefreshSeed: 0 });
+  }
+
+  withShopRefreshSeed(shopRefreshSeed: number): GameState {
+    return this.clone({ shopRefreshSeed: Math.max(0, shopRefreshSeed) });
   }
 
   withChests(chests: Chest[]): GameState {
@@ -120,6 +128,7 @@ export class GameState {
       battleLog: this.battleLog,
       totalBattlesWon: this.totalBattlesWon,
       lastTickAt: this.lastTickAt,
+      shopRefreshSeed: this.shopRefreshSeed,
     };
   }
 

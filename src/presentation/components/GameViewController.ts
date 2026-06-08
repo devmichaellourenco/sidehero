@@ -73,6 +73,8 @@ export class GameViewController {
   private readonly openSettingsBtn: HTMLButtonElement;
   private readonly openShopBtn: HTMLButtonElement;
   private shopOffers: ShopOfferDto[] = [];
+  private shopRefreshCost = 0;
+  private canAffordShopRefresh = false;
 
   private readonly battleStrip: BattleStripRenderer;
   private readonly heroPanel: HeroPanelRenderer;
@@ -252,10 +254,42 @@ export class GameViewController {
       return;
     }
 
-    this.shopOffers = response.shopOffers ?? [];
+    this.applyShopPayload(response);
     this.state = response.state;
     this.modalStack.length = 0;
     this.pushModal({ type: 'shop' });
+  }
+
+  private applyShopPayload(response: {
+    shopOffers?: ShopOfferDto[];
+    shopRefreshCost?: number;
+    canAffordShopRefresh?: boolean;
+  }): void {
+    if (response.shopOffers) {
+      this.shopOffers = response.shopOffers;
+    }
+    if (typeof response.shopRefreshCost === 'number') {
+      this.shopRefreshCost = response.shopRefreshCost;
+    }
+    if (typeof response.canAffordShopRefresh === 'boolean') {
+      this.canAffordShopRefresh = response.canAffordShopRefresh;
+    }
+  }
+
+  private async refreshShop(): Promise<void> {
+    const response = await sendGameMessage({ type: 'REFRESH_SHOP' });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha ao renovar loja', 'info');
+      return;
+    }
+
+    this.applyShopPayload(response);
+    this.render(response.state);
+    this.toasts.show('Loja renovada', 'info');
+
+    if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'shop') {
+      this.renderModalTop();
+    }
   }
 
   private async buyShopOffer(offerId: string): Promise<void> {
@@ -269,6 +303,7 @@ export class GameViewController {
       ...offer,
       canAfford: response.state.gold >= offer.price,
     }));
+    this.canAffordShopRefresh = response.state.gold >= this.shopRefreshCost;
 
     this.render(response.state);
 
@@ -697,11 +732,23 @@ export class GameViewController {
         });
         break;
       case 'shop':
-        this.shopModal.render(container, this.state, this.shopOffers, {
-          onBuyOffer: (offerId) => {
-            void this.buyShopOffer(offerId);
+        this.shopModal.render(
+          container,
+          this.state,
+          {
+            offers: this.shopOffers,
+            refreshCost: this.shopRefreshCost,
+            canAffordRefresh: this.canAffordShopRefresh,
           },
-        });
+          {
+            onBuyOffer: (offerId) => {
+              void this.buyShopOffer(offerId);
+            },
+            onRefreshShop: () => {
+              void this.refreshShop();
+            },
+          },
+        );
         break;
     }
   }

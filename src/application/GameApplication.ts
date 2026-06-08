@@ -9,6 +9,7 @@ import { OpenAllChestsUseCase } from './use-cases/OpenAllChestsUseCase';
 import { OpenChestUseCase } from './use-cases/OpenChestUseCase';
 import { BuyShopOfferUseCase } from './use-cases/BuyShopOfferUseCase';
 import { GetShopOffersUseCase } from './use-cases/GetShopOffersUseCase';
+import { RefreshShopUseCase } from './use-cases/RefreshShopUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
 import { ShopService } from '../domain/services/ShopService';
 
@@ -22,6 +23,7 @@ export class GameApplication {
   readonly unequipGear: UnequipGearUseCase;
   readonly getShopOffers: GetShopOffersUseCase;
   readonly buyShopOffer: BuyShopOfferUseCase;
+  readonly refreshShop: RefreshShopUseCase;
 
   constructor(repository: IGameStateRepository) {
     const combatService = new CombatService();
@@ -37,5 +39,6 @@ export class GameApplication {
     this.unequipGear = new UnequipGearUseCase(repository);
     this.getShopOffers = new GetShopOffersUseCase(repository, shopService);
     this.buyShopOffer = new BuyShopOfferUseCase(repository, shopService);
+    this.refreshShop = new RefreshShopUseCase(repository, shopService);
   }
 }

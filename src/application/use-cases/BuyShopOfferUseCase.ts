@@ -16,7 +16,7 @@ export class BuyShopOfferUseCase {
 
   async execute(offerId: string): Promise<BuyShopOfferResult> {
     const state = await this.repository.load();
-    const offer = this.shopService.findOffer(state.stage, offerId);
+    const offer = this.shopService.findOffer(state.stage, state.shopRefreshSeed, offerId);
 
     if (!offer) {
       throw new Error('Oferta não encontrada');

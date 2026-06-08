@@ -6,6 +6,8 @@ import { mapGameStateToDto, mapGearToDto, GameStateDto } from '../dto/GameStateD
 export interface GetShopOffersResult {
   state: GameStateDto;
   offers: ShopOfferDto[];
+  refreshCost: number;
+  canAffordRefresh: boolean;
 }
 
 export class GetShopOffersUseCase {
@@ -16,16 +18,22 @@ export class GetShopOffersUseCase {
 
   async execute(): Promise<GetShopOffersResult> {
     const state = await this.repository.load();
-    const offers = this.shopService.generateOffers(state.stage).map((offer) => ({
-      id: offer.id,
-      price: offer.price,
-      gear: mapGearToDto(offer.gear),
-      canAfford: state.gold.canAfford(offer.price),
-    }));
+    const offers = this.shopService
+      .generateOffers(state.stage, state.shopRefreshSeed)
+      .map((offer) => ({
+        id: offer.id,
+        price: offer.price,
+        gear: mapGearToDto(offer.gear),
+        canAfford: state.gold.canAfford(offer.price),
+      }));
+
+    const refreshCost = this.shopService.calculateRefreshCost(state.stage);
 
     return {
       state: mapGameStateToDto(state),
       offers,
+      refreshCost,
+      canAffordRefresh: state.gold.canAfford(refreshCost),
     };
   }
 }

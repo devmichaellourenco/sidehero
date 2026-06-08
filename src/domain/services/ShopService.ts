@@ -21,28 +21,34 @@ const BASE_PRICE: Record<GearRarity, number> = {
   epic: 110,
 };
 
+const REFRESH_BASE_COST = 15;
+
 export class ShopService {
   constructor(private readonly lootService: LootService) {}
 
-  generateOffers(stage: number): ShopOffer[] {
+  generateOffers(stage: number, refreshSeed = 0): ShopOffer[] {
     return SHOP_SLOTS.map((slot) => {
       const rarity = SHOP_RARITIES[slot];
-      const gear = this.lootService.generateDeterministicGearForSlot(stage, slot, rarity);
-      const price = this.calculatePrice(stage, rarity);
+      const gear = this.lootService.generateDeterministicGearForSlot(stage, slot, rarity, refreshSeed);
+      const price = this.calculateItemPrice(stage, rarity);
 
       return {
-        id: `shop-${stage}-${slot}`,
+        id: `shop-${stage}-${refreshSeed}-${slot}`,
         gear,
         price,
       };
     });
   }
 
-  findOffer(stage: number, offerId: string): ShopOffer | null {
-    return this.generateOffers(stage).find((offer) => offer.id === offerId) ?? null;
+  findOffer(stage: number, refreshSeed: number, offerId: string): ShopOffer | null {
+    return this.generateOffers(stage, refreshSeed).find((offer) => offer.id === offerId) ?? null;
   }
 
-  private calculatePrice(stage: number, rarity: GearRarity): number {
+  calculateRefreshCost(stage: number): number {
+    return REFRESH_BASE_COST + Math.max(0, stage - 1) * 5;
+  }
+
+  private calculateItemPrice(stage: number, rarity: GearRarity): number {
     const stageBonus = Math.max(0, stage - 1) * (rarity === 'epic' ? 12 : rarity === 'rare' ? 8 : 5);
     return BASE_PRICE[rarity] + stageBonus;
   }

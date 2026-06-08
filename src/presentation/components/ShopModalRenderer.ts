@@ -5,18 +5,26 @@ import { renderGearCard } from './GearPresentation';
 
 export type ShopModalHandlers = {
   onBuyOffer: (offerId: string) => void;
+  onRefreshShop: () => void;
 };
+
+export interface ShopModalViewModel {
+  offers: ShopOfferDto[];
+  refreshCost: number;
+  canAffordRefresh: boolean;
+}
 
 export class ShopModalRenderer {
   render(
     container: HTMLElement,
     state: GameStateDto,
-    offers: ShopOfferDto[],
+    viewModel: ShopModalViewModel,
     handlers: ShopModalHandlers,
   ): void {
     const goldIcon = imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'shop-gold-icon');
+    const refreshDisabled = viewModel.canAffordRefresh ? '' : 'disabled';
 
-    const offerCards = offers
+    const offerCards = viewModel.offers
       .map((offer) => {
         const disabledAttr = offer.canAfford ? '' : 'disabled';
         const affordClass = offer.canAfford ? '' : ' shop-offer-unaffordable';
@@ -42,9 +50,19 @@ export class ShopModalRenderer {
 
     container.innerHTML = `
       <p class="shop-intro">
-        Ofertas do Stage ${state.stage}. Itens vão para o inventário — as ofertas mudam ao avançar de stage.
+        Ofertas do Stage ${state.stage}. Gaste ouro para renovar o estoque sem avançar de stage.
       </p>
-      <p class="shop-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
+      <div class="shop-toolbar">
+        <p class="shop-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
+        <button
+          type="button"
+          class="gear-equip-btn shop-refresh-btn"
+          data-shop-refresh
+          ${refreshDisabled}
+        >
+          Renovar loja ${goldIcon} ${viewModel.refreshCost}
+        </button>
+      </div>
       <div class="shop-offers-grid">
         ${offerCards || '<p class="empty-state">Nenhuma oferta disponível.</p>'}
       </div>
@@ -57,6 +75,13 @@ export class ShopModalRenderer {
           handlers.onBuyOffer(offerId);
         }
       });
+    });
+
+    container.querySelector('[data-shop-refresh]')?.addEventListener('click', () => {
+      const button = container.querySelector('[data-shop-refresh]') as HTMLButtonElement | null;
+      if (button && !button.disabled) {
+        handlers.onRefreshShop();
+      }
     });
   }
 }

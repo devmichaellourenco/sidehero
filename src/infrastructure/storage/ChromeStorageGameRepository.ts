@@ -68,6 +68,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       battleLog: props.battleLog,
       totalBattlesWon: props.totalBattlesWon,
       lastTickAt: props.lastTickAt,
+      shopRefreshSeed: props.shopRefreshSeed,
     };
   }
 
@@ -90,6 +91,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
         : [],
       totalBattlesWon: typeof raw.totalBattlesWon === 'number' ? raw.totalBattlesWon : 0,
       lastTickAt: typeof raw.lastTickAt === 'number' ? raw.lastTickAt : Date.now(),
+      shopRefreshSeed: typeof raw.shopRefreshSeed === 'number' ? raw.shopRefreshSeed : 0,
     });
   }
 }

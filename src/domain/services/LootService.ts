@@ -29,13 +29,28 @@ export class LootService {
     return this.createGear(stage, slot, rarity, multiplier, name);
   }
 
-  generateDeterministicGearForSlot(stage: number, slot: GearSlot, rarity: GearRarity): Gear {
+  generateDeterministicGearForSlot(
+    stage: number,
+    slot: GearSlot,
+    rarity: GearRarity,
+    refreshSeed = 0,
+  ): Gear {
     const multiplier = RARITY_MULTIPLIER[rarity];
     const names = SLOT_NAMES[slot];
     const slotSeed = slot === 'weapon' ? 1 : slot === 'armor' ? 2 : 3;
-    const name = names[(stage * 3 + slotSeed) % names.length];
+    const nameIndex = (stage * 3 + slotSeed + refreshSeed * 7) % names.length;
+    const name = names[nameIndex];
+    const statBump = refreshSeed % 3;
 
-    return this.createGear(stage, slot, rarity, multiplier, name, `shop-gear-${stage}-${slot}`);
+    return this.createGear(
+      stage,
+      slot,
+      rarity,
+      multiplier,
+      name,
+      `shop-gear-${stage}-${refreshSeed}-${slot}`,
+      statBump,
+    );
   }
 
   private createGear(
@@ -45,8 +60,9 @@ export class LootService {
     multiplier: number,
     name: string,
     id?: string,
+    statBump = 0,
   ): Gear {
-    const base = 2 + Math.floor(stage / 2);
+    const base = 2 + Math.floor(stage / 2) + statBump;
 
     return Gear.create({
       id: id ?? `gear-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,

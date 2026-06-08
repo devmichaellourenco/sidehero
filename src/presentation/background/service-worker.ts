@@ -110,11 +110,27 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
     }
     case 'GET_SHOP_OFFERS': {
       const result = await app.getShopOffers.execute();
-      return { ok: true, state: result.state, shopOffers: result.offers };
+      return {
+        ok: true,
+        state: result.state,
+        shopOffers: result.offers,
+        shopRefreshCost: result.refreshCost,
+        canAffordShopRefresh: result.canAffordRefresh,
+      };
     }
     case 'BUY_SHOP_OFFER': {
       const result = await app.buyShopOffer.execute(message.offerId);
       return { ok: true, state: result.state, purchasedGear: result.purchasedGear };
+    }
+    case 'REFRESH_SHOP': {
+      const result = await app.refreshShop.execute();
+      return {
+        ok: true,
+        state: result.state,
+        shopOffers: result.offers,
+        shopRefreshCost: result.refreshCost,
+        canAffordShopRefresh: result.canAffordRefresh,
+      };
     }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
