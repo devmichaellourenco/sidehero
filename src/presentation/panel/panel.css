@@ -72,6 +72,27 @@ body {
   gap: 10px;
 }
 
+.brand > div {
+  flex: 1;
+}
+
+.settings-btn {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(18, 28, 48, 0.92);
+  color: #fff8e7;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.settings-btn:hover {
+  filter: brightness(1.08);
+}
+
 .brand-icon {
   width: 40px;
   height: 40px;
@@ -1509,4 +1530,76 @@ body.modal-open {
 
 .game-scroll::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+.settings-intro {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(18, 28, 48, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.settings-item-select {
+  align-items: center;
+  justify-content: space-between;
+  cursor: default;
+}
+
+.settings-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-item-text strong {
+  font-family: var(--font-heading);
+  font-size: 11px;
+}
+
+.settings-item-text small {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.settings-speed-select {
+  min-width: 56px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 18, 36, 0.96);
+  color: #fff8e7;
+  font-family: var(--font-heading);
+  font-size: 11px;
+}
+
+.settings-hint {
+  margin-top: 14px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.settings-hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 18, 36, 0.96);
+  font-family: var(--font-heading);
+  font-size: 10px;
 }

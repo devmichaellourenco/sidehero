@@ -1,3 +1,4 @@
+import { CHEST_EVERY_N_WINS } from '../constants/CombatRules';
 import { GameState } from '../entities/GameState';
 import { Enemy } from '../entities/Enemy';
 import { Chest } from '../entities/Chest';
@@ -8,8 +9,6 @@ export interface CombatTickResult {
 }
 
 export class CombatService {
-  private static readonly CHEST_EVERY_N_WINS = 3;
-
   executeTick(state: GameState): CombatTickResult {
     if (!state.currentEnemy) {
       return {
@@ -73,7 +72,7 @@ export class CombatService {
     const newStage = state.stage + 1;
     nextState = nextState.withStage(newStage).withEnemy(Enemy.forStage(newStage));
 
-    if (nextState.totalBattlesWon % CombatService.CHEST_EVERY_N_WINS === 0) {
+    if (nextState.totalBattlesWon % CHEST_EVERY_N_WINS === 0) {
       const chest = Chest.create(state.stage);
       nextState = nextState
         .withChests([...nextState.chests, chest])

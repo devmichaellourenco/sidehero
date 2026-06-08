@@ -2,6 +2,10 @@ import { GameState } from '../../domain/entities/GameState';
 import { Gear } from '../../domain/entities/Gear';
 import { GearSlot } from '../../domain/entities/Gear';
 import { Hero } from '../../domain/entities/Hero';
+import {
+  addReplacedGearToInventory,
+  equipHeroWithGear,
+} from './GearEquipService';
 
 const GEAR_SLOTS: GearSlot[] = ['weapon', 'armor', 'accessory'];
 
@@ -74,10 +78,12 @@ export function applyEquipActions(
 
   for (const action of actions) {
     const gear = inventory.find((entry) => entry.id === action.gearId);
-    if (!gear) continue;
+    const hero = heroes.find((entry) => entry.id === action.heroId);
+    if (!gear || !hero) continue;
 
-    heroes = heroes.map((hero) => (hero.id === action.heroId ? hero.equip(gear) : hero));
-    inventory = inventory.filter((entry) => entry.id !== action.gearId);
+    const { hero: updatedHero, replaced } = equipHeroWithGear(hero, gear);
+    heroes = heroes.map((entry) => (entry.id === action.heroId ? updatedHero : entry));
+    inventory = addReplacedGearToInventory(inventory, action.gearId, replaced);
     equippedCount += 1;
   }
 

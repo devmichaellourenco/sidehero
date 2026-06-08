@@ -20,11 +20,15 @@
             <h1>Side Hero</h1>
             <p class="subtitle">Idle RPG no painel lateral</p>
           </div>
+          <button id="open-settings-btn" class="settings-btn" type="button" aria-label="Configurações" title="Configurações">
+            ⚙
+          </button>
         </div>
         <div class="stats-bar">
           <span id="stage-label" class="stat-pill">Stage 1</span>
           <span id="gold-label" class="stat-pill">0</span>
           <span id="chest-label" class="stat-pill">0</span>
+          <span id="chest-progress-label" class="stat-pill">0/3</span>
         </div>
       </header>
 
@@ -46,24 +50,10 @@
       </section>
 
       <footer class="actions">
-        <div class="battle-controls actions-full">
-          <button id="tick-btn" class="btn primary battle-main-btn" type="button">
-            <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />
-            Avançar Batalha
-          </button>
-          <label class="auto-battle-toggle" title="Avança batalhas automaticamente">
-            <input id="auto-battle-toggle" type="checkbox" />
-            <span class="auto-battle-label">Auto</span>
-          </label>
-          <label class="auto-battle-toggle" title="Abre baús automaticamente">
-            <input id="auto-chest-toggle" type="checkbox" />
-            <span class="auto-battle-label">Baús</span>
-          </label>
-          <select id="auto-battle-speed" class="auto-battle-speed" title="Velocidade da auto-batalha" aria-label="Velocidade da auto-batalha">
-            <option value="1">1x</option>
-            <option value="2">2x</option>
-          </select>
-        </div>
+        <button id="tick-btn" class="btn primary actions-full" type="button" title="Avançar batalha (Espaço)">
+          <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />
+          Avançar Batalha
+        </button>
         <button id="open-chest-btn" class="btn secondary" disabled>
           <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" />
           Abrir Baú
