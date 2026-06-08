@@ -30,11 +30,19 @@ export interface CombatSkillDefinition {
   usesAttackStat?: boolean;
   /** Cura só é elegível se algum herói aliado estiver abaixo deste % de HP. */
   healConditionThreshold?: number;
+  /** Duração em turnos do combatente afetado (buff/debuff). */
+  effectDurationTurns?: number;
 }
 
 export function toSkillTargeting(definition: CombatSkillDefinition): SkillTargeting {
-  if (definition.kind === 'heal_ally') {
+  if (definition.kind === 'heal_ally' || definition.kind === 'buff_attack') {
     return definition.targetScope === 'all' ? 'all_allies' : 'single_ally';
+  }
+  if (definition.kind === 'debuff_defense') {
+    if (definition.targetPool === 'heroes') {
+      return definition.targetScope === 'all' ? 'all_allies' : 'single_ally';
+    }
+    return definition.targetScope === 'all' ? 'all_enemies' : 'single_enemy';
   }
   if (definition.targetPool === 'heroes') {
     return definition.targetScope === 'all' ? 'all_allies' : 'single_ally';

@@ -149,4 +149,25 @@ describe('CombatSkillSelector', () => {
     expect(chargingPick?.skillId).toBe('dragon_bite');
     expect(chargingPick?.action.skillName).toBe('Mordida');
   });
+
+  it('sacerdotisa prioriza Bênção em party saudável acima de dano', () => {
+    let priest = Hero.createStarter('p1', 'priest', 'Elara');
+    priest = Hero.restore({
+      ...priest.toProps(),
+      skillRanks: { blessing: 1 },
+      equippedSkillIds: ['basic_attack', 'blessing'],
+    });
+
+    const goblin = Enemy.restore({
+      ...Enemy.forStage(2).toProps(),
+      enemyType: 'goblin',
+    });
+
+    const selected = selector.selectHeroAction(priest, [priest], [goblin], emptyCooldowns);
+
+    expect(selected?.skillId).toBe('blessing');
+    expect(selected?.action.kind).toBe('buff_attack');
+    expect(selected?.action.targeting).toBe('all_allies');
+    expect(selected?.action.effectDurationTurns).toBe(3);
+  });
 });

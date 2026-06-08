@@ -1,6 +1,8 @@
 import { Hero } from '../../domain/entities/Hero';
 import { Enemy } from '../../domain/entities/Enemy';
 import { CombatSkillIntentResolver } from '../../domain/services/combat/CombatSkillIntentResolver';
+import { StatusEffectMap } from '../../domain/services/combat/CombatStatusEffect';
+import { CombatStatusEffectTracker } from '../../domain/services/combat/CombatStatusEffectTracker';
 import { SkillCooldownMap, SkillCooldownTracker } from '../../domain/services/combat/SkillCooldownTracker';
 import { CombatSkillIntentDto } from '../dto/GameStateDto';
 
@@ -11,12 +13,14 @@ export function mapHeroCombatIntent(
   party: Hero[],
   enemies: Enemy[],
   skillCooldowns: SkillCooldownMap | undefined,
+  statusEffects: StatusEffectMap | undefined = undefined,
 ): CombatSkillIntentDto | null {
   const intent = resolver.resolveForHero(
     hero,
     party,
     enemies,
     SkillCooldownTracker.fromMap(skillCooldowns),
+    CombatStatusEffectTracker.fromMap(statusEffects),
   );
 
   return intent ? mapIntentToDto(intent) : null;

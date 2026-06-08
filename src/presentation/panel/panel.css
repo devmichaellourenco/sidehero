@@ -411,6 +411,35 @@ h2 {
   color: #d4b8ff;
 }
 
+.combat-status-effects {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  margin-top: 1px;
+}
+
+.combat-status-effect {
+  font-size: 7px;
+  line-height: 1.1;
+  padding: 1px 3px;
+  border-radius: 2px;
+}
+
+.combat-status-effect--buff {
+  color: #b8e8ff;
+  background: rgba(40, 90, 130, 0.35);
+}
+
+.combat-status-effect--debuff {
+  color: #ffb8b8;
+  background: rgba(130, 40, 40, 0.35);
+}
+
+.enemy-battle-card .combat-status-effects {
+  align-self: flex-end;
+}
+
 .enemy-tooltip-content {
   display: none;
 }

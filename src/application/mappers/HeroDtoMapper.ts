@@ -62,5 +62,6 @@ export function mapHeroToDto(hero: Hero): HeroDto {
     hasUnspentPoints: hero.hasUnspentPoints,
     equipment,
     combatIntent: null,
+    statusEffects: [],
   };
 }

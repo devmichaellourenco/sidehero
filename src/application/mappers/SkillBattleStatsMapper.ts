@@ -21,6 +21,8 @@ const KIND_LABELS: Record<SkillCombatKind, string> = {
   damage_physical: 'Dano físico',
   damage_magic: 'Dano mágico',
   heal_ally: 'Cura',
+  buff_attack: 'Buff ATK',
+  debuff_defense: 'Debuff DEF',
 };
 
 function formatTarget(combat: CombatSkillDefinition): string {
@@ -97,6 +99,12 @@ export function buildSkillBattleStats(
   if (combat.healConditionThreshold !== undefined) {
     const threshold = Math.round(combat.healConditionThreshold * 100);
     stats.push({ label: 'Condição', value: `Só se aliado abaixo de ${threshold}% HP` });
+  }
+
+  if (combat.effectDurationTurns !== undefined && combat.effectDurationTurns > 0) {
+    const turns =
+      combat.effectDurationTurns === 1 ? '1 turno' : `${combat.effectDurationTurns} turnos`;
+    stats.push({ label: 'Duração', value: turns });
   }
 
   return stats;

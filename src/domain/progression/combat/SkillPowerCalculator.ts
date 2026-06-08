@@ -2,11 +2,19 @@ import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { getSkillById } from '../SkillCatalog';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
+import { resolveEffectiveAttack } from '../../services/combat/CombatStatResolver';
+import { CombatStatusEffectTracker } from '../../services/combat/CombatStatusEffectTracker';
 
 export class SkillPowerCalculator {
-  calculateForHero(skill: CombatSkillDefinition, hero: Hero): number {
+  calculateForHero(
+    skill: CombatSkillDefinition,
+    hero: Hero,
+    statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
+    combatantKey?: string,
+  ): number {
     if (skill.usesAttackStat) {
-      return Math.max(1, hero.attack);
+      const key = combatantKey ?? `hero:${hero.id}`;
+      return resolveEffectiveAttack(hero.attack, key, statusEffects);
     }
 
     const rank = hero.toProps().skillRanks[skill.skillId] ?? 1;

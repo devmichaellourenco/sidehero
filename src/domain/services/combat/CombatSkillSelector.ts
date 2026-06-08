@@ -3,11 +3,13 @@ import {
   CombatSkillDefinition,
   toSkillTargeting,
 } from '../../progression/combat/CombatSkillDefinition';
+import { isStatusCombatKind } from '../../progression/combat/SkillCombatKind';
 import { listEnemyCombatSkills } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCatalog';
 import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { CombatAction } from './CombatAction';
+import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { SkillPowerCalculator } from '../../progression/combat/SkillPowerCalculator';
 import { SkillTargetResolver } from './SkillTargetResolver';
@@ -28,6 +30,7 @@ export class CombatSkillSelector {
     party: Hero[],
     enemies: Enemy[],
     cooldowns: SkillCooldownTracker,
+    statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
   ): SelectedCombatAction | null {
     if (!hero.isAlive()) return null;
 
@@ -38,7 +41,7 @@ export class CombatSkillSelector {
       .sort((left, right) => right.usePriority - left.usePriority);
 
     for (const skill of skills) {
-      const action = this.buildAction(skill, hero, party, enemies);
+      const action = this.buildAction(skill, hero, party, enemies, statusEffects);
       if (action) return { action, skillId: skill.skillId };
     }
 
@@ -82,6 +85,7 @@ export class CombatSkillSelector {
     actor: Hero | Enemy,
     party: Hero[],
     enemies: Enemy[],
+    statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
   ): CombatAction | null {
     const skillName = resolveCombatSkillName(skill);
     const targeting = toSkillTargeting(skill);
@@ -96,30 +100,15 @@ export class CombatSkillSelector {
 
       const power =
         actor instanceof Hero
-          ? this.powerCalculator.calculateForHero(skill, actor)
+          ? this.powerCalculator.calculateForHero(
+              skill,
+              actor,
+              statusEffects,
+              combatantKey('hero', actor.id),
+            )
           : this.powerCalculator.calculateForEnemy(skill, actor as Enemy);
 
-      if (skill.kind === 'heal_ally') {
-        return {
-          skillId: skill.skillId,
-          skillName,
-          kind: skill.kind,
-          targeting,
-          power,
-          targetHeroId: targeting === 'single_ally' ? targetHeroIds[0] : undefined,
-          targetHeroIds: targeting === 'all_allies' ? targetHeroIds : undefined,
-        };
-      }
-
-      return {
-        skillId: skill.skillId,
-        skillName,
-        kind: skill.kind,
-        targeting,
-        power,
-        targetHeroId: targeting === 'single_ally' ? targetHeroIds[0] : undefined,
-        targetHeroIds: targeting === 'all_allies' ? targetHeroIds : undefined,
-      };
+      return this.buildHeroPoolAction(skill, skillName, targeting, power, targetHeroIds);
     }
 
     const targetEnemyIds = this.targetResolver.resolveEnemyTargets(skill, enemies);
@@ -127,10 +116,49 @@ export class CombatSkillSelector {
 
     const power =
       actor instanceof Hero
-        ? this.powerCalculator.calculateForHero(skill, actor)
+        ? this.powerCalculator.calculateForHero(
+            skill,
+            actor,
+            statusEffects,
+            combatantKey('hero', actor.id),
+          )
         : this.powerCalculator.calculateForEnemy(skill, actor as Enemy);
 
-    return {
+    return this.buildEnemyPoolAction(skill, skillName, targeting, power, targetEnemyIds);
+  }
+
+  private buildHeroPoolAction(
+    skill: CombatSkillDefinition,
+    skillName: string,
+    targeting: ReturnType<typeof toSkillTargeting>,
+    power: number,
+    targetHeroIds: string[],
+  ): CombatAction {
+    const action: CombatAction = {
+      skillId: skill.skillId,
+      skillName,
+      kind: skill.kind,
+      targeting,
+      power,
+      targetHeroId: targeting === 'single_ally' ? targetHeroIds[0] : undefined,
+      targetHeroIds: targeting === 'all_allies' ? targetHeroIds : undefined,
+    };
+
+    if (isStatusCombatKind(skill.kind)) {
+      action.effectDurationTurns = skill.effectDurationTurns ?? 1;
+    }
+
+    return action;
+  }
+
+  private buildEnemyPoolAction(
+    skill: CombatSkillDefinition,
+    skillName: string,
+    targeting: ReturnType<typeof toSkillTargeting>,
+    power: number,
+    targetEnemyIds: string[],
+  ): CombatAction {
+    const action: CombatAction = {
       skillId: skill.skillId,
       skillName,
       kind: skill.kind,
@@ -139,6 +167,11 @@ export class CombatSkillSelector {
       targetEnemyId: targeting === 'single_enemy' ? targetEnemyIds[0] : undefined,
       targetEnemyIds: targeting === 'all_enemies' ? targetEnemyIds : undefined,
     };
-  }
 
+    if (isStatusCombatKind(skill.kind)) {
+      action.effectDurationTurns = skill.effectDurationTurns ?? 1;
+    }
+
+    return action;
+  }
 }

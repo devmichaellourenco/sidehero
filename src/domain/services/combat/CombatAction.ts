@@ -11,4 +11,5 @@ export interface CombatAction {
   targetHeroIds?: string[];
   targetEnemyId?: string;
   targetEnemyIds?: string[];
+  effectDurationTurns?: number;
 }

@@ -66,6 +66,13 @@ export interface HeroDto {
     } | null
   >;
   combatIntent: CombatSkillIntentDto | null;
+  statusEffects: CombatStatusEffectDto[];
+}
+
+export interface CombatStatusEffectDto {
+  label: string;
+  turnsRemaining: number;
+  polarity: 'buff' | 'debuff';
 }
 
 export interface CombatSkillIntentDto {
@@ -93,6 +100,7 @@ export interface EnemyDto {
   xpReward: number;
   signatureSkills: EnemySignatureSkillDto[];
   combatIntent: CombatSkillIntentDto | null;
+  statusEffects: CombatStatusEffectDto[];
 }
 
 export interface GearDto {

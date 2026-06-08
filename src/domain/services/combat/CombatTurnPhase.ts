@@ -7,6 +7,7 @@ import { CombatActionExecutor } from './CombatActionExecutor';
 import { CombatFloatingEvent } from './CombatFloatingEvent';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { spawnEncounterForStage } from './EncounterSpawner';
+import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { CombatantRef, TurnOrderService } from './TurnOrderService';
 import { VictoryRewardPhase } from './VictoryRewardPhase';
@@ -147,9 +148,13 @@ export class CombatTurnPhase {
     const events: string[] = [];
     const floatingEvents: CombatFloatingEvent[] = [];
     const cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
+    let statusEffects = CombatStatusEffectTracker.fromMap(combat.statusEffects);
     const actorKey = combatantKey(actor.side, actor.id);
     let usedSkillId: string | null = null;
     let skillList = [] as ReturnType<typeof listHeroCombatSkills>;
+    let statusApplications: ReturnType<
+      typeof this.actionExecutor.execute
+    >['statusApplications'] = [];
 
     if (actor.side === 'hero') {
       const hero = heroes.find((entry) => entry.id === actor.id);
@@ -158,15 +163,28 @@ export class CombatTurnPhase {
       }
 
       skillList = listHeroCombatSkills(hero);
-      const selected = this.skillSelector.selectHeroAction(hero, heroes, enemies, cooldowns);
+      const selected = this.skillSelector.selectHeroAction(
+        hero,
+        heroes,
+        enemies,
+        cooldowns,
+        statusEffects,
+      );
       if (!selected) {
         return { state, combat, events, floatingEvents };
       }
 
       usedSkillId = selected.skillId;
-      const result = this.actionExecutor.execute(selected.action, hero.name, heroes, enemies);
+      const result = this.actionExecutor.execute(
+        selected.action,
+        hero.name,
+        heroes,
+        enemies,
+        statusEffects,
+      );
       heroes = result.heroes;
       enemies = result.enemies;
+      statusApplications = result.statusApplications;
       if (result.event) events.push(result.event);
       floatingEvents.push(...result.floatingEvents);
     } else {
@@ -182,18 +200,39 @@ export class CombatTurnPhase {
       }
 
       usedSkillId = selected.skillId;
-      const result = this.actionExecutor.execute(selected.action, enemy.name, heroes, enemies);
+      const result = this.actionExecutor.execute(
+        selected.action,
+        enemy.name,
+        heroes,
+        enemies,
+        statusEffects,
+      );
       heroes = result.heroes;
       enemies = result.enemies;
+      statusApplications = result.statusApplications;
       if (result.event) events.push(result.event);
       floatingEvents.push(...result.floatingEvents);
     }
 
+    for (const application of statusApplications) {
+      statusEffects = statusEffects.apply({
+        combatantKey: application.combatantKey,
+        skillId: application.skillId,
+        kind: application.kind,
+        magnitude: application.magnitude,
+        durationTurns: application.durationTurns,
+      });
+    }
+
+    statusEffects = statusEffects.tickOnTurnEnd(actorKey);
     const updatedCooldowns = cooldowns.onTurnEnd(actorKey, usedSkillId, skillList).toMap();
 
     return {
       state: state.withHeroes(heroes),
-      combat: combat.withEnemies(enemies).withSkillCooldowns(updatedCooldowns),
+      combat: combat
+        .withEnemies(enemies)
+        .withSkillCooldowns(updatedCooldowns)
+        .withStatusEffects(statusEffects.toMap()),
       events,
       floatingEvents,
     };

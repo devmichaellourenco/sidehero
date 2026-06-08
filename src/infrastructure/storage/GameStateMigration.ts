@@ -208,6 +208,10 @@ export function migrateCombat(
           combat.skillCooldowns && typeof combat.skillCooldowns === 'object'
             ? (combat.skillCooldowns as CombatState['skillCooldowns'])
             : {},
+        statusEffects:
+          combat.statusEffects && typeof combat.statusEffects === 'object'
+            ? (combat.statusEffects as CombatState['statusEffects'])
+            : {},
       });
     }
   }

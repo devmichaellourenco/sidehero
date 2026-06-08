@@ -47,6 +47,7 @@ describe('CombatTurnPhase', () => {
       turnIndex: 0,
       round: 1,
       skillCooldowns: {},
+      statusEffects: {},
     });
     const state = GameState.restore({
       ...GameState.initial().toProps(),
@@ -62,5 +63,36 @@ describe('CombatTurnPhase', () => {
     expect(result.floatingEvents).toEqual([
       expect.objectContaining({ target: 'hero', targetId: 'k1', kind: 'damage', amount: expect.any(Number) }),
     ]);
+  });
+
+  it('sacerdotisa aplica Bênção com efeito persistido no combate', () => {
+    let priest = Hero.createStarter('p1', 'priest', 'Elara');
+    priest = Hero.restore({
+      ...priest.toProps(),
+      skillRanks: { blessing: 1 },
+      equippedSkillIds: ['basic_attack', 'blessing'],
+    });
+
+    const enemy = Enemy.forStage(2);
+    const combat = CombatState.restore({
+      ...CombatState.start([priest], [enemy], turnOrder).toProps(),
+      skillCooldowns: {},
+    });
+    const state = GameState.restore({
+      ...GameState.initial().toProps(),
+      heroes: [priest],
+      combat,
+      stage: 2,
+    });
+
+    const result = phase.execute(state);
+    const effects = result.state.combat?.statusEffects['hero:p1'] ?? [];
+
+    expect(result.events.join(' ')).toContain('Bênção');
+    expect(effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'buff_attack', skillId: 'blessing' }),
+      ]),
+    );
   });
 });

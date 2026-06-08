@@ -25,6 +25,11 @@ const ENEMY_SKILL_DISPLAY: Record<string, EnemySkillDisplay> = {
     name: 'Drenar Vida',
     description: 'Dreno mágico que foca o herói com menos vida.',
   },
+  wraith_curse: {
+    skillId: 'wraith_curse',
+    name: 'Maldição',
+    description: 'Reduz a defesa do herói mais ferido por alguns turnos.',
+  },
   dragon_breath: {
     skillId: 'dragon_breath',
     name: 'Baforada',

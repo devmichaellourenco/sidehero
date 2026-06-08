@@ -17,6 +17,7 @@ import {
   mapEnemyCombatIntent,
   mapHeroCombatIntent,
 } from '../mappers/CombatSkillIntentMapper';
+import { mapCombatantStatusEffects } from '../mappers/CombatStatusEffectMapper';
 
 export class GameStatePresenter {
   constructor(private readonly upgradeService: UpgradeService) {}
@@ -26,14 +27,21 @@ export class GameStatePresenter {
     const combat = state.combat;
     const combatEnemies = combat?.enemies ?? [];
     const skillCooldowns = combat?.skillCooldowns;
+    const statusEffects = combat?.statusEffects;
     const enemies = combatEnemies.map((enemy) =>
-      mapEnemyToDto(enemy, state.heroes, combatEnemies, skillCooldowns),
+      mapEnemyToDto(enemy, state.heroes, combatEnemies, skillCooldowns, statusEffects),
     );
     const activeActor = combat?.currentActor() ?? null;
 
     return {
       heroes: state.heroes.map((hero) =>
-        mapHeroToDtoWithCombatIntent(hero, state.heroes, combatEnemies, skillCooldowns),
+        mapHeroToDtoWithCombatIntent(
+          hero,
+          state.heroes,
+          combatEnemies,
+          skillCooldowns,
+          statusEffects,
+        ),
       ),
       enemies,
       enemy: enemies[0] ?? null,
@@ -62,10 +70,12 @@ function mapHeroToDtoWithCombatIntent(
   party: Hero[],
   enemies: Enemy[],
   skillCooldowns: Parameters<typeof mapHeroCombatIntent>[3],
+  combatStatusEffects: Parameters<typeof mapCombatantStatusEffects>[2],
 ) {
   return {
     ...mapHeroBaseToDto(hero),
-    combatIntent: mapHeroCombatIntent(hero, party, enemies, skillCooldowns),
+    combatIntent: mapHeroCombatIntent(hero, party, enemies, skillCooldowns, combatStatusEffects),
+    statusEffects: mapCombatantStatusEffects('hero', hero.id, combatStatusEffects),
   };
 }
 
@@ -74,6 +84,7 @@ function mapEnemyToDto(
   party: Parameters<typeof mapEnemyCombatIntent>[1],
   enemies: Parameters<typeof mapEnemyCombatIntent>[2],
   skillCooldowns: Parameters<typeof mapEnemyCombatIntent>[3],
+  combatStatusEffects: Parameters<typeof mapCombatantStatusEffects>[2],
 ): EnemyDto {
   return {
     id: enemy.id,
@@ -91,6 +102,7 @@ function mapEnemyToDto(
       .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
       .map((entry) => ({ name: entry.name, description: entry.description })),
     combatIntent: mapEnemyCombatIntent(enemy, party, enemies, skillCooldowns),
+    statusEffects: mapCombatantStatusEffects('enemy', enemy.id, combatStatusEffects),
   };
 }
 

@@ -6,6 +6,7 @@ import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { CombatSkillIntent } from './CombatSkillIntent';
 import { CombatSkillSelector } from './CombatSkillSelector';
+import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 
 export class CombatSkillIntentResolver {
@@ -16,12 +17,19 @@ export class CombatSkillIntentResolver {
     party: Hero[],
     enemies: Enemy[],
     cooldowns: SkillCooldownTracker,
+    statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
   ): CombatSkillIntent | null {
     if (!hero.isAlive()) return null;
 
     const key = combatantKey('hero', hero.id);
     const skills = listHeroCombatSkills(hero);
-    const selected = this.selector.selectHeroAction(hero, party, enemies, cooldowns);
+    const selected = this.selector.selectHeroAction(
+      hero,
+      party,
+      enemies,
+      cooldowns,
+      statusEffects,
+    );
     if (!selected) return null;
 
     return this.buildIntent(key, skills, selected.skillId, selected.action.skillName, cooldowns);

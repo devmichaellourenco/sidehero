@@ -7,6 +7,20 @@ export { BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   BASIC_ATTACK_SKILL,
   {
+    skillId: 'blessing',
+    kind: 'buff_attack',
+    targetPool: 'heroes',
+    targetScope: 'all',
+    targetPriority: 'lowest_hp_percent',
+    usePriority: 72,
+    initialCooldown: 1,
+    cooldownTurns: 3,
+    basePower: 4,
+    powerPerRank: 2,
+    attributeFactor: 0.5,
+    effectDurationTurns: 3,
+  },
+  {
     skillId: 'minor_heal',
     kind: 'heal_ally',
     targetPool: 'heroes',

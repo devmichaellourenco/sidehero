@@ -1,5 +1,6 @@
 import { EnemyDto } from '../../application/dto/GameStateDto';
 import { renderCombatSkillIntent } from './CombatSkillIntentPresentation';
+import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -62,6 +63,7 @@ export function renderEnemyBattleCard(
         <span class="enemy-tooltip-content hidden">${renderEnemyTooltipContent(enemy, stage)}</span>
       </div>
       ${renderCombatSkillIntent(enemy.combatIntent)}
+      ${renderCombatStatusEffects(enemy.statusEffects)}
       <div
         class="stat-bar health-bar enemy strip-bar"
         data-bar-label="${healthLabel}"

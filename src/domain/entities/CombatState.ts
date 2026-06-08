@@ -5,6 +5,7 @@ import {
   SkillCooldownMap,
   SkillCooldownTracker,
 } from '../services/combat/SkillCooldownTracker';
+import { StatusEffectMap } from '../services/combat/CombatStatusEffect';
 
 export interface CombatStateProps {
   enemies: EnemyProps[];
@@ -12,6 +13,7 @@ export interface CombatStateProps {
   turnIndex: number;
   round: number;
   skillCooldowns: SkillCooldownMap;
+  statusEffects: StatusEffectMap;
 }
 
 export class CombatState {
@@ -20,6 +22,7 @@ export class CombatState {
   readonly turnIndex: number;
   readonly round: number;
   readonly skillCooldowns: SkillCooldownMap;
+  readonly statusEffects: StatusEffectMap;
 
   private constructor(props: CombatStateProps) {
     this.enemies = props.enemies.map((enemy) => Enemy.restore(enemy));
@@ -27,12 +30,14 @@ export class CombatState {
     this.turnIndex = Math.max(0, props.turnIndex);
     this.round = Math.max(1, props.round);
     this.skillCooldowns = props.skillCooldowns ?? {};
+    this.statusEffects = props.statusEffects ?? {};
   }
 
   static restore(props: CombatStateProps): CombatState {
     return new CombatState({
       ...props,
       skillCooldowns: props.skillCooldowns ?? {},
+      statusEffects: props.statusEffects ?? {},
     });
   }
 
@@ -43,6 +48,7 @@ export class CombatState {
       turnIndex: 0,
       round: 1,
       skillCooldowns: SkillCooldownTracker.createInitial(heroes, enemies),
+      statusEffects: {},
     });
   }
 
@@ -70,6 +76,10 @@ export class CombatState {
     return this.clone({ skillCooldowns });
   }
 
+  withStatusEffects(statusEffects: StatusEffectMap): CombatState {
+    return this.clone({ statusEffects });
+  }
+
   advanceTurn(): CombatState {
     const nextIndex = this.turnIndex + 1;
     if (nextIndex >= this.turnQueue.length) {
@@ -89,6 +99,7 @@ export class CombatState {
       turnIndex: this.turnIndex,
       round: this.round,
       skillCooldowns: structuredClone(this.skillCooldowns),
+      statusEffects: structuredClone(this.statusEffects),
     };
   }
 
