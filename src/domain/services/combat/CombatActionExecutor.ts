@@ -1,55 +1,99 @@
 import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { CombatAction } from './CombatAction';
+import {
+  CombatFloatingEvent,
+  createDamageEvent,
+  createHealEvent,
+} from './CombatFloatingEvent';
 
 export interface CombatActionResult {
   heroes: Hero[];
   enemy: Enemy;
   event: string | null;
+  floatingEvents: CombatFloatingEvent[];
 }
 
 export class CombatActionExecutor {
   execute(action: CombatAction, hero: Hero, party: Hero[], enemy: Enemy): CombatActionResult {
     if (action.power <= 0 && action.kind !== 'heal_ally') {
-      return { heroes: party, enemy, event: null };
+      return { heroes: party, enemy, event: null, floatingEvents: [] };
     }
 
     switch (action.kind) {
       case 'heal_ally': {
         if (!action.targetHeroId) {
-          return { heroes: party, enemy, event: null };
+          return { heroes: party, enemy, event: null, floatingEvents: [] };
         }
 
+        const target = party.find((ally) => ally.id === action.targetHeroId);
+        if (!target) {
+          return { heroes: party, enemy, event: null, floatingEvents: [] };
+        }
+
+        const beforeHealth = target.currentHealth;
         const heroes = party.map((ally) =>
           ally.id === action.targetHeroId ? ally.heal(action.power) : ally,
         );
-        const target = heroes.find((ally) => ally.id === action.targetHeroId);
+        const healed = heroes.find((ally) => ally.id === action.targetHeroId)!;
+        const healEvent = createHealEvent(target.id, beforeHealth, healed.currentHealth);
+        const healedAmount = healEvent?.amount ?? action.power;
         const label = action.skillName ?? 'Cura';
-        const event = target
-          ? `${hero.name} usou ${label} em ${target.name} (+${action.power} HP)`
-          : null;
+        const event = `${hero.name} usou ${label} em ${healed.name} (+${healedAmount} HP)`;
 
-        return { heroes, enemy, event };
+        return {
+          heroes,
+          enemy,
+          event,
+          floatingEvents: healEvent ? [healEvent] : [],
+        };
       }
 
       case 'damage_magic':
       case 'damage_physical': {
+        const beforeHealth = enemy.stats.currentHealth;
         const updatedEnemy = enemy.takeDamage(action.power);
+        const damageEvent = createDamageEvent(
+          'enemy',
+          enemy.id,
+          beforeHealth,
+          updatedEnemy.stats.currentHealth,
+        );
+        const dealt = damageEvent?.amount ?? action.power;
         const verb = action.kind === 'damage_magic' ? 'lançou' : 'usou';
         const label = action.skillName ?? 'Ataque';
-        const event = `${hero.name} ${verb} ${label} (${action.power})`;
+        const event = `${hero.name} ${verb} ${label} (${dealt})`;
 
-        return { heroes: party, enemy: updatedEnemy, event };
+        return {
+          heroes: party,
+          enemy: updatedEnemy,
+          event,
+          floatingEvents: damageEvent ? [damageEvent] : [],
+        };
       }
 
       case 'basic_attack': {
+        const beforeHealth = enemy.stats.currentHealth;
         const updatedEnemy = enemy.takeDamage(action.power);
-        const event = `${hero.name} atacou por ${action.power} de dano`;
-        return { heroes: party, enemy: updatedEnemy, event };
+        const damageEvent = createDamageEvent(
+          'enemy',
+          enemy.id,
+          beforeHealth,
+          updatedEnemy.stats.currentHealth,
+        );
+        const dealt = damageEvent?.amount ?? action.power;
+        const event = `${hero.name} atacou por ${dealt} de dano`;
+
+        return {
+          heroes: party,
+          enemy: updatedEnemy,
+          event,
+          floatingEvents: damageEvent ? [damageEvent] : [],
+        };
       }
 
       default:
-        return { heroes: party, enemy, event: null };
+        return { heroes: party, enemy, event: null, floatingEvents: [] };
     }
   }
 }

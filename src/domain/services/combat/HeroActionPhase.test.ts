@@ -19,6 +19,9 @@ describe('HeroActionPhase', () => {
 
     expect(result.enemy.stats.currentHealth).toBeLessThan(enemy.stats.currentHealth);
     expect(result.events.some((e) => e.includes('Raio Arcano'))).toBe(true);
+    expect(result.floatingEvents).toEqual([
+      expect.objectContaining({ target: 'enemy', kind: 'damage', amount: expect.any(Number) }),
+    ]);
   });
 
   it('cura aliado ferido e persiste HP na party', () => {
@@ -41,5 +44,10 @@ describe('HeroActionPhase', () => {
     const healedKnight = result.heroes.find((h) => h.id === 'k1')!;
     expect(healedKnight.currentHealth).toBeGreaterThan(15);
     expect(result.events.some((e) => e.includes('Cura Menor'))).toBe(true);
+    expect(result.floatingEvents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ target: 'hero', targetId: 'k1', kind: 'heal', amount: expect.any(Number) }),
+      ]),
+    );
   });
 });

@@ -29,8 +29,14 @@ export function renderEnemyBattleCard(enemy: EnemyDto, stage: number, spriteHtml
   const healthLabel = formatEnemyHealthLabel(enemy);
 
   return `
-    <div class="enemy-battle-card">
-      <div class="enemy-battle-hitbox" data-enemy-tooltip tabindex="0" aria-label="${escapeHtml(enemy.name)}">
+    <div class="enemy-battle-card" data-enemy-id="${escapeHtml(enemy.id)}">
+      <div
+        class="enemy-battle-hitbox"
+        data-float-anchor="enemy"
+        data-enemy-tooltip
+        tabindex="0"
+        aria-label="${escapeHtml(enemy.name)}"
+      >
         ${spriteHtml}
         <div class="enemy-name">${escapeHtml(enemy.name)}</div>
         <span class="enemy-tooltip-content hidden">${renderEnemyTooltipContent(enemy, stage)}</span>

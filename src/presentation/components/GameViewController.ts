@@ -10,6 +10,8 @@ import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
 import { sendGameMessage } from '../../infrastructure/messaging/GameMessageBus';
 import { filterBattleLogMessages } from './BattleLogFilter';
+import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEventDto';
+import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer, EquipPickerMode } from './EquipPickerModalRenderer';
 import { GameStateChangeDetector } from './GameStateChangeDetector';
@@ -81,6 +83,7 @@ export class GameViewController {
   private upgradeNodes: UpgradeNodeDto[] = [];
 
   private readonly battleStrip: BattleStripRenderer;
+  private readonly battleFloats: BattleFloatingTextController;
   private readonly heroPanel: HeroPanelRenderer;
   private readonly modal: ModalController;
   private readonly inventoryModal: InventoryModalRenderer;
@@ -110,9 +113,15 @@ export class GameViewController {
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
 
+    const battleStripEl = root.querySelector('.battle-strip') as HTMLElement;
+
     this.battleStrip = new BattleStripRenderer(
       root.querySelector('#heroes-container')!,
       root.querySelector('#enemy-container')!,
+    );
+    this.battleFloats = new BattleFloatingTextController(
+      root.querySelector('#battle-float-layer')!,
+      battleStripEl,
     );
 
     this.heroPanel = new HeroPanelRenderer(root.querySelector('#hero-panels')!);
@@ -466,6 +475,12 @@ export class GameViewController {
       return;
     }
     this.render(response.state);
+    this.showCombatFloats(response.combatFloats);
+  }
+
+  private showCombatFloats(combatFloats?: CombatFloatingEventDto[]): void {
+    if (!combatFloats?.length) return;
+    this.battleFloats.show(combatFloats);
   }
 
   private async openNextChest(): Promise<void> {

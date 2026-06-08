@@ -28,8 +28,14 @@ export function renderHeroTooltipContent(hero: HeroDto): string {
 
 export function renderHeroBattleSprite(hero: HeroDto, glowHtml: string, spriteHtml: string): string {
   return `
-    <div class="hero-battle-card">
-      <div class="hero-sprite" data-hero-tooltip tabindex="0" aria-label="${escapeHtml(hero.name)}">
+    <div class="hero-battle-card" data-hero-id="${escapeHtml(hero.id)}">
+      <div
+        class="hero-sprite"
+        data-float-anchor="hero"
+        data-hero-tooltip
+        tabindex="0"
+        aria-label="${escapeHtml(hero.name)}"
+      >
         ${glowHtml}
         ${spriteHtml}
         <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>

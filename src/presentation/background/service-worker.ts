@@ -98,9 +98,9 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       return { ok: true, state };
     }
     case 'TICK': {
-      const state = await app.tick.execute(message.ticks ?? 1);
-      await syncBackgroundTickAlarm(state.upgradeLevels);
-      return { ok: true, state };
+      const result = await app.tick.execute(message.ticks ?? 1);
+      await syncBackgroundTickAlarm(result.state.upgradeLevels);
+      return { ok: true, state: result.state, combatFloats: result.combatFloats };
     }
     case 'OPEN_CHEST': {
       const result = await app.openChest.execute(message.chestId);

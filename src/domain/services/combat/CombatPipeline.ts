@@ -17,11 +17,13 @@ export class CombatPipeline implements ICombatService {
       return {
         state: state.withEnemy(Enemy.forStage(state.stage)),
         events: ['Novo inimigo apareceu no painel!'],
+        floatingEvents: [],
       };
     }
 
     const actionResult = this.heroAction.execute(state.heroes, state.currentEnemy);
     const events = [...actionResult.events];
+    const floatingEvents = [...actionResult.floatingEvents];
 
     if (actionResult.enemy.isAlive()) {
       const counterResult = this.enemyCounter.execute(
@@ -32,6 +34,7 @@ export class CombatPipeline implements ICombatService {
       return {
         state: counterResult.state,
         events: [...events, ...counterResult.events],
+        floatingEvents: [...floatingEvents, ...counterResult.floatingEvents],
       };
     }
 
@@ -44,6 +47,7 @@ export class CombatPipeline implements ICombatService {
     return {
       state: victoryResult.state,
       events: [...events, ...victoryResult.events],
+      floatingEvents,
     };
   }
 }

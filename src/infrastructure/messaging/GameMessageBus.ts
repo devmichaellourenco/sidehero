@@ -1,3 +1,4 @@
+import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEventDto';
 import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
 import { AscensionOptionDto } from '../../application/dto/AscensionOptionDto';
@@ -34,6 +35,7 @@ export type GameResponse =
   | {
       ok: true;
       state: GameStateDto;
+      combatFloats?: CombatFloatingEventDto[];
       openedGear?: GearDto;
       openedGears?: GearDto[];
       equippedCount?: number;
