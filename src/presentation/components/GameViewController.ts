@@ -3,6 +3,7 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { HeroDetailTab } from './HeroDetailModalRenderer';
 import { AutoBattleController } from '../controllers/AutoBattleController';
+import { GearMutationQueue } from '../controllers/GearMutationQueue';
 import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
 import { LootFlowController } from '../controllers/LootFlowController';
@@ -52,6 +53,7 @@ export class GameViewController {
   private readonly lootFlow = new LootFlowController();
   private readonly prefsController = new GamePreferencesController();
   private readonly autoBattleController = new AutoBattleController();
+  private readonly gearMutations = new GearMutationQueue();
   private refreshTimer: number | null = null;
   private heroSkillNodes: SkillNodeDto[] = [];
   private heroAscensionOptions: AscensionOptionDto[] = [];
@@ -84,6 +86,7 @@ export class GameViewController {
 
   private readonly battleStrip: BattleStripRenderer;
   private readonly battleFloats: BattleFloatingTextController;
+  private readonly heroPanelsEl: HTMLElement;
   private readonly heroPanel: HeroPanelRenderer;
   private readonly modal: ModalController;
   private readonly inventoryModal: InventoryModalRenderer;
@@ -124,7 +127,8 @@ export class GameViewController {
       battleStripEl,
     );
 
-    this.heroPanel = new HeroPanelRenderer(root.querySelector('#hero-panels')!);
+    this.heroPanelsEl = root.querySelector('#hero-panels')!;
+    this.heroPanel = new HeroPanelRenderer(this.heroPanelsEl);
 
     this.modal = new ModalController(
       root.querySelector('#modal-root')!,
@@ -156,6 +160,7 @@ export class GameViewController {
     );
 
     this.prefsController.apply(this.state);
+    this.bindHeroPanelDelegation();
     this.bindModalActionDelegation();
 
     this.tickBtn.addEventListener('click', () => this.tick());
@@ -560,13 +565,8 @@ export class GameViewController {
     }
   }
 
-  private equippingGear = false;
-
   private async equipGear(heroId: string, gearId: string): Promise<void> {
-    if (this.equippingGear) return;
-
-    this.equippingGear = true;
-    try {
+    await this.gearMutations.run(async () => {
       const response = await sendGameMessage({ type: 'EQUIP_GEAR', heroId, gearId });
       if (!response.ok) {
         this.handleFailedResponse(response.error);
@@ -578,9 +578,7 @@ export class GameViewController {
       if (gearName) {
         this.toasts.show(`${gearName} equipado!`, 'loot');
       }
-    } finally {
-      this.equippingGear = false;
-    }
+    });
   }
 
   private async handleLootReceived(gearIds: string[], gearNames: string[] = []): Promise<void> {
@@ -612,30 +610,28 @@ export class GameViewController {
       return;
     }
 
-    const response = await sendGameMessage({
-      type: 'EQUIP_BEST_LOADOUT',
-      gearIds,
+    await this.gearMutations.run(async () => {
+      const response = await sendGameMessage({
+        type: 'EQUIP_BEST_LOADOUT',
+        gearIds,
+      });
+
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
+
+      const equippedCount = response.equippedCount ?? 0;
+      this.afterGearMutation(response.state);
+
+      if (equippedCount > 0 && !options.silent) {
+        const label = equippedCount === 1 ? '1 item equipado' : `${equippedCount} itens equipados`;
+        const message = options.fromLoot ? `Loot auto-equipado: ${label}` : `Equipe otimizada: ${label}`;
+        this.toasts.show(message, options.fromLoot ? 'loot' : 'info');
+      } else if (!options.fromLoot && !options.silent) {
+        this.toasts.show('Nenhum upgrade disponível no momento', 'info');
+      }
     });
-
-    if (!response.ok) {
-      this.handleFailedResponse(response.error);
-      return;
-    }
-
-    const equippedCount = response.equippedCount ?? 0;
-    this.render(response.state);
-
-    if (equippedCount > 0 && !options.silent) {
-      const label = equippedCount === 1 ? '1 item equipado' : `${equippedCount} itens equipados`;
-      const message = options.fromLoot ? `Loot auto-equipado: ${label}` : `Equipe otimizada: ${label}`;
-      this.toasts.show(message, options.fromLoot ? 'loot' : 'info');
-    } else if (!options.fromLoot && !options.silent) {
-      this.toasts.show('Nenhum upgrade disponível no momento', 'info');
-    }
-
-    if (this.modal.isOpen() && this.modalStack.length > 0) {
-      this.renderModalTop();
-    }
   }
 
   private async equipRecommendedLoot(gearIds: string[]): Promise<void> {
@@ -679,13 +675,15 @@ export class GameViewController {
   }
 
   private async unequipGear(heroId: string, slot: GearSlotKey): Promise<void> {
-    const response = await sendGameMessage({ type: 'UNEQUIP_GEAR', heroId, slot });
-    if (!response.ok) {
-      this.handleFailedResponse(response.error);
-      return;
-    }
+    await this.gearMutations.run(async () => {
+      const response = await sendGameMessage({ type: 'UNEQUIP_GEAR', heroId, slot });
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
 
-    this.afterGearMutation(response.state);
+      this.afterGearMutation(response.state);
+    });
   }
 
   private afterGearMutation(state: GameStateDto): void {
@@ -711,14 +709,93 @@ export class GameViewController {
     }
   }
 
+  /** Delegação no painel de heróis — sobrevive a re-renders do tick/refresh. */
+  private bindHeroPanelDelegation(): void {
+    this.heroPanelsEl.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest(
+        '.equipment-slot-clickable, [data-hero-open]',
+      ) as HTMLElement | null;
+
+      if (!target) return;
+
+      if (target.classList.contains('equipment-slot-clickable')) {
+        event.preventDefault();
+        event.stopPropagation();
+        const heroId = target.getAttribute('data-hero');
+        const slot = target.getAttribute('data-slot');
+        if (heroId && slot) {
+          this.openEquipPickerFromSlot(heroId, slot);
+        }
+        return;
+      }
+
+      const heroId = target.getAttribute('data-hero-open');
+      if (heroId) {
+        this.openHeroDetailModal(heroId);
+      }
+    });
+  }
+
   /** Delegação no body do modal — sobrevive a re-renders e não quebra com ticks. */
   private bindModalActionDelegation(): void {
     this.modal.getBody().addEventListener('click', (event) => {
       const target = (event.target as HTMLElement).closest(
-        '[data-equip-gear], [data-pick-gear], [data-pick-hero], [data-unequip-hero], [data-loot-equip-hero]',
+        [
+          '.equipment-slot-clickable',
+          '[data-equip-gear]',
+          '[data-pick-gear]',
+          '[data-pick-hero]',
+          '[data-unequip-hero]',
+          '[data-loot-equip-hero]',
+          '[data-optimize-loadout]',
+          '[data-loot-keep]',
+          '[data-loot-batch-equip]',
+          '[data-loot-batch-keep]',
+        ].join(', '),
       ) as HTMLElement | null;
 
       if (!target || !this.modal.isOpen()) return;
+      if (target instanceof HTMLButtonElement && target.disabled) return;
+
+      const equipSlot = target.classList.contains('equipment-slot-clickable')
+        ? target
+        : null;
+      if (equipSlot) {
+        event.preventDefault();
+        const heroId = equipSlot.getAttribute('data-hero');
+        const slot = equipSlot.getAttribute('data-slot');
+        if (heroId && slot) {
+          this.openEquipPickerFromSlot(heroId, slot);
+        }
+        return;
+      }
+
+      if (target.hasAttribute('data-optimize-loadout')) {
+        event.preventDefault();
+        void this.optimizeLoadout();
+        return;
+      }
+
+      if (target.hasAttribute('data-loot-keep')) {
+        event.preventDefault();
+        this.closeLootModal();
+        return;
+      }
+
+      if (target.hasAttribute('data-loot-batch-keep')) {
+        event.preventDefault();
+        this.closeLootBatchModal();
+        return;
+      }
+
+      if (target.hasAttribute('data-loot-batch-equip')) {
+        event.preventDefault();
+        const topView = this.modalStack[this.modalStack.length - 1];
+        if (topView?.type === 'loot-batch') {
+          void this.equipRecommendedLoot(topView.gearIds);
+        }
+        return;
+      }
 
       const equipFromInventory = target.getAttribute('data-equip-gear');
       if (equipFromInventory) {
@@ -1148,10 +1225,7 @@ export class GameViewController {
     });
 
     this.battleStrip.render(state);
-    this.heroPanel.render(state, {
-      onHeroClick: (heroId) => this.openHeroDetailModal(heroId),
-      onSlotClick: (heroId, slot) => this.openEquipPickerFromSlot(heroId, slot),
-    });
+    this.heroPanel.render(state);
 
     this.shopRefreshUnlocked = state.featureFlags.shopRefresh;
     this.shopRefreshRemaining = Math.max(0, state.shopRefreshLimit - state.shopRefreshUses);

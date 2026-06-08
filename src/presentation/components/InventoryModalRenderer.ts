@@ -88,7 +88,6 @@ export class InventoryModalRenderer {
       `;
       this.bindFilters(container, handlers);
       this.bindSort(container, handlers);
-      this.bindOptimize(container, handlers);
       return;
     }
 
@@ -101,7 +100,6 @@ export class InventoryModalRenderer {
       `;
       this.bindFilters(container, handlers);
       this.bindSort(container, handlers);
-      this.bindOptimize(container, handlers);
       return;
     }
 
@@ -125,7 +123,6 @@ export class InventoryModalRenderer {
 
     this.bindFilters(container, handlers);
     this.bindSort(container, handlers);
-    this.bindOptimize(container, handlers);
 
     void handlers;
   }
@@ -137,14 +134,6 @@ export class InventoryModalRenderer {
         this.activeFilter = filter;
         handlers.onFilterChange(filter);
       });
-    });
-  }
-
-  private bindOptimize(container: HTMLElement, handlers: InventoryModalHandlers): void {
-    const button = container.querySelector('[data-optimize-loadout]') as HTMLButtonElement | null;
-    button?.addEventListener('click', () => {
-      if (button.disabled) return;
-      handlers.onOptimizeLoadout();
     });
   }
 

@@ -54,8 +54,6 @@ export class LootModalRenderer {
       </div>
     `;
 
-    container.querySelector('[data-loot-keep]')?.addEventListener('click', () => {
-      handlers.onKeepInInventory();
-    });
+    void handlers;
   }
 }

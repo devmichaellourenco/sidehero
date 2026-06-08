@@ -112,13 +112,6 @@ export class HeroDetailModalRenderer {
       });
     });
 
-    container.querySelectorAll('.equipment-slot-clickable').forEach((button) => {
-      button.addEventListener('click', () => {
-        const slot = button.getAttribute('data-slot');
-        if (slot) handlers.onSlotClick(hero.id, slot);
-      });
-    });
-
     container.querySelectorAll('[data-attr-spend]').forEach((button) => {
       button.addEventListener('click', () => {
         const attr = button.getAttribute('data-attr-spend') as 'str' | 'dex' | 'int';

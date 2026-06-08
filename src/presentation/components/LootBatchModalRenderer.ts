@@ -61,14 +61,6 @@ export class LootBatchModalRenderer {
       }
     `;
 
-    const equipButton = container.querySelector('[data-loot-batch-equip]') as HTMLButtonElement | null;
-    equipButton?.addEventListener('click', () => {
-      if (equipButton.disabled) return;
-      handlers.onEquipRecommended();
-    });
-
-    container.querySelector('[data-loot-batch-keep]')?.addEventListener('click', () => {
-      handlers.onKeepAll();
-    });
+    void handlers;
   }
 }

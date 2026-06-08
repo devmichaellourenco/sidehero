@@ -6,15 +6,10 @@ import { renderHeroActiveSkills } from './HeroActiveSkillsPresentation';
 import { renderHeroBars } from './HeroBarsPresentation';
 import { renderHeroEquipmentRow } from './GearPresentation';
 
-export type HeroPanelHandlers = {
-  onHeroClick: (heroId: string) => void;
-  onSlotClick: (heroId: string, slot: string) => void;
-};
-
 export class HeroPanelRenderer {
   constructor(private readonly container: HTMLElement) {}
 
-  render(state: GameStateDto, handlers: HeroPanelHandlers): void {
+  render(state: GameStateDto): void {
     const attackIcon = getAssetUrl(ASSETS.ui.attack);
     const defenseIcon = getAssetUrl(ASSETS.ui.defense);
     const healthIcon = getAssetUrl(ASSETS.ui.health);
@@ -44,22 +39,6 @@ export class HeroPanelRenderer {
         `;
       })
       .join('');
-
-    this.container.querySelectorAll('[data-hero-open]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const heroId = button.getAttribute('data-hero-open');
-        if (heroId) handlers.onHeroClick(heroId);
-      });
-    });
-
-    this.container.querySelectorAll('.equipment-slot-clickable').forEach((button) => {
-      button.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const heroId = button.getAttribute('data-hero');
-        const slot = button.getAttribute('data-slot');
-        if (heroId && slot) handlers.onSlotClick(heroId, slot);
-      });
-    });
 
     bindBarTooltips(this.container);
     bindEquipmentTooltips(this.container);
