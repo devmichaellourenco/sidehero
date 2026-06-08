@@ -1,3 +1,5 @@
+import { HeroActiveSkillStatDto } from './GameStateDto';
+
 export type SkillBranchDto = 'offense' | 'defense' | 'utility';
 export type SkillScopeDto = 'universal' | 'class';
 export type SkillNodeStatusDto = 'locked' | 'ready' | 'owned' | 'maxed';
@@ -12,7 +14,9 @@ export interface SkillNodeDto {
   name: string;
   description: string;
   branch: SkillBranchDto;
+  branchLabel: string;
   scope: SkillScopeDto;
+  scopeLabel: string;
   maxRank: number;
   currentRank: number;
   status: SkillNodeStatusDto;
@@ -21,6 +25,8 @@ export interface SkillNodeDto {
   canDeactivate: boolean;
   activationCost: number;
   scaling: string;
+  scalingLabel: string;
+  battleStats: HeroActiveSkillStatDto[];
   requirements: SkillRequirementDto[];
 }
 

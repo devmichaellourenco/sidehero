@@ -3,6 +3,7 @@ import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
+import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
 import { renderHeroAttributesTab } from './hero-detail/HeroAttributesTabRenderer';
 import { renderHeroClassTab } from './hero-detail/HeroClassTabRenderer';
 import { renderHeroSheetTab } from './hero-detail/HeroSheetTabRenderer';
@@ -75,6 +76,7 @@ export class HeroDetailModalRenderer {
     this.bindInteractions(container, hero, handlers);
     bindBarTooltips(container);
     bindEquipmentTooltips(container);
+    bindSkillChipTooltips(container);
   }
 
   private renderTabContent(hero: HeroDto): string {

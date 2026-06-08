@@ -9,10 +9,23 @@ export interface GearRequirementsDto {
   int?: number;
 }
 
+export interface HeroActiveSkillStatDto {
+  label: string;
+  value: string;
+}
+
 export interface HeroActiveSkillDto {
   id: string;
   name: string;
   branch: 'offense' | 'defense' | 'utility';
+  branchLabel: string;
+  description: string;
+  currentRank: number;
+  maxRank: number;
+  scope: 'universal' | 'class';
+  scopeLabel: string;
+  scalingLabel: string;
+  battleStats: HeroActiveSkillStatDto[];
 }
 
 export interface HeroDto {

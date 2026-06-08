@@ -1,6 +1,7 @@
 import { AscensionOptionDto } from '../../../application/dto/AscensionOptionDto';
 import { HeroDto } from '../../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../../application/dto/SkillNodeDto';
+import { renderSkillCard } from '../SkillCardPresentation';
 
 export interface HeroClassTabData {
   hero: HeroDto;
@@ -94,39 +95,21 @@ function renderAscensionSkillNodes(
   maxActiveSkills: number,
 ): string {
   const cards = nodes
-    .map((node) => {
-      const rankLabel = `${node.currentRank}/${node.maxRank}`;
-      const equipLabel = node.isEquipped ? 'Ativa' : 'Inativa';
-      const canAllocate = node.status === 'ready' && unspentPoints > 0;
-      const canActivate = node.canActivate;
-      const canDeactivate = node.canDeactivate;
-
-      return `
-        <article class="skill-card skill-card-${node.status}">
-          <header class="skill-card-header">
-            <h4>${node.name}</h4>
-            <span class="skill-rank">${rankLabel}</span>
-          </header>
-          <p class="skill-desc">${node.description}</p>
-          <p class="skill-meta">Ascensão · ${node.scaling.toUpperCase()}</p>
-          <ul class="skill-reqs">
-            ${node.requirements.map((req) => `<li class="${req.met ? 'met' : 'unmet'}">${req.label}</li>`).join('')}
-          </ul>
-          <div class="skill-actions">
-            <button type="button" data-ascension-allocate="${node.id}" ${canAllocate ? '' : 'disabled'}>+1 rank</button>
-            <button type="button" data-skill-activate="${node.id}" ${canActivate ? '' : 'disabled'}>Ativar (${node.activationCost} ouro)</button>
-            <button type="button" data-skill-deactivate="${node.id}" ${canDeactivate ? '' : 'disabled'}>Desativar</button>
-            <span class="skill-equip-status">${equipLabel}</span>
-          </div>
-        </article>
-      `;
-    })
+    .map((node) =>
+      renderSkillCard(node, {
+        allocateAttr: 'data-ascension-allocate',
+        activateAttr: 'data-skill-activate',
+        deactivateAttr: 'data-skill-deactivate',
+        canAllocate: node.status === 'ready' && unspentPoints > 0,
+      }),
+    )
     .join('');
 
   return `
     <p class="hero-detail-hint">
       Pontos de ascensão: <strong>${unspentPoints}</strong>
       · Slots de batalha: <strong>${activeSkillCount}/${maxActiveSkills}</strong>
+      · Passe o mouse sobre uma skill para ver detalhes de combate
     </p>
     <div class="skill-list">${cards}</div>
   `;

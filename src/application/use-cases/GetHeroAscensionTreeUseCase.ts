@@ -39,7 +39,7 @@ export class GetHeroAscensionTreeUseCase {
       state: this.presenter.present(state),
       options: mapAscensionOptions(this.ascensionService.listOptions(hero)),
       ascensionName: ascension?.name ?? null,
-      ascensionSkillNodes: mapSkillTree(this.skillService.buildAscensionTree(hero)),
+      ascensionSkillNodes: mapSkillTree(hero, this.skillService.buildAscensionTree(hero)),
     };
   }
 }

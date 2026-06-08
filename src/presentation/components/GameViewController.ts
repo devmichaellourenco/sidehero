@@ -713,10 +713,18 @@ export class GameViewController {
   private bindHeroPanelDelegation(): void {
     this.heroPanelsEl.addEventListener('click', (event) => {
       const target = (event.target as HTMLElement).closest(
-        '.equipment-slot-clickable, [data-hero-open]',
+        '.equipment-slot-clickable, [data-hero-skills-open], [data-hero-open]',
       ) as HTMLElement | null;
 
       if (!target) return;
+
+      const skillsHeroId = target.getAttribute('data-hero-skills-open');
+      if (skillsHeroId) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.openHeroDetailModal(skillsHeroId, 'skills');
+        return;
+      }
 
       if (target.classList.contains('equipment-slot-clickable')) {
         event.preventDefault();
@@ -860,10 +868,18 @@ export class GameViewController {
     this.pushModal({ type: 'inventory' });
   }
 
-  private openHeroDetailModal(heroId: string): void {
+  private openHeroDetailModal(heroId: string, tab: HeroDetailTab = 'sheet'): void {
     this.modalStack.length = 0;
-    this.heroDetailModal.setActiveTab('sheet');
-    void this.loadHeroSkillTree(heroId).then(() => {
+    this.heroDetailModal.setActiveTab(tab);
+
+    const prepare =
+      tab === 'skills'
+        ? this.loadHeroSkillTree(heroId)
+        : tab === 'class'
+          ? this.loadHeroAscensionTree(heroId)
+          : this.loadHeroSkillTree(heroId);
+
+    void prepare.then(() => {
       this.pushModal({ type: 'hero-detail', heroId });
     });
   }

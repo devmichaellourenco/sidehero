@@ -1,19 +1,8 @@
 import { Hero } from '../../domain/entities/Hero';
-import { getSkillById } from '../../domain/progression/SkillCatalog';
 import { MAX_ACTIVE_BATTLE_SKILLS } from '../../domain/progression/SkillBattleSlots';
 import { AttributesDto } from '../dto/AttributesDto';
-import { HeroActiveSkillDto, HeroDto } from '../dto/GameStateDto';
-
-function mapActiveSkills(equippedSkillIds: string[]): HeroActiveSkillDto[] {
-  return equippedSkillIds.map((skillId) => {
-    const definition = getSkillById(skillId);
-    return {
-      id: skillId,
-      name: definition?.name ?? skillId,
-      branch: definition?.branch ?? 'utility',
-    };
-  });
-}
+import { HeroDto } from '../dto/GameStateDto';
+import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
 
 function mapAttributes(attrs: { str: number; dex: number; int: number }): AttributesDto {
   return { str: attrs.str, dex: attrs.dex, int: attrs.int };
@@ -67,7 +56,7 @@ export function mapHeroToDto(hero: Hero): HeroDto {
     unspentAscensionPoints: props.unspentAscensionPoints,
     skillRanks: { ...props.skillRanks },
     equippedSkillIds: [...props.equippedSkillIds],
-    activeSkills: mapActiveSkills(props.equippedSkillIds),
+    activeSkills: mapHeroActiveSkills(hero),
     maxActiveSkills: MAX_ACTIVE_BATTLE_SKILLS,
     ascensionId: props.ascensionId,
     hasUnspentPoints: hero.hasUnspentPoints,

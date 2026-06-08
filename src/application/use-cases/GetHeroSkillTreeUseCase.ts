@@ -27,7 +27,7 @@ export class GetHeroSkillTreeUseCase {
 
     return {
       state: this.presenter.present(state),
-      nodes: mapSkillTree(this.skillService.buildTree(hero)),
+      nodes: mapSkillTree(hero, this.skillService.buildTree(hero)),
     };
   }
 }

@@ -2,6 +2,7 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
+import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
 import { renderHeroActiveSkills } from './HeroActiveSkillsPresentation';
 import { renderHeroBars } from './HeroBarsPresentation';
 import { renderHeroEquipmentRow } from './GearPresentation';
@@ -42,5 +43,6 @@ export class HeroPanelRenderer {
 
     bindBarTooltips(this.container);
     bindEquipmentTooltips(this.container);
+    bindSkillChipTooltips(this.container);
   }
 }
