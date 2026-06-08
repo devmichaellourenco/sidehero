@@ -1,4 +1,5 @@
 import { GameStateDto, GearDto, HeroDto } from '../../application/dto/GameStateDto';
+import { GearUpgradeHintDto } from '../../application/dto/GearUpgradeHintDto';
 import { EquippedGearDto, GEAR_SLOT_LABELS, GearSlotKey } from './GearPresentation';
 
 export interface GearStatComparison {
@@ -14,11 +15,7 @@ export interface BestHeroRecommendation {
   totalGain: number;
 }
 
-function gearPower(gear: Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>): number {
-  return gear.attackBonus + gear.defenseBonus + gear.healthBonus;
-}
-
-export type GearUpgradeStatus = 'upgrade' | 'downgrade' | 'equal';
+export type GearUpgradeStatus = GearUpgradeHintDto['status'];
 
 export interface GearUpgradeInfo {
   status: GearUpgradeStatus;
@@ -26,21 +23,26 @@ export interface GearUpgradeInfo {
   recommendation: BestHeroRecommendation | null;
 }
 
+function toRecommendation(hint: GearUpgradeHintDto): BestHeroRecommendation {
+  return {
+    heroId: hint.heroId,
+    heroName: hint.heroName,
+    equipped: hint.equipped,
+    totalGain: hint.gain,
+  };
+}
+
 export function getGearUpgradeInfo(state: GameStateDto, gear: GearDto): GearUpgradeInfo {
-  const recommendation = findBestHeroForGear(state, gear);
-  if (!recommendation) {
+  const hint = state.gearUpgradeHints[gear.id];
+  if (!hint) {
     return { status: 'equal', gain: 0, recommendation: null };
   }
 
-  if (recommendation.totalGain > 0) {
-    return { status: 'upgrade', gain: recommendation.totalGain, recommendation };
-  }
-
-  if (recommendation.totalGain < 0) {
-    return { status: 'downgrade', gain: recommendation.totalGain, recommendation };
-  }
-
-  return { status: 'equal', gain: 0, recommendation };
+  return {
+    status: hint.status,
+    gain: hint.gain,
+    recommendation: toRecommendation(hint),
+  };
 }
 
 export function renderUpgradeBadge(status: GearUpgradeStatus): string {
@@ -75,26 +77,8 @@ export function sortGearByBestGain(state: GameStateDto, gears: GearDto[]): GearD
 }
 
 export function findBestHeroForGear(state: GameStateDto, gear: GearDto): BestHeroRecommendation | null {
-  if (state.heroes.length === 0) return null;
-
-  let best: BestHeroRecommendation | null = null;
-
-  for (const hero of state.heroes) {
-    const equipped = hero.equipment[gear.slot] ?? null;
-    const currentPower = equipped ? gearPower(equipped) : 0;
-    const totalGain = gearPower(gear) - currentPower;
-
-    if (!best || totalGain > best.totalGain) {
-      best = {
-        heroId: hero.id,
-        heroName: hero.name,
-        equipped,
-        totalGain,
-      };
-    }
-  }
-
-  return best;
+  const hint = state.gearUpgradeHints[gear.id];
+  return hint ? toRecommendation(hint) : null;
 }
 
 function formatDelta(current: number, next: number, label: string): string {

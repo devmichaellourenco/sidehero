@@ -1,6 +1,7 @@
 import { AttributesDto } from './AttributesDto';
 import { ChestProgressDto } from '../mappers/ChestProgressMapper';
 import { FeatureFlagsDto } from './FeatureFlagsDto';
+import { GearUpgradeHintDto } from './GearUpgradeHintDto';
 
 export interface GearRequirementsDto {
   minLevel: number;
@@ -119,4 +120,5 @@ export interface GameStateDto {
   purchasableUpgradeCount: number;
   featureFlags: FeatureFlagsDto;
   chestProgress: ChestProgressDto;
+  gearUpgradeHints: Record<string, GearUpgradeHintDto>;
 }

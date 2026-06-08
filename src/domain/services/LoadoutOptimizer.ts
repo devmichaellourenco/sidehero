@@ -13,6 +13,16 @@ export interface EquipAction {
   gain: number;
 }
 
+export type GearUpgradeStatus = 'upgrade' | 'downgrade' | 'equal';
+
+export interface GearUpgradePreview {
+  heroId: string;
+  heroName: string;
+  gain: number;
+  status: GearUpgradeStatus;
+  equipped: Gear | null;
+}
+
 function gearPower(gear: Pick<Gear, 'attackBonus' | 'defenseBonus' | 'healthBonus'>): number {
   return gear.attackBonus + gear.defenseBonus + gear.healthBonus;
 }
@@ -24,6 +34,47 @@ function equippedPower(hero: Hero, slot: GearSlot): number {
 
 export class LoadoutOptimizer {
   constructor(private readonly requirementChecker = new GearRequirementChecker()) {}
+
+  previewUpgradeForGear(state: GameState, gear: Gear): GearUpgradePreview | null {
+    if (state.heroes.length === 0) return null;
+
+    let best: { hero: Hero; gain: number; equipped: Gear | null } | null = null;
+
+    for (const hero of state.heroes) {
+      if (!this.requirementChecker.meets(hero, gear)) continue;
+
+      const equipped = hero.toProps().equipment?.[gear.slot] ?? null;
+      const currentPower = equipped ? gearPower(equipped) : 0;
+      const gain = gearPower(gear) - currentPower;
+
+      if (!best || gain > best.gain) {
+        best = { hero, gain, equipped };
+      }
+    }
+
+    if (!best) return null;
+
+    return {
+      heroId: best.hero.id,
+      heroName: best.hero.name,
+      gain: best.gain,
+      status: best.gain > 0 ? 'upgrade' : best.gain < 0 ? 'downgrade' : 'equal',
+      equipped: best.equipped,
+    };
+  }
+
+  buildInventoryUpgradePreviews(state: GameState): Record<string, GearUpgradePreview> {
+    const previews: Record<string, GearUpgradePreview> = {};
+
+    for (const gear of state.inventory) {
+      const preview = this.previewUpgradeForGear(state, gear);
+      if (preview) {
+        previews[gear.id] = preview;
+      }
+    }
+
+    return previews;
+  }
 
   planBestLoadout(state: GameState, gearIds?: string[]): EquipAction[] {
     const allowedIds = gearIds ? new Set(gearIds) : null;

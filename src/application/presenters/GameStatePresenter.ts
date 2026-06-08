@@ -7,6 +7,7 @@ import { mapChestProgress } from '../mappers/ChestProgressMapper';
 import { mapFeatureFlags } from '../mappers/FeatureFlagsMapper';
 import { mapHeroToDto } from '../mappers/HeroDtoMapper';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
+import { buildInventoryUpgradeHints } from '../mappers/GearUpgradePreviewMapper';
 import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
 
@@ -37,6 +38,7 @@ export class GameStatePresenter {
       purchasableUpgradeCount: this.upgradeService.countAvailable(state),
       featureFlags: mapFeatureFlags(state.upgradeLevels),
       chestProgress: mapChestProgress(state.totalBattlesWon),
+      gearUpgradeHints: buildInventoryUpgradeHints(state),
     };
   }
 }
