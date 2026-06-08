@@ -9,9 +9,11 @@ import {
   syncBackgroundTickAlarm,
   TICK_ALARM,
 } from '../../infrastructure/background/BackgroundTickScheduler';
+import { SerialTaskRunner } from '../../infrastructure/background/SerialTaskRunner';
 
 const app = createGameApplication();
 const sidebarPrefsStore = new SidebarPreferencesStore();
+const stateMutations = new SerialTaskRunner();
 
 async function syncTickAlarmFromState(): Promise<void> {
   const state = await app.getState.execute();
@@ -70,7 +72,7 @@ chrome.alarms.onAlarm.addListener(async (alarm: chrome.alarms.Alarm) => {
     const tickLevel = state.upgradeLevels.background_tick ?? 0;
     if (tickLevel < 1) return;
 
-    await app.tick.execute(1);
+    await stateMutations.run(() => app.tick.execute(1));
   } catch (error) {
     console.error('[Side Hero] Erro no tick idle:', error);
   }
@@ -81,7 +83,8 @@ chrome.runtime.onMessage.addListener((
   _sender: chrome.runtime.MessageSender,
   sendResponse: (response: GameResponse) => void,
 ) => {
-  handleMessage(message)
+  stateMutations
+    .run(() => handleMessage(message))
     .then(sendResponse)
     .catch((error: Error) => {
       const response: GameResponse = { ok: false, error: error.message };
