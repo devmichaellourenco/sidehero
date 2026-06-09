@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { buildPhaseId } from '../../campaign/CampaignIds';
+import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { PhaseRun } from '../../campaign/PhaseRun';
+import { EncounterResolver } from '../../campaign/EncounterResolver';
 import { GameState } from '../../entities/GameState';
 import { Hero } from '../../entities/Hero';
 import { CombatTurnPhase } from './CombatTurnPhase';
@@ -46,5 +48,44 @@ describe('CombatTurnPhase', () => {
 
     expect(state.heroes[0].currentHealth).toBe(state.heroes[0].maxHealth);
     expect(state.phaseRun?.waveIndex).toBe(0);
+  });
+
+  it('inicia fase 1-3 após derrotar boss da 1-2 no tick seguinte', () => {
+    const phaseHandlers = new PhaseCombatHandlers();
+    const resolver = new EncounterResolver();
+    const phaseId = buildPhaseId(1, 2);
+    const phaseRun = PhaseRun.start(phaseId).advanceWave();
+
+    let state = GameState.restore({
+      ...GameState.initial().toProps(),
+      campaignProgress: {
+        ...GameState.initial().campaignProgress.toProps(),
+        selectedPhaseId: phaseId,
+      },
+      phaseRun: phaseRun.toProps(),
+      combat: null,
+    });
+
+    state = phaseHandlers.startPhaseRun(state, phaseRun).state;
+
+    const boss = resolver.resolve(phaseId, 1);
+    expect(boss).not.toBeNull();
+
+    const victory = phaseHandlers.onBossDefeated(
+      state,
+      boss!.enemies,
+      state.heroes,
+      boss!.meta,
+    );
+    state = victory.state;
+
+    expect(state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
+    expect(state.phaseRun).toBeNull();
+
+    const nextTick = phase.execute(state);
+
+    expect(nextTick.state.phaseRun?.phaseId).toBe(buildPhaseId(1, 3));
+    expect(nextTick.state.phaseRun?.waveIndex).toBe(0);
+    expect(nextTick.state.combat?.encounterMeta?.phaseId).toBe(buildPhaseId(1, 3));
   });
 });

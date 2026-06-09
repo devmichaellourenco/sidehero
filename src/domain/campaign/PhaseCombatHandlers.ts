@@ -92,6 +92,8 @@ export class PhaseCombatHandlers {
 
     if (phase.seasonFinale) {
       progress = progress.markSeasonCompleted();
+    } else if (phase.unlocks.length > 0) {
+      progress = progress.withSelectedPhase(phase.unlocks[0]);
     }
 
     let nextState = state

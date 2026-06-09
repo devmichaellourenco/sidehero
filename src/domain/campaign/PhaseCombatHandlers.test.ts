@@ -39,6 +39,33 @@ describe('PhaseCombatHandlers', () => {
     expect(cleared.state.heroes.every((hero) => hero.level === 1)).toBe(true);
   });
 
+  it('avança selectedPhaseId para próxima fase ao derrotar boss', () => {
+    const phaseId = buildPhaseId(1, 2);
+    const phaseRun = PhaseRun.start(phaseId);
+    let state = GameState.initial()
+      .withCampaignProgress(
+        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
+      )
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const boss = resolver.resolve(phaseId, 1);
+    expect(boss).not.toBeNull();
+
+    const victory = handlers.onBossDefeated(
+      state,
+      boss!.enemies,
+      state.heroes,
+      boss!.meta,
+    );
+
+    expect(victory.state.campaignProgress.isCleared(phaseId)).toBe(true);
+    expect(victory.state.campaignProgress.isUnlocked(buildPhaseId(1, 3))).toBe(true);
+    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
+    expect(victory.state.phaseRun).toBeNull();
+    expect(victory.state.combat).toBeNull();
+  });
+
   it('marca temporada concluída ao derrotar boss final', () => {
     const phaseId = '10-50';
     const phaseRun = PhaseRun.start(phaseId);
