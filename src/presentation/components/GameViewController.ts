@@ -7,6 +7,7 @@ import { GearMutationQueue } from '../controllers/GearMutationQueue';
 import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
 import { LootFlowController } from '../controllers/LootFlowController';
+import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
 import { ChestLootFlow } from '../flows/ChestLootFlow';
 import { GearEquipFlow } from '../flows/GearEquipFlow';
@@ -18,6 +19,8 @@ import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { bindCampaignTooltip } from './CampaignTooltipBinder';
+import { detectBattleVictory } from './BattleVictoryDetector';
+import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
 import { GameStateChangeDetector } from './GameStateChangeDetector';
@@ -51,6 +54,7 @@ export class GameViewController {
   private refreshTimer: number | null = null;
   private contextInvalidated = false;
   private idleSummaryShown = false;
+  private resumeAutoBattleAfterVictory = false;
 
   private readonly campaignContextLabel: HTMLElement;
   private readonly goldLabel: HTMLElement;
@@ -69,8 +73,10 @@ export class GameViewController {
   private readonly seasonCompleteBanner: HTMLElement;
   private readonly newGameBtn: HTMLButtonElement;
 
+  private readonly battleStripEl: HTMLElement;
   private readonly battleStrip: BattleStripRenderer;
   private readonly battleFloats: BattleFloatingTextController;
+  private readonly victoryFlow: BattleVictoryFlow;
   private readonly heroPanelsEl: HTMLElement;
   private readonly heroPanel: HeroPanelRenderer;
   private readonly modal: ModalController;
@@ -113,7 +119,7 @@ export class GameViewController {
     this.seasonCompleteBanner = root.querySelector('#season-complete-banner') as HTMLElement;
     this.newGameBtn = root.querySelector('#new-game-btn') as HTMLButtonElement;
 
-    const battleStripEl = root.querySelector('.battle-strip') as HTMLElement;
+    this.battleStripEl = root.querySelector('.battle-strip') as HTMLElement;
 
     this.battleStrip = new BattleStripRenderer(
       root.querySelector('#heroes-container')!,
@@ -121,7 +127,13 @@ export class GameViewController {
     );
     this.battleFloats = new BattleFloatingTextController(
       root.querySelector('#battle-float-layer')!,
-      battleStripEl,
+      this.battleStripEl,
+    );
+    this.victoryFlow = new BattleVictoryFlow(
+      root.querySelector('#battle-victory-overlay')!,
+      this.battleStripEl,
+      new BattleVictoryOverlayRenderer(),
+      () => this.afterVictoryOverlay(),
     );
 
     this.heroPanelsEl = root.querySelector('#hero-panels')!;
@@ -335,7 +347,8 @@ export class GameViewController {
     if (
       this.contextInvalidated ||
       this.prefsController.autoBattleEnabled ||
-      this.chestLootFlow.openingChests
+      this.chestLootFlow.openingChests ||
+      this.victoryFlow.isActive()
     ) {
       return true;
     }
@@ -511,7 +524,7 @@ export class GameViewController {
   }
 
   private async tick(): Promise<void> {
-    if (this.chestLootFlow.openingChests) return;
+    if (this.chestLootFlow.openingChests || this.victoryFlow.isActive()) return;
 
     const response = await this.client.send({ type: 'TICK', ticks: 1 });
     if (!response.ok) {
@@ -778,6 +791,17 @@ export class GameViewController {
     touchPanelSnapshot(state);
   }
 
+  private afterVictoryOverlay(): void {
+    const shouldResumeAutoBattle = this.resumeAutoBattleAfterVictory;
+    this.resumeAutoBattleAfterVictory = false;
+
+    void this.tick().then(() => {
+      if (shouldResumeAutoBattle) {
+        this.syncAutoBattleTimer();
+      }
+    });
+  }
+
   private render(
     state: GameStateDto,
     options: { skipChestToast?: boolean; checkIdleSummary?: boolean } = {},
@@ -793,12 +817,28 @@ export class GameViewController {
     }
 
     const previous = this.state;
-    if (previous && !options.skipChestToast) {
-      this.stateChanges.detect(previous, state, {
-        onChestAvailable: () => {
-          void this.chestLootFlow.openNextChest();
-        },
+    const victoryPayload = previous ? detectBattleVictory(previous, state) : null;
+
+    if (victoryPayload && !this.victoryFlow.isActive()) {
+      this.resumeAutoBattleAfterVictory = this.prefsController.autoBattleEnabled;
+      this.stopAutoBattle();
+      this.victoryFlow.show(victoryPayload, () => {
+        void this.chestLootFlow.openNextChest();
       });
+    }
+
+    if (previous && !options.skipChestToast) {
+      this.stateChanges.detect(
+        previous,
+        state,
+        {
+          onChestAvailable: () => {
+            if (this.victoryFlow.isActive()) return;
+            void this.chestLootFlow.openNextChest();
+          },
+        },
+        { skipVictoryOverlayRewards: Boolean(victoryPayload) },
+      );
     }
 
     this.state = state;

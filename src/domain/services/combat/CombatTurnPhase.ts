@@ -47,13 +47,20 @@ export class CombatTurnPhase {
       return this.finish(started.state, started.events, []);
     }
 
-    combat = this.ensureTurnQueue(workingState.heroes, combat);
-    const active = this.getNextLivingActor(workingState.heroes, combat);
-    if (!active) {
+    const resolved = this.resolveTurnActor(workingState.heroes, combat);
+    combat = resolved.combat;
+
+    if (!resolved.actor) {
+      const livingHeroes = workingState.heroes.filter((hero) => hero.isAlive());
+      if (livingHeroes.length === 0 && workingState.phaseRun) {
+        const wiped = this.phaseHandlers.onPhaseWipe(workingState.withCombat(combat), workingState.phaseRun);
+        return this.finish(wiped.state, wiped.events, []);
+      }
+
       return { state: workingState.withCombat(combat).touchTick(), events: [], floatingEvents: [] };
     }
 
-    const turnResult = this.executeActorTurn(workingState, active.combat, active.actor);
+    const turnResult = this.executeActorTurn(workingState, combat, resolved.actor);
     let nextState = turnResult.state;
     const events = turnResult.events;
     const floatingEvents = turnResult.floatingEvents;
@@ -121,30 +128,36 @@ export class CombatTurnPhase {
     });
   }
 
-  private getNextLivingActor(
+  private resolveTurnActor(
     heroes: Hero[],
     combat: CombatState,
-  ): { actor: CombatantRef; combat: CombatState } | null {
+  ): { actor: CombatantRef | null; combat: CombatState } {
     let currentCombat = combat;
-    const maxSkips = Math.max(1, currentCombat.turnQueue.length);
+    const guard = Math.max(2, currentCombat.turnQueue.length + 2);
 
-    for (let skip = 0; skip < maxSkips; skip++) {
+    for (let step = 0; step < guard; step++) {
+      currentCombat = this.ensureTurnQueue(heroes, currentCombat);
       const actor = currentCombat.currentActor();
-      if (!actor) return null;
+      if (!actor) {
+        return { actor: null, combat: currentCombat };
+      }
 
-      const isAlive =
-        actor.side === 'hero'
-          ? heroes.some((hero) => hero.id === actor.id && hero.isAlive())
-          : Boolean(currentCombat.findEnemy(actor.id)?.isAlive());
-
-      if (isAlive) {
+      if (this.isActorAlive(actor, heroes, currentCombat)) {
         return { actor, combat: currentCombat };
       }
 
       currentCombat = currentCombat.advanceTurn();
     }
 
-    return null;
+    return { actor: null, combat: currentCombat };
+  }
+
+  private isActorAlive(actor: CombatantRef, heroes: Hero[], combat: CombatState): boolean {
+    if (actor.side === 'hero') {
+      return heroes.some((hero) => hero.id === actor.id && hero.isAlive());
+    }
+
+    return Boolean(combat.findEnemy(actor.id)?.isAlive());
   }
 
   private executeActorTurn(

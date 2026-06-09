@@ -32,6 +32,10 @@ const ASSET_MAP = [
 
   ['Sprites/Demo/Demo_Icon_Chest/set_icon_gold_0.png', 'ui/gold.png'],
   ['Sprites/Demo/Demo_Icon_Chest/shop_img_chest_close_s_00.png', 'ui/chest.png'],
+  ['Sprites/Demo/Demo_Icon_Chest/shop_img_chest_open01_s_00.png', 'ui/chest-open.png'],
+  ['Sprites/Component/Popup/popup_01_frame.png', 'ui/victory-frame.png'],
+  ['Sprites/Demo/Demo_Image/image_glow_circle.png', 'ui/victory-glow.png'],
+  ['Sprites/Demo/Demo_Image/group_image_wingbadge1.png', 'ui/victory-wings.png'],
   ['Sprites/Demo/Demo_Icon/icon_color_energy.png', 'ui/energy.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_flag.png', 'ui/stage.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_battle.png', 'ui/attack.png'],
