@@ -3,9 +3,8 @@ import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatal
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
-import { renderHeroActiveSkills } from './HeroActiveSkillsPresentation';
 import { renderHeroBars } from './HeroBarsPresentation';
-import { renderHeroEquipmentRow } from './GearPresentation';
+import { renderHeroLoadoutStrip } from './HeroLoadoutStripPresentation';
 
 export class HeroPanelRenderer {
   constructor(private readonly container: HTMLElement) {}
@@ -25,17 +24,21 @@ export class HeroPanelRenderer {
                   ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'hero-card-icon')}
                   <span>${hero.name}</span>
                 </strong>
-                <span class="hero-level">Lv.${hero.level}</span>
-              </div>
-              <div class="hero-stats">
-                ${imgTag(attackIcon, 'Ataque', 'stat-icon')} ${hero.attack}
-                ${imgTag(defenseIcon, 'Defesa', 'stat-icon')} ${hero.defense}
-                ${imgTag(healthIcon, 'Vida', 'stat-icon')} ${hero.health}/${hero.maxHealth}
+                <div class="hero-card-meta">
+                  <span class="hero-level">Lv.${hero.level}</span>
+                  <span class="hero-inline-stats">
+                    ${imgTag(attackIcon, 'Ataque', 'stat-icon')}
+                    <span>${hero.attack}</span>
+                    ${imgTag(defenseIcon, 'Defesa', 'stat-icon')}
+                    <span>${hero.defense}</span>
+                    ${imgTag(healthIcon, 'Vida', 'stat-icon')}
+                    <span>${hero.health}/${hero.maxHealth}</span>
+                  </span>
+                </div>
               </div>
               ${renderHeroBars(hero, { compact: true })}
-              ${renderHeroActiveSkills(hero)}
             </button>
-            ${renderHeroEquipmentRow(hero, true)}
+            ${renderHeroLoadoutStrip(hero)}
           </article>
         `;
       })

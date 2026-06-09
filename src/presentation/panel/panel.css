@@ -642,29 +642,104 @@ h2 {
   margin-top: 4px;
 }
 
-.hero-active-skills {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
+.hero-loadout-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 6px;
 }
 
-.hero-skill-chip {
-  display: block;
+.hero-loadout-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 0;
   min-width: 0;
-  width: 100%;
-  padding: 3px 4px;
-  border-radius: 4px;
-  font: inherit;
-  font-size: 8px;
-  line-height: 1.2;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.hero-loadout-skills {
+  justify-content: flex-start;
+}
+
+.hero-loadout-gear {
+  justify-content: flex-end;
+}
+
+.hero-loadout-divider {
+  flex: 0 0 1px;
+  align-self: center;
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.loadout-slot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 2px;
+  border-radius: 5px;
+  line-height: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(12, 20, 38, 0.9);
   color: var(--text);
+}
+
+.loadout-slot-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
+
+.loadout-slot-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+.loadout-slot-rarity {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.loadout-slot--gear,
+.loadout-slot--skill {
+  --slot-frame-size: 4px;
+  padding: 1px;
+  border: var(--slot-frame-size) solid transparent;
+  border-image: var(--slot-frame) 20 / var(--slot-frame-size) / 0 stretch;
+  background-color: rgba(18, 28, 48, 0.92);
+  background-clip: padding-box;
+  border-radius: 0;
+}
+
+.loadout-slot--gear.empty .loadout-slot-icon,
+.loadout-slot--empty {
+  opacity: 0.45;
+}
+
+.hero-skill-chip {
+  cursor: default;
+}
+
+.hero-skill-chip-icon {
+  pointer-events: none;
 }
 
 button.hero-skill-chip {
@@ -677,25 +752,8 @@ button.hero-skill-chip:hover {
   transform: translateY(-1px);
 }
 
-.hero-skill-chip--offense {
-  border-color: rgba(229, 57, 53, 0.45);
-  color: #ffcdd2;
-}
-
-.hero-skill-chip--defense {
-  border-color: rgba(66, 165, 245, 0.45);
-  color: #bbdefb;
-}
-
-.hero-skill-chip--utility {
-  border-color: rgba(102, 187, 106, 0.45);
-  color: #c8e6c9;
-}
-
-.hero-skill-chip--empty {
-  color: var(--muted);
-  opacity: 0.55;
-  border-style: dashed;
+.loadout-slot--empty {
+  background-color: rgba(12, 20, 38, 0.55);
 }
 
 button.hero-skill-chip > .hero-skill-chip-tooltip,
@@ -897,8 +955,8 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 .hero-card {
   background: rgba(31, 43, 71, 0.82);
   border-radius: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
   font-size: 11px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -920,8 +978,10 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 
 .hero-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
   margin-bottom: 4px;
 }
 
@@ -930,26 +990,49 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   align-items: center;
   gap: 6px;
   font-family: var(--font-heading);
+  min-width: 0;
+}
+
+.hero-card-title > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hero-card-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+
+.hero-card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
 }
 
 .hero-level {
   color: var(--gold);
   font-family: var(--font-heading);
+  font-size: 10px;
+  white-space: nowrap;
 }
 
-.hero-stats {
-  display: flex;
+.hero-inline-stats {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 4px;
   color: var(--muted);
   font-size: 10px;
+  white-space: nowrap;
+}
+
+.hero-inline-stats .stat-icon {
+  width: 12px;
+  height: 12px;
 }
 
 .equipment-slots-row {

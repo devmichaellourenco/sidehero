@@ -71,21 +71,44 @@ export function renderEquipmentSlot(
     heroId: string;
     compact?: boolean;
     clickable?: boolean;
+    variant?: 'default' | 'loadout';
   },
 ): string {
   const label = GEAR_SLOT_LABELS[slot];
+  const variant = options.variant ?? 'default';
   const compactClass = options.compact ? ' equipment-slot-compact' : '';
   const clickableClass = options.clickable === false ? '' : ' equipment-slot-clickable';
   const frameUrl = gear ? getGearFrameSprite(gear.rarity) : getGearFrameSprite('common');
+  const iconClass =
+    variant === 'loadout' ? 'loadout-slot-icon equipment-slot-icon' : 'equipment-slot-icon';
   const icon = gear
-    ? imgTag(getGearSlotSprite(gear.slot), gear.name, 'equipment-slot-icon')
-    : imgTag(getGearSlotSprite(slot), label, 'equipment-slot-icon equipment-slot-empty');
+    ? imgTag(getGearSlotSprite(gear.slot), gear.name, iconClass)
+    : imgTag(getGearSlotSprite(slot), label, `${iconClass} equipment-slot-empty`);
 
-  const rarityIcon = gear
-    ? imgTag(getGearRaritySprite(gear.rarity), gear.rarity, 'equipment-slot-rarity')
-    : '';
+  const rarityClass =
+    variant === 'loadout' ? 'loadout-slot-rarity equipment-slot-rarity' : 'equipment-slot-rarity';
+  const rarityIcon = gear ? imgTag(getGearRaritySprite(gear.rarity), gear.rarity, rarityClass) : '';
 
   const emptyTitle = `${label}: vazio — clique para equipar`;
+
+  if (variant === 'loadout') {
+    return `
+      <button
+        type="button"
+        class="loadout-slot loadout-slot--gear equipment-slot${clickableClass} ${gear?.rarity ?? 'empty'}"
+        data-hero="${options.heroId}"
+        data-slot="${slot}"
+        ${gear ? '' : `title="${emptyTitle}"`}
+        style="--slot-frame: url('${frameUrl}')"
+      >
+        <span class="loadout-slot-icon-wrap">
+          ${icon}
+          ${rarityIcon}
+        </span>
+        ${gear ? renderEquippedGearTooltip(gear) : ''}
+      </button>
+    `;
+  }
 
   return `
     <button
@@ -118,6 +141,15 @@ export function renderHeroEquipmentRow(hero: HeroDto, compact = true): string {
       ).join('')}
     </div>
   `;
+}
+
+export function renderHeroEquipmentLoadout(hero: HeroDto): string {
+  return GEAR_SLOTS.map((slot) =>
+    renderEquipmentSlot(slot, getHeroEquipment(hero, slot), {
+      heroId: hero.id,
+      variant: 'loadout',
+    }),
+  ).join('');
 }
 
 export function renderGearCard(

@@ -1,6 +1,14 @@
 import { getEnemySkillDisplay } from '../../domain/progression/combat/EnemySkillDisplayCatalog';
 import { getSkillById } from '../../domain/progression/SkillCatalog';
-import { ASSETS, getAssetUrl } from './AssetCatalog';
+import { ASSETS, getAssetUrl, getGearFrameSprite } from './AssetCatalog';
+
+export type SkillBranchKey = 'offense' | 'defense' | 'utility';
+
+const SKILL_BRANCH_FRAME: Record<SkillBranchKey, 'common' | 'rare' | 'epic'> = {
+  offense: 'rare',
+  defense: 'common',
+  utility: 'epic',
+};
 
 type SkillIconKey = keyof typeof ASSETS.skills;
 
@@ -45,6 +53,11 @@ export function getSkillIconPath(skillId: string): string {
 
 export function getSkillIconUrl(skillId: string): string {
   return getAssetUrl(getSkillIconPath(skillId));
+}
+
+export function getSkillBranchFrameUrl(branch: string): string {
+  const key = SKILL_BRANCH_FRAME[branch as SkillBranchKey] ?? 'common';
+  return getGearFrameSprite(key);
 }
 
 export function getSkillDisplayName(skillId: string, fallbackName?: string): string {
