@@ -1,3 +1,4 @@
+import { getUnlockedBattleSkillSlotCount } from '../../domain/progression/SkillBattleSlots';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { ISkillService } from '../../domain/progression/ISkillService';
 import { mapSkillTree } from '../mappers/HeroProgressionMapper';
@@ -27,7 +28,10 @@ export class GetHeroSkillTreeUseCase {
 
     return {
       state: this.presenter.present(state),
-      nodes: mapSkillTree(hero, this.skillService.buildTree(hero)),
+      nodes: mapSkillTree(
+        hero,
+        this.skillService.buildTree(hero, getUnlockedBattleSkillSlotCount(state.upgradeLevels)),
+      ),
     };
   }
 }

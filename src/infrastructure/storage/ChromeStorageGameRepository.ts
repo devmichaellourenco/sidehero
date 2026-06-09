@@ -1,5 +1,11 @@
 import { CampaignProgressProps } from '../../domain/campaign/CampaignProgress';
+import { Hero } from '../../domain/entities/Hero';
 import { GameState } from '../../domain/entities/GameState';
+import {
+  getUnlockedBattleSkillSlotCount,
+  trimEquippedSkillIds,
+} from '../../domain/progression/SkillBattleSlots';
+import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import {
   migrateChest,
@@ -94,9 +100,16 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
     const heroes = heroesRaw.map((hero) => migrateHero(hero));
     const legacyEnemy = migrateEnemy(raw.currentEnemy);
 
+    const upgradeLevels =
+      raw.upgradeLevels && typeof raw.upgradeLevels === 'object'
+        ? (raw.upgradeLevels as UpgradeLevels)
+        : {};
+
+    const normalizedHeroes = normalizeHeroEquippedSkills(heroes, upgradeLevels);
+
     return GameState.restore({
-      heroes,
-      combat: migrateCombat(raw.combat, heroes, legacyEnemy),
+      heroes: normalizedHeroes,
+      combat: migrateCombat(raw.combat, normalizedHeroes, legacyEnemy),
       campaignProgress:
         raw.campaignProgress && typeof raw.campaignProgress === 'object'
           ? (raw.campaignProgress as CampaignProgressProps)
@@ -115,11 +128,27 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       totalBattlesWon: typeof raw.totalBattlesWon === 'number' ? raw.totalBattlesWon : 0,
       lastTickAt: typeof raw.lastTickAt === 'number' ? raw.lastTickAt : Date.now(),
       shopRefreshSeed: typeof raw.shopRefreshSeed === 'number' ? raw.shopRefreshSeed : 0,
-      upgradeLevels:
-        raw.upgradeLevels && typeof raw.upgradeLevels === 'object'
-          ? (raw.upgradeLevels as Record<string, number>)
-          : {},
+      upgradeLevels,
       shopRefreshUses: typeof raw.shopRefreshUses === 'number' ? raw.shopRefreshUses : 0,
     });
   }
+}
+
+function normalizeHeroEquippedSkills(heroes: Hero[], upgradeLevels: UpgradeLevels): Hero[] {
+  const unlockedSlots = getUnlockedBattleSkillSlotCount(upgradeLevels);
+
+  return heroes.map((hero) => {
+    const props = hero.toProps();
+    const trimmed = trimEquippedSkillIds(props.equippedSkillIds, unlockedSlots);
+    const unchanged =
+      trimmed.length === props.equippedSkillIds.length &&
+      trimmed.every((id, index) => id === props.equippedSkillIds[index]);
+
+    if (unchanged) return hero;
+
+    return Hero.restore({
+      ...props,
+      equippedSkillIds: trimmed,
+    });
+  });
 }

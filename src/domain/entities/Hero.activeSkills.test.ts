@@ -29,18 +29,24 @@ describe('Hero.activateSkill', () => {
     expect(hero.toProps().equippedSkillIds).toEqual(['basic_attack']);
   });
 
-  it('permite até 3 skills ativas na batalha', () => {
+  it('permite até 3 skills ativas quando há slots desbloqueados', () => {
     let hero = heroWithSkills(['basic_attack']);
-    hero = hero.activateSkill('power_attack');
-    hero = hero.activateSkill('evasion');
+    hero = hero.activateSkill('power_attack', 3);
+    hero = hero.activateSkill('evasion', 3);
 
     expect(hero.toProps().equippedSkillIds).toHaveLength(MAX_ACTIVE_BATTLE_SKILLS);
+  });
+
+  it('rejeita skill além do limite de slots desbloqueados', () => {
+    let hero = heroWithSkills(['basic_attack']);
+
+    expect(() => hero.activateSkill('power_attack', 1)).toThrow('Limite de 1 skills ativas na batalha');
   });
 
   it('rejeita a 4ª skill ativa', () => {
     const hero = heroWithSkills(['basic_attack', 'power_attack', 'evasion']);
 
-    expect(() => hero.activateSkill('arcane_touch')).toThrow(
+    expect(() => hero.activateSkill('arcane_touch', 3)).toThrow(
       `Limite de ${MAX_ACTIVE_BATTLE_SKILLS} skills ativas na batalha`,
     );
   });

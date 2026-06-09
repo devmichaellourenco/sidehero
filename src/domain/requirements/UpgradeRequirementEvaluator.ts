@@ -26,6 +26,8 @@ export class UpgradeRequirementEvaluator {
         return state.totalBattlesWon >= requirement.value;
       case 'min_chests_opened':
         return state.chestsOpenedCount() >= requirement.value;
+      case 'min_hero_level':
+        return state.heroes.reduce((max, hero) => Math.max(max, hero.level), 0) >= requirement.value;
       default:
         return false;
     }
@@ -41,6 +43,8 @@ export class UpgradeRequirementEvaluator {
         return `${requirement.value} vitórias`;
       case 'min_chests_opened':
         return `${requirement.value} baús abertos`;
+      case 'min_hero_level':
+        return `Herói nível ${requirement.value}+`;
       default:
         return 'Requisito';
     }
@@ -56,6 +60,7 @@ export class UpgradeRequirementEvaluator {
       auto_equip_loot: 'Auto-equipar loot',
       log_filter: 'Log resumido',
       shop_refresh: 'Renovar loja',
+      battle_skill_slots: 'Slots de skill',
     };
     return labels[feature];
   }

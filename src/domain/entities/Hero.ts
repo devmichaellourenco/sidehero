@@ -170,8 +170,8 @@ export class Hero {
     return this.withProgression(this.progression.spendImprovementPointOnSkill(skillId));
   }
 
-  activateSkill(skillId: SkillId): Hero {
-    return this.withProgression(this.progression.activateSkill(skillId));
+  activateSkill(skillId: SkillId, maxActiveSlots: number): Hero {
+    return this.withProgression(this.progression.activateSkill(skillId, maxActiveSlots));
   }
 
   deactivateSkill(skillId: SkillId): Hero {

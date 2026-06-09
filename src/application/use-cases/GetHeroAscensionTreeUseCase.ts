@@ -1,4 +1,5 @@
 import { getAscensionById } from '../../domain/progression/ClassAscensionCatalog';
+import { getUnlockedBattleSkillSlotCount } from '../../domain/progression/SkillBattleSlots';
 import { IClassAscensionService } from '../../domain/progression/IClassAscensionService';
 import { ISkillService } from '../../domain/progression/ISkillService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
@@ -39,7 +40,13 @@ export class GetHeroAscensionTreeUseCase {
       state: this.presenter.present(state),
       options: mapAscensionOptions(this.ascensionService.listOptions(hero)),
       ascensionName: ascension?.name ?? null,
-      ascensionSkillNodes: mapSkillTree(hero, this.skillService.buildAscensionTree(hero)),
+      ascensionSkillNodes: mapSkillTree(
+        hero,
+        this.skillService.buildAscensionTree(
+          hero,
+          getUnlockedBattleSkillSlotCount(state.upgradeLevels),
+        ),
+      ),
     };
   }
 }

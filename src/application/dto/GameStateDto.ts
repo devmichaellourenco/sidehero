@@ -51,6 +51,7 @@ export interface HeroDto {
   equippedSkillIds: string[];
   activeSkills: HeroActiveSkillDto[];
   maxActiveSkills: number;
+  unlockedActiveSkillSlots: number;
   ascensionId: string | null;
   hasUnspentPoints: boolean;
   equipment: Record<

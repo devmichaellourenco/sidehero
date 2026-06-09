@@ -1,3 +1,4 @@
+import { getUnlockedBattleSkillSlotCount } from '../../domain/progression/SkillBattleSlots';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { ISkillService } from '../../domain/progression/ISkillService';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
@@ -23,7 +24,8 @@ export class ActivateSkillUseCase {
       throw new Error('Ouro insuficiente para ativar skill');
     }
 
-    const updatedHero = this.skillService.activate(hero, skillId);
+    const unlockedSlots = getUnlockedBattleSkillSlotCount(state.upgradeLevels);
+    const updatedHero = this.skillService.activate(hero, skillId, unlockedSlots);
     const heroes = state.heroes.map((entry) => (entry.id === heroId ? updatedHero : entry));
     const nextState = state
       .withHeroes(heroes)

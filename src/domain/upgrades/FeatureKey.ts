@@ -7,6 +7,7 @@ export const FEATURE_KEYS = [
   'auto_equip_loot',
   'log_filter',
   'shop_refresh',
+  'battle_skill_slots',
 ] as const;
 
 export type FeatureKey = (typeof FEATURE_KEYS)[number];

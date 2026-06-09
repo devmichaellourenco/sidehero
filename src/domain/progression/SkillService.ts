@@ -3,7 +3,7 @@ import { calculateSkillActivationCost } from './SkillActivationRules';
 import { HeroRequirementEvaluator } from '../requirements/HeroRequirementEvaluator';
 import { ISkillService } from './ISkillService';
 import { BASIC_ATTACK_SKILL_ID } from './combat/BasicAttackSkill';
-import { hasFreeBattleSkillSlot } from './SkillBattleSlots';
+import { hasFreeBattleSkillSlot, MAX_ACTIVE_BATTLE_SKILLS } from './SkillBattleSlots';
 import { getSkillById, getSkillsForHero, SKILL_CATALOG } from './SkillCatalog';
 import { SkillDefinition } from './SkillDefinition';
 import { SkillId } from './SkillId';
@@ -24,18 +24,22 @@ export interface SkillNodeView {
 export class SkillService implements ISkillService {
   private readonly evaluator = new HeroRequirementEvaluator();
 
-  buildTree(hero: Hero): SkillNodeView[] {
-    return this.buildTreeForPointType(hero, 'improvement');
+  buildTree(hero: Hero, unlockedBattleSkillSlots: number): SkillNodeView[] {
+    return this.buildTreeForPointType(hero, 'improvement', unlockedBattleSkillSlots);
   }
 
-  buildAscensionTree(hero: Hero): SkillNodeView[] {
+  buildAscensionTree(hero: Hero, unlockedBattleSkillSlots: number): SkillNodeView[] {
     const props = hero.toProps();
     if (!props.ascensionId) return [];
 
-    return this.buildTreeForPointType(hero, 'ascension');
+    return this.buildTreeForPointType(hero, 'ascension', unlockedBattleSkillSlots);
   }
 
-  private buildTreeForPointType(hero: Hero, pointType: 'improvement' | 'ascension'): SkillNodeView[] {
+  private buildTreeForPointType(
+    hero: Hero,
+    pointType: 'improvement' | 'ascension',
+    unlockedBattleSkillSlots: number,
+  ): SkillNodeView[] {
     const props = hero.toProps();
     const skills = getSkillsForHero(hero.heroClass, props.ascensionId).filter(
       (skill) => skill.pointType === pointType,
@@ -66,7 +70,7 @@ export class SkillService implements ISkillService {
           definition.id !== BASIC_ATTACK_SKILL_ID &&
           currentRank > 0 &&
           !isEquipped &&
-          hasFreeBattleSkillSlot(props.equippedSkillIds),
+          hasFreeBattleSkillSlot(props.equippedSkillIds, unlockedBattleSkillSlots),
         canDeactivate: isEquipped && definition.id !== BASIC_ATTACK_SKILL_ID,
         activationCost: calculateSkillActivationCost(Math.max(1, currentRank + 1)),
         requirements,
@@ -115,13 +119,13 @@ export class SkillService implements ISkillService {
     return hero.spendAscensionPointOnSkill(skillId);
   }
 
-  canActivate(hero: Hero, skillId: SkillId): boolean {
+  canActivate(hero: Hero, skillId: SkillId, unlockedBattleSkillSlots: number): boolean {
     if (skillId === BASIC_ATTACK_SKILL_ID) return false;
 
     const props = hero.toProps();
     if ((props.skillRanks[skillId] ?? 0) < 1) return false;
     if (props.equippedSkillIds.includes(skillId)) return false;
-    return hasFreeBattleSkillSlot(props.equippedSkillIds);
+    return hasFreeBattleSkillSlot(props.equippedSkillIds, unlockedBattleSkillSlots);
   }
 
   canDeactivate(hero: Hero, skillId: SkillId): boolean {
@@ -129,11 +133,12 @@ export class SkillService implements ISkillService {
     return hero.toProps().equippedSkillIds.includes(skillId);
   }
 
-  activate(hero: Hero, skillId: SkillId): Hero {
-    if (!this.canActivate(hero, skillId)) {
+  activate(hero: Hero, skillId: SkillId, unlockedBattleSkillSlots: number): Hero {
+    if (!this.canActivate(hero, skillId, unlockedBattleSkillSlots)) {
       throw new Error('Skill não desbloqueada');
     }
-    return hero.activateSkill(skillId);
+    const slotLimit = Math.max(1, Math.min(MAX_ACTIVE_BATTLE_SKILLS, unlockedBattleSkillSlots));
+    return hero.activateSkill(skillId, slotLimit);
   }
 
   deactivate(hero: Hero, skillId: SkillId): Hero {

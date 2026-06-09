@@ -584,10 +584,17 @@ export class GameViewController {
   private bindHeroPanelDelegation(): void {
     this.heroPanelsEl.addEventListener('click', (event) => {
       const target = (event.target as HTMLElement).closest(
-        '.equipment-slot-clickable, [data-hero-skills-open], [data-hero-open]',
+        '.equipment-slot-clickable, [data-hero-skills-open], [data-open-upgrades], [data-hero-open]',
       ) as HTMLElement | null;
 
       if (!target) return;
+
+      if (target.hasAttribute('data-open-upgrades')) {
+        event.preventDefault();
+        event.stopPropagation();
+        void this.openUpgradesModal();
+        return;
+      }
 
       const skillsHeroId = target.getAttribute('data-hero-skills-open');
       if (skillsHeroId) {

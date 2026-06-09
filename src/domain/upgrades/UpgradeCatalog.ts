@@ -191,6 +191,29 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
       { type: 'min_battles_won', value: 20 },
     ],
   },
+  {
+    id: 'battle_skill_slot_2',
+    feature: 'battle_skill_slots',
+    level: 1,
+    branch: 'combat',
+    name: 'Slot de skill II',
+    description: 'Desbloqueia o 2º slot de skill ativa na batalha.',
+    cost: 60,
+    requirements: [{ type: 'min_hero_level', value: 3 }],
+  },
+  {
+    id: 'battle_skill_slot_3',
+    feature: 'battle_skill_slots',
+    level: 2,
+    branch: 'combat',
+    name: 'Slot de skill III',
+    description: 'Desbloqueia o 3º slot de skill ativa na batalha.',
+    cost: 150,
+    requirements: [
+      { type: 'upgrade_level', feature: 'battle_skill_slots', minLevel: 1 },
+      { type: 'min_hero_level', value: 6 },
+    ],
+  },
 ];
 
 export function getUpgradeById(id: string): UpgradeDefinition | undefined {

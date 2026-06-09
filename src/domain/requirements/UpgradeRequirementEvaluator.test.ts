@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GameState } from '../entities/GameState';
+import { Hero } from '../entities/Hero';
+import { Experience } from '../value-objects/Experience';
 import { UpgradeRequirementEvaluator } from './UpgradeRequirementEvaluator';
 
 describe('UpgradeRequirementEvaluator', () => {
@@ -13,6 +15,21 @@ describe('UpgradeRequirementEvaluator', () => {
 
     expect(evaluator.allMet(state, [{ type: 'min_stage', value: 3 }])).toBe(true);
     expect(evaluator.allMet(state, [{ type: 'min_stage', value: 10 }])).toBe(false);
+  });
+
+  it('valida requisito de nível de herói', () => {
+    const lowLevelHero = Hero.createStarter('h1', 'knight', 'A');
+    const highLevelHero = Hero.restore({
+      ...Hero.createStarter('h2', 'sorcerer', 'B').toProps(),
+      experience: Experience.restore(0, 100, 6),
+    });
+    const state = GameState.restore({
+      ...GameState.initial().toProps(),
+      heroes: [lowLevelHero, highLevelHero],
+    });
+
+    expect(evaluator.allMet(state, [{ type: 'min_hero_level', value: 6 }])).toBe(true);
+    expect(evaluator.allMet(state, [{ type: 'min_hero_level', value: 7 }])).toBe(false);
   });
 
   it('valida requisito de vitórias', () => {

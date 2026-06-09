@@ -1,8 +1,12 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
-import { imgTag } from '../assets/AssetCatalog';
+import { imgTag, getGearFrameSprite } from '../assets/AssetCatalog';
 import { getSkillBranchFrameUrl, getSkillIconUrl } from '../assets/SkillIconCatalog';
-import { getGearFrameSprite } from '../assets/AssetCatalog';
 import { renderSkillRankLabel, renderSkillTooltipContent } from './SkillTooltipPresentation';
+
+const LOCKED_SLOT_UPGRADE_NAMES: Record<number, string> = {
+  2: 'Slot de skill II',
+  3: 'Slot de skill III',
+};
 
 function escapeHtml(text: string): string {
   return text
@@ -14,7 +18,6 @@ function escapeHtml(text: string): string {
 
 function renderSkillChip(skill: HeroDto['activeSkills'][number], heroId: string): string {
   const rankLabel = renderSkillRankLabel(skill.currentRank, skill.maxRank);
-
   const frameUrl = getSkillBranchFrameUrl(skill.branch);
 
   return `
@@ -33,16 +36,50 @@ function renderSkillChip(skill: HeroDto['activeSkills'][number], heroId: string)
   `;
 }
 
-function renderEmptySkillSlot(): string {
+function renderEmptySkillSlot(heroId: string): string {
   const frameUrl = getGearFrameSprite('common');
+  const title = 'Slot de skill vazio — clique para gerenciar skills';
 
-  return `<span class="loadout-slot loadout-slot--skill loadout-slot--empty hero-skill-chip hero-skill-chip--empty" style="--slot-frame: url('${frameUrl}')" aria-hidden="true"></span>`;
+  return `
+    <button
+      type="button"
+      class="loadout-slot loadout-slot--skill loadout-slot--empty hero-skill-chip hero-skill-chip--empty"
+      data-hero-skills-open="${heroId}"
+      style="--slot-frame: url('${frameUrl}')"
+      title="${title}"
+      aria-label="${title}"
+    ></button>
+  `;
+}
+
+function renderLockedSkillSlot(slotNumber: number): string {
+  const frameUrl = getGearFrameSprite('common');
+  const upgradeName = LOCKED_SLOT_UPGRADE_NAMES[slotNumber] ?? 'Melhorias';
+  const title = `Slot bloqueado — desbloqueie em Melhorias (${upgradeName})`;
+
+  return `
+    <button
+      type="button"
+      class="loadout-slot loadout-slot--skill loadout-slot--locked"
+      data-open-upgrades
+      style="--slot-frame: url('${frameUrl}')"
+      title="${title}"
+      aria-label="${title}"
+    >
+      <span class="loadout-slot-lock" aria-hidden="true">🔒</span>
+    </button>
+  `;
 }
 
 export function renderHeroActiveSkillSlots(hero: HeroDto): string {
-  const slots = Array.from({ length: hero.maxActiveSkills }, (_, index) => hero.activeSkills[index] ?? null);
+  return Array.from({ length: hero.maxActiveSkills }, (_, index) => {
+    const slotNumber = index + 1;
 
-  return slots
-    .map((skill) => (skill ? renderSkillChip(skill, hero.id) : renderEmptySkillSlot()))
-    .join('');
+    if (slotNumber > hero.unlockedActiveSkillSlots) {
+      return renderLockedSkillSlot(slotNumber);
+    }
+
+    const skill = hero.activeSkills[index] ?? null;
+    return skill ? renderSkillChip(skill, hero.id) : renderEmptySkillSlot(hero.id);
+  }).join('');
 }

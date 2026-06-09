@@ -1,5 +1,9 @@
 import { Hero } from '../../domain/entities/Hero';
-import { MAX_ACTIVE_BATTLE_SKILLS } from '../../domain/progression/SkillBattleSlots';
+import {
+  getUnlockedBattleSkillSlotCount,
+  MAX_ACTIVE_BATTLE_SKILLS,
+} from '../../domain/progression/SkillBattleSlots';
+import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { AttributesDto } from '../dto/AttributesDto';
 import { HeroDto } from '../dto/GameStateDto';
 import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
@@ -8,7 +12,7 @@ function mapAttributes(attrs: { str: number; dex: number; int: number }): Attrib
   return { str: attrs.str, dex: attrs.dex, int: attrs.int };
 }
 
-export function mapHeroToDto(hero: Hero): HeroDto {
+export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): HeroDto {
   const equipment: HeroDto['equipment'] = {};
   const slots = ['weapon', 'armor', 'accessory'] as const;
   const props = hero.toProps();
@@ -58,6 +62,7 @@ export function mapHeroToDto(hero: Hero): HeroDto {
     equippedSkillIds: [...props.equippedSkillIds],
     activeSkills: mapHeroActiveSkills(hero),
     maxActiveSkills: MAX_ACTIVE_BATTLE_SKILLS,
+    unlockedActiveSkillSlots: getUnlockedBattleSkillSlotCount(upgradeLevels),
     ascensionId: props.ascensionId,
     hasUnspentPoints: hero.hasUnspentPoints,
     equipment,

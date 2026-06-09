@@ -97,15 +97,16 @@ export class HeroProgression {
     });
   }
 
-  activateSkill(skillId: SkillId): HeroProgression {
+  activateSkill(skillId: SkillId, maxActiveSlots: number): HeroProgression {
     if ((this.skillRanks[skillId] ?? 0) < 1) {
       throw new Error('Skill não desbloqueada');
     }
     if (this.equippedSkillIds.includes(skillId)) {
       return this;
     }
-    if (this.equippedSkillIds.length >= MAX_ACTIVE_BATTLE_SKILLS) {
-      throw new Error(`Limite de ${MAX_ACTIVE_BATTLE_SKILLS} skills ativas na batalha`);
+    const slotLimit = Math.max(1, Math.min(MAX_ACTIVE_BATTLE_SKILLS, maxActiveSlots));
+    if (this.equippedSkillIds.length >= slotLimit) {
+      throw new Error(`Limite de ${slotLimit} skills ativas na batalha`);
     }
 
     return new HeroProgression({

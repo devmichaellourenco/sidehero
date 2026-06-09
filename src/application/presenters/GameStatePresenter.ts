@@ -46,6 +46,7 @@ export class GameStatePresenter {
           combatEnemies,
           skillCooldowns,
           statusEffects,
+          state.upgradeLevels,
         ),
       ),
       enemies,
@@ -89,9 +90,10 @@ function mapHeroToDtoWithCombatIntent(
   enemies: Enemy[],
   skillCooldowns: Parameters<typeof mapHeroCombatIntent>[3],
   combatStatusEffects: Parameters<typeof mapCombatantStatusEffects>[2],
+  upgradeLevels: Parameters<typeof mapHeroBaseToDto>[1],
 ) {
   return {
-    ...mapHeroBaseToDto(hero),
+    ...mapHeroBaseToDto(hero, upgradeLevels),
     combatIntent: mapHeroCombatIntent(hero, party, enemies, skillCooldowns, combatStatusEffects),
     statusEffects: mapCombatantStatusEffects('hero', hero.id, combatStatusEffects),
   };

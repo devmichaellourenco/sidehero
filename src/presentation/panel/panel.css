@@ -754,6 +754,17 @@ button.hero-skill-chip:hover {
 
 .loadout-slot--empty {
   background-color: rgba(12, 20, 38, 0.55);
+  cursor: pointer;
+}
+
+.loadout-slot--locked {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.loadout-slot-lock {
+  font-size: 11px;
+  line-height: 1;
 }
 
 button.hero-skill-chip > .hero-skill-chip-tooltip,
