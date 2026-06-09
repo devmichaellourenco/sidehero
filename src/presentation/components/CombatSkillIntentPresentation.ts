@@ -54,9 +54,11 @@ export function renderCombatSkillIntent(intent: CombatSkillIntentDto | null | un
   const nextSkillLabel = getSkillDisplayName(intent.nextSkillId, intent.nextSkillName);
 
   return `
-    <div class="combat-skill-intent ${statusClass}" title="Próxima ação: ${escapeHtml(nextSkillLabel)}">
-      ${renderSkillIcon(intent.nextSkillId, intent.nextSkillName)}
+    <div class="combat-skill-floor-slot">
+      <div class="combat-skill-intent ${statusClass}" title="Próxima ação: ${escapeHtml(nextSkillLabel)}">
+        ${renderSkillIcon(intent.nextSkillId, intent.nextSkillName)}
+      </div>
+      ${chargingHtml ? `<div class="combat-skill-charging">${chargingHtml}</div>` : ''}
     </div>
-    ${chargingHtml ? `<div class="combat-skill-charging">${chargingHtml}</div>` : ''}
   `;
 }

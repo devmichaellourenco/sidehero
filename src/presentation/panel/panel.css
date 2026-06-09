@@ -202,6 +202,11 @@ h2 {
 }
 
 .battle-strip {
+  --strip-floor-height: 28px;
+  --strip-floor-skill-inset: 4px;
+  --strip-floor-skill-zone: 16px;
+  --strip-actor-gap: 2px;
+  --strip-actors-bottom: calc(var(--strip-floor-height) + var(--strip-actor-gap));
   position: relative;
   height: 122px;
   border-radius: 10px;
@@ -268,7 +273,7 @@ h2 {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 14px;
+  height: var(--strip-floor-height);
   background: repeating-linear-gradient(
     90deg,
     #3d2966 0px,
@@ -280,7 +285,7 @@ h2 {
 
 .heroes-row {
   position: absolute;
-  bottom: 16px;
+  bottom: var(--strip-actors-bottom);
   left: 12px;
   display: flex;
   gap: 12px;
@@ -298,6 +303,7 @@ h2 {
 }
 
 .hero-battle-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -355,7 +361,7 @@ h2 {
 
 .enemy-slot {
   position: absolute;
-  bottom: 14px;
+  bottom: var(--strip-actors-bottom);
   right: 16px;
   z-index: 2;
   text-align: right;
@@ -399,6 +405,7 @@ h2 {
 }
 
 .enemy-battle-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -418,14 +425,33 @@ h2 {
   margin-top: 2px;
 }
 
+.combat-skill-floor-slot {
+  position: absolute;
+  top: auto;
+  bottom: calc(-1 * (var(--strip-actors-bottom) - var(--strip-floor-skill-inset)));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: max-content;
+  max-width: 64px;
+  height: var(--strip-floor-skill-zone);
+  z-index: 3;
+  pointer-events: none;
+}
+
 .combat-skill-intent {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 1px;
+  margin-top: 0;
   padding: 1px;
   border-radius: 4px;
   line-height: 0;
+  flex-shrink: 0;
 }
 
 .combat-skill-intent--ready {
@@ -486,15 +512,20 @@ h2 {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 2px;
-  margin-top: 1px;
-  max-width: 56px;
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
-.enemy-battle-card .combat-skill-intent,
-.enemy-battle-card .combat-skill-charging {
-  align-self: flex-end;
+.combat-skill-floor-slot .combat-skill-icon-wrap {
+  width: 16px;
+  height: 16px;
+}
+
+.combat-skill-floor-slot .combat-skill-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .enemy-tooltip-skill {
