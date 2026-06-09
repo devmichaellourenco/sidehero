@@ -6,6 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const resourcesRoot = join(root, 'public', 'ResourcesData');
 const heroesSpritesRoot = join(root, 'public', 'sprites', 'heroes');
+const skillsSpritesRoot = join(root, 'public', 'sprites', 'skills');
 const publicRoot = join(root, 'public');
 const outRoot = join(root, 'dist', 'panel', 'assets');
 
@@ -14,6 +15,14 @@ const HERO_SPRITE_MAP = [
   ['fighter.png', 'characters/knight.png'],
   ['feiticeira.png', 'characters/sorcerer.png'],
   ['priest.png', 'characters/priest.png'],
+];
+
+/** Sprites de skills em public/sprites/skills (nome do arquivo = skillId). */
+const SKILL_SPRITE_MAP = [
+  ['vitality.png', 'skills/vitality.png'],
+  ['arcane_bolt.png', 'skills/arcane_bolt.png'],
+  ['fireball.png', 'skills/fireball.png'],
+  ['heal.png', 'skills/heal.png'],
 ];
 
 /** Logo e demais assets estáticos em public/. */
@@ -78,9 +87,11 @@ async function copyAssetBatch(sourceRoot, entries) {
 export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
+  await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
   await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
 
-  const total = ASSET_MAP.length + HERO_SPRITE_MAP.length + PUBLIC_ASSET_MAP.length;
+  const total =
+    ASSET_MAP.length + HERO_SPRITE_MAP.length + SKILL_SPRITE_MAP.length + PUBLIC_ASSET_MAP.length;
   console.log(`Assets copiados: ${total} arquivos em dist/panel/assets/`);
 }
 

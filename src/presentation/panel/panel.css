@@ -481,8 +481,8 @@ h2 {
 
 .hero-sprite {
   position: relative;
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -506,8 +506,8 @@ h2 {
 }
 
 .hero-battle-card .health-bar.strip-bar {
-  width: 36px;
-  height: 6px;
+  width: 44px;
+  height: 7px;
   margin-top: 2px;
   padding: 1px;
   border-radius: 3px;
@@ -528,7 +528,13 @@ h2 {
   pointer-events: none;
 }
 
-.hero-image,
+.hero-image {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+}
+
 .enemy-image {
   width: 36px;
   height: 36px;
@@ -1198,8 +1204,8 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 }
 
 .hero-card-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -2170,8 +2176,8 @@ body.modal-open {
 }
 
 .hero-detail-sprite {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
 }
@@ -2272,8 +2278,8 @@ body.modal-open {
 }
 
 .equip-hero-card-icon {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
 }
 
@@ -2631,21 +2637,231 @@ body.modal-open {
 }
 
 .skill-card {
-  padding: 10px;
+  padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(12, 18, 36, 0.55);
 }
 
+.skill-card--offense {
+  border-left: 3px solid rgba(229, 57, 53, 0.55);
+}
+
+.skill-card--defense {
+  border-left: 3px solid rgba(66, 165, 245, 0.55);
+}
+
+.skill-card--utility {
+  border-left: 3px solid rgba(102, 187, 106, 0.55);
+}
+
+.skill-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.skill-card-visual {
+  flex: 0 0 72px;
+}
+
+.skill-card-summary {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 2px;
+}
+
 .skill-card-header {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.skill-card-icon-wrap {
+  display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 3px;
+  --slot-frame-size: 4px;
+  border: var(--slot-frame-size) solid transparent;
+  border-image: var(--slot-frame) 20 / var(--slot-frame-size) / 0 stretch;
+  background-color: rgba(18, 28, 48, 0.92);
+  background-clip: padding-box;
+  border-radius: 0;
+  line-height: 0;
+}
+
+.skill-card-icon {
+  width: 64px;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
 }
 
 .skill-card h4 {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.skill-card-rank {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.skill-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.skill-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.skill-card-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.skill-card-badge--offense {
+  border-color: rgba(229, 57, 53, 0.35);
+  background: rgba(229, 57, 53, 0.12);
+}
+
+.skill-card-badge--defense {
+  border-color: rgba(66, 165, 245, 0.35);
+  background: rgba(66, 165, 245, 0.12);
+}
+
+.skill-card-badge--utility {
+  border-color: rgba(102, 187, 106, 0.35);
+  background: rgba(102, 187, 106, 0.12);
+}
+
+.skill-card-badge--equipped {
+  border-color: rgba(245, 197, 66, 0.45);
+  background: rgba(245, 197, 66, 0.14);
+  color: #ffe8a8;
+}
+
+.skill-card-badge--unequipped {
+  color: var(--muted);
+}
+
+.skill-card-badge--ready {
+  border-color: rgba(143, 214, 148, 0.45);
+  color: #b8f0bc;
+}
+
+.skill-card-badge--locked,
+.skill-card-badge--unmet {
+  border-color: rgba(232, 138, 138, 0.35);
+  color: #f0b0b0;
+}
+
+.skill-card-badge--maxed,
+.skill-card-badge--owned {
+  border-color: rgba(143, 214, 148, 0.35);
+  color: #c8f0cc;
+}
+
+.skill-card-desc {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.skill-card-combat {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.skill-card-combat-title {
+  font-weight: 700;
+  color: var(--text);
+  margin-right: 4px;
+}
+
+.skill-card-combat-item {
+  display: inline;
+  white-space: nowrap;
+}
+
+.skill-card-combat-label {
+  color: var(--muted);
+}
+
+.skill-card-combat-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.skill-card-combat-sep {
+  margin: 0 5px;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.skill-card-status-hint {
+  margin-left: auto;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.skill-card-reqs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill-card-req {
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 9px;
+  line-height: 1.3;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.skill-card-req--met {
+  color: #8fd694;
+  background: rgba(40, 90, 50, 0.25);
+}
+
+.skill-card-req--unmet {
+  color: #e88a8a;
+  background: rgba(90, 40, 40, 0.25);
 }
 
 .skill-reqs {

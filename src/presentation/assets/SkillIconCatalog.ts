@@ -23,8 +23,9 @@ const SKILL_ICON_BY_ID: Record<string, SkillIconKey> = {
   orc_smash: 'attack',
   dragon_bite: 'attack',
 
-  fireball: 'magic',
-  arcane_bolt: 'magic',
+  fireball: 'fireball',
+  arcane_bolt: 'arcane_bolt',
+  vitality: 'vitality',
   smite: 'magic',
   arcane_touch: 'magic',
   pyro_inferno: 'magic',
