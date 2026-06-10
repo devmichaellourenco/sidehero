@@ -14,6 +14,7 @@ import { parsePhaseId } from '../../domain/campaign/CampaignIds';
 import { mapDefinitionByIndex } from '../../domain/campaign/CampaignMaps';
 import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
+import { PartyEditPolicy } from '../../domain/party/PartyEditPolicy';
 import { listEnemyCombatSkillsByType } from '../../domain/progression/combat/EnemyCombatSkillCatalog';
 import { getEnemySkillDisplay } from '../../domain/progression/combat/EnemySkillDisplayCatalog';
 import {
@@ -31,24 +32,49 @@ export class GameStatePresenter {
     const combatEnemies = combat?.enemies ?? [];
     const skillCooldowns = combat?.skillCooldowns;
     const statusEffects = combat?.statusEffects;
+    const activeParty = state.activeHeroes();
     const enemies = combatEnemies.map((enemy) =>
-      mapEnemyToDto(enemy, state.heroes, combatEnemies, skillCooldowns, statusEffects),
+      mapEnemyToDto(enemy, activeParty, combatEnemies, skillCooldowns, statusEffects),
     );
     const activeActor = combat?.currentActor() ?? null;
     const campaignLabels = mapCampaignLabels(state);
     const phaseRun = mapPhaseRunDto(state);
 
+    const rosterHeroes = state.roster.map((hero) =>
+      mapHeroToDtoWithCombatIntent(
+        hero,
+        activeParty,
+        combatEnemies,
+        skillCooldowns,
+        statusEffects,
+        state.upgradeLevels,
+      ),
+    );
+
     return {
-      heroes: state.heroes.map((hero) =>
+      heroes: rosterHeroes,
+      activeParty: activeParty.map((hero) =>
         mapHeroToDtoWithCombatIntent(
           hero,
-          state.heroes,
+          activeParty,
           combatEnemies,
           skillCooldowns,
           statusEffects,
           state.upgradeLevels,
         ),
       ),
+      benchHeroes: state.benchHeroes().map((hero) =>
+        mapHeroToDtoWithCombatIntent(
+          hero,
+          activeParty,
+          combatEnemies,
+          skillCooldowns,
+          statusEffects,
+          state.upgradeLevels,
+        ),
+      ),
+      activePartyIds: [...state.activePartyIds],
+      canEditParty: PartyEditPolicy.canEdit(state),
       enemies,
       enemy: enemies[0] ?? null,
       activeTurn: activeActor ? { side: activeActor.side, id: activeActor.id } : null,

@@ -1,3 +1,4 @@
+import { assertLoadoutEditable } from '../policies/assertLoadoutEditable';
 import { getAscensionById } from '../../domain/progression/ClassAscensionCatalog';
 import { IClassAscensionService } from '../../domain/progression/IClassAscensionService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
@@ -13,6 +14,7 @@ export class AscendClassUseCase {
 
   async execute(heroId: string, ascensionId: string): Promise<GameStateDto> {
     const state = await this.repository.load();
+    assertLoadoutEditable(state);
     const hero = state.heroes.find((entry) => entry.id === heroId);
 
     if (!hero) {

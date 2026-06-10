@@ -1,3 +1,4 @@
+import { assertLoadoutEditable } from '../policies/assertLoadoutEditable';
 import { FeatureAccessPolicy } from '../../domain/policies/FeatureAccessPolicy';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { LoadoutOptimizer } from '../../domain/services/LoadoutOptimizer';
@@ -18,6 +19,7 @@ export class EquipBestLoadoutUseCase {
 
   async execute(gearIds?: string[]): Promise<EquipBestLoadoutResult> {
     const state = await this.repository.load();
+    assertLoadoutEditable(state);
 
     if (!FeatureAccessPolicy.resolve(state.upgradeLevels).optimizeLoadout) {
       throw new Error('Otimizar equipe não desbloqueado');

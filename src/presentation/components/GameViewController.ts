@@ -12,6 +12,7 @@ import { CampaignFlow } from '../flows/CampaignFlow';
 import { ChestLootFlow } from '../flows/ChestLootFlow';
 import { GearEquipFlow } from '../flows/GearEquipFlow';
 import { HeroDetailFlow } from '../flows/HeroDetailFlow';
+import { PartyFlow } from '../flows/PartyFlow';
 import { ModalStackController } from '../flows/ModalStackController';
 import { ModalView } from '../flows/ModalTypes';
 import { ShopFlow } from '../flows/ShopFlow';
@@ -71,6 +72,8 @@ export class GameViewController {
   private readonly openShopBtn: HTMLButtonElement;
   private readonly openUpgradesBtn: HTMLButtonElement;
   private readonly seasonCompleteBanner: HTMLElement;
+  private readonly phaseIntermissionBanner: HTMLElement;
+  private readonly phaseIntermissionContinueBtn: HTMLButtonElement;
   private readonly newGameBtn: HTMLButtonElement;
 
   private readonly battleStripEl: HTMLElement;
@@ -97,6 +100,7 @@ export class GameViewController {
   private readonly gearEquipFlow: GearEquipFlow;
   private readonly chestLootFlow: ChestLootFlow;
   private readonly campaignFlow: CampaignFlow;
+  private readonly partyFlow: PartyFlow;
   private readonly modalStackController: ModalStackController;
 
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
@@ -117,6 +121,10 @@ export class GameViewController {
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
     this.seasonCompleteBanner = root.querySelector('#season-complete-banner') as HTMLElement;
+    this.phaseIntermissionBanner = root.querySelector('#phase-intermission-banner') as HTMLElement;
+    this.phaseIntermissionContinueBtn = root.querySelector(
+      '#phase-intermission-continue',
+    ) as HTMLButtonElement;
     this.newGameBtn = root.querySelector('#new-game-btn') as HTMLButtonElement;
 
     this.battleStripEl = root.querySelector('.battle-strip') as HTMLElement;
@@ -196,6 +204,7 @@ export class GameViewController {
     );
 
     this.campaignFlow = new CampaignFlow(this.client, this.modal);
+    this.partyFlow = new PartyFlow(this.client);
 
     this.chestLootFlow = new ChestLootFlow(
       this.client,
@@ -266,6 +275,9 @@ export class GameViewController {
     });
     this.newGameBtn.addEventListener('click', () => {
       void this.startNewGame();
+    });
+    this.phaseIntermissionContinueBtn.addEventListener('click', () => {
+      this.victoryFlow.dismiss();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -348,7 +360,7 @@ export class GameViewController {
       this.contextInvalidated ||
       this.prefsController.autoBattleEnabled ||
       this.chestLootFlow.openingChests ||
-      this.victoryFlow.isActive()
+      this.victoryFlow.isBlockingAdvance()
     ) {
       return true;
     }
@@ -524,7 +536,7 @@ export class GameViewController {
   }
 
   private async tick(): Promise<void> {
-    if (this.chestLootFlow.openingChests || this.victoryFlow.isActive()) return;
+    if (this.chestLootFlow.openingChests || this.victoryFlow.isBlockingAdvance()) return;
 
     const response = await this.client.send({ type: 'TICK', ticks: 1 });
     if (!response.ok) {
@@ -596,6 +608,18 @@ export class GameViewController {
 
   private bindHeroPanelDelegation(): void {
     this.heroPanelsEl.addEventListener('click', (event) => {
+      const partyTarget = (event.target as HTMLElement).closest(
+        '[data-party-add], [data-party-remove], [data-party-move-up], [data-party-move-down]',
+      ) as HTMLElement | null;
+
+      if (partyTarget) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (partyTarget instanceof HTMLButtonElement && partyTarget.disabled) return;
+        void this.handlePartyPanelAction(partyTarget);
+        return;
+      }
+
       const target = (event.target as HTMLElement).closest(
         '.equipment-slot-clickable, [data-hero-skills-open], [data-open-upgrades], [data-hero-open]',
       ) as HTMLElement | null;
@@ -633,6 +657,50 @@ export class GameViewController {
         this.openHeroDetailModal(heroId);
       }
     });
+  }
+
+  private async handlePartyPanelAction(target: HTMLElement): Promise<void> {
+    if (!this.state?.canEditParty) {
+      this.toasts.show('Party só pode ser editada entre fases', 'info');
+      return;
+    }
+
+    try {
+      const addId = target.getAttribute('data-party-add');
+      if (addId) {
+        const next = await this.partyFlow.addToParty(addId);
+        if (next) this.render(next);
+        return;
+      }
+
+      const removeId = target.getAttribute('data-party-remove');
+      if (removeId) {
+        const next = await this.partyFlow.removeFromParty(removeId);
+        if (next) this.render(next);
+        return;
+      }
+
+      const moveUpId = target.getAttribute('data-party-move-up');
+      if (moveUpId && this.state) {
+        const fromIndex = this.state.activePartyIds.indexOf(moveUpId);
+        if (fromIndex > 0) {
+          const next = await this.partyFlow.movePartyMember(fromIndex, fromIndex - 1);
+          if (next) this.render(next);
+        }
+        return;
+      }
+
+      const moveDownId = target.getAttribute('data-party-move-down');
+      if (moveDownId && this.state) {
+        const fromIndex = this.state.activePartyIds.indexOf(moveDownId);
+        if (fromIndex >= 0 && fromIndex < this.state.activePartyIds.length - 1) {
+          const next = await this.partyFlow.movePartyMember(fromIndex, fromIndex + 1);
+          if (next) this.render(next);
+        }
+      }
+    } catch (error) {
+      this.handleFailedResponse(error instanceof Error ? error.message : 'Erro ao editar party');
+    }
   }
 
   private bindModalActionDelegation(): void {
@@ -791,7 +859,16 @@ export class GameViewController {
     touchPanelSnapshot(state);
   }
 
+  private showPhaseIntermissionBanner(): void {
+    this.phaseIntermissionBanner.classList.remove('hidden');
+  }
+
+  private hidePhaseIntermissionBanner(): void {
+    this.phaseIntermissionBanner.classList.add('hidden');
+  }
+
   private afterVictoryOverlay(): void {
+    this.hidePhaseIntermissionBanner();
     const shouldResumeAutoBattle = this.resumeAutoBattleAfterVictory;
     this.resumeAutoBattleAfterVictory = false;
 
@@ -819,12 +896,20 @@ export class GameViewController {
     const previous = this.state;
     const victoryPayload = previous ? detectBattleVictory(previous, state) : null;
 
-    if (victoryPayload && !this.victoryFlow.isActive()) {
+    if (victoryPayload && !this.victoryFlow.isBlockingAdvance()) {
       this.resumeAutoBattleAfterVictory = this.prefsController.autoBattleEnabled;
       this.stopAutoBattle();
-      this.victoryFlow.show(victoryPayload, () => {
-        void this.chestLootFlow.openNextChest();
-      });
+      this.hidePhaseIntermissionBanner();
+      this.victoryFlow.show(
+        victoryPayload,
+        () => {
+          void this.chestLootFlow.openNextChest();
+        },
+        {
+          onIntermissionStart: () => this.showPhaseIntermissionBanner(),
+          onIntermissionEnd: () => this.hidePhaseIntermissionBanner(),
+        },
+      );
     }
 
     if (previous && !options.skipChestToast) {
@@ -833,7 +918,7 @@ export class GameViewController {
         state,
         {
           onChestAvailable: () => {
-            if (this.victoryFlow.isActive()) return;
+            if (this.victoryFlow.isBlockingAdvance()) return;
             void this.chestLootFlow.openNextChest();
           },
         },
@@ -848,6 +933,7 @@ export class GameViewController {
     this.hud.render(state, {
       openingChests: this.chestLootFlow.openingChests,
       autoBattleEnabled: this.prefsController.autoBattleEnabled,
+      combatBlocked: this.victoryFlow.isBlockingAdvance(),
     });
 
     this.battleStrip.render(state);

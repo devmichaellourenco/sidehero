@@ -15,6 +15,8 @@ const HERO_SPRITE_MAP = [
   ['fighter.png', 'characters/knight.png'],
   ['feiticeira.png', 'characters/sorcerer.png'],
   ['priest.png', 'characters/priest.png'],
+  ['berserker.png', 'characters/berserker.png'],
+  ['paladin.png', 'characters/paladin.png'],
 ];
 
 /** Sprites de skills em public/sprites/skills (nome do arquivo = skillId). */

@@ -6,6 +6,7 @@ import { PhaseRun } from './PhaseRun';
 import { EncounterResolver } from './EncounterResolver';
 import { GameState } from '../entities/GameState';
 import { Hero } from '../entities/Hero';
+import { HeroUnlockService } from '../party/HeroUnlockService';
 
 describe('PhaseCombatHandlers', () => {
   const handlers = new PhaseCombatHandlers();
@@ -137,5 +138,30 @@ describe('PhaseCombatHandlers', () => {
     expect(wiped.state.phaseRun?.waveIndex).toBe(0);
     expect(wiped.state.heroes[0].currentHealth).toBe(wiped.state.heroes[0].maxHealth);
     expect(wiped.state.combat?.enemies.length).toBeGreaterThan(0);
+  });
+
+  it('concede XP parcial à reserva ao derrotar boss', () => {
+    let state = GameState.initial().withActivePartyIds(['hero-1', 'hero-2']);
+    state = HeroUnlockService.applyUnlock(state, 'berserker');
+
+    const phaseId = buildPhaseId(1, 2);
+    const phaseRun = PhaseRun.start(phaseId);
+    state = state
+      .withCampaignProgress(GameState.initial().campaignProgress.withSelectedPhase(phaseId))
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const boss = resolver.resolve(phaseId, 1);
+    expect(boss).not.toBeNull();
+
+    const totalXp = boss!.enemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
+    const victory = handlers.onBossDefeated(state, boss!.enemies, state.activeHeroes(), boss!.meta);
+
+    const benchHero = victory.state.roster.find((hero) => hero.id === 'hero-berserker');
+    const activeHero = victory.state.roster.find((hero) => hero.id === 'hero-1');
+    expect(benchHero).toBeDefined();
+    expect(activeHero).toBeDefined();
+    expect(benchHero!.experience.current).toBe(Math.floor(totalXp * 0.5));
+    expect(activeHero!.experience.current).toBe(totalXp);
   });
 });

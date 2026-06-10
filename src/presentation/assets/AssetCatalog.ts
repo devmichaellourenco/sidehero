@@ -1,6 +1,6 @@
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
 
-export type HeroClassKey = 'knight' | 'sorcerer' | 'priest';
+export type HeroClassKey = 'knight' | 'sorcerer' | 'priest' | 'berserker' | 'paladin';
 export type EnemyTypeKey = 'slime' | 'goblin' | 'orc' | 'wraith' | 'dragon';
 export type GearSlotKey = 'weapon' | 'armor' | 'accessory';
 export type GearRarityKey = 'common' | 'rare' | 'epic';
@@ -9,6 +9,8 @@ const HERO_SPRITES: Record<HeroClassKey, string> = {
   knight: 'characters/knight.png',
   sorcerer: 'characters/sorcerer.png',
   priest: 'characters/priest.png',
+  berserker: 'characters/berserker.png',
+  paladin: 'characters/paladin.png',
 };
 
 const ENEMY_SPRITES: Record<EnemyTypeKey, string> = {

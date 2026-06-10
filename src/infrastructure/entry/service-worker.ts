@@ -191,6 +191,18 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.spendAscensionPoint.execute(message.heroId, message.skillId);
       return { ok: true, state };
     }
+    case 'ADD_TO_PARTY': {
+      const state = await app.addToParty.execute(message.heroId);
+      return { ok: true, state };
+    }
+    case 'REMOVE_FROM_PARTY': {
+      const state = await app.removeFromParty.execute(message.heroId);
+      return { ok: true, state };
+    }
+    case 'MOVE_PARTY_MEMBER': {
+      const state = await app.movePartyMember.execute(message.fromIndex, message.toIndex);
+      return { ok: true, state };
+    }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
   }

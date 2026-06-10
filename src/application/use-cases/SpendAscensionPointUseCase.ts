@@ -1,3 +1,4 @@
+import { assertLoadoutEditable } from '../policies/assertLoadoutEditable';
 import { ISkillService } from '../../domain/progression/ISkillService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
@@ -12,6 +13,7 @@ export class SpendAscensionPointUseCase {
 
   async execute(heroId: string, skillId: string): Promise<GameStateDto> {
     const state = await this.repository.load();
+    assertLoadoutEditable(state);
     const hero = state.heroes.find((entry) => entry.id === heroId);
 
     if (!hero) {

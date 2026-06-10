@@ -137,6 +137,10 @@ export interface CampaignProgressDto {
 
 export interface GameStateDto {
   heroes: HeroDto[];
+  activeParty: HeroDto[];
+  activePartyIds: string[];
+  benchHeroes: HeroDto[];
+  canEditParty: boolean;
   enemies: EnemyDto[];
   enemy: EnemyDto | null;
   activeTurn: ActiveTurnDto | null;

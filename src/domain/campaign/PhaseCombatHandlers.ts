@@ -8,6 +8,7 @@ import { TurnOrderService } from '../services/combat/TurnOrderService';
 import { EncounterMeta, EncounterResolver } from './EncounterResolver';
 import { CampaignProgress } from './CampaignProgress';
 import { PhaseRun } from './PhaseRun';
+import { BenchXpPolicy } from '../party/BenchXpPolicy';
 import { resolvePhase } from './CampaignCatalog';
 
 export interface PhaseCombatResult {
@@ -27,7 +28,12 @@ export class PhaseCombatHandlers {
       return { state, events: [] };
     }
 
-    const combat = CombatState.start(state.heroes, resolved.enemies, this.turnOrder, resolved.meta);
+    const combat = CombatState.start(
+      state.activeHeroes(),
+      resolved.enemies,
+      this.turnOrder,
+      resolved.meta,
+    );
     const phase = resolved.phase;
     const waveLabel = `${phaseRun.waveIndex + 1}/${resolved.meta.waveCount}`;
 
@@ -100,10 +106,16 @@ export class PhaseCombatHandlers {
       .map((hero) => hero.gainExperience(totalXp))
       .map((hero) => hero.healFull());
 
+    const benchXp = BenchXpPolicy.benchExperience(totalXp);
+    const benchUpdates =
+      benchXp > 0
+        ? state.benchHeroes().map((hero) => hero.gainExperience(benchXp))
+        : [];
+
     let nextState = state
       .withCampaignProgress(progress)
       .withGold(state.gold.add(totalGold))
-      .withHeroes(recoveredHeroes)
+      .withRosterHeroes([...recoveredHeroes, ...benchUpdates])
       .withStage(progress.highestTierReached)
       .withPhaseRun(null)
       .withCombat(null)
@@ -111,7 +123,9 @@ export class PhaseCombatHandlers {
       .addLog(
         phase.seasonFinale
           ? `🏆 Temporada concluída! Boss final derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada`
-          : `Boss derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada`,
+          : `Boss derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada${
+              benchXp > 0 && benchUpdates.length > 0 ? ` · Reserva +${benchXp} XP` : ''
+            }`,
       );
 
     const events = phase.seasonFinale
@@ -128,7 +142,7 @@ export class PhaseCombatHandlers {
   }
 
   onPhaseWipe(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
-    const recovered = state.heroes.map((hero) => hero.healFull());
+    const recovered = state.activeHeroes().map((hero) => hero.healFull());
     const resetRun = phaseRun.resetWaves();
     const resolved = this.encounterResolver.resolve(resetRun.phaseId, resetRun.waveIndex);
     if (!resolved) {

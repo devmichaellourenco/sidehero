@@ -1,3 +1,4 @@
+import { assertLoadoutEditable } from '../policies/assertLoadoutEditable';
 import { Gear, GearSlot } from '../../domain/entities/Gear';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
@@ -11,6 +12,7 @@ export class UnequipGearUseCase {
 
   async execute(heroId: string, slot: GearSlot): Promise<GameStateDto> {
     const state = await this.repository.load();
+    assertLoadoutEditable(state);
     let removedGear: Gear | null = null;
 
     const heroes = state.heroes.map((hero) => {

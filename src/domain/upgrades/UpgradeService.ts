@@ -1,5 +1,6 @@
 import { GameState } from '../entities/GameState';
 import { getFeatureLevel, UpgradeLevels } from './FeatureKey';
+import { HeroUnlockService } from '../party/HeroUnlockService';
 import { UpgradeRequirementEvaluator } from '../requirements/UpgradeRequirementEvaluator';
 import { getUpgradeById, UPGRADE_CATALOG } from './UpgradeCatalog';
 import { UpgradeDefinition } from './UpgradeDefinition';
@@ -55,10 +56,16 @@ export class UpgradeService {
       [definition.feature]: definition.level,
     };
 
-    return state
+    let nextState = state
       .withGold(state.gold.spend(definition.cost))
       .withUpgradeLevels(nextLevels)
       .addLog(`Comprou melhoria: ${definition.name}`);
+
+    if (definition.unlockHeroClass) {
+      nextState = HeroUnlockService.applyUnlock(nextState, definition.unlockHeroClass);
+    }
+
+    return nextState;
   }
 
   private getStatus(state: GameState, definition: UpgradeDefinition): UpgradeNodeStatus {

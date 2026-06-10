@@ -1,3 +1,4 @@
+import { assertLoadoutEditable } from '../policies/assertLoadoutEditable';
 import { getUnlockedBattleSkillSlotCount } from '../../domain/progression/SkillBattleSlots';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { ISkillService } from '../../domain/progression/ISkillService';
@@ -13,6 +14,7 @@ export class ActivateSkillUseCase {
 
   async execute(heroId: string, skillId: string): Promise<GameStateDto> {
     const state = await this.repository.load();
+    assertLoadoutEditable(state);
     const hero = state.heroes.find((entry) => entry.id === heroId);
 
     if (!hero) {

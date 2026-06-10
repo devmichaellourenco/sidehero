@@ -8,6 +8,7 @@ import { LoadoutOptimizer } from '../../domain/services/LoadoutOptimizer';
 import { LootService } from '../../domain/services/LootService';
 import { ShopService } from '../../domain/services/ShopService';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
+import { PartyService } from '../../domain/party/PartyService';
 import { GameStatePresenter } from '../../application/presenters/GameStatePresenter';
 import { ChromeStorageGameRepository } from '../storage/ChromeStorageGameRepository';
 
@@ -26,6 +27,7 @@ function createDependencies(): GameApplicationDependencies {
     skillService: new SkillService(),
     ascensionService: new ClassAscensionService(),
     loadoutOptimizer: new LoadoutOptimizer(),
+    partyService: new PartyService(),
     presenter: new GameStatePresenter(upgradeService),
   };
 }

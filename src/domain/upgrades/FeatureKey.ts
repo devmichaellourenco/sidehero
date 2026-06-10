@@ -8,6 +8,8 @@ export const FEATURE_KEYS = [
   'log_filter',
   'shop_refresh',
   'battle_skill_slots',
+  'hero_unlock_berserker',
+  'hero_unlock_paladin',
 ] as const;
 
 export type FeatureKey = (typeof FEATURE_KEYS)[number];

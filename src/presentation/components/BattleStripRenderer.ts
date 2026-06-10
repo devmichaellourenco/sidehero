@@ -16,7 +16,7 @@ export class BattleStripRenderer {
     const glowUrl = getAssetUrl(ASSETS.characters.glow);
     const activeTurn = state.activeTurn;
 
-    this.heroesContainer.innerHTML = state.heroes
+    this.heroesContainer.innerHTML = state.activeParty
       .map((hero) => {
         const glowHtml = `<img class="hero-glow" src="${glowUrl}" alt="" aria-hidden="true" />`;
         const spriteHtml = imgTag(getHeroSprite(hero.heroClass), hero.name, 'hero-image');

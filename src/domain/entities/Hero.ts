@@ -31,12 +31,16 @@ const BASE_STATS: Record<HeroClass, { attack: number; defense: number; health: n
   knight: { attack: 12, defense: 8, health: 120 },
   sorcerer: { attack: 18, defense: 3, health: 80 },
   priest: { attack: 8, defense: 5, health: 100 },
+  berserker: { attack: 16, defense: 4, health: 110 },
+  paladin: { attack: 11, defense: 10, health: 115 },
 };
 
 const HERO_EMOJI: Record<HeroClass, string> = {
   knight: '🛡️',
   sorcerer: '🔮',
   priest: '✨',
+  berserker: '🪓',
+  paladin: '⚔️',
 };
 
 export class Hero {

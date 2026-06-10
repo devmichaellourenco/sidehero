@@ -47,11 +47,11 @@ export class CombatTurnPhase {
       return this.finish(started.state, started.events, []);
     }
 
-    const resolved = this.resolveTurnActor(workingState.heroes, combat);
+    const resolved = this.resolveTurnActor(workingState.activeHeroes(), combat);
     combat = resolved.combat;
 
     if (!resolved.actor) {
-      const livingHeroes = workingState.heroes.filter((hero) => hero.isAlive());
+      const livingHeroes = workingState.activeHeroes().filter((hero) => hero.isAlive());
       if (livingHeroes.length === 0 && workingState.phaseRun) {
         const wiped = this.phaseHandlers.onPhaseWipe(workingState.withCombat(combat), workingState.phaseRun);
         return this.finish(wiped.state, wiped.events, []);
@@ -66,7 +66,7 @@ export class CombatTurnPhase {
     const floatingEvents = turnResult.floatingEvents;
     let nextCombat = turnResult.combat.advanceTurn();
 
-    const livingHeroes = nextState.heroes.filter((hero) => hero.isAlive());
+    const livingHeroes = nextState.activeHeroes().filter((hero) => hero.isAlive());
     const livingEnemies = nextCombat.livingEnemies();
     const phaseRun = nextState.phaseRun;
     const encounterMeta = nextCombat.encounterMeta;
@@ -81,7 +81,7 @@ export class CombatTurnPhase {
         const victory = this.phaseHandlers.onBossDefeated(
           nextState,
           nextCombat.enemies,
-          nextState.heroes,
+          nextState.activeHeroes(),
           encounterMeta,
         );
         return this.finish(victory.state, [...events, ...victory.events], floatingEvents);
@@ -90,14 +90,14 @@ export class CombatTurnPhase {
       const waveCleared = this.phaseHandlers.onWaveCleared(
         nextState,
         nextCombat.enemies,
-        nextState.heroes,
+        nextState.activeHeroes(),
         encounterMeta,
         phaseRun,
       );
       return this.finish(waveCleared.state, [...events, ...waveCleared.events], floatingEvents);
     }
 
-    nextCombat = this.ensureTurnQueue(nextState.heroes, nextCombat);
+    nextCombat = this.ensureTurnQueue(nextState.activeHeroes(), nextCombat);
     const logMessage = events.join(' · ');
 
     return this.finish(
@@ -170,7 +170,7 @@ export class CombatTurnPhase {
     events: string[];
     floatingEvents: CombatFloatingEvent[];
   } {
-    let heroes = state.heroes;
+    let heroes = state.activeHeroes();
     let enemies = combat.enemies;
     const events: string[] = [];
     const floatingEvents: CombatFloatingEvent[] = [];

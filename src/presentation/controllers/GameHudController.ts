@@ -39,7 +39,7 @@ export class GameHudController {
     private readonly tickBtn: HTMLButtonElement,
   ) {}
 
-  render(state: GameStateDto, options: { openingChests: boolean; autoBattleEnabled: boolean }): void {
+  render(state: GameStateDto, options: { openingChests: boolean; autoBattleEnabled: boolean; combatBlocked?: boolean }): void {
     const phaseId = state.phaseRun?.phaseId ?? state.campaignProgress.selectedPhaseId;
     const waveSuffix = state.phaseRun
       ? ` · ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
@@ -96,6 +96,6 @@ export class GameHudController {
     this.openChestBtn.classList.toggle('chest-available', hasChests);
 
     this.tickBtn.classList.toggle('auto-battle-active', options.autoBattleEnabled);
-    this.tickBtn.disabled = options.autoBattleEnabled;
+    this.tickBtn.disabled = options.autoBattleEnabled || Boolean(options.combatBlocked);
   }
 }

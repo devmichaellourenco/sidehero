@@ -17,6 +17,34 @@ import {
 
 const STORAGE_KEY = 'taskbar_hero_game_state';
 
+function serializeHero(hero: Hero): Record<string, unknown> {
+  const heroProps = hero.toProps();
+  const equipment = heroProps.equipment ?? {};
+  return {
+    id: heroProps.id,
+    name: heroProps.name,
+    heroClass: heroProps.heroClass,
+    baseAttack: heroProps.baseAttack,
+    baseDefense: heroProps.baseDefense,
+    baseMaxHealth: heroProps.baseMaxHealth,
+    currentHealth: heroProps.currentHealth,
+    experience: {
+      current: heroProps.experience.current,
+      toNextLevel: heroProps.experience.toNextLevel,
+      level: heroProps.experience.level,
+    },
+    equipment: Object.fromEntries(
+      Object.entries(equipment).map(([slot, gear]) => [slot, gear ? gear.toProps() : null]),
+    ),
+    allocatedAttributes: heroProps.allocatedAttributes,
+    unspentImprovementPoints: heroProps.unspentImprovementPoints,
+    unspentAscensionPoints: heroProps.unspentAscensionPoints,
+    skillRanks: heroProps.skillRanks,
+    equippedSkillIds: heroProps.equippedSkillIds,
+    ascensionId: heroProps.ascensionId,
+  };
+}
+
 export class ChromeStorageGameRepository implements IGameStateRepository {
   async load(): Promise<GameState> {
     const result = await chrome.storage.local.get(STORAGE_KEY);
@@ -43,37 +71,13 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
 
   private serialize(state: GameState): Record<string, unknown> {
     const props = state.toProps();
+    const roster = props.roster ?? props.heroes ?? [];
+    const serializedHeroes = roster.map((hero) => serializeHero(hero));
+
     return {
-      heroes: props.heroes.map((h) => {
-        const heroProps = h.toProps();
-        const equipment = heroProps.equipment ?? {};
-        return {
-          id: heroProps.id,
-          name: heroProps.name,
-          heroClass: heroProps.heroClass,
-          baseAttack: heroProps.baseAttack,
-          baseDefense: heroProps.baseDefense,
-          baseMaxHealth: heroProps.baseMaxHealth,
-          currentHealth: heroProps.currentHealth,
-          experience: {
-            current: heroProps.experience.current,
-            toNextLevel: heroProps.experience.toNextLevel,
-            level: heroProps.experience.level,
-          },
-          equipment: Object.fromEntries(
-            Object.entries(equipment).map(([slot, gear]) => [
-              slot,
-              gear ? gear.toProps() : null,
-            ]),
-          ),
-          allocatedAttributes: heroProps.allocatedAttributes,
-          unspentImprovementPoints: heroProps.unspentImprovementPoints,
-          unspentAscensionPoints: heroProps.unspentAscensionPoints,
-          skillRanks: heroProps.skillRanks,
-          equippedSkillIds: heroProps.equippedSkillIds,
-          ascensionId: heroProps.ascensionId,
-        };
-      }),
+      heroes: serializedHeroes,
+      roster: serializedHeroes,
+      activePartyIds: [...props.activePartyIds ?? []],
       combat: props.combat?.toProps() ?? null,
       campaignProgress: props.campaignProgress,
       phaseRun: props.phaseRun,
@@ -91,13 +95,20 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
   }
 
   private deserialize(raw: Record<string, unknown>): GameState {
-    const heroesRaw = Array.isArray(raw.heroes) ? raw.heroes : [];
+    const rosterRaw = Array.isArray(raw.roster)
+      ? raw.roster
+      : Array.isArray(raw.heroes)
+        ? raw.heroes
+        : [];
 
-    if (heroesRaw.length === 0) {
+    if (rosterRaw.length === 0) {
       throw new Error('Estado sem heróis');
     }
 
-    const heroes = heroesRaw.map((hero) => migrateHero(hero));
+    const roster = rosterRaw.map((hero) => migrateHero(hero));
+    const activePartyIds = Array.isArray(raw.activePartyIds)
+      ? raw.activePartyIds.filter((id): id is string => typeof id === 'string')
+      : undefined;
     const legacyEnemy = migrateEnemy(raw.currentEnemy);
 
     const upgradeLevels =
@@ -105,11 +116,13 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
         ? (raw.upgradeLevels as UpgradeLevels)
         : {};
 
-    const normalizedHeroes = normalizeHeroEquippedSkills(heroes, upgradeLevels);
+    const normalizedRoster = normalizeHeroEquippedSkills(roster, upgradeLevels);
 
     return GameState.restore({
-      heroes: normalizedHeroes,
-      combat: migrateCombat(raw.combat, normalizedHeroes, legacyEnemy),
+      roster: normalizedRoster,
+      heroes: normalizedRoster,
+      activePartyIds,
+      combat: migrateCombat(raw.combat, normalizedRoster, legacyEnemy),
       campaignProgress:
         raw.campaignProgress && typeof raw.campaignProgress === 'object'
           ? (raw.campaignProgress as CampaignProgressProps)

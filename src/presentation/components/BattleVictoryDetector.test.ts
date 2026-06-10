@@ -5,6 +5,10 @@ import { detectBattleVictory } from './BattleVictoryDetector';
 function baseState(partial: Partial<GameStateDto> = {}): GameStateDto {
   return {
     heroes: [],
+    activeParty: [],
+    activePartyIds: [],
+    benchHeroes: [],
+    canEditParty: true,
     enemies: [],
     enemy: null,
     activeTurn: null,

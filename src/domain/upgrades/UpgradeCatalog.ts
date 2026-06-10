@@ -214,6 +214,34 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
       { type: 'min_hero_level', value: 6 },
     ],
   },
+  {
+    id: 'hero_unlock_berserker',
+    feature: 'hero_unlock_berserker',
+    level: 1,
+    branch: 'heroes',
+    name: 'Desbloquear Berserker',
+    description: 'Ragnar entra na reserva — alto dano corpo a corpo.',
+    cost: 150,
+    requirements: [
+      { type: 'min_stage', value: 3 },
+      { type: 'min_battles_won', value: 8 },
+    ],
+    unlockHeroClass: 'berserker',
+  },
+  {
+    id: 'hero_unlock_paladin',
+    feature: 'hero_unlock_paladin',
+    level: 1,
+    branch: 'heroes',
+    name: 'Desbloquear Paladino',
+    description: 'Seraphine entra na reserva — tanque equilibrado.',
+    cost: 200,
+    requirements: [
+      { type: 'min_stage', value: 4 },
+      { type: 'min_hero_level', value: 5 },
+    ],
+    unlockHeroClass: 'paladin',
+  },
 ];
 
 export function getUpgradeById(id: string): UpgradeDefinition | undefined {

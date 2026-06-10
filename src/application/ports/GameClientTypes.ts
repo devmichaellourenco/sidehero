@@ -32,7 +32,10 @@ export type GameMessage =
   | { type: 'DEACTIVATE_SKILL'; heroId: string; skillId: string }
   | { type: 'ASCEND_CLASS'; heroId: string; ascensionId: string }
   | { type: 'GET_HERO_ASCENSION_TREE'; heroId: string }
-  | { type: 'SPEND_ASCENSION_POINT'; heroId: string; skillId: string };
+  | { type: 'SPEND_ASCENSION_POINT'; heroId: string; skillId: string }
+  | { type: 'ADD_TO_PARTY'; heroId: string }
+  | { type: 'REMOVE_FROM_PARTY'; heroId: string }
+  | { type: 'MOVE_PARTY_MEMBER'; fromIndex: number; toIndex: number };
 
 export type GameResponse =
   | {

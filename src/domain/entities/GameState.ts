@@ -9,6 +9,7 @@ import { Enemy } from './Enemy';
 import { Gear } from './Gear';
 import { Hero } from './Hero';
 import { TurnOrderService } from '../services/combat/TurnOrderService';
+import { normalizePartyFromProps } from '../party/PartyNormalizer';
 
 export interface BattleLogEntry {
   message: string;
@@ -16,7 +17,10 @@ export interface BattleLogEntry {
 }
 
 export interface GameStateProps {
-  heroes: Hero[];
+  /** Legado — preferir `roster`. Mantido para saves antigos. */
+  heroes?: Hero[];
+  roster?: Hero[];
+  activePartyIds?: string[];
   combat: CombatState | null;
   /** Legado — migrado para `combat` no load. */
   currentEnemy?: Enemy | null;
@@ -36,7 +40,8 @@ export interface GameStateProps {
 }
 
 export class GameState {
-  readonly heroes: Hero[];
+  readonly roster: Hero[];
+  readonly activePartyIds: readonly string[];
   readonly combat: CombatState | null;
   readonly campaignProgress: CampaignProgress;
   readonly phaseRun: PhaseRun | null;
@@ -52,7 +57,10 @@ export class GameState {
   readonly shopRefreshUses: number;
 
   private constructor(props: GameStateProps) {
-    this.heroes = props.heroes;
+    const legacyHeroes = props.heroes ?? [];
+    const party = normalizePartyFromProps(legacyHeroes, props.roster, props.activePartyIds);
+    this.roster = party.roster;
+    this.activePartyIds = party.activePartyIds;
     this.combat = props.combat;
     this.campaignProgress = CampaignProgress.restore(props.campaignProgress);
     this.phaseRun = props.phaseRun ? PhaseRun.restore(props.phaseRun) : null;
@@ -77,7 +85,8 @@ export class GameState {
     const progress = CampaignProgress.initial();
 
     return new GameState({
-      heroes,
+      roster: heroes,
+      activePartyIds: heroes.map((hero) => hero.id),
       combat: null,
       campaignProgress: progress.toProps(),
       phaseRun: null,
@@ -102,6 +111,22 @@ export class GameState {
     });
   }
 
+  /** Alias legado de `roster`. */
+  get heroes(): Hero[] {
+    return this.roster;
+  }
+
+  activeHeroes(): Hero[] {
+    return this.activePartyIds
+      .map((id) => this.roster.find((hero) => hero.id === id))
+      .filter((hero): hero is Hero => hero !== undefined);
+  }
+
+  benchHeroes(): Hero[] {
+    const activeIds = new Set(this.activePartyIds);
+    return this.roster.filter((hero) => !activeIds.has(hero.id));
+  }
+
   get currentEnemy(): Enemy | null {
     return this.combat?.enemies[0] ?? null;
   }
@@ -124,11 +149,25 @@ export class GameState {
     }
 
     const turnOrder = new TurnOrderService();
-    return this.withCombat(CombatState.fromLegacyEnemy(enemy, this.heroes, turnOrder));
+    return this.withCombat(CombatState.fromLegacyEnemy(enemy, this.activeHeroes(), turnOrder));
+  }
+
+  withRoster(roster: Hero[]): GameState {
+    return this.clone({ roster, heroes: roster });
+  }
+
+  withActivePartyIds(activePartyIds: string[]): GameState {
+    return this.clone({ activePartyIds: [...activePartyIds] });
+  }
+
+  withRosterHeroes(updates: Hero[]): GameState {
+    const byId = new Map(updates.map((hero) => [hero.id, hero]));
+    const roster = this.roster.map((hero) => byId.get(hero.id) ?? hero);
+    return this.withRoster(roster);
   }
 
   withHeroes(heroes: Hero[]): GameState {
-    return this.clone({ heroes });
+    return this.withRosterHeroes(heroes);
   }
 
   withGold(gold: Gold): GameState {
@@ -190,7 +229,9 @@ export class GameState {
 
   toProps(): GameStateProps {
     return {
-      heroes: this.heroes,
+      heroes: this.roster,
+      roster: this.roster,
+      activePartyIds: [...this.activePartyIds],
       combat: this.combat,
       campaignProgress: this.campaignProgress.toProps(),
       phaseRun: this.phaseRun?.toProps() ?? null,

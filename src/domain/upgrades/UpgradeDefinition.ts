@@ -1,7 +1,8 @@
+import { HeroClass } from '../entities/HeroClass';
 import { FeatureKey } from './FeatureKey';
 import { UpgradeRequirement } from './UpgradeRequirement';
 
-export type UpgradeBranch = 'combat' | 'chests' | 'equipment' | 'qol' | 'economy';
+export type UpgradeBranch = 'combat' | 'chests' | 'equipment' | 'qol' | 'economy' | 'heroes';
 
 export interface UpgradeDefinition {
   id: string;
@@ -12,4 +13,5 @@ export interface UpgradeDefinition {
   description: string;
   cost: number;
   requirements: UpgradeRequirement[];
+  unlockHeroClass?: HeroClass;
 }

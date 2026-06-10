@@ -21,7 +21,11 @@ import { SpendAscensionPointUseCase } from './use-cases/SpendAscensionPointUseCa
 import { SpendImprovementPointUseCase } from './use-cases/SpendImprovementPointUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
 import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
+import { AddToPartyUseCase } from './use-cases/AddToPartyUseCase';
+import { RemoveFromPartyUseCase } from './use-cases/RemoveFromPartyUseCase';
+import { MovePartyMemberUseCase } from './use-cases/MovePartyMemberUseCase';
 import { GameApplicationDependencies } from './GameApplicationDependencies';
+import { PartyService } from '../domain/party/PartyService';
 
 export class GameApplication {
   readonly getState: GetGameStateUseCase;
@@ -46,6 +50,9 @@ export class GameApplication {
   readonly ascendClass: AscendClassUseCase;
   readonly getHeroAscensionTree: GetHeroAscensionTreeUseCase;
   readonly spendAscensionPoint: SpendAscensionPointUseCase;
+  readonly addToParty: AddToPartyUseCase;
+  readonly removeFromParty: RemoveFromPartyUseCase;
+  readonly movePartyMember: MovePartyMemberUseCase;
 
   constructor(repository: IGameStateRepository, deps: GameApplicationDependencies) {
     const {
@@ -56,6 +63,7 @@ export class GameApplication {
       skillService,
       ascensionService,
       loadoutOptimizer,
+      partyService,
       presenter,
     } = deps;
 
@@ -90,5 +98,8 @@ export class GameApplication {
       skillService,
     );
     this.spendAscensionPoint = new SpendAscensionPointUseCase(repository, presenter, skillService);
+    this.addToParty = new AddToPartyUseCase(repository, partyService, presenter);
+    this.removeFromParty = new RemoveFromPartyUseCase(repository, partyService, presenter);
+    this.movePartyMember = new MovePartyMemberUseCase(repository, partyService, presenter);
   }
 }

@@ -1,4 +1,4 @@
-import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
+import { assertLoadoutEditable } from '../policies/assertLoadoutEditable';
 import {
   addReplacedGearToInventory,
   equipHeroWithGear,
@@ -14,6 +14,7 @@ export class EquipGearUseCase {
 
   async execute(heroId: string, gearId: string): Promise<GameStateDto> {
     const state = await this.repository.load();
+    assertLoadoutEditable(state);
     const gear = state.inventory.find((entry) => entry.id === gearId);
 
     if (!gear) {
