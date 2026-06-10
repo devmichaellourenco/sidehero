@@ -28,6 +28,7 @@ import { GameStateChangeDetector } from './GameStateChangeDetector';
 import { GearSlotKey } from './GearPresentation';
 import { HeroDetailModalRenderer, HeroDetailTab } from './HeroDetailModalRenderer';
 import { HeroPanelRenderer } from './HeroPanelRenderer';
+import { shouldRenderHeroPanel } from './HeroPanelRenderPolicy';
 import { InventoryModalRenderer } from './InventoryModalRenderer';
 import { LootBatchModalRenderer } from './LootBatchModalRenderer';
 import { LootModalRenderer } from './LootModalRenderer';
@@ -479,6 +480,7 @@ export class GameViewController {
 
   private async refresh(options: { checkIdleSummary?: boolean } = {}): Promise<void> {
     if (this.contextInvalidated) return;
+    if (this.state && !this.state.canEditParty) return;
 
     const response = await this.client.send({ type: 'GET_STATE' });
     if (!response.ok) {
@@ -549,7 +551,12 @@ export class GameViewController {
 
   private showCombatFloats(combatFloats?: CombatFloatingEventDto[]): void {
     if (!combatFloats?.length) return;
-    this.battleFloats.show(combatFloats);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.battleFloats.show(combatFloats);
+      });
+    });
   }
 
   private async handleLootReceived(gearIds: string[], gearNames: string[] = []): Promise<void> {
@@ -937,7 +944,9 @@ export class GameViewController {
     });
 
     this.battleStrip.render(state);
-    this.heroPanel.render(state);
+    if (shouldRenderHeroPanel(previous, state)) {
+      this.heroPanel.render(state);
+    }
 
     this.shopFlow.state.shopRefreshUnlocked = state.featureFlags.shopRefresh;
     this.shopFlow.state.shopRefreshRemaining = Math.max(

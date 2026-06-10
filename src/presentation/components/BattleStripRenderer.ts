@@ -1,18 +1,39 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getEnemySprite, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
+import { patchBattleStripInPlace } from './BattleStripPatcher';
+import {
+  battleStripDomMatchesStructure,
+  buildBattleStripStructureKey,
+} from './BattleStripStructure';
 import { renderEnemyBattleCard } from './EnemyBattlePresentation';
 import { bindEnemyTooltips } from './EnemyTooltipBinder';
 import { renderHeroBattleSprite } from './HeroBattlePresentation';
 import { bindHeroTooltips } from './HeroTooltipBinder';
 
 export class BattleStripRenderer {
+  private structureKey: string | null = null;
+
   constructor(
     private readonly heroesContainer: HTMLElement,
     private readonly enemyContainer: HTMLElement,
   ) {}
 
   render(state: GameStateDto): void {
+    const nextStructureKey = buildBattleStripStructureKey(state);
+    if (
+      nextStructureKey === this.structureKey &&
+      battleStripDomMatchesStructure(state, this.heroesContainer, this.enemyContainer)
+    ) {
+      patchBattleStripInPlace(state, this.heroesContainer, this.enemyContainer);
+      return;
+    }
+
+    this.structureKey = nextStructureKey;
+    this.renderFull(state);
+  }
+
+  private renderFull(state: GameStateDto): void {
     const glowUrl = getAssetUrl(ASSETS.characters.glow);
     const activeTurn = state.activeTurn;
 
