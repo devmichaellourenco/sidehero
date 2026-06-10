@@ -96,18 +96,22 @@ export class PhaseCombatHandlers {
       progress = progress.withSelectedPhase(phase.unlocks[0]);
     }
 
+    const recoveredHeroes = heroes
+      .map((hero) => hero.gainExperience(totalXp))
+      .map((hero) => hero.healFull());
+
     let nextState = state
       .withCampaignProgress(progress)
       .withGold(state.gold.add(totalGold))
-      .withHeroes(heroes.map((hero) => hero.gainExperience(totalXp)))
+      .withHeroes(recoveredHeroes)
       .withStage(progress.highestTierReached)
       .withPhaseRun(null)
       .withCombat(null)
       .incrementBattlesWon()
       .addLog(
         phase.seasonFinale
-          ? `🏆 Temporada concluída! Boss final derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP`
-          : `Boss derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP`,
+          ? `🏆 Temporada concluída! Boss final derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada`
+          : `Boss derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada`,
       );
 
     const events = phase.seasonFinale

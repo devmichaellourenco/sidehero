@@ -1,12 +1,13 @@
 {
   "name": "side-hero-extension",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Side Hero — idle RPG no painel lateral do navegador",
   "scripts": {
     "build": "node scripts/generate-icons.mjs && node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
-    "test": "vitest run"
+    "test": "vitest run",
+    "release": "npm test && node scripts/pack-release.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",

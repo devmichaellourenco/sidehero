@@ -39,6 +39,40 @@ describe('PhaseCombatHandlers', () => {
     expect(cleared.state.heroes.every((hero) => hero.level === 1)).toBe(true);
   });
 
+  it('restaura vida da party ao derrotar boss e avançar de fase', () => {
+    const phaseId = buildPhaseId(1, 2);
+    const phaseRun = PhaseRun.start(phaseId);
+    let state = GameState.initial()
+      .withCampaignProgress(
+        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
+      )
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    state = state.withHeroes(
+      state.heroes.map((hero, index) =>
+        Hero.restore({ ...hero.toProps(), currentHealth: index === 0 ? 1 : hero.maxHealth }),
+      ),
+    );
+
+    const boss = resolver.resolve(phaseId, 1);
+    expect(boss).not.toBeNull();
+
+    const victory = handlers.onBossDefeated(
+      state,
+      boss!.enemies,
+      state.heroes,
+      boss!.meta,
+    );
+
+    expect(victory.state.heroes.every((hero) => hero.currentHealth === hero.maxHealth)).toBe(
+      true,
+    );
+    expect(victory.state.battleLog.some((entry) => entry.message.includes('Party recuperada'))).toBe(
+      true,
+    );
+  });
+
   it('avança selectedPhaseId para próxima fase ao derrotar boss', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
