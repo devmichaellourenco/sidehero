@@ -91,6 +91,8 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       shopRefreshSeed: props.shopRefreshSeed,
       upgradeLevels: props.upgradeLevels,
       shopRefreshUses: props.shopRefreshUses,
+      loadoutEditOpen: props.loadoutEditOpen && props.phaseRestartOnResume,
+      phaseRestartOnResume: props.phaseRestartOnResume,
     };
   }
 
@@ -143,6 +145,9 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       shopRefreshSeed: typeof raw.shopRefreshSeed === 'number' ? raw.shopRefreshSeed : 0,
       upgradeLevels,
       shopRefreshUses: typeof raw.shopRefreshUses === 'number' ? raw.shopRefreshUses : 0,
+      phaseRestartOnResume: raw.phaseRestartOnResume === true,
+      loadoutEditOpen:
+        raw.loadoutEditOpen === true && raw.phaseRestartOnResume === true,
     });
   }
 }

@@ -40,10 +40,11 @@ export class BattleFloatingTextController {
   private spawn(event: CombatFloatingEventDto, anchor: HTMLElement, offsetIndex: number): void {
     const anchorRect = anchor.getBoundingClientRect();
     const stripRect = this.battleStrip.getBoundingClientRect();
-    const label = event.kind === 'damage' ? `-${event.amount}` : `+${event.amount}`;
+    const label =
+      event.kind === 'heal' ? `+${event.amount}` : `-${event.amount}`;
 
     const float = document.createElement('span');
-    float.className = `battle-float battle-float--${event.kind}`;
+    float.className = `battle-float battle-float--${event.kind === 'crit' ? 'crit' : event.kind}`;
     float.textContent = label;
     float.setAttribute('role', 'presentation');
     float.setAttribute('aria-hidden', 'true');

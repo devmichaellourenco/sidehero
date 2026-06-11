@@ -8,7 +8,11 @@ import {
   createHealEvent,
 } from './CombatFloatingEvent';
 import { Stats } from '../../value-objects/Stats';
-import { mitigateDamage, resolveEffectiveDefense } from './CombatStatResolver';
+import { CombatActionContext } from './CombatActionContext';
+import {
+  resolveEffectiveTargetDefense,
+  resolveOutgoingDamage,
+} from './CombatDamageResolver';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { StatusApplication } from './CombatStatusEffect';
 import { combatantKey } from './SkillCooldownTracker';
@@ -28,6 +32,7 @@ export class CombatActionExecutor {
     heroes: Hero[],
     enemies: Enemy[],
     statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
+    context?: CombatActionContext,
   ): CombatExecutionResult {
     if (action.power <= 0 && action.kind !== 'heal_ally' && !isStatusCombatKind(action.kind)) {
       return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
@@ -42,10 +47,10 @@ export class CombatActionExecutor {
     }
 
     if (action.targeting === 'single_ally' || action.targeting === 'all_allies') {
-      return this.applyHeroDamage(action, actorName, heroes, enemies, statusEffects);
+      return this.applyHeroDamage(action, actorName, heroes, enemies, statusEffects, context);
     }
 
-    return this.applyEnemyDamage(action, actorName, heroes, enemies, statusEffects);
+    return this.applyEnemyDamage(action, actorName, heroes, enemies, statusEffects, context);
   }
 
   private applyStatusEffect(
@@ -166,6 +171,7 @@ export class CombatActionExecutor {
     heroes: Hero[],
     enemies: Enemy[],
     statusEffects: CombatStatusEffectTracker,
+    context?: CombatActionContext,
   ): CombatExecutionResult {
     const targetIds =
       action.targeting === 'all_allies'
@@ -186,31 +192,39 @@ export class CombatActionExecutor {
       if (!target || !target.isAlive()) continue;
 
       const beforeHealth = target.currentHealth;
-      const effectiveDefense = resolveEffectiveDefense(
+      const heroKey = combatantKey('hero', heroId);
+      const effectiveDefense = resolveEffectiveTargetDefense(
         target.defense,
-        combatantKey('hero', heroId),
+        heroKey,
         statusEffects,
       );
-      const mitigated = mitigateDamage(action.power, effectiveDefense);
+      const resolved = this.resolveDamageAmount(action.power, effectiveDefense, context);
       updatedHeroes = updatedHeroes.map((hero) =>
         hero.id === heroId
           ? Hero.restore({
               ...hero.toProps(),
-              currentHealth: Math.max(0, hero.currentHealth - mitigated),
+              currentHealth: Math.max(0, hero.currentHealth - resolved.amount),
             })
           : hero,
       );
       const damaged = updatedHeroes.find((hero) => hero.id === heroId)!;
-      const damageEvent = createDamageEvent('hero', heroId, beforeHealth, damaged.currentHealth);
+      const damageEvent = createDamageEvent(
+        'hero',
+        heroId,
+        beforeHealth,
+        damaged.currentHealth,
+        resolved.isCrit,
+      );
       if (damageEvent) floatingEvents.push(damageEvent);
     }
 
     const dealt = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
+    const critTag = floatingEvents.some((entry) => entry.kind === 'crit') ? ' CRÍTICO!' : '';
     const scope =
       action.targeting === 'all_allies'
         ? `atingiu todos os heróis (${dealt})`
         : `causou ${dealt}`;
-    const event = `${actorName} usou ${action.skillName} e ${scope}`;
+    const event = `${actorName} usou ${action.skillName} e ${scope}${critTag}`;
 
     return { heroes: updatedHeroes, enemies, event, floatingEvents, statusApplications: [] };
   }
@@ -221,6 +235,7 @@ export class CombatActionExecutor {
     heroes: Hero[],
     enemies: Enemy[],
     statusEffects: CombatStatusEffectTracker,
+    context?: CombatActionContext,
   ): CombatExecutionResult {
     const targetIds =
       action.targeting === 'all_enemies'
@@ -241,17 +256,23 @@ export class CombatActionExecutor {
       if (!target || !target.isAlive()) continue;
 
       const beforeHealth = target.stats.currentHealth;
-      const effectiveDefense = resolveEffectiveDefense(
+      const enemyKey = combatantKey('enemy', enemyId);
+      const effectiveDefense = resolveEffectiveTargetDefense(
         target.stats.defense,
-        combatantKey('enemy', enemyId),
+        enemyKey,
         statusEffects,
       );
-      const mitigated = mitigateDamage(action.power, effectiveDefense);
+      const resolved = this.resolveDamageAmount(
+        action.power,
+        effectiveDefense,
+        context,
+        target.stage,
+      );
       const damaged = Enemy.restore({
         ...target.toProps(),
         stats: Stats.create({
           ...target.stats.toProps(),
-          currentHealth: Math.max(0, target.stats.currentHealth - mitigated),
+          currentHealth: Math.max(0, target.stats.currentHealth - resolved.amount),
         }),
       });
       const damageEvent = createDamageEvent(
@@ -259,12 +280,14 @@ export class CombatActionExecutor {
         enemyId,
         beforeHealth,
         damaged.stats.currentHealth,
+        resolved.isCrit,
       );
       if (damageEvent) floatingEvents.push(damageEvent);
       updatedEnemies = updatedEnemies.map((enemy) => (enemy.id === enemyId ? damaged : enemy));
     }
 
     const dealt = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
+    const critTag = floatingEvents.some((entry) => entry.kind === 'crit') ? ' CRÍTICO!' : '';
     const scope =
       action.targeting === 'all_enemies'
         ? `atingiu todos os inimigos (${dealt})`
@@ -272,9 +295,28 @@ export class CombatActionExecutor {
     const verb = action.kind === 'damage_magic' ? 'lançou' : 'usou';
     const event =
       action.skillId === 'basic_attack'
-        ? `${actorName} usou ${action.skillName} (${dealt} dano)`
-        : `${actorName} ${verb} ${action.skillName} e ${scope}`;
+        ? `${actorName} usou ${action.skillName} (${dealt} dano${critTag})`
+        : `${actorName} ${verb} ${action.skillName} e ${scope}${critTag}`;
 
     return { heroes, enemies: updatedEnemies, event, floatingEvents, statusApplications: [] };
+  }
+
+  private resolveDamageAmount(
+    rawPower: number,
+    targetDefense: number,
+    context?: CombatActionContext,
+    targetStageLevel?: number,
+  ): { amount: number; isCrit: boolean } {
+    const stageLevel = targetStageLevel ?? context?.stageLevel ?? 1;
+    const profile = context?.attackerProfile ?? {
+      attackSpeed: 1,
+      castSpeed: 1,
+      critChance: 0,
+      critDamage: 1.4,
+    };
+
+    return resolveOutgoingDamage(rawPower, targetDefense, stageLevel, profile, {
+      rng: context?.rng,
+    });
   }
 }

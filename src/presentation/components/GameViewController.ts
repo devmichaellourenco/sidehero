@@ -56,7 +56,8 @@ export class GameViewController {
   private refreshTimer: number | null = null;
   private contextInvalidated = false;
   private idleSummaryShown = false;
-  private resumeAutoBattleAfterVictory = false;
+  /** Bloqueia ticks em voo enquanto a pausa está sendo aplicada no servidor. */
+  private pausingLoadout = false;
 
   private readonly campaignContextLabel: HTMLElement;
   private readonly goldLabel: HTMLElement;
@@ -64,6 +65,7 @@ export class GameViewController {
   private readonly chestProgressLabel: HTMLElement;
   private readonly battleLog: HTMLElement;
   private readonly tickBtn: HTMLButtonElement;
+  private readonly pauseLoadoutBtn: HTMLButtonElement;
   private readonly openChestBtn: HTMLButtonElement;
   private readonly openAllChestsBtn: HTMLButtonElement;
   private readonly openInventoryBtn: HTMLButtonElement;
@@ -74,6 +76,8 @@ export class GameViewController {
   private readonly openUpgradesBtn: HTMLButtonElement;
   private readonly seasonCompleteBanner: HTMLElement;
   private readonly phaseIntermissionBanner: HTMLElement;
+  private readonly phaseIntermissionTitle: HTMLElement;
+  private readonly phaseIntermissionDescription: HTMLElement;
   private readonly phaseIntermissionContinueBtn: HTMLButtonElement;
   private readonly newGameBtn: HTMLButtonElement;
 
@@ -113,6 +117,7 @@ export class GameViewController {
     this.chestProgressLabel = root.querySelector('#chest-progress-label')!;
     this.battleLog = root.querySelector('#battle-log')!;
     this.tickBtn = root.querySelector('#tick-btn') as HTMLButtonElement;
+    this.pauseLoadoutBtn = root.querySelector('#pause-loadout-btn') as HTMLButtonElement;
     this.openChestBtn = root.querySelector('#open-chest-btn') as HTMLButtonElement;
     this.openAllChestsBtn = root.querySelector('#open-all-chests-btn') as HTMLButtonElement;
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
@@ -123,6 +128,10 @@ export class GameViewController {
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
     this.seasonCompleteBanner = root.querySelector('#season-complete-banner') as HTMLElement;
     this.phaseIntermissionBanner = root.querySelector('#phase-intermission-banner') as HTMLElement;
+    this.phaseIntermissionTitle = root.querySelector('#phase-intermission-title') as HTMLElement;
+    this.phaseIntermissionDescription = root.querySelector(
+      '#phase-intermission-description',
+    ) as HTMLElement;
     this.phaseIntermissionContinueBtn = root.querySelector(
       '#phase-intermission-continue',
     ) as HTMLButtonElement;
@@ -142,7 +151,6 @@ export class GameViewController {
       root.querySelector('#battle-victory-overlay')!,
       this.battleStripEl,
       new BattleVictoryOverlayRenderer(),
-      () => this.afterVictoryOverlay(),
     );
 
     this.heroPanelsEl = root.querySelector('#hero-panels')!;
@@ -177,6 +185,7 @@ export class GameViewController {
       this.openUpgradesBtn,
       this.openChestBtn,
       this.tickBtn,
+      this.pauseLoadoutBtn,
     );
 
     this.heroDetailFlow = new HeroDetailFlow(
@@ -201,7 +210,7 @@ export class GameViewController {
       this.toasts,
       () => this.state,
       (state) => this.afterGearMutation(state),
-      (error) => this.handleFailedResponse(error),
+      (error) => this.onGearMutationFailed(error),
     );
 
     this.campaignFlow = new CampaignFlow(this.client, this.modal);
@@ -254,6 +263,10 @@ export class GameViewController {
     this.bindModalActionDelegation();
 
     this.tickBtn.addEventListener('click', () => this.tick());
+    this.pauseLoadoutBtn.addEventListener('click', () => {
+      this.stopAutoBattle();
+      void this.pauseForLoadout();
+    });
     this.openChestBtn.addEventListener('click', () => {
       void this.chestLootFlow.openNextChest();
     });
@@ -278,7 +291,7 @@ export class GameViewController {
       void this.startNewGame();
     });
     this.phaseIntermissionContinueBtn.addEventListener('click', () => {
-      this.victoryFlow.dismiss();
+      void this.continueFromLoadoutPause();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -310,6 +323,10 @@ export class GameViewController {
     }
 
     if (this.contextInvalidated) return;
+
+    if (this.isManualLoadoutPause(this.state)) {
+      this.syncLoadoutPauseBanner(this.state);
+    }
 
     this.syncAutoBattleTimer();
 
@@ -356,12 +373,21 @@ export class GameViewController {
     }
   }
 
+  private isManualLoadoutPause(state: GameStateDto | null = this.state): boolean {
+    return Boolean(state?.loadoutEditOpen && state?.phaseRestartOnResume);
+  }
+
+  private isAdvanceBlocked(state: GameStateDto | null = this.state): boolean {
+    if (this.pausingLoadout) return true;
+    return this.isManualLoadoutPause(state);
+  }
+
   private shouldIgnoreKeyboardShortcut(): boolean {
     if (
       this.contextInvalidated ||
       this.prefsController.autoBattleEnabled ||
       this.chestLootFlow.openingChests ||
-      this.victoryFlow.isBlockingAdvance()
+      this.isAdvanceBlocked()
     ) {
       return true;
     }
@@ -456,7 +482,7 @@ export class GameViewController {
   }
 
   private syncAutoBattleTimer(): void {
-    if (this.prefsController.autoBattleEnabled) {
+    if (this.prefsController.autoBattleEnabled && !this.isAdvanceBlocked()) {
       this.stopAutoBattle();
       this.startAutoBattle();
       return;
@@ -465,7 +491,7 @@ export class GameViewController {
   }
 
   private startAutoBattle(): void {
-    if (this.contextInvalidated) return;
+    if (this.contextInvalidated || this.isAdvanceBlocked()) return;
     this.autoBattleController.restart(
       this.prefsController.getAutoBattleIntervalMs(this.state),
       () => {
@@ -480,7 +506,9 @@ export class GameViewController {
 
   private async refresh(options: { checkIdleSummary?: boolean } = {}): Promise<void> {
     if (this.contextInvalidated) return;
-    if (this.state && !this.state.canEditParty) return;
+    if (this.pausingLoadout) return;
+    if (this.state && !this.state.canEditParty && !this.isManualLoadoutPause(this.state)) return;
+    if (this.modal.isOpen() && this.isManualLoadoutPause(this.state)) return;
 
     const response = await this.client.send({ type: 'GET_STATE' });
     if (!response.ok) {
@@ -537,14 +565,68 @@ export class GameViewController {
     app.prepend(banner);
   }
 
-  private async tick(): Promise<void> {
-    if (this.chestLootFlow.openingChests || this.victoryFlow.isBlockingAdvance()) return;
+  private async pauseForLoadout(): Promise<void> {
+    if (this.contextInvalidated || this.isAdvanceBlocked()) return;
 
-    const response = await this.client.send({ type: 'TICK', ticks: 1 });
+    this.stopAutoBattle();
+    this.pausingLoadout = true;
+
+    try {
+      const response = await this.client.send({ type: 'PAUSE_FOR_LOADOUT' });
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
+
+      this.render(response.state);
+      this.toasts.show('Pausa ativa — ajuste sua equipe', 'info');
+    } finally {
+      this.pausingLoadout = false;
+    }
+  }
+
+  private async continueFromLoadoutPause(): Promise<void> {
+    if (!this.isManualLoadoutPause(this.state)) return;
+
+    const response = await this.client.send({ type: 'TICK', restartCurrentPhase: true });
     if (!response.ok) {
       this.handleFailedResponse(response.error);
       return;
     }
+
+    this.render(response.state);
+    this.showCombatFloats(response.combatFloats);
+    this.syncAutoBattleTimer();
+  }
+
+  private async tick(
+    options: { restartCurrentPhase?: boolean } = {},
+  ): Promise<void> {
+    if (this.chestLootFlow.openingChests) return;
+    if (!options.restartCurrentPhase && this.isAdvanceBlocked()) return;
+
+    const response = await this.client.send({
+      type: 'TICK',
+      ticks: 1,
+      restartCurrentPhase: options.restartCurrentPhase,
+    });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    if (!options.restartCurrentPhase && this.isAdvanceBlocked(response.state)) {
+      return;
+    }
+
+    if (
+      !options.restartCurrentPhase &&
+      this.isManualLoadoutPause(this.state) &&
+      !this.isManualLoadoutPause(response.state)
+    ) {
+      return;
+    }
+
     this.render(response.state);
     this.showCombatFloats(response.combatFloats);
   }
@@ -595,17 +677,27 @@ export class GameViewController {
       this.modalStack.pop();
     }
 
-    this.render(state);
+    const lootRevealPending =
+      topView?.type === 'loot-reveal' && this.lootFlow.hasQueued();
+    const shouldCloseModal = this.modalStack.length === 0;
+    const previousState = this.state;
+
+    this.render(state, { previousState });
     this.refreshModalIfOpen();
 
-    if (topView?.type === 'loot-reveal' && this.lootFlow.hasQueued()) {
+    if (lootRevealPending) {
       this.chestLootFlow.advanceLootQueue();
       return;
     }
 
-    if (this.modalStack.length === 0) {
+    if (shouldCloseModal) {
       this.modal.close('action');
     }
+  }
+
+  private onGearMutationFailed(error?: string): void {
+    this.handleFailedResponse(error);
+    this.refreshModalIfOpen();
   }
 
   private afterHeroProgressionMutation(state: GameStateDto): void {
@@ -668,7 +760,7 @@ export class GameViewController {
 
   private async handlePartyPanelAction(target: HTMLElement): Promise<void> {
     if (!this.state?.canEditParty) {
-      this.toasts.show('Party só pode ser editada entre fases', 'info');
+      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
       return;
     }
 
@@ -743,6 +835,7 @@ export class GameViewController {
 
       if (target.hasAttribute('data-optimize-loadout')) {
         event.preventDefault();
+        this.markGearActionPending(target);
         void this.gearEquipFlow.optimizeLoadout();
         return;
       }
@@ -763,6 +856,7 @@ export class GameViewController {
         event.preventDefault();
         const topView = this.modalStack[this.modalStack.length - 1];
         if (topView?.type === 'loot-batch') {
+          this.markGearActionPending(target);
           void this.equipRecommendedLoot(topView.gearIds);
         }
         return;
@@ -779,6 +873,7 @@ export class GameViewController {
       const unequipSlot = target.getAttribute('data-unequip-slot') as GearSlotKey | null;
       if (unequipHeroId && unequipSlot) {
         event.preventDefault();
+        this.markGearActionPending(target);
         void this.gearEquipFlow.unequip(unequipHeroId, unequipSlot);
         return;
       }
@@ -787,6 +882,7 @@ export class GameViewController {
       const lootGearId = target.getAttribute('data-loot-equip-gear');
       if (lootHeroId && lootGearId) {
         event.preventDefault();
+        this.markGearActionPending(target);
         void this.gearEquipFlow.equip(lootHeroId, lootGearId);
         return;
       }
@@ -795,9 +891,17 @@ export class GameViewController {
       const gearId = target.getAttribute('data-pick-gear');
       if (heroId && gearId) {
         event.preventDefault();
+        this.markGearActionPending(target);
         void this.gearEquipFlow.equip(heroId, gearId);
       }
     });
+  }
+
+  private markGearActionPending(target: HTMLElement): void {
+    const button = target.closest('button') as HTMLButtonElement | null;
+    if (!button || button.disabled) return;
+    button.disabled = true;
+    button.classList.add('gear-action-pending');
   }
 
   private refreshModalIfOpen(): void {
@@ -866,29 +970,31 @@ export class GameViewController {
     touchPanelSnapshot(state);
   }
 
-  private showPhaseIntermissionBanner(): void {
+  private syncLoadoutPauseBanner(state: GameStateDto): void {
+    if (!this.isManualLoadoutPause(state)) {
+      this.hidePhaseIntermissionBanner();
+      return;
+    }
+
+    this.phaseIntermissionTitle.textContent = 'Pausa para ajustes';
+    this.phaseIntermissionDescription.textContent =
+      'Ajuste party, equipamentos e skills. A fase atual reiniciará do início ao continuar.';
+
     this.phaseIntermissionBanner.classList.remove('hidden');
+    this.stopAutoBattle();
   }
 
   private hidePhaseIntermissionBanner(): void {
     this.phaseIntermissionBanner.classList.add('hidden');
   }
 
-  private afterVictoryOverlay(): void {
-    this.hidePhaseIntermissionBanner();
-    const shouldResumeAutoBattle = this.resumeAutoBattleAfterVictory;
-    this.resumeAutoBattleAfterVictory = false;
-
-    void this.tick().then(() => {
-      if (shouldResumeAutoBattle) {
-        this.syncAutoBattleTimer();
-      }
-    });
-  }
-
   private render(
     state: GameStateDto,
-    options: { skipChestToast?: boolean; checkIdleSummary?: boolean } = {},
+    options: {
+      skipChestToast?: boolean;
+      checkIdleSummary?: boolean;
+      previousState?: GameStateDto | null;
+    } = {},
   ): void {
     if (this.contextInvalidated || !this.client.isContextValid()) {
       this.handleContextInvalidated();
@@ -900,23 +1006,14 @@ export class GameViewController {
       this.maybeShowIdleSummary(state);
     }
 
-    const previous = this.state;
+    const previous =
+      options.previousState !== undefined ? options.previousState : this.state;
     const victoryPayload = previous ? detectBattleVictory(previous, state) : null;
 
-    if (victoryPayload && !this.victoryFlow.isBlockingAdvance()) {
-      this.resumeAutoBattleAfterVictory = this.prefsController.autoBattleEnabled;
-      this.stopAutoBattle();
-      this.hidePhaseIntermissionBanner();
-      this.victoryFlow.show(
-        victoryPayload,
-        () => {
-          void this.chestLootFlow.openNextChest();
-        },
-        {
-          onIntermissionStart: () => this.showPhaseIntermissionBanner(),
-          onIntermissionEnd: () => this.hidePhaseIntermissionBanner(),
-        },
-      );
+    if (victoryPayload) {
+      this.victoryFlow.show(victoryPayload, () => {
+        void this.chestLootFlow.openNextChest();
+      });
     }
 
     if (previous && !options.skipChestToast) {
@@ -925,7 +1022,7 @@ export class GameViewController {
         state,
         {
           onChestAvailable: () => {
-            if (this.victoryFlow.isBlockingAdvance()) return;
+            if (this.isAdvanceBlocked()) return;
             void this.chestLootFlow.openNextChest();
           },
         },
@@ -936,16 +1033,19 @@ export class GameViewController {
     this.state = state;
 
     this.seasonCompleteBanner.classList.toggle('hidden', !state.seasonCompleted);
+    this.syncLoadoutPauseBanner(state);
 
     this.hud.render(state, {
       openingChests: this.chestLootFlow.openingChests,
       autoBattleEnabled: this.prefsController.autoBattleEnabled,
-      combatBlocked: this.victoryFlow.isBlockingAdvance(),
+      loadoutPauseActive: this.isManualLoadoutPause(state),
     });
 
     this.battleStrip.render(state);
     if (shouldRenderHeroPanel(previous, state)) {
       this.heroPanel.render(state);
+    } else if (!state.canEditParty) {
+      this.heroPanel.patchCombatCooldowns(state);
     }
 
     this.shopFlow.state.shopRefreshUnlocked = state.featureFlags.shopRefresh;

@@ -3,14 +3,17 @@ import { CombatState } from '../../entities/CombatState';
 import { Hero } from '../../entities/Hero';
 import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
+import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
 import { listEnemyCombatSkills } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCatalog';
+import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill';
+import { ActionTimerService } from './ActionTimerService';
 import { CombatActionExecutor } from './CombatActionExecutor';
 import { CombatFloatingEvent } from './CombatFloatingEvent';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
-import { CombatantRef, TurnOrderService } from './TurnOrderService';
+import { CombatantRef } from './TurnOrderService';
 
 export interface CombatTurnPhaseResult {
   state: GameState;
@@ -22,12 +25,17 @@ export class CombatTurnPhase {
   constructor(
     private readonly skillSelector = new CombatSkillSelector(),
     private readonly actionExecutor = new CombatActionExecutor(),
-    private readonly turnOrder = new TurnOrderService(),
+    private readonly actionTimers = new ActionTimerService(),
+    private readonly profiles = new CombatProfileProvider(),
     private readonly phaseHandlers = new PhaseCombatHandlers(),
   ) {}
 
   execute(state: GameState): CombatTurnPhaseResult {
     let workingState = state;
+
+    if (workingState.loadoutEditOpen && workingState.phaseRestartOnResume) {
+      return { state: workingState.touchTick(), events: [], floatingEvents: [] };
+    }
 
     if (!workingState.phaseRun) {
       const phaseRun = PhaseRun.start(workingState.campaignProgress.selectedPhaseId);
@@ -47,11 +55,29 @@ export class CombatTurnPhase {
       return this.finish(started.state, started.events, []);
     }
 
-    const resolved = this.resolveTurnActor(workingState.activeHeroes(), combat);
-    combat = resolved.combat;
+    const heroes = workingState.activeHeroes();
+    const timeline = this.actionTimers.resolveNextActor(
+      combat.actionTimers,
+      heroes,
+      combat.enemies,
+    );
 
-    if (!resolved.actor) {
-      const livingHeroes = workingState.activeHeroes().filter((hero) => hero.isAlive());
+    let cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
+    cooldowns = this.advanceSkillCooldowns(
+      cooldowns,
+      timeline.elapsedSeconds,
+      heroes,
+      combat.enemies,
+      combat.encounterMeta?.isBossWave ?? false,
+    );
+
+    combat = combat
+      .withActionTimers(timeline.timers)
+      .withCombatTime(combat.combatTime + timeline.elapsedSeconds)
+      .withSkillCooldowns(cooldowns.toMap());
+
+    if (!timeline.actor) {
+      const livingHeroes = heroes.filter((hero) => hero.isAlive());
       if (livingHeroes.length === 0 && workingState.phaseRun) {
         const wiped = this.phaseHandlers.onPhaseWipe(workingState.withCombat(combat), workingState.phaseRun);
         return this.finish(wiped.state, wiped.events, []);
@@ -60,11 +86,11 @@ export class CombatTurnPhase {
       return { state: workingState.withCombat(combat).touchTick(), events: [], floatingEvents: [] };
     }
 
-    const turnResult = this.executeActorTurn(workingState, combat, resolved.actor);
+    const turnResult = this.executeActorTurn(workingState, combat, timeline.actor);
     let nextState = turnResult.state;
     const events = turnResult.events;
     const floatingEvents = turnResult.floatingEvents;
-    let nextCombat = turnResult.combat.advanceTurn();
+    let nextCombat = turnResult.combat;
 
     const livingHeroes = nextState.activeHeroes().filter((hero) => hero.isAlive());
     const livingEnemies = nextCombat.livingEnemies();
@@ -97,7 +123,10 @@ export class CombatTurnPhase {
       return this.finish(waveCleared.state, [...events, ...waveCleared.events], floatingEvents);
     }
 
-    nextCombat = this.ensureTurnQueue(nextState.activeHeroes(), nextCombat);
+    nextCombat = nextCombat.withActionTimers(
+      this.actionTimers.removeDead(nextCombat.actionTimers, nextState.activeHeroes(), nextCombat.enemies),
+    );
+
     const logMessage = events.join(' · ');
 
     return this.finish(
@@ -115,49 +144,28 @@ export class CombatTurnPhase {
     return { state, events, floatingEvents };
   }
 
-  private ensureTurnQueue(heroes: Hero[], combat: CombatState): CombatState {
-    if (!combat.needsNewRound() && combat.turnQueue.length > 0) {
-      return combat;
-    }
-
-    const order = this.turnOrder.buildRoundOrder(heroes, combat.livingEnemies());
-    return CombatState.restore({
-      ...combat.toProps(),
-      turnQueue: order,
-      turnIndex: 0,
-    });
-  }
-
-  private resolveTurnActor(
+  private advanceSkillCooldowns(
+    cooldowns: SkillCooldownTracker,
+    elapsedSeconds: number,
     heroes: Hero[],
-    combat: CombatState,
-  ): { actor: CombatantRef | null; combat: CombatState } {
-    let currentCombat = combat;
-    const guard = Math.max(2, currentCombat.turnQueue.length + 2);
+    enemies: CombatState['enemies'],
+    isBossWave: boolean,
+  ): SkillCooldownTracker {
+    if (elapsedSeconds <= 0) return cooldowns;
 
-    for (let step = 0; step < guard; step++) {
-      currentCombat = this.ensureTurnQueue(heroes, currentCombat);
-      const actor = currentCombat.currentActor();
-      if (!actor) {
-        return { actor: null, combat: currentCombat };
-      }
+    let tracker = cooldowns;
 
-      if (this.isActorAlive(actor, heroes, currentCombat)) {
-        return { actor, combat: currentCombat };
-      }
-
-      currentCombat = currentCombat.advanceTurn();
+    for (const hero of heroes) {
+      const key = combatantKey('hero', hero.id);
+      tracker = tracker.advanceKey(key, elapsedSeconds, this.profiles.forHero(hero).castSpeed);
     }
 
-    return { actor: null, combat: currentCombat };
-  }
-
-  private isActorAlive(actor: CombatantRef, heroes: Hero[], combat: CombatState): boolean {
-    if (actor.side === 'hero') {
-      return heroes.some((hero) => hero.id === actor.id && hero.isAlive());
+    for (const enemy of enemies) {
+      const key = combatantKey('enemy', enemy.id);
+      tracker = tracker.advanceKey(key, elapsedSeconds, this.profiles.forEnemy(enemy, isBossWave).castSpeed);
     }
 
-    return Boolean(combat.findEnemy(actor.id)?.isAlive());
+    return tracker;
   }
 
   private executeActorTurn(
@@ -174,12 +182,14 @@ export class CombatTurnPhase {
     let enemies = combat.enemies;
     const events: string[] = [];
     const floatingEvents: CombatFloatingEvent[] = [];
-    const cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
+    let cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
     let statusEffects = CombatStatusEffectTracker.fromMap(combat.statusEffects);
     const actorKey = combatantKey(actor.side, actor.id);
     let usedSkillId: string | null = null;
     let skillList = [] as ReturnType<typeof listHeroCombatSkills>;
     let statusApplications: ReturnType<typeof this.actionExecutor.execute>['statusApplications'] = [];
+    const stageLevel = state.difficultyTier;
+    let attackerProfile = this.profiles.forHero(heroes[0]);
 
     if (actor.side === 'hero') {
       const hero = heroes.find((entry) => entry.id === actor.id);
@@ -187,6 +197,7 @@ export class CombatTurnPhase {
         return { state, combat, events, floatingEvents };
       }
 
+      attackerProfile = this.profiles.forHero(hero);
       skillList = listHeroCombatSkills(hero);
       const selected = this.skillSelector.selectHeroAction(
         hero,
@@ -206,6 +217,7 @@ export class CombatTurnPhase {
         heroes,
         enemies,
         statusEffects,
+        { attackerProfile, stageLevel },
       );
       heroes = result.heroes;
       enemies = result.enemies;
@@ -218,6 +230,7 @@ export class CombatTurnPhase {
         return { state, combat, events, floatingEvents };
       }
 
+      attackerProfile = this.profiles.forEnemy(enemy, combat.encounterMeta?.isBossWave);
       skillList = listEnemyCombatSkills(enemy);
       const selected = this.skillSelector.selectEnemyAction(enemy, heroes, enemies, cooldowns);
       if (!selected) {
@@ -231,6 +244,7 @@ export class CombatTurnPhase {
         heroes,
         enemies,
         statusEffects,
+        { attackerProfile, stageLevel },
       );
       heroes = result.heroes;
       enemies = result.enemies;
@@ -250,14 +264,28 @@ export class CombatTurnPhase {
     }
 
     statusEffects = statusEffects.tickOnTurnEnd(actorKey);
-    const updatedCooldowns = cooldowns.onTurnEnd(actorKey, usedSkillId, skillList).toMap();
+
+    const castSpeed = attackerProfile.castSpeed;
+    const updatedCooldowns = cooldowns
+      .onSkillUsed(actorKey, usedSkillId, skillList, castSpeed)
+      .toMap();
+
+    const usedSkill = usedSkillId !== null && usedSkillId !== BASIC_ATTACK_SKILL_ID;
+    const updatedTimers = this.actionTimers.scheduleAfterAction(
+      combat.actionTimers,
+      actor,
+      attackerProfile.attackSpeed,
+      castSpeed,
+      usedSkill,
+    );
 
     return {
       state: state.withHeroes(heroes),
       combat: combat
         .withEnemies(enemies)
         .withSkillCooldowns(updatedCooldowns)
-        .withStatusEffects(statusEffects.toMap()),
+        .withStatusEffects(statusEffects.toMap())
+        .withActionTimers(updatedTimers),
       events,
       floatingEvents,
     };

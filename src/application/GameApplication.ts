@@ -15,6 +15,7 @@ import { GetShopOffersUseCase } from './use-cases/GetShopOffersUseCase';
 import { GetUpgradeTreeUseCase } from './use-cases/GetUpgradeTreeUseCase';
 import { OpenAllChestsUseCase } from './use-cases/OpenAllChestsUseCase';
 import { OpenChestUseCase } from './use-cases/OpenChestUseCase';
+import { PauseForLoadoutUseCase } from './use-cases/PauseForLoadoutUseCase';
 import { PurchaseUpgradeUseCase } from './use-cases/PurchaseUpgradeUseCase';
 import { RefreshShopUseCase } from './use-cases/RefreshShopUseCase';
 import { SpendAscensionPointUseCase } from './use-cases/SpendAscensionPointUseCase';
@@ -33,6 +34,7 @@ export class GameApplication {
   readonly selectPhase: SelectPhaseUseCase;
   readonly newGame: NewGameUseCase;
   readonly tick: TickGameUseCase;
+  readonly pauseForLoadout: PauseForLoadoutUseCase;
   readonly openChest: OpenChestUseCase;
   readonly openAllChests: OpenAllChestsUseCase;
   readonly equipGear: EquipGearUseCase;
@@ -72,6 +74,7 @@ export class GameApplication {
     this.selectPhase = new SelectPhaseUseCase(repository, presenter);
     this.newGame = new NewGameUseCase(repository, presenter);
     this.tick = new TickGameUseCase(repository, combatService, presenter);
+    this.pauseForLoadout = new PauseForLoadoutUseCase(repository, presenter);
     this.openChest = new OpenChestUseCase(repository, chestService, presenter);
     this.openAllChests = new OpenAllChestsUseCase(repository, chestService, presenter);
     this.equipGear = new EquipGearUseCase(repository, presenter);

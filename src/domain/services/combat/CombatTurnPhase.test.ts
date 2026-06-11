@@ -8,6 +8,7 @@ import { Enemy } from '../../entities/Enemy';
 import { GameState } from '../../entities/GameState';
 import { Hero } from '../../entities/Hero';
 import { Stats } from '../../value-objects/Stats';
+import { ActionTimerService } from './ActionTimerService';
 import { CombatTurnPhase } from './CombatTurnPhase';
 
 function stateWithPhase(phaseId: string, heroes: Hero[]): GameState {
@@ -20,6 +21,23 @@ function stateWithPhase(phaseId: string, heroes: Hero[]): GameState {
     },
     phaseRun: PhaseRun.start(phaseId).toProps(),
     combat: null,
+  });
+}
+
+function createCombat(
+  heroes: Hero[],
+  enemies: Enemy[],
+  encounterMeta: NonNullable<CombatState['encounterMeta']>,
+): CombatState {
+  const timers = new ActionTimerService().createInitial(heroes, enemies);
+
+  return CombatState.restore({
+    enemies: enemies.map((enemy) => enemy.toProps()),
+    actionTimers: timers,
+    combatTime: 0,
+    skillCooldowns: {},
+    statusEffects: {},
+    encounterMeta,
   });
 }
 
@@ -53,7 +71,7 @@ describe('CombatTurnPhase', () => {
     expect(state.phaseRun?.waveIndex).toBe(0);
   });
 
-  it('pula herói derrotado e passa o turno para o próximo combatente', () => {
+  it('ignora herói derrotado na timeline e deixa outro combatente agir', () => {
     const knight = Hero.createStarter('k1', 'knight', 'Arthos');
     const priest = Hero.createStarter('p1', 'priest', 'Elara');
     const deadKnight = Hero.restore({ ...knight.toProps(), currentHealth: 0 });
@@ -67,23 +85,11 @@ describe('CombatTurnPhase', () => {
       xpReward: 10,
     });
 
-    const combat = CombatState.restore({
-      enemies: [enemy.toProps()],
-      turnQueue: [
-        { side: 'hero', id: 'k1' },
-        { side: 'hero', id: 'p1' },
-        { side: 'enemy', id: 'e1' },
-      ],
-      turnIndex: 0,
-      round: 1,
-      skillCooldowns: {},
-      statusEffects: {},
-      encounterMeta: {
-        phaseId: buildPhaseId(1, 1),
-        waveIndex: 0,
-        waveCount: 1,
-        isBossWave: true,
-      },
+    const combat = createCombat([deadKnight, priest], [enemy], {
+      phaseId: buildPhaseId(1, 1),
+      waveIndex: 0,
+      waveCount: 1,
+      isBossWave: true,
     });
 
     let state = GameState.restore({
@@ -97,17 +103,17 @@ describe('CombatTurnPhase', () => {
       combat,
     });
 
-    const beforeActor = state.combat?.currentActor();
-    expect(beforeActor?.id).toBe('k1');
+    const beforeActor = state.combat?.peekNextActor([deadKnight, priest], [enemy]);
+    expect(beforeActor?.id).not.toBe('k1');
 
     const result = phase.execute(state);
-    const afterActor = result.state.combat?.currentActor();
+    const eventLog = result.events.join(' ');
 
-    expect(afterActor?.id).not.toBe('k1');
+    expect(eventLog).not.toContain('Arthos');
     expect(result.events.length).toBeGreaterThan(0);
   });
 
-  it('reconstrói a fila e deixa o inimigo agir quando só restam heróis derrotados na rodada', () => {
+  it('deixa o inimigo agir quando só restam heróis derrotados', () => {
     const knight = Hero.createStarter('k1', 'knight', 'Arthos');
     const deadKnight = Hero.restore({ ...knight.toProps(), currentHealth: 0 });
     const enemy = Enemy.restore({
@@ -120,19 +126,11 @@ describe('CombatTurnPhase', () => {
       xpReward: 10,
     });
 
-    const combat = CombatState.restore({
-      enemies: [enemy.toProps()],
-      turnQueue: [{ side: 'hero', id: 'k1' }],
-      turnIndex: 0,
-      round: 1,
-      skillCooldowns: {},
-      statusEffects: {},
-      encounterMeta: {
-        phaseId: buildPhaseId(1, 1),
-        waveIndex: 0,
-        waveCount: 1,
-        isBossWave: true,
-      },
+    const combat = createCombat([deadKnight], [enemy], {
+      phaseId: buildPhaseId(1, 1),
+      waveIndex: 0,
+      waveCount: 1,
+      isBossWave: true,
     });
 
     let state = GameState.restore({
@@ -147,8 +145,9 @@ describe('CombatTurnPhase', () => {
     });
 
     const result = phase.execute(state);
+    const eventLog = result.events.join(' ');
 
-    expect(result.state.combat?.currentActor()?.side).not.toBe('hero');
+    expect(eventLog.includes('Slime') || eventLog.includes('Reiniciando')).toBe(true);
     expect(result.events.length).toBeGreaterThan(0);
   });
 
@@ -183,6 +182,7 @@ describe('CombatTurnPhase', () => {
 
     expect(state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
     expect(state.phaseRun).toBeNull();
+    expect(state.loadoutEditOpen).toBe(false);
 
     const nextTick = phase.execute(state);
 

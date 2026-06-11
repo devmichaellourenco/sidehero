@@ -17,7 +17,7 @@ export function renderHeroSkillsTab(
         allocateAttr: 'data-skill-allocate',
         activateAttr: 'data-skill-activate',
         deactivateAttr: 'data-skill-deactivate',
-        canAllocate: node.status === 'ready' && unspentPoints > 0,
+        canAllocate: node.canAllocateRank,
       }),
     )
     .join('');

@@ -4,7 +4,7 @@ import { CombatState } from '../entities/CombatState';
 import { GameState } from '../entities/GameState';
 import { HeroUnlockService } from './HeroUnlockService';
 import { PartyService } from './PartyService';
-import { TurnOrderService } from '../services/combat/TurnOrderService';
+import { ActionTimerService } from '../services/combat/ActionTimerService';
 
 describe('PartyService', () => {
   const service = new PartyService();
@@ -31,7 +31,7 @@ describe('PartyService', () => {
   it('bloqueia edição durante combate', () => {
     const base = GameState.initial();
     const locked = base.withCombat(
-      CombatState.start(base.activeHeroes(), [], new TurnOrderService(), null),
+      CombatState.start(base.activeHeroes(), [], new ActionTimerService(), null),
     );
     expect(() => service.addToActiveParty(locked, 'hero-1')).toThrow(
       'Party só pode ser editada fora de combate',

@@ -1,7 +1,9 @@
+import { mitigatePhysicalDamage } from './CombatDamageResolver';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 
-export function mitigateDamage(rawDamage: number, effectiveDefense: number): number {
-  return Math.max(1, rawDamage - Math.max(0, effectiveDefense));
+/** @deprecated Use mitigatePhysicalDamage com stageLevel. Mantido para caminhos legados. */
+export function mitigateDamage(rawDamage: number, effectiveDefense: number, stageLevel = 1): number {
+  return mitigatePhysicalDamage(rawDamage, effectiveDefense, stageLevel);
 }
 
 export function resolveEffectiveDefense(

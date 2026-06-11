@@ -37,16 +37,12 @@ export class BattleVictoryOverlayRenderer {
           ${levelUpRows}
           ${nextPhaseLine}
           <div class="battle-victory-actions">
-            <button type="button" class="battle-victory-adjust" data-victory-adjust>
-              ${imgTag(getAssetUrl(ASSETS.buttons.secondary), '', 'battle-victory-btn-bg')}
-              <span>Realizar alterações</span>
-            </button>
             <button type="button" class="battle-victory-continue" data-victory-continue>
               ${imgTag(getAssetUrl(ASSETS.buttons.primary), '', 'battle-victory-btn-bg')}
-              <span>Continuar</span>
+              <span>Fechar</span>
             </button>
           </div>
-          <p class="battle-victory-hint" data-victory-countdown>Avançando em 3s…</p>
+          <p class="battle-victory-hint" data-victory-countdown>Fechando em 3s · batalha continua no fundo</p>
         </div>
       </div>
     `;

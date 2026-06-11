@@ -60,11 +60,13 @@ export class CombatSkillIntentResolver {
   ): CombatSkillIntent {
     const chargingSkills = this.listChargingSkills(key, skills, cooldowns, nextSkillId);
 
+    const nextRemaining = cooldowns.getRemaining(key, nextSkillId);
+
     return {
       nextSkillName,
       nextSkillId,
-      status: 'ready',
-      turnsRemaining: 0,
+      status: nextRemaining > 0 ? 'cooldown' : 'ready',
+      secondsRemaining: nextRemaining,
       chargingSkills,
     };
   }
@@ -74,15 +76,15 @@ export class CombatSkillIntentResolver {
     skills: CombatSkillDefinition[],
     cooldowns: SkillCooldownTracker,
     nextSkillId: string,
-  ): Array<{ skillId: string; skillName: string; turnsRemaining: number }> {
+  ): Array<{ skillId: string; skillName: string; secondsRemaining: number }> {
     return skills
       .filter((skill) => skill.skillId !== nextSkillId)
       .map((skill) => ({
         skillId: skill.skillId,
         skillName: resolveCombatSkillName(skill),
-        turnsRemaining: cooldowns.getRemaining(key, skill.skillId),
+        secondsRemaining: cooldowns.getRemaining(key, skill.skillId),
       }))
-      .filter((entry) => entry.turnsRemaining > 0)
-      .sort((left, right) => left.turnsRemaining - right.turnsRemaining);
+      .filter((entry) => entry.secondsRemaining > 0)
+      .sort((left, right) => left.secondsRemaining - right.secondsRemaining);
   }
 }

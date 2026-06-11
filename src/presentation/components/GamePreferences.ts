@@ -15,18 +15,20 @@ const STORAGE_KEYS = {
 } as const;
 
 const DEFAULT_PREFERENCES: GamePreferences = {
-  autoBattle: false,
+  autoBattle: true,
   autoOpenChests: false,
   autoEquipLoot: false,
   autoBattleSpeed: 1,
   logFilterImportant: false,
 };
 
-function readFlag(key: string): boolean {
+function readFlag(key: string, defaultValue = false): boolean {
   try {
-    return sessionStorage.getItem(key) === '1';
+    const raw = sessionStorage.getItem(key);
+    if (raw === null) return defaultValue;
+    return raw === '1';
   } catch {
-    return false;
+    return defaultValue;
   }
 }
 
@@ -42,7 +44,7 @@ export function loadGamePreferences(): GamePreferences {
   try {
     const speedRaw = sessionStorage.getItem(STORAGE_KEYS.autoBattleSpeed);
     return {
-      autoBattle: readFlag(STORAGE_KEYS.autoBattle),
+      autoBattle: readFlag(STORAGE_KEYS.autoBattle, true),
       autoOpenChests: readFlag(STORAGE_KEYS.autoOpenChests),
       autoEquipLoot: readFlag(STORAGE_KEYS.autoEquipLoot),
       autoBattleSpeed: speedRaw === '3' ? 3 : speedRaw === '2' ? 2 : 1,

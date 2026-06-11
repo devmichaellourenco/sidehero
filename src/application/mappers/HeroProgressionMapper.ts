@@ -27,6 +27,7 @@ export function mapSkillTree(hero: Hero, nodes: SkillNodeView[]): SkillNodeDto[]
       currentRank: node.currentRank,
       status: node.status,
       isEquipped: node.isEquipped,
+      canAllocateRank: node.canAllocateRank,
       canActivate: node.canActivate,
       canDeactivate: node.canDeactivate,
       activationCost: node.activationCost,

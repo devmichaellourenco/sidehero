@@ -37,6 +37,10 @@ export interface GameStateProps {
   shopRefreshSeed: number;
   upgradeLevels: UpgradeLevels;
   shopRefreshUses: number;
+  /** Janela de edição de loadout (pausa manual ou entre fases). */
+  loadoutEditOpen?: boolean;
+  /** Ao continuar, reinicia a fase atual em vez de avançar para a próxima. */
+  phaseRestartOnResume?: boolean;
 }
 
 export class GameState {
@@ -55,6 +59,8 @@ export class GameState {
   readonly shopRefreshSeed: number;
   readonly upgradeLevels: UpgradeLevels;
   readonly shopRefreshUses: number;
+  readonly loadoutEditOpen: boolean;
+  readonly phaseRestartOnResume: boolean;
 
   private constructor(props: GameStateProps) {
     const legacyHeroes = props.heroes ?? [];
@@ -74,6 +80,8 @@ export class GameState {
     this.shopRefreshSeed = Math.max(0, props.shopRefreshSeed ?? 0);
     this.upgradeLevels = props.upgradeLevels ?? {};
     this.shopRefreshUses = Math.max(0, props.shopRefreshUses ?? 0);
+    this.loadoutEditOpen = props.loadoutEditOpen === true;
+    this.phaseRestartOnResume = props.phaseRestartOnResume === true;
   }
 
   static initial(): GameState {
@@ -100,6 +108,8 @@ export class GameState {
       shopRefreshSeed: 0,
       upgradeLevels: {},
       shopRefreshUses: 0,
+      loadoutEditOpen: false,
+      phaseRestartOnResume: false,
     });
   }
 
@@ -182,6 +192,14 @@ export class GameState {
     return this.clone({ phaseRun: phaseRun?.toProps() ?? null });
   }
 
+  withLoadoutEditOpen(loadoutEditOpen: boolean): GameState {
+    return this.clone({ loadoutEditOpen });
+  }
+
+  withPhaseRestartOnResume(phaseRestartOnResume: boolean): GameState {
+    return this.clone({ phaseRestartOnResume });
+  }
+
   withStage(stage: number): GameState {
     return this.clone({ stage, shopRefreshSeed: 0, shopRefreshUses: 0 });
   }
@@ -245,6 +263,8 @@ export class GameState {
       shopRefreshSeed: this.shopRefreshSeed,
       upgradeLevels: this.upgradeLevels,
       shopRefreshUses: this.shopRefreshUses,
+      loadoutEditOpen: this.loadoutEditOpen,
+      phaseRestartOnResume: this.phaseRestartOnResume,
     };
   }
 

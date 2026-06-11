@@ -16,6 +16,10 @@ export interface GearProps {
   attackBonus: number;
   defenseBonus: number;
   healthBonus: number;
+  attackSpeedBonus?: number;
+  castSpeedBonus?: number;
+  critChanceBonus?: number;
+  critDamageBonus?: number;
   requirements?: GearRequirements;
 }
 
@@ -29,6 +33,10 @@ export class Gear {
   readonly attackBonus: number;
   readonly defenseBonus: number;
   readonly healthBonus: number;
+  readonly attackSpeedBonus: number;
+  readonly castSpeedBonus: number;
+  readonly critChanceBonus: number;
+  readonly critDamageBonus: number;
   readonly requirements: GearRequirements;
 
   private constructor(props: GearProps) {
@@ -39,6 +47,10 @@ export class Gear {
     this.attackBonus = props.attackBonus;
     this.defenseBonus = props.defenseBonus;
     this.healthBonus = props.healthBonus;
+    this.attackSpeedBonus = props.attackSpeedBonus ?? 0;
+    this.castSpeedBonus = props.castSpeedBonus ?? 0;
+    this.critChanceBonus = props.critChanceBonus ?? 0;
+    this.critDamageBonus = props.critDamageBonus ?? 0;
     this.requirements = props.requirements ?? DEFAULT_REQUIREMENTS;
   }
 
@@ -55,6 +67,10 @@ export class Gear {
       attackBonus: this.attackBonus,
       defenseBonus: this.defenseBonus,
       healthBonus: this.healthBonus,
+      attackSpeedBonus: this.attackSpeedBonus,
+      castSpeedBonus: this.castSpeedBonus,
+      critChanceBonus: this.critChanceBonus,
+      critDamageBonus: this.critDamageBonus,
       requirements: this.requirements,
     };
   }

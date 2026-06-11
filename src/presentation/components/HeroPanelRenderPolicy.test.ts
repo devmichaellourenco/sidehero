@@ -23,9 +23,77 @@ describe('shouldRenderHeroPanel', () => {
     expect(shouldRenderHeroPanel(previous, next)).toBe(false);
   });
 
-  it('re-renderiza quando a party fica editável', () => {
-    const previous = state({ canEditParty: false });
-    const next = state({ canEditParty: true });
+  it('re-renderiza quando a party fica editável e o loadout muda', () => {
+    const previous = state({
+      canEditParty: false,
+      heroes: [
+        {
+          id: 'h1',
+          equipment: {},
+        } as GameStateDto['heroes'][0],
+      ],
+    });
+    const next = state({
+      canEditParty: true,
+      heroes: [
+        {
+          id: 'h1',
+          equipment: { weapon: { id: 'g1' } },
+        } as GameStateDto['heroes'][0],
+      ],
+    });
+
+    expect(shouldRenderHeroPanel(previous, next)).toBe(true);
+  });
+
+  it('pula re-render fora de combate quando só o ouro muda', () => {
+    const base = state({
+      canEditParty: true,
+      heroes: [
+        {
+          id: 'h1',
+          level: 1,
+          attack: 10,
+          defense: 5,
+          health: 100,
+          maxHealth: 100,
+          hasUnspentPoints: false,
+          equipment: {},
+        } as GameStateDto['heroes'][0],
+      ],
+    });
+    const previous = { ...base, gold: 100 };
+    const next = { ...base, gold: 200 };
+
+    expect(shouldRenderHeroPanel(previous, next)).toBe(false);
+  });
+
+  it('re-renderiza fora de combate quando o equipamento muda', () => {
+    const base = state({
+      canEditParty: true,
+      heroes: [
+        {
+          id: 'h1',
+          level: 1,
+          attack: 10,
+          defense: 5,
+          health: 100,
+          maxHealth: 100,
+          hasUnspentPoints: false,
+          equipment: {},
+        } as GameStateDto['heroes'][0],
+      ],
+    });
+    const previous = base;
+    const next = state({
+      ...base,
+      heroes: [
+        {
+          ...base.heroes[0],
+          equipment: { weapon: { id: 'g1' } },
+        } as GameStateDto['heroes'][0],
+      ],
+    });
 
     expect(shouldRenderHeroPanel(previous, next)).toBe(true);
   });

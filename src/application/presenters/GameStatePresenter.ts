@@ -15,12 +15,14 @@ import { mapDefinitionByIndex } from '../../domain/campaign/CampaignMaps';
 import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
 import { PartyEditPolicy } from '../../domain/party/PartyEditPolicy';
+import { CHEST_TYPE_LABELS } from '../../domain/combat/ChestType';
 import { listEnemyCombatSkillsByType } from '../../domain/progression/combat/EnemyCombatSkillCatalog';
 import { getEnemySkillDisplay } from '../../domain/progression/combat/EnemySkillDisplayCatalog';
 import {
   mapEnemyCombatIntent,
   mapHeroCombatIntent,
 } from '../mappers/CombatSkillIntentMapper';
+import { mapHeroSkillCooldowns } from '../mappers/HeroSkillCooldownMapper';
 import { mapCombatantStatusEffects } from '../mappers/CombatStatusEffectMapper';
 
 export class GameStatePresenter {
@@ -36,7 +38,7 @@ export class GameStatePresenter {
     const enemies = combatEnemies.map((enemy) =>
       mapEnemyToDto(enemy, activeParty, combatEnemies, skillCooldowns, statusEffects),
     );
-    const activeActor = combat?.currentActor() ?? null;
+    const activeActor = combat?.peekNextActor(state.activeHeroes(), combat.enemies) ?? null;
     const campaignLabels = mapCampaignLabels(state);
     const phaseRun = mapPhaseRunDto(state);
 
@@ -75,6 +77,8 @@ export class GameStatePresenter {
       ),
       activePartyIds: [...state.activePartyIds],
       canEditParty: PartyEditPolicy.canEdit(state),
+      loadoutEditOpen: state.loadoutEditOpen,
+      phaseRestartOnResume: state.phaseRestartOnResume,
       enemies,
       enemy: enemies[0] ?? null,
       activeTurn: activeActor ? { side: activeActor.side, id: activeActor.id } : null,
@@ -121,6 +125,7 @@ function mapHeroToDtoWithCombatIntent(
   return {
     ...mapHeroBaseToDto(hero, upgradeLevels),
     combatIntent: mapHeroCombatIntent(hero, party, enemies, skillCooldowns, combatStatusEffects),
+    combatSkillCooldowns: mapHeroSkillCooldowns(hero, skillCooldowns),
     statusEffects: mapCombatantStatusEffects('hero', hero.id, combatStatusEffects),
   };
 }
@@ -195,6 +200,8 @@ function mapChestToDto(chest: Chest): ChestDto {
   return {
     id: chest.id,
     stageEarned: chest.stageEarned,
+    chestType: chest.chestType,
+    chestLabel: CHEST_TYPE_LABELS[chest.chestType],
     opened: chest.opened,
   };
 }

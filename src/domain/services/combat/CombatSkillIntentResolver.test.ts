@@ -24,7 +24,7 @@ describe('CombatSkillIntentResolver', () => {
     expect(intent?.nextSkillName).toBe('Ataque Básico');
     expect(intent?.nextSkillId).toBe('basic_attack');
     expect(intent?.chargingSkills).toEqual([
-      { skillId: 'goblin_stab', skillName: 'Facada', turnsRemaining: 2 },
+      { skillId: 'goblin_stab', skillName: 'Facada', secondsRemaining: 2 },
     ]);
   });
 

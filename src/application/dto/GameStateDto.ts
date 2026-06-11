@@ -40,6 +40,10 @@ export interface HeroDto {
   experienceToNextLevel: number;
   attack: number;
   defense: number;
+  attackSpeed: number;
+  castSpeed: number;
+  critChance: number;
+  critDamage: number;
   health: number;
   maxHealth: number;
   baseAttributes: AttributesDto;
@@ -64,11 +68,23 @@ export interface HeroDto {
       attackBonus: number;
       defenseBonus: number;
       healthBonus: number;
+      attackSpeedBonus: number;
+      castSpeedBonus: number;
+      critChanceBonus: number;
+      critDamageBonus: number;
       requirements: GearRequirementsDto;
     } | null
   >;
   combatIntent: CombatSkillIntentDto | null;
+  combatSkillCooldowns: HeroSkillCooldownDto[];
   statusEffects: CombatStatusEffectDto[];
+}
+
+export interface HeroSkillCooldownDto {
+  skillId: string;
+  secondsRemaining: number;
+  cooldownTotal: number;
+  ready: boolean;
 }
 
 export interface CombatStatusEffectDto {
@@ -81,8 +97,8 @@ export interface CombatSkillIntentDto {
   nextSkillName: string;
   nextSkillId: string;
   status: 'ready' | 'cooldown';
-  turnsRemaining: number;
-  chargingSkills: Array<{ skillId: string; skillName: string; turnsRemaining: number }>;
+  secondsRemaining: number;
+  chargingSkills: Array<{ skillId: string; skillName: string; secondsRemaining: number }>;
 }
 
 export interface EnemySignatureSkillDto {
@@ -113,12 +129,18 @@ export interface GearDto {
   attackBonus: number;
   defenseBonus: number;
   healthBonus: number;
+  attackSpeedBonus: number;
+  castSpeedBonus: number;
+  critChanceBonus: number;
+  critDamageBonus: number;
   requirements: GearRequirementsDto;
 }
 
 export interface ChestDto {
   id: string;
   stageEarned: number;
+  chestType: string;
+  chestLabel: string;
   opened: boolean;
 }
 
@@ -141,6 +163,8 @@ export interface GameStateDto {
   activePartyIds: string[];
   benchHeroes: HeroDto[];
   canEditParty: boolean;
+  loadoutEditOpen: boolean;
+  phaseRestartOnResume: boolean;
   enemies: EnemyDto[];
   enemy: EnemyDto | null;
   activeTurn: ActiveTurnDto | null;

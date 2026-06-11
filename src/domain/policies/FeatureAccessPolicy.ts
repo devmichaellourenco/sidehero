@@ -25,7 +25,7 @@ export class FeatureAccessPolicy {
     const backgroundTickLevel = getFeatureLevel(levels, 'background_tick');
 
     return {
-      autoBattle: autoBattleLevel >= 1,
+      autoBattle: true,
       autoBattleMaxSpeed: autoBattleLevel >= 3 ? 3 : autoBattleLevel >= 2 ? 2 : 1,
       autoOpenChests: getFeatureLevel(levels, 'auto_open_chests') >= 1,
       openAllChests: openAllLevel >= 1,

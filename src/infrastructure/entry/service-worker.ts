@@ -81,8 +81,14 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.newGame.execute();
       return { ok: true, state };
     }
+    case 'PAUSE_FOR_LOADOUT': {
+      const state = await app.pauseForLoadout.execute();
+      return { ok: true, state };
+    }
     case 'TICK': {
-      const result = await app.tick.execute(message.ticks ?? 1);
+      const result = await app.tick.execute(message.ticks ?? 1, {
+        restartCurrentPhase: message.restartCurrentPhase,
+      });
       await syncBackgroundTickAlarm(result.state.upgradeLevels);
       return { ok: true, state: result.state, combatFloats: result.combatFloats };
     }

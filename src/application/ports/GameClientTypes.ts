@@ -15,7 +15,8 @@ export type GameMessage =
   | { type: 'GET_CAMPAIGN_OVERVIEW' }
   | { type: 'SELECT_PHASE'; phaseId: string }
   | { type: 'NEW_GAME' }
-  | { type: 'TICK'; ticks?: number }
+  | { type: 'PAUSE_FOR_LOADOUT' }
+  | { type: 'TICK'; ticks?: number; restartCurrentPhase?: boolean }
   | { type: 'OPEN_CHEST'; chestId: string }
   | { type: 'OPEN_ALL_CHESTS' }
   | { type: 'EQUIP_GEAR'; heroId: string; gearId: string }

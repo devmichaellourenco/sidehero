@@ -10,7 +10,8 @@ import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
 import { inferEnemyType } from '../../domain/entities/EnemyType';
 import { Chest, ChestProps } from '../../domain/entities/Chest';
 import { CombatState } from '../../domain/entities/CombatState';
-import { TurnOrderService } from '../../domain/services/combat/TurnOrderService';
+import { ActionTimerService } from '../../domain/services/combat/ActionTimerService';
+import { ChestType } from '../../domain/combat/ChestType';
 
 type RawRecord = Record<string, unknown>;
 
@@ -197,13 +198,16 @@ export function migrateCombat(
       .filter((enemy): enemy is Enemy => enemy !== null);
 
     if (enemies.length > 0) {
+      const actionTimerService = new ActionTimerService();
+      const hasActionTimers =
+        combat.actionTimers && typeof combat.actionTimers === 'object';
+
       return CombatState.restore({
         enemies: enemies.map((enemy) => enemy.toProps()),
-        turnQueue: Array.isArray(combat.turnQueue)
-          ? (combat.turnQueue as CombatState['turnQueue'])
-          : [],
-        turnIndex: typeof combat.turnIndex === 'number' ? combat.turnIndex : 0,
-        round: typeof combat.round === 'number' ? combat.round : 1,
+        actionTimers: hasActionTimers
+          ? (combat.actionTimers as CombatState['actionTimers'])
+          : actionTimerService.createInitial(heroes, enemies),
+        combatTime: typeof combat.combatTime === 'number' ? combat.combatTime : 0,
         skillCooldowns:
           combat.skillCooldowns && typeof combat.skillCooldowns === 'object'
             ? (combat.skillCooldowns as CombatState['skillCooldowns'])
@@ -222,17 +226,20 @@ export function migrateCombat(
 
   if (!legacyEnemy) return null;
 
-  const turnOrder = new TurnOrderService();
-  return CombatState.fromLegacyEnemy(legacyEnemy, heroes, turnOrder);
+  return CombatState.fromLegacyEnemy(legacyEnemy, heroes, new ActionTimerService());
 }
 
 export function migrateChest(raw: unknown): Chest {
-  const c = raw as ChestProps;
+  const c = asRecord(raw);
+  const chestType =
+    typeof c.chestType === 'string' ? (c.chestType as ChestType) : 'monster';
+
   return Chest.restore({
-    id: c.id,
-    stageEarned: c.stageEarned,
+    id: typeof c.id === 'string' ? c.id : `chest-${Date.now()}`,
+    stageEarned: typeof c.stageEarned === 'number' ? c.stageEarned : 1,
+    chestType,
     opened: Boolean(c.opened),
-    loot: c.loot && typeof c.loot === 'object' ? Gear.create(c.loot) : null,
+    loot: c.loot && typeof c.loot === 'object' ? Gear.create(c.loot as Parameters<typeof Gear.create>[0]) : null,
   });
 }
 

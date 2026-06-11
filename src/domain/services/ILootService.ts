@@ -1,8 +1,10 @@
+import { ChestType } from '../combat/ChestType';
 import { Gear, GearRarity, GearSlot } from '../entities/Gear';
 
 export interface ILootService {
   generateGear(stage: number): Gear;
-  generateGearForSlot(stage: number, slot: GearSlot, rarity: GearRarity): Gear;
+  generateGearForChest(chestType: ChestType, stage: number): Gear;
+  generateGearForSlot(stage: number, slot: GearSlot, rarity: GearRarity, chestType?: ChestType): Gear;
   generateDeterministicGearForSlot(
     stage: number,
     slot: GearSlot,

@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { FeatureAccessPolicy } from './FeatureAccessPolicy';
 
 describe('FeatureAccessPolicy', () => {
-  it('resolve retorna flags desligadas sem upgrades', () => {
+  it('resolve auto-batalha ligada por padrão sem upgrades', () => {
     const flags = FeatureAccessPolicy.resolve({});
-    expect(flags.autoBattle).toBe(false);
+    expect(flags.autoBattle).toBe(true);
+    expect(flags.autoBattleMaxSpeed).toBe(1);
     expect(flags.optimizeLoadout).toBe(false);
     expect(flags.backgroundTickMultiplier).toBe(1);
   });

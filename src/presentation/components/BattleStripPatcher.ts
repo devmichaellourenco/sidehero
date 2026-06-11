@@ -47,7 +47,15 @@ function replaceOrRemoveStatusEffects(card: HTMLElement, effectsHtml: string, an
 
 function skillIntentKey(intent: CombatSkillIntentDto | null | undefined): string {
   if (!intent) return '';
-  return JSON.stringify(intent);
+  return JSON.stringify({
+    nextSkillId: intent.nextSkillId,
+    status: intent.status,
+    secondsRemaining: Math.round(intent.secondsRemaining * 10) / 10,
+    charging: intent.chargingSkills.map((entry) => ({
+      id: entry.skillId,
+      s: Math.round(entry.secondsRemaining * 10) / 10,
+    })),
+  });
 }
 
 function replaceOrRemoveSkillIntent(

@@ -2,6 +2,6 @@ export interface CombatSkillIntent {
   nextSkillName: string;
   nextSkillId: string;
   status: 'ready' | 'cooldown';
-  turnsRemaining: number;
-  chargingSkills: Array<{ skillId: string; skillName: string; turnsRemaining: number }>;
+  secondsRemaining: number;
+  chargingSkills: Array<{ skillId: string; skillName: string; secondsRemaining: number }>;
 }

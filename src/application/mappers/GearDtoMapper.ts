@@ -10,6 +10,10 @@ export function mapGearToDto(gear: Gear): GearDto {
     attackBonus: gear.attackBonus,
     defenseBonus: gear.defenseBonus,
     healthBonus: gear.healthBonus,
+    attackSpeedBonus: gear.attackSpeedBonus,
+    castSpeedBonus: gear.castSpeedBonus,
+    critChanceBonus: gear.critChanceBonus,
+    critDamageBonus: gear.critDamageBonus,
     requirements: gear.requirements
       ? {
           minLevel: gear.requirements.minLevel,

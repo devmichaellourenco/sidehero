@@ -17,7 +17,9 @@ describe('CombatStatResolver', () => {
     });
 
     expect(resolveEffectiveDefense(10, 'hero:h1', tracker)).toBe(7);
-    expect(mitigateDamage(12, 7)).toBe(5);
+    const mitigated = mitigateDamage(12, 7, 1);
+    expect(mitigated).toBeGreaterThan(1);
+    expect(mitigated).toBeLessThan(12);
   });
 
   it('aumenta ataque efetivo com buff', () => {

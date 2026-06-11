@@ -24,7 +24,13 @@ export class GameStateChangeDetector {
 
     if (!skipVictoryRewards && next.pendingChestCount > previous.pendingChestCount) {
       const count = next.pendingChestCount - previous.pendingChestCount;
-      const label = count === 1 ? 'Baú disponível!' : `${count} baús disponíveis!`;
+      const newestChest = next.chests.filter((chest) => !chest.opened).at(-1);
+      const label =
+        count === 1 && newestChest
+          ? `${newestChest.chestLabel} disponível!`
+          : count === 1
+            ? 'Baú disponível!'
+            : `${count} baús disponíveis!`;
       this.toasts.show(label, 'chest', {
         hint: 'Clique para abrir',
         onClick: handlers.onChestAvailable,

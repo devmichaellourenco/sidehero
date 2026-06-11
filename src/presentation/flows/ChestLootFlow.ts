@@ -80,7 +80,9 @@ export class ChestLootFlow {
 
     const state = this.getState();
     if (!this.shouldAutoOpenChests() || !getFeatureFlags(state).autoOpenChests) return;
-    if (!state || this.openingChests) return;
+    if (!state || this.openingChests || (state.loadoutEditOpen && state.phaseRestartOnResume)) {
+      return;
+    }
     if (this.isModalOpen() || state.pendingChestCount === 0) return;
 
     this.autoOpenChestPending = true;
@@ -89,7 +91,13 @@ export class ChestLootFlow {
 
       const current = this.getState();
       if (!this.shouldAutoOpenChests() || this.openingChests || this.isModalOpen()) return;
-      if (!current || current.pendingChestCount === 0) return;
+      if (
+        !current ||
+        current.pendingChestCount === 0 ||
+        (current.loadoutEditOpen && current.phaseRestartOnResume)
+      ) {
+        return;
+      }
 
       if (
         current.pendingChestCount >= 2 &&

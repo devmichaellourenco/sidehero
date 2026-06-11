@@ -19,10 +19,14 @@ export interface CombatSkillDefinition {
   targetPriority: SkillTargetPriority;
   /** Maior = preferida quando pronta (ataque básico = 0). */
   usePriority: number;
-  /** Turnos até a primeira utilização no combate. */
+  /** Turnos até a primeira utilização (legado). */
   initialCooldown: number;
-  /** Turnos de espera após usar a skill. */
+  /** Turnos de espera após usar a skill (legado). */
   cooldownTurns: number;
+  /** Segundos até a primeira utilização (prioridade sobre initialCooldown). */
+  initialCooldownSeconds?: number;
+  /** Segundos de espera após usar a skill (prioridade sobre cooldownTurns). */
+  cooldownSeconds?: number;
   basePower: number;
   powerPerRank: number;
   attributeFactor: number;

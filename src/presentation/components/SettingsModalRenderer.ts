@@ -17,7 +17,7 @@ export class SettingsModalRenderer {
     handlers: SettingsModalHandlers,
   ): void {
     container.innerHTML = `
-      <p class="settings-intro">Ligue automações já desbloqueadas em Melhorias.</p>
+      <p class="settings-intro">Auto-batalha já vem ativa. Outras automações exigem Melhorias.</p>
       <div class="settings-list">
         ${this.renderToggle({
           key: 'autoBattle',
@@ -109,16 +109,6 @@ export class SettingsModalRenderer {
 
   private renderSpeedSelect(state: GameStateDto, preferences: GamePreferences): string {
     const maxSpeed = state.featureFlags.autoBattleMaxSpeed;
-    if (!state.featureFlags.autoBattle) {
-      return `
-        <div class="settings-item settings-item-locked settings-item-select">
-          <span class="settings-item-text">
-            <strong>Velocidade da auto-batalha</strong>
-            <small>Desbloqueie auto-batalha em Melhorias</small>
-          </span>
-        </div>
-      `;
-    }
 
     const options = [
       { value: 1, label: '1x', enabled: true },

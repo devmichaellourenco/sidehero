@@ -1,5 +1,6 @@
 import { Enemy } from '../../entities/Enemy';
 import { Hero } from '../../entities/Hero';
+import { getCooldownSeconds, getInitialCooldownSeconds } from '../../combat/SkillCooldownTiming';
 import { CombatSkillDefinition } from '../../progression/combat/CombatSkillDefinition';
 import { listEnemyCombatSkills } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCatalog';
@@ -16,8 +17,9 @@ export class SkillCooldownTracker {
       const key = combatantKey('hero', hero.id);
       cooldowns[key] = {};
       for (const skill of listHeroCombatSkills(hero)) {
-        if (skill.initialCooldown > 0) {
-          cooldowns[key][skill.skillId] = skill.initialCooldown;
+        const initial = getInitialCooldownSeconds(skill);
+        if (initial > 0) {
+          cooldowns[key][skill.skillId] = initial;
         }
       }
     }
@@ -26,8 +28,9 @@ export class SkillCooldownTracker {
       const key = combatantKey('enemy', enemy.id);
       cooldowns[key] = {};
       for (const skill of listEnemyCombatSkills(enemy)) {
-        if (skill.initialCooldown > 0) {
-          cooldowns[key][skill.skillId] = skill.initialCooldown;
+        const initial = getInitialCooldownSeconds(skill);
+        if (initial > 0) {
+          cooldowns[key][skill.skillId] = initial;
         }
       }
     }
@@ -51,26 +54,62 @@ export class SkillCooldownTracker {
     return structuredClone(this.cooldowns);
   }
 
+  advanceTime(deltaSeconds: number, castSpeed = 1): SkillCooldownTracker {
+    const next = structuredClone(this.cooldowns);
+
+    for (const key of Object.keys(next)) {
+      for (const skillId of Object.keys(next[key])) {
+        next[key][skillId] = Math.max(0, next[key][skillId] - deltaSeconds * castSpeed);
+      }
+    }
+
+    return new SkillCooldownTracker(next);
+  }
+
+  advanceKey(key: string, deltaSeconds: number, castSpeed = 1): SkillCooldownTracker {
+    const next = structuredClone(this.cooldowns);
+    if (!next[key]) return this;
+
+    for (const skillId of Object.keys(next[key])) {
+      next[key][skillId] = Math.max(0, next[key][skillId] - deltaSeconds * castSpeed);
+    }
+
+    return new SkillCooldownTracker(next);
+  }
+
+  onSkillUsed(
+    key: string,
+    usedSkillId: string | null,
+    skills: CombatSkillDefinition[],
+    castSpeed = 1,
+  ): SkillCooldownTracker {
+    const next = structuredClone(this.cooldowns);
+    next[key] ??= {};
+
+    if (!usedSkillId) {
+      return new SkillCooldownTracker(next);
+    }
+
+    const usedSkill = skills.find((skill) => skill.skillId === usedSkillId);
+    if (!usedSkill) {
+      return new SkillCooldownTracker(next);
+    }
+
+    const cooldownSeconds = getCooldownSeconds(usedSkill);
+    if (cooldownSeconds > 0) {
+      next[key][usedSkillId] = cooldownSeconds / castSpeed;
+    }
+
+    return new SkillCooldownTracker(next);
+  }
+
+  /** Compat legado — converte 1 turno em 1 segundo. */
   onTurnEnd(
     key: string,
     usedSkillId: string | null,
     skills: CombatSkillDefinition[],
   ): SkillCooldownTracker {
-    const next = structuredClone(this.cooldowns);
-    next[key] ??= {};
-
-    for (const skillId of Object.keys(next[key])) {
-      next[key][skillId] = Math.max(0, next[key][skillId] - 1);
-    }
-
-    if (usedSkillId) {
-      const usedSkill = skills.find((skill) => skill.skillId === usedSkillId);
-      if (usedSkill && usedSkill.cooldownTurns > 0) {
-        next[key][usedSkillId] = usedSkill.cooldownTurns;
-      }
-    }
-
-    return new SkillCooldownTracker(next);
+    return this.onSkillUsed(key, usedSkillId, skills, 1);
   }
 }
 

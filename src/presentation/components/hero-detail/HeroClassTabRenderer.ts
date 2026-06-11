@@ -100,7 +100,7 @@ function renderAscensionSkillNodes(
         allocateAttr: 'data-ascension-allocate',
         activateAttr: 'data-skill-activate',
         deactivateAttr: 'data-skill-deactivate',
-        canAllocate: node.status === 'ready' && unspentPoints > 0,
+        canAllocate: node.canAllocateRank,
       }),
     )
     .join('');

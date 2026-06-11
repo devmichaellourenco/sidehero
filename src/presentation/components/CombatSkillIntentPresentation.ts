@@ -10,16 +10,21 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function formatSecondsBadge(seconds: number): string {
+  if (seconds >= 1) return `${Math.ceil(seconds)}s`;
+  return `${Math.ceil(seconds * 10) / 10}s`;
+}
+
 function renderSkillIcon(
   skillId: string,
   skillName: string,
-  options: { turnsRemaining?: number; compact?: boolean } = {},
+  options: { secondsRemaining?: number; compact?: boolean } = {},
 ): string {
   const label = getSkillDisplayName(skillId, skillName);
   const iconUrl = getSkillIconUrl(skillId);
   const turnsBadge =
-    options.turnsRemaining && options.turnsRemaining > 0
-      ? `<span class="combat-skill-turns">${options.turnsRemaining}</span>`
+    options.secondsRemaining && options.secondsRemaining > 0
+      ? `<span class="combat-skill-turns">${formatSecondsBadge(options.secondsRemaining)}</span>`
       : '';
 
   return `
@@ -45,7 +50,7 @@ export function renderCombatSkillIntent(intent: CombatSkillIntentDto | null | un
   const chargingHtml = intent.chargingSkills
     .map((entry) =>
       renderSkillIcon(entry.skillId, entry.skillName, {
-        turnsRemaining: entry.turnsRemaining,
+        secondsRemaining: entry.secondsRemaining,
         compact: true,
       }),
     )

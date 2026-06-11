@@ -1,4 +1,7 @@
 import { Hero } from '../../domain/entities/Hero';
+import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
+
+const combatProfiles = new CombatProfileProvider();
 import {
   getUnlockedBattleSkillSlotCount,
   MAX_ACTIVE_BATTLE_SKILLS,
@@ -29,6 +32,10 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
           attackBonus: gear.attackBonus,
           defenseBonus: gear.defenseBonus,
           healthBonus: gear.healthBonus,
+          attackSpeedBonus: gear.attackSpeedBonus,
+          castSpeedBonus: gear.castSpeedBonus,
+          critChanceBonus: gear.critChanceBonus,
+          critDamageBonus: gear.critDamageBonus,
           requirements: gear.requirements
             ? {
                 minLevel: gear.requirements.minLevel,
@@ -51,6 +58,10 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     experienceToNextLevel: props.experience.toNextLevel,
     attack: hero.attack,
     defense: hero.defense,
+    attackSpeed: combatProfiles.forHero(hero).attackSpeed,
+    castSpeed: combatProfiles.forHero(hero).castSpeed,
+    critChance: combatProfiles.forHero(hero).critChance,
+    critDamage: combatProfiles.forHero(hero).critDamage,
     health: hero.currentHealth,
     maxHealth: hero.maxHealth,
     baseAttributes: mapAttributes(hero.baseAttributes),
@@ -67,6 +78,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     hasUnspentPoints: hero.hasUnspentPoints,
     equipment,
     combatIntent: null,
+    combatSkillCooldowns: [],
     statusEffects: [],
   };
 }

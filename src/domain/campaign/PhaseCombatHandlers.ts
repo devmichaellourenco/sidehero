@@ -4,7 +4,8 @@ import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
 import { Hero } from '../entities/Hero';
 import { Chest } from '../entities/Chest';
-import { TurnOrderService } from '../services/combat/TurnOrderService';
+import { ActionTimerService } from '../services/combat/ActionTimerService';
+import { ChestType } from '../combat/ChestType';
 import { EncounterMeta, EncounterResolver } from './EncounterResolver';
 import { CampaignProgress } from './CampaignProgress';
 import { PhaseRun } from './PhaseRun';
@@ -19,7 +20,7 @@ export interface PhaseCombatResult {
 export class PhaseCombatHandlers {
   constructor(
     private readonly encounterResolver = new EncounterResolver(),
-    private readonly turnOrder = new TurnOrderService(),
+    private readonly actionTimers = new ActionTimerService(),
   ) {}
 
   startPhaseRun(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
@@ -31,7 +32,7 @@ export class PhaseCombatHandlers {
     const combat = CombatState.start(
       state.activeHeroes(),
       resolved.enemies,
-      this.turnOrder,
+      this.actionTimers,
       resolved.meta,
     );
     const phase = resolved.phase;
@@ -59,7 +60,7 @@ export class PhaseCombatHandlers {
       return { state: state.withHeroes(heroes), events: [] };
     }
 
-    const combat = CombatState.start(heroes, resolved.enemies, this.turnOrder, resolved.meta);
+    const combat = CombatState.start(heroes, resolved.enemies, this.actionTimers, resolved.meta);
     const waveLabel = `${nextRun.waveIndex + 1}/${resolved.meta.waveCount}`;
 
     let nextState = state
@@ -68,6 +69,11 @@ export class PhaseCombatHandlers {
       .withPhaseRun(nextRun)
       .withCombat(combat)
       .addLog(`${enemyNames} derrotado(s)! +${totalGold} ouro · Wave ${waveLabel}`);
+
+    if (!meta.isBossWave && Math.random() < 0.12) {
+      const chest = Chest.create(resolved.phase.difficultyTier, 'monster');
+      nextState = nextState.withChests([...nextState.chests, chest]).addLog('📦 Baú de monstro dropou!');
+    }
 
     return {
       state: nextState.touchTick(),
@@ -133,12 +139,38 @@ export class PhaseCombatHandlers {
       : [`${phase.displayName} concluída!`, `+${totalGold} ouro`, `+${totalXp} XP`];
 
     if (nextState.totalBattlesWon % CHEST_EVERY_N_WINS === 0) {
-      const chest = Chest.create(phase.difficultyTier);
+      const chestType: ChestType = phase.seasonFinale ? 'act_boss' : 'boss';
+      const chest = Chest.create(phase.difficultyTier, chestType);
       nextState = nextState.withChests([...nextState.chests, chest]).addLog('📦 Baú dropou no painel!');
       events.push('Baú obtido!');
     }
 
     return { state: nextState.touchTick(), events };
+  }
+
+  restartPhaseFromPause(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
+    const recovered = state.activeHeroes().map((hero) => hero.healFull());
+    const resetRun = phaseRun.resetWaves();
+    const resolved = this.encounterResolver.resolve(resetRun.phaseId, resetRun.waveIndex);
+    if (!resolved) {
+      return {
+        state: state.withHeroes(recovered).withPhaseRun(null).withCombat(null),
+        events: [],
+      };
+    }
+
+    const combat = CombatState.start(recovered, resolved.enemies, this.actionTimers, resolved.meta);
+    const phase = resolved.phase;
+    const waveLabel = `${resetRun.waveIndex + 1}/${resolved.meta.waveCount}`;
+
+    return {
+      state: state
+        .withHeroes(recovered)
+        .withPhaseRun(resetRun)
+        .withCombat(combat)
+        .addLog(`⏯ Fase reiniciada em ${phase.displayName} · Wave ${waveLabel}`),
+      events: [`Fase reiniciada · Wave ${waveLabel}`],
+    };
   }
 
   onPhaseWipe(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
@@ -149,7 +181,7 @@ export class PhaseCombatHandlers {
       return { state: state.withHeroes(recovered).withPhaseRun(null).withCombat(null), events: [] };
     }
 
-    const combat = CombatState.start(recovered, resolved.enemies, this.turnOrder, resolved.meta);
+    const combat = CombatState.start(recovered, resolved.enemies, this.actionTimers, resolved.meta);
     const phase = resolved.phase;
 
     return {

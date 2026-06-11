@@ -472,6 +472,12 @@ h2 {
   color: #6fe3a0;
 }
 
+.battle-float--crit {
+  color: #ffd166;
+  font-size: 13px;
+  text-shadow: 0 0 8px rgba(255, 209, 102, 0.65), 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
 @keyframes battle-float-rise {
   0% {
     opacity: 0;
@@ -965,6 +971,57 @@ h2 {
 
 .hero-skill-chip-icon {
   pointer-events: none;
+}
+
+.hero-skill-chip-media {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
+
+.hero-skill-cooldown {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-skill-cooldown--ready {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hero-skill-cooldown-shade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--cooldown-ratio, 0) * 100%);
+  background: linear-gradient(
+    to top,
+    rgba(6, 10, 22, 0.92) 0%,
+    rgba(18, 28, 52, 0.72) 70%,
+    rgba(40, 58, 96, 0.35) 100%
+  );
+  transition: height 0.5s linear;
+}
+
+.hero-skill-cooldown-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 8px;
+  font-weight: 700;
+  color: #e8edf8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.02em;
 }
 
 button.hero-skill-chip {
@@ -1578,6 +1635,12 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.gear-equip-btn.gear-action-pending,
+.equip-hero-card.gear-action-pending {
+  opacity: 0.55;
+  cursor: wait;
 }
 
 .gear-equip-btn:hover {

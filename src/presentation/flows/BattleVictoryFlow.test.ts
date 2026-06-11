@@ -1,9 +1,10 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { AUTO_CONTINUE_MS, BattleVictoryFlow } from './BattleVictoryFlow';
+import { AUTO_DISMISS_MS, BattleVictoryFlow } from './BattleVictoryFlow';
 import { BattleVictoryPayload } from '../components/BattleVictoryDetector';
 
 function basePayload(): BattleVictoryPayload {
   return {
+    clearedPhaseId: '1-1',
     clearedPhaseName: 'Fase 1-1',
     nextPhaseName: 'Fase 1-2',
     nextPhaseId: '1-2',
@@ -34,16 +35,7 @@ function createMockElement() {
     set innerHTML(value: string) {
       html = value;
     },
-    classListSet: classes,
     querySelector(selector: string) {
-      if (selector === '[data-victory-adjust]') {
-        return {
-          addEventListener: (event: string, listener: EventListener) => {
-            listeners.set(`adjust:${event}`, listener);
-          },
-          click: () => listeners.get('adjust:click')?.(new Event('click')),
-        };
-      }
       if (selector === '[data-victory-continue]') {
         return {
           addEventListener: (event: string, listener: EventListener) => {
@@ -57,9 +49,6 @@ function createMockElement() {
       }
       return null;
     },
-    clickAdjust() {
-      listeners.get('adjust:click')?.(new Event('click'));
-    },
     clickContinue() {
       listeners.get('continue:click')?.(new Event('click'));
     },
@@ -69,13 +58,11 @@ function createMockElement() {
 describe('BattleVictoryFlow', () => {
   let overlay: ReturnType<typeof createMockElement>;
   let strip: ReturnType<typeof createMockElement>;
-  let onContinue: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.useFakeTimers();
     overlay = createMockElement();
     strip = createMockElement();
-    onContinue = vi.fn();
   });
 
   afterEach(() => {
@@ -85,7 +72,8 @@ describe('BattleVictoryFlow', () => {
   function createFlow() {
     const renderer = {
       render: (container: { innerHTML: string }) => {
-        container.innerHTML = '<button data-victory-adjust></button><button data-victory-continue></button><p data-victory-countdown></p>';
+        container.innerHTML =
+          '<button data-victory-continue></button><p data-victory-countdown></p>';
       },
     };
 
@@ -93,50 +81,33 @@ describe('BattleVictoryFlow', () => {
       overlay as unknown as HTMLElement,
       strip as unknown as HTMLElement,
       renderer as never,
-      onContinue,
     );
   }
 
-  it('avança automaticamente após o countdown', () => {
+  it('não bloqueia avanço do jogo', () => {
     const flow = createFlow();
     flow.show(basePayload());
 
-    expect(flow.isBlockingAdvance()).toBe(true);
-    vi.advanceTimersByTime(AUTO_CONTINUE_MS);
-
-    expect(onContinue).toHaveBeenCalledTimes(1);
     expect(flow.isBlockingAdvance()).toBe(false);
+    expect(flow.isActive()).toBe(true);
   });
 
-  it('pausa countdown e entra em intermissão ao ajustar party', () => {
+  it('fecha automaticamente sem retomar campanha', () => {
     const flow = createFlow();
-    const onIntermissionStart = vi.fn();
+    const onChest = vi.fn();
 
-    flow.show(basePayload(), undefined, { onIntermissionStart });
-    overlay.clickAdjust();
+    flow.show(basePayload(), onChest);
+    vi.advanceTimersByTime(AUTO_DISMISS_MS);
 
-    expect(onIntermissionStart).toHaveBeenCalledTimes(1);
-    expect(flow.isIntermissionPause()).toBe(true);
     expect(flow.isActive()).toBe(false);
-    expect(onContinue).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(AUTO_CONTINUE_MS);
-    expect(onContinue).not.toHaveBeenCalled();
+    expect(onChest).toHaveBeenCalledTimes(1);
   });
 
-  it('retoma batalha ao continuar depois da intermissão', () => {
+  it('fecha ao clicar em continuar', () => {
     const flow = createFlow();
-    const onIntermissionEnd = vi.fn();
+    flow.show(basePayload());
+    overlay.clickContinue();
 
-    flow.show(basePayload(), undefined, {
-      onIntermissionStart: vi.fn(),
-      onIntermissionEnd,
-    });
-    overlay.clickAdjust();
-    flow.dismiss();
-
-    expect(onIntermissionEnd).toHaveBeenCalledTimes(1);
-    expect(onContinue).toHaveBeenCalledTimes(1);
-    expect(flow.isBlockingAdvance()).toBe(false);
+    expect(flow.isActive()).toBe(false);
   });
 });

@@ -29,6 +29,10 @@ export interface EquippedGearDto {
   attackBonus: number;
   defenseBonus: number;
   healthBonus: number;
+  attackSpeedBonus?: number;
+  castSpeedBonus?: number;
+  critChanceBonus?: number;
+  critDamageBonus?: number;
 }
 
 function escapeHtml(text: string): string {
@@ -39,8 +43,34 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-export function formatGearBonuses(gear: Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>): string {
-  return `+${gear.attackBonus} ATK · +${gear.defenseBonus} DEF · +${gear.healthBonus} HP`;
+function formatPercent(value: number): string {
+  return `${Math.round(value * 1000) / 10}%`;
+}
+
+export function formatGearBonuses(
+  gear: Pick<
+    GearDto,
+    | 'attackBonus'
+    | 'defenseBonus'
+    | 'healthBonus'
+    | 'attackSpeedBonus'
+    | 'castSpeedBonus'
+    | 'critChanceBonus'
+    | 'critDamageBonus'
+  >,
+): string {
+  const parts = [
+    `+${gear.attackBonus} ATK`,
+    `+${gear.defenseBonus} DEF`,
+    `+${gear.healthBonus} HP`,
+  ];
+
+  if (gear.attackSpeedBonus > 0) parts.push(`+${gear.attackSpeedBonus.toFixed(2)} ASPD`);
+  if (gear.castSpeedBonus > 0) parts.push(`+${gear.castSpeedBonus.toFixed(2)} Cast`);
+  if (gear.critChanceBonus > 0) parts.push(`+${formatPercent(gear.critChanceBonus)} Crít`);
+  if (gear.critDamageBonus > 0) parts.push(`+${formatPercent(gear.critDamageBonus)} Crít Dmg`);
+
+  return parts.join(' · ');
 }
 
 function renderEquippedGearTooltip(gear: EquippedGearDto): string {
@@ -185,7 +215,7 @@ export function renderGearCard(
             ${options.upgradeBadge ?? ''}
           </div>
           <span class="gear-slot-tag">${GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot}</span>
-          <span>+${gear.attackBonus} ATK · +${gear.defenseBonus} DEF · +${gear.healthBonus} HP</span>
+          <span>${formatGearBonuses(gear)}</span>
           ${options.extraContent ?? ''}
         </div>
       </div>
@@ -211,6 +241,11 @@ export function renderEquippedGearCard(
       attackBonus: gear.attackBonus,
       defenseBonus: gear.defenseBonus,
       healthBonus: gear.healthBonus,
+      attackSpeedBonus: gear.attackSpeedBonus ?? 0,
+      castSpeedBonus: gear.castSpeedBonus ?? 0,
+      critChanceBonus: gear.critChanceBonus ?? 0,
+      critDamageBonus: gear.critDamageBonus ?? 0,
+      requirements: { minLevel: 1 },
     },
     {
       actionLabel: 'Desequipar',
@@ -222,4 +257,3 @@ export function renderEquippedGearCard(
     },
   );
 }
-

@@ -25,6 +25,8 @@ export function renderHeroTooltipContent(hero: HeroDto): string {
     <span class="hero-tooltip-line">${healthLabel}</span>
     <span class="hero-tooltip-line">${xpLabel}</span>
     <span class="hero-tooltip-line">ATK ${hero.attack} · DEF ${hero.defense}</span>
+    <span class="hero-tooltip-line">ASPD ${hero.attackSpeed.toFixed(2)}/s · Cast ${hero.castSpeed.toFixed(2)}×</span>
+    <span class="hero-tooltip-line">Crít ${(hero.critChance * 100).toFixed(1)}% · Dmg ${(hero.critDamage * 100).toFixed(0)}%</span>
   `;
 }
 

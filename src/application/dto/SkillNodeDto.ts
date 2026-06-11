@@ -21,6 +21,7 @@ export interface SkillNodeDto {
   currentRank: number;
   status: SkillNodeStatusDto;
   isEquipped: boolean;
+  canAllocateRank: boolean;
   canActivate: boolean;
   canDeactivate: boolean;
   activationCost: number;

@@ -53,6 +53,16 @@ describe('GamePreferencesController', () => {
     sessionStore.clear();
   });
 
+  it('liga auto-batalha por padrão em sessão nova', () => {
+    const controller = new GamePreferencesController();
+    const state = createStateWithAutoBattle();
+
+    controller.apply(state);
+
+    expect(controller.preferences.autoBattle).toBe(true);
+    expect(controller.autoBattleEnabled).toBe(true);
+  });
+
   it('persiste auto-batalha ao atualizar preferência', () => {
     const controller = new GamePreferencesController();
     const state = createStateWithAutoBattle();

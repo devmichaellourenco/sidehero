@@ -1,6 +1,7 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
 import { imgTag, getGearFrameSprite } from '../assets/AssetCatalog';
 import { getSkillBranchFrameUrl, getSkillIconUrl } from '../assets/SkillIconCatalog';
+import { renderSkillCooldownOverlay } from './HeroSkillCooldownPresentation';
 import { renderSkillRankLabel, renderSkillTooltipContent } from './SkillTooltipPresentation';
 
 const LOCKED_SLOT_UPGRADE_NAMES: Record<number, string> = {
@@ -16,21 +17,35 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function renderSkillChip(skill: HeroDto['activeSkills'][number], heroId: string): string {
+function findSkillCooldown(hero: HeroDto, skillId: string) {
+  return hero.combatSkillCooldowns.find((entry) => entry.skillId === skillId);
+}
+
+function renderSkillChip(skill: HeroDto['activeSkills'][number], hero: HeroDto): string {
   const rankLabel = renderSkillRankLabel(skill.currentRank, skill.maxRank);
   const frameUrl = getSkillBranchFrameUrl(skill.branch);
+  const cooldown = findSkillCooldown(hero, skill.id);
+  const cooldownHint =
+    cooldown && !cooldown.ready
+      ? ` · recarga ${cooldown.secondsRemaining.toFixed(1)}s`
+      : '';
 
   return `
     <button
       type="button"
       class="loadout-slot loadout-slot--skill hero-skill-chip hero-skill-chip--${skill.branch}"
-      data-hero-skills-open="${heroId}"
+      data-hero-skills-open="${hero.id}"
+      data-hero-skill-chip="${hero.id}"
+      data-skill-id="${skill.id}"
       data-skill-tooltip
-      aria-label="${escapeHtml(skill.name)} — ${escapeHtml(rankLabel)}"
+      aria-label="${escapeHtml(skill.name)} — ${escapeHtml(rankLabel)}${cooldownHint}"
       title="${escapeHtml(skill.name)}"
       style="--slot-frame: url('${frameUrl}')"
     >
-      ${imgTag(getSkillIconUrl(skill.id), skill.name, 'loadout-slot-icon hero-skill-chip-icon')}
+      <span class="hero-skill-chip-media">
+        ${imgTag(getSkillIconUrl(skill.id), skill.name, 'loadout-slot-icon hero-skill-chip-icon')}
+        ${renderSkillCooldownOverlay(cooldown)}
+      </span>
       ${renderSkillTooltipContent(skill)}
     </button>
   `;
@@ -80,6 +95,6 @@ export function renderHeroActiveSkillSlots(hero: HeroDto): string {
     }
 
     const skill = hero.activeSkills[index] ?? null;
-    return skill ? renderSkillChip(skill, hero.id) : renderEmptySkillSlot(hero.id);
+    return skill ? renderSkillChip(skill, hero) : renderEmptySkillSlot(hero.id);
   }).join('');
 }

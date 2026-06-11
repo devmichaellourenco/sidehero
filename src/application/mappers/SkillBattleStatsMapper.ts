@@ -1,3 +1,4 @@
+import { formatCooldownLabel, getCooldownSeconds, getInitialCooldownSeconds } from '../../domain/combat/SkillCooldownTiming';
 import { Hero } from '../../domain/entities/Hero';
 import { CombatSkillDefinition } from '../../domain/progression/combat/CombatSkillDefinition';
 import { getHeroCombatSkill } from '../../domain/progression/combat/HeroCombatSkillCatalog';
@@ -50,8 +51,9 @@ function formatTarget(combat: CombatSkillDefinition): string {
 }
 
 function formatCooldown(combat: CombatSkillDefinition): string {
-  if (combat.cooldownTurns <= 0) return 'Sem recarga';
-  return combat.cooldownTurns === 1 ? '1 turno' : `${combat.cooldownTurns} turnos`;
+  const seconds = getCooldownSeconds(combat);
+  if (seconds <= 0) return 'Sem recarga';
+  return formatCooldownLabel(seconds);
 }
 
 export function formatScalingLabel(scalingKey: string): string {
@@ -90,10 +92,9 @@ export function buildSkillBattleStats(
 
   stats.push({ label: 'Recarga', value: formatCooldown(combat) });
 
-  if (combat.initialCooldown > 0) {
-    const turns =
-      combat.initialCooldown === 1 ? '1 turno' : `${combat.initialCooldown} turnos`;
-    stats.push({ label: 'Início', value: `Aguarda ${turns}` });
+  const initialSeconds = getInitialCooldownSeconds(combat);
+  if (initialSeconds > 0) {
+    stats.push({ label: 'Início', value: `Aguarda ${formatCooldownLabel(initialSeconds)}` });
   }
 
   if (combat.healConditionThreshold !== undefined) {

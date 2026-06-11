@@ -27,7 +27,7 @@ export class ChestService {
       throw new Error('Baú já foi aberto');
     }
 
-    const loot = this.lootService.generateGear(chest.stageEarned);
+    const loot = this.lootService.generateGearForChest(chest.chestType, chest.stageEarned);
     const updatedChests = state.chests.map((entry) =>
       entry.id === chestId ? entry.open(loot) : entry,
     );
@@ -56,7 +56,7 @@ export class ChestService {
     const logs: string[] = [];
 
     for (const chest of pendingChests) {
-      const loot = this.lootService.generateGear(chest.stageEarned);
+      const loot = this.lootService.generateGearForChest(chest.chestType, chest.stageEarned);
       updatedChests = updatedChests.map((entry) =>
         entry.id === chest.id ? entry.open(loot) : entry,
       );

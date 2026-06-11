@@ -59,8 +59,10 @@
 
       <section id="phase-intermission-banner" class="phase-intermission-banner hidden" aria-live="polite">
         <div class="phase-intermission-copy">
-          <strong>Pausa entre fases</strong>
-          <span>Ajuste party, equipamentos e skills. A batalha só retoma quando você continuar.</span>
+          <strong id="phase-intermission-title">Pausa para ajustes</strong>
+          <span id="phase-intermission-description">
+            Ajuste party, equipamentos e skills. A batalha só retoma quando você continuar.
+          </span>
         </div>
         <button id="phase-intermission-continue" class="btn primary" type="button">Continuar batalha</button>
       </section>
@@ -78,6 +80,9 @@
       <footer class="actions">
         <button id="open-campaign-btn" class="btn secondary actions-full" type="button">
           Campanha
+        </button>
+        <button id="pause-loadout-btn" class="btn secondary actions-full" type="button" title="Pausar para ajustar equipe">
+          Pausar para ajustes
         </button>
         <button id="tick-btn" class="btn primary actions-full" type="button" title="Avançar batalha (Espaço)">
           <img class="btn-icon" src="assets/ui/energy.png" alt="" aria-hidden="true" />

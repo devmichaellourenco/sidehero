@@ -15,6 +15,7 @@ export interface SkillNodeView {
   currentRank: number;
   status: SkillNodeStatus;
   isEquipped: boolean;
+  canAllocateRank: boolean;
   canActivate: boolean;
   canDeactivate: boolean;
   activationCost: number;
@@ -61,11 +62,17 @@ export class SkillService implements ISkillService {
 
       const isEquipped = props.equippedSkillIds.includes(definition.id);
 
+      const canAllocateRank =
+        pointType === 'improvement'
+          ? this.canAllocate(hero, definition.id)
+          : this.canAllocateAscension(hero, definition.id);
+
       return {
         definition,
         currentRank,
         status,
         isEquipped,
+        canAllocateRank,
         canActivate:
           definition.id !== BASIC_ATTACK_SKILL_ID &&
           currentRank > 0 &&

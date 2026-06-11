@@ -12,6 +12,19 @@ describe('PhaseCombatHandlers', () => {
   const handlers = new PhaseCombatHandlers();
   const resolver = new EncounterResolver();
 
+  it('reinicia fase do início ao retomar pausa manual', () => {
+    const phaseId = buildPhaseId(1, 1);
+    const phaseRun = PhaseRun.start(phaseId).advanceWave();
+    let state = GameState.initial().withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const restarted = handlers.restartPhaseFromPause(state, phaseRun);
+
+    expect(restarted.state.phaseRun?.waveIndex).toBe(0);
+    expect(restarted.state.combat).not.toBeNull();
+    expect(restarted.events.some((event) => event.includes('reiniciada'))).toBe(true);
+  });
+
   it('avança para wave 2 após limpar lixo sem conceder XP', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
@@ -99,6 +112,7 @@ describe('PhaseCombatHandlers', () => {
     expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
     expect(victory.state.phaseRun).toBeNull();
     expect(victory.state.combat).toBeNull();
+    expect(victory.state.loadoutEditOpen).toBe(false);
   });
 
   it('marca temporada concluída ao derrotar boss final', () => {

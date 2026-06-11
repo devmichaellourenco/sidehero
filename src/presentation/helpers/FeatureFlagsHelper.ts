@@ -2,7 +2,7 @@ import { FeatureFlagsDto } from '../../application/dto/FeatureFlagsDto';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 
 const DEFAULT_FLAGS: FeatureFlagsDto = {
-  autoBattle: false,
+  autoBattle: true,
   autoBattleMaxSpeed: 1,
   autoOpenChests: false,
   openAllChests: false,

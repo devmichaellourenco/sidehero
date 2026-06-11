@@ -2,16 +2,6 @@ import { UpgradeDefinition } from './UpgradeDefinition';
 
 export const UPGRADE_CATALOG: UpgradeDefinition[] = [
   {
-    id: 'auto_battle_1',
-    feature: 'auto_battle',
-    level: 1,
-    branch: 'combat',
-    name: 'Auto-batalha I',
-    description: 'Desbloqueia auto-batalha em 1x nas Configurações.',
-    cost: 40,
-    requirements: [{ type: 'min_stage', value: 2 }],
-  },
-  {
     id: 'auto_battle_2',
     feature: 'auto_battle',
     level: 2,
@@ -20,7 +10,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     description: 'Desbloqueia velocidade 2x na auto-batalha.',
     cost: 120,
     requirements: [
-      { type: 'upgrade_level', feature: 'auto_battle', minLevel: 1 },
+      { type: 'min_stage', value: 2 },
       { type: 'min_battles_won', value: 10 },
     ],
   },
@@ -68,10 +58,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-abrir baús I',
     description: 'Abre baús automaticamente quando disponíveis.',
     cost: 60,
-    requirements: [
-      { type: 'upgrade_level', feature: 'auto_battle', minLevel: 1 },
-      { type: 'min_stage', value: 3 },
-    ],
+    requirements: [{ type: 'min_stage', value: 3 }],
   },
   {
     id: 'open_all_chests_1',

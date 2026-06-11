@@ -92,7 +92,7 @@ export function renderPartyPanel(state: {
   const partyFull = state.activeParty.length >= 3;
   const lockNotice = state.canEditParty
     ? ''
-    : `<p class="party-lock-notice">🔒 Party e loadout só podem ser editados entre fases.</p>`;
+    : `<p class="party-lock-notice">🔒 Use <strong>Pausar para ajustes</strong> para editar party e loadout durante a fase.</p>`;
 
   const activeHtml =
     state.activeParty.length > 0

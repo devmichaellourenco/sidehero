@@ -37,9 +37,17 @@ export class GameHudController {
     private readonly openUpgradesBtn: HTMLButtonElement,
     private readonly openChestBtn: HTMLButtonElement,
     private readonly tickBtn: HTMLButtonElement,
+    private readonly pauseLoadoutBtn: HTMLButtonElement,
   ) {}
 
-  render(state: GameStateDto, options: { openingChests: boolean; autoBattleEnabled: boolean; combatBlocked?: boolean }): void {
+  render(
+    state: GameStateDto,
+    options: {
+      openingChests: boolean;
+      autoBattleEnabled: boolean;
+      loadoutPauseActive?: boolean;
+    },
+  ): void {
     const phaseId = state.phaseRun?.phaseId ?? state.campaignProgress.selectedPhaseId;
     const waveSuffix = state.phaseRun
       ? ` · ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
@@ -96,6 +104,14 @@ export class GameHudController {
     this.openChestBtn.classList.toggle('chest-available', hasChests);
 
     this.tickBtn.classList.toggle('auto-battle-active', options.autoBattleEnabled);
-    this.tickBtn.disabled = options.autoBattleEnabled || Boolean(options.combatBlocked);
+    const advanceBlocked = Boolean(options.loadoutPauseActive);
+    this.tickBtn.disabled = options.autoBattleEnabled || advanceBlocked;
+
+    const canPause =
+      Boolean(state.phaseRun) &&
+      !state.seasonCompleted &&
+      !options.loadoutPauseActive;
+    this.pauseLoadoutBtn.disabled = !canPause;
+    this.pauseLoadoutBtn.classList.toggle('hidden', options.loadoutPauseActive);
   }
 }

@@ -2,7 +2,9 @@ import { GameState } from '../entities/GameState';
 
 export class PartyEditPolicy {
   static canEdit(state: GameState): boolean {
-    return state.combat === null && state.phaseRun === null;
+    if (state.combat !== null) return false;
+    if (state.loadoutEditOpen && state.phaseRestartOnResume) return true;
+    return state.phaseRun === null;
   }
 
   static assertEditable(state: GameState): void {
