@@ -1,6 +1,8 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { resolvePhase } from '../../domain/campaign/CampaignCatalog';
 
+export type BattleVictoryVariant = 'wave-clear' | 'boss-approach' | 'phase-clear';
+
 export interface HeroVictoryReward {
   heroId: string;
   name: string;
@@ -9,6 +11,7 @@ export interface HeroVictoryReward {
 }
 
 export interface BattleVictoryPayload {
+  variant: BattleVictoryVariant;
   clearedPhaseId: string;
   clearedPhaseName: string;
   nextPhaseId: string | null;
@@ -23,6 +26,35 @@ export interface BattleVictoryPayload {
 }
 
 export function detectBattleVictory(
+  previous: GameStateDto,
+  next: GameStateDto,
+): BattleVictoryPayload | null {
+  return detectPhaseVictory(previous, next) ?? detectWaveClearVictory(previous, next);
+}
+
+function detectWaveClearVictory(
+  previous: GameStateDto,
+  next: GameStateDto,
+): BattleVictoryPayload | null {
+  const previousRun = previous.phaseRun;
+  const nextRun = next.phaseRun;
+
+  if (!previousRun || !nextRun) return null;
+  if (previousRun.phaseId !== nextRun.phaseId) return null;
+  if (nextRun.waveIndex <= previousRun.waveIndex) return null;
+  if (previousRun.isBossWave) return null;
+
+  return buildVictoryPayload(previous, next, {
+    variant: nextRun.isBossWave ? 'boss-approach' : 'wave-clear',
+    clearedPhaseId: previousRun.phaseId,
+    clearedPhaseName: previousRun.displayName,
+    nextPhaseId: null,
+    nextPhaseName: null,
+    seasonCompleted: false,
+  });
+}
+
+function detectPhaseVictory(
   previous: GameStateDto,
   next: GameStateDto,
 ): BattleVictoryPayload | null {
@@ -49,6 +81,28 @@ export function detectBattleVictory(
       ? (nextPhase?.displayName ?? nextPhaseId)
       : null;
 
+  return buildVictoryPayload(previous, next, {
+    variant: 'phase-clear',
+    clearedPhaseId,
+    clearedPhaseName,
+    nextPhaseId: nextPhaseName ? nextPhaseId : null,
+    nextPhaseName,
+    seasonCompleted: seasonJustCompleted,
+  });
+}
+
+function buildVictoryPayload(
+  previous: GameStateDto,
+  next: GameStateDto,
+  context: {
+    variant: BattleVictoryVariant;
+    clearedPhaseId: string;
+    clearedPhaseName: string;
+    nextPhaseId: string | null;
+    nextPhaseName: string | null;
+    seasonCompleted: boolean;
+  },
+): BattleVictoryPayload {
   const goldGained = Math.max(0, next.gold - previous.gold);
   const xpGained = previous.enemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
   const chestCount = Math.max(0, next.pendingChestCount - previous.pendingChestCount);
@@ -71,16 +125,17 @@ export function detectBattleVictory(
     .filter((entry): entry is HeroVictoryReward => entry !== null);
 
   return {
-    clearedPhaseId,
-    clearedPhaseName,
-    nextPhaseId: nextPhaseName ? nextPhaseId : null,
-    nextPhaseName,
+    variant: context.variant,
+    clearedPhaseId: context.clearedPhaseId,
+    clearedPhaseName: context.clearedPhaseName,
+    nextPhaseId: context.nextPhaseId,
+    nextPhaseName: context.nextPhaseName,
     goldGained,
     xpGained,
     heroRewards,
     chestDropped: chestCount > 0,
     chestCount,
     tierReached,
-    seasonCompleted: seasonJustCompleted,
+    seasonCompleted: context.seasonCompleted,
   };
 }

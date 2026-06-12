@@ -15,7 +15,8 @@ import {
   migrateHero,
 } from './GameStateMigration';
 
-const STORAGE_KEY = 'taskbar_hero_game_state';
+const STORAGE_KEY = 'side_hero_game_state';
+const LEGACY_STORAGE_KEY = 'taskbar_hero_game_state';
 
 function serializeHero(hero: Hero): Record<string, unknown> {
   const heroProps = hero.toProps();
@@ -47,8 +48,8 @@ function serializeHero(hero: Hero): Record<string, unknown> {
 
 export class ChromeStorageGameRepository implements IGameStateRepository {
   async load(): Promise<GameState> {
-    const result = await chrome.storage.local.get(STORAGE_KEY);
-    const raw = result[STORAGE_KEY];
+    const result = await chrome.storage.local.get([STORAGE_KEY, LEGACY_STORAGE_KEY]);
+    const raw = result[STORAGE_KEY] ?? result[LEGACY_STORAGE_KEY];
 
     if (!raw || typeof raw !== 'object') {
       const initial = GameState.initial();
@@ -57,7 +58,12 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
     }
 
     try {
-      return this.deserialize(raw);
+      const state = this.deserialize(raw);
+      if (!result[STORAGE_KEY] && result[LEGACY_STORAGE_KEY]) {
+        await this.save(state);
+        await chrome.storage.local.remove(LEGACY_STORAGE_KEY);
+      }
+      return state;
     } catch {
       const initial = GameState.initial();
       await this.save(initial);

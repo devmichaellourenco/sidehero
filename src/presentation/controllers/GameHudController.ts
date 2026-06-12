@@ -25,6 +25,11 @@ function renderCampaignTooltipContent(state: GameStateDto): string {
   `;
 }
 
+function renderIconBadge(value: number): string {
+  if (value <= 0) return '';
+  return `<span class="action-icon-badge">${value}</span>`;
+}
+
 export class GameHudController {
   constructor(
     private readonly campaignContextLabel: HTMLElement,
@@ -36,15 +41,14 @@ export class GameHudController {
     private readonly openAllChestsBtn: HTMLButtonElement,
     private readonly openUpgradesBtn: HTMLButtonElement,
     private readonly openChestBtn: HTMLButtonElement,
-    private readonly tickBtn: HTMLButtonElement,
     private readonly pauseLoadoutBtn: HTMLButtonElement,
+    private readonly continueLoadoutBtn: HTMLButtonElement,
   ) {}
 
   render(
     state: GameStateDto,
     options: {
       openingChests: boolean;
-      autoBattleEnabled: boolean;
       loadoutPauseActive?: boolean;
     },
   ): void {
@@ -71,41 +75,35 @@ export class GameHudController {
     this.chestProgressLabel.title = 'Vitórias até o próximo baú';
 
     const upgradeCount = countUpgradeItems(state);
-    const upgradeBadge =
-      upgradeCount > 0 ? `<span class="inventory-upgrade-badge">↑${upgradeCount}</span>` : '';
-
+    this.openInventoryBtn.title = `Inventário (${state.inventory.length})`;
     this.openInventoryBtn.innerHTML = `
-      ${imgTag(getAssetUrl(ASSETS.ui.inventory), 'Inventário', 'btn-icon')}
-      Inventário (${state.inventory.length})
-      ${upgradeBadge}
+      <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.inventory)}" alt="" aria-hidden="true" />
+      ${renderIconBadge(upgradeCount)}
     `;
 
     const flags = state.featureFlags;
     this.optimizeLoadoutBtn.classList.toggle('hidden', !flags.optimizeLoadout);
     this.optimizeLoadoutBtn.disabled = !flags.optimizeLoadout || upgradeCount === 0;
-    this.optimizeLoadoutBtn.innerHTML =
-      upgradeCount > 0 ? `Otimizar (↑${upgradeCount})` : 'Otimizar equipe';
+    this.optimizeLoadoutBtn.title =
+      upgradeCount > 0 ? `Otimizar equipe (↑${upgradeCount})` : 'Otimizar equipe';
+    this.optimizeLoadoutBtn.innerHTML = `⬆${renderIconBadge(upgradeCount)}`;
 
     this.openAllChestsBtn.classList.toggle(
       'hidden',
       !flags.openAllChests || state.pendingChestCount < 2,
     );
 
-    const purchasableBadge =
-      state.purchasableUpgradeCount > 0
-        ? `<span class="inventory-upgrade-badge">↑${state.purchasableUpgradeCount}</span>`
-        : '';
-    this.openUpgradesBtn.innerHTML = `Melhorias${purchasableBadge}`;
+    this.openUpgradesBtn.title = 'Melhorias';
+    this.openUpgradesBtn.innerHTML = `★${renderIconBadge(state.purchasableUpgradeCount)}`;
 
     const hasChests = state.pendingChestCount > 0;
     this.openChestBtn.disabled = !hasChests || options.openingChests;
     this.openAllChestsBtn.disabled =
       !flags.openAllChests || state.pendingChestCount < 2 || options.openingChests;
     this.openChestBtn.classList.toggle('chest-available', hasChests);
-
-    this.tickBtn.classList.toggle('auto-battle-active', options.autoBattleEnabled);
-    const advanceBlocked = Boolean(options.loadoutPauseActive);
-    this.tickBtn.disabled = options.autoBattleEnabled || advanceBlocked;
+    this.openChestBtn.title = hasChests
+      ? `Abrir baú (${state.pendingChestCount})`
+      : 'Nenhum baú disponível';
 
     const canPause =
       Boolean(state.phaseRun) &&
@@ -113,5 +111,7 @@ export class GameHudController {
       !options.loadoutPauseActive;
     this.pauseLoadoutBtn.disabled = !canPause;
     this.pauseLoadoutBtn.classList.toggle('hidden', options.loadoutPauseActive);
+
+    this.continueLoadoutBtn.classList.toggle('hidden', !options.loadoutPauseActive);
   }
 }

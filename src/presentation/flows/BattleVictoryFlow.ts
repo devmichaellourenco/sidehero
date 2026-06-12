@@ -7,7 +7,6 @@ export const AUTO_DISMISS_MS = 3000;
 export class BattleVictoryFlow {
   private overlayVisible = false;
   private autoDismissTimer: number | null = null;
-  private countdownTimer: number | null = null;
   private pendingChestHandler: (() => void) | null = null;
 
   constructor(
@@ -33,7 +32,6 @@ export class BattleVictoryFlow {
     this.clearTimers();
     this.pendingChestHandler = onChestAvailable ?? null;
     this.overlayVisible = true;
-    this.battleStripEl.classList.add('battle-strip--victory');
     this.renderer.render(this.overlayEl, payload);
     this.overlayEl.classList.remove('hidden');
     this.bindActions();
@@ -55,27 +53,18 @@ export class BattleVictoryFlow {
   }
 
   private bindActions(): void {
-    const continueBtn = this.overlayEl.querySelector('[data-victory-continue]');
-    continueBtn?.addEventListener('click', () => this.dismiss(), { once: true });
+    const detailsToggle = this.overlayEl.querySelector('[data-victory-details-toggle]');
+    const detailsPanel = this.overlayEl.querySelector('[data-victory-details-panel]');
+
+    detailsToggle?.addEventListener('click', () => {
+      if (!detailsPanel || !(detailsToggle instanceof HTMLButtonElement)) return;
+      const expanded = detailsPanel.classList.toggle('hidden') === false;
+      detailsToggle.textContent = expanded ? 'Ocultar' : 'Detalhes';
+      detailsToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    });
   }
 
   private startAutoDismiss(): void {
-    const countdownEl = this.overlayEl.querySelector('[data-victory-countdown]');
-    const startedAt = Date.now();
-
-    const updateCountdown = () => {
-      if (!this.overlayVisible || !countdownEl) return;
-      const remainingMs = AUTO_DISMISS_MS - (Date.now() - startedAt);
-      if (remainingMs <= 0) {
-        countdownEl.textContent = 'Fechando…';
-        return;
-      }
-      const seconds = Math.ceil(remainingMs / 1000);
-      countdownEl.textContent = `Fechando em ${seconds}s · batalha continua no fundo`;
-    };
-
-    updateCountdown();
-    this.countdownTimer = globalThis.setInterval(updateCountdown, 200);
     this.autoDismissTimer = globalThis.setTimeout(() => this.dismiss(), AUTO_DISMISS_MS);
   }
 
@@ -89,10 +78,6 @@ export class BattleVictoryFlow {
     if (this.autoDismissTimer !== null) {
       globalThis.clearTimeout(this.autoDismissTimer);
       this.autoDismissTimer = null;
-    }
-    if (this.countdownTimer !== null) {
-      globalThis.clearInterval(this.countdownTimer);
-      this.countdownTimer = null;
     }
   }
 }

@@ -1,4 +1,5 @@
 import { PhaseCombatHandlers } from '../../domain/campaign/PhaseCombatHandlers';
+import { PhaseRun } from '../../domain/campaign/PhaseRun';
 import { ICombatService } from '../../domain/services/ICombatService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
@@ -27,11 +28,18 @@ export class TickGameUseCase {
     const combatFloats: CombatFloatingEventDto[] = [];
 
     if (options.restartCurrentPhase) {
-      if (!state.loadoutEditOpen || !state.phaseRestartOnResume || !state.phaseRun) {
+      if (!state.loadoutEditOpen || !state.phaseRestartOnResume) {
         throw new Error('Não há pausa ativa para reiniciar a fase');
       }
 
-      const restarted = this.phaseHandlers.restartPhaseFromPause(state, state.phaseRun);
+      const restarted = state.phaseRun
+        ? this.phaseHandlers.restartPhaseFromPause(state, state.phaseRun)
+        : this.phaseHandlers.startSelectedPhaseFromPause(state);
+
+      if (!restarted.state.phaseRun) {
+        throw new Error('Não foi possível iniciar a fase selecionada');
+      }
+
       const nextState = restarted.state
         .withLoadoutEditOpen(false)
         .withPhaseRestartOnResume(false);

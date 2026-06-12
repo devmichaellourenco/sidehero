@@ -131,6 +131,7 @@ describe('BattleVictoryDetector', () => {
     const payload = detectBattleVictory(previous, next);
 
     expect(payload).not.toBeNull();
+    expect(payload?.variant).toBe('phase-clear');
     expect(payload?.clearedPhaseName).toBe('Esgotos Profundos');
     expect(payload?.nextPhaseId).toBe('1-3');
     expect(payload?.goldGained).toBe(25);
@@ -140,7 +141,7 @@ describe('BattleVictoryDetector', () => {
     expect(payload?.heroRewards[0].newLevel).toBe(2);
   });
 
-  it('ignora vitórias em waves intermediárias', () => {
+  it('detecta aproximação do boss com variant boss-approach', () => {
     const previous = baseState({
       phaseRun: {
         phaseId: '1-2',
@@ -149,6 +150,7 @@ describe('BattleVictoryDetector', () => {
         waveCount: 2,
         isBossWave: false,
       },
+      gold: 100,
     });
 
     const next = baseState({
@@ -160,8 +162,12 @@ describe('BattleVictoryDetector', () => {
         isBossWave: true,
       },
       campaignProgress: previous.campaignProgress,
+      gold: 115,
     });
 
-    expect(detectBattleVictory(previous, next)).toBeNull();
+    const payload = detectBattleVictory(previous, next);
+
+    expect(payload).not.toBeNull();
+    expect(payload?.variant).toBe('boss-approach');
   });
 });

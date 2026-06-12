@@ -3,49 +3,55 @@ import { BattleVictoryPayload } from './BattleVictoryDetector';
 
 export class BattleVictoryOverlayRenderer {
   render(container: HTMLElement, payload: BattleVictoryPayload): void {
-    const title = payload.seasonCompleted
-      ? 'Temporada Concluída!'
-      : 'Vitória!';
-
-    const subtitle = payload.seasonCompleted
-      ? `${payload.clearedPhaseName} — boss final derrotado`
-      : payload.clearedPhaseName;
-
+    const isWarning = payload.variant === 'boss-approach';
+    const toneClass = isWarning ? 'battle-victory-compact--warning' : 'battle-victory-compact--clear';
+    const headline = isWarning ? 'WARNING' : 'CLEAR';
+    const subtitle = this.buildSubtitle(payload);
     const rewardRows = this.buildRewardRows(payload);
     const levelUpRows = this.buildLevelUpRows(payload);
     const nextPhaseLine = payload.nextPhaseName
-      ? `<p class="battle-victory-next">Próxima fase: <strong>${payload.nextPhaseName}</strong></p>`
+      ? `<p class="battle-victory-detail-line">Próxima fase: <strong>${payload.nextPhaseName}</strong></p>`
       : payload.seasonCompleted
-        ? '<p class="battle-victory-next">Inicie um novo jogo quando quiser recomeçar.</p>'
+        ? '<p class="battle-victory-detail-line">Temporada concluída!</p>'
         : '';
 
     container.innerHTML = `
-      <div class="battle-victory-backdrop" aria-hidden="true">
-        ${imgTag(getAssetUrl(ASSETS.ui.victoryGlow), '', 'battle-victory-glow')}
-      </div>
-      <div class="battle-victory-card" role="dialog" aria-labelledby="battle-victory-title">
-        <div class="battle-victory-frame" style="background-image: url('${getAssetUrl(ASSETS.ui.victoryFrame)}')"></div>
-        <div class="battle-victory-wings" aria-hidden="true">
-          ${imgTag(getAssetUrl(ASSETS.ui.victoryWings), '', 'battle-victory-wings-img')}
+      <div class="battle-victory-compact ${toneClass}">
+        <div class="battle-victory-compact-main">
+          <span class="battle-victory-compact-label">${headline}</span>
+          <span class="battle-victory-compact-sub">${subtitle}</span>
         </div>
-        <div class="battle-victory-content">
-          <h3 id="battle-victory-title" class="battle-victory-title">${title}</h3>
-          <p class="battle-victory-subtitle">${subtitle}</p>
+        <div class="battle-victory-details hidden" data-victory-details-panel>
+          <p class="battle-victory-detail-line">${payload.clearedPhaseName}</p>
           <ul class="battle-victory-rewards" aria-label="Recompensas">
             ${rewardRows}
           </ul>
           ${levelUpRows}
           ${nextPhaseLine}
-          <div class="battle-victory-actions">
-            <button type="button" class="battle-victory-continue" data-victory-continue>
-              ${imgTag(getAssetUrl(ASSETS.buttons.primary), '', 'battle-victory-btn-bg')}
-              <span>Fechar</span>
-            </button>
-          </div>
-          <p class="battle-victory-hint" data-victory-countdown>Fechando em 3s · batalha continua no fundo</p>
+        </div>
+        <div class="battle-victory-compact-actions">
+          <button type="button" class="battle-victory-details-btn" data-victory-details-toggle>
+            Detalhes
+          </button>
         </div>
       </div>
     `;
+  }
+
+  private buildSubtitle(payload: BattleVictoryPayload): string {
+    if (payload.variant === 'boss-approach') {
+      return 'Boss à frente';
+    }
+
+    if (payload.variant === 'wave-clear') {
+      return 'Wave concluída';
+    }
+
+    if (payload.seasonCompleted) {
+      return 'Boss final';
+    }
+
+    return 'Fase concluída';
   }
 
   private buildRewardRows(payload: BattleVictoryPayload): string {
@@ -70,7 +76,7 @@ export class BattleVictoryOverlayRenderer {
     }
 
     if (rows.length === 0) {
-      rows.push(`<li class="battle-victory-reward battle-victory-reward--empty">Fase concluída</li>`);
+      rows.push(`<li class="battle-victory-reward battle-victory-reward--empty">Sem recompensas extras</li>`);
     }
 
     return rows.join('');

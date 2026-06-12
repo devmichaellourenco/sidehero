@@ -40,4 +40,23 @@ describe('TickGameUseCase — retomada de pausa', () => {
     expect(result.state.phaseRun?.waveIndex).toBe(0);
     expect(result.state.enemies.length).toBeGreaterThan(0);
   });
+
+  it('inicia fase selecionada ao continuar pausa após trocar fase na campanha', async () => {
+    const repository = new MemoryRepository(
+      GameState.initial()
+        .withPhaseRun(null)
+        .withCombat(null)
+        .withLoadoutEditOpen(true)
+        .withPhaseRestartOnResume(true),
+    );
+
+    const tick = new TickGameUseCase(repository, new CombatPipeline(), presenter);
+    const result = await tick.execute(1, { restartCurrentPhase: true });
+
+    expect(result.state.loadoutEditOpen).toBe(false);
+    expect(result.state.phaseRestartOnResume).toBe(false);
+    expect(result.state.phaseRun?.phaseId).toBe('1-1');
+    expect(result.state.phaseRun?.waveIndex).toBe(0);
+    expect(result.state.enemies.length).toBeGreaterThan(0);
+  });
 });

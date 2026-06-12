@@ -40,17 +40,18 @@ export function renderHeroBattleSprite(
 
   return `
     <div class="hero-battle-card${activeClass}" data-hero-id="${escapeHtml(hero.id)}">
-      <div
-        class="hero-sprite"
+      <button
+        type="button"
+        class="hero-sprite hero-sprite--interactive"
         data-float-anchor="hero"
         data-hero-tooltip
-        tabindex="0"
-        aria-label="${escapeHtml(hero.name)}"
+        data-hero-battle-open="${escapeHtml(hero.id)}"
+        aria-label="Abrir ${escapeHtml(hero.name)}"
       >
         ${glowHtml}
         ${spriteHtml}
         <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
-      </div>
+      </button>
       ${renderCombatStatusEffects(hero.statusEffects)}
       ${renderHeroStripHealthBar(hero)}
       ${renderCombatSkillIntent(options.isActiveTurn ? hero.combatIntent : null)}

@@ -4,6 +4,7 @@ import { BattleVictoryPayload } from '../components/BattleVictoryDetector';
 
 function basePayload(): BattleVictoryPayload {
   return {
+    variant: 'phase-clear',
     clearedPhaseId: '1-1',
     clearedPhaseName: 'Fase 1-1',
     nextPhaseName: 'Fase 1-2',
@@ -73,7 +74,7 @@ describe('BattleVictoryFlow', () => {
     const renderer = {
       render: (container: { innerHTML: string }) => {
         container.innerHTML =
-          '<button data-victory-continue></button><p data-victory-countdown></p>';
+          '<button data-victory-details-toggle></button><div data-victory-details-panel class="hidden"></div>';
       },
     };
 
@@ -106,7 +107,7 @@ describe('BattleVictoryFlow', () => {
   it('fecha ao clicar em continuar', () => {
     const flow = createFlow();
     flow.show(basePayload());
-    overlay.clickContinue();
+    vi.advanceTimersByTime(AUTO_DISMISS_MS);
 
     expect(flow.isActive()).toBe(false);
   });

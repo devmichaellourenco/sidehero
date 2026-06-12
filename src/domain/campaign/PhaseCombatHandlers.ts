@@ -148,6 +148,16 @@ export class PhaseCombatHandlers {
     return { state: nextState.touchTick(), events };
   }
 
+  startSelectedPhaseFromPause(state: GameState): PhaseCombatResult {
+    const phaseId = state.campaignProgress.selectedPhaseId;
+    if (!phaseId) {
+      return { state, events: [] };
+    }
+
+    const recovered = state.activeHeroes().map((hero) => hero.healFull());
+    return this.startPhaseRun(state.withHeroes(recovered), PhaseRun.start(phaseId));
+  }
+
   restartPhaseFromPause(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
     const recovered = state.activeHeroes().map((hero) => hero.healFull());
     const resetRun = phaseRun.resetWaves();
