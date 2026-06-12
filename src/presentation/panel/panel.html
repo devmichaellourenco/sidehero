@@ -56,6 +56,9 @@
         <div id="enemy-container" class="enemy-slot"></div>
         <div id="battle-float-layer" class="battle-float-layer" aria-hidden="true"></div>
         <div id="battle-victory-overlay" class="battle-victory-overlay hidden" aria-live="polite"></div>
+        <div id="battle-pause-overlay" class="battle-pause-overlay hidden" aria-live="polite">
+          <span class="battle-pause-label">Pausado</span>
+        </div>
         <button
           id="battle-chest-affordance"
           type="button"
@@ -90,19 +93,6 @@
           <span class="combat-bar-btn-label">Continuar</span>
         </button>
       </div>
-
-      <section id="phase-intermission-banner" class="phase-intermission-banner phase-intermission-banner--compact hidden" aria-live="polite">
-        <strong id="phase-intermission-title">Pausado</strong>
-        <button
-          id="phase-intermission-info"
-          type="button"
-          class="info-chip-btn"
-          aria-label="Informações sobre a pausa"
-          title="Ajuste party, equipamentos e skills. A fase atual reiniciará do início ao continuar."
-        >
-          ℹ
-        </button>
-      </section>
 
       <section class="panel heroes-panel">
         <h2>Heróis</h2>

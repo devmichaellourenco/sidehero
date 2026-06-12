@@ -1,5 +1,5 @@
 import { GameStateDto, HeroSkillCooldownDto } from '../../application/dto/GameStateDto';
-import { formatCooldownLabel } from '../../domain/combat/SkillCooldownTiming';
+import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownTiming';
 import { getSkillCooldownRatio } from './HeroSkillCooldownPresentation';
 
 function findCooldown(
@@ -60,7 +60,7 @@ function patchChip(chip: HTMLElement, cooldown: HeroSkillCooldownDto | undefined
   }
 
   const ratio = getSkillCooldownRatio(cooldown);
-  const remainingLabel = formatCooldownLabel(cooldown.secondsRemaining);
+  const remainingLabel = formatSkillCooldownCountdown(cooldown.secondsRemaining);
 
   overlay.classList.remove('hero-skill-cooldown--ready');
   shade.style.setProperty('--cooldown-ratio', String(ratio));

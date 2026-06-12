@@ -1,4 +1,5 @@
 import { CombatSkillIntentDto } from '../../application/dto/GameStateDto';
+import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownTiming';
 import { getSkillDisplayName, getSkillIconUrl } from '../assets/SkillIconCatalog';
 import { imgTag } from '../assets/AssetCatalog';
 
@@ -11,8 +12,7 @@ function escapeHtml(text: string): string {
 }
 
 function formatSecondsBadge(seconds: number): string {
-  if (seconds >= 1) return `${Math.ceil(seconds)}s`;
-  return `${Math.ceil(seconds * 10) / 10}s`;
+  return formatSkillCooldownCountdown(seconds);
 }
 
 function renderSkillIcon(

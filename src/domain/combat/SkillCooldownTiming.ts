@@ -16,3 +16,9 @@ export function formatCooldownLabel(seconds: number): string {
   if (seconds < 1) return `${(seconds * 10) / 10}s`;
   return `${Math.ceil(seconds * 10) / 10}s`;
 }
+
+/** Contagem regressiva nas skills — só inteiros; frações arredondam para cima. */
+export function formatSkillCooldownCountdown(seconds: number): string {
+  if (seconds <= 0) return '0';
+  return String(Math.ceil(seconds));
+}

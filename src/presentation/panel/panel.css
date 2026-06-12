@@ -29,6 +29,12 @@
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
+  --toast-info-bg: linear-gradient(135deg, #0e6b78 0%, #12a0b3 100%);
+  --toast-chest-bg: linear-gradient(135deg, #9a7209 0%, #d4a82a 55%, #8a6508 100%);
+  --toast-level-bg: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
+  --toast-victory-bg: linear-gradient(135deg, #b71c3a 0%, #f0627a 100%);
+  --toast-loot-bg: linear-gradient(135deg, #6a1b9a 0%, #ab47bc 100%);
+  --toast-idle-bg: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
 }
 
 * {
@@ -248,6 +254,31 @@ h2 {
   align-items: stretch;
   justify-content: stretch;
   pointer-events: auto;
+}
+
+.battle-pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 214, 96, 0.42);
+  pointer-events: none;
+}
+
+.battle-pause-overlay.hidden {
+  display: none;
+}
+
+.battle-pause-label {
+  font-family: var(--font-heading);
+  font-size: clamp(26px, 8vw, 40px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .battle-victory-overlay.hidden {
@@ -2145,61 +2176,84 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   font-style: italic;
 }
 
-.phase-intermission-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 0 8px 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, rgba(36, 58, 96, 0.95), rgba(24, 38, 64, 0.95));
-  border: 1px solid rgba(120, 180, 255, 0.28);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-}
-
-.phase-intermission-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.phase-intermission-copy strong {
-  font-family: var(--font-heading);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #b8d4ff;
-}
-
-.phase-intermission-copy span {
-  font-size: 10px;
-  color: var(--muted);
-  line-height: 1.35;
-}
-
 .formation-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.formation-active-row,
+.formation-active-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 14px;
+}
+
 .formation-bench-row {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
 }
 
-.formation-slot,
+.formation-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .formation-bench-slot {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+}
+
+.formation-slot-toolbar {
+  position: absolute;
+  top: -18px;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding-right: 2px;
+  pointer-events: none;
+}
+
+.formation-slot-toolbar .formation-remove-btn {
+  pointer-events: auto;
+}
+
+.formation-slot-toolbar--spacer {
+  display: none;
+}
+
+.formation-remove-btn {
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.formation-swap-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+
+.formation-swap-btn {
+  min-width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  border-radius: 8px;
 }
 
 .formation-slot-sprite,
@@ -2221,12 +2275,6 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   height: 44px;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
-}
-
-.formation-slot-controls {
-  display: flex;
-  flex-direction: row;
-  gap: 3px;
 }
 
 .formation-bench-add {
@@ -2658,15 +2706,18 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 10px 12px;
+  padding: 10px 14px;
   border-radius: 10px;
   font-size: 11px;
   font-family: var(--font-heading);
   letter-spacing: 0.03em;
   color: #fff;
-  background: rgba(20, 32, 58, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  background: var(--toast-info-bg);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
   opacity: 0;
   transform: translateY(-8px);
   transition: opacity 0.25s ease, transform 0.25s ease;
@@ -2691,26 +2742,40 @@ body.modal-open {
   transform: translateY(0);
 }
 
+.game-toast-info {
+  background: var(--toast-info-bg);
+  border-color: rgba(160, 235, 245, 0.55);
+}
+
 .game-toast-chest {
-  border-color: rgba(245, 197, 66, 0.55);
-  background: linear-gradient(90deg, rgba(62, 48, 20, 0.95), rgba(20, 32, 58, 0.96));
+  background: var(--toast-chest-bg);
+  border-color: rgba(255, 236, 160, 0.65);
+  color: #1f1400;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.game-toast-chest .game-toast-hint {
+  color: rgba(30, 20, 0, 0.72);
 }
 
 .game-toast-level {
-  border-color: rgba(66, 165, 245, 0.55);
+  background: var(--toast-level-bg);
+  border-color: rgba(187, 222, 255, 0.6);
 }
 
 .game-toast-victory {
-  border-color: rgba(233, 69, 96, 0.55);
+  background: var(--toast-victory-bg);
+  border-color: rgba(255, 190, 200, 0.6);
 }
 
 .game-toast-loot {
-  border-color: rgba(171, 71, 188, 0.55);
+  background: var(--toast-loot-bg);
+  border-color: rgba(230, 190, 255, 0.6);
 }
 
 .game-toast-idle {
-  border-color: rgba(129, 199, 132, 0.55);
-  background: linear-gradient(90deg, rgba(24, 48, 28, 0.95), rgba(20, 32, 58, 0.96));
+  background: var(--toast-idle-bg);
+  border-color: rgba(200, 255, 205, 0.55);
 }
 
 .loot-reveal-intro {
@@ -3603,39 +3668,6 @@ body.modal-open {
 .combat-bar-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.battle-strip--paused::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background: rgba(8, 12, 24, 0.28);
-  pointer-events: none;
-}
-
-.phase-intermission-banner--compact {
-  margin-top: -4px;
-  padding: 8px 10px;
-}
-
-.phase-intermission-banner--compact strong {
-  flex: 1;
-  font-size: 11px;
-}
-
-.info-chip-btn {
-  flex: 0 0 24px;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(18, 28, 48, 0.85);
-  color: #b8d4ff;
-  font-size: 12px;
-  line-height: 22px;
-  cursor: help;
 }
 
 .pending-actions-bar {

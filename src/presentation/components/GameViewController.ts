@@ -82,8 +82,7 @@ export class GameViewController {
   private readonly openShopBtn: HTMLButtonElement;
   private readonly openUpgradesBtn: HTMLButtonElement;
   private readonly seasonCompleteBanner: HTMLElement;
-  private readonly phaseIntermissionBanner: HTMLElement;
-  private readonly phaseIntermissionTitle: HTMLElement;
+  private readonly battlePauseOverlay: HTMLElement;
   private readonly pendingActionsBarEl: HTMLElement;
   private readonly battleLogOverlayEl: HTMLElement;
   private readonly openBattleLogBtn: HTMLButtonElement;
@@ -141,8 +140,7 @@ export class GameViewController {
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
     this.seasonCompleteBanner = root.querySelector('#season-complete-banner') as HTMLElement;
-    this.phaseIntermissionBanner = root.querySelector('#phase-intermission-banner') as HTMLElement;
-    this.phaseIntermissionTitle = root.querySelector('#phase-intermission-title') as HTMLElement;
+    this.battlePauseOverlay = root.querySelector('#battle-pause-overlay') as HTMLElement;
     this.pendingActionsBarEl = root.querySelector('#pending-actions-bar') as HTMLElement;
     this.battleLogOverlayEl = document.querySelector('#battle-log-overlay') as HTMLElement;
     this.heroesContainerEl = root.querySelector('#heroes-container') as HTMLElement;
@@ -837,7 +835,7 @@ export class GameViewController {
   private bindHeroPanelDelegation(): void {
     this.heroPanelsEl.addEventListener('click', (event) => {
       const partyTarget = (event.target as HTMLElement).closest(
-        '[data-party-add], [data-party-remove], [data-party-move-up], [data-party-move-down]',
+        '[data-party-add], [data-party-remove], [data-party-swap]',
       ) as HTMLElement | null;
 
       if (partyTarget) {
@@ -908,20 +906,13 @@ export class GameViewController {
         return;
       }
 
-      const moveUpId = target.getAttribute('data-party-move-up');
-      if (moveUpId && this.state) {
-        const fromIndex = this.state.activePartyIds.indexOf(moveUpId);
-        if (fromIndex > 0) {
-          const next = await this.partyFlow.movePartyMember(fromIndex, fromIndex - 1);
-          if (next) this.render(next);
-        }
-        return;
-      }
-
-      const moveDownId = target.getAttribute('data-party-move-down');
-      if (moveDownId && this.state) {
-        const fromIndex = this.state.activePartyIds.indexOf(moveDownId);
-        if (fromIndex >= 0 && fromIndex < this.state.activePartyIds.length - 1) {
+      const swapIndexRaw = target.getAttribute('data-party-swap');
+      if (swapIndexRaw !== null && this.state) {
+        const fromIndex = Number.parseInt(swapIndexRaw, 10);
+        if (
+          fromIndex >= 0 &&
+          fromIndex < this.state.activePartyIds.length - 1
+        ) {
           const next = await this.partyFlow.movePartyMember(fromIndex, fromIndex + 1);
           if (next) this.render(next);
         }
@@ -1106,20 +1097,16 @@ export class GameViewController {
 
   private syncLoadoutPauseBanner(state: GameStateDto): void {
     if (!this.isManualLoadoutPause(state)) {
-      this.hidePhaseIntermissionBanner();
+      this.hideBattlePauseOverlay();
       return;
     }
 
-    this.phaseIntermissionTitle.textContent = 'Pausado';
-    this.battleStripEl.classList.add('battle-strip--paused');
-
-    this.phaseIntermissionBanner.classList.remove('hidden');
+    this.battlePauseOverlay.classList.remove('hidden');
     this.stopAutoBattle();
   }
 
-  private hidePhaseIntermissionBanner(): void {
-    this.phaseIntermissionBanner.classList.add('hidden');
-    this.battleStripEl.classList.remove('battle-strip--paused');
+  private hideBattlePauseOverlay(): void {
+    this.battlePauseOverlay.classList.add('hidden');
   }
 
   private render(

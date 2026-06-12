@@ -54,27 +54,41 @@ function renderFormationSprite(hero: HeroDto): string {
   `;
 }
 
-function renderFormationControls(
+function renderFormationRemoveButton(
   hero: HeroDto,
   state: Pick<PartyPanelState, 'canEditParty' | 'activeParty'>,
 ): string {
-  if (!state.canEditParty) return '';
-
-  const index = state.activeParty.findIndex((entry) => entry.id === hero.id);
-  const canRemove = state.activeParty.length > 1;
-  const canMoveLeft = index > 0;
-  const canMoveRight = index >= 0 && index < state.activeParty.length - 1;
+  if (!state.canEditParty || state.activeParty.length <= 1) {
+    return '<div class="formation-slot-toolbar formation-slot-toolbar--spacer" aria-hidden="true"></div>';
+  }
 
   return `
-    <div class="formation-slot-controls">
-      <button type="button" class="party-btn" data-party-move-up="${hero.id}" ${canMoveLeft ? '' : 'disabled'} title="Mover para esquerda">←</button>
-      <button type="button" class="party-btn" data-party-move-down="${hero.id}" ${canMoveRight ? '' : 'disabled'} title="Mover para direita">→</button>
-      ${
-        canRemove
-          ? `<button type="button" class="party-btn party-btn-remove" data-party-remove="${hero.id}" title="Enviar para reserva">−</button>`
-          : ''
-      }
+    <div class="formation-slot-toolbar">
+      <button
+        type="button"
+        class="party-btn party-btn-remove formation-remove-btn"
+        data-party-remove="${hero.id}"
+        title="Enviar para reserva"
+        aria-label="Remover ${hero.name} da equipe"
+      >−</button>
     </div>
+  `;
+}
+
+function renderFormationSwapButton(
+  leftIndex: number,
+  canEditParty: boolean,
+): string {
+  if (!canEditParty) return '';
+
+  return `
+    <button
+      type="button"
+      class="party-btn formation-swap-btn"
+      data-party-swap="${leftIndex}"
+      title="Trocar ordem"
+      aria-label="Trocar ordem dos heróis"
+    >⇄</button>
   `;
 }
 
@@ -84,10 +98,32 @@ function renderFormationActiveSlot(
 ): string {
   return `
     <article class="formation-slot" data-formation-hero="${hero.id}">
+      ${renderFormationRemoveButton(hero, state)}
       ${renderFormationSprite(hero)}
-      ${renderFormationControls(hero, state)}
     </article>
   `;
+}
+
+function renderFormationActiveRow(state: PartyPanelState): string {
+  if (state.activeParty.length === 0) {
+    return '<p class="empty-state formation-empty">Nenhum herói na equipe.</p>';
+  }
+
+  const parts: string[] = [];
+
+  state.activeParty.forEach((hero, index) => {
+    parts.push(renderFormationActiveSlot(hero, state));
+
+    if (index < state.activeParty.length - 1) {
+      parts.push(`
+        <div class="formation-swap-cell">
+          ${renderFormationSwapButton(index, state.canEditParty)}
+        </div>
+      `);
+    }
+  });
+
+  return parts.join('');
 }
 
 function renderFormationBenchSlot(
@@ -134,10 +170,7 @@ function renderBattlingTab(state: PartyPanelState): string {
 function renderFormationTab(state: PartyPanelState): string {
   const partyFull = state.activeParty.length >= 3;
 
-  const activeHtml =
-    state.activeParty.length > 0
-      ? state.activeParty.map((hero) => renderFormationActiveSlot(hero, state)).join('')
-      : '<p class="empty-state formation-empty">Nenhum herói na equipe.</p>';
+  const activeHtml = renderFormationActiveRow(state);
 
   const benchHtml =
     state.benchHeroes.length > 0

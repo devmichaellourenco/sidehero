@@ -1,4 +1,5 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
+import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownTiming';
 import { imgTag, getGearFrameSprite } from '../assets/AssetCatalog';
 import { getSkillBranchFrameUrl, getSkillIconUrl } from '../assets/SkillIconCatalog';
 import { renderSkillCooldownOverlay } from './HeroSkillCooldownPresentation';
@@ -27,7 +28,7 @@ function renderSkillChip(skill: HeroDto['activeSkills'][number], hero: HeroDto):
   const cooldown = findSkillCooldown(hero, skill.id);
   const cooldownHint =
     cooldown && !cooldown.ready
-      ? ` · recarga ${cooldown.secondsRemaining.toFixed(1)}s`
+      ? ` · recarga ${formatSkillCooldownCountdown(cooldown.secondsRemaining)}`
       : '';
 
   return `
