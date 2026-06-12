@@ -106,21 +106,14 @@
 
       <section class="panel heroes-panel">
         <h2>Heróis</h2>
-        <div id="hero-panels" class="game-scroll"></div>
-      </section>
-
-      <section id="battle-log-panel" class="panel log-panel">
-        <div class="log-panel-header">
-          <h2>Log de Batalha</h2>
-          <button id="battle-log-toggle" type="button" class="panel-collapse-btn" aria-expanded="true" aria-label="Recolher log">
-            ▼
-          </button>
-        </div>
-        <ul id="battle-log" class="game-scroll"></ul>
+        <div id="hero-panels" class="heroes-panel-body game-scroll"></div>
       </section>
 
       <footer class="actions">
         <div class="actions-icon-bar" aria-label="Sistemas do jogo">
+          <button id="open-battle-log-btn" class="action-icon-btn" type="button" title="Log de batalha" aria-label="Log de batalha" aria-expanded="false">
+            <span class="action-icon-glyph" aria-hidden="true">📜</span>
+          </button>
           <button id="open-campaign-btn" class="action-icon-btn" type="button" title="Campanha" aria-label="Campanha">
             <img class="btn-icon" src="assets/ui/stage.png" alt="" aria-hidden="true" />
           </button>
@@ -144,6 +137,17 @@
           </button>
         </div>
       </footer>
+    </div>
+
+    <div id="battle-log-overlay" class="battle-log-overlay hidden" aria-hidden="true">
+      <div class="battle-log-backdrop" data-battle-log-close></div>
+      <section class="battle-log-floating panel" aria-label="Log de batalha">
+        <div class="battle-log-header">
+          <h2>Log de Batalha</h2>
+          <button id="battle-log-close" type="button" class="battle-log-close-btn" aria-label="Fechar log">×</button>
+        </div>
+        <ul id="battle-log" class="battle-log-list game-scroll"></ul>
+      </section>
     </div>
 
     <div id="hero-drawer-root" class="hero-drawer-root hidden" aria-hidden="true">

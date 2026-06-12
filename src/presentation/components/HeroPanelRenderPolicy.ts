@@ -38,6 +38,10 @@ export function shouldRenderHeroPanel(
 ): boolean {
   if (!previous) return true;
 
+  if (previous.canEditParty !== next.canEditParty) {
+    return true;
+  }
+
   if (next.canEditParty) {
     return loadoutDisplayKey(previous) !== loadoutDisplayKey(next);
   }

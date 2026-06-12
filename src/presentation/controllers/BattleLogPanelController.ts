@@ -1,45 +1,57 @@
-const COLLAPSED_KEY = 'sidehero_battle_log_collapsed';
+const VISIBLE_KEY = 'sidehero_battle_log_visible';
 
 export class BattleLogPanelController {
-  private collapsed = false;
+  private visible = false;
 
   constructor(
-    private readonly panel: HTMLElement,
-    private readonly _list: HTMLElement,
-    toggleBtn: HTMLButtonElement,
+    private readonly overlay: HTMLElement,
+    private readonly toggleBtn: HTMLButtonElement,
+    closeBtn: HTMLButtonElement,
   ) {
-    this.collapsed = this.readCollapsedPreference();
-    toggleBtn.addEventListener('click', () => {
-      this.collapsed = !this.collapsed;
-      this.writeCollapsedPreference(this.collapsed);
-      this.applyCollapsedState();
+    this.visible = this.readVisiblePreference();
+    toggleBtn.addEventListener('click', () => this.toggle());
+    closeBtn.addEventListener('click', () => this.hide());
+
+    overlay.querySelectorAll('[data-battle-log-close]').forEach((element) => {
+      element.addEventListener('click', () => this.hide());
     });
-    this.applyCollapsedState();
+
+    this.applyVisibility();
   }
 
-  private readCollapsedPreference(): boolean {
+  private readVisiblePreference(): boolean {
     try {
-      return sessionStorage.getItem(COLLAPSED_KEY) === '1';
+      return sessionStorage.getItem(VISIBLE_KEY) === '1';
     } catch {
       return false;
     }
   }
 
-  private writeCollapsedPreference(collapsed: boolean): void {
+  private writeVisiblePreference(visible: boolean): void {
     try {
-      sessionStorage.setItem(COLLAPSED_KEY, collapsed ? '1' : '0');
+      sessionStorage.setItem(VISIBLE_KEY, visible ? '1' : '0');
     } catch {
       // sessionStorage indisponível
     }
   }
 
-  private applyCollapsedState(): void {
-    this.panel.classList.toggle('log-panel--collapsed', this.collapsed);
-    const toggle = this.panel.querySelector('.panel-collapse-btn') as HTMLButtonElement | null;
-    toggle?.setAttribute('aria-expanded', this.collapsed ? 'false' : 'true');
-    toggle?.setAttribute('aria-label', this.collapsed ? 'Expandir log' : 'Recolher log');
-    if (toggle) {
-      toggle.textContent = this.collapsed ? '▶' : '▼';
-    }
+  toggle(): void {
+    this.visible = !this.visible;
+    this.writeVisiblePreference(this.visible);
+    this.applyVisibility();
+  }
+
+  hide(): void {
+    if (!this.visible) return;
+    this.visible = false;
+    this.writeVisiblePreference(false);
+    this.applyVisibility();
+  }
+
+  private applyVisibility(): void {
+    this.overlay.classList.toggle('hidden', !this.visible);
+    this.overlay.setAttribute('aria-hidden', this.visible ? 'false' : 'true');
+    this.toggleBtn.classList.toggle('action-icon-btn--active', this.visible);
+    this.toggleBtn.setAttribute('aria-expanded', this.visible ? 'true' : 'false');
   }
 }

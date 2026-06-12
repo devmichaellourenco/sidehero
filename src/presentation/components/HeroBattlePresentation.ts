@@ -30,6 +30,26 @@ export function renderHeroTooltipContent(hero: HeroDto): string {
   `;
 }
 
+function renderGearTooltipLine(label: string, gearName: string | null): string {
+  return `<span class="hero-tooltip-line">${label}: ${gearName ? escapeHtml(gearName) : '—'}</span>`;
+}
+
+export function renderHeroFormationTooltipContent(hero: HeroDto): string {
+  const skillNames =
+    hero.activeSkills.length > 0
+      ? hero.activeSkills.map((skill) => skill.name).join(', ')
+      : '—';
+
+  return `
+    ${renderHeroTooltipContent(hero)}
+    <span class="hero-tooltip-divider"></span>
+    ${renderGearTooltipLine('Arma', hero.equipment.weapon?.name ?? null)}
+    ${renderGearTooltipLine('Armadura', hero.equipment.armor?.name ?? null)}
+    ${renderGearTooltipLine('Acessório', hero.equipment.accessory?.name ?? null)}
+    <span class="hero-tooltip-line">Skills: ${escapeHtml(skillNames)}</span>
+  `;
+}
+
 export function renderHeroBattleSprite(
   hero: HeroDto,
   glowHtml: string,

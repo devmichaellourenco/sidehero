@@ -85,7 +85,8 @@ export class GameViewController {
   private readonly phaseIntermissionBanner: HTMLElement;
   private readonly phaseIntermissionTitle: HTMLElement;
   private readonly pendingActionsBarEl: HTMLElement;
-  private readonly battleLogPanelEl: HTMLElement;
+  private readonly battleLogOverlayEl: HTMLElement;
+  private readonly openBattleLogBtn: HTMLButtonElement;
   private readonly heroesContainerEl: HTMLElement;
   private readonly newGameBtn: HTMLButtonElement;
 
@@ -127,7 +128,8 @@ export class GameViewController {
     this.goldLabel = root.querySelector('#gold-label')!;
     this.chestLabel = root.querySelector('#chest-label')!;
     this.chestProgressLabel = root.querySelector('#chest-progress-label')!;
-    this.battleLog = root.querySelector('#battle-log')!;
+    this.battleLog = document.querySelector('#battle-log')!;
+    this.openBattleLogBtn = root.querySelector('#open-battle-log-btn') as HTMLButtonElement;
     this.pauseLoadoutBtn = root.querySelector('#pause-loadout-btn') as HTMLButtonElement;
     this.continueLoadoutBtn = root.querySelector('#continue-loadout-btn') as HTMLButtonElement;
     this.openChestBtn = root.querySelector('#open-chest-btn') as HTMLButtonElement;
@@ -142,7 +144,7 @@ export class GameViewController {
     this.phaseIntermissionBanner = root.querySelector('#phase-intermission-banner') as HTMLElement;
     this.phaseIntermissionTitle = root.querySelector('#phase-intermission-title') as HTMLElement;
     this.pendingActionsBarEl = root.querySelector('#pending-actions-bar') as HTMLElement;
-    this.battleLogPanelEl = root.querySelector('#battle-log-panel') as HTMLElement;
+    this.battleLogOverlayEl = document.querySelector('#battle-log-overlay') as HTMLElement;
     this.heroesContainerEl = root.querySelector('#heroes-container') as HTMLElement;
     this.newGameBtn = root.querySelector('#new-game-btn') as HTMLButtonElement;
 
@@ -217,9 +219,9 @@ export class GameViewController {
     });
 
     this.battleLogPanel = new BattleLogPanelController(
-      this.battleLogPanelEl,
-      this.battleLog,
-      root.querySelector('#battle-log-toggle') as HTMLButtonElement,
+      this.battleLogOverlayEl,
+      this.openBattleLogBtn,
+      document.querySelector('#battle-log-close') as HTMLButtonElement,
     );
 
     this.heroDetailFlow = new HeroDetailFlow(
@@ -886,7 +888,7 @@ export class GameViewController {
   }
 
   private async handlePartyPanelAction(target: HTMLElement): Promise<void> {
-    if (!this.state?.canEditParty) {
+    if (!this.state?.canEditParty && !this.isManualLoadoutPause(this.state)) {
       this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
       return;
     }

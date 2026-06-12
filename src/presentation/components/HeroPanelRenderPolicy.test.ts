@@ -104,4 +104,19 @@ describe('shouldRenderHeroPanel', () => {
 
     expect(shouldRenderHeroPanel(previous, next)).toBe(true);
   });
+
+  it('re-renderiza ao pausar para editar formação sem mudar loadout', () => {
+    const previous = state({
+      canEditParty: false,
+      loadoutEditOpen: false,
+      phaseRestartOnResume: false,
+    });
+    const next = state({
+      canEditParty: true,
+      loadoutEditOpen: true,
+      phaseRestartOnResume: true,
+    });
+
+    expect(shouldRenderHeroPanel(previous, next)).toBe(true);
+  });
 });
