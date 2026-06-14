@@ -1,5 +1,5 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { ASSETS, getAssetUrl, getEnemySprite, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { ASSETS, getAssetUrl, getEnemySpriteUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { patchBattleStripInPlace } from './BattleStripPatcher';
 import {
@@ -59,7 +59,7 @@ export class BattleStripRenderer {
         ${state.enemies
           .map((enemy) => {
             const spriteHtml = imgTag(
-              getEnemySprite(enemy.enemyType),
+              getEnemySpriteUrl(enemy.enemyType, enemy.name),
               enemy.name,
               'enemy-image',
             );

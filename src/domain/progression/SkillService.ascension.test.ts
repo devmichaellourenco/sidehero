@@ -6,7 +6,7 @@ describe('SkillService — ascensão', () => {
   const service = new SkillService();
 
   it('expõe sub-árvore apenas após ascender', () => {
-    const knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     expect(service.buildAscensionTree(knight)).toHaveLength(0);
 
     const ascended = Hero.restore({
@@ -22,7 +22,7 @@ describe('SkillService — ascensão', () => {
 
   it('aloca ponto de ascensão em skill da sub-árvore', () => {
     const ascended = Hero.restore({
-      ...Hero.createStarter('k1', 'knight', 'Arthos').toProps(),
+      ...Hero.createStarter('k1', 'knight', 'Galneon').toProps(),
       ascensionId: 'knight_guardian',
       unspentAscensionPoints: 1,
     });

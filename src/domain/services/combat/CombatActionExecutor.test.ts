@@ -9,7 +9,7 @@ describe('CombatActionExecutor', () => {
 
   it('aplica blessing como buff de ataque em todos os aliados', () => {
     const priest = Hero.createStarter('p1', 'priest', 'Elara');
-    const knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const enemy = Enemy.forStage(1);
 
     const result = executor.execute(
@@ -37,7 +37,7 @@ describe('CombatActionExecutor', () => {
   });
 
   it('debuff de defesa aumenta dano recebido pelo herói', () => {
-    const knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const enemy = Enemy.forStage(1);
     const statusEffects = CombatStatusEffectTracker.fromMap({}).apply({
       combatantKey: 'hero:k1',

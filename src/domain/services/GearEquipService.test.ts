@@ -5,7 +5,7 @@ import { Experience } from '../value-objects/Experience';
 import { canHeroEquip, equipHeroWithGear } from './GearEquipService';
 
 function heroAtLevel(level: number): Hero {
-  const base = Hero.createStarter('hero-1', 'knight', 'Arthos');
+  const base = Hero.createStarter('hero-1', 'knight', 'Galneon');
   return Hero.restore({
     ...base.toProps(),
     experience: Experience.restore(0, 100, level),

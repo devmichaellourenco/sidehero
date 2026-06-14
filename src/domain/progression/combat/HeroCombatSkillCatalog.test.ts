@@ -5,7 +5,7 @@ import { listHeroCombatSkills } from './HeroCombatSkillCatalog';
 describe('listHeroCombatSkills', () => {
   it('só retorna skills equipadas com rank, sem fallback implícito', () => {
     const hero = Hero.restore({
-      ...Hero.createStarter('h1', 'knight', 'Arthos').toProps(),
+      ...Hero.createStarter('h1', 'knight', 'Galneon').toProps(),
       skillRanks: { basic_attack: 1 },
       equippedSkillIds: ['basic_attack'],
     });

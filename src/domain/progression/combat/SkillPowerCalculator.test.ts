@@ -9,7 +9,7 @@ describe('SkillPowerCalculator', () => {
   const calculator = new SkillPowerCalculator();
 
   it('calcula poder de magia com scaling de INT', () => {
-    let sorcerer = Hero.createStarter('s1', 'sorcerer', 'Lyra');
+    let sorcerer = Hero.createStarter('s1', 'sorcerer', 'Nix');
     sorcerer = Hero.restore({
       ...sorcerer.toProps(),
       skillRanks: { fireball: 1 },
@@ -21,29 +21,28 @@ describe('SkillPowerCalculator', () => {
     expect(power).toBeGreaterThan(profile.basePower);
   });
 
-  it('calcula poder fixo de skills memoráveis de inimigo por stage', () => {
-    const calculator = new SkillPowerCalculator();
+  it('calcula poder fixo de skills de inimigo por stage', () => {
     const goblin = Enemy.restore({
       ...Enemy.forStage(2).toProps(),
-      enemyType: 'goblin',
+      enemyType: 'goblin_raider',
     });
     const dragon = Enemy.restore({
       ...Enemy.forStage(5).toProps(),
-      enemyType: 'dragon',
+      enemyType: 'young_green_dragon',
     });
 
-    const goblinStab = listEnemyCombatSkillsByType('goblin').find(
+    const goblinStab = listEnemyCombatSkillsByType('goblin_raider').find(
       (skill) => skill.skillId === 'goblin_stab',
     )!;
-    const dragonBreath = listEnemyCombatSkillsByType('dragon').find(
+    const dragonBreath = listEnemyCombatSkillsByType('young_green_dragon').find(
       (skill) => skill.skillId === 'dragon_breath',
     )!;
-    const slimeAcid = listEnemyCombatSkillsByType('slime').find(
-      (skill) => skill.skillId === 'slime_acid',
+    const wildBite = listEnemyCombatSkillsByType('giant_rat').find(
+      (skill) => skill.skillId === 'wild_bite',
     )!;
 
     expect(calculator.calculateForEnemy(goblinStab, goblin)).toBe(8);
     expect(calculator.calculateForEnemy(dragonBreath, dragon)).toBe(17);
-    expect(calculator.calculateForEnemy(slimeAcid, Enemy.forStage(1))).toBe(5);
+    expect(calculator.calculateForEnemy(wildBite, Enemy.forStage(1))).toBe(6);
   });
 });

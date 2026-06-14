@@ -1,6 +1,9 @@
 import { PhaseId, buildPhaseId } from './CampaignIds';
 import { PhaseDefinition } from './PhaseDefinition';
 import { EnemySlot, WaveDefinition } from './WaveDefinition';
+import { EnemyType } from '../entities/EnemyType';
+import { getPowerTierForGlobalTier, milestoneBossForMapIndex } from '../enemies/EnemyTierProgression';
+import { getSubbossesForPowerTier } from '../enemies/EnemyRosterCatalog';
 
 function wave(id: string, slots: EnemySlot[], goldMultiplier = 1): WaveDefinition {
   return { id, slots, goldMultiplier };
@@ -14,8 +17,14 @@ function elite(type: EnemySlot['enemyType'], count = 1): EnemySlot {
   return { enemyType: type, role: 'elite', count };
 }
 
-function boss(type: EnemySlot['enemyType'], count = 1): EnemySlot {
-  return { enemyType: type, role: 'boss', count };
+function boss(type: EnemySlot['enemyType'], count = 1, displayName?: string): EnemySlot {
+  return { enemyType: type, role: 'boss', count, displayName };
+}
+
+function subbossForMap(mapIndex: number, offset = 0): EnemyType {
+  const tier = getPowerTierForGlobalTier(mapIndex * 50);
+  const subs = getSubbossesForPowerTier(tier);
+  return subs[offset % subs.length].id;
 }
 
 export interface MilestoneBlueprint {
@@ -25,17 +34,17 @@ export interface MilestoneBlueprint {
   majorMilestone?: boolean;
 }
 
-/** Composições únicas para cada fase X-50 (boss de capítulo). */
+/** Composições únicas para cada fase X-50 (boss de capítulo). Nomes de exibição mantidos. */
 const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
   [buildPhaseId(1, 50)]: {
-    displayName: 'Guardião das Esgotos',
+    displayName: 'Guardião Elemental',
     majorMilestone: true,
     statMultiplier: 1.5,
     waves: [
-      wave('w1', [trash('slime', 3), trash('goblin', 2)]),
-      wave('w2', [elite('goblin', 2), elite('slime', 2)], 1.15),
-      wave('w3', [elite('orc'), trash('goblin', 2)], 1.2),
-      wave('w4', [boss('orc'), elite('goblin')], 1.7),
+      wave('w1', [trash('goblin_raider', 3), trash('goblin_archer', 2)]),
+      wave('w2', [elite('goblin_shaman', 2), elite('road_bandit', 2)], 1.15),
+      wave('w3', [elite('bandit_captain'), trash('kobold_pyro', 2)], 1.2),
+      wave('w4', [boss('saci', 1, 'Saci'), elite('goblin_raider')], 1.7),
     ],
   },
   [buildPhaseId(2, 50)]: {
@@ -43,30 +52,30 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.55,
     waves: [
-      wave('w1', [trash('goblin', 2), trash('orc', 2)]),
-      wave('w2', [elite('orc', 2), elite('goblin')], 1.2),
-      wave('w3', [elite('wraith'), elite('orc')], 1.3),
-      wave('w4', [boss('orc', 2)], 1.75),
+      wave('w1', [trash('orc_warrior', 2), trash('gnoll_hunter', 2)]),
+      wave('w2', [elite(subbossForMap(2, 0), 2), elite('skeleton_warrior')], 1.2),
+      wave('w3', [elite('renegade_necromancer'), trash('rot_zombie', 2)], 1.3),
+      wave('w4', [boss('hill_ogre', 1, 'Ogro das Colinas'), elite('orc_berserker')], 1.75),
     ],
   },
   [buildPhaseId(3, 50)]: {
     displayName: 'Espectro de Valdris',
     statMultiplier: 1.48,
     waves: [
-      wave('w1', [trash('wraith', 2), trash('orc')]),
-      wave('w2', [elite('wraith', 2)], 1.2),
-      wave('w3', [elite('orc'), elite('wraith')], 1.25),
-      wave('w4', [boss('wraith'), elite('goblin', 2)], 1.65),
+      wave('w1', [trash('giant_spider', 2), trash('lizardman', 2)]),
+      wave('w2', [elite('minor_fire_elemental', 2), elite('orc_warrior')], 1.2),
+      wave('w3', [elite('bloody_orc_chief'), trash('skeleton_warrior', 2)], 1.25),
+      wave('w4', [boss('bloody_orc_chief', 1, 'Chefe Orc do Clã Sangrento'), elite('gnoll_hunter')], 1.65),
     ],
   },
   [buildPhaseId(4, 50)]: {
     displayName: 'Duque de Morthaven',
     statMultiplier: 1.5,
     waves: [
-      wave('w1', [trash('goblin', 2), trash('wraith', 2)]),
-      wave('w2', [elite('orc'), elite('wraith')], 1.2),
-      wave('w3', [elite('dragon'), trash('orc', 2)], 1.3),
-      wave('w4', [boss('wraith'), boss('orc')], 1.7),
+      wave('w1', [trash('orc_berserker', 2), trash('minor_fire_elemental', 2)]),
+      wave('w2', [elite('renegade_necromancer'), elite('giant_spider')], 1.2),
+      wave('w3', [elite('mountain_troll'), trash('rot_zombie', 2)], 1.3),
+      wave('w4', [boss('mountain_troll', 1, 'Troll das Montanhas'), elite('orc_warrior')], 1.7),
     ],
   },
   [buildPhaseId(5, 50)]: {
@@ -74,50 +83,50 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.65,
     waves: [
-      wave('w1', [trash('wraith', 2), trash('dragon')]),
-      wave('w2', [elite('dragon', 2), elite('wraith')], 1.25),
-      wave('w3', [elite('dragon'), elite('orc', 2)], 1.35),
-      wave('w4', [boss('dragon'), elite('wraith', 2)], 1.85),
+      wave('w1', [trash('gargoyle', 2), trash('minotaur', 2)]),
+      wave('w2', [elite('cultist_mage', 2), elite('war_worg')], 1.25),
+      wave('w3', [elite('three_head_hydra'), trash('lesser_demon', 2)], 1.35),
+      wave('w4', [boss('three_head_hydra', 1, 'Hidra de Três Cabeças'), elite('shadow_arachnid')], 1.85),
     ],
   },
   [buildPhaseId(6, 50)]: {
     displayName: 'Senhor do Abismo',
     statMultiplier: 1.52,
     waves: [
-      wave('w1', [trash('dragon', 2), trash('wraith', 2)]),
-      wave('w2', [elite('wraith', 2), elite('dragon')], 1.25),
-      wave('w3', [elite('dragon', 2)], 1.3),
-      wave('w4', [boss('wraith'), boss('dragon')], 1.72),
+      wave('w1', [trash('death_knight', 2), trash('major_elemental', 2)]),
+      wave('w2', [elite('dead_general', 2), elite('cultist_mage')], 1.25),
+      wave('w3', [elite('young_green_dragon'), trash('lesser_demon', 2)], 1.3),
+      wave('w4', [boss('young_green_dragon', 1, 'Dragão Verde Jovem'), elite('gargoyle')], 1.72),
     ],
   },
   [buildPhaseId(7, 50)]: {
     displayName: 'Forjador Eterno',
     statMultiplier: 1.54,
     waves: [
-      wave('w1', [trash('orc', 3), elite('goblin', 2)]),
-      wave('w2', [elite('dragon'), elite('orc', 2)], 1.25),
-      wave('w3', [elite('wraith'), elite('dragon')], 1.32),
-      wave('w4', [boss('dragon'), elite('orc', 2)], 1.75),
+      wave('w1', [trash('stone_giant', 2), trash('frost_giant', 2)]),
+      wave('w2', [elite('chimera'), elite('manticore')], 1.25),
+      wave('w3', [elite('lesser_lich'), trash('infernal_devil', 2)], 1.32),
+      wave('w4', [boss('lesser_lich', 1, 'Lich Menor'), elite('aberrant_abomination')], 1.75),
     ],
   },
   [buildPhaseId(8, 50)]: {
     displayName: 'Guardião do Bosque',
     statMultiplier: 1.56,
     waves: [
-      wave('w1', [trash('wraith', 3), trash('slime', 2)]),
-      wave('w2', [elite('wraith', 2), elite('dragon')], 1.28),
-      wave('w3', [elite('dragon', 2), trash('orc', 2)], 1.33),
-      wave('w4', [boss('wraith', 2), elite('dragon')], 1.78),
+      wave('w1', [trash('adult_black_dragon', 2), trash('infernal_devil', 2)]),
+      wave('w2', [elite('demonic_warlord'), elite('chimera')], 1.28),
+      wave('w3', [elite('awakened_titan'), trash('manticore', 2)], 1.33),
+      wave('w4', [boss('awakened_titan', 1, 'Titã Desperto'), elite('stone_giant')], 1.78),
     ],
   },
   [buildPhaseId(9, 50)]: {
     displayName: 'Sentinela do Crepúsculo',
     statMultiplier: 1.58,
     waves: [
-      wave('w1', [trash('dragon', 2), trash('wraith', 3)]),
-      wave('w2', [elite('dragon', 2), elite('wraith', 2)], 1.3),
-      wave('w3', [elite('dragon'), elite('wraith'), elite('orc')], 1.38),
-      wave('w4', [boss('dragon'), boss('wraith')], 1.8),
+      wave('w1', [trash('ancient_dragon', 2), trash('soul_devourer', 2)]),
+      wave('w2', [elite('archlich'), elite('void_herald')], 1.3),
+      wave('w3', [elite('demon_prince'), trash('primordial_behemoth', 2)], 1.38),
+      wave('w4', [boss('demon_prince', 1, 'Príncipe Demônio'), elite('ancient_dragon')], 1.8),
     ],
   },
   [buildPhaseId(10, 50)]: {
@@ -125,10 +134,10 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.95,
     waves: [
-      wave('w1', [trash('dragon', 3), trash('wraith', 3)]),
-      wave('w2', [elite('dragon', 2), elite('wraith', 2), elite('orc', 2)], 1.35),
-      wave('w3', [elite('dragon', 2), elite('wraith', 2)], 1.45),
-      wave('w4', [boss('dragon'), boss('wraith'), elite('dragon')], 2.1),
+      wave('w1', [trash('void_herald', 3), trash('soul_devourer', 3)]),
+      wave('w2', [elite('archlich', 2), elite('primordial_behemoth', 2), elite('ancient_dragon')], 1.35),
+      wave('w3', [elite('demon_prince', 2), elite('fallen_magic_god')], 1.45),
+      wave('w4', [boss('fallen_magic_god', 1, 'Deus Caído da Magia'), elite('void_herald')], 2.1),
     ],
   },
 };
@@ -153,4 +162,8 @@ export function applyMilestoneBlueprint(
     milestoneBoss: true,
     seasonFinale: phase.seasonFinale,
   };
+}
+
+export function getMilestoneBossType(mapIndex: number): EnemyType {
+  return milestoneBossForMapIndex(mapIndex);
 }

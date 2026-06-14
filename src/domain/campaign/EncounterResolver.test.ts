@@ -20,4 +20,12 @@ describe('EncounterResolver', () => {
     expect(resolved?.phase.difficultyTier).toBe(20);
     expect(resolved?.enemies.length).toBeGreaterThan(0);
   });
+
+  it('fase 1-50 tem Saci como boss final do capítulo', () => {
+    const finale = resolver.resolve(buildPhaseId(1, 50), 3);
+
+    expect(finale?.meta.isBossWave).toBe(true);
+    expect(finale?.enemies[0]?.name).toBe('Saci');
+    expect(finale?.enemies[0]?.enemyType).toBe('saci');
+  });
 });

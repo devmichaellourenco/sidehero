@@ -6,14 +6,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const resourcesRoot = join(root, 'public', 'ResourcesData');
 const heroesSpritesRoot = join(root, 'public', 'sprites', 'heroes');
+const enemiesSpritesRoot = join(root, 'public', 'sprites', 'enemies');
 const skillsSpritesRoot = join(root, 'public', 'sprites', 'skills');
 const publicRoot = join(root, 'public');
 const outRoot = join(root, 'dist', 'panel', 'assets');
 
 /** Sprites de heróis em public/sprites/heroes. */
 const HERO_SPRITE_MAP = [
-  ['fighter.png', 'characters/knight.png'],
-  ['feiticeira.png', 'characters/sorcerer.png'],
+  ['galneon_aprendiz.png', 'characters/knight.png'],
+  ['nix_aprendiz.png', 'characters/sorcerer.png'],
   ['priest.png', 'characters/priest.png'],
   ['berserker.png', 'characters/berserker.png'],
   ['paladin.png', 'characters/paladin.png'],
@@ -25,6 +26,14 @@ const SKILL_SPRITE_MAP = [
   ['arcane_bolt.png', 'skills/arcane_bolt.png'],
   ['fireball.png', 'skills/fireball.png'],
   ['heal.png', 'skills/heal.png'],
+  ['mana_shield.png', 'skills/mana_shield.png'],
+];
+
+/** Sprites de inimigos em public/sprites/enemies (sobrescreve placeholders do pack Demo). */
+const ENEMY_SPRITE_MAP = [
+  ['goblin.png', 'characters/goblin.png'],
+  ['goblin_boss.png', 'characters/goblin_boss.png'],
+  ['saci_boss.png', 'characters/saci_boss.png'],
 ];
 
 /** Logo e demais assets estáticos em public/. */
@@ -34,11 +43,6 @@ const ASSET_MAP = [
   ['Fonts/Alata-Regular.ttf', 'fonts/Alata-Regular.ttf'],
   ['Fonts/JosefinSans-Bold.ttf', 'fonts/JosefinSans-Bold.ttf'],
 
-  ['Sprites/Demo/Demo_Character/character_sample_04.png', 'characters/slime.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_05.png', 'characters/goblin.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_06.png', 'characters/orc.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_08.png', 'characters/wraith.png'],
-  ['Sprites/Demo/Demo_Character/character_sample_07.png', 'characters/dragon.png'],
   ['Sprites/Demo/Demo_Character/character_back_glow_small.png', 'characters/glow.png'],
 
   ['Sprites/Demo/Demo_Icon_Chest/set_icon_gold_0.png', 'ui/gold.png'],
@@ -89,11 +93,16 @@ async function copyAssetBatch(sourceRoot, entries) {
 export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
+  await copyAssetBatch(enemiesSpritesRoot, ENEMY_SPRITE_MAP);
   await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
   await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
 
   const total =
-    ASSET_MAP.length + HERO_SPRITE_MAP.length + SKILL_SPRITE_MAP.length + PUBLIC_ASSET_MAP.length;
+    ASSET_MAP.length +
+    HERO_SPRITE_MAP.length +
+    ENEMY_SPRITE_MAP.length +
+    SKILL_SPRITE_MAP.length +
+    PUBLIC_ASSET_MAP.length;
   console.log(`Assets copiados: ${total} arquivos em dist/panel/assets/`);
 }
 

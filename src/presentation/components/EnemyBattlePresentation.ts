@@ -60,7 +60,6 @@ export function renderEnemyBattleCard(
         aria-label="${escapeHtml(enemy.name)}"
       >
         ${spriteHtml}
-        <div class="enemy-name">${escapeHtml(enemy.name)}</div>
         <span class="enemy-tooltip-content hidden">${renderEnemyTooltipContent(enemy, stage)}</span>
       </div>
       ${renderCombatStatusEffects(enemy.statusEffects)}

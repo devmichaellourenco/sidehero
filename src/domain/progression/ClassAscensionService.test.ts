@@ -7,7 +7,7 @@ describe('ClassAscensionService', () => {
   const service = new ClassAscensionService();
 
   it('lista duas opções por classe base', () => {
-    const knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const options = service.listOptions(knight);
 
     expect(options).toHaveLength(2);
@@ -15,7 +15,7 @@ describe('ClassAscensionService', () => {
   });
 
   it('permite ascender quando requisitos são atendidos', () => {
-    let knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    let knight = Hero.createStarter('k1', 'knight', 'Galneon');
     knight = Hero.restore({
       ...knight.toProps(),
       experience: Experience.restore(0, 100, 10),
@@ -30,7 +30,7 @@ describe('ClassAscensionService', () => {
   });
 
   it('impede segunda ascensão', () => {
-    let knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    let knight = Hero.createStarter('k1', 'knight', 'Galneon');
     knight = Hero.restore({
       ...knight.toProps(),
       ascensionId: 'knight_guardian',

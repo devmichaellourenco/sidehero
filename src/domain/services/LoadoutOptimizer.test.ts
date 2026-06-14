@@ -28,7 +28,7 @@ function createGear(id: string, attackBonus: number, minLevel = 1): Gear {
 
 describe('LoadoutOptimizer.previewUpgradeForGear', () => {
   it('ignora heróis que não atendem requisitos do item', () => {
-    const hero = heroAtLevel('hero-1', 'knight', 'Arthos', 1);
+    const hero = heroAtLevel('hero-1', 'knight', 'Galneon', 1);
     const gear = createGear('g1', 20, 5);
     const state = GameState.restore({
       ...GameState.initial().toProps(),
@@ -41,7 +41,7 @@ describe('LoadoutOptimizer.previewUpgradeForGear', () => {
   });
 
   it('retorna melhor ganho entre heróis elegíveis', () => {
-    const heroA = heroAtLevel('hero-1', 'knight', 'Arthos', 5);
+    const heroA = heroAtLevel('hero-1', 'knight', 'Galneon', 5);
     const heroB = heroAtLevel('hero-2', 'sorcerer', 'Mage', 5);
     const gear = createGear('g2', 15, 1);
     const state = GameState.restore({

@@ -45,7 +45,7 @@ describe('CombatTurnPhase', () => {
   const phase = new CombatTurnPhase();
 
   it('inicia fase 1-1 no primeiro tick', () => {
-    const sorcerer = Hero.createStarter('s1', 'sorcerer', 'Lyra');
+    const sorcerer = Hero.createStarter('s1', 'sorcerer', 'Nix');
     const state = stateWithPhase(buildPhaseId(1, 1), [sorcerer]);
 
     const result = phase.execute(state);
@@ -56,7 +56,7 @@ describe('CombatTurnPhase', () => {
   });
 
   it('reinicia fase com cura completa ao perder', () => {
-    let knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    let knight = Hero.createStarter('k1', 'knight', 'Galneon');
     knight = Hero.restore({ ...knight.toProps(), currentHealth: 1 });
 
     let state = stateWithPhase(buildPhaseId(1, 1), [knight]);
@@ -72,13 +72,13 @@ describe('CombatTurnPhase', () => {
   });
 
   it('ignora herói derrotado na timeline e deixa outro combatente agir', () => {
-    const knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const priest = Hero.createStarter('p1', 'priest', 'Elara');
     const deadKnight = Hero.restore({ ...knight.toProps(), currentHealth: 0 });
     const enemy = Enemy.restore({
       id: 'e1',
       name: 'Slime',
-      enemyType: 'slime',
+      enemyType: 'giant_rat',
       stage: 1,
       stats: Stats.fromBase(8, 2, 40),
       goldReward: 5,
@@ -109,17 +109,17 @@ describe('CombatTurnPhase', () => {
     const result = phase.execute(state);
     const eventLog = result.events.join(' ');
 
-    expect(eventLog).not.toContain('Arthos');
+    expect(eventLog).not.toContain('Galneon');
     expect(result.events.length).toBeGreaterThan(0);
   });
 
   it('deixa o inimigo agir quando só restam heróis derrotados', () => {
-    const knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const deadKnight = Hero.restore({ ...knight.toProps(), currentHealth: 0 });
     const enemy = Enemy.restore({
       id: 'e1',
       name: 'Slime',
-      enemyType: 'slime',
+      enemyType: 'giant_rat',
       stage: 1,
       stats: Stats.fromBase(8, 2, 40),
       goldReward: 5,

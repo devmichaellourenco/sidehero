@@ -7,13 +7,22 @@ import { Stats } from '../../domain/value-objects/Stats';
 import { Gear, GearSlot } from '../../domain/entities/Gear';
 import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
-import { inferEnemyType } from '../../domain/entities/EnemyType';
+import { inferEnemyType, migrateLegacyEnemyType } from '../../domain/entities/EnemyType';
 import { Chest, ChestProps } from '../../domain/entities/Chest';
 import { CombatState } from '../../domain/entities/CombatState';
 import { ActionTimerService } from '../../domain/services/combat/ActionTimerService';
 import { ChestType } from '../../domain/combat/ChestType';
 
 type RawRecord = Record<string, unknown>;
+
+const LEGACY_HERO_NAMES: Record<string, string> = {
+  Arthos: 'Galneon',
+  Lyra: 'Nix',
+};
+
+function migrateHeroName(name: string): string {
+  return LEGACY_HERO_NAMES[name] ?? name;
+}
 
 function asRecord(value: unknown): RawRecord {
   return value !== null && typeof value === 'object' ? (value as RawRecord) : {};
@@ -117,10 +126,12 @@ export function migrateHero(raw: unknown): Hero {
 
   const progression = migrateProgression(h);
 
+  const heroName = migrateHeroName(h.name);
+
   if (typeof h.baseAttack === 'number') {
     return Hero.restore({
       id: h.id,
-      name: h.name,
+      name: heroName,
       heroClass: h.heroClass as HeroProps['heroClass'],
       baseAttack: h.baseAttack,
       baseDefense: typeof h.baseDefense === 'number' ? h.baseDefense : 5,
@@ -135,7 +146,7 @@ export function migrateHero(raw: unknown): Hero {
   const stats = asRecord(h.stats);
   return Hero.restore({
     id: h.id,
-    name: h.name,
+    name: heroName,
     heroClass: h.heroClass as HeroProps['heroClass'],
     baseAttack: typeof stats.attack === 'number' ? stats.attack : 10,
     baseDefense: typeof stats.defense === 'number' ? stats.defense : 5,
@@ -166,7 +177,7 @@ export function migrateEnemy(raw: unknown): Enemy | null {
     name,
     enemyType:
       typeof e.enemyType === 'string'
-        ? (e.enemyType as EnemyProps['enemyType'])
+        ? migrateLegacyEnemyType(e.enemyType)
         : inferEnemyType(name, stage),
     stage,
     stats: Stats.create({

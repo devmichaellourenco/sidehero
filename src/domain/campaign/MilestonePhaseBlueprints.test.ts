@@ -12,7 +12,7 @@ describe('MilestonePhaseBlueprints', () => {
   });
 
   it('aplica nomes únicos nos marcos principais 50/100/250/500', () => {
-    expect(resolvePhase(buildPhaseId(1, 50))?.displayName).toBe('Guardião das Esgotos');
+    expect(resolvePhase(buildPhaseId(1, 50))?.displayName).toBe('Guardião Elemental');
     expect(resolvePhase(buildPhaseId(2, 50))?.displayName).toBe('Capitão da Mina');
     expect(resolvePhase(buildPhaseId(5, 50))?.displayName).toBe('Colosso do Céu Quebrado');
     expect(resolvePhase(buildPhaseId(10, 50))?.displayName).toBe('Soberano do Vazio');

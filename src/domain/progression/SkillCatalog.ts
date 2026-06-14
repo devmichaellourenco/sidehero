@@ -352,6 +352,20 @@ export const SKILL_CATALOG: SkillDefinition[] = [
     pointType: 'ascension',
     ascensionId: 'priest_inquisitor',
   },
+  // Monstros — acervo unificado (heróis podem desbloquear no futuro)
+  { id: 'wild_bite', scope: 'monster', branch: 'offense', name: 'Mordida Selvagem', description: 'Mordida feroz do predador.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
+  { id: 'goblin_stab', scope: 'monster', branch: 'offense', name: 'Facada', description: 'Golpe traiçoeiro com dano extra.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
+  { id: 'orc_smash', scope: 'monster', branch: 'offense', name: 'Pancada', description: 'Golpe pesado esmagador.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
+  { id: 'poison_spit', scope: 'monster', branch: 'offense', name: 'Cuspe Venenoso', description: 'Veneno corrosivo à distância.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
+  { id: 'ground_slam', scope: 'monster', branch: 'offense', name: 'Pancada Sísmica', description: 'Golpe de área que treme o chão.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
+  { id: 'regenerate', scope: 'monster', branch: 'utility', name: 'Regeneração', description: 'Recupera vida ao longo do combate.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
+  { id: 'slime_acid', scope: 'monster', branch: 'offense', name: 'Ácido', description: 'Corrói o alvo com dano mágico.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
+  { id: 'wraith_drain', scope: 'monster', branch: 'offense', name: 'Drenar Vida', description: 'Dreno mágico de vitalidade.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
+  { id: 'wraith_curse', scope: 'monster', branch: 'offense', name: 'Maldição', description: 'Reduz a defesa do alvo.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
+  { id: 'dragon_breath', scope: 'monster', branch: 'offense', name: 'Baforada', description: 'Fogo em área devastador.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
+  { id: 'dragon_bite', scope: 'monster', branch: 'offense', name: 'Mordida', description: 'Mordida devastadora.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
+  { id: 'saci_fire', scope: 'monster', branch: 'offense', name: 'Chama Elemental', description: 'Fogo concentrado no alvo.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
+  { id: 'saci_wind', scope: 'monster', branch: 'offense', name: 'Rajada de Vento', description: 'Vento cortante em área.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
 ];
 
 export function getSkillById(skillId: string): SkillDefinition | undefined {
@@ -365,6 +379,7 @@ export function getSkillsForHero(heroClass: string, ascensionId: string | null):
     }
     if (skill.scope === 'universal') return true;
     if (skill.scope === 'class' && skill.heroClass === heroClass) return true;
+    if (skill.scope === 'monster') return false;
     return false;
   });
 }

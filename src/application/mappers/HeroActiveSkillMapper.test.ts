@@ -5,7 +5,7 @@ import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
 
 describe('HeroActiveSkillMapper', () => {
   it('enriquece ataque básico com descrição e stats de combate', () => {
-    const hero = Hero.createStarter('hero-1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('hero-1', 'knight', 'Galneon');
     const [basicAttack] = mapHeroActiveSkills(hero);
 
     expect(basicAttack.id).toBe('basic_attack');

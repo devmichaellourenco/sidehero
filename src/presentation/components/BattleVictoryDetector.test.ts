@@ -60,7 +60,7 @@ describe('BattleVictoryDetector', () => {
         {
           id: 'boss-1',
           name: 'Capitão Slime',
-          enemyType: 'slime',
+          enemyType: 'giant_rat',
           health: 0,
           maxHealth: 50,
           attack: 5,
@@ -76,7 +76,7 @@ describe('BattleVictoryDetector', () => {
       heroes: [
         {
           id: 'h1',
-          name: 'Arthos',
+          name: 'Galneon',
           heroClass: 'knight',
           emoji: '⚔',
           level: 1,

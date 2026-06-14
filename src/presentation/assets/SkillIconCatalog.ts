@@ -37,6 +37,12 @@ const SKILL_ICON_BY_ID: Record<string, SkillIconKey> = {
   slime_acid: 'magic',
   wraith_drain: 'magic',
   dragon_breath: 'magic',
+  wild_bite: 'attack',
+  poison_spit: 'magic',
+  ground_slam: 'attack',
+  regenerate: 'heal',
+  saci_fire: 'fireball',
+  saci_wind: 'arcane_bolt',
 
   minor_heal: 'heal',
   oracle_mend: 'heal',
@@ -45,6 +51,7 @@ const SKILL_ICON_BY_ID: Record<string, SkillIconKey> = {
 
   blessing: 'buff',
   wraith_curse: 'debuff',
+  mana_shield: 'mana_shield',
 };
 
 export function getSkillIconPath(skillId: string): string {

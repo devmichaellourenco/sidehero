@@ -6,6 +6,8 @@ export interface EnemySlot {
   enemyType: EnemyType;
   role: EnemyRole;
   count: number;
+  /** Nome exibido no combate (ex.: boss único "Saci" sem prefixo "Boss"). */
+  displayName?: string;
 }
 
 export interface WaveDefinition {

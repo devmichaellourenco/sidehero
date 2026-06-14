@@ -11,10 +11,10 @@ describe('CombatSkillIntentResolver', () => {
     const goblin = Enemy.restore({
       ...Enemy.forStage(2).toProps(),
       id: 'goblin-1',
-      enemyType: 'goblin',
+      enemyType: 'goblin_raider',
       name: 'Goblin Lv.2',
     });
-    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('h1', 'knight', 'Galneon');
     const cooldowns = SkillCooldownTracker.fromMap({
       'enemy:goblin-1': { goblin_stab: 2 },
     });
@@ -32,10 +32,10 @@ describe('CombatSkillIntentResolver', () => {
     const dragon = Enemy.restore({
       ...Enemy.forStage(5).toProps(),
       id: 'dragon-1',
-      enemyType: 'dragon',
+      enemyType: 'young_green_dragon',
       name: 'Dragon Lv.5',
     });
-    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('h1', 'knight', 'Galneon');
     const cooldowns = SkillCooldownTracker.fromMap({});
 
     const intent = resolver.resolveForEnemy(dragon, [hero], [dragon], cooldowns);

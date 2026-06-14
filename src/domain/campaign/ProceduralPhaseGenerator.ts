@@ -1,5 +1,9 @@
 import { EnemyType } from '../entities/EnemyType';
-import { ENEMY_DEFINITIONS } from '../entities/EnemyType';
+import {
+  pickCommonForGlobalTier,
+  pickLevelBossForGlobalTier,
+  pickSubbossForGlobalTier,
+} from '../enemies/EnemyTierProgression';
 import {
   MapId,
   PhaseId,
@@ -8,7 +12,7 @@ import {
   parsePhaseId,
 } from './CampaignIds';
 import { PhaseDefinition } from './PhaseDefinition';
-import { EnemySlot, WaveDefinition } from './WaveDefinition';
+import { WaveDefinition } from './WaveDefinition';
 
 const MAP_CONFIG: Record<
   MapId,
@@ -26,8 +30,9 @@ export class ProceduralPhaseGenerator {
     }
 
     const phaseId = buildPhaseId(config.mapIndex, phaseNumber);
+    const globalTier = difficultyTierForPhase(config.mapIndex, phaseNumber);
     const waveCount = Math.min(5, 2 + Math.floor(phaseNumber / 12));
-    const waves = this.buildWaves(phaseNumber, waveCount);
+    const waves = this.buildWaves(globalTier, waveCount);
     const unlocks = this.resolveUnlocks(mapId, config.mapIndex, phaseNumber, config.maxPhases);
 
     return {
@@ -35,7 +40,7 @@ export class ProceduralPhaseGenerator {
       campaignId: config.campaignId,
       mapId,
       displayName: `${config.displayPrefix} ${phaseId}`,
-      difficultyTier: difficultyTierForPhase(config.mapIndex, phaseNumber),
+      difficultyTier: globalTier,
       waves,
       unlocks,
     };
@@ -47,13 +52,13 @@ export class ProceduralPhaseGenerator {
     return this.generate(mapId, phaseNumber);
   }
 
-  private buildWaves(phaseNumber: number, waveCount: number): WaveDefinition[] {
+  private buildWaves(globalTier: number, waveCount: number): WaveDefinition[] {
     const waves: WaveDefinition[] = [];
 
     for (let index = 0; index < waveCount; index++) {
       const isBoss = index === waveCount - 1;
-      const enemyType = this.pickEnemyType(phaseNumber, index, isBoss);
-      const count = isBoss ? (phaseNumber % 10 === 0 ? 2 : 1) : 1 + (index % 2);
+      const enemyType = this.pickEnemyType(globalTier, index, isBoss);
+      const count = isBoss ? 1 : 1 + (index % 2);
 
       const role = isBoss ? 'boss' : index === waveCount - 2 && waveCount > 2 ? 'elite' : 'trash';
       waves.push({
@@ -66,12 +71,10 @@ export class ProceduralPhaseGenerator {
     return waves;
   }
 
-  private pickEnemyType(phaseNumber: number, waveIndex: number, isBoss: boolean): EnemyType {
-    const types = ENEMY_DEFINITIONS.map((entry) => entry.type);
-    if (isBoss && phaseNumber >= 20) {
-      return phaseNumber % 2 === 0 ? 'dragon' : 'wraith';
-    }
-    return types[(phaseNumber + waveIndex) % types.length];
+  private pickEnemyType(globalTier: number, waveIndex: number, isBoss: boolean): EnemyType {
+    if (isBoss) return pickLevelBossForGlobalTier(globalTier);
+    if (waveIndex === 1) return pickSubbossForGlobalTier(globalTier, waveIndex);
+    return pickCommonForGlobalTier(globalTier, waveIndex);
   }
 
   private resolveUnlocks(

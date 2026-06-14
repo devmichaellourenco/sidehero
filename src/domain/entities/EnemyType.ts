@@ -1,26 +1,55 @@
-export type EnemyType = 'slime' | 'goblin' | 'orc' | 'wraith' | 'dragon';
+export type { EnemyType } from '../enemies/EnemyRosterCatalog';
+export {
+  ENEMY_ROSTER,
+  getEnemyRosterEntry,
+  getCommonsForPowerTier,
+  getSubbossesForPowerTier,
+  getBossForPowerTier,
+  isKnownEnemyType,
+} from '../enemies/EnemyRosterCatalog';
 
-export const ENEMY_DEFINITIONS: ReadonlyArray<{ type: EnemyType; name: string }> = [
-  { type: 'slime', name: 'Slime' },
-  { type: 'goblin', name: 'Goblin' },
-  { type: 'orc', name: 'Orc' },
-  { type: 'wraith', name: 'Wraith' },
-  { type: 'dragon', name: 'Dragon' },
-];
+import {
+  ENEMY_ROSTER,
+  getEnemyRosterEntry,
+  isKnownEnemyType,
+  type EnemyType,
+} from '../enemies/EnemyRosterCatalog';
+import { pickCommonForGlobalTier } from '../enemies/EnemyTierProgression';
+
+const LEGACY_TYPE_MAP: Record<string, EnemyType> = {
+  slime: 'giant_rat',
+  goblin: 'goblin_raider',
+  orc: 'orc_warrior',
+  wraith: 'skeleton_warrior',
+  dragon: 'young_green_dragon',
+  saci: 'saci',
+};
 
 export function enemyTypeForStage(stage: number): EnemyType {
-  return ENEMY_DEFINITIONS[(stage - 1) % ENEMY_DEFINITIONS.length].type;
+  return pickCommonForGlobalTier(stage, 0);
 }
 
 export function enemyNameForStage(stage: number): string {
-  const definition = ENEMY_DEFINITIONS[(stage - 1) % ENEMY_DEFINITIONS.length];
-  return `${definition.name} Lv.${stage}`;
+  const entry = getEnemyRosterEntry(enemyTypeForStage(stage));
+  return `${entry?.name ?? 'Inimigo'} Lv.${stage}`;
 }
 
 export function inferEnemyType(name: string, stage: number): EnemyType {
-  const match = ENEMY_DEFINITIONS.find((definition) =>
-    name.toLowerCase().startsWith(definition.name.toLowerCase()),
-  );
+  const lower = name.toLowerCase();
+  if (lower.startsWith('saci')) return 'saci';
 
-  return match?.type ?? enemyTypeForStage(stage);
+  for (const entry of ENEMY_ROSTER) {
+    if (lower.includes(entry.name.toLowerCase())) return entry.id;
+  }
+
+  for (const [legacy, mapped] of Object.entries(LEGACY_TYPE_MAP)) {
+    if (lower.startsWith(legacy)) return mapped;
+  }
+
+  return enemyTypeForStage(stage);
+}
+
+export function migrateLegacyEnemyType(type: string): EnemyType {
+  if (isKnownEnemyType(type)) return type;
+  return LEGACY_TYPE_MAP[type] ?? 'goblin_raider';
 }

@@ -214,8 +214,13 @@ h2 {
   --strip-floor-skill-zone: 16px;
   --strip-actor-gap: 2px;
   --strip-actors-bottom: calc(var(--strip-floor-height) + var(--strip-actor-gap));
+  /** Slot base do sprite; zoom compensa margem transparente dos PNG 1024². */
+  --strip-hero-slot: 46px;
+  --strip-enemy-slot: 52px;
+  --strip-enemy-boss-slot: 58px;
+  --strip-sprite-zoom: 1.24;
   position: relative;
-  height: 122px;
+  height: 128px;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.08);
@@ -478,10 +483,10 @@ h2 {
 
 .hero-sprite {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: var(--strip-hero-slot);
+  height: var(--strip-hero-slot);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   animation: march 1.2s ease-in-out infinite;
 }
@@ -503,7 +508,7 @@ h2 {
 }
 
 .hero-battle-card .health-bar.strip-bar {
-  width: 44px;
+  width: calc(var(--strip-hero-slot) - 6px);
   height: 7px;
   margin-top: 2px;
   padding: 1px;
@@ -526,17 +531,38 @@ h2 {
 }
 
 .hero-image {
-  width: 46px;
-  height: 46px;
+  width: var(--strip-hero-slot);
+  height: var(--strip-hero-slot);
   object-fit: contain;
+  object-position: center bottom;
+  transform: scale(var(--strip-sprite-zoom));
+  transform-origin: center bottom;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
 }
 
+.enemy-battle-hitbox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: var(--strip-enemy-slot);
+  min-height: var(--strip-enemy-slot);
+  cursor: default;
+}
+
+.enemy-battle-card--boss {
+  --strip-enemy-slot: var(--strip-enemy-boss-slot);
+}
+
 .enemy-image {
-  width: 36px;
-  height: 36px;
+  width: var(--strip-enemy-slot);
+  height: var(--strip-enemy-slot);
   object-fit: contain;
+  object-position: center bottom;
+  transform: scaleX(-1) scale(var(--strip-sprite-zoom));
+  transform-origin: center bottom;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+  animation: enemy-shake 0.5s ease-in-out infinite;
 }
 
 @keyframes march {
@@ -577,20 +603,13 @@ h2 {
   animation-duration: 0.75s;
 }
 
-.enemy-image {
-  width: 40px;
-  height: 40px;
-  transform: scaleX(-1);
-  animation: enemy-shake 0.5s ease-in-out infinite;
-}
-
 @keyframes enemy-shake {
   0%,
   100% {
-    transform: scaleX(-1) translateX(0);
+    transform: scaleX(-1) scale(var(--strip-sprite-zoom)) translateX(0);
   }
   50% {
-    transform: scaleX(-1) translateX(3px);
+    transform: scaleX(-1) scale(var(--strip-sprite-zoom)) translateX(3px);
   }
 }
 
@@ -600,19 +619,6 @@ h2 {
   flex-direction: column;
   align-items: flex-end;
   cursor: default;
-}
-
-.enemy-battle-hitbox {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  cursor: default;
-}
-
-.enemy-name {
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 2px;
 }
 
 .combat-skill-floor-slot {
@@ -3508,10 +3514,6 @@ body.modal-open {
 .campaign-phase-meta {
   font-size: 9px;
   color: var(--muted);
-}
-
-.enemy-battle-card--boss .enemy-name {
-  color: #ffb86c;
 }
 
 .enemy-battle-card--boss .enemy-image {

@@ -1,5 +1,5 @@
 import { Enemy } from '../entities/Enemy';
-import { EnemyType, ENEMY_DEFINITIONS } from '../entities/EnemyType';
+import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
 import { Stats } from '../value-objects/Stats';
 import { PhaseId } from './CampaignIds';
 import { EnemyRole, EnemySlot, WaveDefinition } from './WaveDefinition';
@@ -60,14 +60,20 @@ function createEnemyFromSlot(
   const goldReward = Math.floor(8 * scale * roleScale.reward * context.goldMultiplier);
   const xpReward = context.isBossWave ? Math.floor(15 * scale * roleScale.reward) : 0;
 
-  const definition = ENEMY_DEFINITIONS.find((entry) => entry.type === slot.enemyType);
-  const baseName = definition?.name ?? slot.enemyType;
+  const rosterEntry = getEnemyRosterEntry(slot.enemyType);
+  const baseName = rosterEntry?.name ?? slot.enemyType;
   const prefix = slot.role === 'boss' ? 'Boss ' : slot.role === 'elite' ? 'Elite ' : '';
   const suffix = slot.count > 1 ? ` ${context.slotIndex + 1}` : '';
+  const defaultName = `${prefix}${baseName} Lv.${context.difficultyTier}${suffix}`;
+  const name = slot.displayName
+    ? slot.count > 1
+      ? `${slot.displayName} ${context.slotIndex + 1}`
+      : slot.displayName
+    : defaultName;
 
   return Enemy.restore({
     id: `${context.phaseId}-w${context.waveIndex}-s${context.slotIndex}`,
-    name: `${prefix}${baseName} Lv.${context.difficultyTier}${suffix}`,
+    name,
     enemyType: slot.enemyType,
     stage: context.difficultyTier,
     stats: Stats.fromBase(attack, defense, maxHealth),

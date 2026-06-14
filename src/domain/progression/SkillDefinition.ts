@@ -3,7 +3,7 @@ import { AttributeKey } from './Attributes';
 import { ProgressionRequirement } from './ProgressionRequirement';
 import { AscensionId, SkillId } from './SkillId';
 
-export type SkillScope = 'universal' | 'class';
+export type SkillScope = 'universal' | 'class' | 'monster';
 export type SkillBranch = 'offense' | 'defense' | 'utility';
 export type SkillPointType = 'improvement' | 'ascension';
 

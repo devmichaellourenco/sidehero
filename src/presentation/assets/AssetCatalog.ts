@@ -1,7 +1,7 @@
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
+import { getEnemyRosterEntry } from '../../domain/enemies/EnemyRosterCatalog';
 
 export type HeroClassKey = 'knight' | 'sorcerer' | 'priest' | 'berserker' | 'paladin';
-export type EnemyTypeKey = 'slime' | 'goblin' | 'orc' | 'wraith' | 'dragon';
 export type GearSlotKey = 'weapon' | 'armor' | 'accessory';
 export type GearRarityKey = 'common' | 'rare' | 'epic';
 
@@ -13,13 +13,11 @@ const HERO_SPRITES: Record<HeroClassKey, string> = {
   paladin: 'characters/paladin.png',
 };
 
-const ENEMY_SPRITES: Record<EnemyTypeKey, string> = {
-  slime: 'characters/slime.png',
-  goblin: 'characters/goblin.png',
-  orc: 'characters/orc.png',
-  wraith: 'characters/wraith.png',
-  dragon: 'characters/dragon.png',
-};
+const ENEMY_PLACEHOLDER_SPRITES = {
+  common: 'characters/goblin.png',
+  boss: 'characters/goblin_boss.png',
+  saci: 'characters/saci_boss.png',
+} as const;
 
 const GEAR_SLOT_SPRITES: Record<GearSlotKey, string> = {
   weapon: 'gear/weapon.png',
@@ -62,7 +60,6 @@ export const ASSETS = {
     health: 'ui/health.png',
     inventory: 'ui/inventory.png',
   },
-  /** Ícones de skills — dedicados em skills/ ou placeholders em ui/gear. */
   skills: {
     attack: 'ui/attack.png',
     magic: 'ui/energy.png',
@@ -75,6 +72,7 @@ export const ASSETS = {
     vitality: 'skills/vitality.png',
     arcane_bolt: 'skills/arcane_bolt.png',
     fireball: 'skills/fireball.png',
+    mana_shield: 'skills/mana_shield.png',
   },
   backgrounds: {
     battle: 'backgrounds/battle.png',
@@ -110,8 +108,36 @@ export function getHeroSprite(heroClass: string): string {
   return getAssetUrl(HERO_SPRITES[heroClass as HeroClassKey] ?? HERO_SPRITES.knight);
 }
 
-export function getEnemySprite(enemyType: string): string {
-  return getAssetUrl(ENEMY_SPRITES[enemyType as EnemyTypeKey] ?? ENEMY_SPRITES.slime);
+/** Sprite placeholder: comuns → goblin; subchefes/chefes → goblin_boss; Saci → saci_boss. */
+export function getEnemySpriteUrl(enemyType: string, enemyName: string): string {
+  const entry = getEnemyRosterEntry(enemyType);
+
+  if (entry?.spriteVariant === 'saci' || enemyType === 'saci') {
+    return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.saci);
+  }
+
+  if (
+    enemyName.startsWith('Elite ') ||
+    enemyName.startsWith('Boss ') ||
+    entry?.rosterRole === 'subboss' ||
+    entry?.rosterRole === 'boss'
+  ) {
+    return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.boss);
+  }
+
+  return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.common);
+}
+
+/** @deprecated Use getEnemySpriteUrl */
+export function getEnemySprite(enemyType: string, options?: { isBoss?: boolean }): string {
+  if (options?.isBoss) {
+    const entry = getEnemyRosterEntry(enemyType);
+    if (entry?.spriteVariant === 'saci' || enemyType === 'saci') {
+      return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.saci);
+    }
+    return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.boss);
+  }
+  return getEnemySpriteUrl(enemyType, '');
 }
 
 export function getGearSlotSprite(slot: string): string {

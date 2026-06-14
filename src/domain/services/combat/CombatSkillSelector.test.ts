@@ -28,7 +28,7 @@ describe('CombatSkillSelector', () => {
       equippedSkillIds: ['basic_attack', 'minor_heal'],
     });
 
-    let knight = Hero.createStarter('k1', 'knight', 'Arthos');
+    let knight = Hero.createStarter('k1', 'knight', 'Galneon');
     knight = Hero.restore({
       ...knight.toProps(),
       currentHealth: 10,
@@ -97,10 +97,10 @@ describe('CombatSkillSelector', () => {
     const goblin = Enemy.restore({
       ...Enemy.forStage(2).toProps(),
       id: 'goblin-1',
-      enemyType: 'goblin',
+      enemyType: 'goblin_raider',
       name: 'Goblin Lv.2',
     });
-    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('h1', 'knight', 'Galneon');
 
     const selected = selector.selectEnemyAction(goblin, [hero], [goblin], emptyCooldowns);
 
@@ -114,26 +114,24 @@ describe('CombatSkillSelector', () => {
     const slime = Enemy.restore({
       ...Enemy.forStage(3).toProps(),
       id: 'slime-1',
-      enemyType: 'slime',
-      name: 'Slime Lv.3',
+      enemyType: 'giant_rat',
+      name: 'Rato Gigante Lv.3',
     });
-    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('h1', 'knight', 'Galneon');
 
     const selected = selector.selectEnemyAction(slime, [hero], [slime], emptyCooldowns);
 
-    expect(selected?.skillId).toBe('slime_acid');
-    expect(selected?.action.skillName).toBe('Ácido');
-    expect(selected?.action.power).toBe(7);
+    expect(selected?.skillId).toBe('wild_bite');
   });
 
   it('orc prioriza Pancada com poder fixo acima do ataque básico', () => {
     const orc = Enemy.restore({
       ...Enemy.forStage(4).toProps(),
       id: 'orc-1',
-      enemyType: 'orc',
+      enemyType: 'orc_warrior',
       name: 'Orc Lv.4',
     });
-    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('h1', 'knight', 'Galneon');
 
     const selected = selector.selectEnemyAction(orc, [hero], [orc], emptyCooldowns);
 
@@ -146,10 +144,10 @@ describe('CombatSkillSelector', () => {
     const wraith = Enemy.restore({
       ...Enemy.forStage(6).toProps(),
       id: 'wraith-1',
-      enemyType: 'wraith',
+      enemyType: 'skeleton_warrior',
       name: 'Wraith Lv.6',
     });
-    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('h1', 'knight', 'Galneon');
 
     const selected = selector.selectEnemyAction(wraith, [hero], [wraith], emptyCooldowns);
 
@@ -162,10 +160,10 @@ describe('CombatSkillSelector', () => {
     const dragon = Enemy.restore({
       ...Enemy.forStage(5).toProps(),
       id: 'dragon-1',
-      enemyType: 'dragon',
+      enemyType: 'young_green_dragon',
       name: 'Dragon Lv.5',
     });
-    const hero = Hero.createStarter('h1', 'knight', 'Arthos');
+    const hero = Hero.createStarter('h1', 'knight', 'Galneon');
     const ready = SkillCooldownTracker.fromMap({});
     const charging = SkillCooldownTracker.fromMap({
       'enemy:dragon-1': { dragon_breath: 2 },
@@ -192,7 +190,7 @@ describe('CombatSkillSelector', () => {
 
     const goblin = Enemy.restore({
       ...Enemy.forStage(2).toProps(),
-      enemyType: 'goblin',
+      enemyType: 'goblin_raider',
     });
 
     const selected = selector.selectHeroAction(priest, [priest], [goblin], emptyCooldowns);

@@ -1,49 +1,15 @@
+import { getSkillById } from '../SkillCatalog';
+
 export interface EnemySkillDisplay {
   skillId: string;
   name: string;
   description: string;
 }
 
-const ENEMY_SKILL_DISPLAY: Record<string, EnemySkillDisplay> = {
-  slime_acid: {
-    skillId: 'slime_acid',
-    name: 'Ácido',
-    description: 'Corrói o herói mais ferido com dano mágico fixo.',
-  },
-  goblin_stab: {
-    skillId: 'goblin_stab',
-    name: 'Facada',
-    description: 'Golpe traiçoeiro com dano extra além do ATK.',
-  },
-  orc_smash: {
-    skillId: 'orc_smash',
-    name: 'Pancada',
-    description: 'Golpe pesado no alvo mais vulnerável.',
-  },
-  wraith_drain: {
-    skillId: 'wraith_drain',
-    name: 'Drenar Vida',
-    description: 'Dreno mágico que foca o herói com menos vida.',
-  },
-  wraith_curse: {
-    skillId: 'wraith_curse',
-    name: 'Maldição',
-    description: 'Reduz a defesa do herói mais ferido por alguns turnos.',
-  },
-  dragon_breath: {
-    skillId: 'dragon_breath',
-    name: 'Baforada',
-    description: 'Fogo em área que atinge todo o grupo de heróis.',
-  },
-  dragon_bite: {
-    skillId: 'dragon_bite',
-    name: 'Mordida',
-    description: 'Mordida devastadora no herói mais resistente.',
-  },
-};
-
 export function getEnemySkillDisplay(skillId: string): EnemySkillDisplay | null {
-  return ENEMY_SKILL_DISPLAY[skillId] ?? null;
+  const skill = getSkillById(skillId);
+  if (!skill) return null;
+  return { skillId: skill.id, name: skill.name, description: skill.description };
 }
 
 export function listEnemySkillDisplays(skillIds: string[]): EnemySkillDisplay[] {

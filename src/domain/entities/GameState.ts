@@ -86,8 +86,8 @@ export class GameState {
 
   static initial(): GameState {
     const heroes = [
-      Hero.createStarter('hero-1', 'knight', 'Arthos'),
-      Hero.createStarter('hero-2', 'sorcerer', 'Lyra'),
+      Hero.createStarter('hero-1', 'knight', 'Galneon'),
+      Hero.createStarter('hero-2', 'sorcerer', 'Nix'),
       Hero.createStarter('hero-3', 'priest', 'Elara'),
     ];
     const progress = CampaignProgress.initial();

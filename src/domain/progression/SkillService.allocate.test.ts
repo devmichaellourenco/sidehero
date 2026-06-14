@@ -8,7 +8,7 @@ describe('SkillService — alocação de rank', () => {
 
   it('permite +1 rank quando status é owned e há pontos', () => {
     const hero = Hero.restore({
-      ...Hero.createStarter('k1', 'knight', 'Arthos').toProps(),
+      ...Hero.createStarter('k1', 'knight', 'Galneon').toProps(),
       experience: Experience.restore(0, 100, 5),
       allocatedAttributes: { str: 10, dex: 5, int: 5 },
       skillRanks: { power_attack: 1 },

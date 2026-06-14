@@ -1,4 +1,4 @@
-import { EnemyType, ENEMY_DEFINITIONS } from '../entities/EnemyType';
+import { EnemyType } from '../entities/EnemyType';
 import { CAMPAIGN_MAPS, TOTAL_CAMPAIGN_PHASES } from './CampaignMaps';
 import {
   buildPhaseId,
@@ -6,6 +6,11 @@ import {
   isMilestonePhase,
   isSeasonFinalePhase,
 } from './CampaignIds';
+import {
+  pickCommonForGlobalTier,
+  pickLevelBossForGlobalTier,
+  pickSubbossForGlobalTier,
+} from '../enemies/EnemyTierProgression';
 import { applyMilestoneBlueprint, getMilestoneBlueprint } from './MilestonePhaseBlueprints';
 import { PhaseDefinition } from './PhaseDefinition';
 import { EnemySlot, WaveDefinition } from './WaveDefinition';
@@ -24,19 +29,6 @@ function elite(type: EnemyType, count = 1): EnemySlot {
 
 function boss(type: EnemyType, count = 1): EnemySlot {
   return { enemyType: type, role: 'boss', count };
-}
-
-function pickEnemyType(globalTier: number, offset: number): EnemyType {
-  const index = Math.floor(globalTier / 8) + offset;
-  return ENEMY_DEFINITIONS[index % ENEMY_DEFINITIONS.length].type;
-}
-
-function bossTypeForTier(globalTier: number): EnemyType {
-  if (globalTier >= 400) return 'dragon';
-  if (globalTier >= 250) return 'wraith';
-  if (globalTier >= 120) return 'orc';
-  if (globalTier >= 40) return 'goblin';
-  return 'slime';
 }
 
 function buildUnlocks(mapIndex: number, phaseNumber: number): string[] {
@@ -60,20 +52,20 @@ function buildWaves(
 ): WaveDefinition[] {
   if (seasonFinale) {
     return [
-      wave('w1', [trash(pickEnemyType(globalTier, 0), 3), trash(pickEnemyType(globalTier, 1), 2)]),
-      wave('w2', [elite(bossTypeForTier(globalTier), 2), trash(pickEnemyType(globalTier, 2), 2)], 1.2),
-      wave('w3', [elite(bossTypeForTier(globalTier), 2), elite(pickEnemyType(globalTier, 3))], 1.3),
-      wave('w4', [boss('dragon'), boss('wraith')], 2),
+      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 3), trash(pickCommonForGlobalTier(globalTier, 1), 2)]),
+      wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 2), 2)], 1.2),
+      wave('w3', [elite(pickLevelBossForGlobalTier(globalTier), 2), elite(pickSubbossForGlobalTier(globalTier, 1))], 1.3),
+      wave('w4', [boss('fallen_magic_god'), boss('demon_prince')], 2),
     ];
   }
 
   if (milestoneBoss) {
-    const bossEnemy = bossTypeForTier(globalTier);
+    const bossEnemy = pickLevelBossForGlobalTier(globalTier);
     return [
-      wave('w1', [trash(pickEnemyType(globalTier, 0), 2), trash(pickEnemyType(globalTier, 1), 2)]),
-      wave('w2', [elite(pickEnemyType(globalTier, 2)), trash(pickEnemyType(globalTier, 3), 2)], 1.15),
-      wave('w3', [elite(bossEnemy), elite(pickEnemyType(globalTier, 4))], 1.25),
-      wave('w4', [boss(bossEnemy), elite(pickEnemyType(globalTier, 1))], 1.6),
+      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 1), 2)]),
+      wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0)), trash(pickCommonForGlobalTier(globalTier, 3), 2)], 1.15),
+      wave('w3', [elite(bossEnemy), elite(pickCommonForGlobalTier(globalTier, 4))], 1.25),
+      wave('w4', [boss(bossEnemy), elite(pickSubbossForGlobalTier(globalTier, 1))], 1.6),
     ];
   }
 
@@ -85,7 +77,11 @@ function buildWaves(
 
   for (let index = 0; index < waveCount; index++) {
     const isBoss = index === waveCount - 1;
-    const enemyType = isBoss ? bossTypeForTier(globalTier) : pickEnemyType(globalTier, index);
+    const enemyType = isBoss
+      ? pickLevelBossForGlobalTier(globalTier)
+      : index === waveCount - 2 && waveCount >= 3
+        ? pickSubbossForGlobalTier(globalTier, index)
+        : pickCommonForGlobalTier(globalTier, index);
     const count = isBoss ? 1 : 1 + (index % 2);
 
     if (isBoss) {

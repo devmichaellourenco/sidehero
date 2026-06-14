@@ -9,6 +9,7 @@ describe('SkillIconCatalog', () => {
     expect(getSkillIconPath('arcane_bolt')).toBe(ASSETS.skills.arcane_bolt);
     expect(getSkillIconPath('vitality')).toBe(ASSETS.skills.vitality);
     expect(getSkillIconPath('minor_heal')).toBe(ASSETS.skills.heal);
+    expect(getSkillIconPath('mana_shield')).toBe(ASSETS.skills.mana_shield);
   });
 
   it('resolve nome amigável para tooltip', () => {

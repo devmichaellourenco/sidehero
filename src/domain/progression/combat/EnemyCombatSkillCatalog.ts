@@ -1,120 +1,14 @@
 import { Enemy } from '../../entities/Enemy';
 import { EnemyType } from '../../entities/EnemyType';
+import { getEnemyRosterEntry } from '../../enemies/EnemyRosterCatalog';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
 import { ENEMY_BASIC_ATTACK_SKILL } from './BasicAttackSkill';
-
-const ENEMY_SKILL_SETS: Record<EnemyType, CombatSkillDefinition[]> = {
-  slime: [
-    ENEMY_BASIC_ATTACK_SKILL,
-    {
-      skillId: 'slime_acid',
-      kind: 'damage_magic',
-      targetPool: 'heroes',
-      targetScope: 'single',
-      targetPriority: 'lowest_hp_percent',
-      usePriority: 40,
-      initialCooldown: 0,
-      cooldownTurns: 2,
-      basePower: 4,
-      powerPerRank: 0,
-      attributeFactor: 0,
-    },
-  ],
-  goblin: [
-    ENEMY_BASIC_ATTACK_SKILL,
-    {
-      skillId: 'goblin_stab',
-      kind: 'damage_physical',
-      targetPool: 'heroes',
-      targetScope: 'single',
-      targetPriority: 'lowest_hp_percent',
-      usePriority: 55,
-      initialCooldown: 0,
-      cooldownTurns: 2,
-      basePower: 6,
-      powerPerRank: 0,
-      attributeFactor: 0,
-    },
-  ],
-  orc: [
-    ENEMY_BASIC_ATTACK_SKILL,
-    {
-      skillId: 'orc_smash',
-      kind: 'damage_physical',
-      targetPool: 'heroes',
-      targetScope: 'single',
-      targetPriority: 'lowest_hp_percent',
-      usePriority: 70,
-      initialCooldown: 1,
-      cooldownTurns: 2,
-      basePower: 8,
-      powerPerRank: 0,
-      attributeFactor: 0,
-    },
-  ],
-  wraith: [
-    ENEMY_BASIC_ATTACK_SKILL,
-    {
-      skillId: 'wraith_drain',
-      kind: 'damage_magic',
-      targetPool: 'heroes',
-      targetScope: 'single',
-      targetPriority: 'lowest_hp_percent',
-      usePriority: 75,
-      initialCooldown: 0,
-      cooldownTurns: 2,
-      basePower: 6,
-      powerPerRank: 0,
-      attributeFactor: 0,
-    },
-    {
-      skillId: 'wraith_curse',
-      kind: 'debuff_defense',
-      targetPool: 'heroes',
-      targetScope: 'single',
-      targetPriority: 'lowest_hp_percent',
-      usePriority: 68,
-      initialCooldown: 0,
-      cooldownTurns: 3,
-      basePower: 3,
-      powerPerRank: 0,
-      attributeFactor: 0,
-      effectDurationTurns: 2,
-    },
-  ],
-  dragon: [
-    ENEMY_BASIC_ATTACK_SKILL,
-    {
-      skillId: 'dragon_breath',
-      kind: 'damage_magic',
-      targetPool: 'heroes',
-      targetScope: 'all',
-      targetPriority: 'lowest_hp_percent',
-      usePriority: 85,
-      initialCooldown: 2,
-      cooldownTurns: 3,
-      basePower: 12,
-      powerPerRank: 0,
-      attributeFactor: 0,
-    },
-    {
-      skillId: 'dragon_bite',
-      kind: 'damage_physical',
-      targetPool: 'heroes',
-      targetScope: 'single',
-      targetPriority: 'highest_hp_percent',
-      usePriority: 80,
-      initialCooldown: 0,
-      cooldownTurns: 2,
-      basePower: 8,
-      powerPerRank: 0,
-      attributeFactor: 0,
-    },
-  ],
-};
+import { listCombatSkillsForEnemy } from './CombatSkillRegistry';
 
 export function listEnemyCombatSkillsByType(enemyType: EnemyType): CombatSkillDefinition[] {
-  return ENEMY_SKILL_SETS[enemyType] ?? [ENEMY_BASIC_ATTACK_SKILL];
+  const entry = getEnemyRosterEntry(enemyType);
+  if (!entry) return [ENEMY_BASIC_ATTACK_SKILL];
+  return listCombatSkillsForEnemy(entry.skillIds);
 }
 
 export function listEnemyCombatSkills(enemy: Enemy): CombatSkillDefinition[] {
