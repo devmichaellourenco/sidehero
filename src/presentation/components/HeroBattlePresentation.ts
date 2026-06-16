@@ -4,7 +4,7 @@ import {
   formatHealthLabel,
   renderHeroStripHealthBar,
 } from './HeroBarsPresentation';
-import { renderCombatSkillIntent } from './CombatSkillIntentPresentation';
+import { renderCombatSkillBar, patchCombatSkillBar } from './CombatSkillIntentPresentation';
 import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
 
 function escapeHtml(text: string): string {
@@ -74,7 +74,7 @@ export function renderHeroBattleSprite(
       </button>
       ${renderCombatStatusEffects(hero.statusEffects)}
       ${renderHeroStripHealthBar(hero)}
-      ${renderCombatSkillIntent(options.isActiveTurn ? hero.combatIntent : null)}
+      ${renderCombatSkillBar(hero.combatSkills)}
     </div>
   `;
 }

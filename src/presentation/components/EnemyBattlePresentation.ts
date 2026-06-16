@@ -1,5 +1,5 @@
 import { EnemyDto } from '../../application/dto/GameStateDto';
-import { renderCombatSkillIntent } from './CombatSkillIntentPresentation';
+import { renderCombatSkillBar } from './CombatSkillIntentPresentation';
 import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
 
 function escapeHtml(text: string): string {
@@ -73,7 +73,7 @@ export function renderEnemyBattleCard(
           <div class="health-fill enemy" style="width: ${healthPercent}%"></div>
         </div>
       </div>
-      ${renderCombatSkillIntent(options.isActiveTurn ? enemy.combatIntent : null)}
+      ${renderCombatSkillBar(enemy.combatSkills)}
     </div>
   `;
 }

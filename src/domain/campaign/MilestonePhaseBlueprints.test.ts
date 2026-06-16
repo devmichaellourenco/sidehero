@@ -18,6 +18,13 @@ describe('MilestonePhaseBlueprints', () => {
     expect(resolvePhase(buildPhaseId(10, 50))?.displayName).toBe('Soberano do Vazio');
   });
 
+  it('aplica Gonodor no marco final de Gondonor', () => {
+    const phase = resolvePhase(buildPhaseId(2, 50));
+    expect(phase?.displayName).toBe('Capitão da Mina');
+    const bossWave = phase?.waves.at(-1);
+    expect(bossWave?.slots.some((slot) => slot.enemyType === 'gonodor' && slot.role === 'boss')).toBe(true);
+  });
+
   it('marcos principais têm multiplicador maior', () => {
     expect(resolvePhase(buildPhaseId(1, 50))?.statMultiplier).toBeGreaterThanOrEqual(1.5);
     expect(resolvePhase(buildPhaseId(10, 50))?.statMultiplier).toBeGreaterThanOrEqual(1.9);

@@ -23,6 +23,8 @@ const LEGACY_TYPE_MAP: Record<string, EnemyType> = {
   wraith: 'skeleton_warrior',
   dragon: 'young_green_dragon',
   saci: 'saci',
+  gonodor: 'gonodor',
+  vorax: 'vorax',
 };
 
 export function enemyTypeForStage(stage: number): EnemyType {
@@ -36,6 +38,8 @@ export function enemyNameForStage(stage: number): string {
 
 export function inferEnemyType(name: string, stage: number): EnemyType {
   const lower = name.toLowerCase();
+  if (lower.startsWith('gonodor')) return 'gonodor';
+  if (lower.startsWith('vorax')) return 'vorax';
   if (lower.startsWith('saci')) return 'saci';
 
   for (const entry of ENEMY_ROSTER) {

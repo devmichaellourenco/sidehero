@@ -14,6 +14,8 @@ export class BattleFloatingTextController {
     const targetOffsets = new Map<string, number>();
 
     for (const event of events) {
+      if (event.kind === 'buff' || event.kind === 'debuff') continue;
+
       const anchor = this.findAnchor(event);
       if (!anchor) continue;
 
@@ -41,7 +43,12 @@ export class BattleFloatingTextController {
     const anchorRect = anchor.getBoundingClientRect();
     const stripRect = this.battleStrip.getBoundingClientRect();
     const label =
-      event.kind === 'heal' ? `+${event.amount}` : `-${event.amount}`;
+      event.kind === 'heal'
+        ? `+${event.amount}`
+        : event.kind === 'crit' || event.kind === 'damage'
+          ? `-${event.amount}`
+          : '';
+    if (!label) return;
 
     const float = document.createElement('span');
     float.className = `battle-float battle-float--${event.kind === 'crit' ? 'crit' : event.kind}`;

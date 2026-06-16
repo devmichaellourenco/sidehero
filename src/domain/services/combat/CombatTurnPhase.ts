@@ -4,13 +4,15 @@ import { Hero } from '../../entities/Hero';
 import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
+import { MULTI_SKILL_STAGGER_SECONDS } from '../../combat/CombatTimingConstants';
 import { listEnemyCombatSkills } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCatalog';
 import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill';
 import { ActionTimerService } from './ActionTimerService';
 import { CombatActionExecutor } from './CombatActionExecutor';
 import { CombatFloatingEvent } from './CombatFloatingEvent';
-import { CombatSkillSelector } from './CombatSkillSelector';
+import { CombatSkillSelector, SelectedCombatAction } from './CombatSkillSelector';
+import { PendingSkillAction } from './PendingSkillAction';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { CombatantRef } from './TurnOrderService';
@@ -75,6 +77,16 @@ export class CombatTurnPhase {
       .withActionTimers(timeline.timers)
       .withCombatTime(combat.combatTime + timeline.elapsedSeconds)
       .withSkillCooldowns(cooldowns.toMap());
+
+    const pendingResult = this.processPendingSkillActions(workingState, combat);
+    if (pendingResult.handled) {
+      return this.finish(
+        pendingResult.state.withCombat(pendingResult.combat).touchTick(),
+        pendingResult.events,
+        pendingResult.floatingEvents,
+      );
+    }
+    combat = pendingResult.combat;
 
     if (!timeline.actor) {
       const livingHeroes = heroes.filter((hero) => hero.isAlive());
@@ -168,15 +180,49 @@ export class CombatTurnPhase {
     return tracker;
   }
 
-  private executeActorTurn(
+  private processPendingSkillActions(
+    state: GameState,
+    combat: CombatState,
+  ): {
+    handled: boolean;
+    state: GameState;
+    combat: CombatState;
+    events: string[];
+    floatingEvents: CombatFloatingEvent[];
+  } {
+    const due = combat.pendingSkillActions
+      .filter((entry) => entry.executeAt <= combat.combatTime)
+      .sort((left, right) => left.executeAt - right.executeAt);
+
+    if (due.length === 0) {
+      return { handled: false, state, combat, events: [], floatingEvents: [] };
+    }
+
+    const next = due[0];
+    const remaining = combat.pendingSkillActions.filter((entry) => entry !== next);
+    const actor: CombatantRef = { side: next.side, id: next.combatantId };
+    const strike = this.executeSkillStrike(state, combat, actor, next.skillId);
+
+    return {
+      handled: true,
+      state: strike.state,
+      combat: strike.combat.withPendingSkillActions(remaining),
+      events: strike.events,
+      floatingEvents: strike.floatingEvents,
+    };
+  }
+
+  private executeSkillStrike(
     state: GameState,
     combat: CombatState,
     actor: CombatantRef,
+    forcedSkillId?: string,
   ): {
     state: GameState;
     combat: CombatState;
     events: string[];
     floatingEvents: CombatFloatingEvent[];
+    usedSkillId: string | null;
   } {
     let heroes = state.activeHeroes();
     let enemies = combat.enemies;
@@ -194,20 +240,27 @@ export class CombatTurnPhase {
     if (actor.side === 'hero') {
       const hero = heroes.find((entry) => entry.id === actor.id);
       if (!hero?.isAlive()) {
-        return { state, combat, events, floatingEvents };
+        return { state, combat, events, floatingEvents, usedSkillId: null };
       }
 
       attackerProfile = this.profiles.forHero(hero);
       skillList = listHeroCombatSkills(hero);
-      const selected = this.skillSelector.selectHeroAction(
-        hero,
-        heroes,
-        enemies,
-        cooldowns,
-        statusEffects,
-      );
+      const selected = forcedSkillId
+        ? this.findSelectedAction(
+            this.skillSelector.selectAllReadyHeroActions(
+              hero,
+              heroes,
+              enemies,
+              cooldowns,
+              statusEffects,
+            ),
+            forcedSkillId,
+          )
+        : this.skillSelector.selectAllReadyHeroActions(hero, heroes, enemies, cooldowns, statusEffects)[0] ??
+          null;
+
       if (!selected) {
-        return { state, combat, events, floatingEvents };
+        return { state, combat, events, floatingEvents, usedSkillId: null };
       }
 
       usedSkillId = selected.skillId;
@@ -227,14 +280,21 @@ export class CombatTurnPhase {
     } else {
       const enemy = enemies.find((entry) => entry.id === actor.id);
       if (!enemy?.isAlive()) {
-        return { state, combat, events, floatingEvents };
+        return { state, combat, events, floatingEvents, usedSkillId: null };
       }
 
       attackerProfile = this.profiles.forEnemy(enemy, combat.encounterMeta?.isBossWave);
       skillList = listEnemyCombatSkills(enemy);
-      const selected = this.skillSelector.selectEnemyAction(enemy, heroes, enemies, cooldowns);
+      const selected = forcedSkillId
+        ? this.findSelectedAction(
+            this.skillSelector.selectAllReadyEnemyActions(enemy, heroes, enemies, cooldowns),
+            forcedSkillId,
+          )
+        : this.skillSelector.selectAllReadyEnemyActions(enemy, heroes, enemies, cooldowns)[0] ??
+          null;
+
       if (!selected) {
-        return { state, combat, events, floatingEvents };
+        return { state, combat, events, floatingEvents, usedSkillId: null };
       }
 
       usedSkillId = selected.skillId;
@@ -288,6 +348,85 @@ export class CombatTurnPhase {
         .withActionTimers(updatedTimers),
       events,
       floatingEvents,
+      usedSkillId,
+    };
+  }
+
+  private findSelectedAction(
+    actions: SelectedCombatAction[],
+    skillId: string,
+  ): SelectedCombatAction | null {
+    return actions.find((entry) => entry.skillId === skillId) ?? null;
+  }
+
+  private queueFollowUpSkills(
+    combat: CombatState,
+    actor: CombatantRef,
+    followUps: SelectedCombatAction[],
+  ): PendingSkillAction[] {
+    return followUps.map((entry, index) => ({
+      side: actor.side,
+      combatantId: actor.id,
+      skillId: entry.skillId,
+      executeAt: combat.combatTime + MULTI_SKILL_STAGGER_SECONDS * (index + 1),
+    }));
+  }
+
+  private executeActorTurn(
+    state: GameState,
+    combat: CombatState,
+    actor: CombatantRef,
+  ): {
+    state: GameState;
+    combat: CombatState;
+    events: string[];
+    floatingEvents: CombatFloatingEvent[];
+  } {
+    let heroes = state.activeHeroes();
+    let enemies = combat.enemies;
+    const actorKey = combatantKey(actor.side, actor.id);
+    let cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
+    const statusEffects = CombatStatusEffectTracker.fromMap(combat.statusEffects);
+
+    let readyActions: SelectedCombatAction[] = [];
+    if (actor.side === 'hero') {
+      const hero = heroes.find((entry) => entry.id === actor.id);
+      if (!hero?.isAlive()) {
+        return { state, combat, events: [], floatingEvents: [] };
+      }
+      readyActions = this.skillSelector.selectAllReadyHeroActions(
+        hero,
+        heroes,
+        enemies,
+        cooldowns,
+        statusEffects,
+      );
+    } else {
+      const enemy = enemies.find((entry) => entry.id === actor.id);
+      if (!enemy?.isAlive()) {
+        return { state, combat, events: [], floatingEvents: [] };
+      }
+      readyActions = this.skillSelector.selectAllReadyEnemyActions(enemy, heroes, enemies, cooldowns);
+    }
+
+    if (readyActions.length === 0) {
+      return { state, combat, events: [], floatingEvents: [] };
+    }
+
+    const [first, ...followUps] = readyActions;
+    const strike = this.executeSkillStrike(state, combat, actor, first.skillId);
+    const pending = [
+      ...combat.pendingSkillActions.filter(
+        (entry) => !(entry.side === actor.side && entry.combatantId === actor.id),
+      ),
+      ...this.queueFollowUpSkills(combat, actor, followUps),
+    ];
+
+    return {
+      state: strike.state,
+      combat: strike.combat.withPendingSkillActions(pending),
+      events: strike.events,
+      floatingEvents: strike.floatingEvents,
     };
   }
 }

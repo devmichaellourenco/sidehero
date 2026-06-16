@@ -55,7 +55,7 @@ function buildWaves(
       wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 3), trash(pickCommonForGlobalTier(globalTier, 1), 2)]),
       wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 2), 2)], 1.2),
       wave('w3', [elite(pickLevelBossForGlobalTier(globalTier), 2), elite(pickSubbossForGlobalTier(globalTier, 1))], 1.3),
-      wave('w4', [boss('fallen_magic_god'), boss('demon_prince')], 2),
+      wave('w4', [boss('vorax'), boss('demon_prince')], 2),
     ];
   }
 

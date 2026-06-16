@@ -13,11 +13,22 @@ const HERO_SPRITES: Record<HeroClassKey, string> = {
   paladin: 'characters/paladin.png',
 };
 
-const ENEMY_PLACEHOLDER_SPRITES = {
+const ENEMY_SPRITE_PATHS = {
   common: 'characters/goblin.png',
   boss: 'characters/goblin_boss.png',
   saci: 'characters/saci_boss.png',
+  goblinArcher: 'characters/goblin_archer.png',
+  goblinArcherAlt: 'characters/goblin_archer_alt.png',
+  goblinBomber: 'characters/goblin_bomber.png',
+  gonodor: 'characters/gonodor_boss.png',
+  vorax: 'characters/vorax_boss.png',
 } as const;
+
+function pickGoblinArcherSprite(enemyId?: string): string {
+  if (!enemyId) return ENEMY_SPRITE_PATHS.goblinArcher;
+  const hash = enemyId.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return hash % 2 === 1 ? ENEMY_SPRITE_PATHS.goblinArcherAlt : ENEMY_SPRITE_PATHS.goblinArcher;
+}
 
 const GEAR_SLOT_SPRITES: Record<GearSlotKey, string> = {
   weapon: 'gear/weapon.png',
@@ -108,12 +119,28 @@ export function getHeroSprite(heroClass: string): string {
   return getAssetUrl(HERO_SPRITES[heroClass as HeroClassKey] ?? HERO_SPRITES.knight);
 }
 
-/** Sprite placeholder: comuns → goblin; subchefes/chefes → goblin_boss; Saci → saci_boss. */
-export function getEnemySpriteUrl(enemyType: string, enemyName: string): string {
+/** Sprite por roster: comuns → goblin; variantes dedicadas; bosses narrativos únicos. */
+export function getEnemySpriteUrl(enemyType: string, enemyName: string, enemyId?: string): string {
   const entry = getEnemyRosterEntry(enemyType);
 
+  if (entry?.spriteVariant === 'vorax' || enemyType === 'vorax') {
+    return getAssetUrl(ENEMY_SPRITE_PATHS.vorax);
+  }
+
+  if (entry?.spriteVariant === 'gonodor' || enemyType === 'gonodor') {
+    return getAssetUrl(ENEMY_SPRITE_PATHS.gonodor);
+  }
+
   if (entry?.spriteVariant === 'saci' || enemyType === 'saci') {
-    return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.saci);
+    return getAssetUrl(ENEMY_SPRITE_PATHS.saci);
+  }
+
+  if (entry?.spriteVariant === 'goblin_archer' || enemyType === 'goblin_archer') {
+    return getAssetUrl(pickGoblinArcherSprite(enemyId));
+  }
+
+  if (entry?.spriteVariant === 'goblin_bomber' || enemyType === 'goblin_bomber') {
+    return getAssetUrl(ENEMY_SPRITE_PATHS.goblinBomber);
   }
 
   if (
@@ -122,10 +149,10 @@ export function getEnemySpriteUrl(enemyType: string, enemyName: string): string 
     entry?.rosterRole === 'subboss' ||
     entry?.rosterRole === 'boss'
   ) {
-    return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.boss);
+    return getAssetUrl(ENEMY_SPRITE_PATHS.boss);
   }
 
-  return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.common);
+  return getAssetUrl(ENEMY_SPRITE_PATHS.common);
 }
 
 /** @deprecated Use getEnemySpriteUrl */
@@ -133,9 +160,15 @@ export function getEnemySprite(enemyType: string, options?: { isBoss?: boolean }
   if (options?.isBoss) {
     const entry = getEnemyRosterEntry(enemyType);
     if (entry?.spriteVariant === 'saci' || enemyType === 'saci') {
-      return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.saci);
+      return getAssetUrl(ENEMY_SPRITE_PATHS.saci);
     }
-    return getAssetUrl(ENEMY_PLACEHOLDER_SPRITES.boss);
+    if (entry?.spriteVariant === 'vorax' || enemyType === 'vorax') {
+      return getAssetUrl(ENEMY_SPRITE_PATHS.vorax);
+    }
+    if (entry?.spriteVariant === 'gonodor' || enemyType === 'gonodor') {
+      return getAssetUrl(ENEMY_SPRITE_PATHS.gonodor);
+    }
+    return getAssetUrl(ENEMY_SPRITE_PATHS.boss);
   }
   return getEnemySpriteUrl(enemyType, '');
 }

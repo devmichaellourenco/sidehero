@@ -78,6 +78,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     hasUnspentPoints: hero.hasUnspentPoints,
     equipment,
     combatIntent: null,
+    combatSkills: [],
     combatSkillCooldowns: [],
     statusEffects: [],
   };

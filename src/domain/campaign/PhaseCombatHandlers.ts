@@ -11,6 +11,12 @@ import { CampaignProgress } from './CampaignProgress';
 import { PhaseRun } from './PhaseRun';
 import { BenchXpPolicy } from '../party/BenchXpPolicy';
 import { resolvePhase } from './CampaignCatalog';
+import {
+  grantsPhaseChests,
+  isPhaseReplay,
+  scalePhaseGold,
+  scalePhaseXp,
+} from './PhaseLootPolicy';
 
 export interface PhaseCombatResult {
   state: GameState;
@@ -51,7 +57,10 @@ export class PhaseCombatHandlers {
     meta: EncounterMeta,
     phaseRun: PhaseRun,
   ): PhaseCombatResult {
-    const totalGold = defeatedEnemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
+    const phaseId = meta.phaseId;
+    const replay = isPhaseReplay(state.campaignProgress, phaseId);
+    const baseGold = defeatedEnemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
+    const totalGold = scalePhaseGold(baseGold, state.campaignProgress, phaseId);
     const enemyNames = defeatedEnemies.map((enemy) => enemy.name).join(', ');
     const nextRun = phaseRun.advanceWave();
     const resolved = this.encounterResolver.resolve(nextRun.phaseId, nextRun.waveIndex);
@@ -64,20 +73,34 @@ export class PhaseCombatHandlers {
     const waveLabel = `${nextRun.waveIndex + 1}/${resolved.meta.waveCount}`;
 
     let nextState = state
-      .withGold(state.gold.add(totalGold))
+      .withGold(totalGold > 0 ? state.gold.add(totalGold) : state.gold)
       .withHeroes(heroes)
       .withPhaseRun(nextRun)
-      .withCombat(combat)
-      .addLog(`${enemyNames} derrotado(s)! +${totalGold} ouro · Wave ${waveLabel}`);
+      .withCombat(combat);
 
-    if (!meta.isBossWave && Math.random() < 0.12) {
+    if (totalGold > 0 && replay) {
+      nextState = nextState.addLog(
+        `${enemyNames} derrotado(s)! +${totalGold} ouro (50%) · Wave ${waveLabel}`,
+      );
+    } else if (totalGold > 0) {
+      nextState = nextState.addLog(`${enemyNames} derrotado(s)! +${totalGold} ouro · Wave ${waveLabel}`);
+    } else {
+      nextState = nextState.addLog(`${enemyNames} derrotado(s)! · Wave ${waveLabel}`);
+    }
+
+    if (grantsPhaseChests(state.campaignProgress, phaseId) && !meta.isBossWave && Math.random() < 0.12) {
       const chest = Chest.create(resolved.phase.difficultyTier, 'monster');
       nextState = nextState.withChests([...nextState.chests, chest]).addLog('📦 Baú de monstro dropou!');
     }
 
+    const events = [`Wave ${waveLabel} iniciada`];
+    if (totalGold > 0) {
+      events.push(replay ? `+${totalGold} ouro (50%)` : `+${totalGold} ouro`);
+    }
+
     return {
       state: nextState.touchTick(),
-      events: [`Wave ${waveLabel} iniciada`, `+${totalGold} ouro`],
+      events,
     };
   }
 
@@ -92,9 +115,11 @@ export class PhaseCombatHandlers {
       return { state, events: [] };
     }
 
-    const totalGold = defeatedEnemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
-    const totalXp = defeatedEnemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
-    const enemyNames = defeatedEnemies.map((enemy) => enemy.name).join(', ');
+    const replay = isPhaseReplay(state.campaignProgress, meta.phaseId);
+    const baseGold = defeatedEnemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
+    const baseXp = defeatedEnemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
+    const totalGold = scalePhaseGold(baseGold, state.campaignProgress, meta.phaseId);
+    const totalXp = scalePhaseXp(baseXp, state.campaignProgress, meta.phaseId);
 
     let progress = state.campaignProgress.markCleared(
       meta.phaseId,
@@ -104,7 +129,7 @@ export class PhaseCombatHandlers {
 
     if (phase.seasonFinale) {
       progress = progress.markSeasonCompleted();
-    } else if (phase.unlocks.length > 0) {
+    } else if (!replay && phase.unlocks.length > 0) {
       progress = progress.withSelectedPhase(phase.unlocks[0]);
     }
 
@@ -118,27 +143,39 @@ export class PhaseCombatHandlers {
         ? state.benchHeroes().map((hero) => hero.gainExperience(benchXp))
         : [];
 
+    const benchLog =
+      benchXp > 0 && benchUpdates.length > 0 ? ` · Reserva +${benchXp} XP` : '';
+
     let nextState = state
       .withCampaignProgress(progress)
-      .withGold(state.gold.add(totalGold))
+      .withGold(totalGold > 0 ? state.gold.add(totalGold) : state.gold)
       .withRosterHeroes([...recoveredHeroes, ...benchUpdates])
       .withStage(progress.highestTierReached)
       .withPhaseRun(null)
       .withCombat(null)
-      .incrementBattlesWon()
-      .addLog(
-        phase.seasonFinale
-          ? `🏆 Temporada concluída! Boss final derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada`
-          : `Boss derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada${
-              benchXp > 0 && benchUpdates.length > 0 ? ` · Reserva +${benchXp} XP` : ''
-            }`,
+      .incrementBattlesWon();
+
+    const rewardSuffix = replay ? ' (repetição — 50% ouro, 75% XP)' : '';
+
+    if (phase.seasonFinale) {
+      nextState = nextState.addLog(
+        replay
+          ? `🏆 Boss final derrotado em ${phase.displayName}${rewardSuffix}! +${totalGold} ouro, +${totalXp} XP · Party recuperada${benchLog}`
+          : `🏆 Temporada concluída! Boss final derrotado em ${phase.displayName}! +${totalGold} ouro, +${totalXp} XP · Party recuperada`,
       );
+    } else {
+      nextState = nextState.addLog(
+        `Boss derrotado em ${phase.displayName}${rewardSuffix}! +${totalGold} ouro, +${totalXp} XP · Party recuperada${benchLog}`,
+      );
+    }
 
-    const events = phase.seasonFinale
-      ? ['🏆 Temporada concluída!', `${phase.displayName} finalizada!`, `+${totalGold} ouro`, `+${totalXp} XP`]
-      : [`${phase.displayName} concluída!`, `+${totalGold} ouro`, `+${totalXp} XP`];
+    const events = replay
+      ? [`${phase.displayName} repetida!`, `+${totalGold} ouro`, `+${totalXp} XP`]
+      : phase.seasonFinale
+        ? ['🏆 Temporada concluída!', `${phase.displayName} finalizada!`, `+${totalGold} ouro`, `+${totalXp} XP`]
+        : [`${phase.displayName} concluída!`, `+${totalGold} ouro`, `+${totalXp} XP`];
 
-    if (nextState.totalBattlesWon % CHEST_EVERY_N_WINS === 0) {
+    if (grantsPhaseChests(state.campaignProgress, meta.phaseId) && nextState.totalBattlesWon % CHEST_EVERY_N_WINS === 0) {
       const chestType: ChestType = phase.seasonFinale ? 'act_boss' : 'boss';
       const chest = Chest.create(phase.difficultyTier, chestType);
       nextState = nextState.withChests([...nextState.chests, chest]).addLog('📦 Baú dropou no painel!');

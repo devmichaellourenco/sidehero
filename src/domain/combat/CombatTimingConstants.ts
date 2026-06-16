@@ -9,3 +9,6 @@ export const SKILL_ACTION_RECOVERY_SECONDS = 0.35;
 
 /** Intervalo mínimo entre ações (evita burst instantâneo). */
 export const MIN_ACTION_INTERVAL_SECONDS = 0.2;
+
+/** Intervalo entre skills extras prontas no mesmo ciclo de ação. */
+export const MULTI_SKILL_STAGGER_SECONDS = 1;

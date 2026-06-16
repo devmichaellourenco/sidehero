@@ -1,6 +1,8 @@
+export type CombatFloatKind = 'damage' | 'heal' | 'crit' | 'buff' | 'debuff';
+
 export interface CombatFloatingEventDto {
   target: 'hero' | 'enemy';
   targetId: string;
-  kind: 'damage' | 'heal';
+  kind: CombatFloatKind;
   amount: number;
 }

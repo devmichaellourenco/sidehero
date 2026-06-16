@@ -24,6 +24,7 @@ import { getHeroNavigation } from '../helpers/HeroNavigationHelper';
 import { buildPendingActions, PendingActionKind } from '../policies/PendingActionsPolicy';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
+import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
 import { bindCampaignTooltip } from './CampaignTooltipBinder';
 import { detectBattleVictory } from './BattleVictoryDetector';
 import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
@@ -92,6 +93,7 @@ export class GameViewController {
   private readonly battleStripEl: HTMLElement;
   private readonly battleStrip: BattleStripRenderer;
   private readonly battleFloats: BattleFloatingTextController;
+  private readonly battleImpacts: BattleImpactFeedbackController;
   private readonly victoryFlow: BattleVictoryFlow;
   private readonly heroPanelsEl: HTMLElement;
   private readonly heroPanel: HeroPanelRenderer;
@@ -156,6 +158,7 @@ export class GameViewController {
       root.querySelector('#battle-float-layer')!,
       this.battleStripEl,
     );
+    this.battleImpacts = new BattleImpactFeedbackController(this.battleStripEl);
     this.victoryFlow = new BattleVictoryFlow(
       root.querySelector('#battle-victory-overlay')!,
       this.battleStripEl,
@@ -647,6 +650,7 @@ export class GameViewController {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         this.battleFloats.show(combatFloats);
+        this.battleImpacts.show(combatFloats);
       });
     });
   }

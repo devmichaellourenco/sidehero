@@ -48,6 +48,30 @@ export class CombatSkillSelector {
     return null;
   }
 
+  selectAllReadyHeroActions(
+    hero: Hero,
+    party: Hero[],
+    enemies: Enemy[],
+    cooldowns: SkillCooldownTracker,
+    statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
+  ): SelectedCombatAction[] {
+    if (!hero.isAlive()) return [];
+
+    const key = combatantKey('hero', hero.id);
+    const skills = listHeroCombatSkills(hero)
+      .filter((skill) => cooldowns.isReady(key, skill.skillId))
+      .filter((skill) => this.meetsHealCondition(skill, party))
+      .sort((left, right) => right.usePriority - left.usePriority);
+
+    const actions: SelectedCombatAction[] = [];
+    for (const skill of skills) {
+      const action = this.buildAction(skill, hero, party, enemies, statusEffects);
+      if (action) actions.push({ action, skillId: skill.skillId });
+    }
+
+    return actions;
+  }
+
   selectEnemyAction(
     enemy: Enemy,
     party: Hero[],
@@ -67,6 +91,28 @@ export class CombatSkillSelector {
     }
 
     return null;
+  }
+
+  selectAllReadyEnemyActions(
+    enemy: Enemy,
+    party: Hero[],
+    enemies: Enemy[],
+    cooldowns: SkillCooldownTracker,
+  ): SelectedCombatAction[] {
+    if (!enemy.isAlive()) return [];
+
+    const key = combatantKey('enemy', enemy.id);
+    const skills = listEnemyCombatSkills(enemy)
+      .filter((skill) => cooldowns.isReady(key, skill.skillId))
+      .sort((left, right) => right.usePriority - left.usePriority);
+
+    const actions: SelectedCombatAction[] = [];
+    for (const skill of skills) {
+      const action = this.buildAction(skill, enemy, party, enemies);
+      if (action) actions.push({ action, skillId: skill.skillId });
+    }
+
+    return actions;
   }
 
   private meetsHealCondition(skill: CombatSkillDefinition, party: Hero[]): boolean {

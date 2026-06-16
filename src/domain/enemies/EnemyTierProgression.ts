@@ -56,7 +56,7 @@ export function pickLevelBossForGlobalTier(globalTier: number): EnemyType {
 export function milestoneBossForMapIndex(mapIndex: number): EnemyType {
   const milestoneByMap: Record<number, EnemyType> = {
     1: 'saci',
-    2: 'hill_ogre',
+    2: 'gonodor',
     3: 'bloody_orc_chief',
     4: 'mountain_troll',
     5: 'three_head_hydra',
@@ -64,7 +64,7 @@ export function milestoneBossForMapIndex(mapIndex: number): EnemyType {
     7: 'lesser_lich',
     8: 'awakened_titan',
     9: 'demon_prince',
-    10: 'fallen_magic_god',
+    10: 'vorax',
   };
   return milestoneByMap[mapIndex] ?? pickLevelBossForGlobalTier(difficultyTierForPhase(mapIndex, 50));
 }

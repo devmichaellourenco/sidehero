@@ -76,6 +76,7 @@ export interface HeroDto {
     } | null
   >;
   combatIntent: CombatSkillIntentDto | null;
+  combatSkills: CombatBattleSkillDto[];
   combatSkillCooldowns: HeroSkillCooldownDto[];
   statusEffects: CombatStatusEffectDto[];
 }
@@ -91,6 +92,15 @@ export interface CombatStatusEffectDto {
   label: string;
   turnsRemaining: number;
   polarity: 'buff' | 'debuff';
+}
+
+export interface CombatBattleSkillDto {
+  skillId: string;
+  skillName: string;
+  secondsRemaining: number;
+  cooldownTotal: number;
+  ready: boolean;
+  highlight: 'none' | 'next' | 'queued';
 }
 
 export interface CombatSkillIntentDto {
@@ -118,6 +128,7 @@ export interface EnemyDto {
   xpReward: number;
   signatureSkills: EnemySignatureSkillDto[];
   combatIntent: CombatSkillIntentDto | null;
+  combatSkills: CombatBattleSkillDto[];
   statusEffects: CombatStatusEffectDto[];
 }
 

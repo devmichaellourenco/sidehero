@@ -59,7 +59,7 @@ export class BattleStripRenderer {
         ${state.enemies
           .map((enemy) => {
             const spriteHtml = imgTag(
-              getEnemySpriteUrl(enemy.enemyType, enemy.name),
+              getEnemySpriteUrl(enemy.enemyType, enemy.name, enemy.id),
               enemy.name,
               'enemy-image',
             );

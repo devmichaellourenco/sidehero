@@ -34,6 +34,11 @@ const ENEMY_SPRITE_MAP = [
   ['goblin.png', 'characters/goblin.png'],
   ['goblin_boss.png', 'characters/goblin_boss.png'],
   ['saci_boss.png', 'characters/saci_boss.png'],
+  ['goblin_arqueiro.png', 'characters/goblin_archer.png'],
+  ['goblin_arqueiro_1.png', 'characters/goblin_archer_alt.png'],
+  ['goblin_bombardeiro.png', 'characters/goblin_bomber.png'],
+  ['gonodor_boss.png', 'characters/gonodor_boss.png'],
+  ['vorax_final_boss.png', 'characters/vorax_boss.png'],
 ];
 
 /** Logo e demais assets estáticos em public/. */

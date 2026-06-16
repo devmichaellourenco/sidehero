@@ -1,6 +1,6 @@
-import { CombatSkillIntentDto, EnemyDto, GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
-import { renderCombatSkillIntent } from './CombatSkillIntentPresentation';
+import { EnemyDto, GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
+import { patchCombatSkillBar } from './CombatSkillIntentPresentation';
 import { formatEnemyHealthLabel } from './EnemyBattlePresentation';
 import { formatHealthLabel } from './HeroBarsPresentation';
 
@@ -45,52 +45,6 @@ function replaceOrRemoveStatusEffects(card: HTMLElement, effectsHtml: string, an
   anchorEl.insertAdjacentHTML('afterend', effectsHtml);
 }
 
-function skillIntentKey(intent: CombatSkillIntentDto | null | undefined): string {
-  if (!intent) return '';
-  return JSON.stringify({
-    nextSkillId: intent.nextSkillId,
-    status: intent.status,
-    secondsRemaining: Math.round(intent.secondsRemaining * 10) / 10,
-    charging: intent.chargingSkills.map((entry) => ({
-      id: entry.skillId,
-      s: Math.round(entry.secondsRemaining * 10) / 10,
-    })),
-  });
-}
-
-function replaceOrRemoveSkillIntent(
-  card: HTMLElement,
-  intent: CombatSkillIntentDto | null | undefined,
-): void {
-  const intentHtml = renderCombatSkillIntent(intent);
-  const existing = card.querySelector('.combat-skill-floor-slot') as HTMLElement | null;
-  const nextKey = skillIntentKey(intent);
-
-  if (!intentHtml) {
-    existing?.remove();
-    return;
-  }
-
-  if (existing && existing.dataset.intentKey === nextKey) {
-    return;
-  }
-
-  if (existing) {
-    existing.outerHTML = intentHtml;
-    card.querySelector<HTMLElement>('.combat-skill-floor-slot')?.setAttribute(
-      'data-intent-key',
-      nextKey,
-    );
-    return;
-  }
-
-  card.insertAdjacentHTML('beforeend', intentHtml);
-  card.querySelector<HTMLElement>('.combat-skill-floor-slot')?.setAttribute(
-    'data-intent-key',
-    nextKey,
-  );
-}
-
 function patchHeroCard(card: HTMLElement, hero: HeroDto, isActiveTurn: boolean): void {
   card.classList.toggle('hero-battle-card--active-turn', isActiveTurn);
 
@@ -102,7 +56,7 @@ function patchHeroCard(card: HTMLElement, hero: HeroDto, isActiveTurn: boolean):
   );
 
   replaceOrRemoveStatusEffects(card, renderCombatStatusEffects(hero.statusEffects), '.hero-sprite');
-  replaceOrRemoveSkillIntent(card, isActiveTurn ? hero.combatIntent : null);
+  patchCombatSkillBar(card, hero.combatSkills);
 }
 
 function patchEnemyCard(
@@ -124,7 +78,7 @@ function patchEnemyCard(
     renderCombatStatusEffects(enemy.statusEffects),
     '.enemy-battle-hitbox',
   );
-  replaceOrRemoveSkillIntent(card, isActiveTurn ? enemy.combatIntent : null);
+  patchCombatSkillBar(card, enemy.combatSkills);
 }
 
 export function patchBattleStripInPlace(

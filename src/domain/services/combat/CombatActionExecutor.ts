@@ -6,6 +6,7 @@ import {
   CombatFloatingEvent,
   createDamageEvent,
   createHealEvent,
+  createStatusImpactEvent,
 } from './CombatFloatingEvent';
 import { Stats } from '../../value-objects/Stats';
 import { CombatActionContext } from './CombatActionContext';
@@ -94,14 +95,25 @@ export class CombatActionExecutor {
     }
 
     const duration = action.effectDurationTurns ?? 1;
-    const statusApplications: StatusApplication[] = targetKeys.map((target) => ({
-      combatantKey: target.key,
-      skillId: action.skillId,
-      kind: action.kind as StatusApplication['kind'],
-      magnitude: action.power,
-      durationTurns: duration,
-      skillName: action.skillName,
-    }));
+    const impactKind = action.kind === 'buff_attack' ? 'buff' : 'debuff';
+    const floatingEvents: CombatFloatingEvent[] = [];
+
+    const statusApplications: StatusApplication[] = targetKeys.map((target) => {
+      const [, combatantId] = target.key.split(':');
+      const side = target.key.startsWith('hero:') ? 'hero' : 'enemy';
+      floatingEvents.push(
+        createStatusImpactEvent(side, combatantId, impactKind, action.power),
+      );
+
+      return {
+        combatantKey: target.key,
+        skillId: action.skillId,
+        kind: action.kind as StatusApplication['kind'],
+        magnitude: action.power,
+        durationTurns: duration,
+        skillName: action.skillName,
+      };
+    });
 
     const statLabel =
       action.kind === 'buff_attack'
@@ -113,7 +125,7 @@ export class CombatActionExecutor {
         : `${statLabel}, ${duration}t`;
     const event = `${actorName} usou ${action.skillName} (${scope})`;
 
-    return { heroes, enemies, event, floatingEvents: [], statusApplications };
+    return { heroes, enemies, event, floatingEvents, statusApplications };
   }
 
   private applyHeal(

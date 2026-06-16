@@ -19,6 +19,20 @@ describe('AssetCatalog — sprites de inimigo', () => {
     expect(url).not.toContain('goblin_boss');
   });
 
+  it('usa goblin_arqueiro para Goblin Arqueiro', () => {
+    const url = getEnemySpriteUrl('goblin_archer', 'Goblin Arqueiro Lv.3', 'enemy-a');
+    expect(url).toContain('characters/goblin_archer.png');
+    expect(url).not.toContain('goblin_boss');
+  });
+
+  it('alterna sprite de arqueiro por instância', () => {
+    const urls = new Set([
+      getEnemySpriteUrl('goblin_archer', 'Goblin Arqueiro', 'archer-1'),
+      getEnemySpriteUrl('goblin_archer', 'Goblin Arqueiro', 'archer-2'),
+    ]);
+    expect(urls.size).toBe(2);
+  });
+
   it('usa goblin_boss para subchefe/chefe', () => {
     const url = getEnemySpriteUrl('hill_ogre', 'Ogro das Colinas');
     expect(url).toContain('characters/goblin_boss.png');
@@ -27,5 +41,20 @@ describe('AssetCatalog — sprites de inimigo', () => {
   it('usa saci_boss para Saci', () => {
     const url = getEnemySpriteUrl('saci', 'Saci');
     expect(url).toContain('characters/saci_boss.png');
+  });
+
+  it('usa goblin_bomber para Goblin Bombardeiro', () => {
+    const url = getEnemySpriteUrl('goblin_bomber', 'Goblin Bombardeiro Lv.5');
+    expect(url).toContain('characters/goblin_bomber.png');
+  });
+
+  it('usa gonodor_boss para Gonodor', () => {
+    const url = getEnemySpriteUrl('gonodor', 'Gonodor');
+    expect(url).toContain('characters/gonodor_boss.png');
+  });
+
+  it('usa vorax_boss para Vorax', () => {
+    const url = getEnemySpriteUrl('vorax', 'Vorax');
+    expect(url).toContain('characters/vorax_boss.png');
   });
 });

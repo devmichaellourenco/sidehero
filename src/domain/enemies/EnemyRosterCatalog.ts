@@ -1,6 +1,6 @@
 export type EnemyPowerTier = 1 | 2 | 3 | 4 | 5;
 export type EnemyRosterRole = 'common' | 'subboss' | 'boss';
-export type EnemySpriteVariant = 'common' | 'boss' | 'saci';
+export type EnemySpriteVariant = 'common' | 'boss' | 'saci' | 'goblin_archer' | 'goblin_bomber' | 'gonodor' | 'vorax';
 
 export interface EnemyRosterEntry {
   id: string;
@@ -43,6 +43,7 @@ const SK = {
   demon5: ['basic_attack', 'pyro_inferno', 'wraith_drain'] as const,
   god5: ['basic_attack', 'arcane_surge', 'dragon_breath', 'saci_wind'] as const,
   saci: ['basic_attack', 'saci_fire', 'saci_wind'] as const,
+  gonodor: ['basic_attack', 'pyro_ember', 'power_attack', 'ground_slam'] as const,
 };
 
 /** 50 inimigos de campanha + Saci (único narrativo). */
@@ -52,9 +53,9 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'cave_bat', name: 'Morcego das Cavernas', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.beast1 },
   { id: 'gray_wolf', name: 'Lobo Cinzento', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.beast1 },
   { id: 'goblin_raider', name: 'Goblin Saqueador', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.goblin1 },
-  { id: 'goblin_archer', name: 'Goblin Arqueiro', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.goblin1 },
+  { id: 'goblin_archer', name: 'Goblin Arqueiro', powerTier: T1, rosterRole: 'common', spriteVariant: 'goblin_archer', skillIds: SK.goblin1 },
   { id: 'kobold_digger', name: 'Kobold Escavador', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.goblin1 },
-  { id: 'kobold_pyro', name: 'Kobold Piromaníaco', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.fire1 },
+  { id: 'goblin_bomber', name: 'Goblin Bombardeiro', powerTier: T1, rosterRole: 'common', spriteVariant: 'goblin_bomber', skillIds: SK.fire1 },
   { id: 'road_bandit', name: 'Bandido de Estrada', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.bandit1 },
   { id: 'goblin_shaman', name: 'Xamã Goblin', powerTier: T1, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.shaman1 },
   { id: 'bandit_captain', name: 'Capitão dos Bandidos', powerTier: T1, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.captain1 },
@@ -107,8 +108,10 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'demon_prince', name: 'Príncipe Demônio', powerTier: T5, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.demon5 },
   { id: 'fallen_magic_god', name: 'Deus Caído da Magia', powerTier: T5, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.god5 },
 
-  // Único narrativo (fase 1-50)
+  // Únicos narrativos
   { id: 'saci', name: 'Saci', powerTier: T1, rosterRole: 'boss', spriteVariant: 'saci', skillIds: SK.saci },
+  { id: 'gonodor', name: 'Gonodor', powerTier: T1, rosterRole: 'boss', spriteVariant: 'gonodor', skillIds: SK.gonodor },
+  { id: 'vorax', name: 'Vorax', powerTier: T5, rosterRole: 'boss', spriteVariant: 'vorax', skillIds: SK.god5 },
 ];
 
 const ROSTER_BY_ID = new Map(ENEMY_ROSTER.map((entry) => [entry.id, entry]));
@@ -127,8 +130,12 @@ export function getSubbossesForPowerTier(tier: EnemyPowerTier): EnemyRosterEntry
   return ENEMY_ROSTER.filter((e) => e.powerTier === tier && e.rosterRole === 'subboss');
 }
 
+const UNIQUE_BOSS_IDS = new Set(['saci', 'gonodor', 'vorax']);
+
 export function getBossForPowerTier(tier: EnemyPowerTier): EnemyRosterEntry {
-  const boss = ENEMY_ROSTER.find((e) => e.powerTier === tier && e.rosterRole === 'boss' && e.id !== 'saci');
+  const boss = ENEMY_ROSTER.find(
+    (e) => e.powerTier === tier && e.rosterRole === 'boss' && !UNIQUE_BOSS_IDS.has(e.id),
+  );
   if (!boss) throw new Error(`Boss não definido para tier ${tier}`);
   return boss;
 }

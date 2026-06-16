@@ -8,6 +8,7 @@ import {
 import { CombatantRef } from '../services/combat/TurnOrderService';
 import { StatusEffectMap } from '../services/combat/CombatStatusEffect';
 import { EncounterMeta } from '../campaign/EncounterResolver';
+import { PendingSkillAction } from '../services/combat/PendingSkillAction';
 
 export interface CombatStateProps {
   enemies: EnemyProps[];
@@ -16,6 +17,7 @@ export interface CombatStateProps {
   skillCooldowns: SkillCooldownMap;
   statusEffects: StatusEffectMap;
   encounterMeta: EncounterMeta | null;
+  pendingSkillActions?: PendingSkillAction[];
   /** Legado — ignorado após migração temporal. */
   turnQueue?: CombatantRef[];
   turnIndex?: number;
@@ -29,6 +31,7 @@ export class CombatState {
   readonly skillCooldowns: SkillCooldownMap;
   readonly statusEffects: StatusEffectMap;
   readonly encounterMeta: EncounterMeta | null;
+  readonly pendingSkillActions: PendingSkillAction[];
 
   private constructor(props: CombatStateProps) {
     this.enemies = props.enemies.map((enemy) => Enemy.restore(enemy));
@@ -37,6 +40,7 @@ export class CombatState {
     this.skillCooldowns = props.skillCooldowns ?? {};
     this.statusEffects = props.statusEffects ?? {};
     this.encounterMeta = props.encounterMeta ?? null;
+    this.pendingSkillActions = [...(props.pendingSkillActions ?? [])];
   }
 
   static restore(props: CombatStateProps): CombatState {
@@ -63,6 +67,7 @@ export class CombatState {
       skillCooldowns: SkillCooldownTracker.createInitial(heroes, enemies),
       statusEffects: {},
       encounterMeta,
+      pendingSkillActions: [],
     });
   }
 
@@ -113,6 +118,10 @@ export class CombatState {
     return this.clone({ statusEffects });
   }
 
+  withPendingSkillActions(pendingSkillActions: PendingSkillAction[]): CombatState {
+    return this.clone({ pendingSkillActions: [...pendingSkillActions] });
+  }
+
   toProps(): CombatStateProps {
     return {
       enemies: this.enemies.map((enemy) => enemy.toProps()),
@@ -121,6 +130,7 @@ export class CombatState {
       skillCooldowns: structuredClone(this.skillCooldowns),
       statusEffects: structuredClone(this.statusEffects),
       encounterMeta: this.encounterMeta ? { ...this.encounterMeta } : null,
+      pendingSkillActions: [...this.pendingSkillActions],
     };
   }
 

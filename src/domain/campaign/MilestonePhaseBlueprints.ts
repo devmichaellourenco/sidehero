@@ -43,7 +43,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     waves: [
       wave('w1', [trash('goblin_raider', 3), trash('goblin_archer', 2)]),
       wave('w2', [elite('goblin_shaman', 2), elite('road_bandit', 2)], 1.15),
-      wave('w3', [elite('bandit_captain'), trash('kobold_pyro', 2)], 1.2),
+      wave('w3', [elite('bandit_captain'), trash('goblin_bomber', 2)], 1.2),
       wave('w4', [boss('saci', 1, 'Saci'), elite('goblin_raider')], 1.7),
     ],
   },
@@ -52,10 +52,10 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.55,
     waves: [
-      wave('w1', [trash('orc_warrior', 2), trash('gnoll_hunter', 2)]),
-      wave('w2', [elite(subbossForMap(2, 0), 2), elite('skeleton_warrior')], 1.2),
-      wave('w3', [elite('renegade_necromancer'), trash('rot_zombie', 2)], 1.3),
-      wave('w4', [boss('hill_ogre', 1, 'Ogro das Colinas'), elite('orc_berserker')], 1.75),
+      wave('w1', [trash('goblin_raider', 2), trash('goblin_bomber', 2)]),
+      wave('w2', [elite('goblin_shaman', 2), elite('goblin_archer', 2)], 1.2),
+      wave('w3', [elite('bandit_captain'), trash('goblin_bomber', 2)], 1.3),
+      wave('w4', [boss('gonodor', 1, 'Gonodor'), elite('goblin_raider')], 1.75),
     ],
   },
   [buildPhaseId(3, 50)]: {
@@ -137,7 +137,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
       wave('w1', [trash('void_herald', 3), trash('soul_devourer', 3)]),
       wave('w2', [elite('archlich', 2), elite('primordial_behemoth', 2), elite('ancient_dragon')], 1.35),
       wave('w3', [elite('demon_prince', 2), elite('fallen_magic_god')], 1.45),
-      wave('w4', [boss('fallen_magic_god', 1, 'Deus Caído da Magia'), elite('void_herald')], 2.1),
+      wave('w4', [boss('vorax', 1, 'Vorax'), elite('void_herald')], 2.1),
     ],
   },
 };

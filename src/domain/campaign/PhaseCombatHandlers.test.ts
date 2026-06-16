@@ -154,6 +154,68 @@ describe('PhaseCombatHandlers', () => {
     expect(wiped.state.combat?.enemies.length).toBeGreaterThan(0);
   });
 
+  it('concede 50% do ouro ao repetir wave de fase já cleared', () => {
+    const phaseId = buildPhaseId(1, 2);
+    const phaseRun = PhaseRun.start(phaseId);
+    const wave1 = resolver.resolve(phaseId, 0);
+    expect(wave1).not.toBeNull();
+
+    const clearedProgress = GameState.initial()
+      .campaignProgress.markCleared(phaseId, [buildPhaseId(1, 3)], 2)
+      .withSelectedPhase(buildPhaseId(1, 5));
+
+    const baseGold = wave1!.enemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
+    const expectedGold = Math.floor(baseGold * 0.5);
+
+    let state = GameState.initial()
+      .withGold(GameState.initial().gold.add(500))
+      .withCampaignProgress(clearedProgress)
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const replayWave = handlers.onWaveCleared(
+      state,
+      wave1!.enemies,
+      state.heroes,
+      wave1!.meta,
+      phaseRun,
+    );
+
+    expect(replayWave.state.gold.amount).toBe(500 + expectedGold);
+    expect(replayWave.events.some((event) => event.includes('50%'))).toBe(true);
+    expect(replayWave.state.chests).toHaveLength(0);
+  });
+
+  it('concede 50% ouro e 75% XP ao repetir boss sem baú nem avanço de fase', () => {
+    const phaseId = buildPhaseId(1, 2);
+    const phaseRun = PhaseRun.start(phaseId);
+    const boss = resolver.resolve(phaseId, 1);
+    expect(boss).not.toBeNull();
+
+    const clearedProgress = GameState.initial()
+      .campaignProgress.markCleared(phaseId, [buildPhaseId(1, 3)], 2)
+      .withSelectedPhase(buildPhaseId(1, 5));
+
+    const baseGold = boss!.enemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
+    const baseXp = boss!.enemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
+    const expectedGold = Math.floor(baseGold * 0.5);
+    const expectedXp = Math.floor(baseXp * 0.75);
+
+    let state = GameState.initial()
+      .withGold(GameState.initial().gold.add(1000))
+      .withCampaignProgress(clearedProgress)
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const victory = handlers.onBossDefeated(state, boss!.enemies, state.activeHeroes(), boss!.meta);
+
+    expect(victory.state.gold.amount).toBe(1000 + expectedGold);
+    expect(victory.state.chests).toHaveLength(0);
+    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 5));
+    expect(victory.state.activeHeroes()[0].experience.current).toBe(expectedXp);
+    expect(victory.state.battleLog.some((entry) => entry.message.includes('75% XP'))).toBe(true);
+  });
+
   it('concede XP parcial à reserva ao derrotar boss', () => {
     let state = GameState.initial().withActivePartyIds(['hero-1', 'hero-2']);
     state = HeroUnlockService.applyUnlock(state, 'berserker');

@@ -1,5 +1,5 @@
 export type CombatFloatTarget = 'hero' | 'enemy';
-export type CombatFloatKind = 'damage' | 'heal' | 'crit';
+export type CombatFloatKind = 'damage' | 'heal' | 'crit' | 'buff' | 'debuff';
 
 export interface CombatFloatingEvent {
   target: CombatFloatTarget;
@@ -35,4 +35,13 @@ export function createHealEvent(
   if (amount <= 0) return null;
 
   return { target: 'hero', targetId, kind: 'heal', amount };
+}
+
+export function createStatusImpactEvent(
+  target: CombatFloatTarget,
+  targetId: string,
+  kind: 'buff' | 'debuff',
+  amount = 0,
+): CombatFloatingEvent {
+  return { target, targetId, kind, amount };
 }
