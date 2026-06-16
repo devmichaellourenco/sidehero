@@ -1,47 +1,43 @@
 import { describe, expect, it } from 'vitest';
-import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownTiming';
 import { getSkillCooldownRatio, renderSkillCooldownOverlay } from './HeroSkillCooldownPresentation';
 
-describe('getSkillCooldownRatio', () => {
-  it('retorna 0 quando pronta', () => {
-    expect(
-      getSkillCooldownRatio({
-        skillId: 'fireball',
-        secondsRemaining: 0,
-        cooldownTotal: 2,
-        ready: true,
-      }),
-    ).toBe(0);
-  });
+const readyCooldown = {
+  skillId: 'fireball',
+  secondsRemaining: 0,
+  cooldownTotal: 2,
+  ready: true,
+  cooldownLabel: '0',
+  cooldownRatio: 0,
+};
 
-  it('calcula proporção da recarga restante', () => {
-    expect(
-      getSkillCooldownRatio({
-        skillId: 'fireball',
-        secondsRemaining: 1,
-        cooldownTotal: 2,
-        ready: false,
-      }),
-    ).toBe(0.5);
+const chargingCooldown = {
+  skillId: 'fireball',
+  secondsRemaining: 1,
+  cooldownTotal: 2,
+  ready: false,
+  cooldownLabel: '1',
+  cooldownRatio: 0.5,
+};
+
+describe('getSkillCooldownRatio', () => {
+  it('usa ratio pré-calculado do DTO', () => {
+    expect(getSkillCooldownRatio(readyCooldown)).toBe(0);
+    expect(getSkillCooldownRatio(chargingCooldown)).toBe(0.5);
   });
 });
 
 describe('renderSkillCooldownOverlay', () => {
-  it('exibe contagem inteira arredondada para cima', () => {
+  it('exibe label pré-calculado do DTO', () => {
     const html = renderSkillCooldownOverlay({
       skillId: 'fireball',
       secondsRemaining: 0.75,
       cooldownTotal: 2,
       ready: false,
+      cooldownLabel: '1',
+      cooldownRatio: 0.375,
     });
 
     expect(html).toContain('>1<');
     expect(html).not.toContain('0.7');
-  });
-});
-
-describe('formatSkillCooldownCountdown', () => {
-  it('re-exporta comportamento do domínio', () => {
-    expect(formatSkillCooldownCountdown(0.75)).toBe('1');
   });
 });

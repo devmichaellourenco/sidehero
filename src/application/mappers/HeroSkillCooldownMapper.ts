@@ -3,6 +3,7 @@ import { Hero } from '../../domain/entities/Hero';
 import { getHeroCombatSkill } from '../../domain/progression/combat/HeroCombatSkillCatalog';
 import { SkillCooldownMap, SkillCooldownTracker, combatantKey } from '../../domain/services/combat/SkillCooldownTracker';
 import { HeroSkillCooldownDto } from '../dto/GameStateDto';
+import { mapSkillCooldownPresentation } from './SkillCooldownPresentationMapper';
 
 export function mapHeroSkillCooldowns(
   hero: Hero,
@@ -19,11 +20,16 @@ export function mapHeroSkillCooldowns(
     const baseCooldown = definition ? getCooldownSeconds(definition) : 0;
     const cooldownTotal = Math.max(baseCooldown, secondsRemaining, 0);
 
+    const ready = secondsRemaining <= 0 || baseCooldown <= 0;
+    const cooldown = mapSkillCooldownPresentation(secondsRemaining, cooldownTotal, ready);
+
     return {
       skillId,
       secondsRemaining,
       cooldownTotal,
-      ready: secondsRemaining <= 0 || baseCooldown <= 0,
+      ready,
+      cooldownLabel: cooldown.cooldownLabel,
+      cooldownRatio: cooldown.cooldownRatio,
     };
   });
 }

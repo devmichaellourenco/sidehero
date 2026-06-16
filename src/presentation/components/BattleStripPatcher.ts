@@ -3,11 +3,7 @@ import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
 import { patchCombatSkillBar } from './CombatSkillIntentPresentation';
 import { formatEnemyHealthLabel } from './EnemyBattlePresentation';
 import { formatHealthLabel } from './HeroBarsPresentation';
-
-function clampPercent(value: number, total: number): number {
-  if (total <= 0) return 0;
-  return Math.max(0, Math.min(100, (value / total) * 100));
-}
+import { clampHealthPercent } from './BattleActorHealthPresentation';
 
 function updateHealthBar(
   card: HTMLElement,
@@ -78,7 +74,7 @@ export function patchBattleStripInPlace(
       isActiveTurn: activeTurn?.side === 'hero' && activeTurn.id === hero.id,
       activeTurnClass: 'hero-battle-card--active-turn',
       healthLabel: formatHealthLabel(hero),
-      healthPercent: clampPercent(hero.health, hero.maxHealth),
+      healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
       statusEffectsHtml: renderCombatStatusEffects(hero.statusEffects),
       combatSkills: hero.combatSkills,
     });
@@ -94,11 +90,15 @@ export function patchBattleStripInPlace(
       isActiveTurn: activeTurn?.side === 'enemy' && activeTurn.id === enemy.id,
       activeTurnClass: 'enemy-battle-card--active-turn',
       healthLabel: formatEnemyHealthLabel(enemy),
-      healthPercent: clampPercent(enemy.health, enemy.maxHealth),
+      healthPercent: clampHealthPercent(enemy.health, enemy.maxHealth),
       statusEffectsHtml: renderCombatStatusEffects(enemy.statusEffects),
       combatSkills: enemy.combatSkills,
     });
   }
+}
+
+export function shouldUseCrowdedBattleStrip(heroCount: number, enemyCount: number): boolean {
+  return heroCount + enemyCount >= 5 || (heroCount >= 3 && enemyCount >= 2);
 }
 
 export function syncBattleStripCrowdedLayout(
@@ -106,7 +106,8 @@ export function syncBattleStripCrowdedLayout(
   heroCount: number,
   enemyCount: number,
 ): void {
-  const crowded =
-    heroCount + enemyCount >= 5 || (heroCount >= 3 && enemyCount >= 2);
-  battleStrip.classList.toggle('battle-strip--crowded', crowded);
+  battleStrip.classList.toggle(
+    'battle-strip--crowded',
+    shouldUseCrowdedBattleStrip(heroCount, enemyCount),
+  );
 }

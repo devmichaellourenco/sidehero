@@ -2,10 +2,9 @@ import { HeroDto } from '../../application/dto/GameStateDto';
 import {
   formatExperienceLabel,
   formatHealthLabel,
-  renderHeroStripHealthBar,
 } from './HeroBarsPresentation';
-import { renderCombatSkillBar, patchCombatSkillBar } from './CombatSkillIntentPresentation';
-import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
+import { renderBattleActorCard } from './BattleActorCardPresentation';
+import { clampHealthPercent } from './BattleActorHealthPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -56,25 +55,16 @@ export function renderHeroBattleSprite(
   spriteHtml: string,
   options: { isActiveTurn?: boolean } = {},
 ): string {
-  const activeClass = options.isActiveTurn ? ' hero-battle-card--active-turn' : '';
-
-  return `
-    <div class="battle-actor-card hero-battle-card${activeClass}" data-hero-id="${escapeHtml(hero.id)}">
-      <button
-        type="button"
-        class="hero-sprite hero-sprite--interactive battle-actor-hitbox"
-        data-float-anchor="hero"
-        data-hero-tooltip
-        data-hero-battle-open="${escapeHtml(hero.id)}"
-        aria-label="Abrir ${escapeHtml(hero.name)}"
-      >
-        ${glowHtml}
-        ${spriteHtml}
-        ${renderCombatStatusEffects(hero.statusEffects)}
-        <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
-      </button>
-      ${renderHeroStripHealthBar(hero)}
-      ${renderCombatSkillBar(hero.combatSkills)}
-    </div>
-  `;
+  return renderBattleActorCard({
+    side: 'hero',
+    id: hero.id,
+    name: hero.name,
+    isActiveTurn: options.isActiveTurn ?? false,
+    spriteInnerHtml: `${glowHtml}${spriteHtml}`,
+    tooltipHtml: renderHeroTooltipContent(hero),
+    healthLabel: formatHealthLabel(hero),
+    healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
+    statusEffects: hero.statusEffects,
+    combatSkills: hero.combatSkills,
+  });
 }

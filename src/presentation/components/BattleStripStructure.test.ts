@@ -20,4 +20,20 @@ describe('buildBattleStripStructureKey', () => {
 
     expect(buildBattleStripStructureKey(base)).not.toBe(buildBattleStripStructureKey(swappedHero));
   });
+
+  it('permanece estável para o mesmo lineup', () => {
+    const state = minimalState();
+    expect(buildBattleStripStructureKey(state)).toBe(buildBattleStripStructureKey(state));
+  });
+
+  it('muda quando a ordem dos inimigos muda', () => {
+    const first = minimalState({
+      enemies: [{ id: 'e1' } as GameStateDto['enemies'][0], { id: 'e2' } as GameStateDto['enemies'][0]],
+    });
+    const swapped = minimalState({
+      enemies: [{ id: 'e2' } as GameStateDto['enemies'][0], { id: 'e1' } as GameStateDto['enemies'][0]],
+    });
+
+    expect(buildBattleStripStructureKey(first)).not.toBe(buildBattleStripStructureKey(swapped));
+  });
 });

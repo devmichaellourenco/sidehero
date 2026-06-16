@@ -1,5 +1,4 @@
 import { CombatBattleSkillDto } from '../../application/dto/GameStateDto';
-import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownTiming';
 import { getSkillDisplayName, getSkillIconUrl } from '../assets/SkillIconCatalog';
 import { imgTag } from '../assets/AssetCatalog';
 
@@ -11,11 +10,6 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function getSkillCooldownRatio(skill: CombatBattleSkillDto): number {
-  if (skill.ready || skill.cooldownTotal <= 0) return 0;
-  return Math.min(1, skill.secondsRemaining / skill.cooldownTotal);
-}
-
 function renderSkillCooldownOverlay(skill: CombatBattleSkillDto): string {
   if (skill.ready) {
     return `
@@ -25,14 +19,11 @@ function renderSkillCooldownOverlay(skill: CombatBattleSkillDto): string {
     `;
   }
 
-  const ratio = getSkillCooldownRatio(skill);
-  const label = formatSkillCooldownCountdown(skill.secondsRemaining);
-
   return `
-    <span class="combat-skill-cooldown" aria-hidden="true" data-remaining-label="${escapeHtml(label)}">
-      <span class="combat-skill-cooldown-shade" style="--cooldown-ratio: ${ratio}"></span>
+    <span class="combat-skill-cooldown" aria-hidden="true" data-remaining-label="${escapeHtml(skill.cooldownLabel)}">
+      <span class="combat-skill-cooldown-shade" style="--cooldown-ratio: ${skill.cooldownRatio}"></span>
       <span class="combat-skill-cooldown-fill"></span>
-      <span class="combat-skill-cooldown-label">${escapeHtml(label)}</span>
+      <span class="combat-skill-cooldown-label">${escapeHtml(skill.cooldownLabel)}</span>
     </span>
   `;
 }
@@ -88,6 +79,8 @@ export function renderCombatSkillIntent(
       cooldownTotal: 0,
       ready: intent.status === 'ready',
       highlight: 'next',
+      cooldownLabel: '',
+      cooldownRatio: 0,
     },
   ]);
 }
@@ -167,11 +160,9 @@ export function patchCombatSkillCooldowns(
       continue;
     }
 
-    const ratio = getSkillCooldownRatio(skill);
-    const remainingLabel = formatSkillCooldownCountdown(skill.secondsRemaining);
     overlay.classList.remove('combat-skill-cooldown--ready');
-    shade.style.setProperty('--cooldown-ratio', String(ratio));
-    label.textContent = remainingLabel;
-    overlay.setAttribute('data-remaining-label', remainingLabel);
+    shade.style.setProperty('--cooldown-ratio', String(skill.cooldownRatio));
+    label.textContent = skill.cooldownLabel;
+    overlay.setAttribute('data-remaining-label', skill.cooldownLabel);
   }
 }

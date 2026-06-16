@@ -1,6 +1,6 @@
 import { EnemyDto } from '../../application/dto/GameStateDto';
-import { renderCombatSkillBar } from './CombatSkillIntentPresentation';
-import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
+import { renderBattleActorCard } from './BattleActorCardPresentation';
+import { clampHealthPercent } from './BattleActorHealthPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -45,35 +45,17 @@ export function renderEnemyBattleCard(
   spriteHtml: string,
   options: { isActiveTurn?: boolean; isBossWave?: boolean } = {},
 ): string {
-  const healthPercent = Math.max(0, (enemy.health / enemy.maxHealth) * 100);
-  const healthLabel = formatEnemyHealthLabel(enemy);
-  const activeClass = options.isActiveTurn ? ' enemy-battle-card--active-turn' : '';
-  const bossClass = options.isBossWave ? ' enemy-battle-card--boss' : '';
-
-  return `
-    <div class="battle-actor-card enemy-battle-card${activeClass}${bossClass}" data-enemy-id="${escapeHtml(enemy.id)}">
-      <div
-        class="enemy-battle-hitbox battle-actor-hitbox"
-        data-float-anchor="enemy"
-        data-enemy-tooltip
-        tabindex="0"
-        aria-label="${escapeHtml(enemy.name)}"
-      >
-        ${spriteHtml}
-        ${renderCombatStatusEffects(enemy.statusEffects)}
-        <span class="enemy-tooltip-content hidden">${renderEnemyTooltipContent(enemy, stage)}</span>
-      </div>
-      <div
-        class="stat-bar health-bar enemy strip-bar"
-        data-bar-label="${healthLabel}"
-        tabindex="0"
-        aria-label="Vida ${healthLabel}"
-      >
-        <div class="stat-bar-track">
-          <div class="health-fill enemy" style="width: ${healthPercent}%"></div>
-        </div>
-      </div>
-      ${renderCombatSkillBar(enemy.combatSkills)}
-    </div>
-  `;
+  return renderBattleActorCard({
+    side: 'enemy',
+    id: enemy.id,
+    name: enemy.name,
+    isActiveTurn: options.isActiveTurn ?? false,
+    isBoss: options.isBossWave,
+    spriteInnerHtml: spriteHtml,
+    tooltipHtml: renderEnemyTooltipContent(enemy, stage),
+    healthLabel: formatEnemyHealthLabel(enemy),
+    healthPercent: clampHealthPercent(enemy.health, enemy.maxHealth),
+    statusEffects: enemy.statusEffects,
+    combatSkills: enemy.combatSkills,
+  });
 }

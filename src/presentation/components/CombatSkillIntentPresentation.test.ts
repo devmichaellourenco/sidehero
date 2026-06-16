@@ -11,6 +11,8 @@ describe('CombatSkillIntentPresentation', () => {
         cooldownTotal: 3,
         ready: true,
         highlight: 'next',
+        cooldownLabel: '0',
+        cooldownRatio: 0,
       },
       {
         skillId: 'arcane_bolt',
@@ -19,6 +21,8 @@ describe('CombatSkillIntentPresentation', () => {
         cooldownTotal: 3,
         ready: false,
         highlight: 'none',
+        cooldownLabel: '2',
+        cooldownRatio: 0.5,
       },
     ]);
 
@@ -27,5 +31,6 @@ describe('CombatSkillIntentPresentation', () => {
     expect(html).toContain('data-skill-id="arcane_bolt"');
     expect(html).toContain('combat-skill-slot--next');
     expect(html).toContain('combat-skill-cooldown-shade');
+    expect(html).toContain('>2<');
   });
 });

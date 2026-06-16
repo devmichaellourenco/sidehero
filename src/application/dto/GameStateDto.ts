@@ -86,6 +86,8 @@ export interface HeroSkillCooldownDto {
   secondsRemaining: number;
   cooldownTotal: number;
   ready: boolean;
+  cooldownLabel: string;
+  cooldownRatio: number;
 }
 
 export interface CombatStatusEffectDto {
@@ -93,6 +95,7 @@ export interface CombatStatusEffectDto {
   tooltip: string;
   turnsRemaining: number;
   polarity: 'buff' | 'debuff';
+  iconPath: string;
 }
 
 export interface CombatBattleSkillDto {
@@ -102,6 +105,8 @@ export interface CombatBattleSkillDto {
   cooldownTotal: number;
   ready: boolean;
   highlight: 'none' | 'next' | 'queued';
+  cooldownLabel: string;
+  cooldownRatio: number;
 }
 
 export interface CombatSkillIntentDto {

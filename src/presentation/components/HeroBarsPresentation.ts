@@ -1,9 +1,5 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
-
-function clampPercent(value: number, total: number): number {
-  if (total <= 0) return 0;
-  return Math.max(0, Math.min(100, (value / total) * 100));
-}
+import { clampHealthPercent, renderStripHealthBar } from './BattleActorHealthPresentation';
 
 export function formatHealthLabel(hero: Pick<HeroDto, 'health' | 'maxHealth'>): string {
   return `${hero.health}/${hero.maxHealth}`;
@@ -16,26 +12,16 @@ export function formatExperienceLabel(
 }
 
 export function renderHeroStripHealthBar(hero: HeroDto): string {
-  const healthPercent = clampPercent(hero.health, hero.maxHealth);
-  const healthLabel = formatHealthLabel(hero);
-
-  return `
-    <div
-      class="stat-bar health-bar hero strip-bar"
-      data-bar-label="${healthLabel}"
-      tabindex="0"
-      aria-label="Vida ${healthLabel}"
-    >
-      <div class="stat-bar-track">
-        <div class="health-fill hero" style="width: ${healthPercent}%"></div>
-      </div>
-    </div>
-  `;
+  return renderStripHealthBar({
+    side: 'hero',
+    healthLabel: formatHealthLabel(hero),
+    healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
+  });
 }
 
 export function renderHeroBars(hero: HeroDto, options: { compact?: boolean } = {}): string {
-  const healthPercent = clampPercent(hero.health, hero.maxHealth);
-  const xpPercent = clampPercent(hero.experience, hero.experienceToNextLevel);
+  const healthPercent = clampHealthPercent(hero.health, hero.maxHealth);
+  const xpPercent = clampHealthPercent(hero.experience, hero.experienceToNextLevel);
   const compactClass = options.compact ? ' hero-bars-compact' : '';
   const healthLabel = formatHealthLabel(hero);
   const xpLabel = formatExperienceLabel(hero);

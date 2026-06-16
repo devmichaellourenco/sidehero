@@ -1,5 +1,5 @@
 import { CombatStatusEffectDto } from '../../application/dto/GameStateDto';
-import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
+import { getAssetUrl, imgTag } from '../assets/AssetCatalog';
 
 function escapeHtml(text: string): string {
   return text
@@ -9,8 +9,8 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function statusIconAsset(kind: CombatStatusEffectDto['kind']): string {
-  return kind === 'buff_attack' ? ASSETS.skills.buff : ASSETS.skills.debuff;
+function statusIconAsset(effect: CombatStatusEffectDto): string {
+  return getAssetUrl(effect.iconPath);
 }
 
 export function renderCombatStatusEffects(effects: CombatStatusEffectDto[]): string {
@@ -22,7 +22,7 @@ export function renderCombatStatusEffects(effects: CombatStatusEffectDto[]): str
         effect.polarity === 'buff'
           ? 'combat-status-badge--buff'
           : 'combat-status-badge--debuff';
-      const iconUrl = getAssetUrl(statusIconAsset(effect.kind));
+      const iconUrl = statusIconAsset(effect);
       const iconAlt = effect.polarity === 'buff' ? 'Buff' : 'Debuff';
 
       return `

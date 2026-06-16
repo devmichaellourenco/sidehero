@@ -1,9 +1,7 @@
 import { HeroSkillCooldownDto } from '../../application/dto/GameStateDto';
-import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownTiming';
 
 export function getSkillCooldownRatio(cooldown: HeroSkillCooldownDto): number {
-  if (cooldown.ready || cooldown.cooldownTotal <= 0) return 0;
-  return Math.min(1, cooldown.secondsRemaining / cooldown.cooldownTotal);
+  return cooldown.cooldownRatio;
 }
 
 export function renderSkillCooldownOverlay(cooldown: HeroSkillCooldownDto | undefined): string {
@@ -15,20 +13,17 @@ export function renderSkillCooldownOverlay(cooldown: HeroSkillCooldownDto | unde
     `;
   }
 
-  const ratio = getSkillCooldownRatio(cooldown);
-  const label = formatSkillCooldownCountdown(cooldown.secondsRemaining);
-
   return `
     <span
       class="hero-skill-cooldown"
       aria-hidden="true"
-      data-remaining-label="${label}"
+      data-remaining-label="${cooldown.cooldownLabel}"
     >
       <span
         class="hero-skill-cooldown-shade"
-        style="--cooldown-ratio: ${ratio}"
+        style="--cooldown-ratio: ${cooldown.cooldownRatio}"
       ></span>
-      <span class="hero-skill-cooldown-label">${label}</span>
+      <span class="hero-skill-cooldown-label">${cooldown.cooldownLabel}</span>
     </span>
   `;
 }

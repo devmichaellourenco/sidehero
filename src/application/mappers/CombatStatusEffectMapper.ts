@@ -2,6 +2,7 @@ import { statusEffectTooltip, StatusEffectMap } from '../../domain/services/comb
 import { CombatStatusEffectTracker } from '../../domain/services/combat/CombatStatusEffectTracker';
 import { combatantKey } from '../../domain/services/combat/SkillCooldownTracker';
 import { CombatStatusEffectDto } from '../dto/GameStateDto';
+import { mapCombatStatusEffectIconPath } from './CombatStatusEffectIconMapper';
 
 export function mapCombatantStatusEffects(
   side: 'hero' | 'enemy',
@@ -16,5 +17,6 @@ export function mapCombatantStatusEffects(
     tooltip: statusEffectTooltip(effect),
     turnsRemaining: effect.remainingTurns,
     polarity: effect.kind === 'buff_attack' ? 'buff' : 'debuff',
+    iconPath: mapCombatStatusEffectIconPath(effect.kind),
   }));
 }
