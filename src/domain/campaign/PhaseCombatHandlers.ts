@@ -129,7 +129,7 @@ export class PhaseCombatHandlers {
 
     if (phase.seasonFinale) {
       progress = progress.markSeasonCompleted();
-    } else if (!replay && phase.unlocks.length > 0) {
+    } else if (phase.unlocks.length > 0) {
       progress = progress.withSelectedPhase(phase.unlocks[0]);
     }
 

@@ -186,7 +186,7 @@ describe('PhaseCombatHandlers', () => {
     expect(replayWave.state.chests).toHaveLength(0);
   });
 
-  it('concede 50% ouro e 75% XP ao repetir boss sem baú nem avanço de fase', () => {
+  it('concede 50% ouro e 75% XP ao repetir boss sem baú e avança para a próxima fase', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
     const boss = resolver.resolve(phaseId, 1);
@@ -211,9 +211,33 @@ describe('PhaseCombatHandlers', () => {
 
     expect(victory.state.gold.amount).toBe(1000 + expectedGold);
     expect(victory.state.chests).toHaveLength(0);
-    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 5));
+    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
     expect(victory.state.activeHeroes()[0].experience.current).toBe(expectedXp);
     expect(victory.state.battleLog.some((entry) => entry.message.includes('75% XP'))).toBe(true);
+  });
+
+  it('avança para a próxima fase ao repetir fase antiga selecionada manualmente', () => {
+    const phaseId = buildPhaseId(1, 1);
+    const phaseRun = PhaseRun.start(phaseId);
+    const phase = resolvePhase(phaseId)!;
+    const bossWaveIndex = phase.waves.length - 1;
+    const boss = resolver.resolve(phaseId, bossWaveIndex);
+    expect(boss).not.toBeNull();
+
+    const clearedProgress = GameState.initial()
+      .campaignProgress.markCleared(phaseId, [buildPhaseId(1, 2)], 1)
+      .withSelectedPhase(phaseId);
+
+    let state = GameState.initial()
+      .withCampaignProgress(clearedProgress)
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const victory = handlers.onBossDefeated(state, boss!.enemies, state.activeHeroes(), boss!.meta);
+
+    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 2));
+    expect(victory.state.phaseRun).toBeNull();
+    expect(victory.state.combat).toBeNull();
   });
 
   it('concede XP parcial à reserva ao derrotar boss', () => {
