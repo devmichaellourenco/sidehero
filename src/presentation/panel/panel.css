@@ -489,6 +489,7 @@ h2 {
   align-items: flex-end;
   justify-content: center;
   animation: march 1.2s ease-in-out infinite;
+  overflow: visible;
 }
 
 .hero-battle-card {
@@ -497,6 +498,7 @@ h2 {
   flex-direction: column;
   align-items: center;
   cursor: default;
+  overflow: visible;
 }
 
 .hero-battle-card:nth-child(2) .hero-sprite {
@@ -611,13 +613,11 @@ h2 {
 
 .battle-impact {
   position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
   width: 22px;
   height: 22px;
-  z-index: 6;
+  z-index: 5;
   pointer-events: none;
+  transform: translateX(-50%);
   animation: battle-impact-pop 0.65s ease-out forwards;
 }
 

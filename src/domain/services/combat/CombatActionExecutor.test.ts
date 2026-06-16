@@ -36,6 +36,62 @@ describe('CombatActionExecutor', () => {
     expect(result.event).toContain('Bênção');
   });
 
+  it('emite floating de cura no aliado curado, não no conjurador', () => {
+    const priest = Hero.createStarter('p1', 'priest', 'Elara');
+    const damagedKnight = Hero.createStarter('k1', 'knight', 'Galneon').takeDamage(50);
+    const hpBeforeHeal = damagedKnight.currentHealth;
+    const enemy = Enemy.forStage(1);
+
+    const result = executor.execute(
+      {
+        skillId: 'minor_heal',
+        skillName: 'Cura Menor',
+        kind: 'heal_ally',
+        targeting: 'single_ally',
+        power: 20,
+        targetHeroId: 'k1',
+      },
+      'Elara',
+      [priest, damagedKnight],
+      [enemy],
+    );
+
+    expect(result.floatingEvents).toHaveLength(1);
+    expect(result.floatingEvents[0]).toMatchObject({
+      target: 'hero',
+      targetId: 'k1',
+      kind: 'heal',
+      amount: 20,
+    });
+    expect(result.heroes.find((hero) => hero.id === 'k1')?.currentHealth).toBe(hpBeforeHeal + 20);
+  });
+
+  it('emite floating de cura para cada aliado em cura em área', () => {
+    const priest = Hero.createStarter('p1', 'priest', 'Elara').takeDamage(30);
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon').takeDamage(40);
+    const enemy = Enemy.forStage(1);
+
+    const result = executor.execute(
+      {
+        skillId: 'group_heal',
+        skillName: 'Cura em Grupo',
+        kind: 'heal_ally',
+        targeting: 'all_allies',
+        power: 15,
+        targetHeroIds: ['p1', 'k1'],
+      },
+      'Elara',
+      [priest, knight],
+      [enemy],
+    );
+
+    expect(result.floatingEvents).toHaveLength(2);
+    expect(result.floatingEvents.map((entry) => entry.targetId).sort()).toEqual(['k1', 'p1']);
+    expect(result.floatingEvents.every((entry) => entry.kind === 'heal' && entry.target === 'hero')).toBe(
+      true,
+    );
+  });
+
   it('debuff de defesa aumenta dano recebido pelo herói', () => {
     const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const enemy = Enemy.forStage(1);

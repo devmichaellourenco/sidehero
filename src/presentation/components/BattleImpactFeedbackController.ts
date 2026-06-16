@@ -11,7 +11,10 @@ const IMPACT_ICON: Record<'damage' | 'heal' | 'buff' | 'debuff', string> = {
 };
 
 export class BattleImpactFeedbackController {
-  constructor(private readonly battleStrip: HTMLElement) {}
+  constructor(
+    private readonly floatLayer: HTMLElement,
+    private readonly battleStrip: HTMLElement,
+  ) {}
 
   show(events: CombatFloatingEventDto[]): void {
     if (!events.length) return;
@@ -21,9 +24,10 @@ export class BattleImpactFeedbackController {
       if (!visualKind) continue;
 
       const card = this.findCard(event);
-      if (!card) continue;
+      const anchor = this.findAnchor(event);
+      if (!card || !anchor) continue;
 
-      this.spawnImpact(card, visualKind);
+      this.spawnImpact(card, anchor, visualKind);
     }
   }
 
@@ -41,14 +45,25 @@ export class BattleImpactFeedbackController {
     return this.battleStrip.querySelector(`[data-enemy-id="${event.targetId}"]`);
   }
 
+  private findAnchor(event: CombatFloatingEventDto): HTMLElement | null {
+    if (event.target === 'hero') {
+      return this.battleStrip.querySelector(
+        `[data-hero-id="${event.targetId}"] [data-float-anchor="hero"]`,
+      );
+    }
+
+    return this.battleStrip.querySelector(
+      `[data-enemy-id="${event.targetId}"] [data-float-anchor="enemy"]`,
+    );
+  }
+
   private spawnImpact(
     card: HTMLElement,
+    anchor: HTMLElement,
     kind: keyof typeof IMPACT_ICON,
   ): void {
-    const anchor =
-      card.querySelector<HTMLElement>('[data-float-anchor="hero"]') ??
-      card.querySelector<HTMLElement>('[data-float-anchor="enemy"]');
-    if (!anchor) return;
+    const anchorRect = anchor.getBoundingClientRect();
+    const stripRect = this.battleStrip.getBoundingClientRect();
 
     card.classList.remove(
       'battle-card--impact-damage',
@@ -71,6 +86,8 @@ export class BattleImpactFeedbackController {
     const overlay = document.createElement('span');
     overlay.className = `battle-impact battle-impact--${kind}`;
     overlay.setAttribute('aria-hidden', 'true');
+    overlay.style.left = `${anchorRect.left - stripRect.left + anchorRect.width / 2}px`;
+    overlay.style.top = `${anchorRect.top - stripRect.top + 4}px`;
 
     const icon = document.createElement('img');
     icon.src = getAssetUrl(IMPACT_ICON[kind]);
@@ -78,7 +95,7 @@ export class BattleImpactFeedbackController {
     icon.className = 'battle-impact-icon';
     overlay.appendChild(icon);
 
-    anchor.appendChild(overlay);
+    this.floatLayer.appendChild(overlay);
     window.setTimeout(() => overlay.remove(), IMPACT_DURATION_MS);
   }
 }

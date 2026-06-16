@@ -158,7 +158,10 @@ export class GameViewController {
       root.querySelector('#battle-float-layer')!,
       this.battleStripEl,
     );
-    this.battleImpacts = new BattleImpactFeedbackController(this.battleStripEl);
+    this.battleImpacts = new BattleImpactFeedbackController(
+      root.querySelector('#battle-float-layer')!,
+      this.battleStripEl,
+    );
     this.victoryFlow = new BattleVictoryFlow(
       root.querySelector('#battle-victory-overlay')!,
       this.battleStripEl,

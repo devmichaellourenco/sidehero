@@ -70,3 +70,13 @@ A separação entre `BattleFloatingTextController` (texto) e `BattleImpactFeedba
 Os eventos reutilizam o pipeline existente de `floatingEvents`, evitando novo canal de DTO ou estado de combate. Para escalar, basta estender `CombatFloatKind` e mapear novos ícones em `IMPACT_ICON`; efeitos visuais adicionais ficam confinados ao controller e ao CSS.
 
 Próximos passos opcionais: ícone dedicado para debuff, duração configurável por tipo, ou testes unitários do controller com DOM mock.
+
+## Correção — cura em aliado (122)
+
+**Problema:** ícone de cura não aparecia no herói curado (ex.: Elara curando Galneon), embora o evento de domínio fosse emitido corretamente.
+
+**Causa:** o ícone era anexado dentro do `button.hero-sprite`, ficando atrás da camada `#battle-float-layer` (z-index 4) e parcialmente oculto pelo sprite.
+
+**Correção:** `BattleImpactFeedbackController` passa a renderizar ícones na mesma camada dos números flutuantes, posicionados via `getBoundingClientRect` do anchor do alvo. Flash/shake permanecem no card do personagem.
+
+**Testes:** `CombatActionExecutor.test.ts` — cura single ally e cura em área emitem `floatingEvents` com `target: 'hero'` e `targetId` do aliado curado.
