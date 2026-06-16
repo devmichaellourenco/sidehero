@@ -68,7 +68,7 @@ export function renderCombatSkillBar(skills: CombatBattleSkillDto[] | null | und
   if (!skills || skills.length === 0) return '';
 
   return `
-    <div class="combat-skill-floor-slot" data-combat-skill-bar>
+    <div class="combat-skill-bar combat-skill-floor-slot" data-combat-skill-bar data-skill-count="${skills.length}">
       ${skills.map(renderSkillSlot).join('')}
     </div>
   `;

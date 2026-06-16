@@ -89,7 +89,8 @@ export interface HeroSkillCooldownDto {
 }
 
 export interface CombatStatusEffectDto {
-  label: string;
+  kind: 'buff_attack' | 'debuff_defense';
+  tooltip: string;
   turnsRemaining: number;
   polarity: 'buff' | 'debuff';
 }

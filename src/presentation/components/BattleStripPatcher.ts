@@ -27,11 +27,11 @@ function updateHealthBar(
   }
 }
 
-function replaceOrRemoveStatusEffects(card: HTMLElement, effectsHtml: string, anchor: string): void {
-  const anchorEl = card.querySelector(anchor);
-  if (!anchorEl) return;
+function replaceOrRemoveStatusBadges(card: HTMLElement, effectsHtml: string): void {
+  const hitbox = card.querySelector('.battle-actor-hitbox');
+  if (!hitbox) return;
 
-  const existing = card.querySelector('.combat-status-effects');
+  const existing = hitbox.querySelector('.combat-status-badges');
   if (!effectsHtml) {
     existing?.remove();
     return;
@@ -42,43 +42,25 @@ function replaceOrRemoveStatusEffects(card: HTMLElement, effectsHtml: string, an
     return;
   }
 
-  anchorEl.insertAdjacentHTML('afterend', effectsHtml);
+  hitbox.insertAdjacentHTML('beforeend', effectsHtml);
 }
 
-function patchHeroCard(card: HTMLElement, hero: HeroDto, isActiveTurn: boolean): void {
-  card.classList.toggle('hero-battle-card--active-turn', isActiveTurn);
-
-  updateHealthBar(
-    card,
-    '.health-bar',
-    formatHealthLabel(hero),
-    clampPercent(hero.health, hero.maxHealth),
-  );
-
-  replaceOrRemoveStatusEffects(card, renderCombatStatusEffects(hero.statusEffects), '.hero-sprite');
-  patchCombatSkillBar(card, hero.combatSkills);
-}
-
-function patchEnemyCard(
+function patchActorCard(
   card: HTMLElement,
-  enemy: EnemyDto,
-  isActiveTurn: boolean,
+  options: {
+    isActiveTurn: boolean;
+    activeTurnClass: string;
+    healthLabel: string;
+    healthPercent: number;
+    statusEffectsHtml: string;
+    combatSkills: HeroDto['combatSkills'] | EnemyDto['combatSkills'];
+  },
 ): void {
-  card.classList.toggle('enemy-battle-card--active-turn', isActiveTurn);
+  card.classList.toggle(options.activeTurnClass, options.isActiveTurn);
 
-  updateHealthBar(
-    card,
-    '.health-bar',
-    formatEnemyHealthLabel(enemy),
-    clampPercent(enemy.health, enemy.maxHealth),
-  );
-
-  replaceOrRemoveStatusEffects(
-    card,
-    renderCombatStatusEffects(enemy.statusEffects),
-    '.enemy-battle-hitbox',
-  );
-  patchCombatSkillBar(card, enemy.combatSkills);
+  updateHealthBar(card, '.health-bar', options.healthLabel, options.healthPercent);
+  replaceOrRemoveStatusBadges(card, options.statusEffectsHtml);
+  patchCombatSkillBar(card, options.combatSkills);
 }
 
 export function patchBattleStripInPlace(
@@ -92,8 +74,14 @@ export function patchBattleStripInPlace(
     const card = heroesContainer.querySelector<HTMLElement>(`[data-hero-id="${hero.id}"]`);
     if (!card) continue;
 
-    const isActive = activeTurn?.side === 'hero' && activeTurn.id === hero.id;
-    patchHeroCard(card, hero, isActive);
+    patchActorCard(card, {
+      isActiveTurn: activeTurn?.side === 'hero' && activeTurn.id === hero.id,
+      activeTurnClass: 'hero-battle-card--active-turn',
+      healthLabel: formatHealthLabel(hero),
+      healthPercent: clampPercent(hero.health, hero.maxHealth),
+      statusEffectsHtml: renderCombatStatusEffects(hero.statusEffects),
+      combatSkills: hero.combatSkills,
+    });
   }
 
   if (state.enemies.length === 0) return;
@@ -102,7 +90,23 @@ export function patchBattleStripInPlace(
     const card = enemyContainer.querySelector<HTMLElement>(`[data-enemy-id="${enemy.id}"]`);
     if (!card) continue;
 
-    const isActive = activeTurn?.side === 'enemy' && activeTurn.id === enemy.id;
-    patchEnemyCard(card, enemy, isActive);
+    patchActorCard(card, {
+      isActiveTurn: activeTurn?.side === 'enemy' && activeTurn.id === enemy.id,
+      activeTurnClass: 'enemy-battle-card--active-turn',
+      healthLabel: formatEnemyHealthLabel(enemy),
+      healthPercent: clampPercent(enemy.health, enemy.maxHealth),
+      statusEffectsHtml: renderCombatStatusEffects(enemy.statusEffects),
+      combatSkills: enemy.combatSkills,
+    });
   }
+}
+
+export function syncBattleStripCrowdedLayout(
+  battleStrip: HTMLElement,
+  heroCount: number,
+  enemyCount: number,
+): void {
+  const crowded =
+    heroCount + enemyCount >= 5 || (heroCount >= 3 && enemyCount >= 2);
+  battleStrip.classList.toggle('battle-strip--crowded', crowded);
 }

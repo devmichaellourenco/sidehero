@@ -51,18 +51,18 @@ export function renderEnemyBattleCard(
   const bossClass = options.isBossWave ? ' enemy-battle-card--boss' : '';
 
   return `
-    <div class="enemy-battle-card${activeClass}${bossClass}" data-enemy-id="${escapeHtml(enemy.id)}">
+    <div class="battle-actor-card enemy-battle-card${activeClass}${bossClass}" data-enemy-id="${escapeHtml(enemy.id)}">
       <div
-        class="enemy-battle-hitbox"
+        class="enemy-battle-hitbox battle-actor-hitbox"
         data-float-anchor="enemy"
         data-enemy-tooltip
         tabindex="0"
         aria-label="${escapeHtml(enemy.name)}"
       >
         ${spriteHtml}
+        ${renderCombatStatusEffects(enemy.statusEffects)}
         <span class="enemy-tooltip-content hidden">${renderEnemyTooltipContent(enemy, stage)}</span>
       </div>
-      ${renderCombatStatusEffects(enemy.statusEffects)}
       <div
         class="stat-bar health-bar enemy strip-bar"
         data-bar-label="${healthLabel}"

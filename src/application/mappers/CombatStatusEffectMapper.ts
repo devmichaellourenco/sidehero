@@ -1,4 +1,4 @@
-import { statusEffectLabel, StatusEffectMap } from '../../domain/services/combat/CombatStatusEffect';
+import { statusEffectTooltip, StatusEffectMap } from '../../domain/services/combat/CombatStatusEffect';
 import { CombatStatusEffectTracker } from '../../domain/services/combat/CombatStatusEffectTracker';
 import { combatantKey } from '../../domain/services/combat/SkillCooldownTracker';
 import { CombatStatusEffectDto } from '../dto/GameStateDto';
@@ -12,7 +12,8 @@ export function mapCombatantStatusEffects(
   const key = combatantKey(side, id);
 
   return tracker.listFor(key).map((effect) => ({
-    label: statusEffectLabel(effect),
+    kind: effect.kind,
+    tooltip: statusEffectTooltip(effect),
     turnsRemaining: effect.remainingTurns,
     polarity: effect.kind === 'buff_attack' ? 'buff' : 'debuff',
   }));

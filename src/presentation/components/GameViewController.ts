@@ -153,6 +153,7 @@ export class GameViewController {
     this.battleStrip = new BattleStripRenderer(
       this.heroesContainerEl,
       root.querySelector('#enemy-container')!,
+      this.battleStripEl,
     );
     this.battleFloats = new BattleFloatingTextController(
       root.querySelector('#battle-float-layer')!,

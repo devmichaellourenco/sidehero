@@ -1,7 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
-import { patchBattleStripInPlace } from './BattleStripPatcher';
+import { patchBattleStripInPlace, syncBattleStripCrowdedLayout } from './BattleStripPatcher';
 import {
   battleStripDomMatchesStructure,
   buildBattleStripStructureKey,
@@ -17,9 +17,16 @@ export class BattleStripRenderer {
   constructor(
     private readonly heroesContainer: HTMLElement,
     private readonly enemyContainer: HTMLElement,
+    private readonly battleStrip: HTMLElement,
   ) {}
 
   render(state: GameStateDto): void {
+    syncBattleStripCrowdedLayout(
+      this.battleStrip,
+      state.activeParty.length,
+      state.enemies.length,
+    );
+
     const nextStructureKey = buildBattleStripStructureKey(state);
     if (
       nextStructureKey === this.structureKey &&

@@ -59,10 +59,10 @@ export function renderHeroBattleSprite(
   const activeClass = options.isActiveTurn ? ' hero-battle-card--active-turn' : '';
 
   return `
-    <div class="hero-battle-card${activeClass}" data-hero-id="${escapeHtml(hero.id)}">
+    <div class="battle-actor-card hero-battle-card${activeClass}" data-hero-id="${escapeHtml(hero.id)}">
       <button
         type="button"
-        class="hero-sprite hero-sprite--interactive"
+        class="hero-sprite hero-sprite--interactive battle-actor-hitbox"
         data-float-anchor="hero"
         data-hero-tooltip
         data-hero-battle-open="${escapeHtml(hero.id)}"
@@ -70,9 +70,9 @@ export function renderHeroBattleSprite(
       >
         ${glowHtml}
         ${spriteHtml}
+        ${renderCombatStatusEffects(hero.statusEffects)}
         <span class="hero-tooltip-content hidden">${renderHeroTooltipContent(hero)}</span>
       </button>
-      ${renderCombatStatusEffects(hero.statusEffects)}
       ${renderHeroStripHealthBar(hero)}
       ${renderCombatSkillBar(hero.combatSkills)}
     </div>
