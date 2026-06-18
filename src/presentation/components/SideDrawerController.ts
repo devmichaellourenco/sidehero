@@ -1,4 +1,5 @@
 import { hideEquipmentTooltip } from '../components/EquipmentTooltipBinder';
+import { hideInventoryGearTooltip } from '../components/InventoryGearTooltipBinder';
 import { hideSkillChipTooltip } from '../components/SkillChipTooltipBinder';
 
 export type DrawerCloseReason = 'backdrop' | 'button' | 'escape' | 'action';
@@ -63,6 +64,7 @@ export class SideDrawerController {
 
     hideEquipmentTooltip();
     hideSkillChipTooltip();
+    hideInventoryGearTooltip();
     this.root.classList.add('hidden');
     this.root.setAttribute('aria-hidden', 'true');
     this.unbindEscape();

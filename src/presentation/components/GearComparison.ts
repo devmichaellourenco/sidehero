@@ -1,6 +1,6 @@
 import { GameStateDto, GearDto, HeroDto } from '../../application/dto/GameStateDto';
 import { GearUpgradeHintDto } from '../../application/dto/GearUpgradeHintDto';
-import { EquippedGearDto, GEAR_SLOT_LABELS, GearSlotKey } from './GearPresentation';
+import { EquippedGearDto, GEAR_SLOT_LABELS, GearSlotKey, getHeroEquipment } from './GearPresentation';
 
 export interface GearStatComparison {
   attack: string;
@@ -45,6 +45,65 @@ export function getGearUpgradeInfo(state: GameStateDto, gear: GearDto): GearUpgr
   };
 }
 
+function gearPower(
+  gear: Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
+): number {
+  return gear.attackBonus + gear.defenseBonus + gear.healthBonus;
+}
+
+export function getGearUpgradeInfoForHero(
+  state: GameStateDto,
+  gear: GearDto,
+  heroId: string,
+): GearUpgradeInfo {
+  const hero = state.heroes.find((entry) => entry.id === heroId);
+  if (!hero) return getGearUpgradeInfo(state, gear);
+
+  const equipped = getHeroEquipment(hero, gear.slot as GearSlotKey);
+  const gain = gearPower(gear) - gearPower(equipped ?? { attackBonus: 0, defenseBonus: 0, healthBonus: 0 });
+  const status: GearUpgradeStatus = gain > 0 ? 'upgrade' : gain < 0 ? 'downgrade' : 'equal';
+
+  return {
+    status,
+    gain,
+    recommendation: {
+      heroId: hero.id,
+      heroName: hero.name,
+      equipped,
+      totalGain: gain,
+    },
+  };
+}
+
+export function getGearUpgradeInfoForActiveParty(
+  state: GameStateDto,
+  gear: GearDto,
+): GearUpgradeInfo {
+  let best: GearUpgradeInfo = { status: 'equal', gain: 0, recommendation: null };
+
+  for (const heroId of state.activePartyIds) {
+    const info = getGearUpgradeInfoForHero(state, gear, heroId);
+    if (info.gain > best.gain) {
+      best = info;
+    }
+  }
+
+  return best;
+}
+
+export function sortGearForHero(
+  state: GameStateDto,
+  gears: GearDto[],
+  heroId: string,
+): GearDto[] {
+  return [...gears].sort((left, right) => {
+    const leftGain = getGearUpgradeInfoForHero(state, left, heroId).gain;
+    const rightGain = getGearUpgradeInfoForHero(state, right, heroId).gain;
+    if (rightGain !== leftGain) return rightGain - leftGain;
+    return left.name.localeCompare(right.name, 'pt-BR');
+  });
+}
+
 export function renderUpgradeBadge(status: GearUpgradeStatus): string {
   const labels: Record<GearUpgradeStatus, string> = {
     upgrade: '↑ upgrade',
@@ -56,7 +115,9 @@ export function renderUpgradeBadge(status: GearUpgradeStatus): string {
 }
 
 export function countUpgradeItems(state: GameStateDto): number {
-  return state.inventory.filter((gear) => getGearUpgradeInfo(state, gear).status === 'upgrade').length;
+  return state.inventory.filter(
+    (gear) => getGearUpgradeInfoForActiveParty(state, gear).status === 'upgrade',
+  ).length;
 }
 
 export function countRecommendedFromLoot(state: GameStateDto, gearIds: string[]): number {

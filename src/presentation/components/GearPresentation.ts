@@ -5,6 +5,8 @@ import {
   getGearSlotSprite,
   imgTag,
 } from '../assets/AssetCatalog';
+import { canHeroEquipGear } from '../../application/mappers/GearRequirementPresentationMapper';
+import { renderGearRequirementLines } from './GearRequirementPresentation';
 
 export const GEAR_SLOTS = ['weapon', 'armor', 'accessory'] as const;
 export type GearSlotKey = (typeof GEAR_SLOTS)[number];
@@ -73,15 +75,29 @@ export function formatGearBonuses(
   return parts.join(' · ');
 }
 
-function renderEquippedGearTooltip(gear: EquippedGearDto): string {
-  const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
-  const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
+export function renderEquipmentSlotTooltip(
+  slot: GearSlotKey,
+  gear: EquippedGearDto | null,
+): string {
+  const slotLabel = GEAR_SLOT_LABELS[slot];
+
+  if (gear) {
+    const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
+
+    return `
+      <span class="equipment-slot-tooltip" role="tooltip">
+        <strong class="equipment-slot-tooltip-name">${escapeHtml(gear.name)}</strong>
+        <span class="equipment-slot-tooltip-meta">${slotLabel} · ${rarityLabel}</span>
+        <span class="equipment-slot-tooltip-stats">${formatGearBonuses(gear)}</span>
+      </span>
+    `;
+  }
 
   return `
     <span class="equipment-slot-tooltip" role="tooltip">
-      <strong class="equipment-slot-tooltip-name">${escapeHtml(gear.name)}</strong>
-      <span class="equipment-slot-tooltip-meta">${slotLabel} · ${rarityLabel}</span>
-      <span class="equipment-slot-tooltip-stats">${formatGearBonuses(gear)}</span>
+      <strong class="equipment-slot-tooltip-name">${slotLabel}</strong>
+      <span class="equipment-slot-tooltip-meta">Vazio</span>
+      <span class="equipment-slot-tooltip-stats">Clique para equipar</span>
     </span>
   `;
 }
@@ -99,14 +115,12 @@ export function renderEquipmentSlot(
   gear: EquippedGearDto | null,
   options: {
     heroId: string;
-    compact?: boolean;
     clickable?: boolean;
     variant?: 'default' | 'loadout';
   },
 ): string {
   const label = GEAR_SLOT_LABELS[slot];
   const variant = options.variant ?? 'default';
-  const compactClass = options.compact ? ' equipment-slot-compact' : '';
   const clickableClass = options.clickable === false ? '' : ' equipment-slot-clickable';
   const frameUrl = gear ? getGearFrameSprite(gear.rarity) : getGearFrameSprite('common');
   const iconClass =
@@ -118,24 +132,25 @@ export function renderEquipmentSlot(
   const rarityClass =
     variant === 'loadout' ? 'loadout-slot-rarity equipment-slot-rarity' : 'equipment-slot-rarity';
   const rarityIcon = gear ? imgTag(getGearRaritySprite(gear.rarity), gear.rarity, rarityClass) : '';
-
-  const emptyTitle = `${label}: vazio — clique para equipar`;
+  const ariaLabel = gear
+    ? `${gear.name} · ${label}`
+    : `${label}: vazio — clique para equipar`;
 
   if (variant === 'loadout') {
     return `
       <button
         type="button"
-        class="loadout-slot loadout-slot--gear equipment-slot${clickableClass} ${gear?.rarity ?? 'empty'}"
+        class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass} ${gear?.rarity ?? 'empty'}"
         data-hero="${options.heroId}"
         data-slot="${slot}"
-        ${gear ? '' : `title="${emptyTitle}"`}
+        aria-label="${escapeHtml(ariaLabel)}"
         style="--slot-frame: url('${frameUrl}')"
       >
         <span class="loadout-slot-icon-wrap">
           ${icon}
           ${rarityIcon}
         </span>
-        ${gear ? renderEquippedGearTooltip(gear) : ''}
+        ${renderEquipmentSlotTooltip(slot, gear)}
       </button>
     `;
   }
@@ -143,30 +158,27 @@ export function renderEquipmentSlot(
   return `
     <button
       type="button"
-      class="equipment-slot${compactClass}${clickableClass} ${gear?.rarity ?? 'empty'}"
+      class="equipment-slot equipment-slot--icon-only${clickableClass} ${gear?.rarity ?? 'empty'}"
       data-hero="${options.heroId}"
       data-slot="${slot}"
-      ${gear ? '' : `title="${emptyTitle}"`}
+      aria-label="${escapeHtml(ariaLabel)}"
       style="--slot-frame: url('${frameUrl}')"
     >
-      <span class="equipment-slot-label">${label}</span>
       <span class="equipment-slot-icon-wrap">
         ${icon}
         ${rarityIcon}
       </span>
-      ${gear ? `<span class="equipment-slot-name">${escapeHtml(gear.name)}</span>` : ''}
-      ${gear ? renderEquippedGearTooltip(gear) : ''}
+      ${renderEquipmentSlotTooltip(slot, gear)}
     </button>
   `;
 }
 
-export function renderHeroEquipmentRow(hero: HeroDto, compact = true): string {
+export function renderHeroEquipmentRow(hero: HeroDto): string {
   return `
     <div class="equipment-slots-row">
       ${GEAR_SLOTS.map((slot) =>
         renderEquipmentSlot(slot, getHeroEquipment(hero, slot), {
           heroId: hero.id,
-          compact,
         }),
       ).join('')}
     </div>
@@ -185,6 +197,7 @@ export function renderHeroEquipmentLoadout(hero: HeroDto): string {
 export function renderGearCard(
   gear: GearDto,
   options: {
+    hero?: HeroDto;
     actionLabel?: string;
     actionClassName?: string;
     actionDataAttrs?: Record<string, string>;
@@ -196,7 +209,11 @@ export function renderGearCard(
   const frameUrl = getGearFrameSprite(gear.rarity);
   const actionLabel = options.actionLabel ?? 'Equipar';
   const actionClassName = options.actionClassName ?? 'gear-equip-btn';
-  const showAction = options.showAction !== false;
+  const canEquip = !options.hero || canHeroEquipGear(options.hero, gear);
+  const showAction = options.showAction !== false && canEquip;
+  const requirementSection = options.hero
+    ? renderGearRequirementLines(options.hero, gear)
+    : '';
 
   const dataAttrs = Object.entries(options.actionDataAttrs ?? { 'data-gear': gear.id })
     .map(([key, value]) => `${key}="${value}"`)
@@ -216,6 +233,7 @@ export function renderGearCard(
           </div>
           <span class="gear-slot-tag">${GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot}</span>
           <span>${formatGearBonuses(gear)}</span>
+          ${requirementSection}
           ${options.extraContent ?? ''}
         </div>
       </div>

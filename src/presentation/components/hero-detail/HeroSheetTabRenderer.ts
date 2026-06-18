@@ -31,7 +31,7 @@ export function renderHeroSheetTab(hero: HeroDto): string {
     <section class="hero-detail-equipment">
       <h4>Equipamento</h4>
       <p class="hero-detail-hint">Toque em um slot para equipar ou trocar o item.</p>
-      ${renderHeroEquipmentRow(hero, false)}
+      ${renderHeroEquipmentRow(hero)}
     </section>
   `;
 }

@@ -57,3 +57,25 @@ describe('LoadoutOptimizer.previewUpgradeForGear', () => {
     expect(preview?.status).toBe('upgrade');
   });
 });
+
+describe('LoadoutOptimizer.optimizeLoadout', () => {
+  it('equipa em rodadas até estabilizar e redistribui itens substituídos', () => {
+    const heroA = heroAtLevel('hero-1', 'knight', 'Galneon', 5);
+    const heroB = heroAtLevel('hero-2', 'sorcerer', 'Mage', 5);
+    const swordStrong = createGear('s-strong', 20, 1);
+    const swordMedium = createGear('s-medium', 12, 1);
+
+    let state = GameState.restore({
+      ...GameState.initial().toProps(),
+      heroes: [heroA, heroB],
+      activePartyIds: [heroA.id, heroB.id],
+      inventory: [swordStrong, swordMedium],
+    });
+
+    const optimizer = new LoadoutOptimizer();
+    const result = optimizer.optimizeLoadout(state);
+
+    expect(result.equippedCount).toBeGreaterThanOrEqual(2);
+    expect(result.state.inventory).toHaveLength(0);
+  });
+});

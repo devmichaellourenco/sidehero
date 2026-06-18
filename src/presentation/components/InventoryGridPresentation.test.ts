@@ -1,0 +1,66 @@
+import { describe, expect, it } from 'vitest';
+import { GameStateDto } from '../../application/dto/GameStateDto';
+import {
+  renderInventoryGrid,
+  renderInventoryGridSlot,
+  resolveDefaultInventoryHeroId,
+} from './InventoryGridPresentation';
+
+function gear(id: string): GameStateDto['inventory'][0] {
+  return {
+    id,
+    name: `Item ${id}`,
+    slot: 'weapon',
+    rarity: 'rare',
+    attackBonus: 10,
+    defenseBonus: 2,
+    healthBonus: 0,
+    attackSpeedBonus: 0,
+    castSpeedBonus: 0,
+    critChanceBonus: 0,
+    critDamageBonus: 0,
+    requirements: { minLevel: 1 },
+  };
+}
+
+function minimalState(): GameStateDto {
+  return {
+    heroes: [
+      {
+        id: 'h1',
+        name: 'Galneon',
+        heroClass: 'knight',
+        equipment: { weapon: null, armor: null, accessory: null },
+      } as GameStateDto['heroes'][0],
+    ],
+    activeParty: [{ id: 'h1' } as GameStateDto['activeParty'][0]],
+    activePartyIds: ['h1'],
+    inventory: [gear('g1'), gear('g2')],
+  } as GameStateDto;
+}
+
+describe('InventoryGridPresentation', () => {
+  it('resolveDefaultInventoryHeroId usa herói da party', () => {
+    expect(resolveDefaultInventoryHeroId(minimalState())).toBe('h1');
+  });
+
+  it('renderiza grid com slots compactos', () => {
+    const html = renderInventoryGrid(minimalState(), minimalState().inventory, 'h1');
+    expect(html).toContain('inventory-grid');
+    expect(html).toContain('data-inventory-gear-id="g1"');
+    expect(html).toContain('inventory-grid-badge');
+  });
+
+  it('inclui tooltip com delta e ação equipar', () => {
+    const state = minimalState();
+    const hero = state.heroes[0];
+    const html = renderInventoryGridSlot(gear('g1'), {
+      hero,
+      upgradeStatus: 'upgrade',
+    });
+
+    expect(html).toContain('inventory-gear-tooltip-stats');
+    expect(html).toContain('data-inventory-equip="g1"');
+    expect(html).toContain('inventory-grid-badge--upgrade');
+  });
+});

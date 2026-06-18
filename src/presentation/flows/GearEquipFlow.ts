@@ -15,7 +15,11 @@ export class GearEquipFlow {
     private readonly onFailed: (error?: string) => void,
   ) {}
 
-  async equip(heroId: string, gearId: string): Promise<void> {
+  async equip(
+    heroId: string,
+    gearId: string,
+    options: { fromInventory?: boolean } = {},
+  ): Promise<void> {
     await this.gearMutations.run(async () => {
       const response = await this.client.send({ type: 'EQUIP_GEAR', heroId, gearId });
       if (!response.ok) {
@@ -25,13 +29,17 @@ export class GearEquipFlow {
 
       const gearName = this.getState()?.inventory.find((entry) => entry.id === gearId)?.name;
       this.onGearMutated(response.state);
-      if (gearName) {
+      if (gearName && !options.fromInventory) {
         this.toasts.show(`${gearName} equipado!`, 'loot');
       }
     });
   }
 
-  async unequip(heroId: string, slot: GearSlotKey): Promise<void> {
+  async unequip(
+    heroId: string,
+    slot: GearSlotKey,
+    _options: { fromInventory?: boolean } = {},
+  ): Promise<void> {
     await this.gearMutations.run(async () => {
       const response = await this.client.send({ type: 'UNEQUIP_GEAR', heroId, slot });
       if (!response.ok) {
@@ -45,7 +53,7 @@ export class GearEquipFlow {
 
   async optimizeLoadout(
     gearIds?: string[],
-    options: { fromLoot?: boolean; silent?: boolean } = {},
+    options: { fromLoot?: boolean; silent?: boolean; fromInventory?: boolean } = {},
   ): Promise<void> {
     const state = this.getState();
     if (!getFeatureFlags(state).optimizeLoadout) {
@@ -67,11 +75,11 @@ export class GearEquipFlow {
       const equippedCount = response.equippedCount ?? 0;
       this.onGearMutated(response.state);
 
-      if (equippedCount > 0 && !options.silent) {
+      if (equippedCount > 0 && !options.silent && !options.fromInventory) {
         const label = equippedCount === 1 ? '1 item equipado' : `${equippedCount} itens equipados`;
         const message = options.fromLoot ? `Loot auto-equipado: ${label}` : `Equipe otimizada: ${label}`;
         this.toasts.show(message, options.fromLoot ? 'loot' : 'info');
-      } else if (!options.fromLoot && !options.silent) {
+      } else if (!options.fromLoot && !options.silent && !options.fromInventory) {
         this.toasts.show('Nenhum upgrade disponível no momento', 'info');
       }
     });

@@ -83,8 +83,9 @@ export class LoadoutOptimizer {
     );
 
     const actions: EquipAction[] = [];
+    const heroes = state.activeHeroes();
 
-    for (const hero of state.heroes) {
+    for (const hero of heroes) {
       for (const slot of GEAR_SLOTS) {
         const currentPower = equippedPower(hero, slot);
 
@@ -116,6 +117,36 @@ export class LoadoutOptimizer {
     return selected;
   }
 
+  optimizeLoadout(
+    state: GameState,
+    gearIds?: string[],
+  ): { state: GameState; equippedCount: number } {
+    let current = state;
+    let totalEquipped = 0;
+    const maxRounds = 24;
+
+    for (let round = 0; round < maxRounds; round += 1) {
+      const actions = this.planBestLoadout(current, round === 0 ? gearIds : undefined);
+      if (actions.length === 0) break;
+
+      const result = this.applyEquipActions(current, actions);
+      if (result.equippedCount === 0) break;
+
+      current = result.state;
+      totalEquipped += result.equippedCount;
+    }
+
+    if (totalEquipped === 0) {
+      return { state, equippedCount: 0 };
+    }
+
+    const label = totalEquipped === 1 ? '1 item equipado' : `${totalEquipped} itens equipados`;
+    return {
+      state: current.addLog(`Otimizou equipe: ${label}`),
+      equippedCount: totalEquipped,
+    };
+  }
+
   applyEquipActions(
     state: GameState,
     actions: EquipAction[],
@@ -143,9 +174,8 @@ export class LoadoutOptimizer {
       return { state, equippedCount: 0 };
     }
 
-    const label = equippedCount === 1 ? '1 item equipado' : `${equippedCount} itens equipados`;
     return {
-      state: state.withHeroes(heroes).withInventory(inventory).addLog(`Otimizou equipe: ${label}`),
+      state: state.withHeroes(heroes).withInventory(inventory),
       equippedCount,
     };
   }

@@ -1610,7 +1610,8 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 0;
   padding: 6px 4px;
   border: var(--slot-frame-size) solid transparent;
   border-image: var(--slot-frame) 20 / var(--slot-frame-size) / 0 stretch;
@@ -1623,6 +1624,12 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   overflow: visible;
 }
 
+.equipment-slot--icon-only {
+  aspect-ratio: 1;
+  min-height: 48px;
+  padding: 8px;
+}
+
 .equipment-slot-clickable {
   cursor: pointer;
   transition: filter 0.15s ease, transform 0.1s ease;
@@ -1633,33 +1640,25 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   transform: translateY(-1px);
 }
 
-.equipment-slot-compact .equipment-slot-label {
-  font-size: 8px;
-}
-
-.equipment-slot-compact .equipment-slot-name {
+.equipment-slot-compact .equipment-slot-label,
+.equipment-slot-compact .equipment-slot-name,
+.equipment-slot-label,
+.equipment-slot-name {
   display: none;
-}
-
-.equipment-slot-label {
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 9px;
 }
 
 .equipment-slot-icon-wrap {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .equipment-slot-icon {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
 }
 
@@ -1677,12 +1676,7 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 }
 
 .equipment-slot-name {
-  text-align: center;
-  line-height: 1.2;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: none;
 }
 
 .equipment-slot > .equipment-slot-tooltip {
@@ -1709,7 +1703,7 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 
 .gear-tooltip-portal {
   position: fixed;
-  z-index: 1100;
+  z-index: 1500;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1742,6 +1736,507 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 
 .gear-tooltip-portal.common {
   border-color: rgba(158, 158, 158, 0.45);
+}
+
+#inventory-gear-tooltip-portal {
+  z-index: 1500;
+  max-width: 240px;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-name {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  color: var(--text);
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-meta,
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-hero,
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-equipped {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-stats {
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-delta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 9px;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-delta > span {
+  display: block;
+}
+
+.gear-tooltip-portal--interactive {
+  pointer-events: auto;
+}
+
+.gear-tooltip-portal--interactive .inventory-gear-tooltip-action {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(66, 165, 245, 0.25);
+  border: 1px solid rgba(66, 165, 245, 0.45);
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.gear-requirement-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gear-requirement-lines-title {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gear-requirement-line {
+  display: block;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.gear-requirement-line--met {
+  color: var(--muted);
+}
+
+.gear-requirement-line--unmet {
+  color: #ff8b8b;
+  font-weight: 600;
+}
+
+#inventory-gear-tooltip-portal .gear-requirement-lines {
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.equip-hero-card--locked {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.inventory-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.inventory-hero-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inventory-hero-select-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: var(--font-heading);
+}
+
+.inventory-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.inventory-hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(31, 43, 71, 0.85);
+  color: var(--text);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.inventory-hero-chip--active {
+  border-color: rgba(245, 197, 66, 0.55);
+  background: rgba(245, 197, 66, 0.12);
+}
+
+.inventory-hero-chip-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.inventory-hero-chip-name {
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-hero-chip-party {
+  color: var(--gold);
+  font-size: 9px;
+}
+
+.inventory-loadout {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(14, 22, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.inventory-loadout--hero-changed .inventory-loadout-portrait {
+  animation: inventory-hero-swap 0.45s ease;
+}
+
+@keyframes inventory-hero-swap {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.inventory-loadout-portrait {
+  position: relative;
+  width: 108px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.inventory-loadout-glow {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  transform: translateX(-50%);
+  object-fit: contain;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.inventory-loadout-sprite {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
+}
+
+.inventory-loadout-hero-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.inventory-loadout-hero-name {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.inventory-loadout-hero-level {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.inventory-loadout-slots {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  align-self: center;
+  margin-top: 0;
+}
+
+.inventory-loadout-slot {
+  width: 100%;
+}
+
+.inventory-loadout-slot--filled {
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.inventory-loadout-slot--filled:hover {
+  filter: brightness(1.1);
+}
+
+.inventory-loadout-slot--empty {
+  opacity: 0.85;
+}
+
+.inventory-loadout-slot--equipped-new {
+  animation: inventory-slot-equip 0.65s ease;
+  box-shadow: 0 0 0 1px rgba(102, 187, 106, 0.45);
+}
+
+.inventory-loadout-slot--cleared {
+  animation: inventory-slot-clear 0.5s ease;
+}
+
+@keyframes inventory-slot-equip {
+  0% {
+    background-color: rgba(46, 125, 50, 0.35);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: rgba(18, 28, 48, 0.92);
+    transform: scale(1);
+  }
+}
+
+@keyframes inventory-slot-clear {
+  0% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.inventory-grid-slot--returned {
+  animation: inventory-item-returned 0.75s ease;
+  box-shadow: 0 0 0 2px rgba(171, 71, 188, 0.55);
+}
+
+.inventory-grid-returned-badge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  font-size: 9px;
+  line-height: 1;
+  color: #e1bee7;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+@keyframes inventory-item-returned {
+  0% {
+    transform: scale(1.08);
+    filter: brightness(1.35);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.inventory-loadout-slot--active {
+  box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.55);
+}
+
+.equip-picker-panel {
+  gap: 10px;
+}
+
+.equip-picker-slot-label {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0;
+}
+
+.inventory-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inventory-toolbar-row .modal-sort {
+  margin-bottom: 0;
+}
+
+.inventory-upgrades-toggle.active {
+  border-color: rgba(126, 231, 135, 0.55);
+  color: #7ee787;
+}
+
+.inventory-count {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.inventory-filters {
+  margin-bottom: 0;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.inventory-grid-slot {
+  --grid-frame: 8px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: var(--grid-frame) solid transparent;
+  border-image-source: var(--gear-frame);
+  border-image-slice: 20;
+  border-image-width: var(--grid-frame);
+  border-image-repeat: stretch;
+  background: rgba(22, 32, 54, 0.92);
+  background-clip: padding-box;
+  cursor: pointer;
+}
+
+.inventory-grid-slot:focus-visible {
+  outline: 2px solid rgba(245, 197, 66, 0.65);
+  outline-offset: 1px;
+}
+
+.inventory-grid-slot--locked {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.inventory-grid-slot--locked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 20, 0.35);
+  pointer-events: none;
+}
+
+.inventory-grid-slot-icon-wrap {
+  position: absolute;
+  inset: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inventory-grid-slot-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.inventory-grid-slot-rarity {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.inventory-grid-badge {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 4px;
+  font-size: 9px;
+  line-height: 14px;
+  font-family: var(--font-heading);
+  text-align: center;
+  pointer-events: none;
+}
+
+.inventory-grid-badge--upgrade {
+  color: #0f1f12;
+  background: #7ee787;
+}
+
+.inventory-grid-badge--downgrade {
+  color: #fff;
+  background: rgba(255, 107, 107, 0.9);
+}
+
+.inventory-grid-badge--equal {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.inventory-gear-tooltip-name {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 11px;
+}
+
+.inventory-gear-tooltip-meta,
+.inventory-gear-tooltip-hero {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.inventory-gear-tooltip-stats {
+  display: block;
+  margin-top: 2px;
+}
+
+.inventory-gear-tooltip-delta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  font-size: 9px;
+}
+
+.inventory-footer {
+  display: flex;
+  justify-content: stretch;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.inventory-footer .inventory-optimize-btn {
+  width: 100%;
+}
+
+@media (max-width: 340px) {
+  .inventory-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
 .modal-gear-list {
@@ -2886,21 +3381,13 @@ body.modal-open {
 }
 
 .hero-detail-equipment .equipment-slots-row {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
 .hero-detail-equipment .equipment-slot {
-  flex-direction: row;
-  justify-content: flex-start;
-  padding: 10px 12px;
-}
-
-.hero-detail-equipment .equipment-slot-name {
-  display: block;
-  flex: 1;
-  text-align: left;
-  font-size: 11px;
+  min-height: 56px;
+  padding: 10px;
 }
 
 .equip-picker-context {

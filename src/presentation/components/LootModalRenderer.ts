@@ -1,6 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { findBestHeroForGear, renderComparisonBlock } from './GearComparison';
 import { renderGearCard } from './GearPresentation';
+import { canHeroEquipGear } from './GearRequirementPresentation';
 
 export type LootModalHandlers = {
   onEquipBest: (heroId: string, gearId: string) => void;
@@ -24,6 +25,7 @@ export class LootModalRenderer {
     const hero = recommendation
       ? state.heroes.find((entry) => entry.id === recommendation.heroId)
       : null;
+    const canEquip = Boolean(hero && canHeroEquipGear(hero, gear));
 
     const comparisonSection =
       hero && recommendation
@@ -34,19 +36,19 @@ export class LootModalRenderer {
       ? `Equipar em ${recommendation.heroName}`
       : 'Equipar';
 
-    const equipDataAttrs = recommendation
+    const equipDataAttrs = recommendation && canEquip
       ? `data-loot-equip-hero="${recommendation.heroId}" data-loot-equip-gear="${gear.id}"`
       : '';
 
     container.innerHTML = `
       <p class="loot-reveal-intro">Você recebeu um novo item do baú!</p>
       <div class="loot-reveal-item">
-        ${renderGearCard(gear, { showAction: false })}
+        ${renderGearCard(gear, { showAction: false, hero: hero ?? undefined })}
       </div>
       ${comparisonSection}
       <div class="loot-reveal-actions">
         ${
-          recommendation
+          recommendation && canEquip
             ? `<button type="button" class="gear-equip-btn" ${equipDataAttrs}>${equipLabel}</button>`
             : ''
         }

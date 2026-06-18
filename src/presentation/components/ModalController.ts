@@ -1,4 +1,5 @@
 import { hideEquipmentTooltip } from './EquipmentTooltipBinder';
+import { hideInventoryGearTooltip } from './InventoryGearTooltipBinder';
 import { hideSkillChipTooltip } from './SkillChipTooltipBinder';
 
 export type ModalCloseReason = 'backdrop' | 'button' | 'escape' | 'action';
@@ -72,6 +73,7 @@ export class ModalController {
 
     hideEquipmentTooltip();
     hideSkillChipTooltip();
+    hideInventoryGearTooltip(true);
     this.root.classList.add('hidden');
     this.root.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');

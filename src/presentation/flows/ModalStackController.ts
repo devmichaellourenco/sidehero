@@ -110,11 +110,18 @@ export class ModalStackController {
           container,
           state,
           {
-            onEquipGear: (gearId) => this.onEquipPickerFromGear(gearId),
+            onEquipGear: (gearId, heroId) => {
+              void this.gearEquipFlow.equip(heroId, gearId, { fromInventory: true });
+            },
+            onUnequipGear: (heroId, slot) => {
+              void this.gearEquipFlow.unequip(heroId, slot, { fromInventory: true });
+            },
             onFilterChange: () => this.renderTop(stack, state),
             onSortChange: () => this.renderTop(stack, state),
+            onHeroChange: () => this.renderTop(stack, state),
+            onUpgradesOnlyChange: () => this.renderTop(stack, state),
             onOptimizeLoadout: () => {
-              void this.gearEquipFlow.optimizeLoadout();
+              void this.gearEquipFlow.optimizeLoadout(undefined, { fromInventory: true });
             },
           },
           { showOptimize: state.featureFlags.optimizeLoadout },
@@ -136,6 +143,8 @@ export class ModalStackController {
           onUnequip: (heroId, slot) => {
             void this.gearEquipFlow.unequip(heroId, slot);
           },
+          onSortChange: () => this.renderTop(stack, state),
+          onUpgradesOnlyChange: () => this.renderTop(stack, state),
         });
         break;
       case 'loot-reveal':

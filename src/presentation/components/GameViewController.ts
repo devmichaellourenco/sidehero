@@ -305,6 +305,15 @@ export class GameViewController {
     this.bindHeroDrawerNavigation();
     this.bindGearActionDelegation(this.modal.getBody(), () => this.modal.isOpen());
     this.bindGearActionDelegation(this.heroDrawer.getBody(), () => this.heroDrawer.isOpen());
+    document.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest('[data-inventory-equip]') as HTMLElement | null;
+      if (!target) return;
+      const gearId = target.getAttribute('data-inventory-equip');
+      const heroId = target.getAttribute('data-inventory-equip-hero');
+      if (!gearId || !heroId) return;
+      this.markGearActionPending(target);
+      void this.gearEquipFlow.equip(heroId, gearId, { fromInventory: true });
+    });
 
     this.pauseLoadoutBtn.addEventListener('click', () => {
       this.stopAutoBattle();
@@ -692,7 +701,6 @@ export class GameViewController {
   private afterGearMutation(state: GameStateDto): void {
     const topView = this.modalStack[this.modalStack.length - 1];
     if (
-      topView?.type === 'equip-picker' ||
       topView?.type === 'loot-reveal' ||
       topView?.type === 'loot-batch'
     ) {

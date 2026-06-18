@@ -25,10 +25,9 @@ export class EquipBestLoadoutUseCase {
       throw new Error('Otimizar equipe não desbloqueado');
     }
 
-    const actions = this.loadoutOptimizer.planBestLoadout(state, gearIds);
-    const { state: nextState, equippedCount } = this.loadoutOptimizer.applyEquipActions(
+    const { state: nextState, equippedCount } = this.loadoutOptimizer.optimizeLoadout(
       state,
-      actions,
+      gearIds,
     );
 
     await this.repository.save(nextState);
