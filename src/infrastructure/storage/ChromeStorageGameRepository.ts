@@ -91,6 +91,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       gold: props.gold,
       chests: props.chests.map((c) => c.toProps()),
       inventory: props.inventory.map((g) => g.toProps()),
+      stash: props.stash.map((g) => g.toProps()),
       battleLog: props.battleLog,
       totalBattlesWon: props.totalBattlesWon,
       lastTickAt: props.lastTickAt,
@@ -143,6 +144,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       gold: typeof raw.gold === 'number' ? raw.gold : 0,
       chests: Array.isArray(raw.chests) ? raw.chests.map((c) => migrateChest(c)) : [],
       inventory: Array.isArray(raw.inventory) ? raw.inventory.map((g) => migrateGear(g)) : [],
+      stash: Array.isArray(raw.stash) ? raw.stash.map((g) => migrateGear(g)) : [],
       battleLog: Array.isArray(raw.battleLog)
         ? (raw.battleLog as { message: string; timestamp: number }[])
         : [],

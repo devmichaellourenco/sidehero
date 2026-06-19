@@ -25,6 +25,7 @@ import {
 import { mapEnemyCombatSkills, mapHeroCombatSkills } from '../mappers/CombatSkillBarMapper';
 import { mapHeroSkillCooldowns } from '../mappers/HeroSkillCooldownMapper';
 import { mapCombatantStatusEffects } from '../mappers/CombatStatusEffectMapper';
+import { StorageCapacityPolicy } from '../../domain/storage/StorageCapacityPolicy';
 
 export class GameStatePresenter {
   constructor(private readonly upgradeService: UpgradeService) {}
@@ -109,6 +110,14 @@ export class GameStatePresenter {
       gold: state.gold.value(),
       chests: state.chests.map(mapChestToDto),
       inventory: state.inventory.map(mapGearToDto),
+      stash: state.stash.map(mapGearToDto),
+      storageCapacity: {
+        inventoryLimit: StorageCapacityPolicy.inventoryLimit(),
+        inventoryUsed: state.inventory.length,
+        stashLimit: StorageCapacityPolicy.stashLimit(state.upgradeLevels),
+        stashUsed: state.stash.length,
+        stashUnlocked: StorageCapacityPolicy.isStashUnlocked(state.upgradeLevels),
+      },
       battleLog: state.battleLog,
       totalBattlesWon: state.totalBattlesWon,
       pendingChestCount: state.pendingChests().length,

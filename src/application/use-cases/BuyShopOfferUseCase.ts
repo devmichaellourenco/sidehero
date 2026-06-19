@@ -1,5 +1,6 @@
 import { Gear } from '../../domain/entities/Gear';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
+import { GearStorageService } from '../../domain/services/GearStorageService';
 import { ShopService } from '../../domain/services/ShopService';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
@@ -15,6 +16,7 @@ export class BuyShopOfferUseCase {
     private readonly repository: IGameStateRepository,
     private readonly shopService: ShopService,
     private readonly presenter: GameStatePresenter,
+    private readonly gearStorageService: GearStorageService = new GearStorageService(),
   ) {}
 
   async execute(offerId: string): Promise<BuyShopOfferResult> {
@@ -37,6 +39,7 @@ export class BuyShopOfferUseCase {
       ...offer.gear.toProps(),
       id: `gear-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     });
+    this.gearStorageService.assertCanAddToInventory(state);
     const nextState = state
       .withGold(state.gold.spend(offer.price))
       .withInventory([...state.inventory, purchasedGear])

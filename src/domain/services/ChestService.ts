@@ -1,6 +1,7 @@
 import { GameState } from '../entities/GameState';
 import { Gear } from '../entities/Gear';
 import { FeatureAccessPolicy } from '../policies/FeatureAccessPolicy';
+import { GearStorageService } from './GearStorageService';
 import { ILootService } from './ILootService';
 
 export interface OpenChestResult {
@@ -14,7 +15,10 @@ export interface OpenAllChestsResult {
 }
 
 export class ChestService {
-  constructor(private readonly lootService: ILootService) {}
+  constructor(
+    private readonly lootService: ILootService,
+    private readonly gearStorageService: GearStorageService = new GearStorageService(),
+  ) {}
 
   openOne(state: GameState, chestId: string): OpenChestResult {
     const chest = state.chests.find((entry) => entry.id === chestId);
@@ -27,6 +31,7 @@ export class ChestService {
       throw new Error('Baú já foi aberto');
     }
 
+    this.gearStorageService.assertCanAddToInventory(state);
     const loot = this.lootService.generateGearForChest(chest.chestType, chest.stageEarned);
     const updatedChests = state.chests.map((entry) =>
       entry.id === chestId ? entry.open(loot) : entry,
@@ -56,6 +61,7 @@ export class ChestService {
     const logs: string[] = [];
 
     for (const chest of pendingChests) {
+      this.gearStorageService.assertInventoryHasRoom(inventory.length);
       const loot = this.lootService.generateGearForChest(chest.chestType, chest.stageEarned);
       updatedChests = updatedChests.map((entry) =>
         entry.id === chest.id ? entry.open(loot) : entry,

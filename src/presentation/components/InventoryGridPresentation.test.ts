@@ -30,6 +30,8 @@ function minimalState(): GameStateDto {
         id: 'h1',
         name: 'Galneon',
         heroClass: 'knight',
+        level: 1,
+        totalAttributes: { str: 0, dex: 0, int: 0 },
         equipment: { weapon: null, armor: null, accessory: null },
       } as GameStateDto['heroes'][0],
     ],

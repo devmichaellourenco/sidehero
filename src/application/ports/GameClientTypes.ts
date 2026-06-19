@@ -22,6 +22,9 @@ export type GameMessage =
   | { type: 'EQUIP_GEAR'; heroId: string; gearId: string }
   | { type: 'EQUIP_BEST_LOADOUT'; gearIds?: string[] }
   | { type: 'UNEQUIP_GEAR'; heroId: string; slot: string }
+  | { type: 'MOVE_GEAR_TO_STASH'; gearId: string }
+  | { type: 'MOVE_GEAR_FROM_STASH'; gearId: string }
+  | { type: 'DESTROY_GEAR'; gearId: string; location: 'inventory' | 'stash' }
   | { type: 'GET_SHOP_OFFERS' }
   | { type: 'BUY_SHOP_OFFER'; offerId: string }
   | { type: 'REFRESH_SHOP' }

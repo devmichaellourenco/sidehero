@@ -15,6 +15,9 @@ const DEFAULT_FLAGS: FeatureFlagsDto = {
   shopRefresh: false,
   backgroundTick: false,
   backgroundTickMultiplier: 1,
+  itemStash: false,
+  stashCapacity: 0,
+  inventoryCapacity: 30,
 };
 
 export function getFeatureFlags(state: GameStateDto | null): FeatureFlagsDto {

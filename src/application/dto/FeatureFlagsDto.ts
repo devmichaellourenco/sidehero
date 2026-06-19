@@ -12,4 +12,7 @@ export interface FeatureFlagsDto {
   shopRefresh: boolean;
   backgroundTick: boolean;
   backgroundTickMultiplier: number;
+  itemStash: boolean;
+  stashCapacity: number;
+  inventoryCapacity: number;
 }

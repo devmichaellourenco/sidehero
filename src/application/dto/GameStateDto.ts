@@ -174,6 +174,14 @@ export interface CampaignProgressDto {
   seasonCompleted: boolean;
 }
 
+export interface StorageCapacityDto {
+  inventoryLimit: number;
+  inventoryUsed: number;
+  stashLimit: number;
+  stashUsed: number;
+  stashUnlocked: boolean;
+}
+
 export interface GameStateDto {
   heroes: HeroDto[];
   activeParty: HeroDto[];
@@ -196,6 +204,8 @@ export interface GameStateDto {
   gold: number;
   chests: ChestDto[];
   inventory: GearDto[];
+  stash: GearDto[];
+  storageCapacity: StorageCapacityDto;
   battleLog: { message: string; timestamp: number }[];
   totalBattlesWon: number;
   pendingChestCount: number;

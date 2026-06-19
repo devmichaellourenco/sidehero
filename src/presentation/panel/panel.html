@@ -113,6 +113,9 @@
           <button id="open-inventory-btn" class="action-icon-btn" type="button" title="Inventário" aria-label="Inventário">
             <img class="btn-icon" src="assets/ui/inventory.png" alt="" aria-hidden="true" />
           </button>
+          <button id="open-stash-btn" class="action-icon-btn hidden" type="button" title="Baú de itens" aria-label="Baú de itens">
+            <img class="btn-icon" src="assets/ui/chest-open.png" alt="" aria-hidden="true" />
+          </button>
           <button id="optimize-loadout-btn" class="action-icon-btn hidden" type="button" title="Otimizar equipe" aria-label="Otimizar equipe">
             ⬆
           </button>
@@ -162,6 +165,26 @@
           <button type="button" class="modal-close" data-modal-close aria-label="Fechar">×</button>
         </header>
         <div id="modal-body" class="modal-body game-scroll"></div>
+      </div>
+    </div>
+
+    <div id="destroy-gear-confirm-root" class="confirm-dialog-root hidden" aria-hidden="true">
+      <div class="confirm-dialog-backdrop" data-destroy-confirm-cancel></div>
+      <div
+        class="confirm-dialog destroy-gear-confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="destroy-confirm-title"
+        aria-describedby="destroy-confirm-body"
+      >
+        <header class="confirm-dialog-header">
+          <h2 id="destroy-confirm-title" class="confirm-dialog-title">Destruir item</h2>
+        </header>
+        <div id="destroy-confirm-body" class="confirm-dialog-body"></div>
+        <footer class="confirm-dialog-actions">
+          <button type="button" class="gear-unequip-btn" data-destroy-confirm-cancel>Cancelar</button>
+          <button type="button" class="gear-destroy-btn" data-destroy-confirm-accept>Destruir</button>
+        </footer>
       </div>
     </div>
 

@@ -37,6 +37,7 @@ export class GameHudController {
     private readonly chestLabel: HTMLElement,
     private readonly chestProgressLabel: HTMLElement,
     private readonly openInventoryBtn: HTMLButtonElement,
+    private readonly openStashBtn: HTMLButtonElement,
     private readonly optimizeLoadoutBtn: HTMLButtonElement,
     private readonly openAllChestsBtn: HTMLButtonElement,
     private readonly openUpgradesBtn: HTMLButtonElement,
@@ -75,11 +76,22 @@ export class GameHudController {
     this.chestProgressLabel.title = 'Vitórias até o próximo baú';
 
     const upgradeCount = countUpgradeItems(state);
-    this.openInventoryBtn.title = `Inventário (${state.inventory.length})`;
+    this.openInventoryBtn.title = `Inventário (${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit})`;
     this.openInventoryBtn.innerHTML = `
       <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.inventory)}" alt="" aria-hidden="true" />
-      ${renderIconBadge(upgradeCount)}
+      ${renderIconBadge(upgradeCount > 0 ? upgradeCount : state.storageCapacity.inventoryUsed >= state.storageCapacity.inventoryLimit ? 1 : 0)}
     `;
+
+    if (state.storageCapacity.stashUnlocked) {
+      this.openStashBtn.classList.remove('hidden');
+      this.openStashBtn.title = `Baú (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
+      this.openStashBtn.innerHTML = `
+        <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.chestOpen)}" alt="" aria-hidden="true" />
+        ${renderIconBadge(state.storageCapacity.stashUsed)}
+      `;
+    } else {
+      this.openStashBtn.classList.add('hidden');
+    }
 
     const flags = state.featureFlags;
     this.optimizeLoadoutBtn.classList.toggle('hidden', !flags.optimizeLoadout);

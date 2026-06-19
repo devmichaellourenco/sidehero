@@ -14,6 +14,7 @@ import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
 import { ChestLootFlow } from '../flows/ChestLootFlow';
 import { GearEquipFlow } from '../flows/GearEquipFlow';
+import { GearStorageFlow, bindGearStorageActions } from '../flows/GearStorageFlow';
 import { HeroDetailFlow } from '../flows/HeroDetailFlow';
 import { PartyFlow } from '../flows/PartyFlow';
 import { ModalStackController } from '../flows/ModalStackController';
@@ -36,6 +37,7 @@ import { HeroDetailModalRenderer, HeroDetailTab } from './HeroDetailModalRendere
 import { HeroPanelRenderer } from './HeroPanelRenderer';
 import { shouldRenderHeroPanel } from './HeroPanelRenderPolicy';
 import { InventoryModalRenderer } from './InventoryModalRenderer';
+import { StashModalRenderer } from './StashModalRenderer';
 import { LootBatchModalRenderer } from './LootBatchModalRenderer';
 import { LootModalRenderer } from './LootModalRenderer';
 import { ModalController } from './ModalController';
@@ -51,6 +53,7 @@ import { SettingsModalRenderer } from './SettingsModalRenderer';
 import { ShopModalRenderer } from './ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
 import { ToastController } from './ToastController';
+import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -76,8 +79,9 @@ export class GameViewController {
   private readonly continueLoadoutBtn: HTMLButtonElement;
   private readonly openChestBtn: HTMLButtonElement;
   private readonly openAllChestsBtn: HTMLButtonElement;
-  private readonly openInventoryBtn: HTMLButtonElement;
-  private readonly optimizeLoadoutBtn: HTMLButtonElement;
+    private readonly openInventoryBtn: HTMLButtonElement;
+    private readonly openStashBtn: HTMLButtonElement;
+    private readonly optimizeLoadoutBtn: HTMLButtonElement;
   private readonly openSettingsBtn: HTMLButtonElement;
   private readonly openCampaignBtn: HTMLButtonElement;
   private readonly openShopBtn: HTMLButtonElement;
@@ -100,6 +104,7 @@ export class GameViewController {
   private readonly modal: ModalController;
   private readonly heroDrawer: SideDrawerController;
   private readonly inventoryModal: InventoryModalRenderer;
+  private readonly stashModal: StashModalRenderer;
   private readonly heroDetailModal: HeroDetailModalRenderer;
   private readonly equipPickerModal: EquipPickerModalRenderer;
   private readonly lootModal: LootModalRenderer;
@@ -108,6 +113,7 @@ export class GameViewController {
   private readonly shopModal: ShopModalRenderer;
   private readonly upgradeTreeModal: UpgradeTreeModalRenderer;
   private readonly toasts: ToastController;
+  private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
   private readonly stateChanges: GameStateChangeDetector;
   private readonly hud: GameHudController;
   private readonly battleChestAffordance: BattleChestAffordanceController;
@@ -117,6 +123,7 @@ export class GameViewController {
   private readonly heroDetailFlow: HeroDetailFlow;
   private readonly shopFlow: ShopFlow;
   private readonly gearEquipFlow: GearEquipFlow;
+  private readonly gearStorageFlow: GearStorageFlow;
   private readonly chestLootFlow: ChestLootFlow;
   private readonly campaignFlow: CampaignFlow;
   private readonly partyFlow: PartyFlow;
@@ -136,6 +143,7 @@ export class GameViewController {
     this.openChestBtn = root.querySelector('#open-chest-btn') as HTMLButtonElement;
     this.openAllChestsBtn = root.querySelector('#open-all-chests-btn') as HTMLButtonElement;
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
+    this.openStashBtn = root.querySelector('#open-stash-btn') as HTMLButtonElement;
     this.optimizeLoadoutBtn = root.querySelector('#optimize-loadout-btn') as HTMLButtonElement;
     this.openSettingsBtn = root.querySelector('#open-settings-btn') as HTMLButtonElement;
     this.openCampaignBtn = root.querySelector('#open-campaign-btn') as HTMLButtonElement;
@@ -185,6 +193,7 @@ export class GameViewController {
     );
 
     this.inventoryModal = new InventoryModalRenderer();
+    this.stashModal = new StashModalRenderer();
     this.heroDetailModal = new HeroDetailModalRenderer();
     this.equipPickerModal = new EquipPickerModalRenderer();
     this.lootModal = new LootModalRenderer();
@@ -193,6 +202,11 @@ export class GameViewController {
     this.shopModal = new ShopModalRenderer();
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
+    this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
+      root.querySelector('#destroy-gear-confirm-root')!,
+      root.querySelector('#destroy-confirm-body')!,
+      root.querySelector('[data-destroy-confirm-accept]') as HTMLButtonElement,
+    );
     this.stateChanges = new GameStateChangeDetector(this.toasts);
     bindCampaignTooltip(this.campaignContextLabel);
 
@@ -202,6 +216,7 @@ export class GameViewController {
       this.chestLabel,
       this.chestProgressLabel,
       this.openInventoryBtn,
+      this.openStashBtn,
       this.optimizeLoadoutBtn,
       this.openAllChestsBtn,
       this.openUpgradesBtn,
@@ -254,6 +269,15 @@ export class GameViewController {
       (error) => this.onGearMutationFailed(error),
     );
 
+    this.gearStorageFlow = new GearStorageFlow(
+      this.client,
+      this.gearMutations,
+      this.toasts,
+      this.destroyGearConfirmDialog,
+      (state) => this.afterStorageMutation(state),
+      (error) => this.onGearMutationFailed(error),
+    );
+
     this.campaignFlow = new CampaignFlow(this.client, this.modal);
     this.partyFlow = new PartyFlow(this.client);
 
@@ -276,6 +300,7 @@ export class GameViewController {
     this.modalStackController = new ModalStackController(
       this.modal,
       this.inventoryModal,
+      this.stashModal,
       this.heroDetailFlow,
       this.equipPickerModal,
       this.lootModal,
@@ -285,6 +310,7 @@ export class GameViewController {
       this.upgradeTreeModal,
       this.shopFlow,
       this.gearEquipFlow,
+      this.gearStorageFlow,
       this.chestLootFlow,
       this.lootFlow,
       () => this.prefsController.preferences,
@@ -297,7 +323,11 @@ export class GameViewController {
       (gearIds) => {
         void this.equipRecommendedLoot(gearIds);
       },
+      () => this.openStashModal(),
+      () => this.openInventoryModal(),
     );
+
+    bindGearStorageActions(document, this.gearStorageFlow, () => this.state);
 
     this.prefsController.apply(this.state);
     this.bindHeroPanelDelegation();
@@ -329,6 +359,7 @@ export class GameViewController {
       void this.chestLootFlow.openAllChests();
     });
     this.openInventoryBtn.addEventListener('click', () => this.openInventoryModal());
+    this.openStashBtn.addEventListener('click', () => this.openStashModal());
     this.optimizeLoadoutBtn.addEventListener('click', () => {
       void this.gearEquipFlow.optimizeLoadout();
     });
@@ -698,6 +729,12 @@ export class GameViewController {
     this.chestLootFlow.closeLootBatchModal();
   }
 
+  private afterStorageMutation(state: GameStateDto): void {
+    this.render(state);
+    this.refreshHeroDrawerIfOpen();
+    this.refreshModalIfOpen();
+  }
+
   private afterGearMutation(state: GameStateDto): void {
     const topView = this.modalStack[this.modalStack.length - 1];
     if (
@@ -1054,6 +1091,21 @@ export class GameViewController {
     this.closeHeroDrawer();
     this.modalStack.length = 0;
     this.pushModal({ type: 'inventory' });
+  }
+
+  private openStashModal(): void {
+    if (this.contextInvalidated) return;
+    if (!this.state?.storageCapacity.stashUnlocked) {
+      this.toasts.show('Desbloqueie Baú de itens em Melhorias', 'info');
+      return;
+    }
+    this.closeHeroDrawer();
+    if (this.modal.isOpen() && this.modalStack.length > 0) {
+      this.pushModal({ type: 'stash' });
+      return;
+    }
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'stash' });
   }
 
   private openHeroDetailModal(heroId: string, tab: HeroDetailTab = 'sheet'): void {

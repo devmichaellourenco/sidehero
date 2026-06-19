@@ -31,6 +31,7 @@ export interface GameStateProps {
   gold: number;
   chests: Chest[];
   inventory: Gear[];
+  stash: Gear[];
   battleLog: BattleLogEntry[];
   totalBattlesWon: number;
   lastTickAt: number;
@@ -53,6 +54,7 @@ export class GameState {
   readonly gold: Gold;
   readonly chests: Chest[];
   readonly inventory: Gear[];
+  readonly stash: Gear[];
   readonly battleLog: BattleLogEntry[];
   readonly totalBattlesWon: number;
   readonly lastTickAt: number;
@@ -74,6 +76,7 @@ export class GameState {
     this.gold = Gold.of(props.gold);
     this.chests = props.chests;
     this.inventory = props.inventory;
+    this.stash = props.stash ?? [];
     this.battleLog = props.battleLog.slice(-20);
     this.totalBattlesWon = props.totalBattlesWon;
     this.lastTickAt = props.lastTickAt;
@@ -102,6 +105,7 @@ export class GameState {
       gold: 0,
       chests: [],
       inventory: [],
+      stash: [],
       battleLog: [{ message: 'A aventura começou no Side Hero!', timestamp: Date.now() }],
       totalBattlesWon: 0,
       lastTickAt: Date.now(),
@@ -228,6 +232,10 @@ export class GameState {
     return this.clone({ inventory });
   }
 
+  withStash(stash: Gear[]): GameState {
+    return this.clone({ stash });
+  }
+
   addLog(message: string): GameState {
     const entry = { message, timestamp: Date.now() };
     return this.clone({ battleLog: [...this.battleLog, entry] });
@@ -257,6 +265,7 @@ export class GameState {
       gold: this.gold.value(),
       chests: this.chests,
       inventory: this.inventory,
+      stash: this.stash,
       battleLog: this.battleLog,
       totalBattlesWon: this.totalBattlesWon,
       lastTickAt: this.lastTickAt,

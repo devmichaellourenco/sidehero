@@ -23,6 +23,7 @@ import {
   canHeroEquipGear,
   renderGearRequirementLines,
 } from './GearRequirementPresentation';
+import { renderInventoryStorageActions } from './StorageGridPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -95,6 +96,7 @@ export function renderInventoryGridSlot(
     upgradeStatus: GearUpgradeStatus;
     returnedToInventory?: boolean;
     equipMode?: InventoryGridEquipMode;
+    canStash?: boolean;
   },
 ): string {
   const frameUrl = getGearFrameSprite(gear.rarity);
@@ -125,6 +127,10 @@ export function renderInventoryGridSlot(
   const returnedBadge = options.returnedToInventory
     ? '<span class="inventory-grid-returned-badge" aria-hidden="true">↩</span>'
     : '';
+  const storageActions =
+    options.canStash !== undefined
+      ? renderInventoryStorageActions(gear, { canStash: options.canStash })
+      : '';
 
   return `
     <button
@@ -154,6 +160,7 @@ export function renderInventoryGridSlot(
           <span>${comparison.health}</span>
         </span>
         ${equipAction}
+        ${storageActions}
       </span>
     </button>
   `;
@@ -167,6 +174,7 @@ export function renderInventoryGrid(
     returnedGearIds?: string[];
     equipMode?: InventoryGridEquipMode;
     upgradeForHeroId?: string;
+    canStash?: boolean;
   } = {},
 ): string {
   const hero = state.heroes.find((entry) => entry.id === selectedHeroId);
@@ -193,6 +201,7 @@ export function renderInventoryGrid(
               : getGearUpgradeInfoForActiveParty(state, gear).status,
             returnedToInventory: returnedSet.has(gear.id),
             equipMode,
+            canStash: options.canStash,
           }),
         )
         .join('')}

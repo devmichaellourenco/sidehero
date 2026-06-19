@@ -115,6 +115,18 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       );
       return { ok: true, state };
     }
+    case 'MOVE_GEAR_TO_STASH': {
+      const state = await app.moveGearToStash.execute(message.gearId);
+      return { ok: true, state };
+    }
+    case 'MOVE_GEAR_FROM_STASH': {
+      const state = await app.moveGearFromStash.execute(message.gearId);
+      return { ok: true, state };
+    }
+    case 'DESTROY_GEAR': {
+      const state = await app.destroyGear.execute(message.gearId, message.location);
+      return { ok: true, state };
+    }
     case 'GET_SHOP_OFFERS': {
       const result = await app.getShopOffers.execute();
       return {

@@ -1,4 +1,5 @@
 import { UpgradeLevels, getFeatureLevel } from '../upgrades/FeatureKey';
+import { StorageCapacityPolicy } from '../storage/StorageCapacityPolicy';
 
 export interface FeatureAccessSnapshot {
   autoBattle: boolean;
@@ -14,6 +15,9 @@ export interface FeatureAccessSnapshot {
   shopRefresh: boolean;
   backgroundTick: boolean;
   backgroundTickMultiplier: number;
+  itemStash: boolean;
+  stashCapacity: number;
+  inventoryCapacity: number;
 }
 
 export class FeatureAccessPolicy {
@@ -38,6 +42,9 @@ export class FeatureAccessPolicy {
       shopRefresh: getFeatureLevel(levels, 'shop_refresh') >= 1,
       backgroundTick: backgroundTickLevel >= 1,
       backgroundTickMultiplier: backgroundTickLevel >= 2 ? 2 : 1,
+      itemStash: StorageCapacityPolicy.isStashUnlocked(levels),
+      stashCapacity: StorageCapacityPolicy.stashLimit(levels),
+      inventoryCapacity: StorageCapacityPolicy.inventoryLimit(),
     };
   }
 

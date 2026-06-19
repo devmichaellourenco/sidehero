@@ -2,6 +2,7 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { EquipPickerModalRenderer } from '../components/EquipPickerModalRenderer';
 import { HeroDetailModalRenderer } from '../components/HeroDetailModalRenderer';
 import { InventoryModalRenderer } from '../components/InventoryModalRenderer';
+import { StashModalRenderer } from '../components/StashModalRenderer';
 import { LootBatchModalRenderer } from '../components/LootBatchModalRenderer';
 import { LootModalRenderer } from '../components/LootModalRenderer';
 import { ModalController } from '../components/ModalController';
@@ -12,6 +13,7 @@ import { GamePreferences } from '../components/GamePreferences';
 import { LootFlowController } from '../controllers/LootFlowController';
 import { ChestLootFlow } from './ChestLootFlow';
 import { GearEquipFlow } from './GearEquipFlow';
+import { GearStorageFlow } from './GearStorageFlow';
 import { HeroDetailFlow } from './HeroDetailFlow';
 import { ModalView } from './ModalTypes';
 import { ShopFlow } from './ShopFlow';
@@ -20,6 +22,7 @@ export class ModalStackController {
   constructor(
     private readonly modal: ModalController,
     private readonly inventoryModal: InventoryModalRenderer,
+    private readonly stashModal: StashModalRenderer,
     private readonly heroDetailFlow: HeroDetailFlow,
     private readonly equipPickerModal: EquipPickerModalRenderer,
     private readonly lootModal: LootModalRenderer,
@@ -29,6 +32,7 @@ export class ModalStackController {
     private readonly upgradeTreeModal: UpgradeTreeModalRenderer,
     private readonly shopFlow: ShopFlow,
     private readonly gearEquipFlow: GearEquipFlow,
+    private readonly gearStorageFlow: GearStorageFlow,
     private readonly chestLootFlow: ChestLootFlow,
     private readonly lootFlow: LootFlowController,
     private readonly getPreferences: () => GamePreferences,
@@ -40,12 +44,18 @@ export class ModalStackController {
     private readonly onEquipPickerFromSlot: (heroId: string, slot: string) => void,
     private readonly onEquipPickerFromGear: (gearId: string) => void,
     private readonly onEquipRecommendedLoot: (gearIds: string[]) => void,
+    private readonly onOpenStash: () => void,
+    private readonly onOpenInventory: () => void,
   ) {}
 
   getModalTitle(view: ModalView, state: GameStateDto): string {
     switch (view.type) {
       case 'inventory':
-        return `Inventário (${state.inventory.length})`;
+        return `Inventário (${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit})`;
+      case 'stash':
+        return state.storageCapacity.stashUnlocked
+          ? `Baú (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`
+          : 'Baú de itens';
       case 'hero-detail': {
         const hero = state.heroes.find((entry) => entry.id === view.heroId);
         return hero ? hero.name : 'Herói';
@@ -123,9 +133,20 @@ export class ModalStackController {
             onOptimizeLoadout: () => {
               void this.gearEquipFlow.optimizeLoadout(undefined, { fromInventory: true });
             },
+            onOpenStash: () => this.onOpenStash(),
           },
           { showOptimize: state.featureFlags.optimizeLoadout },
         );
+        break;
+      case 'stash':
+        this.stashModal.render(container, state, {
+          onFilterChange: () => this.renderTop(stack, state),
+          onSortChange: () => this.renderTop(stack, state),
+          onWithdrawGear: (gearId) => {
+            void this.gearStorageFlow.moveFromStash(gearId);
+          },
+          onOpenInventory: () => this.onOpenInventory(),
+        });
         break;
       case 'hero-detail':
         this.heroDetailFlow.bindToModal(container, state, view.heroId, {

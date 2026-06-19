@@ -29,6 +29,7 @@ export type InventoryModalHandlers = {
   onHeroChange: (heroId: string) => void;
   onUpgradesOnlyChange: (enabled: boolean) => void;
   onOptimizeLoadout: () => void;
+  onOpenStash: () => void;
 };
 
 export class InventoryModalRenderer {
@@ -132,11 +133,19 @@ export class InventoryModalRenderer {
         >
           Só upgrades
         </button>
+        ${
+          state.storageCapacity.stashUnlocked
+            ? `<button type="button" class="filter-btn" data-open-stash>Baú (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})</button>`
+            : ''
+        }
       </div>
     `;
 
     const heroSelector = renderInventoryHeroSelector(state, selectedHeroId);
-    const countLabel = `<p class="inventory-count">${filtered.length} / ${state.inventory.length} itens</p>`;
+    const countLabel = `<p class="inventory-count">${state.storageCapacity.inventoryUsed} / ${state.storageCapacity.inventoryLimit} itens · ${filtered.length} visíveis</p>`;
+    const canStash =
+      state.storageCapacity.stashUnlocked &&
+      state.storageCapacity.stashUsed < state.storageCapacity.stashLimit;
 
     if (state.inventory.length === 0) {
       container.innerHTML = `
@@ -168,6 +177,7 @@ export class InventoryModalRenderer {
         ${countLabel}
         ${renderInventoryGrid(state, sorted, selectedHeroId, {
           returnedGearIds: equipFeedback?.returnedGearIds,
+          canStash,
         })}
         <footer class="inventory-footer">${optimizeButton}</footer>
       </div>
@@ -234,6 +244,10 @@ export class InventoryModalRenderer {
     container.querySelector('[data-upgrades-only]')?.addEventListener('click', () => {
       this.upgradesOnly = !this.upgradesOnly;
       handlers.onUpgradesOnlyChange(this.upgradesOnly);
+    });
+
+    container.querySelector('[data-open-stash]')?.addEventListener('click', () => {
+      handlers.onOpenStash();
     });
 
     container.querySelectorAll('[data-inventory-unequip-hero]').forEach((button) => {
