@@ -1,3 +1,5 @@
+import { DamageElement } from '../../domain/combat/DamageElement';
+
 export type CombatFloatKind = 'damage' | 'heal' | 'crit' | 'buff' | 'debuff';
 
 export interface CombatFloatingEventDto {
@@ -5,4 +7,5 @@ export interface CombatFloatingEventDto {
   targetId: string;
   kind: CombatFloatKind;
   amount: number;
+  damageElement?: DamageElement;
 }

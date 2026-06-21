@@ -25,6 +25,9 @@ import {
 import { mapEnemyCombatSkills, mapHeroCombatSkills } from '../mappers/CombatSkillBarMapper';
 import { mapHeroSkillCooldowns } from '../mappers/HeroSkillCooldownMapper';
 import { mapCombatantStatusEffects } from '../mappers/CombatStatusEffectMapper';
+import { mapCombatResistSummary } from '../mappers/CombatResistMapper';
+import { resistanceProfileFromHeroEquipment } from '../../domain/combat/ResistanceProfileAggregator';
+import { resolveEnemyInnateResists } from '../../domain/enemies/EnemyInnateResists';
 import { StorageCapacityPolicy } from '../../domain/storage/StorageCapacityPolicy';
 
 export class GameStatePresenter {
@@ -159,6 +162,9 @@ function mapHeroToDtoWithCombatIntent(
     }),
     combatSkillCooldowns: mapHeroSkillCooldowns(hero, skillCooldowns),
     statusEffects: mapCombatantStatusEffects('hero', hero.id, combatStatusEffects),
+    combatResists: mapCombatResistSummary(
+      resistanceProfileFromHeroEquipment(hero.toProps().equipment),
+    ),
   };
 }
 
@@ -200,6 +206,9 @@ function mapEnemyToDto(
       combatTime: combatBarContext.combatTime,
     }),
     statusEffects: mapCombatantStatusEffects('enemy', enemy.id, combatStatusEffects),
+    combatResists: mapCombatResistSummary(
+      resolveEnemyInnateResists(enemy.enemyType, enemy.stage),
+    ),
   };
 }
 

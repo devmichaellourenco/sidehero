@@ -1,4 +1,5 @@
 import { formatCooldownLabel, getCooldownSeconds, getInitialCooldownSeconds } from '../../domain/combat/SkillCooldownTiming';
+import { DAMAGE_ELEMENT_LABELS } from '../../domain/combat/DamageElement';
 import { Hero } from '../../domain/entities/Hero';
 import { CombatSkillDefinition } from '../../domain/progression/combat/CombatSkillDefinition';
 import { getHeroCombatSkill } from '../../domain/progression/combat/HeroCombatSkillCatalog';
@@ -19,12 +20,22 @@ const SCOPE_LABELS: Record<SkillScopeDto, string> = {
 };
 
 const KIND_LABELS: Record<SkillCombatKind, string> = {
-  damage_physical: 'Dano físico',
-  damage_magic: 'Dano mágico',
+  damage: 'Dano',
   heal_ally: 'Cura',
   buff_attack: 'Buff ATK',
   debuff_defense: 'Debuff DEF',
 };
+
+function formatDamageType(combat: CombatSkillDefinition): string {
+  if (!combat.damageComponents?.length) {
+    return KIND_LABELS.damage;
+  }
+
+  const labels = [
+    ...new Set(combat.damageComponents.map((entry) => DAMAGE_ELEMENT_LABELS[entry.element])),
+  ];
+  return labels.join(' + ');
+}
 
 function formatTarget(combat: CombatSkillDefinition): string {
   const pool =
@@ -78,7 +89,10 @@ export function buildSkillBattleStats(
   if (!combat) return [];
 
   const stats: HeroActiveSkillStatDto[] = [
-    { label: 'Tipo', value: KIND_LABELS[combat.kind] },
+    {
+      label: 'Tipo',
+      value: combat.kind === 'damage' ? formatDamageType(combat) : KIND_LABELS[combat.kind],
+    },
     { label: 'Alvo', value: formatTarget(combat) },
   ];
 

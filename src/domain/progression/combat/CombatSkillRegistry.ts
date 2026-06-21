@@ -1,3 +1,4 @@
+import { damageComponent, standardDamage } from '../../combat/DamageComponentPresets';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
 import { BASIC_ATTACK_SKILL, ENEMY_BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 import { HERO_COMBAT_SKILL_CATALOG } from './HeroCombatSkillCatalog';
@@ -6,7 +7,8 @@ import { HERO_COMBAT_SKILL_CATALOG } from './HeroCombatSkillCatalog';
 const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   {
     skillId: 'wild_bite',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -19,7 +21,8 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'goblin_stab',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -32,7 +35,8 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'orc_smash',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -45,7 +49,8 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'poison_spit',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('chaos', 'single'),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -55,10 +60,12 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
     basePower: 5,
     powerPerRank: 0,
     attributeFactor: 0,
+    onHitDot: { element: 'chaos', damagePerTurn: 3, durationTurns: 3, applyChance: 0.7 },
   },
   {
     skillId: 'ground_slam',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'all', { delivery: 'aoe' }),
     targetPool: 'heroes',
     targetScope: 'all',
     targetPriority: 'lowest_hp_percent',
@@ -85,7 +92,8 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'slime_acid',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('chaos', 'single'),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -95,10 +103,12 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
     basePower: 4,
     powerPerRank: 0,
     attributeFactor: 0,
+    onHitDot: { element: 'chaos', damagePerTurn: 2, durationTurns: 4, applyChance: 0.85 },
   },
   {
     skillId: 'wraith_drain',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('chaos', 'single'),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -125,7 +135,10 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'dragon_breath',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('fire', 'all', {
+      extras: [damageComponent('physical', 'aoe', 0.1)],
+    }),
     targetPool: 'heroes',
     targetScope: 'all',
     targetPriority: 'lowest_hp_percent',
@@ -138,7 +151,8 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'dragon_bite',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'highest_hp_percent',
@@ -151,7 +165,8 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'saci_fire',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('fire', 'single'),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -164,7 +179,8 @@ const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
   },
   {
     skillId: 'saci_wind',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('lightning', 'all', { delivery: 'aoe' }),
     targetPool: 'heroes',
     targetScope: 'all',
     targetPriority: 'lowest_hp_percent',
@@ -221,7 +237,7 @@ export function resolveCombatSkill(
     return { ...base, targetPool: 'heroes' };
   }
 
-  if (base.targetPool === 'heroes' && base.kind.startsWith('damage')) {
+  if (base.targetPool === 'heroes' && base.kind === 'damage') {
     return base;
   }
 

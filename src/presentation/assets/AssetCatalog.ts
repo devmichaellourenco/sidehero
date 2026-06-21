@@ -3,7 +3,16 @@ import { getEnemyRosterEntry } from '../../domain/enemies/EnemyRosterCatalog';
 
 export type HeroClassKey = 'knight' | 'sorcerer' | 'priest' | 'berserker' | 'paladin';
 export type GearSlotKey = 'weapon' | 'armor' | 'accessory';
-export type GearRarityKey = 'common' | 'rare' | 'epic';
+export type GearRarityKey = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
+
+const RARITY_ASSET_FALLBACK: Record<GearRarityKey, 'common' | 'rare' | 'epic'> = {
+  common: 'common',
+  uncommon: 'common',
+  rare: 'rare',
+  epic: 'epic',
+  legendary: 'epic',
+  mythic: 'epic',
+};
 
 const HERO_SPRITES: Record<HeroClassKey, string> = {
   knight: 'characters/knight.png',
@@ -178,11 +187,15 @@ export function getGearSlotSprite(slot: string): string {
 }
 
 export function getGearRaritySprite(rarity: string): string {
-  return getAssetUrl(GEAR_RARITY_SPRITES[rarity as GearRarityKey] ?? GEAR_RARITY_SPRITES.common);
+  const key = (rarity in RARITY_ASSET_FALLBACK ? rarity : 'common') as GearRarityKey;
+  const assetKey = RARITY_ASSET_FALLBACK[key];
+  return getAssetUrl(GEAR_RARITY_SPRITES[assetKey]);
 }
 
 export function getGearFrameSprite(rarity: string): string {
-  return getAssetUrl(GEAR_FRAME_SPRITES[rarity as GearRarityKey] ?? GEAR_FRAME_SPRITES.common);
+  const key = (rarity in RARITY_ASSET_FALLBACK ? rarity : 'common') as GearRarityKey;
+  const assetKey = RARITY_ASSET_FALLBACK[key];
+  return getAssetUrl(GEAR_FRAME_SPRITES[assetKey]);
 }
 
 export function imgTag(src: string, alt: string, className?: string): string {

@@ -1,10 +1,13 @@
-import { SkillCombatKind } from '../../progression/combat/SkillCombatKind';
+import { DamageElement, DAMAGE_ELEMENT_LABELS } from '../../combat/DamageElement';
+
+export type CombatStatusEffectKind = 'buff_attack' | 'debuff_defense' | 'dot';
 
 export interface CombatStatusEffect {
   skillId: string;
-  kind: 'buff_attack' | 'debuff_defense';
+  kind: CombatStatusEffectKind;
   magnitude: number;
   remainingTurns: number;
+  dotElement?: DamageElement;
 }
 
 export type StatusEffectMap = Record<string, CombatStatusEffect[]>;
@@ -12,17 +15,23 @@ export type StatusEffectMap = Record<string, CombatStatusEffect[]>;
 export interface StatusApplication {
   combatantKey: string;
   skillId: string;
-  kind: Extract<SkillCombatKind, 'buff_attack' | 'debuff_defense'>;
+  kind: CombatStatusEffectKind;
   magnitude: number;
   durationTurns: number;
   skillName: string;
+  dotElement?: DamageElement;
 }
 
 export function statusEffectLabel(effect: CombatStatusEffect): string {
   if (effect.kind === 'buff_attack') {
     return `ATK+${formatStatusMagnitude(effect.magnitude)}`;
   }
-  return `DEF-${formatStatusMagnitude(effect.magnitude)}`;
+  if (effect.kind === 'debuff_defense') {
+    return `DEF-${formatStatusMagnitude(effect.magnitude)}`;
+  }
+
+  const element = effect.dotElement ? DAMAGE_ELEMENT_LABELS[effect.dotElement] : 'DOT';
+  return `${element} ${formatStatusMagnitude(effect.magnitude)}/t`;
 }
 
 export function statusEffectTooltip(effect: CombatStatusEffect): string {

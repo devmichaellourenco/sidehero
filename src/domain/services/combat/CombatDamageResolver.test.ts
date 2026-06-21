@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   mitigatePhysicalDamage,
   resolveOutgoingDamage,
+  resolveOutgoingPhysicalDamage,
   rollCriticalMultiplier,
 } from './CombatDamageResolver';
 
@@ -25,7 +26,7 @@ describe('CombatDamageResolver', () => {
   });
 
   it('resolve dano final com perfil de atacante', () => {
-    const result = resolveOutgoingDamage(
+    const result = resolveOutgoingPhysicalDamage(
       20,
       8,
       5,
@@ -35,5 +36,39 @@ describe('CombatDamageResolver', () => {
 
     expect(result.isCrit).toBe(true);
     expect(result.amount).toBeGreaterThan(1);
+  });
+
+  it('resolve dano multi-elemento somando componentes', () => {
+    const result = resolveOutgoingDamage(
+      100,
+      [
+        { element: 'fire', delivery: 'aoe', weight: 0.85 },
+        { element: 'physical', delivery: 'aoe', weight: 0.15 },
+      ],
+      { armor: 10, stageLevel: 1, resistances: { fire: 50, cold: 0, lightning: 0, chaos: 0, allElemental: 0 } },
+      { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 },
+    );
+
+    expect(result.amount).toBeGreaterThan(1);
+    expect(result.amount).toBeLessThan(100);
+    expect(result.dodged).toBe(false);
+    expect(result.blocked).toBe(false);
+  });
+
+  it('dodge anula dano final após mitigação por componente', () => {
+    const result = resolveOutgoingDamage(
+      30,
+      [{ element: 'physical', delivery: 'melee', weight: 1 }],
+      {
+        armor: 5,
+        stageLevel: 1,
+        resistances: { fire: 0, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        defensive: { dodgeChance: 1, blockChance: 0, damageReduction: 0 },
+      },
+      { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 },
+    );
+
+    expect(result.amount).toBe(0);
+    expect(result.dodged).toBe(true);
   });
 });

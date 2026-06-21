@@ -17,8 +17,11 @@ const SHOP_RARITIES: Record<GearSlot, GearRarity> = {
 
 const BASE_PRICE: Record<GearRarity, number> = {
   common: 25,
+  uncommon: 40,
   rare: 55,
   epic: 110,
+  legendary: 180,
+  mythic: 300,
 };
 
 const REFRESH_BASE_COST = 15;

@@ -1,3 +1,5 @@
+import { DamageElement } from '../../combat/DamageElement';
+
 export type CombatFloatTarget = 'hero' | 'enemy';
 export type CombatFloatKind = 'damage' | 'heal' | 'crit' | 'buff' | 'debuff';
 
@@ -6,6 +8,7 @@ export interface CombatFloatingEvent {
   targetId: string;
   kind: CombatFloatKind;
   amount: number;
+  damageElement?: DamageElement;
 }
 
 export function createDamageEvent(
@@ -14,6 +17,7 @@ export function createDamageEvent(
   beforeHealth: number,
   afterHealth: number,
   isCrit = false,
+  damageElement?: DamageElement,
 ): CombatFloatingEvent | null {
   const amount = Math.max(0, beforeHealth - afterHealth);
   if (amount <= 0) return null;
@@ -23,6 +27,7 @@ export function createDamageEvent(
     targetId,
     kind: isCrit ? 'crit' : 'damage',
     amount,
+    damageElement,
   };
 }
 

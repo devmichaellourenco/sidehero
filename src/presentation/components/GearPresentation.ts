@@ -19,8 +19,11 @@ export const GEAR_SLOT_LABELS: Record<GearSlotKey, string> = {
 
 export const GEAR_RARITY_LABELS: Record<string, string> = {
   common: 'Comum',
+  uncommon: 'Incomum',
   rare: 'Raro',
   epic: 'Épico',
+  legendary: 'Lendário',
+  mythic: 'Mítico',
 };
 
 export interface EquippedGearDto {
@@ -35,6 +38,30 @@ export interface EquippedGearDto {
   castSpeedBonus?: number;
   critChanceBonus?: number;
   critDamageBonus?: number;
+  fireResistBonus?: number;
+  coldResistBonus?: number;
+  lightningResistBonus?: number;
+  chaosResistBonus?: number;
+  allElementalResistBonus?: number;
+}
+
+function formatResistBonuses(
+  gear: Pick<
+    GearDto,
+    | 'fireResistBonus'
+    | 'coldResistBonus'
+    | 'lightningResistBonus'
+    | 'chaosResistBonus'
+    | 'allElementalResistBonus'
+  >,
+): string[] {
+  const parts: string[] = [];
+  if (gear.fireResistBonus > 0) parts.push(`+${gear.fireResistBonus}% Fogo`);
+  if (gear.coldResistBonus > 0) parts.push(`+${gear.coldResistBonus}% Gelo`);
+  if (gear.lightningResistBonus > 0) parts.push(`+${gear.lightningResistBonus}% Raio`);
+  if (gear.chaosResistBonus > 0) parts.push(`+${gear.chaosResistBonus}% Caos`);
+  if (gear.allElementalResistBonus > 0) parts.push(`+${gear.allElementalResistBonus}% Elemental`);
+  return parts;
 }
 
 function escapeHtml(text: string): string {
@@ -59,6 +86,14 @@ export function formatGearBonuses(
     | 'castSpeedBonus'
     | 'critChanceBonus'
     | 'critDamageBonus'
+    | 'fireResistBonus'
+    | 'coldResistBonus'
+    | 'lightningResistBonus'
+    | 'chaosResistBonus'
+    | 'allElementalResistBonus'
+    | 'dodgeChanceBonus'
+    | 'blockChanceBonus'
+    | 'damageReductionBonus'
   >,
 ): string {
   const parts = [
@@ -71,6 +106,12 @@ export function formatGearBonuses(
   if (gear.castSpeedBonus > 0) parts.push(`+${gear.castSpeedBonus.toFixed(2)} Cast`);
   if (gear.critChanceBonus > 0) parts.push(`+${formatPercent(gear.critChanceBonus)} Crít`);
   if (gear.critDamageBonus > 0) parts.push(`+${formatPercent(gear.critDamageBonus)} Crít Dmg`);
+  if (gear.dodgeChanceBonus > 0) parts.push(`+${formatPercent(gear.dodgeChanceBonus)} Esquiva`);
+  if (gear.blockChanceBonus > 0) parts.push(`+${formatPercent(gear.blockChanceBonus)} Bloqueio`);
+  if (gear.damageReductionBonus > 0) {
+    parts.push(`+${formatPercent(gear.damageReductionBonus)} Red. Dano`);
+  }
+  parts.push(...formatResistBonuses(gear));
 
   return parts.join(' · ');
 }

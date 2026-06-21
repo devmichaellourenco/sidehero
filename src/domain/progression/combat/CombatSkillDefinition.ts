@@ -1,3 +1,5 @@
+import { DamageComponent } from '../../combat/DamageComponent';
+import { DamageElement } from '../../combat/DamageElement';
 import { SkillId } from '../SkillId';
 import { SkillCombatKind } from './SkillCombatKind';
 import { SkillTargeting } from './SkillTargeting';
@@ -10,9 +12,18 @@ export type SkillTargetPriority =
   | 'highest_hp'
   | 'highest_hp_percent';
 
+export interface OnHitDotEffect {
+  element: DamageElement;
+  damagePerTurn: number;
+  durationTurns: number;
+  applyChance?: number;
+}
+
 export interface CombatSkillDefinition {
   skillId: SkillId | 'basic_attack' | string;
   kind: SkillCombatKind;
+  /** Obrigatório quando kind === 'damage'. */
+  damageComponents?: DamageComponent[];
   /** Pool absoluto de alvos no combate. */
   targetPool: SkillTargetPool;
   targetScope: SkillTargetScope;
@@ -36,6 +47,8 @@ export interface CombatSkillDefinition {
   healConditionThreshold?: number;
   /** Duração em turnos do combatente afetado (buff/debuff). */
   effectDurationTurns?: number;
+  /** Aplica DOT ao acertar dano (veneno, ignite, etc.). */
+  onHitDot?: OnHitDotEffect;
 }
 
 export function toSkillTargeting(definition: CombatSkillDefinition): SkillTargeting {

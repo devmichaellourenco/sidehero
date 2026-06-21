@@ -30,6 +30,13 @@ export interface HeroActiveSkillDto {
   battleStats: HeroActiveSkillStatDto[];
 }
 
+export interface CombatResistSummaryDto {
+  fire: number;
+  cold: number;
+  lightning: number;
+  chaos: number;
+}
+
 export interface HeroDto {
   id: string;
   name: string;
@@ -72,6 +79,11 @@ export interface HeroDto {
       castSpeedBonus: number;
       critChanceBonus: number;
       critDamageBonus: number;
+      fireResistBonus: number;
+      coldResistBonus: number;
+      lightningResistBonus: number;
+      chaosResistBonus: number;
+      allElementalResistBonus: number;
       requirements: GearRequirementsDto;
     } | null
   >;
@@ -79,6 +91,7 @@ export interface HeroDto {
   combatSkills: CombatBattleSkillDto[];
   combatSkillCooldowns: HeroSkillCooldownDto[];
   statusEffects: CombatStatusEffectDto[];
+  combatResists: CombatResistSummaryDto;
 }
 
 export interface HeroSkillCooldownDto {
@@ -91,7 +104,7 @@ export interface HeroSkillCooldownDto {
 }
 
 export interface CombatStatusEffectDto {
-  kind: 'buff_attack' | 'debuff_defense';
+  kind: 'buff_attack' | 'debuff_defense' | 'dot';
   tooltip: string;
   turnsRemaining: number;
   polarity: 'buff' | 'debuff';
@@ -136,9 +149,8 @@ export interface EnemyDto {
   combatIntent: CombatSkillIntentDto | null;
   combatSkills: CombatBattleSkillDto[];
   statusEffects: CombatStatusEffectDto[];
+  combatResists: CombatResistSummaryDto;
 }
-
-export interface GearDto {
   id: string;
   name: string;
   slot: string;
@@ -150,6 +162,14 @@ export interface GearDto {
   castSpeedBonus: number;
   critChanceBonus: number;
   critDamageBonus: number;
+  fireResistBonus: number;
+  coldResistBonus: number;
+  lightningResistBonus: number;
+  chaosResistBonus: number;
+  allElementalResistBonus: number;
+  dodgeChanceBonus: number;
+  blockChanceBonus: number;
+  damageReductionBonus: number;
   requirements: GearRequirementsDto;
 }
 

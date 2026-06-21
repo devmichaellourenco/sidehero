@@ -1,10 +1,12 @@
+import { standardDamage } from '../../combat/DamageComponentPresets';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
 
 export const BASIC_ATTACK_SKILL_ID = 'basic_attack';
 
 export const BASIC_ATTACK_SKILL: CombatSkillDefinition = {
   skillId: BASIC_ATTACK_SKILL_ID,
-  kind: 'damage_physical',
+  kind: 'damage',
+  damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
   targetPool: 'enemies',
   targetScope: 'single',
   targetPriority: 'lowest_hp_percent',

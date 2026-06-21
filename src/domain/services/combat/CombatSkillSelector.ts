@@ -186,6 +186,8 @@ export class CombatSkillSelector {
       kind: skill.kind,
       targeting,
       power,
+      damageComponents: skill.damageComponents,
+      onHitDot: skill.onHitDot,
       targetHeroId: targeting === 'single_ally' ? targetHeroIds[0] : undefined,
       targetHeroIds: targeting === 'all_allies' ? targetHeroIds : undefined,
     };
@@ -210,6 +212,8 @@ export class CombatSkillSelector {
       kind: skill.kind,
       targeting,
       power,
+      damageComponents: skill.damageComponents,
+      onHitDot: skill.onHitDot,
       targetEnemyId: targeting === 'single_enemy' ? targetEnemyIds[0] : undefined,
       targetEnemyIds: targeting === 'all_enemies' ? targetEnemyIds : undefined,
     };

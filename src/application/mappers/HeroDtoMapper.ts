@@ -1,5 +1,6 @@
 import { Hero } from '../../domain/entities/Hero';
 import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
+import { resistanceProfileFromHeroEquipment } from '../../domain/combat/ResistanceProfileAggregator';
 
 const combatProfiles = new CombatProfileProvider();
 import {
@@ -10,6 +11,7 @@ import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { AttributesDto } from '../dto/AttributesDto';
 import { HeroDto } from '../dto/GameStateDto';
 import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
+import { mapCombatResistSummary } from './CombatResistMapper';
 
 function mapAttributes(attrs: { str: number; dex: number; int: number }): AttributesDto {
   return { str: attrs.str, dex: attrs.dex, int: attrs.int };
@@ -36,6 +38,11 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
           castSpeedBonus: gear.castSpeedBonus,
           critChanceBonus: gear.critChanceBonus,
           critDamageBonus: gear.critDamageBonus,
+          fireResistBonus: gear.fireResistBonus,
+          coldResistBonus: gear.coldResistBonus,
+          lightningResistBonus: gear.lightningResistBonus,
+          chaosResistBonus: gear.chaosResistBonus,
+          allElementalResistBonus: gear.allElementalResistBonus,
           requirements: gear.requirements
             ? {
                 minLevel: gear.requirements.minLevel,
@@ -81,5 +88,8 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     combatSkills: [],
     combatSkillCooldowns: [],
     statusEffects: [],
+    combatResists: mapCombatResistSummary(
+      resistanceProfileFromHeroEquipment(props.equipment),
+    ),
   };
 }

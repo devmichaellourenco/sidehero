@@ -1,3 +1,5 @@
+import { PartialResistanceProfile } from '../combat/ResistanceProfile';
+
 export type EnemyPowerTier = 1 | 2 | 3 | 4 | 5;
 export type EnemyRosterRole = 'common' | 'subboss' | 'boss';
 export type EnemySpriteVariant = 'common' | 'boss' | 'saci' | 'goblin_archer' | 'goblin_bomber' | 'gonodor' | 'vorax';
@@ -11,6 +13,8 @@ export interface EnemyRosterEntry {
   spriteVariant: EnemySpriteVariant;
   /** Skills do acervo unificado (CombatSkillRegistry). */
   skillIds: readonly string[];
+  /** Resistências inatas explícitas (somadas ao tema inferido por id). */
+  innateResists?: PartialResistanceProfile;
 }
 
 const T1: EnemyPowerTier = 1;
@@ -69,7 +73,7 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'lizardman', name: 'Homem-Lagarto', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.orc1 },
   { id: 'skeleton_warrior', name: 'Esqueleto Guerreiro', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.undead1 },
   { id: 'rot_zombie', name: 'Zumbi Putrefato', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.undead1 },
-  { id: 'minor_fire_elemental', name: 'Elemental Menor de Fogo', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.fire1 },
+  { id: 'minor_fire_elemental', name: 'Elemental Menor de Fogo', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.fire1, innateResists: { fire: 20 } },
   { id: 'renegade_necromancer', name: 'Necromante Renegado', powerTier: T2, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.necromancer2 },
   { id: 'bloody_orc_chief', name: 'Chefe Orc do Clã Sangrento', powerTier: T2, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.orcChief2 },
   { id: 'mountain_troll', name: 'Troll das Montanhas', powerTier: T2, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.troll2 },
@@ -82,14 +86,14 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'shadow_arachnid', name: 'Aracnídeo Sombrio', powerTier: T3, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'poison_spit', 'wraith_drain'] },
   { id: 'cultist_mage', name: 'Mago Cultista', powerTier: T3, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'arcane_bolt', 'fireball'] },
   { id: 'lesser_demon', name: 'Demônio Menor', powerTier: T3, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'pyro_ember', 'wraith_drain'] },
-  { id: 'major_elemental', name: 'Elemental Maior', powerTier: T3, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'fireball', 'arcane_surge'] },
+  { id: 'major_elemental', name: 'Elemental Maior', powerTier: T3, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'fireball', 'arcane_surge'], innateResists: { fire: 15, lightning: 10 } },
   { id: 'three_head_hydra', name: 'Hidra de Três Cabeças', powerTier: T3, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.hydra3 },
   { id: 'dead_general', name: 'General dos Mortos', powerTier: T3, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.general3 },
   { id: 'young_green_dragon', name: 'Dragão Verde Jovem', powerTier: T3, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.dragon3 },
 
   // Nível 4 — Especialista
   { id: 'stone_giant', name: 'Gigante da Pedra', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'ground_slam'] },
-  { id: 'frost_giant', name: 'Gigante do Gelo', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'ground_slam', 'arcane_bolt'] },
+  { id: 'frost_giant', name: 'Gigante do Gelo', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'ground_slam', 'arcane_bolt'], innateResists: { cold: 25 } },
   { id: 'chimera', name: 'Quimera', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'dragon_breath', 'wild_bite'] },
   { id: 'manticore', name: 'Mantícora', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'poison_spit', 'wild_bite'] },
   { id: 'infernal_devil', name: 'Diabo Infernal', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'pyro_inferno', 'wraith_curse'] },

@@ -17,6 +17,6 @@ export function mapCombatantStatusEffects(
     tooltip: statusEffectTooltip(effect),
     turnsRemaining: effect.remainingTurns,
     polarity: effect.kind === 'buff_attack' ? 'buff' : 'debuff',
-    iconPath: mapCombatStatusEffectIconPath(effect.kind),
+    iconPath: mapCombatStatusEffectIconPath(effect.kind, effect.dotElement),
   }));
 }

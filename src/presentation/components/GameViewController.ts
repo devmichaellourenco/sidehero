@@ -716,12 +716,7 @@ export class GameViewController {
         fromLoot: true,
         silent: flags.autoEquipSilent,
       });
-      return;
     }
-
-    this.lootFlow.reset();
-    this.modalStack.length = 0;
-    this.chestLootFlow.enqueueLootModals(gearIds);
   }
 
   private async equipRecommendedLoot(gearIds: string[]): Promise<void> {

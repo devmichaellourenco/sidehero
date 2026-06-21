@@ -1,16 +1,19 @@
 import { GameState } from '../../entities/GameState';
 import { CombatState } from '../../entities/CombatState';
 import { Hero } from '../../entities/Hero';
+import { Enemy } from '../../entities/Enemy';
+import { Stats } from '../../value-objects/Stats';
 import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
+import { scaledDotDamage } from '../../combat/DifficultyCombatScaling';
 import { MULTI_SKILL_STAGGER_SECONDS } from '../../combat/CombatTimingConstants';
 import { listEnemyCombatSkills } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCatalog';
 import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill';
 import { ActionTimerService } from './ActionTimerService';
 import { CombatActionExecutor } from './CombatActionExecutor';
-import { CombatFloatingEvent } from './CombatFloatingEvent';
+import { CombatFloatingEvent, createDamageEvent } from './CombatFloatingEvent';
 import { CombatSkillSelector, SelectedCombatAction } from './CombatSkillSelector';
 import { PendingSkillAction } from './PendingSkillAction';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
@@ -320,7 +323,61 @@ export class CombatTurnPhase {
         kind: application.kind,
         magnitude: application.magnitude,
         durationTurns: application.durationTurns,
+        dotElement: application.dotElement,
       });
+    }
+
+    const dotTick = statusEffects.tickDotDamage(actorKey);
+    if (dotTick.damage > 0) {
+      const dotDamage = scaledDotDamage(dotTick.damage, stageLevel);
+      if (actor.side === 'hero') {
+        const hero = heroes.find((entry) => entry.id === actor.id);
+        if (hero?.isAlive()) {
+          const beforeHealth = hero.currentHealth;
+          heroes = heroes.map((entry) =>
+            entry.id === actor.id
+              ? Hero.restore({
+                  ...entry.toProps(),
+                  currentHealth: Math.max(0, entry.currentHealth - dotDamage),
+                })
+              : entry,
+          );
+          const after = heroes.find((entry) => entry.id === actor.id)!;
+          const damageEvent = createDamageEvent(
+            'hero',
+            actor.id,
+            beforeHealth,
+            after.currentHealth,
+            false,
+            dotTick.dotElement,
+          );
+          if (damageEvent) floatingEvents.push(damageEvent);
+          events.push(`${hero.name} sofre ${dotDamage} de dano contínuo`);
+        }
+      } else {
+        const enemy = enemies.find((entry) => entry.id === actor.id);
+        if (enemy?.isAlive()) {
+          const beforeHealth = enemy.stats.currentHealth;
+          const updated = Enemy.restore({
+            ...enemy.toProps(),
+            stats: Stats.create({
+              ...enemy.stats.toProps(),
+              currentHealth: Math.max(0, enemy.stats.currentHealth - dotDamage),
+            }),
+          });
+          enemies = enemies.map((entry) => (entry.id === actor.id ? updated : entry));
+          const damageEvent = createDamageEvent(
+            'enemy',
+            actor.id,
+            beforeHealth,
+            updated.stats.currentHealth,
+            false,
+            dotTick.dotElement,
+          );
+          if (damageEvent) floatingEvents.push(damageEvent);
+          events.push(`${enemy.name} sofre ${dotDamage} de dano contínuo`);
+        }
+      }
     }
 
     statusEffects = statusEffects.tickOnTurnEnd(actorKey);

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { Gear } from '../../entities/Gear';
 import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { CombatActionExecutor } from './CombatActionExecutor';
@@ -107,7 +108,8 @@ describe('CombatActionExecutor', () => {
       {
         skillId: 'basic_attack',
         skillName: 'Ataque Básico',
-        kind: 'damage_physical',
+        kind: 'damage',
+        damageComponents: [{ element: 'physical', delivery: 'melee', weight: 1 }],
         targeting: 'single_ally',
         power: 20,
         targetHeroId: 'k1',
@@ -122,7 +124,8 @@ describe('CombatActionExecutor', () => {
       {
         skillId: 'basic_attack',
         skillName: 'Ataque Básico',
-        kind: 'damage_physical',
+        kind: 'damage',
+        damageComponents: [{ element: 'physical', delivery: 'melee', weight: 1 }],
         targeting: 'single_ally',
         power: 20,
         targetHeroId: 'k1',
@@ -136,5 +139,123 @@ describe('CombatActionExecutor', () => {
     const healthWithout = withoutDebuff.heroes[0].currentHealth;
     const healthWith = withDebuff.heroes[0].currentHealth;
     expect(healthWith).toBeLessThan(healthWithout);
+  });
+
+  it('resistência de gear reduz dano elemental recebido', () => {
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
+    const withResist = knight.equip(
+      Gear.create({
+        id: 'armor-fire',
+        name: 'Armadura Ígnea',
+        slot: 'armor',
+        rarity: 'epic',
+        attackBonus: 0,
+        defenseBonus: 4,
+        healthBonus: 0,
+        fireResistBonus: 50,
+      }),
+    );
+    const enemy = Enemy.forStage(1);
+
+    const baseline = executor.execute(
+      {
+        skillId: 'saci_fire',
+        skillName: 'Fogo do Saci',
+        kind: 'damage',
+        damageComponents: [{ element: 'fire', delivery: 'projectile', weight: 1 }],
+        targeting: 'single_ally',
+        power: 40,
+        targetHeroId: 'k1',
+      },
+      'Saci',
+      [knight],
+      [enemy],
+    );
+
+    const mitigated = executor.execute(
+      {
+        skillId: 'saci_fire',
+        skillName: 'Fogo do Saci',
+        kind: 'damage',
+        damageComponents: [{ element: 'fire', delivery: 'projectile', weight: 1 }],
+        targeting: 'single_ally',
+        power: 40,
+        targetHeroId: 'k1',
+      },
+      'Saci',
+      [withResist],
+      [enemy],
+    );
+
+    expect(mitigated.heroes[0].currentHealth).toBeGreaterThan(baseline.heroes[0].currentHealth);
+  });
+
+  it('esquiva de gear evita dano recebido', () => {
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
+    const withDodge = knight.equip(
+      Gear.create({
+        id: 'armor-dodge',
+        name: 'Manto Etéreo',
+        slot: 'armor',
+        rarity: 'legendary',
+        attackBonus: 0,
+        defenseBonus: 2,
+        healthBonus: 0,
+        dodgeChanceBonus: 0.5,
+      }),
+    );
+    const enemy = Enemy.forStage(1);
+    const hpBefore = withDodge.currentHealth;
+
+    const result = executor.execute(
+      {
+        skillId: 'basic_attack',
+        skillName: 'Ataque Básico',
+        kind: 'damage',
+        damageComponents: [{ element: 'physical', delivery: 'melee', weight: 1 }],
+        targeting: 'single_ally',
+        power: 30,
+        targetHeroId: 'k1',
+      },
+      'Goblin',
+      [withDodge],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      { rng: () => 0 },
+    );
+
+    expect(result.heroes[0].currentHealth).toBe(hpBefore);
+    expect(result.event).toContain('ESQUIVOU');
+  });
+
+  it('aplica DOT ao acertar com onHitDot', () => {
+    const mage = Hero.createStarter('m1', 'sorcerer', 'Aria');
+    const enemy = Enemy.forStage(1);
+
+    const result = executor.execute(
+      {
+        skillId: 'fireball',
+        skillName: 'Bola de Fogo',
+        kind: 'damage',
+        damageComponents: [{ element: 'fire', delivery: 'projectile', weight: 1 }],
+        targeting: 'single_enemy',
+        power: 20,
+        targetEnemyId: enemy.id,
+        onHitDot: { element: 'fire', damagePerTurn: 5, durationTurns: 3, applyChance: 1 },
+      },
+      'Aria',
+      [mage],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      { rng: () => 0 },
+    );
+
+    expect(result.statusApplications).toHaveLength(1);
+    expect(result.statusApplications[0]).toMatchObject({
+      kind: 'dot',
+      magnitude: 5,
+      durationTurns: 3,
+      dotElement: 'fire',
+    });
   });
 });

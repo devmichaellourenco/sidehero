@@ -1,4 +1,11 @@
 import { CombatStatusEffect, StatusEffectMap } from './CombatStatusEffect';
+import { DamageElement } from '../../combat/DamageElement';
+
+export interface DotTickResult {
+  damage: number;
+  dotElement?: DamageElement;
+  tracker: CombatStatusEffectTracker;
+}
 
 export class CombatStatusEffectTracker {
   constructor(private readonly effects: StatusEffectMap) {}
@@ -21,6 +28,7 @@ export class CombatStatusEffectTracker {
     kind: CombatStatusEffect['kind'];
     magnitude: number;
     durationTurns: number;
+    dotElement?: CombatStatusEffect['dotElement'];
   }): CombatStatusEffectTracker {
     const next = structuredClone(this.effects);
     next[params.combatantKey] ??= [];
@@ -34,6 +42,7 @@ export class CombatStatusEffectTracker {
       kind: params.kind,
       magnitude: Math.max(1, params.magnitude),
       remainingTurns: Math.max(1, params.durationTurns),
+      dotElement: params.dotElement,
     });
 
     next[params.combatantKey] = withoutSkill;
@@ -57,6 +66,13 @@ export class CombatStatusEffectTracker {
     }
 
     return new CombatStatusEffectTracker(next);
+  }
+
+  tickDotDamage(combatantKey: string): DotTickResult {
+    const dots = (this.effects[combatantKey] ?? []).filter((effect) => effect.kind === 'dot');
+    const damage = dots.reduce((sum, effect) => sum + effect.magnitude, 0);
+    const dotElement = dots[0]?.dotElement;
+    return { damage, dotElement, tracker: this };
   }
 
   getAttackBonus(combatantKey: string): number {

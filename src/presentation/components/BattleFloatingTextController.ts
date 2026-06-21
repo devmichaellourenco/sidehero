@@ -1,4 +1,5 @@
 import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEventDto';
+import { resolveBattleFloatClass } from './BattleFloatingTextPresentation';
 
 const FLOAT_DURATION_MS = 900;
 
@@ -51,7 +52,7 @@ export class BattleFloatingTextController {
     if (!label) return;
 
     const float = document.createElement('span');
-    float.className = `battle-float battle-float--${event.kind === 'crit' ? 'crit' : event.kind}`;
+    float.className = `battle-float battle-float--${resolveBattleFloatClass(event)}`;
     float.textContent = label;
     float.setAttribute('role', 'presentation');
     float.setAttribute('aria-hidden', 'true');

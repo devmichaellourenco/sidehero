@@ -450,6 +450,26 @@ h2 {
   color: #ff6b7f;
 }
 
+.battle-float--damage-physical {
+  color: #d8dce6;
+}
+
+.battle-float--damage-fire {
+  color: #ff8c42;
+}
+
+.battle-float--damage-cold {
+  color: #6ec5ff;
+}
+
+.battle-float--damage-lightning {
+  color: #f4e76e;
+}
+
+.battle-float--damage-chaos {
+  color: #c77dff;
+}
+
 .battle-float--heal {
   color: #6fe3a0;
 }
@@ -1050,6 +1070,10 @@ h2 {
   font-size: 10px;
   color: #fff8e7;
   line-height: 1.35;
+}
+
+.enemy-tooltip-resist {
+  color: #9fd4ff;
 }
 
 .health-bar {
@@ -2914,9 +2938,14 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 }
 
 .hero-tooltip-line {
+  display: block;
   font-size: 10px;
   color: #fff8e7;
   line-height: 1.35;
+}
+
+.hero-tooltip-resist {
+  color: #9fd4ff;
 }
 
 .loot-batch-list {

@@ -38,7 +38,16 @@ export class GearRequirementChecker {
     rarity: Gear['rarity'],
   ): GearRequirements {
     const baseLevel = Math.max(1, Math.floor(stage / 3));
-    const rarityBump = rarity === 'epic' ? 3 : rarity === 'rare' ? 1 : 0;
+    const rarityBump =
+      rarity === 'mythic'
+        ? 8
+        : rarity === 'legendary'
+          ? 5
+          : rarity === 'epic'
+            ? 3
+            : rarity === 'rare'
+              ? 1
+              : 0;
 
     const reqs: GearRequirements = { minLevel: baseLevel + rarityBump };
 

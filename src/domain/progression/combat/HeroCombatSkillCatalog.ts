@@ -1,3 +1,4 @@
+import { damageComponent, standardDamage } from '../../combat/DamageComponentPresets';
 import { Hero } from '../../entities/Hero';
 import { BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
@@ -36,7 +37,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'fireball',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('fire', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -46,10 +48,12 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 10,
     powerPerRank: 6,
     attributeFactor: 1.5,
+    onHitDot: { element: 'fire', damagePerTurn: 5, durationTurns: 3, applyChance: 0.6 },
   },
   {
     skillId: 'arcane_bolt',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('lightning', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -62,7 +66,11 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'smite',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('lightning', 'single', {
+      delivery: 'melee',
+      extras: [damageComponent('physical', 'melee', 0.3)],
+    }),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -75,7 +83,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'arcane_touch',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('lightning', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -88,7 +97,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'shield_bash',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -101,7 +111,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'power_attack',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -156,7 +167,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'reaver_cleave',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'all', { delivery: 'aoe' }),
     targetPool: 'enemies',
     targetScope: 'all',
     targetPriority: 'lowest_hp_percent',
@@ -169,7 +181,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'reaver_fury',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -182,7 +195,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'guardian_strike',
-    kind: 'damage_physical',
+    kind: 'damage',
+    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -195,7 +209,10 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'pyro_inferno',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('fire', 'all', {
+      extras: [damageComponent('physical', 'aoe', 0.15)],
+    }),
     targetPool: 'enemies',
     targetScope: 'all',
     targetPriority: 'lowest_hp_percent',
@@ -208,7 +225,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'pyro_ember',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('fire', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -218,10 +236,12 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 10,
     powerPerRank: 5,
     attributeFactor: 1.3,
+    onHitDot: { element: 'fire', damagePerTurn: 4, durationTurns: 2 },
   },
   {
     skillId: 'arcane_surge',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('lightning', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -234,7 +254,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'arcane_focus',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('lightning', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -247,7 +268,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'inquisitor_judgment',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('lightning', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'highest_hp_percent',
@@ -260,7 +282,8 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   },
   {
     skillId: 'inquisitor_flame',
-    kind: 'damage_magic',
+    kind: 'damage',
+    damageComponents: standardDamage('fire', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
