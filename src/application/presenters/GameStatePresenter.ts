@@ -43,8 +43,6 @@ export class GameStatePresenter {
     const activeActor = combat?.peekNextActor(state.activeHeroes(), combat.enemies) ?? null;
     const combatBarContext = {
       activeTurn: activeActor,
-      pendingActions: combat?.pendingSkillActions ?? [],
-      combatTime: combat?.combatTime ?? 0,
     };
     const enemies = combatEnemies.map((enemy) =>
       mapEnemyToDto(enemy, activeParty, combatEnemies, skillCooldowns, statusEffects, combatBarContext),
@@ -144,8 +142,6 @@ function mapHeroToDtoWithCombatIntent(
   upgradeLevels: Parameters<typeof mapHeroBaseToDto>[1],
   combatBarContext: {
     activeTurn: { side: 'hero' | 'enemy'; id: string } | null;
-    pendingActions: import('../../domain/services/combat/PendingSkillAction').PendingSkillAction[];
-    combatTime: number;
   },
 ) {
   const isActiveTurn =
@@ -157,8 +153,6 @@ function mapHeroToDtoWithCombatIntent(
     combatIntent: mapHeroCombatIntent(hero, party, enemies, skillCooldowns, combatStatusEffects),
     combatSkills: mapHeroCombatSkills(hero, party, enemies, skillCooldowns, combatStatusEffects, {
       isActiveTurn,
-      pendingActions: combatBarContext.pendingActions,
-      combatTime: combatBarContext.combatTime,
     }),
     combatSkillCooldowns: mapHeroSkillCooldowns(hero, skillCooldowns),
     statusEffects: mapCombatantStatusEffects('hero', hero.id, combatStatusEffects),
@@ -176,8 +170,6 @@ function mapEnemyToDto(
   combatStatusEffects: Parameters<typeof mapCombatantStatusEffects>[2],
   combatBarContext: {
     activeTurn: { side: 'hero' | 'enemy'; id: string } | null;
-    pendingActions: import('../../domain/services/combat/PendingSkillAction').PendingSkillAction[];
-    combatTime: number;
   },
 ): EnemyDto {
   const isActiveTurn =
@@ -202,8 +194,6 @@ function mapEnemyToDto(
     combatIntent: mapEnemyCombatIntent(enemy, party, enemies, skillCooldowns),
     combatSkills: mapEnemyCombatSkills(enemy, party, enemies, skillCooldowns, {
       isActiveTurn,
-      pendingActions: combatBarContext.pendingActions,
-      combatTime: combatBarContext.combatTime,
     }),
     statusEffects: mapCombatantStatusEffects('enemy', enemy.id, combatStatusEffects),
     combatResists: mapCombatResistSummary(

@@ -54,24 +54,24 @@ export class SkillCooldownTracker {
     return structuredClone(this.cooldowns);
   }
 
-  advanceTime(deltaSeconds: number, castSpeed = 1): SkillCooldownTracker {
+  advanceTime(deltaSeconds: number): SkillCooldownTracker {
     const next = structuredClone(this.cooldowns);
 
     for (const key of Object.keys(next)) {
       for (const skillId of Object.keys(next[key])) {
-        next[key][skillId] = Math.max(0, next[key][skillId] - deltaSeconds * castSpeed);
+        next[key][skillId] = Math.max(0, next[key][skillId] - deltaSeconds);
       }
     }
 
     return new SkillCooldownTracker(next);
   }
 
-  advanceKey(key: string, deltaSeconds: number, castSpeed = 1): SkillCooldownTracker {
+  advanceKey(key: string, deltaSeconds: number): SkillCooldownTracker {
     const next = structuredClone(this.cooldowns);
     if (!next[key]) return this;
 
     for (const skillId of Object.keys(next[key])) {
-      next[key][skillId] = Math.max(0, next[key][skillId] - deltaSeconds * castSpeed);
+      next[key][skillId] = Math.max(0, next[key][skillId] - deltaSeconds);
     }
 
     return new SkillCooldownTracker(next);

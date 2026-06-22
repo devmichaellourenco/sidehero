@@ -1,6 +1,7 @@
 import { CombatBattleSkillDto } from '../../application/dto/GameStateDto';
 import { getSkillDisplayName, getSkillIconUrl } from '../assets/SkillIconCatalog';
 import { imgTag } from '../assets/AssetCatalog';
+import { stampSkillCooldownOverlay } from './SkillCooldownDisplayAnimator';
 
 function escapeHtml(text: string): string {
   return text
@@ -157,6 +158,9 @@ export function patchCombatSkillCooldowns(
       shade.style.setProperty('--cooldown-ratio', '0');
       label.textContent = '';
       overlay.removeAttribute('data-remaining-label');
+      delete overlay.dataset.cdRemaining;
+      delete overlay.dataset.cdTotal;
+      delete overlay.dataset.cdCapturedAt;
       continue;
     }
 
@@ -164,5 +168,6 @@ export function patchCombatSkillCooldowns(
     shade.style.setProperty('--cooldown-ratio', String(skill.cooldownRatio));
     label.textContent = skill.cooldownLabel;
     overlay.setAttribute('data-remaining-label', skill.cooldownLabel);
+    stampSkillCooldownOverlay(overlay, skill.secondsRemaining, skill.cooldownTotal);
   }
 }

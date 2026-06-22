@@ -79,11 +79,10 @@ export class CombatState {
     return CombatState.start(heroes, [enemy], actionTimers);
   }
 
-  /** Combatente com ação mais atrasada (próximo a agir). */
+  /** Combatente pronto para agir (timer ≤ 0), ou null se todos aguardam. */
   peekNextActor(heroes: Hero[], enemies: Enemy[]): CombatantRef | null {
     const service = new ActionTimerService();
-    const resolved = service.resolveNextActor(this.actionTimers, heroes, enemies);
-    return resolved.actor;
+    return service.peekNextActor(this.actionTimers, heroes, enemies);
   }
 
   get round(): number {

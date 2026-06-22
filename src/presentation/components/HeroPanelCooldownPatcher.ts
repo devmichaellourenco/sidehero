@@ -1,5 +1,6 @@
 import { GameStateDto, HeroSkillCooldownDto } from '../../application/dto/GameStateDto';
 import { getSkillCooldownRatio } from './HeroSkillCooldownPresentation';
+import { stampSkillCooldownOverlay } from './SkillCooldownDisplayAnimator';
 
 function findCooldown(
   heroId: string,
@@ -55,6 +56,9 @@ function patchChip(chip: HTMLElement, cooldown: HeroSkillCooldownDto | undefined
     shade.style.setProperty('--cooldown-ratio', '0');
     label.textContent = '';
     overlay.removeAttribute('data-remaining-label');
+    delete overlay.dataset.cdRemaining;
+    delete overlay.dataset.cdTotal;
+    delete overlay.dataset.cdCapturedAt;
     return;
   }
 
@@ -65,6 +69,7 @@ function patchChip(chip: HTMLElement, cooldown: HeroSkillCooldownDto | undefined
   shade.style.setProperty('--cooldown-ratio', String(ratio));
   label.textContent = remainingLabel;
   overlay.setAttribute('data-remaining-label', remainingLabel);
+  stampSkillCooldownOverlay(overlay, cooldown.secondsRemaining, cooldown.cooldownTotal);
 }
 
 export function patchHeroPanelCooldowns(container: HTMLElement, state: GameStateDto): void {

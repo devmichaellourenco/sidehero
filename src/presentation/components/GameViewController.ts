@@ -54,6 +54,7 @@ import { ShopModalRenderer } from './ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
 import { ToastController } from './ToastController';
 import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
+import { SkillCooldownDisplayAnimator } from './SkillCooldownDisplayAnimator';
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -119,6 +120,7 @@ export class GameViewController {
   private readonly battleChestAffordance: BattleChestAffordanceController;
   private readonly pendingActionsBar: PendingActionsBarController;
   private readonly battleLogPanel: BattleLogPanelController;
+  private readonly skillCooldownAnimator = new SkillCooldownDisplayAnimator();
 
   private readonly heroDetailFlow: HeroDetailFlow;
   private readonly shopFlow: ShopFlow;
@@ -1231,6 +1233,7 @@ export class GameViewController {
     this.pendingActionsBar.render(buildPendingActions(state));
 
     this.battleStrip.render(state);
+    this.skillCooldownAnimator.setCombatActive(Boolean(state.phaseRun && !state.canEditParty));
     if (shouldRenderHeroPanel(previous, state)) {
       this.heroPanel.render(state);
     } else if (!state.canEditParty) {

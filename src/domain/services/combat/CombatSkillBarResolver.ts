@@ -8,7 +8,6 @@ import { Enemy } from '../../entities/Enemy';
 import { CombatSkillBarEntry, CombatSkillHighlight } from './CombatSkillBar';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
-import { PendingSkillAction } from './PendingSkillAction';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 
 export class CombatSkillBarResolver {
@@ -19,11 +18,7 @@ export class CombatSkillBarResolver {
     party: Hero[],
     enemies: Enemy[],
     cooldowns: SkillCooldownTracker,
-    options: {
-      isActiveTurn: boolean;
-      pendingActions: PendingSkillAction[];
-      combatTime: number;
-    },
+    options: { isActiveTurn: boolean },
     statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
   ): CombatSkillBarEntry[] {
     if (!hero.isAlive()) return [];
@@ -33,10 +28,6 @@ export class CombatSkillBarResolver {
     const highlights = this.resolveHighlights(
       hero,
       null,
-      key,
-      hero.id,
-      'hero',
-      skills,
       party,
       enemies,
       cooldowns,
@@ -52,11 +43,7 @@ export class CombatSkillBarResolver {
     party: Hero[],
     enemies: Enemy[],
     cooldowns: SkillCooldownTracker,
-    options: {
-      isActiveTurn: boolean;
-      pendingActions: PendingSkillAction[];
-      combatTime: number;
-    },
+    options: { isActiveTurn: boolean },
   ): CombatSkillBarEntry[] {
     if (!enemy.isAlive()) return [];
 
@@ -65,10 +52,6 @@ export class CombatSkillBarResolver {
     const highlights = this.resolveHighlights(
       null,
       enemy,
-      key,
-      enemy.id,
-      'enemy',
-      skills,
       party,
       enemies,
       cooldowns,
@@ -81,47 +64,28 @@ export class CombatSkillBarResolver {
   private resolveHighlights(
     hero: Hero | null,
     enemy: Enemy | null,
-    key: string,
-    combatantId: string,
-    side: 'hero' | 'enemy',
-    skills: CombatSkillDefinition[],
     party: Hero[],
     enemies: Enemy[],
     cooldowns: SkillCooldownTracker,
-    options: {
-      isActiveTurn: boolean;
-      pendingActions: PendingSkillAction[];
-      combatTime: number;
-    },
+    options: { isActiveTurn: boolean },
     statusEffects: CombatStatusEffectTracker = CombatStatusEffectTracker.fromMap({}),
   ): Map<string, CombatSkillHighlight> {
     const highlights = new Map<string, CombatSkillHighlight>();
-
-    const pendingForActor = options.pendingActions
-      .filter((entry) => entry.side === side && entry.combatantId === combatantId)
-      .sort((left, right) => left.executeAt - right.executeAt);
-
-    if (pendingForActor.length > 0) {
-      highlights.set(pendingForActor[0].skillId, 'next');
-      if (pendingForActor.length > 1) {
-        highlights.set(pendingForActor[1].skillId, 'queued');
-      }
-      return highlights;
-    }
 
     if (!options.isActiveTurn) {
       return highlights;
     }
 
-    const readyActions =
-      side === 'hero' && hero
-        ? this.selector.selectAllReadyHeroActions(hero, party, enemies, cooldowns, statusEffects)
-        : enemy
-          ? this.selector.selectAllReadyEnemyActions(enemy, party, enemies, cooldowns)
-          : [];
+    const nextAction =
+      hero !== null
+        ? this.selector.selectHeroAction(hero, party, enemies, cooldowns, statusEffects)
+        : enemy !== null
+          ? this.selector.selectEnemyAction(enemy, party, enemies, cooldowns)
+          : null;
 
-    if (readyActions[0]) highlights.set(readyActions[0].skillId, 'next');
-    if (readyActions[1]) highlights.set(readyActions[1].skillId, 'queued');
+    if (nextAction) {
+      highlights.set(nextAction.skillId, 'next');
+    }
 
     return highlights;
   }

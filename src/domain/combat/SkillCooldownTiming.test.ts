@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { formatSkillCooldownCountdown } from './SkillCooldownTiming';
 
 describe('formatSkillCooldownCountdown', () => {
-  it('arredonda frações para cima', () => {
-    expect(formatSkillCooldownCountdown(0.75)).toBe('1');
-    expect(formatSkillCooldownCountdown(0.1)).toBe('1');
-    expect(formatSkillCooldownCountdown(1.2)).toBe('2');
+  it('exibe décimos abaixo de 10 s (arredondando para cima na casa decimal)', () => {
+    expect(formatSkillCooldownCountdown(0.75)).toBe('0.8');
+    expect(formatSkillCooldownCountdown(0.1)).toBe('0.1');
+    expect(formatSkillCooldownCountdown(1.2)).toBe('1.2');
   });
 
   it('exibe inteiros exatos', () => {

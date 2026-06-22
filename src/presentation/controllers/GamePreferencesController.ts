@@ -80,7 +80,7 @@ export class GamePreferencesController {
   getAutoBattleIntervalMs(state: GameStateDto | null): number {
     const flags = getFeatureFlags(state);
     const speed = Math.min(this.autoBattleSpeed, flags.autoBattleMaxSpeed);
-    return Math.floor(2500 / speed);
+    return Math.floor(600 / speed);
   }
 
   private clampToFlags(preferences: GamePreferences, flags: FeatureFlagsDto): GamePreferences {

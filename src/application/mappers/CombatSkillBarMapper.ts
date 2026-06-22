@@ -1,7 +1,6 @@
 import { Hero } from '../../domain/entities/Hero';
 import { Enemy } from '../../domain/entities/Enemy';
 import { CombatSkillBarResolver } from '../../domain/services/combat/CombatSkillBarResolver';
-import { PendingSkillAction } from '../../domain/services/combat/PendingSkillAction';
 import { StatusEffectMap } from '../../domain/services/combat/CombatStatusEffect';
 import { CombatStatusEffectTracker } from '../../domain/services/combat/CombatStatusEffectTracker';
 import { SkillCooldownMap, SkillCooldownTracker } from '../../domain/services/combat/SkillCooldownTracker';
@@ -29,32 +28,20 @@ function mapEntryToDto(entry: ReturnType<CombatSkillBarResolver['resolveForHero'
   };
 }
 
-function barOptions(
-  isActiveTurn: boolean,
-  pendingActions: PendingSkillAction[],
-  combatTime: number,
-) {
-  return { isActiveTurn, pendingActions, combatTime };
-}
-
 export function mapHeroCombatSkills(
   hero: Hero,
   party: Hero[],
   enemies: Enemy[],
   skillCooldowns: SkillCooldownMap | undefined,
   combatStatusEffects: StatusEffectMap | undefined,
-  options: {
-    isActiveTurn: boolean;
-    pendingActions: PendingSkillAction[];
-    combatTime: number;
-  },
+  options: { isActiveTurn: boolean },
 ): CombatBattleSkillDto[] {
   const entries = resolver.resolveForHero(
     hero,
     party,
     enemies,
     SkillCooldownTracker.fromMap(skillCooldowns),
-    barOptions(options.isActiveTurn, options.pendingActions, options.combatTime),
+    options,
     CombatStatusEffectTracker.fromMap(combatStatusEffects),
   );
 
@@ -66,18 +53,14 @@ export function mapEnemyCombatSkills(
   party: Hero[],
   enemies: Enemy[],
   skillCooldowns: SkillCooldownMap | undefined,
-  options: {
-    isActiveTurn: boolean;
-    pendingActions: PendingSkillAction[];
-    combatTime: number;
-  },
+  options: { isActiveTurn: boolean },
 ): CombatBattleSkillDto[] {
   const entries = resolver.resolveForEnemy(
     enemy,
     party,
     enemies,
     SkillCooldownTracker.fromMap(skillCooldowns),
-    barOptions(options.isActiveTurn, options.pendingActions, options.combatTime),
+    options,
   );
 
   return entries.map(mapEntryToDto);

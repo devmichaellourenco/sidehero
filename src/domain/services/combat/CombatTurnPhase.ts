@@ -7,15 +7,17 @@ import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
 import { scaledDotDamage } from '../../combat/DifficultyCombatScaling';
-import { MULTI_SKILL_STAGGER_SECONDS } from '../../combat/CombatTimingConstants';
+import {
+  COMBAT_DELTA_SECONDS,
+  MAX_ACTIONS_PER_TICK,
+} from '../../combat/CombatTimingConstants';
 import { listEnemyCombatSkills } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCatalog';
 import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill';
 import { ActionTimerService } from './ActionTimerService';
 import { CombatActionExecutor } from './CombatActionExecutor';
 import { CombatFloatingEvent, createDamageEvent } from './CombatFloatingEvent';
-import { CombatSkillSelector, SelectedCombatAction } from './CombatSkillSelector';
-import { PendingSkillAction } from './PendingSkillAction';
+import { CombatSkillSelector } from './CombatSkillSelector';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { CombatantRef } from './TurnOrderService';
@@ -60,92 +62,72 @@ export class CombatTurnPhase {
       return this.finish(started.state, started.events, []);
     }
 
-    const heroes = workingState.activeHeroes();
-    const timeline = this.actionTimers.resolveNextActor(
-      combat.actionTimers,
-      heroes,
-      combat.enemies,
-    );
+    const events: string[] = [];
+    const floatingEvents: CombatFloatingEvent[] = [];
 
     let cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
-    cooldowns = this.advanceSkillCooldowns(
-      cooldowns,
-      timeline.elapsedSeconds,
-      heroes,
-      combat.enemies,
-      combat.encounterMeta?.isBossWave ?? false,
-    );
+    cooldowns = cooldowns.advanceTime(COMBAT_DELTA_SECONDS);
 
     combat = combat
-      .withActionTimers(timeline.timers)
-      .withCombatTime(combat.combatTime + timeline.elapsedSeconds)
-      .withSkillCooldowns(cooldowns.toMap());
+      .withActionTimers(this.actionTimers.advanceAll(combat.actionTimers, COMBAT_DELTA_SECONDS))
+      .withCombatTime(combat.combatTime + COMBAT_DELTA_SECONDS)
+      .withSkillCooldowns(cooldowns.toMap())
+      .withPendingSkillActions([]);
 
-    const pendingResult = this.processPendingSkillActions(workingState, combat);
-    if (pendingResult.handled) {
-      return this.finish(
-        pendingResult.state.withCombat(pendingResult.combat).touchTick(),
-        pendingResult.events,
-        pendingResult.floatingEvents,
-      );
-    }
-    combat = pendingResult.combat;
+    let actionsResolved = 0;
 
-    if (!timeline.actor) {
+    while (actionsResolved < MAX_ACTIONS_PER_TICK) {
+      const heroes = workingState.activeHeroes();
       const livingHeroes = heroes.filter((hero) => hero.isAlive());
-      if (livingHeroes.length === 0 && workingState.phaseRun) {
-        const wiped = this.phaseHandlers.onPhaseWipe(workingState.withCombat(combat), workingState.phaseRun);
-        return this.finish(wiped.state, wiped.events, []);
-      }
+      const livingEnemies = combat.livingEnemies();
+      const phaseRun = workingState.phaseRun;
+      const encounterMeta = combat.encounterMeta;
 
-      return { state: workingState.withCombat(combat).touchTick(), events: [], floatingEvents: [] };
-    }
-
-    const turnResult = this.executeActorTurn(workingState, combat, timeline.actor);
-    let nextState = turnResult.state;
-    const events = turnResult.events;
-    const floatingEvents = turnResult.floatingEvents;
-    let nextCombat = turnResult.combat;
-
-    const livingHeroes = nextState.activeHeroes().filter((hero) => hero.isAlive());
-    const livingEnemies = nextCombat.livingEnemies();
-    const phaseRun = nextState.phaseRun;
-    const encounterMeta = nextCombat.encounterMeta;
-
-    if (livingHeroes.length === 0 && phaseRun) {
-      const wiped = this.phaseHandlers.onPhaseWipe(nextState, phaseRun);
-      return this.finish(wiped.state, [...events, ...wiped.events], floatingEvents);
-    }
-
-    if (livingEnemies.length === 0 && phaseRun && encounterMeta) {
-      if (encounterMeta.isBossWave) {
-        const victory = this.phaseHandlers.onBossDefeated(
-          nextState,
-          nextCombat.enemies,
-          nextState.activeHeroes(),
-          encounterMeta,
-        );
-        return this.finish(victory.state, [...events, ...victory.events], floatingEvents);
-      }
-
-      const waveCleared = this.phaseHandlers.onWaveCleared(
-        nextState,
-        nextCombat.enemies,
-        nextState.activeHeroes(),
-        encounterMeta,
+      const outcome = this.tryResolveCombatOutcome(
+        workingState,
+        combat,
+        livingHeroes,
+        livingEnemies,
         phaseRun,
+        encounterMeta,
+        events,
+        floatingEvents,
       );
-      return this.finish(waveCleared.state, [...events, ...waveCleared.events], floatingEvents);
+      if (outcome) {
+        return outcome;
+      }
+
+      const readyActors = this.actionTimers.listReadyActors(
+        combat.actionTimers,
+        heroes,
+        combat.enemies,
+      );
+
+      if (readyActors.length === 0) {
+        break;
+      }
+
+      const strike = this.executeSkillStrike(workingState, combat, readyActors[0]);
+      workingState = strike.state;
+      combat = strike.combat;
+      events.push(...strike.events);
+      floatingEvents.push(...strike.floatingEvents);
+
+      if (strike.usedSkillId === null) {
+        break;
+      }
+
+      actionsResolved += 1;
     }
 
-    nextCombat = nextCombat.withActionTimers(
-      this.actionTimers.removeDead(nextCombat.actionTimers, nextState.activeHeroes(), nextCombat.enemies),
+    combat = combat.withActionTimers(
+      this.actionTimers.removeDead(combat.actionTimers, workingState.activeHeroes(), combat.enemies),
     );
 
     const logMessage = events.join(' · ');
 
     return this.finish(
-      (logMessage ? nextState.addLog(logMessage) : nextState).withCombat(nextCombat).touchTick(),
+      (logMessage ? workingState.addLog(logMessage) : workingState).withCombat(combat).touchTick(),
       events,
       floatingEvents,
     );
@@ -159,67 +141,49 @@ export class CombatTurnPhase {
     return { state, events, floatingEvents };
   }
 
-  private advanceSkillCooldowns(
-    cooldowns: SkillCooldownTracker,
-    elapsedSeconds: number,
-    heroes: Hero[],
-    enemies: CombatState['enemies'],
-    isBossWave: boolean,
-  ): SkillCooldownTracker {
-    if (elapsedSeconds <= 0) return cooldowns;
-
-    let tracker = cooldowns;
-
-    for (const hero of heroes) {
-      const key = combatantKey('hero', hero.id);
-      tracker = tracker.advanceKey(key, elapsedSeconds, this.profiles.forHero(hero).castSpeed);
-    }
-
-    for (const enemy of enemies) {
-      const key = combatantKey('enemy', enemy.id);
-      tracker = tracker.advanceKey(key, elapsedSeconds, this.profiles.forEnemy(enemy, isBossWave).castSpeed);
-    }
-
-    return tracker;
-  }
-
-  private processPendingSkillActions(
+  private tryResolveCombatOutcome(
     state: GameState,
     combat: CombatState,
-  ): {
-    handled: boolean;
-    state: GameState;
-    combat: CombatState;
-    events: string[];
-    floatingEvents: CombatFloatingEvent[];
-  } {
-    const due = combat.pendingSkillActions
-      .filter((entry) => entry.executeAt <= combat.combatTime)
-      .sort((left, right) => left.executeAt - right.executeAt);
-
-    if (due.length === 0) {
-      return { handled: false, state, combat, events: [], floatingEvents: [] };
+    livingHeroes: Hero[],
+    livingEnemies: Enemy[],
+    phaseRun: PhaseRun | null,
+    encounterMeta: CombatState['encounterMeta'],
+    events: string[],
+    floatingEvents: CombatFloatingEvent[],
+  ): CombatTurnPhaseResult | null {
+    if (livingHeroes.length === 0 && phaseRun) {
+      const wiped = this.phaseHandlers.onPhaseWipe(state.withCombat(combat), phaseRun);
+      return this.finish(wiped.state, [...events, ...wiped.events], floatingEvents);
     }
 
-    const next = due[0];
-    const remaining = combat.pendingSkillActions.filter((entry) => entry !== next);
-    const actor: CombatantRef = { side: next.side, id: next.combatantId };
-    const strike = this.executeSkillStrike(state, combat, actor, next.skillId);
+    if (livingEnemies.length === 0 && phaseRun && encounterMeta) {
+      if (encounterMeta.isBossWave) {
+        const victory = this.phaseHandlers.onBossDefeated(
+          state,
+          combat.enemies,
+          state.activeHeroes(),
+          encounterMeta,
+        );
+        return this.finish(victory.state, [...events, ...victory.events], floatingEvents);
+      }
 
-    return {
-      handled: true,
-      state: strike.state,
-      combat: strike.combat.withPendingSkillActions(remaining),
-      events: strike.events,
-      floatingEvents: strike.floatingEvents,
-    };
+      const waveCleared = this.phaseHandlers.onWaveCleared(
+        state,
+        combat.enemies,
+        state.activeHeroes(),
+        encounterMeta,
+        phaseRun,
+      );
+      return this.finish(waveCleared.state, [...events, ...waveCleared.events], floatingEvents);
+    }
+
+    return null;
   }
 
   private executeSkillStrike(
     state: GameState,
     combat: CombatState,
     actor: CombatantRef,
-    forcedSkillId?: string,
   ): {
     state: GameState;
     combat: CombatState;
@@ -248,22 +212,16 @@ export class CombatTurnPhase {
 
       attackerProfile = this.profiles.forHero(hero);
       skillList = listHeroCombatSkills(hero);
-      const selected = forcedSkillId
-        ? this.findSelectedAction(
-            this.skillSelector.selectAllReadyHeroActions(
-              hero,
-              heroes,
-              enemies,
-              cooldowns,
-              statusEffects,
-            ),
-            forcedSkillId,
-          )
-        : this.skillSelector.selectAllReadyHeroActions(hero, heroes, enemies, cooldowns, statusEffects)[0] ??
-          null;
+      const selected = this.skillSelector.selectHeroAction(
+        hero,
+        heroes,
+        enemies,
+        cooldowns,
+        statusEffects,
+      );
 
       if (!selected) {
-        return { state, combat, events, floatingEvents, usedSkillId: null };
+        return this.scheduleIdleRecovery(state, combat, actor, attackerProfile);
       }
 
       usedSkillId = selected.skillId;
@@ -288,16 +246,10 @@ export class CombatTurnPhase {
 
       attackerProfile = this.profiles.forEnemy(enemy, combat.encounterMeta?.isBossWave);
       skillList = listEnemyCombatSkills(enemy);
-      const selected = forcedSkillId
-        ? this.findSelectedAction(
-            this.skillSelector.selectAllReadyEnemyActions(enemy, heroes, enemies, cooldowns),
-            forcedSkillId,
-          )
-        : this.skillSelector.selectAllReadyEnemyActions(enemy, heroes, enemies, cooldowns)[0] ??
-          null;
+      const selected = this.skillSelector.selectEnemyAction(enemy, heroes, enemies, cooldowns);
 
       if (!selected) {
-        return { state, combat, events, floatingEvents, usedSkillId: null };
+        return this.scheduleIdleRecovery(state, combat, actor, attackerProfile);
       }
 
       usedSkillId = selected.skillId;
@@ -409,81 +361,32 @@ export class CombatTurnPhase {
     };
   }
 
-  private findSelectedAction(
-    actions: SelectedCombatAction[],
-    skillId: string,
-  ): SelectedCombatAction | null {
-    return actions.find((entry) => entry.skillId === skillId) ?? null;
-  }
-
-  private queueFollowUpSkills(
-    combat: CombatState,
-    actor: CombatantRef,
-    followUps: SelectedCombatAction[],
-  ): PendingSkillAction[] {
-    return followUps.map((entry, index) => ({
-      side: actor.side,
-      combatantId: actor.id,
-      skillId: entry.skillId,
-      executeAt: combat.combatTime + MULTI_SKILL_STAGGER_SECONDS * (index + 1),
-    }));
-  }
-
-  private executeActorTurn(
+  private scheduleIdleRecovery(
     state: GameState,
     combat: CombatState,
     actor: CombatantRef,
+    profile: ReturnType<CombatProfileProvider['forHero']>,
   ): {
     state: GameState;
     combat: CombatState;
     events: string[];
     floatingEvents: CombatFloatingEvent[];
+    usedSkillId: string | null;
   } {
-    let heroes = state.activeHeroes();
-    let enemies = combat.enemies;
-    const actorKey = combatantKey(actor.side, actor.id);
-    let cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
-    const statusEffects = CombatStatusEffectTracker.fromMap(combat.statusEffects);
-
-    let readyActions: SelectedCombatAction[] = [];
-    if (actor.side === 'hero') {
-      const hero = heroes.find((entry) => entry.id === actor.id);
-      if (!hero?.isAlive()) {
-        return { state, combat, events: [], floatingEvents: [] };
-      }
-      readyActions = this.skillSelector.selectAllReadyHeroActions(
-        hero,
-        heroes,
-        enemies,
-        cooldowns,
-        statusEffects,
-      );
-    } else {
-      const enemy = enemies.find((entry) => entry.id === actor.id);
-      if (!enemy?.isAlive()) {
-        return { state, combat, events: [], floatingEvents: [] };
-      }
-      readyActions = this.skillSelector.selectAllReadyEnemyActions(enemy, heroes, enemies, cooldowns);
-    }
-
-    if (readyActions.length === 0) {
-      return { state, combat, events: [], floatingEvents: [] };
-    }
-
-    const [first, ...followUps] = readyActions;
-    const strike = this.executeSkillStrike(state, combat, actor, first.skillId);
-    const pending = [
-      ...combat.pendingSkillActions.filter(
-        (entry) => !(entry.side === actor.side && entry.combatantId === actor.id),
-      ),
-      ...this.queueFollowUpSkills(combat, actor, followUps),
-    ];
+    const updatedTimers = this.actionTimers.scheduleAfterAction(
+      combat.actionTimers,
+      actor,
+      profile.attackSpeed,
+      profile.castSpeed,
+      false,
+    );
 
     return {
-      state: strike.state,
-      combat: strike.combat.withPendingSkillActions(pending),
-      events: strike.events,
-      floatingEvents: strike.floatingEvents,
+      state,
+      combat: combat.withActionTimers(updatedTimers),
+      events: [],
+      floatingEvents: [],
+      usedSkillId: null,
     };
   }
 }

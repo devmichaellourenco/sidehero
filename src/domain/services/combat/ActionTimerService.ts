@@ -10,6 +10,13 @@ import { CombatantRef } from './TurnOrderService';
 
 export type ActionTimerMap = Record<string, number>;
 
+interface LivingCombatant {
+  key: string;
+  side: 'hero' | 'enemy';
+  id: string;
+  tieBreaker: number;
+}
+
 export class ActionTimerService {
   constructor(private readonly profiles = new CombatProfileProvider()) {}
 
@@ -40,40 +47,17 @@ export class ActionTimerService {
     return next;
   }
 
-  resolveNextActor(
-    timers: ActionTimerMap,
-    heroes: Hero[],
-    enemies: Enemy[],
-  ): { actor: CombatantRef | null; elapsedSeconds: number; timers: ActionTimerMap } {
-    const living = this.listLivingCombatants(heroes, enemies);
-    if (living.length === 0) {
-      return { actor: null, elapsedSeconds: 0, timers };
-    }
+  /** Combatentes prontos para agir (timer ≤ 0), ordenados por prioridade de fila. */
+  listReadyActors(timers: ActionTimerMap, heroes: Hero[], enemies: Enemy[]): CombatantRef[] {
+    return this.listLivingCombatants(heroes, enemies)
+      .filter((entry) => (timers[entry.key] ?? 0) <= 0)
+      .sort((left, right) => this.compareQueueOrder(timers, left, right))
+      .map((entry) => ({ side: entry.side, id: entry.id }));
+  }
 
-    const readyTimes = living.map((entry) => timers[entry.key] ?? 0);
-    const minTimer = Math.min(...readyTimes);
-    const elapsedSeconds = Math.max(0, minTimer);
-    const advanced = this.advanceAll(timers, elapsedSeconds);
-
-    const ready = living
-      .filter((entry) => (advanced[entry.key] ?? 0) <= 0)
-      .sort((left, right) => {
-        const leftTimer = advanced[left.key] ?? 0;
-        const rightTimer = advanced[right.key] ?? 0;
-        if (leftTimer !== rightTimer) return leftTimer - rightTimer;
-        return left.tieBreaker - right.tieBreaker;
-      });
-
-    if (ready.length === 0) {
-      return { actor: null, elapsedSeconds, timers: advanced };
-    }
-
-    const picked = ready[0];
-    return {
-      actor: { side: picked.side, id: picked.id },
-      elapsedSeconds,
-      timers: advanced,
-    };
+  /** Próximo a agir (para UI). Retorna null se ninguém está pronto. */
+  peekNextActor(timers: ActionTimerMap, heroes: Hero[], enemies: Enemy[]): CombatantRef | null {
+    return this.listReadyActors(timers, heroes, enemies)[0] ?? null;
   }
 
   scheduleAfterAction(
@@ -109,13 +93,19 @@ export class ActionTimerService {
     return next;
   }
 
-  private listLivingCombatants(heroes: Hero[], enemies: Enemy[]) {
-    const entries: Array<{
-      key: string;
-      side: 'hero' | 'enemy';
-      id: string;
-      tieBreaker: number;
-    }> = [];
+  private compareQueueOrder(
+    timers: ActionTimerMap,
+    left: LivingCombatant,
+    right: LivingCombatant,
+  ): number {
+    const leftTimer = timers[left.key] ?? 0;
+    const rightTimer = timers[right.key] ?? 0;
+    if (leftTimer !== rightTimer) return leftTimer - rightTimer;
+    return left.tieBreaker - right.tieBreaker;
+  }
+
+  private listLivingCombatants(heroes: Hero[], enemies: Enemy[]): LivingCombatant[] {
+    const entries: LivingCombatant[] = [];
 
     heroes.forEach((hero, index) => {
       if (!hero.isAlive()) return;

@@ -9,9 +9,9 @@ describe('mapSkillCooldownPresentation', () => {
     });
   });
 
-  it('calcula ratio e arredonda label para cima', () => {
+  it('calcula ratio e exibe décimos abaixo de 10 s', () => {
     expect(mapSkillCooldownPresentation(1.5, 3, false)).toEqual({
-      cooldownLabel: '2',
+      cooldownLabel: '1.5',
       cooldownRatio: 0.5,
     });
   });

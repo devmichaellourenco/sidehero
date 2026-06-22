@@ -21,8 +21,6 @@ describe('CombatSkillBarResolver', () => {
 
     const bar = resolver.resolveForEnemy(goblin, [hero], [goblin], cooldowns, {
       isActiveTurn: false,
-      pendingActions: [],
-      combatTime: 0,
     });
 
     expect(bar.length).toBeGreaterThan(1);
@@ -38,8 +36,6 @@ describe('CombatSkillBarResolver', () => {
 
     const bar = resolver.resolveForHero(sorcerer, [sorcerer, hero], [enemy], cooldowns, {
       isActiveTurn: true,
-      pendingActions: [],
-      combatTime: 0,
     });
 
     const highlighted = bar.filter((entry) => entry.highlight !== 'none');

@@ -231,9 +231,7 @@ export function migrateCombat(
           combat.encounterMeta && typeof combat.encounterMeta === 'object'
             ? (combat.encounterMeta as CombatState['encounterMeta'])
             : null,
-        pendingSkillActions: Array.isArray(combat.pendingSkillActions)
-          ? (combat.pendingSkillActions as CombatState['pendingSkillActions'])
-          : [],
+        pendingSkillActions: [],
       });
     }
   }
