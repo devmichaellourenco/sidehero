@@ -1,8 +1,8 @@
-# Step-by-Step — MVP Taskbar Hero (Extensão Chrome)
+# Step-by-Step — MVP Side Hero (Extensão Chrome)
 
 ## Objetivo
 
-Criar um MVP de jogo idle RPG inspirado em **Task Bar Hero**, funcionando como extensão Chrome. O jogador acompanha heróis batalhando em uma "taskbar" pixel enquanto navega na web.
+Criar um MVP de jogo idle RPG na barra de ferramentas, funcionando como extensão Chrome. O jogador acompanha heróis batalhando em uma "taskbar" pixel enquanto navega na web.
 
 ## Arquitetura (DDD + SOLID)
 
@@ -89,7 +89,7 @@ No Chrome: `chrome://extensions` → Modo desenvolvedor → Carregar sem compact
 ## Próximos passos sugeridos
 
 - Overlay na barra de ferramentas do SO (requer native messaging)
-- Sistema de runas e automação (como TBH original)
+- Sistema de runas e automação avançada
 - Sprites pixel art reais
 - Sons e animações de combate
 - Testes unitários para `CombatService` e `LootService`

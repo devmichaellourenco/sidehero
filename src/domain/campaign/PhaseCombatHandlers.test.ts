@@ -136,8 +136,8 @@ describe('PhaseCombatHandlers', () => {
     expect(victory.events.some((event) => event.includes('Temporada concluída'))).toBe(true);
   });
 
-  it('reinicia fase com cura completa no wipe', () => {
-    const phaseId = buildPhaseId(1, 1);
+  it('reinicia na fase anterior com cura completa no wipe', () => {
+    const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial().withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
@@ -149,9 +149,24 @@ describe('PhaseCombatHandlers', () => {
 
     const wiped = handlers.onPhaseWipe(state, phaseRun);
 
+    expect(wiped.state.phaseRun?.phaseId).toBe(buildPhaseId(1, 1));
     expect(wiped.state.phaseRun?.waveIndex).toBe(0);
+    expect(wiped.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 1));
     expect(wiped.state.heroes[0].currentHealth).toBe(wiped.state.heroes[0].maxHealth);
     expect(wiped.state.combat?.enemies.length).toBeGreaterThan(0);
+    expect(wiped.events.some((event) => event.includes('fase anterior'))).toBe(true);
+  });
+
+  it('permanece na fase 1-1 ao morrer na primeira fase', () => {
+    const phaseId = buildPhaseId(1, 1);
+    const phaseRun = PhaseRun.start(phaseId);
+    let state = GameState.initial().withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const wiped = handlers.onPhaseWipe(state, phaseRun);
+
+    expect(wiped.state.phaseRun?.phaseId).toBe(buildPhaseId(1, 1));
+    expect(wiped.state.phaseRun?.waveIndex).toBe(0);
   });
 
   it('concede 50% do ouro ao repetir wave de fase já cleared', () => {

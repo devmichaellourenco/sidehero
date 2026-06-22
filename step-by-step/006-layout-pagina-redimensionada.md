@@ -4,7 +4,7 @@
 
 ## Problema
 
-O painel do Taskbar Hero ficava **por cima** do conteúdo da página. O afiliado-extensao **reduz o espaço** da página à esquerda, sem cobrir o conteúdo.
+O painel do Side Hero ficava **por cima** do conteúdo da página. O afiliado-extensao **reduz o espaço** da página à esquerda, sem cobrir o conteúdo.
 
 ## Solução
 

@@ -1,4 +1,4 @@
-/** Slots canônicos do equipamento (modelo completo TBH-adaptado). */
+/** Slots canônicos do equipamento (modelo completo de 10 posições). */
 export type GearSlotId =
   | 'hand'
   | 'off_hand'

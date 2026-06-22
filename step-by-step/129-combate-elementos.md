@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Inspirado no [TBH mechanics](https://taskbarhero.wiki/mechanics), adaptado ao combate estático do Side Hero:
+Inspirado em combate por ação com timers, adaptado ao combate estático do Side Hero:
 
 - Elementos: physical, fire, cold, lightning, chaos (poison → chaos)
 - Skills com `damageComponents` (multi-elemento)

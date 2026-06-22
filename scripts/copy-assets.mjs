@@ -15,7 +15,7 @@ const outRoot = join(root, 'dist', 'panel', 'assets');
 const HERO_SPRITE_MAP = [
   ['galneon_aprendiz.png', 'characters/knight.png'],
   ['nix_aprendiz.png', 'characters/sorcerer.png'],
-  ['priest.png', 'characters/priest.png'],
+  ['priest_aprendiz.png', 'characters/priest_aprendiz.png'],
   ['berserker.png', 'characters/berserker.png'],
   ['paladin.png', 'characters/paladin.png'],
 ];

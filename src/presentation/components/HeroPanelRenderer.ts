@@ -5,6 +5,7 @@ import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
 import { patchHeroPanelCooldowns } from './HeroPanelCooldownPatcher';
 import {
   bindHeroesPanelInteractions,
+  clampBattlingIndex,
   HeroesPanelTab,
   renderHeroesPanel,
 } from './HeroesPanelPresentation';
@@ -13,14 +14,24 @@ const TAB_KEY = 'sidehero_heroes_panel_tab';
 
 export class HeroPanelRenderer {
   private activeTab: HeroesPanelTab = this.readTabPreference();
+  private battlingHeroIndex = 0;
   private lastState: GameStateDto | null = null;
 
   constructor(private readonly container: HTMLElement) {}
 
   render(state: GameStateDto): void {
     this.lastState = state;
-    this.container.innerHTML = renderHeroesPanel(state, this.activeTab);
+    this.battlingHeroIndex = clampBattlingIndex(
+      state.activeParty.length,
+      this.battlingHeroIndex,
+    );
+    this.container.innerHTML = renderHeroesPanel(
+      state,
+      this.activeTab,
+      this.battlingHeroIndex,
+    );
     this.bindTabButtons();
+    this.bindBattlingNav();
     this.bindInteractions();
     patchHeroPanelCooldowns(this.container, state);
   }
@@ -39,6 +50,29 @@ export class HeroPanelRenderer {
         this.writeTabPreference(tab);
         this.render(this.lastState);
       });
+    });
+  }
+
+  private bindBattlingNav(): void {
+    const prev = this.container.querySelector('[data-battling-hero-prev]');
+    const next = this.container.querySelector('[data-battling-hero-next]');
+
+    prev?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!this.lastState || this.battlingHeroIndex <= 0) return;
+      this.battlingHeroIndex -= 1;
+      this.render(this.lastState);
+    });
+
+    next?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!this.lastState) return;
+      const maxIndex = this.lastState.activeParty.length - 1;
+      if (this.battlingHeroIndex >= maxIndex) return;
+      this.battlingHeroIndex += 1;
+      this.render(this.lastState);
     });
   }
 

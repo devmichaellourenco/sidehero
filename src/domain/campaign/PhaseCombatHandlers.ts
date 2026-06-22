@@ -11,6 +11,7 @@ import { CampaignProgress } from './CampaignProgress';
 import { PhaseRun } from './PhaseRun';
 import { BenchXpPolicy } from '../party/BenchXpPolicy';
 import { resolvePhase } from './CampaignCatalog';
+import { previousPhaseId } from './CampaignIds';
 import {
   grantsPhaseChests,
   isPhaseReplay,
@@ -222,22 +223,28 @@ export class PhaseCombatHandlers {
 
   onPhaseWipe(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
     const recovered = state.activeHeroes().map((hero) => hero.healFull());
-    const resetRun = phaseRun.resetWaves();
+    const failedPhase = resolvePhase(phaseRun.phaseId);
+    const restartPhaseId = previousPhaseId(phaseRun.phaseId);
+    const resetRun = PhaseRun.start(restartPhaseId);
     const resolved = this.encounterResolver.resolve(resetRun.phaseId, resetRun.waveIndex);
     if (!resolved) {
       return { state: state.withHeroes(recovered).withPhaseRun(null).withCombat(null), events: [] };
     }
 
     const combat = CombatState.start(recovered, resolved.enemies, this.actionTimers, resolved.meta);
-    const phase = resolved.phase;
+    const restartPhase = resolved.phase;
+    const failedName = failedPhase?.displayName ?? phaseRun.phaseId;
 
     return {
       state: state
         .withHeroes(recovered)
+        .withCampaignProgress(state.campaignProgress.withSelectedPhase(restartPhaseId))
         .withPhaseRun(resetRun)
         .withCombat(combat)
-        .addLog(`Party derrotada em ${phase.displayName}! Reiniciando a fase...`),
-      events: ['Party derrotada! Reiniciando a fase...'],
+        .addLog(
+          `Party derrotada em ${failedName}! Reiniciando na fase anterior (${restartPhase.displayName})...`,
+        ),
+      events: ['Party derrotada! Reiniciando na fase anterior...'],
     };
   }
 }

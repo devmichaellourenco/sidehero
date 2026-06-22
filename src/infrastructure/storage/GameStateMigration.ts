@@ -109,7 +109,7 @@ function migrateExperience(raw: unknown): Experience {
   const exp = asRecord(raw);
   return Experience.restore(
     typeof exp.current === 'number' ? exp.current : 0,
-    typeof exp.toNextLevel === 'number' ? exp.toNextLevel : 100,
+    typeof exp.toNextLevel === 'number' ? exp.toNextLevel : 0,
     typeof exp.level === 'number' ? exp.level : 1,
   );
 }

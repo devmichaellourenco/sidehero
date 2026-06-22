@@ -3185,6 +3185,178 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   position: relative;
 }
 
+.battling-hero-focus {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.battling-hero-toolbar {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  gap: 6px;
+}
+
+.battling-hero-nav {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(42, 63, 95, 0.9);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 36px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.battling-hero-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.battling-hero-position {
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battling-hero-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(24, 36, 58, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.battling-hero-main {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.battling-hero-main:hover {
+  filter: brightness(1.05);
+}
+
+.battling-hero-portrait {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.battling-hero-glow {
+  position: absolute;
+  inset: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  object-fit: contain;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.battling-hero-sprite {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+}
+
+.battling-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.battling-hero-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.battling-hero-title strong {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battling-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.battling-hero-stats .stat-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.hero-loadout-strip--featured {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 0;
+}
+
+.hero-loadout-strip--featured .hero-loadout-divider {
+  width: 100%;
+  height: 1px;
+}
+
+.hero-loadout-strip--featured .hero-loadout-group {
+  justify-content: center;
+  gap: 8px;
+}
+
+.hero-loadout-strip--featured .loadout-slot {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+}
+
+.hero-loadout-strip--featured .loadout-slot-icon-wrap {
+  width: 30px;
+  height: 30px;
+}
+
+.hero-loadout-strip--featured .loadout-slot-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.hero-loadout-strip--featured .loadout-slot-rarity {
+  width: 12px;
+  height: 12px;
+}
+
 .party-slot-controls {
   display: flex;
   justify-content: flex-end;

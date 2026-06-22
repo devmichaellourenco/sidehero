@@ -36,6 +36,21 @@ export function buildPhaseId(mapIndex: number, phaseNumber: number): PhaseId {
   return `${mapIndex}-${phaseNumber}`;
 }
 
+/** Fase imediatamente anterior na campanha (1-1 permanece em 1-1). */
+export function previousPhaseId(phaseId: PhaseId): PhaseId {
+  const { mapIndex, phaseNumber } = parsePhaseId(phaseId);
+
+  if (mapIndex <= 1 && phaseNumber <= 1) {
+    return buildPhaseId(1, 1);
+  }
+
+  if (phaseNumber <= 1) {
+    return buildPhaseId(mapIndex - 1, 50);
+  }
+
+  return buildPhaseId(mapIndex, phaseNumber - 1);
+}
+
 export function mapIdFromIndex(mapIndex: number): MapId {
   return mapDefinitionByIndex(mapIndex)?.id ?? 'stendra';
 }

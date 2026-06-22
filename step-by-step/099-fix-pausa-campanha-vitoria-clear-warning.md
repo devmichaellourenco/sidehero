@@ -16,7 +16,7 @@
 
 **Problema:** CLEAR aparecia no boss e WARNING na wave normal.
 
-**Referência Taskbar Hero:**
+**Comportamento esperado:**
 - **WARNING** (vermelho) — ao concluir wave e **ir para o boss**
 - **CLEAR** (azul) — ao concluir boss/fase e seguir
 

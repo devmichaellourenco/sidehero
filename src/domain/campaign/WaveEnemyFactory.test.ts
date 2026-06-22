@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { difficultyScale } from './WaveEnemyFactory';
+import { stageScalingFactorsForTier } from '../progression/StageScalingCatalog';
 
-describe('difficultyScale', () => {
+describe('stageScalingFactorsForTier', () => {
   it('cresce de forma agressiva em tiers altos', () => {
-    const early = difficultyScale(5);
-    const mid = difficultyScale(50);
-    const late = difficultyScale(200);
-    const finale = difficultyScale(500, 1.85);
+    const early = stageScalingFactorsForTier(5);
+    const mid = stageScalingFactorsForTier(50);
+    const late = stageScalingFactorsForTier(200);
+    const finale = stageScalingFactorsForTier(500, 1.85);
 
-    expect(mid).toBeGreaterThan(early * 3);
-    expect(late).toBeGreaterThan(mid * 3);
-    expect(finale).toBeGreaterThan(late * 1.5);
+    expect(mid.atk).toBeGreaterThan(early.atk * 3);
+    expect(late.hp).toBeGreaterThan(mid.hp * 3);
+    expect(finale.atk).toBeGreaterThan(late.atk * 1.5);
   });
 });

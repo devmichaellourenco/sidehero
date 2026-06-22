@@ -17,7 +17,7 @@ const RARITY_ASSET_FALLBACK: Record<GearRarityKey, 'common' | 'rare' | 'epic'> =
 const HERO_SPRITES: Record<HeroClassKey, string> = {
   knight: 'characters/knight.png',
   sorcerer: 'characters/sorcerer.png',
-  priest: 'characters/priest.png',
+  priest: 'characters/priest_aprendiz.png',
   berserker: 'characters/berserker.png',
   paladin: 'characters/paladin.png',
 };

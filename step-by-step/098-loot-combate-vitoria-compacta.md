@@ -15,7 +15,7 @@ Item vai para o inventário; equipar só na pausa ou entre fases.
 
 ## 2. Overlay de vitória compacto
 
-Estilo inspirado no Taskbar Hero:
+Estilo compacto na battle strip:
 
 | Situação | Visual |
 |----------|--------|

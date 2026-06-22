@@ -4,7 +4,7 @@
 
 ## Problema
 
-Clique no ícone do Taskbar Hero não alternava o painel, enquanto afiliado-extensao funcionava.
+Clique no ícone do Side Hero não alternava o painel, enquanto afiliado-extensao funcionava.
 
 ## Causas
 

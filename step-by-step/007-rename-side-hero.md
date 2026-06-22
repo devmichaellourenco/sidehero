@@ -4,7 +4,7 @@
 
 ## Alteração
 
-Marca exibida renomeada de **Taskbar Hero** para **Side Hero**.
+Marca exibida definida como **Side Hero**.
 
 ## Arquivos atualizados
 

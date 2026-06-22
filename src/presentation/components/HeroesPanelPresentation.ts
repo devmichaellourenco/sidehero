@@ -13,35 +13,66 @@ type PartyPanelState = {
   canEditParty: boolean;
 };
 
-function renderBattlingHeroCard(hero: HeroDto): string {
+function clampBattlingIndex(partySize: number, index: number): number {
+  if (partySize <= 0) return 0;
+  return Math.max(0, Math.min(partySize - 1, index));
+}
+
+function renderBattlingHeroFocus(hero: HeroDto, index: number, partySize: number): string {
   const attackIcon = getAssetUrl(ASSETS.ui.attack);
   const defenseIcon = getAssetUrl(ASSETS.ui.defense);
   const healthIcon = getAssetUrl(ASSETS.ui.health);
+  const glowUrl = getAssetUrl(ASSETS.characters.glow);
+  const hasPrev = index > 0;
+  const hasNext = index < partySize - 1;
 
   return `
-    <article class="hero-card party-active-card" data-hero-card="${hero.id}">
-      <button type="button" class="hero-card-main" data-hero-open="${hero.id}">
-        <div class="hero-card-header">
-          <strong class="hero-card-title">
-            ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'hero-card-icon')}
-            <span>${hero.name}</span>
-          </strong>
-          <div class="hero-card-meta">
-            <span class="hero-level">Lv.${hero.level}</span>
-            <span class="hero-inline-stats">
+    <div class="battling-hero-focus">
+      <div class="battling-hero-toolbar">
+        <button
+          type="button"
+          class="battling-hero-nav"
+          data-battling-hero-prev
+          aria-label="Herói anterior"
+          ${hasPrev ? '' : 'disabled'}
+        >←</button>
+        <span class="battling-hero-position" aria-live="polite">
+          ${hero.name} · ${index + 1}/${partySize}
+        </span>
+        <button
+          type="button"
+          class="battling-hero-nav"
+          data-battling-hero-next
+          aria-label="Próximo herói"
+          ${hasNext ? '' : 'disabled'}
+        >→</button>
+      </div>
+
+      <article class="battling-hero-card party-active-card" data-hero-card="${hero.id}">
+        <button type="button" class="battling-hero-main" data-hero-open="${hero.id}">
+          <div class="battling-hero-portrait" aria-hidden="true">
+            <img class="battling-hero-glow" src="${glowUrl}" alt="" />
+            ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'battling-hero-sprite')}
+          </div>
+          <div class="battling-hero-info">
+            <div class="battling-hero-title">
+              <strong>${hero.name}</strong>
+              <span class="hero-level">Lv.${hero.level}</span>
+            </div>
+            <div class="hero-stats battling-hero-stats">
               ${imgTag(attackIcon, 'Ataque', 'stat-icon')}
               <span>${hero.attack}</span>
               ${imgTag(defenseIcon, 'Defesa', 'stat-icon')}
               <span>${hero.defense}</span>
               ${imgTag(healthIcon, 'Vida', 'stat-icon')}
               <span>${hero.health}/${hero.maxHealth}</span>
-            </span>
+            </div>
+            ${renderHeroBars(hero)}
           </div>
-        </div>
-        ${renderHeroBars(hero, { compact: true })}
-      </button>
-      ${renderHeroLoadoutStrip(hero)}
-    </article>
+        </button>
+        ${renderHeroLoadoutStrip(hero, { variant: 'featured' })}
+      </article>
+    </div>
   `;
 }
 
@@ -154,15 +185,21 @@ function renderPartyLockNotice(canEditParty: boolean): string {
   return `<p class="party-lock-notice" title="Use o botão ⏸ acima da batalha para pausar e editar party e loadout.">🔒 Formação bloqueada durante a fase</p>`;
 }
 
-function renderBattlingTab(state: PartyPanelState): string {
-  const activeHtml =
-    state.activeParty.length > 0
-      ? state.activeParty.map((hero) => renderBattlingHeroCard(hero)).join('')
-      : '<p class="empty-state">Nenhum herói em batalha.</p>';
+function renderBattlingTab(state: PartyPanelState, battlingHeroIndex: number): string {
+  if (state.activeParty.length === 0) {
+    return `
+      <div class="heroes-tab-panel heroes-tab-panel--battling">
+        <p class="empty-state">Nenhum herói em batalha.</p>
+      </div>
+    `;
+  }
+
+  const safeIndex = clampBattlingIndex(state.activeParty.length, battlingHeroIndex);
+  const hero = state.activeParty[safeIndex];
 
   return `
     <div class="heroes-tab-panel heroes-tab-panel--battling">
-      <div class="party-active-list">${activeHtml}</div>
+      ${renderBattlingHeroFocus(hero, safeIndex, state.activeParty.length)}
     </div>
   `;
 }
@@ -194,16 +231,22 @@ function renderFormationTab(state: PartyPanelState): string {
   `;
 }
 
-export function renderHeroesPanel(state: PartyPanelState, tab: HeroesPanelTab): string {
+export function renderHeroesPanel(
+  state: PartyPanelState,
+  tab: HeroesPanelTab,
+  battlingHeroIndex = 0,
+): string {
   return `
     <nav class="heroes-panel-tabs" aria-label="Abas de heróis">
       <button type="button" class="heroes-panel-tab ${tab === 'battling' ? 'active' : ''}" data-heroes-tab="battling">Batalhando</button>
       <button type="button" class="heroes-panel-tab ${tab === 'formation' ? 'active' : ''}" data-heroes-tab="formation">Formação</button>
     </nav>
-    ${tab === 'formation' ? renderFormationTab(state) : renderBattlingTab(state)}
+    ${tab === 'formation' ? renderFormationTab(state) : renderBattlingTab(state, battlingHeroIndex)}
   `;
 }
 
 export function bindHeroesPanelInteractions(container: HTMLElement): void {
   bindHeroTooltips(container);
 }
+
+export { clampBattlingIndex };

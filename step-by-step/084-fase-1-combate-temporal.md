@@ -1,4 +1,4 @@
-# 084 — Fase 1: combate temporal inspirado no TBH
+# 084 — Fase 1: combate temporal por timers de ação
 
 ## Objetivo
 
@@ -10,12 +10,12 @@ Migrar o combate para timeline por **Attack Speed / Cast Speed**, adicionar **cr
 |---------|--------|
 | `CombatTimingConstants.ts` | Constantes de tempo e recovery |
 | `CombatProfile.ts` | Value object ASPD, Cast, Crit |
-| `ClassCombatBaselines.ts` | Baselines por classe (TBH-inspired) |
+| `ClassCombatBaselines.ts` | Baselines por classe |
 | `EnemyCombatBaselines.ts` | Baselines por tipo de inimigo |
 | `CombatProfileProvider.ts` | Agrega base + gear + DEX |
 | `SkillCooldownTiming.ts` | Cooldowns em segundos (legado: 1 turno = 1s) |
 | `ActionTimerService.ts` | Timeline de ações por combatente |
-| `CombatDamageResolver.ts` | Armadura TBH-like + roll de crítico |
+| `CombatDamageResolver.ts` | Armadura com diminishing returns + roll de crítico |
 | `CombatState.ts` | `actionTimers` + `combatTime` (substitui fila de turnos) |
 | `CombatTurnPhase.ts` | Orquestra timeline + skills + cast speed |
 
@@ -45,4 +45,4 @@ Migrar o combate para timeline por **Attack Speed / Cast Speed**, adicionar **cr
 
 - Elementos/resistências
 - Dodge/Block
-- Árvore de skills por classe (8 tiers TBH)
+- Árvore de skills por classe (8 tiers de progressão)

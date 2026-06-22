@@ -1,3 +1,9 @@
+import {
+  clampHeroLevel,
+  expRequiredToAdvanceFromLevel,
+  HERO_MAX_LEVEL,
+} from '../progression/HeroLevelXpCatalog';
+
 export class Experience {
   private constructor(
     readonly current: number,
@@ -6,28 +12,67 @@ export class Experience {
   ) {}
 
   static initial(): Experience {
-    return new Experience(0, 100, 1);
+    return Experience.atLevel(1, 0);
   }
 
-  static restore(current: number, toNextLevel: number, level: number): Experience {
-    return new Experience(current, toNextLevel, level);
+  static restore(current: number, _toNextLevel: number, level: number): Experience {
+    const normalizedLevel = clampHeroLevel(level);
+    const normalizedCurrent = Math.max(0, current);
+
+    if (normalizedLevel >= HERO_MAX_LEVEL) {
+      return new Experience(0, 0, HERO_MAX_LEVEL);
+    }
+
+    return new Experience(
+      normalizedCurrent,
+      expRequiredToAdvanceFromLevel(normalizedLevel),
+      normalizedLevel,
+    );
+  }
+
+  private static atLevel(level: number, current: number): Experience {
+    const normalizedLevel = clampHeroLevel(level);
+
+    if (normalizedLevel >= HERO_MAX_LEVEL) {
+      return new Experience(0, 0, HERO_MAX_LEVEL);
+    }
+
+    return new Experience(
+      Math.max(0, current),
+      expRequiredToAdvanceFromLevel(normalizedLevel),
+      normalizedLevel,
+    );
   }
 
   gain(amount: number): { experience: Experience; leveledUp: boolean } {
+    if (amount <= 0 || this.level >= HERO_MAX_LEVEL) {
+      return { experience: this, leveledUp: false };
+    }
+
     let xp = this.current + amount;
     let level = this.level;
-    let threshold = this.toNextLevel;
     let leveledUp = false;
 
-    while (xp >= threshold) {
+    while (level < HERO_MAX_LEVEL) {
+      const threshold = expRequiredToAdvanceFromLevel(level);
+      if (xp < threshold) {
+        break;
+      }
+
       xp -= threshold;
       level += 1;
-      threshold = Math.floor(threshold * 1.4);
       leveledUp = true;
     }
 
+    if (level >= HERO_MAX_LEVEL) {
+      return {
+        experience: new Experience(0, 0, HERO_MAX_LEVEL),
+        leveledUp,
+      };
+    }
+
     return {
-      experience: new Experience(xp, threshold, level),
+      experience: new Experience(xp, expRequiredToAdvanceFromLevel(level), level),
       leveledUp,
     };
   }

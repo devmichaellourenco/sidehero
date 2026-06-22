@@ -1,5 +1,6 @@
 import { Enemy } from '../entities/Enemy';
 import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
+import { stageScalingFactorsForTier } from '../progression/StageScalingCatalog';
 import { Stats } from '../value-objects/Stats';
 import { PhaseId } from './CampaignIds';
 import { EnemyRole, EnemySlot, WaveDefinition } from './WaveDefinition';
@@ -17,13 +18,6 @@ const ROLE_SCALE: Record<EnemyRole, { stat: number; reward: number }> = {
   elite: { stat: 1.35, reward: 1.25 },
   boss: { stat: 1.75, reward: 1.6 },
 };
-
-/** Curva de escala: exige farm e equipamento para avançar nas fases altas. */
-export function difficultyScale(tier: number, phaseMultiplier = 1): number {
-  const normalized = Math.max(0, tier - 1);
-  const base = 1 + Math.pow(normalized, 1.12) * 0.11;
-  return base * phaseMultiplier;
-}
 
 export function spawnEnemiesForWave(
   wave: WaveDefinition,
@@ -52,13 +46,18 @@ function createEnemyFromSlot(
   slot: EnemySlot,
   context: WaveSpawnContext & { slotIndex: number; goldMultiplier: number },
 ): Enemy {
-  const scale = difficultyScale(context.difficultyTier, context.statMultiplier ?? 1);
+  const scaling = stageScalingFactorsForTier(
+    context.difficultyTier,
+    context.statMultiplier ?? 1,
+  );
   const roleScale = ROLE_SCALE[slot.role];
-  const attack = Math.floor(10 * scale * roleScale.stat);
-  const defense = Math.floor(4 * scale * roleScale.stat);
-  const maxHealth = Math.floor(60 * scale * roleScale.stat);
-  const goldReward = Math.floor(8 * scale * roleScale.reward * context.goldMultiplier);
-  const xpReward = context.isBossWave ? Math.floor(15 * scale * roleScale.reward) : 0;
+  const attack = Math.floor(10 * scaling.atk * roleScale.stat);
+  const defense = Math.floor(4 * scaling.atk * roleScale.stat);
+  const maxHealth = Math.floor(60 * scaling.hp * roleScale.stat);
+  const goldReward = Math.floor(8 * scaling.gold * roleScale.reward * context.goldMultiplier);
+  const xpReward = context.isBossWave
+    ? Math.floor(15 * scaling.exp * roleScale.reward)
+    : 0;
 
   const rosterEntry = getEnemyRosterEntry(slot.enemyType);
   const baseName = rosterEntry?.name ?? slot.enemyType;
