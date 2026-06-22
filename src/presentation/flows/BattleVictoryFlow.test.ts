@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { AUTO_DISMISS_MS, BattleVictoryFlow } from './BattleVictoryFlow';
+import { OVERLAY_ANIMATION_MS, BattleVictoryFlow } from './BattleVictoryFlow';
 import { BattleVictoryPayload } from '../components/BattleVictoryDetector';
 
 function basePayload(): BattleVictoryPayload {
@@ -37,21 +37,27 @@ function createMockElement() {
       html = value;
     },
     querySelector(selector: string) {
-      if (selector === '[data-victory-continue]') {
+      if (selector === '.battle-victory-compact-label') {
         return {
           addEventListener: (event: string, listener: EventListener) => {
-            listeners.set(`continue:${event}`, listener);
+            listeners.set(`label:${event}`, listener);
           },
-          click: () => listeners.get('continue:click')?.(new Event('click')),
         };
       }
-      if (selector === '[data-victory-countdown]') {
-        return { textContent: '' };
+      if (selector === '[data-victory-details-toggle]') {
+        return {
+          addEventListener: (event: string, listener: EventListener) => {
+            listeners.set(`details:${event}`, listener);
+          },
+        };
+      }
+      if (selector === '[data-victory-details-panel]') {
+        return { classList: { toggle: () => false } };
       }
       return null;
     },
-    clickContinue() {
-      listeners.get('continue:click')?.(new Event('click'));
+    emitLabelAnimationEnd() {
+      listeners.get('label:animationend')?.(new Event('animationend'));
     },
   };
 }
@@ -74,7 +80,7 @@ describe('BattleVictoryFlow', () => {
     const renderer = {
       render: (container: { innerHTML: string }) => {
         container.innerHTML =
-          '<button data-victory-details-toggle></button><div data-victory-details-panel class="hidden"></div>';
+          '<span class="battle-victory-compact-label"></span><button data-victory-details-toggle></button><div data-victory-details-panel class="hidden"></div>';
       },
     };
 
@@ -85,30 +91,33 @@ describe('BattleVictoryFlow', () => {
     );
   }
 
-  it('não bloqueia avanço do jogo', () => {
+  it('bloqueia avanço enquanto overlay está visível', () => {
     const flow = createFlow();
     flow.show(basePayload());
 
-    expect(flow.isBlockingAdvance()).toBe(false);
+    expect(flow.isBlockingAdvance()).toBe(true);
     expect(flow.isActive()).toBe(true);
   });
 
-  it('fecha automaticamente sem retomar campanha', () => {
+  it('fecha após animação e chama callback de retomada', () => {
     const flow = createFlow();
-    const onChest = vi.fn();
+    const onDismiss = vi.fn();
 
-    flow.show(basePayload(), onChest);
-    vi.advanceTimersByTime(AUTO_DISMISS_MS);
+    flow.show(basePayload(), onDismiss);
+    overlay.emitLabelAnimationEnd();
 
     expect(flow.isActive()).toBe(false);
-    expect(onChest).toHaveBeenCalledTimes(1);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
-  it('fecha ao clicar em continuar', () => {
+  it('fecha automaticamente após timeout de fallback', () => {
     const flow = createFlow();
-    flow.show(basePayload());
-    vi.advanceTimersByTime(AUTO_DISMISS_MS);
+    const onDismiss = vi.fn();
+
+    flow.show(basePayload(), onDismiss);
+    vi.advanceTimersByTime(OVERLAY_ANIMATION_MS + 300);
 
     expect(flow.isActive()).toBe(false);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 });

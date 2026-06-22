@@ -1,13 +1,14 @@
 import { BattleVictoryOverlayRenderer } from '../components/BattleVictoryOverlayRenderer';
 import { BattleVictoryPayload } from '../components/BattleVictoryDetector';
 
-export const AUTO_DISMISS_MS = 3000;
+/** Duração da animação do rótulo CLEAR/WARNING/DEFEAT. */
+export const OVERLAY_ANIMATION_MS = 2200;
 
-/** Overlay informativo de vitória — não bloqueia ticks nem auto-batalha. */
+/** Overlay de resultado — bloqueia ticks até a animação terminar. */
 export class BattleVictoryFlow {
   private overlayVisible = false;
   private autoDismissTimer: number | null = null;
-  private pendingChestHandler: (() => void) | null = null;
+  private pendingDismissHandler: (() => void) | null = null;
 
   constructor(
     private readonly overlayEl: HTMLElement,
@@ -19,23 +20,23 @@ export class BattleVictoryFlow {
     return this.overlayVisible;
   }
 
-  /** Mantido por compatibilidade — vitória não bloqueia mais o avanço. */
   isBlockingAdvance(): boolean {
-    return false;
+    return this.overlayVisible;
   }
 
   isIntermissionPause(): boolean {
-    return false;
+    return this.overlayVisible;
   }
 
-  show(payload: BattleVictoryPayload, onChestAvailable?: () => void): void {
+  show(payload: BattleVictoryPayload, onDismiss?: () => void): void {
     this.clearTimers();
-    this.pendingChestHandler = onChestAvailable ?? null;
+    this.pendingDismissHandler = onDismiss ?? null;
     this.overlayVisible = true;
     this.renderer.render(this.overlayEl, payload);
     this.overlayEl.classList.remove('hidden');
+    this.battleStripEl.classList.add('battle-strip--victory');
     this.bindActions();
-    this.startAutoDismiss();
+    this.scheduleDismissAfterAnimation();
   }
 
   dismiss(): void {
@@ -45,10 +46,10 @@ export class BattleVictoryFlow {
     this.overlayVisible = false;
     this.hideOverlay();
 
-    const chestHandler = this.pendingChestHandler;
-    this.pendingChestHandler = null;
-    if (chestHandler) {
-      chestHandler();
+    const handler = this.pendingDismissHandler;
+    this.pendingDismissHandler = null;
+    if (handler) {
+      handler();
     }
   }
 
@@ -64,8 +65,16 @@ export class BattleVictoryFlow {
     });
   }
 
-  private startAutoDismiss(): void {
-    this.autoDismissTimer = globalThis.setTimeout(() => this.dismiss(), AUTO_DISMISS_MS);
+  private scheduleDismissAfterAnimation(): void {
+    const label = this.overlayEl.querySelector('.battle-victory-compact-label');
+    if (label) {
+      label.addEventListener('animationend', () => this.dismiss(), { once: true });
+    }
+
+    this.autoDismissTimer = globalThis.setTimeout(
+      () => this.dismiss(),
+      OVERLAY_ANIMATION_MS + 300,
+    );
   }
 
   private hideOverlay(): void {

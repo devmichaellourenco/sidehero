@@ -1,4 +1,5 @@
 import { CHEST_EVERY_N_WINS } from '../constants/CombatRules';
+import { CombatIntermission } from './CombatIntermission';
 import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
@@ -64,37 +65,39 @@ export class PhaseCombatHandlers {
     const totalGold = scalePhaseGold(baseGold, state.campaignProgress, phaseId);
     const enemyNames = defeatedEnemies.map((enemy) => enemy.name).join(', ');
     const nextRun = phaseRun.advanceWave();
-    const resolved = this.encounterResolver.resolve(nextRun.phaseId, nextRun.waveIndex);
-
-    if (!resolved) {
-      return { state: state.withHeroes(heroes), events: [] };
-    }
-
-    const combat = CombatState.start(heroes, resolved.enemies, this.actionTimers, resolved.meta);
-    const waveLabel = `${nextRun.waveIndex + 1}/${resolved.meta.waveCount}`;
+    const phase = resolvePhase(phaseId);
+    const nextWave = this.encounterResolver.resolve(nextRun.phaseId, nextRun.waveIndex);
+    const variant = nextWave?.meta.isBossWave ? 'boss-approach' : 'wave-clear';
 
     let nextState = state
       .withGold(totalGold > 0 ? state.gold.add(totalGold) : state.gold)
       .withHeroes(heroes)
       .withPhaseRun(nextRun)
-      .withCombat(combat);
+      .withCombat(state.combat?.withAllEnemiesDefeated() ?? null)
+      .withCombatIntermission(
+        CombatIntermission.create({
+          variant,
+          clearedPhaseId: phaseId,
+          clearedPhaseName: phase?.displayName ?? phaseId,
+        }),
+      );
 
     if (totalGold > 0 && replay) {
       nextState = nextState.addLog(
-        `${enemyNames} derrotado(s)! +${totalGold} ouro (50%) · Wave ${waveLabel}`,
+        `${enemyNames} derrotado(s)! +${totalGold} ouro (50%)`,
       );
     } else if (totalGold > 0) {
-      nextState = nextState.addLog(`${enemyNames} derrotado(s)! +${totalGold} ouro · Wave ${waveLabel}`);
+      nextState = nextState.addLog(`${enemyNames} derrotado(s)! +${totalGold} ouro`);
     } else {
-      nextState = nextState.addLog(`${enemyNames} derrotado(s)! · Wave ${waveLabel}`);
+      nextState = nextState.addLog(`${enemyNames} derrotado(s)!`);
     }
 
     if (grantsPhaseChests(state.campaignProgress, phaseId) && !meta.isBossWave && Math.random() < 0.12) {
-      const chest = Chest.create(resolved.phase.difficultyTier, 'monster');
+      const chest = Chest.create(phase?.difficultyTier ?? state.stage, 'monster');
       nextState = nextState.withChests([...nextState.chests, chest]).addLog('📦 Baú de monstro dropou!');
     }
 
-    const events = [`Wave ${waveLabel} iniciada`];
+    const events: string[] = [];
     if (totalGold > 0) {
       events.push(replay ? `+${totalGold} ouro (50%)` : `+${totalGold} ouro`);
     }
@@ -147,6 +150,13 @@ export class PhaseCombatHandlers {
     const benchLog =
       benchXp > 0 && benchUpdates.length > 0 ? ` · Reserva +${benchXp} XP` : '';
 
+    const nextPhaseId = phase.seasonFinale ? null : progress.selectedPhaseId;
+    const nextPhase = nextPhaseId ? resolvePhase(nextPhaseId) : null;
+    const nextPhaseName =
+      nextPhaseId && nextPhaseId !== meta.phaseId
+        ? (nextPhase?.displayName ?? nextPhaseId)
+        : null;
+
     let nextState = state
       .withCampaignProgress(progress)
       .withGold(totalGold > 0 ? state.gold.add(totalGold) : state.gold)
@@ -154,6 +164,15 @@ export class PhaseCombatHandlers {
       .withStage(progress.highestTierReached)
       .withPhaseRun(null)
       .withCombat(null)
+      .withCombatIntermission(
+        CombatIntermission.create({
+          variant: 'phase-clear',
+          clearedPhaseId: meta.phaseId,
+          clearedPhaseName: phase.displayName,
+          nextPhaseId: phase.seasonFinale ? null : nextPhaseId,
+          nextPhaseName: phase.seasonFinale ? null : nextPhaseName,
+        }),
+      )
       .incrementBattlesWon();
 
     const rewardSuffix = replay ? ' (repetição — 50% ouro, 75% XP)' : '';
@@ -226,13 +245,7 @@ export class PhaseCombatHandlers {
     const failedPhase = resolvePhase(phaseRun.phaseId);
     const restartPhaseId = previousPhaseId(phaseRun.phaseId);
     const resetRun = PhaseRun.start(restartPhaseId);
-    const resolved = this.encounterResolver.resolve(resetRun.phaseId, resetRun.waveIndex);
-    if (!resolved) {
-      return { state: state.withHeroes(recovered).withPhaseRun(null).withCombat(null), events: [] };
-    }
-
-    const combat = CombatState.start(recovered, resolved.enemies, this.actionTimers, resolved.meta);
-    const restartPhase = resolved.phase;
+    const restartPhase = resolvePhase(restartPhaseId);
     const failedName = failedPhase?.displayName ?? phaseRun.phaseId;
 
     return {
@@ -240,11 +253,60 @@ export class PhaseCombatHandlers {
         .withHeroes(recovered)
         .withCampaignProgress(state.campaignProgress.withSelectedPhase(restartPhaseId))
         .withPhaseRun(resetRun)
-        .withCombat(combat)
+        .withCombat(null)
+        .withCombatIntermission(
+          CombatIntermission.create({
+            variant: 'defeat',
+            clearedPhaseId: phaseRun.phaseId,
+            clearedPhaseName: failedName,
+          }),
+        )
         .addLog(
-          `Party derrotada em ${failedName}! Reiniciando na fase anterior (${restartPhase.displayName})...`,
+          `Party derrotada em ${failedName}! Reiniciando na fase anterior (${restartPhase?.displayName ?? restartPhaseId})...`,
         ),
       events: ['Party derrotada! Reiniciando na fase anterior...'],
+    };
+  }
+
+  resumeIntermission(state: GameState): PhaseCombatResult {
+    if (!state.combatIntermission) {
+      return { state, events: [] };
+    }
+
+    const cleared = state.withCombatIntermission(null);
+
+    if (cleared.phaseRun) {
+      return this.startCombatForPhaseRun(cleared, cleared.phaseRun);
+    }
+
+    const phaseId = cleared.campaignProgress.selectedPhaseId;
+    if (!phaseId) {
+      return { state: cleared, events: [] };
+    }
+
+    return this.startPhaseRun(cleared, PhaseRun.start(phaseId));
+  }
+
+  private startCombatForPhaseRun(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
+    const resolved = this.encounterResolver.resolve(phaseRun.phaseId, phaseRun.waveIndex);
+    if (!resolved) {
+      return {
+        state: state.withPhaseRun(null).withCombat(null),
+        events: [],
+      };
+    }
+
+    const combat = CombatState.start(
+      state.activeHeroes(),
+      resolved.enemies,
+      this.actionTimers,
+      resolved.meta,
+    );
+    const waveLabel = `${phaseRun.waveIndex + 1}/${resolved.meta.waveCount}`;
+
+    return {
+      state: state.withPhaseRun(phaseRun).withCombat(combat).touchTick(),
+      events: [`Wave ${waveLabel} iniciada`],
     };
   }
 }

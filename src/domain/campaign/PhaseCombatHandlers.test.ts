@@ -48,7 +48,13 @@ describe('PhaseCombatHandlers', () => {
     );
 
     expect(cleared.state.phaseRun?.waveIndex).toBe(1);
-    expect(cleared.state.combat?.encounterMeta?.isBossWave).toBe(true);
+    expect(cleared.state.combatIntermission?.variant).toBe('boss-approach');
+    expect(cleared.state.combat).not.toBeNull();
+    expect(cleared.state.combat?.livingEnemies().length).toBe(0);
+
+    const resumed = handlers.resumeIntermission(cleared.state);
+    expect(resumed.state.combat?.encounterMeta?.isBossWave).toBe(true);
+    expect(resumed.state.combatIntermission).toBeNull();
     expect(cleared.events.some((event) => event.includes('ouro'))).toBe(true);
     expect(cleared.state.heroes.every((hero) => hero.level === 1)).toBe(true);
   });
@@ -153,7 +159,12 @@ describe('PhaseCombatHandlers', () => {
     expect(wiped.state.phaseRun?.waveIndex).toBe(0);
     expect(wiped.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 1));
     expect(wiped.state.heroes[0].currentHealth).toBe(wiped.state.heroes[0].maxHealth);
-    expect(wiped.state.combat?.enemies.length).toBeGreaterThan(0);
+    expect(wiped.state.combatIntermission?.variant).toBe('defeat');
+    expect(wiped.state.combat).toBeNull();
+
+    const resumed = handlers.resumeIntermission(wiped.state);
+    expect(resumed.state.combat?.enemies.length).toBeGreaterThan(0);
+    expect(resumed.state.combatIntermission).toBeNull();
     expect(wiped.events.some((event) => event.includes('fase anterior'))).toBe(true);
   });
 

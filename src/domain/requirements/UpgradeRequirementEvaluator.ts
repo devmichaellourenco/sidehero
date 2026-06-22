@@ -61,6 +61,10 @@ export class UpgradeRequirementEvaluator {
       log_filter: 'Log resumido',
       shop_refresh: 'Renovar loja',
       battle_skill_slots: 'Slots de skill',
+      hero_unlock_berserker: 'Berserker',
+      hero_unlock_paladin: 'Paladino',
+      item_stash: 'Baú de itens',
+      divine_forge: 'Forja Divina',
     };
     return labels[feature];
   }

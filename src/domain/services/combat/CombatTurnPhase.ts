@@ -44,6 +44,10 @@ export class CombatTurnPhase {
       return { state: workingState.touchTick(), events: [], floatingEvents: [] };
     }
 
+    if (workingState.combatIntermission) {
+      return { state: workingState.touchTick(), events: [], floatingEvents: [] };
+    }
+
     if (!workingState.phaseRun) {
       const phaseRun = PhaseRun.start(workingState.campaignProgress.selectedPhaseId);
       const started = this.phaseHandlers.startPhaseRun(workingState, phaseRun);

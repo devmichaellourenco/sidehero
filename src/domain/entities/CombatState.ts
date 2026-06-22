@@ -1,5 +1,6 @@
 import { Enemy, EnemyProps } from './Enemy';
 import { Hero } from './Hero';
+import { Stats } from '../value-objects/Stats';
 import { ActionTimerMap, ActionTimerService } from '../services/combat/ActionTimerService';
 import {
   SkillCooldownMap,
@@ -95,6 +96,21 @@ export class CombatState {
 
   livingEnemies(): Enemy[] {
     return this.enemies.filter((enemy) => enemy.isAlive());
+  }
+
+  /** Congela o campo com todos os inimigos derrotados (overlay de vitória). */
+  withAllEnemiesDefeated(): CombatState {
+    return this.withEnemies(
+      this.enemies.map((enemy) =>
+        Enemy.restore({
+          ...enemy.toProps(),
+          stats: Stats.create({
+            ...enemy.stats.toProps(),
+            currentHealth: 0,
+          }),
+        }),
+      ),
+    );
   }
 
   withEnemies(enemies: Enemy[]): CombatState {

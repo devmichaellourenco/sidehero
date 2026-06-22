@@ -1,7 +1,7 @@
-import { GameStateDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, CombatIntermissionDto } from '../../application/dto/GameStateDto';
 import { resolvePhase } from '../../domain/campaign/CampaignCatalog';
 
-export type BattleVictoryVariant = 'wave-clear' | 'boss-approach' | 'phase-clear';
+export type BattleVictoryVariant = 'wave-clear' | 'boss-approach' | 'phase-clear' | 'defeat';
 
 export interface HeroVictoryReward {
   heroId: string;
@@ -30,6 +30,30 @@ export function detectBattleVictory(
   next: GameStateDto,
 ): BattleVictoryPayload | null {
   return detectPhaseVictory(previous, next) ?? detectWaveClearVictory(previous, next);
+}
+
+export function buildBattleIntermissionPayload(
+  intermission: CombatIntermissionDto,
+  state: GameStateDto,
+  previous: GameStateDto | null,
+): BattleVictoryPayload {
+  const fromDiff = previous ? detectBattleVictory(previous, state) : null;
+  if (fromDiff) return fromDiff;
+
+  return {
+    variant: intermission.variant,
+    clearedPhaseId: intermission.clearedPhaseId,
+    clearedPhaseName: intermission.clearedPhaseName,
+    nextPhaseId: intermission.nextPhaseId,
+    nextPhaseName: intermission.nextPhaseName,
+    goldGained: 0,
+    xpGained: 0,
+    heroRewards: [],
+    chestDropped: false,
+    chestCount: 0,
+    tierReached: null,
+    seasonCompleted: state.seasonCompleted,
+  };
 }
 
 function detectWaveClearVictory(

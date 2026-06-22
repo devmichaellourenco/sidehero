@@ -19,6 +19,7 @@ function baseState(partial: Partial<GameStateDto> = {}): GameStateDto {
     mapName: 'Estrenda',
     phaseLabel: 'Fase 1-2',
     phaseRun: null,
+    combatIntermission: null,
     campaignProgress: {
       selectedPhaseId: '1-2',
       unlockedPhaseIds: ['1-1', '1-2'],

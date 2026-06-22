@@ -71,7 +71,7 @@ export function renderInventoryHeroSelector(
           title="${escapeHtml(hero.name)} · Lv.${hero.level}"
           aria-pressed="${active ? 'true' : 'false'}"
         >
-          ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'inventory-hero-chip-icon')}
+          ${imgTag(getHeroSprite(hero), hero.name, 'inventory-hero-chip-icon')}
           <span class="inventory-hero-chip-name">${escapeHtml(hero.name)}</span>
           ${inParty ? '<span class="inventory-hero-chip-party" aria-hidden="true">★</span>' : ''}
         </button>

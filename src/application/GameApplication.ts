@@ -21,6 +21,7 @@ import { RefreshShopUseCase } from './use-cases/RefreshShopUseCase';
 import { SpendAscensionPointUseCase } from './use-cases/SpendAscensionPointUseCase';
 import { SpendImprovementPointUseCase } from './use-cases/SpendImprovementPointUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
+import { ResumeCombatIntermissionUseCase } from './use-cases/ResumeCombatIntermissionUseCase';
 import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
 import { AddToPartyUseCase } from './use-cases/AddToPartyUseCase';
 import { RemoveFromPartyUseCase } from './use-cases/RemoveFromPartyUseCase';
@@ -28,6 +29,8 @@ import { MovePartyMemberUseCase } from './use-cases/MovePartyMemberUseCase';
 import { MoveGearToStashUseCase } from './use-cases/MoveGearToStashUseCase';
 import { MoveGearFromStashUseCase } from './use-cases/MoveGearFromStashUseCase';
 import { DestroyGearUseCase } from './use-cases/DestroyGearUseCase';
+import { FuseGearInForgeUseCase } from './use-cases/FuseGearInForgeUseCase';
+import { SalvageGearInForgeUseCase } from './use-cases/SalvageGearInForgeUseCase';
 import { GameApplicationDependencies } from './GameApplicationDependencies';
 import { PartyService } from '../domain/party/PartyService';
 
@@ -37,6 +40,7 @@ export class GameApplication {
   readonly selectPhase: SelectPhaseUseCase;
   readonly newGame: NewGameUseCase;
   readonly tick: TickGameUseCase;
+  readonly resumeCombatIntermission: ResumeCombatIntermissionUseCase;
   readonly pauseForLoadout: PauseForLoadoutUseCase;
   readonly openChest: OpenChestUseCase;
   readonly openAllChests: OpenAllChestsUseCase;
@@ -61,6 +65,8 @@ export class GameApplication {
   readonly moveGearToStash: MoveGearToStashUseCase;
   readonly moveGearFromStash: MoveGearFromStashUseCase;
   readonly destroyGear: DestroyGearUseCase;
+  readonly fuseGearInForge: FuseGearInForgeUseCase;
+  readonly salvageGearInForge: SalvageGearInForgeUseCase;
 
   constructor(repository: IGameStateRepository, deps: GameApplicationDependencies) {
     const {
@@ -72,6 +78,7 @@ export class GameApplication {
       ascensionService,
       loadoutOptimizer,
       partyService,
+      divineForgeService,
       presenter,
     } = deps;
 
@@ -80,6 +87,7 @@ export class GameApplication {
     this.selectPhase = new SelectPhaseUseCase(repository, presenter);
     this.newGame = new NewGameUseCase(repository, presenter);
     this.tick = new TickGameUseCase(repository, combatService, presenter);
+    this.resumeCombatIntermission = new ResumeCombatIntermissionUseCase(repository, presenter);
     this.pauseForLoadout = new PauseForLoadoutUseCase(repository, presenter);
     this.openChest = new OpenChestUseCase(repository, chestService, presenter);
     this.openAllChests = new OpenAllChestsUseCase(repository, chestService, presenter);
@@ -113,5 +121,11 @@ export class GameApplication {
     this.moveGearToStash = new MoveGearToStashUseCase(repository, presenter);
     this.moveGearFromStash = new MoveGearFromStashUseCase(repository, presenter);
     this.destroyGear = new DestroyGearUseCase(repository, presenter);
+    this.fuseGearInForge = new FuseGearInForgeUseCase(repository, presenter, divineForgeService);
+    this.salvageGearInForge = new SalvageGearInForgeUseCase(
+      repository,
+      presenter,
+      divineForgeService,
+    );
   }
 }

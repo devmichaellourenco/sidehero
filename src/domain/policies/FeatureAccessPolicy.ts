@@ -18,6 +18,7 @@ export interface FeatureAccessSnapshot {
   itemStash: boolean;
   stashCapacity: number;
   inventoryCapacity: number;
+  divineForge: boolean;
 }
 
 export class FeatureAccessPolicy {
@@ -45,6 +46,7 @@ export class FeatureAccessPolicy {
       itemStash: StorageCapacityPolicy.isStashUnlocked(levels),
       stashCapacity: StorageCapacityPolicy.stashLimit(levels),
       inventoryCapacity: StorageCapacityPolicy.inventoryLimit(),
+      divineForge: getFeatureLevel(levels, 'divine_forge') >= 1,
     };
   }
 

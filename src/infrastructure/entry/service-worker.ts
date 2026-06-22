@@ -92,6 +92,11 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       await syncBackgroundTickAlarm(result.state.upgradeLevels);
       return { ok: true, state: result.state, combatFloats: result.combatFloats };
     }
+    case 'RESUME_COMBAT_INTERMISSION': {
+      const result = await app.resumeCombatIntermission.execute();
+      await syncBackgroundTickAlarm(result.state.upgradeLevels);
+      return { ok: true, state: result.state, combatFloats: result.combatFloats };
+    }
     case 'OPEN_CHEST': {
       const result = await app.openChest.execute(message.chestId);
       return { ok: true, state: result.state, openedGear: result.openedGear };
@@ -126,6 +131,14 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
     case 'DESTROY_GEAR': {
       const state = await app.destroyGear.execute(message.gearId, message.location);
       return { ok: true, state };
+    }
+    case 'FORGE_FUSE_GEAR': {
+      const result = await app.fuseGearInForge.execute(message.gearIds);
+      return { ok: true, state: result.state, forgedGear: result.forgedGear };
+    }
+    case 'FORGE_SALVAGE_GEAR': {
+      const result = await app.salvageGearInForge.execute(message.gearId);
+      return { ok: true, state: result.state, salvageGold: result.salvageGold };
     }
     case 'GET_SHOP_OFFERS': {
       const result = await app.getShopOffers.execute();

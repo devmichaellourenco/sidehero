@@ -172,6 +172,20 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     ],
   },
   {
+    id: 'divine_forge_1',
+    feature: 'divine_forge',
+    level: 1,
+    branch: 'equipment',
+    name: 'Forja Divina',
+    description:
+      'Desbloqueia a Forja Divina: fundir 9 itens da mesma raridade em um item superior, ou destruir itens por ouro.',
+    cost: 180,
+    requirements: [
+      { type: 'min_stage', value: 4 },
+      { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
+    ],
+  },
+  {
     id: 'log_filter_1',
     feature: 'log_filter',
     level: 1,

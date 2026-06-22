@@ -4,6 +4,7 @@ import { ClassAscensionService } from '../../domain/progression/ClassAscensionSe
 import { SkillService } from '../../domain/progression/SkillService';
 import { CombatService } from '../../domain/services/CombatService';
 import { ChestService } from '../../domain/services/ChestService';
+import { DivineForgeService } from '../../domain/services/DivineForgeService';
 import { LoadoutOptimizer } from '../../domain/services/LoadoutOptimizer';
 import { LootService } from '../../domain/services/LootService';
 import { ShopService } from '../../domain/services/ShopService';
@@ -28,6 +29,7 @@ function createDependencies(): GameApplicationDependencies {
     ascensionService: new ClassAscensionService(),
     loadoutOptimizer: new LoadoutOptimizer(),
     partyService: new PartyService(),
+    divineForgeService: new DivineForgeService(lootService),
     presenter: new GameStatePresenter(upgradeService),
   };
 }

@@ -3,9 +3,14 @@ import { BattleVictoryPayload } from './BattleVictoryDetector';
 
 export class BattleVictoryOverlayRenderer {
   render(container: HTMLElement, payload: BattleVictoryPayload): void {
+    const isDefeat = payload.variant === 'defeat';
     const isWarning = payload.variant === 'boss-approach';
-    const toneClass = isWarning ? 'battle-victory-compact--warning' : 'battle-victory-compact--clear';
-    const headline = isWarning ? 'WARNING' : 'CLEAR';
+    const toneClass = isDefeat
+      ? 'battle-victory-compact--defeat'
+      : isWarning
+        ? 'battle-victory-compact--warning'
+        : 'battle-victory-compact--clear';
+    const headline = isDefeat ? 'DEFEAT' : isWarning ? 'WARNING' : 'CLEAR';
     const subtitle = this.buildSubtitle(payload);
     const rewardRows = this.buildRewardRows(payload);
     const levelUpRows = this.buildLevelUpRows(payload);
@@ -14,13 +19,9 @@ export class BattleVictoryOverlayRenderer {
       : payload.seasonCompleted
         ? '<p class="battle-victory-detail-line">Temporada concluída!</p>'
         : '';
-
-    container.innerHTML = `
-      <div class="battle-victory-compact ${toneClass}">
-        <div class="battle-victory-compact-main">
-          <span class="battle-victory-compact-label">${headline}</span>
-          <span class="battle-victory-compact-sub">${subtitle}</span>
-        </div>
+    const detailsSection = isDefeat
+      ? ''
+      : `
         <div class="battle-victory-details hidden" data-victory-details-panel>
           <p class="battle-victory-detail-line">${payload.clearedPhaseName}</p>
           <ul class="battle-victory-rewards" aria-label="Recompensas">
@@ -34,11 +35,24 @@ export class BattleVictoryOverlayRenderer {
             Detalhes
           </button>
         </div>
+      `;
+
+    container.innerHTML = `
+      <div class="battle-victory-compact ${toneClass}">
+        <div class="battle-victory-compact-main">
+          <span class="battle-victory-compact-label">${headline}</span>
+          <span class="battle-victory-compact-sub">${subtitle}</span>
+        </div>
+        ${detailsSection}
       </div>
     `;
   }
 
   private buildSubtitle(payload: BattleVictoryPayload): string {
+    if (payload.variant === 'defeat') {
+      return 'Party derrotada';
+    }
+
     if (payload.variant === 'boss-approach') {
       return 'Boss à frente';
     }

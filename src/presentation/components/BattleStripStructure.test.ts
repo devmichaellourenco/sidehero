@@ -7,6 +7,7 @@ function minimalState(overrides: Partial<GameStateDto> = {}): GameStateDto {
     activeParty: [{ id: 'h1' } as GameStateDto['activeParty'][0]],
     enemies: [{ id: 'e1' } as GameStateDto['enemies'][0]],
     phaseRun: null,
+    combatIntermission: null,
     ...overrides,
   } as GameStateDto;
 }

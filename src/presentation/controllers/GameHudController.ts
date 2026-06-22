@@ -38,6 +38,7 @@ export class GameHudController {
     private readonly chestProgressLabel: HTMLElement,
     private readonly openInventoryBtn: HTMLButtonElement,
     private readonly openStashBtn: HTMLButtonElement,
+    private readonly openForgeBtn: HTMLButtonElement,
     private readonly optimizeLoadoutBtn: HTMLButtonElement,
     private readonly openAllChestsBtn: HTMLButtonElement,
     private readonly openUpgradesBtn: HTMLButtonElement,
@@ -76,6 +77,8 @@ export class GameHudController {
     this.chestProgressLabel.title = 'Vitórias até o próximo baú';
 
     const upgradeCount = countUpgradeItems(state);
+    const flags = state.featureFlags;
+
     this.openInventoryBtn.title = `Inventário (${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit})`;
     this.openInventoryBtn.innerHTML = `
       <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.inventory)}" alt="" aria-hidden="true" />
@@ -93,7 +96,16 @@ export class GameHudController {
       this.openStashBtn.classList.add('hidden');
     }
 
-    const flags = state.featureFlags;
+    if (flags.divineForge) {
+      this.openForgeBtn.classList.remove('hidden');
+      this.openForgeBtn.title = 'Forja Divina';
+      this.openForgeBtn.innerHTML = `
+        <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.forge)}" alt="" aria-hidden="true" />
+      `;
+    } else {
+      this.openForgeBtn.classList.add('hidden');
+    }
+
     this.optimizeLoadoutBtn.classList.toggle('hidden', !flags.optimizeLoadout);
     this.optimizeLoadoutBtn.disabled = !flags.optimizeLoadout || upgradeCount === 0;
     this.optimizeLoadoutBtn.title =

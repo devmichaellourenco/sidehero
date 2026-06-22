@@ -9,6 +9,9 @@ import { ModalController } from '../components/ModalController';
 import { SettingsModalRenderer } from '../components/SettingsModalRenderer';
 import { ShopModalRenderer } from '../components/ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from '../components/UpgradeTreeModalRenderer';
+import { DivineForgeModalRenderer } from '../components/DivineForgeModalRenderer';
+import { evaluateForgeSelection } from '../components/DivineForgePresentation';
+import { calculateForgeSalvageGold } from '../../domain/forge/ForgeSalvageGoldCatalog';
 import { GamePreferences } from '../components/GamePreferences';
 import { LootFlowController } from '../controllers/LootFlowController';
 import { ChestLootFlow } from './ChestLootFlow';
@@ -17,6 +20,7 @@ import { GearStorageFlow } from './GearStorageFlow';
 import { HeroDetailFlow } from './HeroDetailFlow';
 import { ModalView } from './ModalTypes';
 import { ShopFlow } from './ShopFlow';
+import { DivineForgeFlow } from './DivineForgeFlow';
 
 export class ModalStackController {
   constructor(
@@ -30,7 +34,9 @@ export class ModalStackController {
     private readonly settingsModal: SettingsModalRenderer,
     private readonly shopModal: ShopModalRenderer,
     private readonly upgradeTreeModal: UpgradeTreeModalRenderer,
+    private readonly divineForgeModal: DivineForgeModalRenderer,
     private readonly shopFlow: ShopFlow,
+    private readonly divineForgeFlow: DivineForgeFlow,
     private readonly gearEquipFlow: GearEquipFlow,
     private readonly gearStorageFlow: GearStorageFlow,
     private readonly chestLootFlow: ChestLootFlow,
@@ -66,6 +72,8 @@ export class ModalStackController {
         return 'Loja';
       case 'upgrades':
         return 'Melhorias';
+      case 'divine-forge':
+        return 'Forja Divina';
       case 'loot-batch':
         return `Loot dos baús (${view.gearIds.length})`;
       case 'loot-reveal': {
@@ -221,6 +229,24 @@ export class ModalStackController {
             },
           },
         );
+        break;
+      case 'divine-forge':
+        this.divineForgeModal.render(container, state, {
+          onTabChange: () => this.renderTop(stack, state),
+          onSelectionChange: () => this.renderTop(stack, state),
+          onFuse: (gearIds) => {
+            const gears = state.inventory.filter((entry) => gearIds.includes(entry.id));
+            const status = evaluateForgeSelection(new Set(gearIds), state.inventory);
+            if (!status.canFuse || !status.nextRarityLabel) return;
+            void this.divineForgeFlow.fuse(gearIds, gears, status.nextRarityLabel);
+          },
+          onSalvage: (gearId) => {
+            const gear = state.inventory.find((entry) => entry.id === gearId);
+            if (!gear) return;
+            const goldPreview = calculateForgeSalvageGold(gear.rarity, state.stage);
+            void this.divineForgeFlow.salvage(gear, goldPreview);
+          },
+        });
         break;
     }
   }

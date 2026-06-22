@@ -198,7 +198,7 @@ export class EquipPickerModalRenderer {
                 data-pick-gear="${gearId}"
                 ${canEquip ? '' : 'disabled'}
               >
-                ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'equip-hero-card-icon')}
+                ${imgTag(getHeroSprite(hero), hero.name, 'equip-hero-card-icon')}
                 <span class="equip-hero-card-name">${hero.name}</span>
                 <span class="equip-hero-card-level">Lv.${hero.level}</span>
                 ${requirements}

@@ -1,5 +1,6 @@
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
 import { getEnemyRosterEntry } from '../../domain/enemies/EnemyRosterCatalog';
+import { HeroSpriteInput, resolveHeroSpritePath } from './HeroSpriteCatalog';
 
 export type HeroClassKey = 'knight' | 'sorcerer' | 'priest' | 'berserker' | 'paladin';
 export type GearSlotKey = 'weapon' | 'armor' | 'accessory';
@@ -15,8 +16,8 @@ const RARITY_ASSET_FALLBACK: Record<GearRarityKey, 'common' | 'rare' | 'epic'> =
 };
 
 const HERO_SPRITES: Record<HeroClassKey, string> = {
-  knight: 'characters/knight.png',
-  sorcerer: 'characters/sorcerer.png',
+  knight: 'characters/galneon_aprendiz.png',
+  sorcerer: 'characters/nix_aprendiz.png',
   priest: 'characters/priest_aprendiz.png',
   berserker: 'characters/berserker.png',
   paladin: 'characters/paladin.png',
@@ -79,6 +80,9 @@ export const ASSETS = {
     defense: 'ui/defense.png',
     health: 'ui/health.png',
     inventory: 'ui/inventory.png',
+    forge: 'gear/epic.png',
+    arrowPrev: 'ui/arrow-prev.png',
+    arrowNext: 'ui/arrow-next.png',
   },
   skills: {
     attack: 'ui/attack.png',
@@ -124,7 +128,12 @@ export function getAssetUrl(relativePath: string): string {
   }
 }
 
-export function getHeroSprite(heroClass: string): string {
+export function getHeroSprite(hero: HeroSpriteInput): string {
+  return getAssetUrl(resolveHeroSpritePath(hero));
+}
+
+/** @deprecated Prefer getHeroSprite({ id, heroClass, ascensionId }). */
+export function getHeroSpriteByClass(heroClass: string): string {
   return getAssetUrl(HERO_SPRITES[heroClass as HeroClassKey] ?? HERO_SPRITES.knight);
 }
 

@@ -1,5 +1,6 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { navArrowIconHtml } from '../assets/NavArrowPresentation';
 import { renderHeroFormationTooltipContent } from './HeroBattlePresentation';
 import { renderHeroBars } from './HeroBarsPresentation';
 import { renderHeroLoadoutStrip } from './HeroLoadoutStripPresentation';
@@ -35,7 +36,7 @@ function renderBattlingHeroFocus(hero: HeroDto, index: number, partySize: number
           data-battling-hero-prev
           aria-label="Herói anterior"
           ${hasPrev ? '' : 'disabled'}
-        >←</button>
+        >${navArrowIconHtml('prev')}</button>
         <span class="battling-hero-position" aria-live="polite">
           ${hero.name} · ${index + 1}/${partySize}
         </span>
@@ -45,14 +46,14 @@ function renderBattlingHeroFocus(hero: HeroDto, index: number, partySize: number
           data-battling-hero-next
           aria-label="Próximo herói"
           ${hasNext ? '' : 'disabled'}
-        >→</button>
+        >${navArrowIconHtml('next')}</button>
       </div>
 
       <article class="battling-hero-card party-active-card" data-hero-card="${hero.id}">
         <button type="button" class="battling-hero-main" data-hero-open="${hero.id}">
           <div class="battling-hero-portrait" aria-hidden="true">
             <img class="battling-hero-glow" src="${glowUrl}" alt="" />
-            ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'battling-hero-sprite')}
+            ${imgTag(getHeroSprite(hero), hero.name, 'battling-hero-sprite')}
           </div>
           <div class="battling-hero-info">
             <div class="battling-hero-title">
@@ -79,7 +80,7 @@ function renderBattlingHeroFocus(hero: HeroDto, index: number, partySize: number
 function renderFormationSprite(hero: HeroDto): string {
   return `
     <div class="formation-slot-sprite" data-hero-tooltip tabindex="0">
-      ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'formation-hero-image')}
+      ${imgTag(getHeroSprite(hero), hero.name, 'formation-hero-image')}
       <span class="hero-tooltip-content hidden">${renderHeroFormationTooltipContent(hero)}</span>
     </div>
   `;
@@ -165,7 +166,7 @@ function renderFormationBenchSlot(
   return `
     <article class="formation-bench-slot" data-bench-hero="${hero.id}">
       <div class="formation-bench-sprite" data-hero-tooltip tabindex="0">
-        ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'formation-hero-image')}
+        ${imgTag(getHeroSprite(hero), hero.name, 'formation-hero-image')}
         <span class="hero-tooltip-content hidden">${renderHeroFormationTooltipContent(hero)}</span>
       </div>
       ${

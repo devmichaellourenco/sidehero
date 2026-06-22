@@ -13,9 +13,13 @@ const outRoot = join(root, 'dist', 'panel', 'assets');
 
 /** Sprites de heróis em public/sprites/heroes. */
 const HERO_SPRITE_MAP = [
-  ['galneon_aprendiz.png', 'characters/knight.png'],
-  ['nix_aprendiz.png', 'characters/sorcerer.png'],
+  ['galneon_aprendiz.png', 'characters/galneon_aprendiz.png'],
+  ['galneon_general.png', 'characters/galneon_general.png'],
+  ['galneon_guerreiro.png', 'characters/galneon_guerreiro.png'],
+  ['nix_aprendiz.png', 'characters/nix_aprendiz.png'],
+  ['nix_feiticeira.png', 'characters/nix_feiticeira.png'],
   ['priest_aprendiz.png', 'characters/priest_aprendiz.png'],
+  ['priest.png', 'characters/priest.png'],
   ['berserker.png', 'characters/berserker.png'],
   ['paladin.png', 'characters/paladin.png'],
 ];
@@ -62,6 +66,8 @@ const ASSET_MAP = [
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_shield.png', 'ui/defense.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_life.png', 'ui/health.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_inventory.png', 'ui/inventory.png'],
+  ['Sprites/Demo/Demo_Icon/icon_white_arrow_prev.png', 'ui/arrow-prev.png'],
+  ['Sprites/Demo/Demo_Icon/icon_white_arrow_next.png', 'ui/arrow-next.png'],
 
   ['Sprites/Demo/Demo_Background/background_gradient_01.png', 'backgrounds/battle.png'],
   ['Sprites/Demo/Demo_Background/background_05_sample_01.png', 'backgrounds/app.png'],

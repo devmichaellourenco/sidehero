@@ -1,4 +1,5 @@
 import { CampaignProgressProps } from '../../domain/campaign/CampaignProgress';
+import { CombatIntermissionProps } from '../../domain/campaign/CombatIntermission';
 import { Hero } from '../../domain/entities/Hero';
 import { GameState } from '../../domain/entities/GameState';
 import {
@@ -100,6 +101,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       shopRefreshUses: props.shopRefreshUses,
       loadoutEditOpen: props.loadoutEditOpen && props.phaseRestartOnResume,
       phaseRestartOnResume: props.phaseRestartOnResume,
+      combatIntermission: props.combatIntermission,
     };
   }
 
@@ -156,6 +158,10 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       phaseRestartOnResume: raw.phaseRestartOnResume === true,
       loadoutEditOpen:
         raw.loadoutEditOpen === true && raw.phaseRestartOnResume === true,
+      combatIntermission:
+        raw.combatIntermission && typeof raw.combatIntermission === 'object'
+          ? (raw.combatIntermission as CombatIntermissionProps)
+          : null,
     });
   }
 }

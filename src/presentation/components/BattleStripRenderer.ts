@@ -47,7 +47,7 @@ export class BattleStripRenderer {
     this.heroesContainer.innerHTML = state.activeParty
       .map((hero) => {
         const glowHtml = `<img class="hero-glow" src="${glowUrl}" alt="" aria-hidden="true" />`;
-        const spriteHtml = imgTag(getHeroSprite(hero.heroClass), hero.name, 'hero-image');
+        const spriteHtml = imgTag(getHeroSprite(hero), hero.name, 'hero-image');
         const isActive = activeTurn?.side === 'hero' && activeTurn.id === hero.id;
         return renderHeroBattleSprite(hero, glowHtml, spriteHtml, { isActiveTurn: isActive });
       })

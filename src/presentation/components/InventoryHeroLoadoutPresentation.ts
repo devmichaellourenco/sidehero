@@ -111,7 +111,7 @@ export function renderInventoryHeroLoadout(
     <section class="inventory-loadout${pulseClass}" aria-label="Equipamento de ${escapeHtml(hero.name)}">
       <div class="inventory-loadout-portrait">
         <img class="inventory-loadout-glow" src="${glowUrl}" alt="" aria-hidden="true" />
-        ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'inventory-loadout-sprite')}
+        ${imgTag(getHeroSprite(hero), hero.name, 'inventory-loadout-sprite')}
         <div class="inventory-loadout-hero-meta">
           <strong class="inventory-loadout-hero-name">${escapeHtml(hero.name)}</strong>
           <span class="inventory-loadout-hero-level">Lv.${hero.level}</span>

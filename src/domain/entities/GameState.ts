@@ -1,6 +1,7 @@
 import { Gold } from '../value-objects/Gold';
 import { UpgradeLevels } from '../upgrades/FeatureKey';
 import { CampaignProgress, CampaignProgressProps } from '../campaign/CampaignProgress';
+import { CombatIntermission, CombatIntermissionProps } from '../campaign/CombatIntermission';
 import { PhaseRun, PhaseRunProps } from '../campaign/PhaseRun';
 import { resolvePhase } from '../campaign/CampaignCatalog';
 import { Chest } from './Chest';
@@ -42,6 +43,8 @@ export interface GameStateProps {
   loadoutEditOpen?: boolean;
   /** Ao continuar, reinicia a fase atual em vez de avançar para a próxima. */
   phaseRestartOnResume?: boolean;
+  /** Pausa entre waves/fases até o jogador ver o overlay de resultado. */
+  combatIntermission?: CombatIntermissionProps | null;
 }
 
 export class GameState {
@@ -63,6 +66,7 @@ export class GameState {
   readonly shopRefreshUses: number;
   readonly loadoutEditOpen: boolean;
   readonly phaseRestartOnResume: boolean;
+  readonly combatIntermission: CombatIntermission | null;
 
   private constructor(props: GameStateProps) {
     const legacyHeroes = props.heroes ?? [];
@@ -85,6 +89,9 @@ export class GameState {
     this.shopRefreshUses = Math.max(0, props.shopRefreshUses ?? 0);
     this.loadoutEditOpen = props.loadoutEditOpen === true;
     this.phaseRestartOnResume = props.phaseRestartOnResume === true;
+    this.combatIntermission = props.combatIntermission
+      ? CombatIntermission.restore(props.combatIntermission)
+      : null;
   }
 
   static initial(): GameState {
@@ -114,6 +121,7 @@ export class GameState {
       shopRefreshUses: 0,
       loadoutEditOpen: false,
       phaseRestartOnResume: false,
+      combatIntermission: null,
     });
   }
 
@@ -204,6 +212,10 @@ export class GameState {
     return this.clone({ phaseRestartOnResume });
   }
 
+  withCombatIntermission(combatIntermission: CombatIntermission | null): GameState {
+    return this.clone({ combatIntermission: combatIntermission?.toProps() ?? null });
+  }
+
   withStage(stage: number): GameState {
     return this.clone({ stage, shopRefreshSeed: 0, shopRefreshUses: 0 });
   }
@@ -274,6 +286,7 @@ export class GameState {
       shopRefreshUses: this.shopRefreshUses,
       loadoutEditOpen: this.loadoutEditOpen,
       phaseRestartOnResume: this.phaseRestartOnResume,
+      combatIntermission: this.combatIntermission?.toProps() ?? null,
     };
   }
 

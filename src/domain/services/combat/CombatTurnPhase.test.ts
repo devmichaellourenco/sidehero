@@ -180,9 +180,11 @@ describe('CombatTurnPhase', () => {
     );
     state = victory.state;
 
-    expect(state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
+    expect(state.combatIntermission?.variant).toBe('phase-clear');
     expect(state.phaseRun).toBeNull();
-    expect(state.loadoutEditOpen).toBe(false);
+
+    const resumed = phaseHandlers.resumeIntermission(state);
+    state = resumed.state;
 
     const nextTick = phase.execute(state);
 

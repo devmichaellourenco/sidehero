@@ -194,6 +194,14 @@ export interface CampaignProgressDto {
   seasonCompleted: boolean;
 }
 
+export interface CombatIntermissionDto {
+  variant: 'wave-clear' | 'boss-approach' | 'phase-clear' | 'defeat';
+  clearedPhaseId: string;
+  clearedPhaseName: string;
+  nextPhaseId: string | null;
+  nextPhaseName: string | null;
+}
+
 export interface StorageCapacityDto {
   inventoryLimit: number;
   inventoryUsed: number;
@@ -218,6 +226,7 @@ export interface GameStateDto {
   mapName: string;
   phaseLabel: string;
   phaseRun: PhaseRunDto | null;
+  combatIntermission: CombatIntermissionDto | null;
   campaignProgress: CampaignProgressDto;
   stage: number;
   difficultyTier: number;

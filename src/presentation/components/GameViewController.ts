@@ -27,7 +27,8 @@ import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
 import { bindCampaignTooltip } from './CampaignTooltipBinder';
-import { detectBattleVictory } from './BattleVictoryDetector';
+import { mountNavArrowIcons } from '../assets/NavArrowPresentation';
+import { buildBattleIntermissionPayload } from './BattleVictoryDetector';
 import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
@@ -54,7 +55,10 @@ import { ShopModalRenderer } from './ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
 import { ToastController } from './ToastController';
 import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
+import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
+import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
 import { SkillCooldownDisplayAnimator } from './SkillCooldownDisplayAnimator';
+import { DivineForgeFlow } from '../flows/DivineForgeFlow';
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -82,6 +86,7 @@ export class GameViewController {
   private readonly openAllChestsBtn: HTMLButtonElement;
     private readonly openInventoryBtn: HTMLButtonElement;
     private readonly openStashBtn: HTMLButtonElement;
+    private readonly openForgeBtn: HTMLButtonElement;
     private readonly optimizeLoadoutBtn: HTMLButtonElement;
   private readonly openSettingsBtn: HTMLButtonElement;
   private readonly openCampaignBtn: HTMLButtonElement;
@@ -113,8 +118,10 @@ export class GameViewController {
   private readonly settingsModal: SettingsModalRenderer;
   private readonly shopModal: ShopModalRenderer;
   private readonly upgradeTreeModal: UpgradeTreeModalRenderer;
+  private readonly divineForgeModal: DivineForgeModalRenderer;
   private readonly toasts: ToastController;
   private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
+  private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
   private readonly stateChanges: GameStateChangeDetector;
   private readonly hud: GameHudController;
   private readonly battleChestAffordance: BattleChestAffordanceController;
@@ -126,10 +133,14 @@ export class GameViewController {
   private readonly shopFlow: ShopFlow;
   private readonly gearEquipFlow: GearEquipFlow;
   private readonly gearStorageFlow: GearStorageFlow;
+  private readonly divineForgeFlow: DivineForgeFlow;
   private readonly chestLootFlow: ChestLootFlow;
   private readonly campaignFlow: CampaignFlow;
   private readonly partyFlow: PartyFlow;
   private readonly modalStackController: ModalStackController;
+
+  private shownIntermissionKey: string | null = null;
+  private intermissionResuming = false;
 
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
     this.client = client;
@@ -146,6 +157,7 @@ export class GameViewController {
     this.openAllChestsBtn = root.querySelector('#open-all-chests-btn') as HTMLButtonElement;
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
     this.openStashBtn = root.querySelector('#open-stash-btn') as HTMLButtonElement;
+    this.openForgeBtn = root.querySelector('#open-forge-btn') as HTMLButtonElement;
     this.optimizeLoadoutBtn = root.querySelector('#optimize-loadout-btn') as HTMLButtonElement;
     this.openSettingsBtn = root.querySelector('#open-settings-btn') as HTMLButtonElement;
     this.openCampaignBtn = root.querySelector('#open-campaign-btn') as HTMLButtonElement;
@@ -203,13 +215,21 @@ export class GameViewController {
     this.settingsModal = new SettingsModalRenderer();
     this.shopModal = new ShopModalRenderer();
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
+    this.divineForgeModal = new DivineForgeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
       root.querySelector('#destroy-gear-confirm-root')!,
       root.querySelector('#destroy-confirm-body')!,
       root.querySelector('[data-destroy-confirm-accept]') as HTMLButtonElement,
     );
+    this.forgeConfirmDialog = new DivineForgeConfirmDialog(
+      root.querySelector('#forge-confirm-root')!,
+      root.querySelector('#forge-confirm-title')!,
+      root.querySelector('#forge-confirm-body')!,
+      root.querySelector('[data-forge-confirm-accept]') as HTMLButtonElement,
+    );
     this.stateChanges = new GameStateChangeDetector(this.toasts);
+    mountNavArrowIcons(root);
     bindCampaignTooltip(this.campaignContextLabel);
 
     this.hud = new GameHudController(
@@ -219,6 +239,7 @@ export class GameViewController {
       this.chestProgressLabel,
       this.openInventoryBtn,
       this.openStashBtn,
+      this.openForgeBtn,
       this.optimizeLoadoutBtn,
       this.openAllChestsBtn,
       this.openUpgradesBtn,
@@ -280,6 +301,15 @@ export class GameViewController {
       (error) => this.onGearMutationFailed(error),
     );
 
+    this.divineForgeFlow = new DivineForgeFlow(
+      this.client,
+      this.gearMutations,
+      this.forgeConfirmDialog,
+      this.toasts,
+      (state) => this.afterForgeMutation(state),
+      (error) => this.onGearMutationFailed(error),
+    );
+
     this.campaignFlow = new CampaignFlow(this.client, this.modal);
     this.partyFlow = new PartyFlow(this.client);
 
@@ -310,7 +340,9 @@ export class GameViewController {
       this.settingsModal,
       this.shopModal,
       this.upgradeTreeModal,
+      this.divineForgeModal,
       this.shopFlow,
+      this.divineForgeFlow,
       this.gearEquipFlow,
       this.gearStorageFlow,
       this.chestLootFlow,
@@ -362,6 +394,7 @@ export class GameViewController {
     });
     this.openInventoryBtn.addEventListener('click', () => this.openInventoryModal());
     this.openStashBtn.addEventListener('click', () => this.openStashModal());
+    this.openForgeBtn.addEventListener('click', () => this.openForgeModal());
     this.optimizeLoadoutBtn.addEventListener('click', () => {
       void this.gearEquipFlow.optimizeLoadout();
     });
@@ -456,6 +489,7 @@ export class GameViewController {
   }
 
   private isAdvanceBlocked(state: GameStateDto | null = this.state): boolean {
+    if (this.victoryFlow.isBlockingAdvance()) return true;
     if (this.pausingLoadout) return true;
     return this.isManualLoadoutPause(state);
   }
@@ -658,6 +692,53 @@ export class GameViewController {
     this.syncAutoBattleTimer();
   }
 
+  private async resumeCombatIntermission(): Promise<void> {
+    if (this.intermissionResuming) return;
+    this.intermissionResuming = true;
+
+    try {
+      const response = await this.client.send({ type: 'RESUME_COMBAT_INTERMISSION' });
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
+
+      this.shownIntermissionKey = null;
+      this.render(response.state);
+      this.showCombatFloats(response.combatFloats);
+      this.syncAutoBattleTimer();
+    } finally {
+      this.intermissionResuming = false;
+    }
+  }
+
+  private buildIntermissionKey(state: GameStateDto): string | null {
+    if (!state.combatIntermission) return null;
+    const wave = state.phaseRun?.waveIndex ?? 'none';
+    return `${state.combatIntermission.variant}:${state.combatIntermission.clearedPhaseId}:${wave}`;
+  }
+
+  private showCombatIntermissionOverlay(
+    previous: GameStateDto | null,
+    state: GameStateDto,
+  ): void {
+    if (!state.combatIntermission || this.victoryFlow.isActive() || this.intermissionResuming) {
+      return;
+    }
+
+    const key = this.buildIntermissionKey(state);
+    if (!key || key === this.shownIntermissionKey) {
+      return;
+    }
+
+    this.shownIntermissionKey = key;
+    const payload = buildBattleIntermissionPayload(state.combatIntermission, state, previous);
+    this.stopAutoBattle();
+    this.victoryFlow.show(payload, () => {
+      void this.resumeCombatIntermission();
+    });
+  }
+
   private async tick(
     options: { restartCurrentPhase?: boolean } = {},
   ): Promise<void> {
@@ -730,6 +811,12 @@ export class GameViewController {
     this.render(state);
     this.refreshHeroDrawerIfOpen();
     this.refreshModalIfOpen();
+  }
+
+  private afterForgeMutation(state: GameStateDto): void {
+    this.divineForgeModal.clearAfterFuse();
+    this.divineForgeModal.clearAfterSalvage();
+    this.afterStorageMutation(state);
   }
 
   private afterGearMutation(state: GameStateDto): void {
@@ -1105,6 +1192,22 @@ export class GameViewController {
     this.pushModal({ type: 'stash' });
   }
 
+  private openForgeModal(): void {
+    if (this.contextInvalidated) return;
+    if (!this.state?.featureFlags.divineForge) {
+      this.toasts.show('Desbloqueie Forja Divina em Melhorias', 'info');
+      return;
+    }
+    this.closeHeroDrawer();
+    this.divineForgeModal.resetSelection();
+    if (this.modal.isOpen() && this.modalStack.length > 0) {
+      this.pushModal({ type: 'divine-forge' });
+      return;
+    }
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'divine-forge' });
+  }
+
   private openHeroDetailModal(heroId: string, tab: HeroDetailTab = 'sheet'): void {
     this.openHeroDrawer(heroId, tab);
   }
@@ -1194,12 +1297,11 @@ export class GameViewController {
 
     const previous =
       options.previousState !== undefined ? options.previousState : this.state;
-    const victoryPayload = previous ? detectBattleVictory(previous, state) : null;
 
-    if (victoryPayload) {
-      this.victoryFlow.show(victoryPayload, () => {
-        void this.chestLootFlow.openNextChest();
-      });
+    this.showCombatIntermissionOverlay(previous, state);
+
+    if (!state.combatIntermission) {
+      this.shownIntermissionKey = null;
     }
 
     if (previous && !options.skipChestToast) {
@@ -1212,7 +1314,7 @@ export class GameViewController {
             void this.chestLootFlow.openNextChest();
           },
         },
-        { skipVictoryOverlayRewards: Boolean(victoryPayload) },
+        { skipVictoryOverlayRewards: Boolean(state.combatIntermission) },
       );
     }
 

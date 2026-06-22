@@ -15,4 +15,5 @@ export interface FeatureFlagsDto {
   itemStash: boolean;
   stashCapacity: number;
   inventoryCapacity: number;
+  divineForge: boolean;
 }

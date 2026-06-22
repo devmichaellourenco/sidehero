@@ -9,4 +9,5 @@ export type ModalView =
   | { type: 'loot-batch'; gearIds: string[] }
   | { type: 'settings' }
   | { type: 'shop' }
-  | { type: 'upgrades' };
+  | { type: 'upgrades' }
+  | { type: 'divine-forge' };

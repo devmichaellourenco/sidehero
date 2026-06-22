@@ -17,6 +17,7 @@ export type GameMessage =
   | { type: 'NEW_GAME' }
   | { type: 'PAUSE_FOR_LOADOUT' }
   | { type: 'TICK'; ticks?: number; restartCurrentPhase?: boolean }
+  | { type: 'RESUME_COMBAT_INTERMISSION' }
   | { type: 'OPEN_CHEST'; chestId: string }
   | { type: 'OPEN_ALL_CHESTS' }
   | { type: 'EQUIP_GEAR'; heroId: string; gearId: string }
@@ -25,6 +26,8 @@ export type GameMessage =
   | { type: 'MOVE_GEAR_TO_STASH'; gearId: string }
   | { type: 'MOVE_GEAR_FROM_STASH'; gearId: string }
   | { type: 'DESTROY_GEAR'; gearId: string; location: 'inventory' | 'stash' }
+  | { type: 'FORGE_FUSE_GEAR'; gearIds: string[] }
+  | { type: 'FORGE_SALVAGE_GEAR'; gearId: string }
   | { type: 'GET_SHOP_OFFERS' }
   | { type: 'BUY_SHOP_OFFER'; offerId: string }
   | { type: 'REFRESH_SHOP' }
@@ -62,6 +65,8 @@ export type GameResponse =
       ascensionSkillNodes?: SkillNodeDto[];
       purchasableUpgradeCount?: number;
       purchasedUpgradeId?: string;
+      forgedGear?: GearDto;
+      salvageGold?: number;
       campaign?: CampaignOverviewDto;
     }
   | { ok: false; error: string };

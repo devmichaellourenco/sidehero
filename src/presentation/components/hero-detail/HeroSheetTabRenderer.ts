@@ -13,7 +13,7 @@ export function renderHeroSheetTab(hero: HeroDto): string {
     <div class="hero-detail">
       <div class="hero-detail-portrait">
         <img class="hero-detail-glow" src="${glowUrl}" alt="" aria-hidden="true" />
-        ${imgTag(getHeroSprite(hero.heroClass), hero.name, 'hero-detail-sprite')}
+        ${imgTag(getHeroSprite(hero), hero.name, 'hero-detail-sprite')}
       </div>
       <div class="hero-detail-info">
         <div class="hero-detail-title">

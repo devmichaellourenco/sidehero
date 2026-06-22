@@ -3,6 +3,7 @@ import { ISkillService } from '../domain/progression/ISkillService';
 import { ICombatService } from '../domain/services/ICombatService';
 import { ILootService } from '../domain/services/ILootService';
 import { LoadoutOptimizer } from '../domain/services/LoadoutOptimizer';
+import { DivineForgeService } from '../domain/services/DivineForgeService';
 import { PartyService } from '../domain/party/PartyService';
 import { ChestService } from '../domain/services/ChestService';
 import { ShopService } from '../domain/services/ShopService';
@@ -19,5 +20,6 @@ export interface GameApplicationDependencies {
   ascensionService: IClassAscensionService;
   loadoutOptimizer: LoadoutOptimizer;
   partyService: PartyService;
+  divineForgeService: DivineForgeService;
   presenter: GameStatePresenter;
 }

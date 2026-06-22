@@ -116,6 +116,9 @@
           <button id="open-stash-btn" class="action-icon-btn hidden" type="button" title="Baú de itens" aria-label="Baú de itens">
             <img class="btn-icon" src="assets/ui/chest-open.png" alt="" aria-hidden="true" />
           </button>
+          <button id="open-forge-btn" class="action-icon-btn hidden" type="button" title="Forja Divina" aria-label="Forja Divina">
+            <img class="btn-icon" src="assets/gear/epic.png" alt="" aria-hidden="true" />
+          </button>
           <button id="optimize-loadout-btn" class="action-icon-btn hidden" type="button" title="Otimizar equipe" aria-label="Otimizar equipe">
             ⬆
           </button>
@@ -147,9 +150,9 @@
       <div class="hero-drawer-backdrop" data-drawer-close></div>
       <aside class="hero-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="hero-drawer-title">
         <header class="hero-drawer-header">
-          <button type="button" class="hero-drawer-nav" data-hero-drawer-prev aria-label="Herói anterior">←</button>
+          <button type="button" class="hero-drawer-nav" data-hero-drawer-prev data-nav-arrow="prev" aria-label="Herói anterior"></button>
           <h2 id="hero-drawer-title" class="hero-drawer-title"></h2>
-          <button type="button" class="hero-drawer-nav" data-hero-drawer-next aria-label="Próximo herói">→</button>
+          <button type="button" class="hero-drawer-nav" data-hero-drawer-next data-nav-arrow="next" aria-label="Próximo herói"></button>
           <button type="button" class="hero-drawer-close" data-drawer-close aria-label="Fechar">×</button>
         </header>
         <div id="hero-drawer-body" class="hero-drawer-body game-scroll"></div>
@@ -160,7 +163,7 @@
       <div class="modal-backdrop" data-modal-close></div>
       <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <header class="modal-header">
-          <button type="button" class="modal-back hidden" data-modal-back aria-label="Voltar">←</button>
+          <button type="button" class="modal-back hidden" data-modal-back data-nav-arrow="prev" aria-label="Voltar"></button>
           <h2 id="modal-title" class="modal-title"></h2>
           <button type="button" class="modal-close" data-modal-close aria-label="Fechar">×</button>
         </header>
@@ -184,6 +187,26 @@
         <footer class="confirm-dialog-actions">
           <button type="button" class="gear-unequip-btn" data-destroy-confirm-cancel>Cancelar</button>
           <button type="button" class="gear-destroy-btn" data-destroy-confirm-accept>Destruir</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="forge-confirm-root" class="confirm-dialog-root hidden" aria-hidden="true">
+      <div class="confirm-dialog-backdrop" data-forge-confirm-cancel></div>
+      <div
+        class="confirm-dialog forge-confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="forge-confirm-title"
+        aria-describedby="forge-confirm-body"
+      >
+        <header class="confirm-dialog-header">
+          <h2 id="forge-confirm-title" class="confirm-dialog-title"></h2>
+        </header>
+        <div id="forge-confirm-body" class="confirm-dialog-body"></div>
+        <footer class="confirm-dialog-actions">
+          <button type="button" class="gear-unequip-btn" data-forge-confirm-cancel>Cancelar</button>
+          <button type="button" class="gear-destroy-btn" data-forge-confirm-accept>Confirmar</button>
         </footer>
       </div>
     </div>

@@ -98,6 +98,15 @@ export class GameStatePresenter {
       mapName: campaignLabels.mapName,
       phaseLabel: campaignLabels.phaseLabel,
       phaseRun,
+      combatIntermission: state.combatIntermission
+        ? {
+            variant: state.combatIntermission.variant,
+            clearedPhaseId: state.combatIntermission.clearedPhaseId,
+            clearedPhaseName: state.combatIntermission.clearedPhaseName,
+            nextPhaseId: state.combatIntermission.nextPhaseId,
+            nextPhaseName: state.combatIntermission.nextPhaseName,
+          }
+        : null,
       campaignProgress: {
         selectedPhaseId: state.campaignProgress.selectedPhaseId,
         unlockedPhaseIds: [...state.campaignProgress.unlockedPhaseIds],
@@ -224,12 +233,12 @@ function mapCampaignLabels(state: GameState): {
 }
 
 function mapPhaseRunDto(state: GameState): GameStateDto['phaseRun'] {
-  const phaseId = state.combat?.encounterMeta?.phaseId ?? state.phaseRun?.phaseId;
-  if (!phaseId) return null;
+  if (!state.phaseRun) return null;
 
+  const phaseId = state.phaseRun.phaseId;
   const phase = resolvePhase(phaseId);
-  const meta = state.combat?.encounterMeta;
-  const waveIndex = meta?.waveIndex ?? state.phaseRun?.waveIndex ?? 0;
+  const meta = state.combatIntermission ? null : state.combat?.encounterMeta;
+  const waveIndex = meta?.waveIndex ?? state.phaseRun.waveIndex;
   const waveCount = meta?.waveCount ?? phase?.waves.length ?? 1;
 
   return {

@@ -1,6 +1,7 @@
 import { AscensionOptionDto } from '../../../application/dto/AscensionOptionDto';
 import { HeroDto } from '../../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../../application/dto/SkillNodeDto';
+import { getHeroSprite, imgTag } from '../../assets/AssetCatalog';
 import { renderSkillCard } from '../SkillCardPresentation';
 
 export interface HeroClassTabData {
@@ -29,6 +30,13 @@ function renderAscensionChoiceView(hero: HeroDto, options: AscensionOptionDto[])
 
       return `
         <article class="ascension-card">
+          <div class="ascension-card-preview" aria-hidden="true">
+            ${imgTag(
+              getHeroSprite({ id: hero.id, heroClass: hero.heroClass, ascensionId: option.id }),
+              option.name,
+              'ascension-card-sprite',
+            )}
+          </div>
           <header class="ascension-card-header">
             <h4>${option.name}</h4>
             <span class="ascension-points-badge">+${option.pointsGranted} pts</span>
@@ -78,9 +86,14 @@ function renderAscendedView(
   return `
     <section class="hero-class-tab">
       <div class="hero-class-status">
+        <div class="hero-class-portrait" aria-hidden="true">
+          ${imgTag(getHeroSprite(hero), hero.name, 'hero-class-sprite')}
+        </div>
+        <div class="hero-class-status-text">
         <p><strong>Classe base:</strong> ${hero.heroClass}</p>
         <p><strong>Ascensão:</strong> ${label}</p>
         <p><strong>Pontos de ascensão:</strong> ${hero.unspentAscensionPoints}</p>
+        </div>
       </div>
       <h4 class="hero-class-subtitle">Sub-árvore de ascensão</h4>
       ${skillSection}

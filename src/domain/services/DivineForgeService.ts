@@ -1,0 +1,99 @@
+import { GameState } from '../entities/GameState';
+import { Gear } from '../entities/Gear';
+import { DivineForgePolicy } from '../forge/DivineForgePolicy';
+import { calculateForgeSalvageGold } from '../forge/ForgeSalvageGoldCatalog';
+import {
+  FORGE_FUSE_REQUIRED_COUNT,
+  canForgeFuseRarity,
+  getNextGearRarity,
+} from '../gear/GearRarityProgression';
+import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
+import { GearStorageService } from './GearStorageService';
+import { ILootService } from './ILootService';
+
+export interface ForgeFuseResult {
+  state: GameState;
+  created: Gear;
+}
+
+export interface ForgeSalvageResult {
+  state: GameState;
+  goldGained: number;
+}
+
+export class DivineForgeService {
+  constructor(
+    private readonly lootService: ILootService,
+    private readonly gearStorage: GearStorageService = new GearStorageService(),
+  ) {}
+
+  fuse(state: GameState, gearIds: string[]): ForgeFuseResult {
+    if (!DivineForgePolicy.isUnlocked(state.upgradeLevels)) {
+      throw new Error('Forja Divina não desbloqueada');
+    }
+
+    if (gearIds.length !== FORGE_FUSE_REQUIRED_COUNT) {
+      throw new Error(`Selecione exatamente ${FORGE_FUSE_REQUIRED_COUNT} itens`);
+    }
+
+    const uniqueIds = new Set(gearIds);
+    if (uniqueIds.size !== gearIds.length) {
+      throw new Error('Itens duplicados na seleção');
+    }
+
+    const gears = gearIds.map((id) => {
+      const gear = state.inventory.find((entry) => entry.id === id);
+      if (!gear) {
+        throw new Error('Selecione apenas itens do inventário');
+      }
+      return gear;
+    });
+
+    const rarity = gears[0].rarity;
+    if (!gears.every((gear) => gear.rarity === rarity)) {
+      throw new Error('Todos os itens devem ter a mesma raridade');
+    }
+
+    if (!canForgeFuseRarity(rarity)) {
+      throw new Error('Raridade máxima — não é possível fundir');
+    }
+
+    const nextRarity = getNextGearRarity(rarity);
+    if (!nextRarity) {
+      throw new Error('Raridade máxima — não é possível fundir');
+    }
+
+    const remaining = state.inventory.filter((gear) => !uniqueIds.has(gear.id));
+    this.gearStorage.assertInventoryHasRoom(remaining.length, 1);
+
+    const slot = ACTIVE_GEAR_SLOTS[Math.floor(Math.random() * ACTIVE_GEAR_SLOTS.length)];
+    const created = this.lootService.generateGearForSlot(state.stage, slot, nextRarity);
+
+    const nextState = state
+      .withInventory([...remaining, created])
+      .addLog(
+        `Forja Divina: ${FORGE_FUSE_REQUIRED_COUNT} itens fundidos em ${created.name} (${nextRarity}).`,
+      );
+
+    return { state: nextState, created };
+  }
+
+  salvage(state: GameState, gearId: string): ForgeSalvageResult {
+    if (!DivineForgePolicy.isUnlocked(state.upgradeLevels)) {
+      throw new Error('Forja Divina não desbloqueada');
+    }
+
+    const gear = state.inventory.find((entry) => entry.id === gearId);
+    if (!gear) {
+      throw new Error('Item não encontrado no inventário');
+    }
+
+    const goldGained = calculateForgeSalvageGold(gear.rarity, state.stage);
+    const nextState = state
+      .withInventory(state.inventory.filter((entry) => entry.id !== gearId))
+      .withGold(state.gold.add(goldGained))
+      .addLog(`Forja Divina: ${gear.name} destruído por +${goldGained} ouro.`);
+
+    return { state: nextState, goldGained };
+  }
+}
