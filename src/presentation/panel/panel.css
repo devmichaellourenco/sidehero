@@ -535,7 +535,7 @@ h2 {
   bottom: var(--strip-actors-bottom);
   left: 8px;
   display: flex;
-  flex-direction: row;
+  flex-direction: row-reverse;
   align-items: flex-end;
   gap: var(--strip-actor-gap);
   z-index: 2;
@@ -555,7 +555,7 @@ h2 {
 
 .enemies-row {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: flex-end;
   gap: var(--strip-actor-gap);
 }
@@ -3050,19 +3050,23 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
 
 .formation-active-row {
   display: flex;
-  flex-direction: row;
+  flex-direction: row-reverse;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  width: 100%;
   padding-top: 14px;
 }
 
 .formation-bench-row {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 6px;
+  width: 100%;
 }
 
 .formation-slot {
