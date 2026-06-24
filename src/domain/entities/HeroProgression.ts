@@ -127,10 +127,6 @@ export class HeroProgression {
   }
 
   ascend(ascensionId: AscensionId, pointsGranted: number): HeroProgression {
-    if (this.ascensionId !== null) {
-      throw new Error('Herói já ascendeu — ascensão é irreversível');
-    }
-
     return new HeroProgression({
       ...this.toProps(),
       ascensionId,

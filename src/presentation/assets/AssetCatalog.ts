@@ -18,7 +18,7 @@ const RARITY_ASSET_FALLBACK: Record<GearRarityKey, 'common' | 'rare' | 'epic'> =
 const HERO_SPRITES: Record<HeroClassKey, string> = {
   knight: 'characters/galneon_aprendiz.png',
   sorcerer: 'characters/nix_aprendiz.png',
-  priest: 'characters/priest_aprendiz.png',
+  priest: 'characters/elara_aprendiz.png',
   berserker: 'characters/berserker.png',
   paladin: 'characters/paladin.png',
 };
@@ -90,6 +90,7 @@ export const ASSETS = {
     heal: 'skills/heal.png',
     buff: 'ui/defense.png',
     debuff: 'ui/defense.png',
+    evasion: 'skills/evasion.png',
     physical: 'ui/attack.png',
     weapon: 'gear/weapon.png',
     chest: 'ui/chest.png',
@@ -97,6 +98,10 @@ export const ASSETS = {
     arcane_bolt: 'skills/arcane_bolt.png',
     fireball: 'skills/fireball.png',
     mana_shield: 'skills/mana_shield.png',
+    thrust: 'skills/thrust.png',
+    blessing: 'skills/blessing.png',
+    iron_skin: 'skills/iron_skin.png',
+    power_attack: 'skills/power_attack.png',
   },
   backgrounds: {
     battle: 'backgrounds/battle.png',

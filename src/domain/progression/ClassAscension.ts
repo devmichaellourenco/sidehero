@@ -9,4 +9,8 @@ export interface ClassAscension {
   description: string;
   requirements: ProgressionRequirement[];
   pointsGranted: number;
+  /** Ascensão necessária antes desta. `null` = disponível para Aprendiz. */
+  prerequisiteAscensionId: AscensionId | null;
+  /** Rótulo do caminho (ex.: Caminho Militar). */
+  pathLabel?: string;
 }

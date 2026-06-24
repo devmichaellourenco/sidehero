@@ -2,10 +2,11 @@ import { Hero } from '../entities/Hero';
 import { ClassAscension } from './ClassAscension';
 import {
   getAscensionById,
-  getAscensionsForClass,
+  getNextAscensionOptions,
 } from './ClassAscensionCatalog';
 import { HeroRequirementEvaluator } from '../requirements/HeroRequirementEvaluator';
 import { IClassAscensionService } from './IClassAscensionService';
+import { normalizeAscensionId } from './normalizeAscensionId';
 import { AscensionId } from './SkillId';
 
 export interface AscensionOptionView {
@@ -18,25 +19,26 @@ export class ClassAscensionService implements IClassAscensionService {
   private readonly evaluator = new HeroRequirementEvaluator();
 
   listOptions(hero: Hero): AscensionOptionView[] {
-    const alreadyAscended = hero.toProps().ascensionId !== null;
+    const currentAscensionId = normalizeAscensionId(hero.toProps().ascensionId);
 
-    return getAscensionsForClass(hero.heroClass).map((definition) => {
+    return getNextAscensionOptions(hero.heroClass, currentAscensionId).map((definition) => {
       const requirements = this.evaluator.evaluateAll(hero, definition.requirements);
       const reqsMet = requirements.every((req) => req.met);
 
       return {
         definition,
         requirements,
-        canAscend: !alreadyAscended && reqsMet,
+        canAscend: reqsMet,
       };
     });
   }
 
   canAscend(hero: Hero, ascensionId: AscensionId): boolean {
-    if (hero.toProps().ascensionId !== null) return false;
-
     const definition = getAscensionById(ascensionId);
     if (!definition || definition.heroClass !== hero.heroClass) return false;
+
+    const currentAscensionId = normalizeAscensionId(hero.toProps().ascensionId);
+    if (definition.prerequisiteAscensionId !== currentAscensionId) return false;
 
     return this.evaluator.allMet(hero, definition.requirements);
   }

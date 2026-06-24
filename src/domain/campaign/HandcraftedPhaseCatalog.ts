@@ -52,8 +52,8 @@ function buildWaves(
 ): WaveDefinition[] {
   if (seasonFinale) {
     return [
-      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 3), trash(pickCommonForGlobalTier(globalTier, 1), 2)]),
-      wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 2), 2)], 1.2),
+      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 1), 1)]),
+      wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0)), trash(pickCommonForGlobalTier(globalTier, 2), 2)], 1.2),
       wave('w3', [elite(pickLevelBossForGlobalTier(globalTier), 2), elite(pickSubbossForGlobalTier(globalTier, 1))], 1.3),
       wave('w4', [boss('vorax'), boss('demon_prince')], 2),
     ];
@@ -62,7 +62,7 @@ function buildWaves(
   if (milestoneBoss) {
     const bossEnemy = pickLevelBossForGlobalTier(globalTier);
     return [
-      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 1), 2)]),
+      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 1), 1)]),
       wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0)), trash(pickCommonForGlobalTier(globalTier, 3), 2)], 1.15),
       wave('w3', [elite(bossEnemy), elite(pickCommonForGlobalTier(globalTier, 4))], 1.25),
       wave('w4', [boss(bossEnemy), elite(pickSubbossForGlobalTier(globalTier, 1))], 1.6),

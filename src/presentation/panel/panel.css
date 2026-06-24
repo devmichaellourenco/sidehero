@@ -4574,8 +4574,15 @@ body.modal-open {
 
 .ascension-card-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ascension-path-label {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
 }
 
 .ascension-card h4 {

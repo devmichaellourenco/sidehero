@@ -2,6 +2,7 @@ import { createAttributes } from '../../domain/progression/Attributes';
 import { BASIC_ATTACK_SKILL_ID } from '../../domain/progression/combat/BasicAttackSkill';
 import { MAX_ACTIVE_BATTLE_SKILLS } from '../../domain/progression/SkillBattleSlots';
 import { AscensionId, SkillId } from '../../domain/progression/SkillId';
+import { normalizeAscensionId } from '../../domain/progression/normalizeAscensionId';
 import { Experience } from '../../domain/value-objects/Experience';
 import { Stats } from '../../domain/value-objects/Stats';
 import { Gear, GearSlot } from '../../domain/entities/Gear';
@@ -47,19 +48,61 @@ function migrateAttributes(raw: unknown): HeroProps['allocatedAttributes'] {
   );
 }
 
+const LEGACY_KNIGHT_SKILL_MAP: Record<string, SkillId> = {
+  guardian_strike: 'mil_gen_decree',
+  guardian_resolve: 'mil_cap_order',
+  reaver_cleave: 'mil_guer_cleave',
+  reaver_fury: 'mar_gla_slash',
+};
+
+const LEGACY_SORCERER_SKILL_MAP: Record<string, SkillId> = {
+  pyro_inferno: 'inn_fei_flame',
+  pyro_ember: 'inn_fei_spark',
+  arcane_surge: 'arc_mag_bolt',
+  arcane_focus: 'arc_mag_weave',
+};
+
+function migrateAscensionId(raw: unknown): AscensionId | null {
+  if (typeof raw !== 'string') return null;
+  return normalizeAscensionId(raw as AscensionId);
+}
+
+const LEGACY_PRIEST_SKILL_MAP: Record<string, SkillId> = {
+  oracle_mend: 'vid_clr_renew',
+  oracle_sanctuary: 'vid_gua_aegis',
+  inquisitor_judgment: 'sag_san_judgment',
+  inquisitor_flame: 'sag_clr_light',
+};
+
 function migrateSkillRanks(raw: unknown): Record<SkillId, number> {
   const ranks = asRecord(raw);
-  return Object.fromEntries(
+  const migrated = Object.fromEntries(
     Object.entries(ranks)
       .filter(([, value]) => typeof value === 'number' && value > 0)
-      .map(([id, value]) => [id, value as number]),
-  );
+      .map(([id, value]) => {
+        const nextId =
+          LEGACY_KNIGHT_SKILL_MAP[id] ??
+          LEGACY_SORCERER_SKILL_MAP[id] ??
+          LEGACY_PRIEST_SKILL_MAP[id] ??
+          id;
+        return [nextId, value as number];
+      }),
+  ) as Record<SkillId, number>;
+
+  return migrated;
 }
 
 function migrateEquippedSkillIds(raw: unknown): SkillId[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((id): id is SkillId => typeof id === 'string')
+    .map(
+      (id) =>
+        LEGACY_KNIGHT_SKILL_MAP[id] ??
+        LEGACY_SORCERER_SKILL_MAP[id] ??
+        LEGACY_PRIEST_SKILL_MAP[id] ??
+        id,
+    )
     .slice(0, MAX_ACTIVE_BATTLE_SKILLS);
 }
 
@@ -100,8 +143,7 @@ function migrateProgression(raw: RawRecord): Pick<
       typeof raw.unspentAscensionPoints === 'number' ? raw.unspentAscensionPoints : 0,
     skillRanks: starter.skillRanks,
     equippedSkillIds: starter.equippedSkillIds,
-    ascensionId:
-      typeof raw.ascensionId === 'string' ? (raw.ascensionId as AscensionId) : null,
+    ascensionId: migrateAscensionId(raw.ascensionId),
   };
 }
 

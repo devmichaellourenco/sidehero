@@ -1,5 +1,20 @@
 import { Hero } from '../entities/Hero';
 import { ProgressionRequirement } from '../progression/ProgressionRequirement';
+import {
+  getKnightEvolution,
+  hasReachedKnightEvolution,
+  isKnightEvolutionId,
+} from '../progression/KnightEvolutionCatalog';
+import {
+  getPriestEvolution,
+  hasReachedPriestEvolution,
+  isPriestEvolutionId,
+} from '../progression/PriestEvolutionCatalog';
+import {
+  getSorcererEvolution,
+  hasReachedSorcererEvolution,
+  isSorcererEvolutionId,
+} from '../progression/SorcererEvolutionCatalog';
 import { EvaluatedRequirement } from './EvaluatedRequirement';
 
 export class HeroRequirementEvaluator {
@@ -25,6 +40,15 @@ export class HeroRequirementEvaluator {
       case 'hero_class':
         return hero.heroClass === requirement.heroClass;
       case 'ascension':
+        if (isKnightEvolutionId(requirement.ascensionId)) {
+          return hasReachedKnightEvolution(hero.toProps().ascensionId, requirement.ascensionId);
+        }
+        if (isSorcererEvolutionId(requirement.ascensionId)) {
+          return hasReachedSorcererEvolution(hero.toProps().ascensionId, requirement.ascensionId);
+        }
+        if (isPriestEvolutionId(requirement.ascensionId)) {
+          return hasReachedPriestEvolution(hero.toProps().ascensionId, requirement.ascensionId);
+        }
         return hero.toProps().ascensionId === requirement.ascensionId;
       default:
         return false;
@@ -41,8 +65,21 @@ export class HeroRequirementEvaluator {
         return `Skill ${requirement.skillId} rank ${requirement.minRank}`;
       case 'hero_class':
         return `Classe ${requirement.heroClass}`;
-      case 'ascension':
+      case 'ascension': {
+        const knightEvolution = getKnightEvolution(requirement.ascensionId);
+        if (knightEvolution) {
+          return `${knightEvolution.pathLabel} · ${knightEvolution.name}`;
+        }
+        const sorcererEvolution = getSorcererEvolution(requirement.ascensionId);
+        if (sorcererEvolution) {
+          return `${sorcererEvolution.pathLabel} · ${sorcererEvolution.name}`;
+        }
+        const priestEvolution = getPriestEvolution(requirement.ascensionId);
+        if (priestEvolution) {
+          return `${priestEvolution.pathLabel} · ${priestEvolution.name}`;
+        }
         return `Ascensão ${requirement.ascensionId}`;
+      }
       default:
         return 'Requisito';
     }

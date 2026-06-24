@@ -7,6 +7,7 @@ export interface AscensionOptionDto {
   id: string;
   name: string;
   description: string;
+  pathLabel?: string;
   requirements: AscensionRequirementDto[];
   canAscend: boolean;
   pointsGranted: number;

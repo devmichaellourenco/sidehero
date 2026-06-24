@@ -14,14 +14,17 @@ type SkillIconKey = keyof typeof ASSETS.skills;
 
 const SKILL_ICON_BY_ID: Record<string, SkillIconKey> = {
   basic_attack: 'attack',
-  power_attack: 'physical',
-  shield_bash: 'weapon',
+  power_attack: 'power_attack',
+  shield_bash: 'attack',
+  thrust:'thrust',
   reaver_cleave: 'attack',
   reaver_fury: 'attack',
   guardian_strike: 'weapon',
   goblin_stab: 'attack',
   orc_smash: 'attack',
   dragon_bite: 'attack',
+  iron_skin: 'iron_skin',
+  evasion: 'evasion',
 
   fireball: 'fireball',
   arcane_bolt: 'arcane_bolt',
@@ -49,7 +52,7 @@ const SKILL_ICON_BY_ID: Record<string, SkillIconKey> = {
   oracle_sanctuary: 'heal',
   guardian_resolve: 'heal',
 
-  blessing: 'buff',
+  blessing: 'blessing',
   wraith_curse: 'debuff',
   mana_shield: 'mana_shield',
 };

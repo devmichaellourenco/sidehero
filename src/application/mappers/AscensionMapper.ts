@@ -6,6 +6,7 @@ export function mapAscensionOptions(options: AscensionOptionView[]): AscensionOp
     id: option.definition.id,
     name: option.definition.name,
     description: option.definition.description,
+    pathLabel: option.definition.pathLabel,
     requirements: option.requirements,
     canAscend: option.canAscend,
     pointsGranted: option.definition.pointsGranted,

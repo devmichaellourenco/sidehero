@@ -1,4 +1,6 @@
 import { getAscensionById } from '../../domain/progression/ClassAscensionCatalog';
+import { getHeroEvolutionDisplayName } from '../../domain/progression/getHeroEvolutionDisplayName';
+import { normalizeAscensionId } from '../../domain/progression/normalizeAscensionId';
 import { getUnlockedBattleSkillSlotCount } from '../../domain/progression/SkillBattleSlots';
 import { IClassAscensionService } from '../../domain/progression/IClassAscensionService';
 import { ISkillService } from '../../domain/progression/ISkillService';
@@ -34,12 +36,17 @@ export class GetHeroAscensionTreeUseCase {
     }
 
     const props = hero.toProps();
-    const ascension = props.ascensionId ? getAscensionById(props.ascensionId) : null;
+    const ascensionId = normalizeAscensionId(props.ascensionId);
+    const ascension = ascensionId ? getAscensionById(ascensionId) : null;
+    const ascensionName =
+      ascensionId && (hero.heroClass === 'knight' || hero.heroClass === 'sorcerer' || hero.heroClass === 'priest')
+        ? getHeroEvolutionDisplayName(hero.heroClass, ascensionId)
+        : ascension?.name ?? null;
 
     return {
       state: this.presenter.present(state),
       options: mapAscensionOptions(this.ascensionService.listOptions(hero)),
-      ascensionName: ascension?.name ?? null,
+      ascensionName: ascensionName,
       ascensionSkillNodes: mapSkillTree(
         hero,
         this.skillService.buildAscensionTree(

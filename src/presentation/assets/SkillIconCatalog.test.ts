@@ -10,6 +10,14 @@ describe('SkillIconCatalog', () => {
     expect(getSkillIconPath('vitality')).toBe(ASSETS.skills.vitality);
     expect(getSkillIconPath('minor_heal')).toBe(ASSETS.skills.heal);
     expect(getSkillIconPath('mana_shield')).toBe(ASSETS.skills.mana_shield);
+    expect(getSkillIconPath('iron_skin')).toBe(ASSETS.skills.iron_skin);
+    expect(getSkillIconPath('blessing')).toBe(ASSETS.skills.blessing);
+    expect(getSkillIconPath('thrust')).toBe(ASSETS.skills.thrust);
+    expect(getSkillIconPath('shield_bash')).toBe(ASSETS.skills.attack);
+    expect(getSkillIconPath('reaver_cleave')).toBe(ASSETS.skills.attack);
+    expect(getSkillIconPath('reaver_fury')).toBe(ASSETS.skills.attack);
+    expect(getSkillIconPath('guardian_strike')).toBe(ASSETS.skills.weapon);
+    expect(getSkillIconPath('goblin_stab')).toBe(ASSETS.skills.attack);
   });
 
   it('resolve nome amigável para tooltip', () => {

@@ -41,8 +41,8 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.5,
     waves: [
-      wave('w1', [trash('goblin_raider', 3), trash('goblin_archer', 2)]),
-      wave('w2', [elite('goblin_shaman', 2), elite('road_bandit', 2)], 1.15),
+      wave('w1', [trash('goblin_raider', 2), trash('goblin_archer', 1)]),
+      wave('w2', [elite('goblin_shaman', 2), elite('road_bandit', 1)], 1.15),
       wave('w3', [elite('bandit_captain'), trash('goblin_bomber', 2)], 1.2),
       wave('w4', [boss('saci', 1, 'Saci'), elite('goblin_raider')], 1.7),
     ],
@@ -52,8 +52,8 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.55,
     waves: [
-      wave('w1', [trash('goblin_raider', 2), trash('goblin_bomber', 2)]),
-      wave('w2', [elite('goblin_shaman', 2), elite('goblin_archer', 2)], 1.2),
+      wave('w1', [trash('goblin_raider', 2), trash('goblin_bomber', 1)]),
+      wave('w2', [elite('goblin_shaman', 2), elite('goblin_archer', 1)], 1.2),
       wave('w3', [elite('bandit_captain'), trash('goblin_bomber', 2)], 1.3),
       wave('w4', [boss('gonodor', 1, 'Gonodor'), elite('goblin_raider')], 1.75),
     ],
@@ -62,7 +62,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     displayName: 'Espectro de Valdris',
     statMultiplier: 1.48,
     waves: [
-      wave('w1', [trash('giant_spider', 2), trash('lizardman', 2)]),
+      wave('w1', [trash('giant_spider', 2), trash('lizardman', 1)]),
       wave('w2', [elite('minor_fire_elemental', 2), elite('orc_warrior')], 1.2),
       wave('w3', [elite('bloody_orc_chief'), trash('skeleton_warrior', 2)], 1.25),
       wave('w4', [boss('bloody_orc_chief', 1, 'Chefe Orc do Clã Sangrento'), elite('gnoll_hunter')], 1.65),
@@ -72,7 +72,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     displayName: 'Duque de Morthaven',
     statMultiplier: 1.5,
     waves: [
-      wave('w1', [trash('orc_berserker', 2), trash('minor_fire_elemental', 2)]),
+      wave('w1', [trash('orc_berserker', 2), trash('minor_fire_elemental', 1)]),
       wave('w2', [elite('renegade_necromancer'), elite('giant_spider')], 1.2),
       wave('w3', [elite('mountain_troll'), trash('rot_zombie', 2)], 1.3),
       wave('w4', [boss('mountain_troll', 1, 'Troll das Montanhas'), elite('orc_warrior')], 1.7),
@@ -83,7 +83,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.65,
     waves: [
-      wave('w1', [trash('gargoyle', 2), trash('minotaur', 2)]),
+      wave('w1', [trash('gargoyle', 2), trash('minotaur', 1)]),
       wave('w2', [elite('cultist_mage', 2), elite('war_worg')], 1.25),
       wave('w3', [elite('three_head_hydra'), trash('lesser_demon', 2)], 1.35),
       wave('w4', [boss('three_head_hydra', 1, 'Hidra de Três Cabeças'), elite('shadow_arachnid')], 1.85),
@@ -93,7 +93,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     displayName: 'Senhor do Abismo',
     statMultiplier: 1.52,
     waves: [
-      wave('w1', [trash('death_knight', 2), trash('major_elemental', 2)]),
+      wave('w1', [trash('death_knight', 2), trash('major_elemental', 1)]),
       wave('w2', [elite('dead_general', 2), elite('cultist_mage')], 1.25),
       wave('w3', [elite('young_green_dragon'), trash('lesser_demon', 2)], 1.3),
       wave('w4', [boss('young_green_dragon', 1, 'Dragão Verde Jovem'), elite('gargoyle')], 1.72),
@@ -103,7 +103,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     displayName: 'Forjador Eterno',
     statMultiplier: 1.54,
     waves: [
-      wave('w1', [trash('stone_giant', 2), trash('frost_giant', 2)]),
+      wave('w1', [trash('stone_giant', 2), trash('frost_giant', 1)]),
       wave('w2', [elite('chimera'), elite('manticore')], 1.25),
       wave('w3', [elite('lesser_lich'), trash('infernal_devil', 2)], 1.32),
       wave('w4', [boss('lesser_lich', 1, 'Lich Menor'), elite('aberrant_abomination')], 1.75),
@@ -113,7 +113,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     displayName: 'Guardião do Bosque',
     statMultiplier: 1.56,
     waves: [
-      wave('w1', [trash('adult_black_dragon', 2), trash('infernal_devil', 2)]),
+      wave('w1', [trash('adult_black_dragon', 2), trash('infernal_devil', 1)]),
       wave('w2', [elite('demonic_warlord'), elite('chimera')], 1.28),
       wave('w3', [elite('awakened_titan'), trash('manticore', 2)], 1.33),
       wave('w4', [boss('awakened_titan', 1, 'Titã Desperto'), elite('stone_giant')], 1.78),
@@ -123,7 +123,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     displayName: 'Sentinela do Crepúsculo',
     statMultiplier: 1.58,
     waves: [
-      wave('w1', [trash('ancient_dragon', 2), trash('soul_devourer', 2)]),
+      wave('w1', [trash('ancient_dragon', 2), trash('soul_devourer', 1)]),
       wave('w2', [elite('archlich'), elite('void_herald')], 1.3),
       wave('w3', [elite('demon_prince'), trash('primordial_behemoth', 2)], 1.38),
       wave('w4', [boss('demon_prince', 1, 'Príncipe Demônio'), elite('ancient_dragon')], 1.8),
@@ -134,8 +134,8 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     majorMilestone: true,
     statMultiplier: 1.95,
     waves: [
-      wave('w1', [trash('void_herald', 3), trash('soul_devourer', 3)]),
-      wave('w2', [elite('archlich', 2), elite('primordial_behemoth', 2), elite('ancient_dragon')], 1.35),
+      wave('w1', [trash('void_herald', 2), trash('soul_devourer', 1)]),
+      wave('w2', [elite('archlich'), elite('primordial_behemoth'), elite('ancient_dragon')], 1.35),
       wave('w3', [elite('demon_prince', 2), elite('fallen_magic_god')], 1.45),
       wave('w4', [boss('vorax', 1, 'Vorax'), elite('void_herald')], 2.1),
     ],

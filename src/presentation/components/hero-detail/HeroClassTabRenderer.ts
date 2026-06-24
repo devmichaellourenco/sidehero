@@ -1,6 +1,7 @@
 import { AscensionOptionDto } from '../../../application/dto/AscensionOptionDto';
 import { HeroDto } from '../../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../../application/dto/SkillNodeDto';
+import { getHeroEvolutionDisplayName } from '../../../domain/progression/getHeroEvolutionDisplayName';
 import { getHeroSprite, imgTag } from '../../assets/AssetCatalog';
 import { renderSkillCard } from '../SkillCardPresentation';
 
@@ -13,20 +14,83 @@ export interface HeroClassTabData {
 
 export function renderHeroClassTab(data: HeroClassTabData): string {
   const { hero, options, ascensionName, ascensionSkillNodes } = data;
+  const evolutionLabel =
+    hero.ascensionId && (hero.heroClass === 'knight' || hero.heroClass === 'sorcerer' || hero.heroClass === 'priest')
+      ? getHeroEvolutionDisplayName(hero.heroClass, hero.ascensionId)
+      : ascensionName;
 
-  if (hero.ascensionId) {
-    return renderAscendedView(hero, ascensionName, ascensionSkillNodes);
-  }
+  const statusSection = hero.ascensionId
+    ? renderEvolutionStatus(hero, evolutionLabel)
+    : renderAprendizStatus(hero);
 
-  return renderAscensionChoiceView(hero, options);
+  const choiceSection =
+    options.length > 0 ? renderEvolutionChoiceView(hero, options, Boolean(hero.ascensionId)) : '';
+
+  const skillSection =
+    hero.ascensionId && ascensionSkillNodes.length > 0
+      ? renderAscensionSkillNodes(
+          ascensionSkillNodes,
+          hero.unspentAscensionPoints,
+          hero.activeSkills.length,
+          hero.maxActiveSkills,
+        )
+      : hero.ascensionId
+        ? '<p class="empty-state">Nenhuma skill de evolução disponível.</p>'
+        : '';
+
+  return `
+    <section class="hero-class-tab">
+      ${statusSection}
+      ${choiceSection}
+      ${hero.ascensionId ? '<h4 class="hero-class-subtitle">Skills de evolução</h4>' : ''}
+      ${skillSection}
+    </section>
+  `;
 }
 
-function renderAscensionChoiceView(hero: HeroDto, options: AscensionOptionDto[]): string {
+function renderAprendizStatus(hero: HeroDto): string {
+  return `
+    <p class="hero-detail-hint">
+      Classe base: <strong>${hero.heroClass}</strong> · Level ${hero.level} · <strong>Aprendiz</strong>
+    </p>
+    <div class="hero-class-status">
+      <div class="hero-class-portrait" aria-hidden="true">
+        ${imgTag(getHeroSprite(hero), hero.name, 'hero-class-sprite')}
+      </div>
+    </div>
+  `;
+}
+
+function renderEvolutionStatus(hero: HeroDto, evolutionLabel: string | null): string {
+  return `
+    <div class="hero-class-status">
+      <div class="hero-class-portrait" aria-hidden="true">
+        ${imgTag(getHeroSprite(hero), hero.name, 'hero-class-sprite')}
+      </div>
+      <div class="hero-class-status-text">
+        <p><strong>Classe base:</strong> ${hero.heroClass}</p>
+        <p><strong>Evolução:</strong> ${evolutionLabel ?? hero.ascensionId}</p>
+        <p><strong>Level:</strong> ${hero.level}</p>
+        <p><strong>Pontos de ascensão:</strong> ${hero.unspentAscensionPoints}</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderEvolutionChoiceView(
+  hero: HeroDto,
+  options: AscensionOptionDto[],
+  isUpgrade: boolean,
+): string {
   const cards = options
     .map((option) => {
       const reqs = option.requirements
         .map((req) => `<li class="${req.met ? 'met' : 'unmet'}">${req.label}</li>`)
         .join('');
+
+      const pathLabel = option.pathLabel
+        ? `<span class="ascension-path-label">${option.pathLabel}</span>`
+        : '';
 
       return `
         <article class="ascension-card">
@@ -38,6 +102,7 @@ function renderAscensionChoiceView(hero: HeroDto, options: AscensionOptionDto[])
             )}
           </div>
           <header class="ascension-card-header">
+            ${pathLabel}
             <h4>${option.name}</h4>
             <span class="ascension-points-badge">+${option.pointsGranted} pts</span>
           </header>
@@ -49,55 +114,21 @@ function renderAscensionChoiceView(hero: HeroDto, options: AscensionOptionDto[])
             data-ascend="${option.id}"
             ${option.canAscend ? '' : 'disabled'}
           >
-            Ascender (irreversível)
+            ${isUpgrade ? 'Evoluir' : 'Escolher caminho'}
           </button>
         </article>
       `;
     })
     .join('');
 
-  return `
-    <section class="hero-class-tab">
-      <p class="hero-detail-hint">
-        Classe base: <strong>${hero.heroClass}</strong> · Level ${hero.level}
-      </p>
-      <p class="hero-detail-warning">A ascensão é permanente. Escolha com cuidado.</p>
-      <div class="ascension-list">${cards}</div>
-    </section>
-  `;
-}
-
-function renderAscendedView(
-  hero: HeroDto,
-  ascensionName: string | null,
-  nodes: SkillNodeDto[],
-): string {
-  const label = ascensionName ?? hero.ascensionId ?? 'Ascendido';
-  const skillSection =
-    nodes.length > 0
-      ? renderAscensionSkillNodes(
-          nodes,
-          hero.unspentAscensionPoints,
-          hero.activeSkills.length,
-          hero.maxActiveSkills,
-        )
-      : '<p class="empty-state">Nenhuma skill de ascensão disponível.</p>';
+  const hint = isUpgrade
+    ? 'Atenda os requisitos para desbloquear a próxima evolução do seu caminho.'
+    : 'Escolha um caminho permanente. Ambos começam como Aprendiz.';
 
   return `
-    <section class="hero-class-tab">
-      <div class="hero-class-status">
-        <div class="hero-class-portrait" aria-hidden="true">
-          ${imgTag(getHeroSprite(hero), hero.name, 'hero-class-sprite')}
-        </div>
-        <div class="hero-class-status-text">
-        <p><strong>Classe base:</strong> ${hero.heroClass}</p>
-        <p><strong>Ascensão:</strong> ${label}</p>
-        <p><strong>Pontos de ascensão:</strong> ${hero.unspentAscensionPoints}</p>
-        </div>
-      </div>
-      <h4 class="hero-class-subtitle">Sub-árvore de ascensão</h4>
-      ${skillSection}
-    </section>
+    <h4 class="hero-class-subtitle">${isUpgrade ? 'Próxima evolução' : 'Escolha o caminho'}</h4>
+    <p class="hero-detail-warning">${hint}</p>
+    <div class="ascension-list">${cards}</div>
   `;
 }
 
