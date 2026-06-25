@@ -1,5 +1,5 @@
 import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEventDto';
-import { GameStateDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import { getDefaultGameClient } from '../../infrastructure/messaging/defaultGameClient';
 import { AutoBattleController } from '../controllers/AutoBattleController';
@@ -33,7 +33,6 @@ import { buildBattleIntermissionPayload } from './BattleVictoryDetector';
 import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
-import { GameStateChangeDetector } from './GameStateChangeDetector';
 import { GearSlotKey } from './GearPresentation';
 import { HeroDetailModalRenderer, HeroDetailTab } from './HeroDetailModalRenderer';
 import { HeroPanelRenderer } from './HeroPanelRenderer';
@@ -55,6 +54,7 @@ import { SettingsModalRenderer } from './SettingsModalRenderer';
 import { ShopModalRenderer } from './ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
 import { ToastController } from './ToastController';
+import { RewardPresentationController } from '../delight/RewardPresentationController';
 import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
 import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
 import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
@@ -121,9 +121,9 @@ export class GameViewController {
   private readonly upgradeTreeModal: UpgradeTreeModalRenderer;
   private readonly divineForgeModal: DivineForgeModalRenderer;
   private readonly toasts: ToastController;
+  private readonly rewards: RewardPresentationController;
   private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
   private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
-  private readonly stateChanges: GameStateChangeDetector;
   private readonly hud: GameHudController;
   private readonly battleChestAffordance: BattleChestAffordanceController;
   private readonly pendingActionsBar: PendingActionsBarController;
@@ -218,6 +218,7 @@ export class GameViewController {
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
     this.divineForgeModal = new DivineForgeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
+    this.rewards = new RewardPresentationController(root);
     this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
       root.querySelector('#destroy-gear-confirm-root')!,
       root.querySelector('#destroy-confirm-body')!,
@@ -229,7 +230,6 @@ export class GameViewController {
       root.querySelector('#forge-confirm-body')!,
       root.querySelector('[data-forge-confirm-accept]') as HTMLButtonElement,
     );
-    this.stateChanges = new GameStateChangeDetector(this.toasts);
     mountNavArrowIcons(root);
     hydratePanelIcons(root);
     bindCampaignTooltip(this.campaignContextLabel);
@@ -273,6 +273,7 @@ export class GameViewController {
       this.client,
       this.heroDetailModal,
       this.toasts,
+      this.rewards,
       (state) => this.afterHeroProgressionMutation(state),
       () => this.refreshHeroDetailViews(),
     );
@@ -280,6 +281,7 @@ export class GameViewController {
     this.shopFlow = new ShopFlow(
       this.client,
       this.toasts,
+      this.rewards,
       (state) => this.render(state),
       () => this.refreshModalIfOpen(),
       () => this.enforceUpgradeGates(),
@@ -308,6 +310,7 @@ export class GameViewController {
       this.gearMutations,
       this.forgeConfirmDialog,
       this.toasts,
+      this.rewards,
       (state) => this.afterForgeMutation(state),
       (error) => this.onGearMutationFailed(error),
     );
@@ -322,7 +325,7 @@ export class GameViewController {
       () => this.modal.isOpen(),
       (error) => this.handleFailedResponse(error),
       (state, options) => this.render(state, options),
-      (gearIds, gearNames) => this.handleLootReceived(gearIds, gearNames),
+      (gears) => this.handleLootReceived(gears),
       (view) => this.pushModal(view),
       () => this.modal.close('action'),
       () => this.modalStack,
@@ -784,11 +787,11 @@ export class GameViewController {
     });
   }
 
-  private async handleLootReceived(gearIds: string[], gearNames: string[] = []): Promise<void> {
-    if (gearIds.length === 1 && gearNames[0]) {
-      this.stateChanges.showLootReceived(gearNames[0]);
-    } else if (gearIds.length > 1) {
-      this.toasts.show(`${gearIds.length} itens recebidos dos baús`, 'loot');
+  private async handleLootReceived(gears: GearDto[]): Promise<void> {
+    if (gears.length === 1) {
+      await this.rewards.celebrateLoot(gears[0]);
+    } else if (gears.length > 1) {
+      this.rewards.celebrateBatchLoot(gears);
     }
 
     if (!this.state?.canEditParty) {
@@ -797,10 +800,13 @@ export class GameViewController {
 
     const flags = getFeatureFlags(this.state);
     if (this.prefsController.autoEquipLoot && flags.autoEquipLoot) {
-      await this.gearEquipFlow.optimizeLoadout(gearIds, {
-        fromLoot: true,
-        silent: flags.autoEquipSilent,
-      });
+      await this.gearEquipFlow.optimizeLoadout(
+        gears.map((gear) => gear.id),
+        {
+          fromLoot: true,
+          silent: flags.autoEquipSilent,
+        },
+      );
     }
   }
 
@@ -1260,7 +1266,7 @@ export class GameViewController {
     const summary = buildIdleSummary(snapshot, state);
     if (!summary) return;
 
-    this.stateChanges.showIdleSummary(summary);
+    this.rewards.showIdleReport(snapshot, state);
     this.idleSummaryShown = true;
     touchPanelSnapshot(state);
   }
@@ -1307,7 +1313,7 @@ export class GameViewController {
     }
 
     if (previous && !options.skipChestToast) {
-      this.stateChanges.detect(
+      this.rewards.detectStateChange(
         previous,
         state,
         {
@@ -1316,7 +1322,7 @@ export class GameViewController {
             void this.chestLootFlow.openNextChest();
           },
         },
-        { skipVictoryOverlayRewards: Boolean(state.combatIntermission) },
+        { skipVictoryRewards: Boolean(state.combatIntermission) },
       );
     }
 

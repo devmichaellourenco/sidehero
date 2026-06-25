@@ -1,4 +1,10 @@
 import { ActiveGearSlot } from './GearSlotCatalog';
+import {
+  GALNEON_HERO_ID,
+  GALNEON_STANDARD_SWORD_BASE_NAME,
+  GALNEON_STANDARD_SWORD_SPRITES,
+  GALNEON_STANDARD_SWORD_TEMPLATE_ID,
+} from './GalneonGearCatalog';
 
 export interface GearTemplateDefinition {
   id: string;
@@ -6,6 +12,10 @@ export interface GearTemplateDefinition {
   slot: ActiveGearSlot;
   /** Caminho relativo em `panel/assets/`. */
   sprite: string;
+  /** Sprite alternativo por raridade (ex.: espada padrão do Galneon). */
+  spriteByRarity?: Partial<Record<GearRarity, string>>;
+  /** Quando definido, só o herói com este id pode equipar. */
+  exclusiveHeroId?: string;
 }
 
 export const GEAR_TEMPLATES: GearTemplateDefinition[] = [
@@ -81,6 +91,14 @@ export const GEAR_TEMPLATES: GearTemplateDefinition[] = [
     slot: 'accessory',
     sprite: 'gear/items/equip_gem_red.png',
   },
+  {
+    id: GALNEON_STANDARD_SWORD_TEMPLATE_ID,
+    baseName: GALNEON_STANDARD_SWORD_BASE_NAME,
+    slot: 'weapon',
+    sprite: GALNEON_STANDARD_SWORD_SPRITES.common,
+    spriteByRarity: GALNEON_STANDARD_SWORD_SPRITES,
+    exclusiveHeroId: GALNEON_HERO_ID,
+  },
 ];
 
 const TEMPLATE_BY_ID = new Map(GEAR_TEMPLATES.map((entry) => [entry.id, entry]));
@@ -96,7 +114,17 @@ export function getGearTemplate(templateId: string): GearTemplateDefinition | un
 }
 
 export function listGearTemplatesForSlot(slot: ActiveGearSlot): GearTemplateDefinition[] {
-  return GEAR_TEMPLATES.filter((entry) => entry.slot === slot);
+  return GEAR_TEMPLATES.filter((entry) => entry.slot === slot && !entry.exclusiveHeroId);
+}
+
+export function resolveGearTemplateSprite(
+  template: GearTemplateDefinition,
+  rarity?: GearRarity,
+): string {
+  if (rarity && template.spriteByRarity?.[rarity]) {
+    return template.spriteByRarity[rarity]!;
+  }
+  return template.sprite;
 }
 
 export function stripGearRaritySuffix(name: string): string {

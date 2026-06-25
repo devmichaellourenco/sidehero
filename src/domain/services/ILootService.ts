@@ -11,4 +11,11 @@ export interface ILootService {
     rarity: GearRarity,
     refreshSeed?: number,
   ): Gear;
+  generateGearFromTemplate(
+    templateId: string,
+    stage: number,
+    rarity: GearRarity,
+    id?: string,
+    statBump?: number,
+  ): Gear;
 }

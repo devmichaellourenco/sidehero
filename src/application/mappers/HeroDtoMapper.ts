@@ -50,6 +50,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
                 str: gear.requirements.str,
                 dex: gear.requirements.dex,
                 int: gear.requirements.int,
+                heroId: gear.requirements.heroId,
               }
             : { minLevel: 1 },
         }

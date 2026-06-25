@@ -1,0 +1,46 @@
+import { RewardMomentKind } from './types/RewardMoment';
+import { RewardTier } from './types/RewardTier';
+
+export const REWARD_KIND_PRIORITY: Record<RewardMomentKind, number> = {
+  season_complete: 100,
+  feature_unlock: 85,
+  upgrade_purchased: 80,
+  tier_up: 70,
+  idle_report: 65,
+  phase_cleared: 55,
+  forge_created: 50,
+  shop_purchase: 45,
+  loot_received: 40,
+  level_up: 35,
+  chest_available: 30,
+};
+
+export const REWARD_KIND_TIER: Record<RewardMomentKind, RewardTier> = {
+  season_complete: 'macro',
+  idle_report: 'macro',
+  feature_unlock: 'meso',
+  upgrade_purchased: 'meso',
+  tier_up: 'meso',
+  phase_cleared: 'meso',
+  forge_created: 'meso',
+  shop_purchase: 'meso',
+  loot_received: 'meso',
+  level_up: 'meso',
+  chest_available: 'meso',
+};
+
+export const REWARD_AUTO_DISMISS_MS: Partial<Record<RewardMomentKind, number>> = {
+  chest_available: 5500,
+  level_up: 3200,
+  phase_cleared: 3500,
+  tier_up: 4000,
+  loot_received: 2800,
+  shop_purchase: 2800,
+  forge_created: 3200,
+  upgrade_purchased: 3500,
+  feature_unlock: 4000,
+  season_complete: 8000,
+  idle_report: 7000,
+};
+
+export const LOOT_CELEBRATION_RARITIES = new Set(['rare', 'epic', 'legendary', 'mythic']);

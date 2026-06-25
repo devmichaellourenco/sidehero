@@ -9,6 +9,7 @@ export interface GearRequirementsDto {
   str?: number;
   dex?: number;
   int?: number;
+  heroId?: string;
 }
 
 export interface HeroActiveSkillStatDto {

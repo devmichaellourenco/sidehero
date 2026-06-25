@@ -8,6 +8,7 @@ const resourcesRoot = join(root, 'public', 'ResourcesData');
 const heroesSpritesRoot = join(root, 'public', 'sprites', 'heroes');
 const enemiesSpritesRoot = join(root, 'public', 'sprites', 'enemies');
 const skillsSpritesRoot = join(root, 'public', 'sprites', 'skills');
+const itemsSpritesRoot = join(root, 'public', 'sprites', 'items');
 const publicRoot = join(root, 'public');
 const outRoot = join(root, 'dist', 'panel', 'assets');
 
@@ -62,6 +63,15 @@ const ENEMY_SPRITE_MAP = [
   ['goblin_bombardeiro.png', 'characters/goblin_bomber.png'],
   ['gonodor_boss.png', 'characters/gonodor_boss.png'],
   ['vorax_final_boss.png', 'characters/vorax_boss.png'],
+];
+
+/** Sprites de itens customizados em public/sprites/items. */
+const ITEM_WEAPON_SPRITE_MAP = [
+  ['weapons/standard_common_sword.png', 'gear/items/standard_common_sword.png'],
+  ['weapons/standard_uncommon_sword.png', 'gear/items/standard_uncommon_sword.png'],
+  ['weapons/standard_rare_sword.png', 'gear/items/standard_rare_sword.png'],
+  ['weapons/standard_epic_sword.png', 'gear/items/standard_epic_sword.png'],
+  ['weapons/standard_legendary_sword.png', 'gear/items/standard_legendary_sword.png'],
 ];
 
 /** Logo e demais assets estáticos em public/. */
@@ -148,6 +158,7 @@ export async function copyAssets() {
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
   await copyAssetBatch(enemiesSpritesRoot, ENEMY_SPRITE_MAP);
   await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
+  await copyAssetBatch(itemsSpritesRoot, ITEM_WEAPON_SPRITE_MAP);
   await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
 
   const total =
@@ -156,6 +167,7 @@ export async function copyAssets() {
     HERO_SPRITE_MAP.length +
     ENEMY_SPRITE_MAP.length +
     SKILL_SPRITE_MAP.length +
+    ITEM_WEAPON_SPRITE_MAP.length +
     PUBLIC_ASSET_MAP.length;
   console.log(`Assets copiados: ${total} arquivos em dist/panel/assets/`);
 }

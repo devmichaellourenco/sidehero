@@ -1,8 +1,9 @@
-import { GearDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import { GearMutationQueue } from '../controllers/GearMutationQueue';
-import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
-import { ToastController } from './ToastController';
+import { ToastController } from '../components/ToastController';
+import { DivineForgeConfirmDialog } from '../components/DivineForgeConfirmDialog';
+import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 
 export class DivineForgeFlow {
   constructor(
@@ -10,6 +11,7 @@ export class DivineForgeFlow {
     private readonly gearMutations: GearMutationQueue,
     private readonly confirmDialog: DivineForgeConfirmDialog,
     private readonly toasts: ToastController,
+    private readonly rewards: RewardCelebrationPort,
     private readonly onMutated: (state: GameStateDto) => void,
     private readonly onFailed: (error?: string) => void,
   ) {}
@@ -30,7 +32,7 @@ export class DivineForgeFlow {
       }
       this.onMutated(response.state);
       if (response.forgedGear) {
-        this.toasts.show(`Criado: ${response.forgedGear.name}`, 'success');
+        this.rewards.celebrateForgeCreated(response.forgedGear);
       }
     });
   }
@@ -51,7 +53,7 @@ export class DivineForgeFlow {
       }
       this.onMutated(response.state);
       const gold = response.salvageGold ?? goldPreview;
-      this.toasts.show(`+${gold} ouro`, 'success');
+      this.toasts.show(`+${gold} ouro`, 'info');
     });
   }
 }

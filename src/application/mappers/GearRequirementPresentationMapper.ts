@@ -1,4 +1,5 @@
 import { GearDto, HeroDto } from '../dto/GameStateDto';
+import { GALNEON_HERO_ID } from '../../domain/gear/GalneonGearCatalog';
 
 export interface GearRequirementLineDto {
   label: string;
@@ -49,6 +50,15 @@ export function evaluateGearRequirements(
       met: attrs.int >= reqs.int,
       current: attrs.int,
       required: reqs.int,
+    });
+  }
+  if (reqs.heroId !== undefined) {
+    const heroLabel = reqs.heroId === GALNEON_HERO_ID ? 'Galneon' : 'Herói exclusivo';
+    lines.push({
+      label: heroLabel,
+      met: hero.id === reqs.heroId,
+      current: hero.id === reqs.heroId ? 1 : 0,
+      required: 1,
     });
   }
 

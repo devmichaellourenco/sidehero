@@ -1,5 +1,6 @@
 import { Hero } from '../entities/Hero';
 import { Gear, GearRequirements } from '../entities/Gear';
+import { getGearTemplate } from '../gear/GearTemplateCatalog';
 
 export interface RequirementCheckResult {
   met: boolean;
@@ -23,6 +24,9 @@ export class GearRequirementChecker {
     }
     if (reqs.int !== undefined && attrs.int < reqs.int) {
       unmetLabels.push(`INT ${reqs.int}`);
+    }
+    if (reqs.heroId !== undefined && hero.id !== reqs.heroId) {
+      unmetLabels.push('Herói exclusivo');
     }
 
     return { met: unmetLabels.length === 0, unmetLabels };
@@ -62,6 +66,20 @@ export class GearRequirementChecker {
       if (rarity !== 'common') reqs.int = (reqs.int ?? 0) + rarityBump;
     }
 
+    return reqs;
+  }
+
+  static inferRequirementsForTemplate(
+    templateId: string,
+    stage: number,
+    slot: Gear['slot'],
+    rarity: Gear['rarity'],
+  ): GearRequirements {
+    const template = getGearTemplate(templateId);
+    const reqs = GearRequirementChecker.inferRequirements(stage, slot, rarity);
+    if (template?.exclusiveHeroId) {
+      return { ...reqs, heroId: template.exclusiveHeroId };
+    }
     return reqs;
   }
 }

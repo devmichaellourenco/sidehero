@@ -1,4 +1,4 @@
-import { GameStateDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import { LootFlowController } from '../controllers/LootFlowController';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
@@ -15,7 +15,7 @@ export class ChestLootFlow {
     private readonly isModalOpen: () => boolean,
     private readonly onFailed: (error?: string) => void,
     private readonly onStateRendered: (state: GameStateDto, options?: { skipChestToast?: boolean }) => void,
-    private readonly onLootReceived: (gearIds: string[], gearNames?: string[]) => Promise<void>,
+    private readonly onLootReceived: (gears: GearDto[]) => Promise<void>,
     private readonly pushModal: (view: ModalView) => void,
     private readonly closeModal: () => void,
     private readonly getModalStack: () => ModalView[],
@@ -43,7 +43,7 @@ export class ChestLootFlow {
       this.onStateRendered(response.state, { skipChestToast: true });
 
       if (response.openedGear) {
-        await this.onLootReceived([response.openedGear.id], [response.openedGear.name]);
+        await this.onLootReceived([response.openedGear]);
       }
     } finally {
       this.openingChests = false;
@@ -68,7 +68,7 @@ export class ChestLootFlow {
       this.onStateRendered(response.state, { skipChestToast: true });
 
       if (openedGears.length > 0) {
-        await this.onLootReceived(openedGears.map((gear) => gear.id));
+        await this.onLootReceived(openedGears);
       }
     } finally {
       this.openingChests = false;

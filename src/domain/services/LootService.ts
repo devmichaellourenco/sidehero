@@ -2,7 +2,10 @@ import { ChestType } from '../combat/ChestType';
 import { lootPrimaryStatScale } from '../combat/DifficultyCombatScaling';
 import { Gear, GearRarity, GearSlot } from '../entities/Gear';
 import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
-import { listGearTemplatesForSlot } from '../gear/GearTemplateCatalog';
+import {
+  getGearTemplate,
+  listGearTemplatesForSlot,
+} from '../gear/GearTemplateCatalog';
 import { GearRequirementChecker } from './GearRequirementChecker';
 import { ILootService } from './ILootService';
 
@@ -105,6 +108,33 @@ export class LootService implements ILootService {
     );
   }
 
+  generateGearFromTemplate(
+    templateId: string,
+    stage: number,
+    rarity: GearRarity,
+    id?: string,
+    statBump = 0,
+  ): Gear {
+    const template = getGearTemplate(templateId);
+    if (!template) {
+      throw new Error(`Template de equipamento inválido: ${templateId}`);
+    }
+
+    const multiplier = RARITY_MULTIPLIER[rarity];
+    return this.createGear(
+      stage,
+      template.slot,
+      rarity,
+      multiplier,
+      `${template.baseName} (${rarity})`,
+      template.id,
+      id,
+      statBump,
+      'monster',
+      templateId,
+    );
+  }
+
   private createGear(
     stage: number,
     slot: GearSlot,
@@ -115,6 +145,7 @@ export class LootService implements ILootService {
     id?: string,
     statBump = 0,
     chestType: ChestType = 'monster',
+    requirementTemplateId?: string,
   ): Gear {
     const base = Math.floor((2 + Math.floor(stage / 2) + statBump) * lootPrimaryStatScale(stage));
     const secondary = this.rollSecondaryStats(slot, rarity, chestType);
@@ -133,7 +164,14 @@ export class LootService implements ILootService {
       ...secondary,
       ...resistances,
       ...defensive,
-      requirements: GearRequirementChecker.inferRequirements(stage, slot, rarity),
+      requirements: requirementTemplateId
+        ? GearRequirementChecker.inferRequirementsForTemplate(
+            requirementTemplateId,
+            stage,
+            slot,
+            rarity,
+          )
+        : GearRequirementChecker.inferRequirements(stage, slot, rarity),
     });
   }
 

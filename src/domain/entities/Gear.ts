@@ -19,6 +19,8 @@ export interface GearRequirements {
   str?: number;
   dex?: number;
   int?: number;
+  /** Herói exclusivo (ex.: Galneon). */
+  heroId?: string;
 }
 
 export interface GearProps {

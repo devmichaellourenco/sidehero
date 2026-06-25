@@ -29,6 +29,7 @@
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
+  --z-delight: 10500;
   --toast-info-bg: linear-gradient(135deg, #0e6b78 0%, #12a0b3 100%);
   --toast-chest-bg: linear-gradient(135deg, #9a7209 0%, #d4a82a 55%, #8a6508 100%);
   --toast-level-bg: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
@@ -5181,4 +5182,369 @@ body.modal-open {
   margin-top: 4px;
   color: #e8c547;
   font-size: 0.78rem;
+}
+
+/* ── Player Delight / Reward Celebrations ── */
+
+.delight-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-delight);
+}
+
+.delight-card-layer,
+.delight-macro-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.delight-card-layer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 18px 12px 0;
+}
+
+.delight-card {
+  pointer-events: auto;
+  width: min(100%, 320px);
+  opacity: 0;
+  transform: translateY(-18px) scale(0.92);
+  transition:
+    opacity 0.28s ease,
+    transform 0.35s cubic-bezier(0.22, 1.12, 0.36, 1);
+}
+
+.delight-card--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.delight-card-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  border: 2px solid var(--accent);
+  background:
+    linear-gradient(145deg, rgba(22, 33, 62, 0.97) 0%, rgba(15, 22, 44, 0.98) 100%);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(233, 69, 96, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.delight-card-glow {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 30% 20%, rgba(233, 69, 96, 0.22), transparent 55%);
+  pointer-events: none;
+  animation: delight-glow-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes delight-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.delight-card--chest .delight-card-inner {
+  border-color: #d4a82a;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(212, 168, 42, 0.25);
+}
+
+.delight-card--level .delight-card-inner {
+  border-color: #42a5f5;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(66, 165, 245, 0.22);
+}
+
+.delight-card--victory .delight-card-inner {
+  border-color: var(--accent);
+}
+
+.delight-card--loot .delight-card-inner,
+.delight-card--forge .delight-card-inner {
+  border-color: #ab47bc;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(171, 71, 188, 0.22);
+}
+
+.delight-card--unlock .delight-card-inner {
+  border-color: #66bb6a;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(102, 187, 106, 0.2);
+}
+
+.delight-card--idle .delight-card-inner {
+  border-color: #66bb6a;
+}
+
+.delight-card-icon-wrap {
+  position: relative;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delight-card-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+}
+
+.delight-card-emoji {
+  font-size: 36px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+}
+
+.delight-card-spark {
+  font-size: 28px;
+  color: var(--gold);
+}
+
+.delight-gear-frame {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.delight-gear-frame--rare {
+  box-shadow: 0 0 12px rgba(66, 165, 245, 0.45);
+}
+
+.delight-gear-frame--epic {
+  box-shadow: 0 0 14px rgba(171, 71, 188, 0.5);
+}
+
+.delight-gear-frame--legendary,
+.delight-gear-frame--mythic {
+  box-shadow: 0 0 16px rgba(245, 197, 66, 0.55);
+  animation: delight-legendary-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes delight-legendary-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.delight-card-gear-sprite {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.delight-card-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.delight-card-eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+
+.delight-card-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  line-height: 1.1;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.delight-card-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.delight-card-details {
+  margin-top: 6px;
+  padding-left: 14px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.delight-card-details li + li {
+  margin-top: 2px;
+}
+
+.delight-card-cta {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.delight-card-cta:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.delight-macro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.32s ease;
+}
+
+.delight-macro--visible {
+  opacity: 1;
+}
+
+.delight-macro-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 10, 22, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.delight-macro-panel {
+  position: relative;
+  z-index: 1;
+  width: min(92%, 340px);
+  padding: 22px 18px 18px;
+  border-radius: 16px;
+  border: 2px solid var(--accent);
+  background: linear-gradient(160deg, rgba(22, 33, 62, 0.98), rgba(12, 18, 36, 0.99));
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    0 0 24px rgba(233, 69, 96, 0.2);
+  text-align: center;
+  transform: translateY(12px) scale(0.94);
+  animation: delight-macro-enter 0.38s cubic-bezier(0.22, 1.12, 0.36, 1) forwards;
+}
+
+@keyframes delight-macro-enter {
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.delight-macro--idle .delight-macro-panel {
+  border-color: #66bb6a;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    0 0 24px rgba(102, 187, 106, 0.18);
+}
+
+.delight-macro-icon-wrap {
+  margin-bottom: 10px;
+}
+
+.delight-macro-icon {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.delight-macro-trophy {
+  font-size: 42px;
+  line-height: 1;
+}
+
+.delight-macro-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.delight-macro-title {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.delight-macro-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 10px;
+}
+
+.delight-macro-details {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.delight-macro-details li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(233, 69, 96, 0.18);
+  border: 1px solid rgba(233, 69, 96, 0.35);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.delight-macro--idle .delight-macro-details li {
+  background: rgba(102, 187, 106, 0.16);
+  border-color: rgba(102, 187, 106, 0.35);
+}
+
+.delight-macro-cta {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.delight-macro-cta:hover {
+  filter: brightness(1.08);
 }

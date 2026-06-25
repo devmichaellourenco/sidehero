@@ -11,6 +11,7 @@ describe('GearRequirementChecker', () => {
     const gear = Gear.create({
       id: 'g1',
       name: 'Espada',
+      templateId: 'rusty_blade',
       slot: 'weapon',
       rarity: 'common',
       attackBonus: 5,
@@ -27,6 +28,7 @@ describe('GearRequirementChecker', () => {
     const gear = Gear.create({
       id: 'g2',
       name: 'Machado',
+      templateId: 'pixel_axe',
       slot: 'weapon',
       rarity: 'rare',
       attackBonus: 10,

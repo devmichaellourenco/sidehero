@@ -4,6 +4,7 @@ import { IGameClient } from '../../application/ports/IGameClient';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { HeroDetailModalRenderer, HeroDetailTab } from '../components/HeroDetailModalRenderer';
 import { ToastController } from '../components/ToastController';
+import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 
 export class HeroDetailFlow {
   skillNodes: SkillNodeDto[] = [];
@@ -15,6 +16,7 @@ export class HeroDetailFlow {
     private readonly client: IGameClient,
     private readonly heroDetailModal: HeroDetailModalRenderer,
     private readonly toasts: ToastController,
+    private readonly rewards: RewardCelebrationPort,
     private readonly onStateUpdated: (state: GameStateDto) => void,
     private readonly refreshModal: () => void,
   ) {}
@@ -160,7 +162,10 @@ export class HeroDetailFlow {
     await this.loadAscensionTree(heroId);
     this.heroDetailModal.setActiveTab('class');
     this.afterMutation(response.state);
-    this.toasts.show('Ascensão realizada!', 'loot');
+    const hero = response.state.heroes.find((entry) => entry.id === heroId);
+    if (hero) {
+      this.rewards.celebrateAscension(hero.name, hero.emoji);
+    }
   }
 
   private async allocateAscensionSkill(heroId: string, skillId: string): Promise<void> {

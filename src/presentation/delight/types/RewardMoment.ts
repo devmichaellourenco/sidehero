@@ -1,0 +1,46 @@
+import { GearDto } from '../../../application/dto/GameStateDto';
+import { RewardTier } from './RewardTier';
+
+export type RewardTone =
+  | 'chest'
+  | 'level'
+  | 'victory'
+  | 'loot'
+  | 'unlock'
+  | 'idle'
+  | 'gold'
+  | 'forge';
+
+export type RewardMomentKind =
+  | 'chest_available'
+  | 'level_up'
+  | 'phase_cleared'
+  | 'tier_up'
+  | 'season_complete'
+  | 'feature_unlock'
+  | 'upgrade_purchased'
+  | 'loot_received'
+  | 'shop_purchase'
+  | 'forge_created'
+  | 'idle_report';
+
+export interface RewardMomentCta {
+  label: string;
+  onClick: () => void;
+}
+
+export interface RewardMoment {
+  id: string;
+  kind: RewardMomentKind;
+  tier: RewardTier;
+  priority: number;
+  title: string;
+  subtitle?: string;
+  detailLines?: string[];
+  iconUrl?: string;
+  gear?: GearDto;
+  heroEmoji?: string;
+  tone: RewardTone;
+  cta?: RewardMomentCta;
+  autoDismissMs?: number;
+}

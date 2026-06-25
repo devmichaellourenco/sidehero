@@ -1,4 +1,8 @@
 import { Gear, GearRarity, GearSlot } from '../entities/Gear';
+import {
+  GALNEON_STANDARD_SWORD_SHOP_RARITIES,
+  GALNEON_STANDARD_SWORD_TEMPLATE_ID,
+} from '../gear/GalneonGearCatalog';
 import { LootService } from './LootService';
 
 export interface ShopOffer {
@@ -7,10 +11,9 @@ export interface ShopOffer {
   price: number;
 }
 
-const SHOP_SLOTS: GearSlot[] = ['weapon', 'armor', 'accessory'];
+const SHOP_ACCESSORY_SLOTS: GearSlot[] = ['armor', 'accessory'];
 
-const SHOP_RARITIES: Record<GearSlot, GearRarity> = {
-  weapon: 'common',
+const SHOP_RARITIES: Record<'armor' | 'accessory', GearRarity> = {
   armor: 'rare',
   accessory: 'epic',
 };
@@ -30,17 +33,33 @@ export class ShopService {
   constructor(private readonly lootService: LootService) {}
 
   generateOffers(stage: number, refreshSeed = 0): ShopOffer[] {
-    return SHOP_SLOTS.map((slot) => {
+    const galneonSwords = GALNEON_STANDARD_SWORD_SHOP_RARITIES.map((rarity) => {
+      const gear = this.lootService.generateGearFromTemplate(
+        GALNEON_STANDARD_SWORD_TEMPLATE_ID,
+        stage,
+        rarity,
+        `shop-galneon-sword-${stage}-${refreshSeed}-${rarity}`,
+      );
+
+      return {
+        id: `shop-${stage}-${refreshSeed}-galneon-sword-${rarity}`,
+        gear,
+        price: this.calculateItemPrice(stage, rarity),
+      };
+    });
+
+    const genericOffers = SHOP_ACCESSORY_SLOTS.map((slot) => {
       const rarity = SHOP_RARITIES[slot];
       const gear = this.lootService.generateDeterministicGearForSlot(stage, slot, rarity, refreshSeed);
-      const price = this.calculateItemPrice(stage, rarity);
 
       return {
         id: `shop-${stage}-${refreshSeed}-${slot}`,
         gear,
-        price,
+        price: this.calculateItemPrice(stage, rarity),
       };
     });
+
+    return [...galneonSwords, ...genericOffers];
   }
 
   findOffer(stage: number, refreshSeed: number, offerId: string): ShopOffer | null {

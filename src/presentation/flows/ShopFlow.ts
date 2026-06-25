@@ -3,6 +3,7 @@ import { IGameClient } from '../../application/ports/IGameClient';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { ToastController } from '../components/ToastController';
+import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 
 export interface ShopFlowState {
   offers: ShopOfferDto[];
@@ -26,6 +27,7 @@ export class ShopFlow {
   constructor(
     private readonly client: IGameClient,
     private readonly toasts: ToastController,
+    private readonly rewards: RewardCelebrationPort,
     private readonly onStateUpdated: (state: GameStateDto) => void,
     private readonly refreshModal: () => void,
     private readonly enforceUpgradeGates: () => void,
@@ -57,7 +59,7 @@ export class ShopFlow {
     this.state.upgradeNodes = response.upgradeNodes ?? [];
     this.onStateUpdated(response.state);
     this.enforceUpgradeGates();
-    this.toasts.show('Melhoria desbloqueada!', 'loot');
+    this.rewards.celebrateUpgradePurchased(upgradeId);
     this.refreshModal();
   }
 
@@ -94,7 +96,7 @@ export class ShopFlow {
     this.onStateUpdated(response.state);
 
     if (response.purchasedGear) {
-      this.toasts.show(`Comprou ${response.purchasedGear.name}`, 'loot');
+      this.rewards.celebrateShopPurchase(response.purchasedGear);
     }
 
     this.refreshModal();

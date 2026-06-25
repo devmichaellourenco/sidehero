@@ -29,6 +29,7 @@ export function mapGearToDto(gear: Gear): GearDto {
           str: gear.requirements.str,
           dex: gear.requirements.dex,
           int: gear.requirements.int,
+          heroId: gear.requirements.heroId,
         }
       : { minLevel: 1 },
   };

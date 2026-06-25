@@ -20,4 +20,9 @@ describe('GearTemplateCatalog', () => {
     expect(listGearTemplatesForSlot('armor')).toHaveLength(4);
     expect(listGearTemplatesForSlot('accessory')).toHaveLength(4);
   });
+
+  it('não inclui itens exclusivos de herói no loot aleatório', () => {
+    const weaponTemplates = listGearTemplatesForSlot('weapon');
+    expect(weaponTemplates.some((entry) => entry.id === 'galneon_standard_sword')).toBe(false);
+  });
 });
