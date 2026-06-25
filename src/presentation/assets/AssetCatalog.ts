@@ -1,4 +1,5 @@
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
+import { GearSpriteInput, resolveGearSpritePath } from './GearSpriteCatalog';
 import { getEnemyRosterEntry } from '../../domain/enemies/EnemyRosterCatalog';
 import { HeroSpriteInput, resolveHeroSpritePath } from './HeroSpriteCatalog';
 
@@ -200,6 +201,10 @@ export function getEnemySprite(enemyType: string, options?: { isBoss?: boolean }
 
 export function getGearSlotSprite(slot: string): string {
   return getAssetUrl(GEAR_SLOT_SPRITES[slot as GearSlotKey] ?? GEAR_SLOT_SPRITES.weapon);
+}
+
+export function getGearSprite(gear: GearSpriteInput): string {
+  return getAssetUrl(resolveGearSpritePath(gear));
 }
 
 export function getGearRaritySprite(rarity: string): string {

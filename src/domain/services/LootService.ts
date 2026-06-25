@@ -2,14 +2,9 @@ import { ChestType } from '../combat/ChestType';
 import { lootPrimaryStatScale } from '../combat/DifficultyCombatScaling';
 import { Gear, GearRarity, GearSlot } from '../entities/Gear';
 import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
+import { listGearTemplatesForSlot } from '../gear/GearTemplateCatalog';
 import { GearRequirementChecker } from './GearRequirementChecker';
 import { ILootService } from './ILootService';
-
-const SLOT_NAMES: Record<GearSlot, string[]> = {
-  weapon: ['Espada Enferrujada', 'Machado Pixel', 'Cajado Arcano', 'Lâmina Side'],
-  armor: ['Escudo de Madeira', 'Armadura 8-bit', 'Manto do Herói', 'Placa Chrome'],
-  accessory: ['Anel de Cobre', 'Amuleto Idle', 'Pingente RPG', 'Badge Extensão'],
-};
 
 const RARITY_MULTIPLIER: Record<GearRarity, number> = {
   common: 1,
@@ -69,9 +64,19 @@ export class LootService implements ILootService {
 
   generateGearForSlot(stage: number, slot: GearSlot, rarity: GearRarity, chestType: ChestType = 'monster'): Gear {
     const multiplier = RARITY_MULTIPLIER[rarity];
-    const names = SLOT_NAMES[slot];
-    const name = names[Math.floor(Math.random() * names.length)];
-    return this.createGear(stage, slot, rarity, multiplier, name, undefined, 0, chestType);
+    const templates = listGearTemplatesForSlot(slot);
+    const template = templates[Math.floor(Math.random() * templates.length)];
+    return this.createGear(
+      stage,
+      slot,
+      rarity,
+      multiplier,
+      `${template.baseName} (${rarity})`,
+      template.id,
+      undefined,
+      0,
+      chestType,
+    );
   }
 
   generateDeterministicGearForSlot(
@@ -81,10 +86,10 @@ export class LootService implements ILootService {
     refreshSeed = 0,
   ): Gear {
     const multiplier = RARITY_MULTIPLIER[rarity];
-    const names = SLOT_NAMES[slot];
+    const templates = listGearTemplatesForSlot(slot);
     const slotSeed = slot === 'weapon' ? 1 : slot === 'armor' ? 2 : 3;
-    const nameIndex = (stage * 3 + slotSeed + refreshSeed * 7) % names.length;
-    const name = names[nameIndex];
+    const templateIndex = (stage * 3 + slotSeed + refreshSeed * 7) % templates.length;
+    const template = templates[templateIndex];
     const statBump = refreshSeed % 3;
 
     return this.createGear(
@@ -92,7 +97,8 @@ export class LootService implements ILootService {
       slot,
       rarity,
       multiplier,
-      name,
+      `${template.baseName} (${rarity})`,
+      template.id,
       `shop-gear-${stage}-${refreshSeed}-${slot}`,
       statBump,
       'monster',
@@ -105,6 +111,7 @@ export class LootService implements ILootService {
     rarity: GearRarity,
     multiplier: number,
     name: string,
+    templateId: string,
     id?: string,
     statBump = 0,
     chestType: ChestType = 'monster',
@@ -116,7 +123,8 @@ export class LootService implements ILootService {
 
     return Gear.create({
       id: id ?? `gear-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      name: `${name} (${rarity})`,
+      name,
+      templateId,
       slot,
       rarity,
       attackBonus: slot === 'weapon' ? Math.floor(base * multiplier) : Math.floor(base * 0.3),

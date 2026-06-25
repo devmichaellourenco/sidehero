@@ -24,6 +24,7 @@ export interface GearRequirements {
 export interface GearProps {
   id: string;
   name: string;
+  templateId: string;
   slot: GearSlot;
   rarity: GearRarity;
   attackBonus: number;
@@ -49,6 +50,7 @@ const DEFAULT_REQUIREMENTS: GearRequirements = { minLevel: 1 };
 export class Gear {
   readonly id: string;
   readonly name: string;
+  readonly templateId: string;
   readonly slot: GearSlot;
   readonly rarity: GearRarity;
   readonly attackBonus: number;
@@ -71,6 +73,7 @@ export class Gear {
   private constructor(props: GearProps) {
     this.id = props.id;
     this.name = props.name;
+    this.templateId = props.templateId;
     this.slot = props.slot;
     this.rarity = props.rarity;
     this.attackBonus = props.attackBonus;
@@ -99,6 +102,7 @@ export class Gear {
     return {
       id: this.id,
       name: this.name,
+      templateId: this.templateId,
       slot: this.slot,
       rarity: this.rarity,
       attackBonus: this.attackBonus,

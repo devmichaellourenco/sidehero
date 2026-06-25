@@ -3,6 +3,7 @@ import {
   getGearFrameSprite,
   getGearRaritySprite,
   getGearSlotSprite,
+  getGearSprite,
   imgTag,
 } from '../assets/AssetCatalog';
 import {
@@ -28,7 +29,7 @@ export function renderDestroyGearConfirmContent(gear: GearDto): string {
   return `
     <div class="destroy-confirm-gear ${gear.rarity}" style="--gear-frame: url('${frameUrl}')">
       <span class="destroy-confirm-gear-icon-wrap">
-        ${imgTag(getGearSlotSprite(gear.slot), slotLabel, 'destroy-confirm-gear-icon')}
+        ${imgTag(getGearSprite(gear), slotLabel, 'destroy-confirm-gear-icon')}
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'destroy-confirm-gear-rarity')}
       </span>
       <div class="destroy-confirm-gear-info">

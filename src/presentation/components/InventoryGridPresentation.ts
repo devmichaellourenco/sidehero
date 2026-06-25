@@ -3,6 +3,7 @@ import {
   getGearFrameSprite,
   getGearRaritySprite,
   getGearSlotSprite,
+  getGearSprite,
   getHeroSprite,
   imgTag,
 } from '../assets/AssetCatalog';
@@ -142,7 +143,7 @@ export function renderInventoryGridSlot(
       style="--gear-frame: url('${frameUrl}')"
     >
       <span class="inventory-grid-slot-icon-wrap">
-        ${imgTag(getGearSlotSprite(gear.slot), slotLabel, 'inventory-grid-slot-icon')}
+        ${imgTag(getGearSprite(gear), slotLabel, 'inventory-grid-slot-icon')}
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'inventory-grid-slot-rarity')}
       </span>
       <span class="inventory-grid-badge inventory-grid-badge--${options.upgradeStatus}" aria-hidden="true">${badge}</span>

@@ -29,6 +29,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
       ? {
           id: gear.id,
           name: gear.name,
+          templateId: gear.templateId,
           slot: gear.slot,
           rarity: gear.rarity,
           attackBonus: gear.attackBonus,

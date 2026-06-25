@@ -3,6 +3,7 @@ import {
   getGearFrameSprite,
   getGearRaritySprite,
   getGearSlotSprite,
+  getGearSprite,
   imgTag,
 } from '../assets/AssetCatalog';
 import { canHeroEquipGear } from '../../application/mappers/GearRequirementPresentationMapper';
@@ -29,6 +30,7 @@ export const GEAR_RARITY_LABELS: Record<string, string> = {
 export interface EquippedGearDto {
   id: string;
   name: string;
+  templateId: string;
   slot: string;
   rarity: string;
   attackBonus: number;
@@ -167,7 +169,7 @@ export function renderEquipmentSlot(
   const iconClass =
     variant === 'loadout' ? 'loadout-slot-icon equipment-slot-icon' : 'equipment-slot-icon';
   const icon = gear
-    ? imgTag(getGearSlotSprite(gear.slot), gear.name, iconClass)
+    ? imgTag(getGearSprite(gear), gear.name, iconClass)
     : imgTag(getGearSlotSprite(slot), label, `${iconClass} equipment-slot-empty`);
 
   const rarityClass =
@@ -264,7 +266,7 @@ export function renderGearCard(
     <div class="gear-item ${gear.rarity}" style="--gear-frame: url('${frameUrl}')">
       <div class="gear-item-main">
         <div class="gear-icon-wrap">
-          ${imgTag(getGearSlotSprite(gear.slot), gear.slot, 'gear-slot-icon')}
+          ${imgTag(getGearSprite(gear), gear.slot, 'gear-slot-icon')}
           ${imgTag(getGearRaritySprite(gear.rarity), gear.rarity, 'gear-rarity-icon')}
         </div>
         <div class="gear-item-info">
@@ -295,6 +297,7 @@ export function renderEquippedGearCard(
     {
       id: gear.id,
       name: gear.name,
+      templateId: gear.templateId,
       slot: gear.slot,
       rarity: gear.rarity,
       attackBonus: gear.attackBonus,

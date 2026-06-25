@@ -1,5 +1,5 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
+import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
 import { countUpgradeItems } from '../components/GearComparison';
 
 function escapeHtml(text: string): string {
@@ -25,12 +25,97 @@ function renderCampaignTooltipContent(state: GameStateDto): string {
   `;
 }
 
-function renderIconBadge(value: number): string {
-  if (value <= 0) return '';
-  return `<span class="action-icon-badge">${value}</span>`;
+function buildCampaignTooltipKey(state: GameStateDto): string {
+  const waveKey = state.phaseRun
+    ? `${state.phaseRun.waveIndex}/${state.phaseRun.waveCount}/${state.phaseRun.isBossWave}`
+    : 'none';
+  return `${state.campaignName}|${state.mapName}|${state.phaseLabel}|${waveKey}|${state.stage}`;
+}
+
+function createIcon(assetPath: string, alt: string, className: string): HTMLImageElement {
+  const img = document.createElement('img');
+  img.className = className;
+  img.alt = alt;
+  img.loading = 'eager';
+  img.decoding = 'async';
+  img.src = getAssetUrl(assetPath);
+  return img;
+}
+
+function ensureButtonIcon(button: HTMLButtonElement, assetPath: string): HTMLImageElement {
+  let icon = button.querySelector<HTMLImageElement>(':scope > .btn-icon');
+  if (!icon) {
+    icon = createIcon(assetPath, '', 'btn-icon');
+    icon.setAttribute('aria-hidden', 'true');
+    button.prepend(icon);
+    return icon;
+  }
+
+  const nextSrc = getAssetUrl(assetPath);
+  if (icon.src !== nextSrc) {
+    icon.src = nextSrc;
+  }
+  icon.loading = 'eager';
+  return icon;
+}
+
+function ensureBadge(button: HTMLButtonElement): HTMLElement {
+  let badge = button.querySelector<HTMLElement>(':scope > .action-icon-badge');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 'action-icon-badge hidden';
+    button.append(badge);
+  }
+  return badge;
+}
+
+function ensureGlyph(button: HTMLButtonElement, glyph: string): HTMLElement {
+  let glyphEl = button.querySelector<HTMLElement>(':scope > .action-icon-glyph');
+  if (!glyphEl) {
+    glyphEl = document.createElement('span');
+    glyphEl.className = 'action-icon-glyph';
+    glyphEl.setAttribute('aria-hidden', 'true');
+    button.replaceChildren(glyphEl);
+  }
+  glyphEl.textContent = glyph;
+  return glyphEl;
+}
+
+function setupStatPill(
+  container: HTMLElement,
+  assetPath: string,
+  alt: string,
+): HTMLElement {
+  container.replaceChildren();
+  const icon = createIcon(assetPath, alt, 'stat-icon');
+  const value = document.createElement('span');
+  container.append(icon, document.createTextNode(' '), value);
+  return value;
+}
+
+function updateBadge(badge: HTMLElement, value: number): void {
+  if (value <= 0) {
+    badge.classList.add('hidden');
+    badge.textContent = '';
+    return;
+  }
+
+  badge.classList.remove('hidden');
+  badge.textContent = String(value);
 }
 
 export class GameHudController {
+  private readonly campaignCompactEl: HTMLElement;
+  private readonly campaignTooltipEl: HTMLElement;
+  private readonly goldValueEl: HTMLElement;
+  private readonly chestValueEl: HTMLElement;
+  private readonly chestProgressValueEl: HTMLElement;
+  private readonly inventoryBadgeEl: HTMLElement;
+  private readonly stashBadgeEl: HTMLElement;
+  private readonly optimizeBadgeEl: HTMLElement;
+  private readonly upgradesBadgeEl: HTMLElement;
+  private lastCampaignTooltipKey = '';
+
   constructor(
     private readonly campaignContextLabel: HTMLElement,
     private readonly goldLabel: HTMLElement,
@@ -45,7 +130,38 @@ export class GameHudController {
     private readonly openChestBtn: HTMLButtonElement,
     private readonly pauseLoadoutBtn: HTMLButtonElement,
     private readonly continueLoadoutBtn: HTMLButtonElement,
-  ) {}
+  ) {
+    this.campaignContextLabel.replaceChildren();
+    this.campaignContextLabel.append(
+      createIcon(ASSETS.ui.campaign, 'Campanha', 'stat-icon'),
+      (this.campaignCompactEl = document.createElement('span')),
+      (this.campaignTooltipEl = document.createElement('span')),
+    );
+    this.campaignCompactEl.className = 'campaign-context-compact';
+    this.campaignTooltipEl.className = 'campaign-tooltip-content hidden';
+
+    this.goldValueEl = setupStatPill(this.goldLabel, ASSETS.ui.gold, 'Ouro');
+    this.chestValueEl = setupStatPill(this.chestLabel, ASSETS.ui.chest, 'Baús');
+    this.chestProgressValueEl = setupStatPill(
+      this.chestProgressLabel,
+      ASSETS.ui.chest,
+      'Próximo baú',
+    );
+
+    ensureButtonIcon(this.openInventoryBtn, ASSETS.ui.inventory);
+    this.inventoryBadgeEl = ensureBadge(this.openInventoryBtn);
+
+    ensureButtonIcon(this.openStashBtn, ASSETS.ui.chestOpen);
+    this.stashBadgeEl = ensureBadge(this.openStashBtn);
+
+    ensureButtonIcon(this.openForgeBtn, ASSETS.ui.forge);
+
+    ensureGlyph(this.optimizeLoadoutBtn, '⬆');
+    this.optimizeBadgeEl = ensureBadge(this.optimizeLoadoutBtn);
+
+    ensureGlyph(this.openUpgradesBtn, '★');
+    this.upgradesBadgeEl = ensureBadge(this.openUpgradesBtn);
+  }
 
   render(
     state: GameStateDto,
@@ -59,49 +175,50 @@ export class GameHudController {
       ? ` · ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
       : '';
 
-    this.campaignContextLabel.innerHTML = `
-      ${imgTag(getAssetUrl(ASSETS.ui.campaign), 'Campanha', 'stat-icon')}
-      <span class="campaign-context-compact">${escapeHtml(phaseId)}${escapeHtml(waveSuffix)}</span>
-      <span class="campaign-tooltip-content hidden">${renderCampaignTooltipContent(state)}</span>
-    `;
+    this.campaignCompactEl.textContent = `${phaseId}${waveSuffix}`;
     this.campaignContextLabel.setAttribute(
       'aria-label',
       `${state.campaignName}, ${state.mapName}, ${state.phaseLabel}`,
     );
 
-    this.goldLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'stat-icon')} ${state.gold}`;
-    this.chestLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.chest), 'Baús', 'stat-icon')} ${state.pendingChestCount}`;
+    const tooltipKey = buildCampaignTooltipKey(state);
+    if (tooltipKey !== this.lastCampaignTooltipKey) {
+      this.campaignTooltipEl.innerHTML = renderCampaignTooltipContent(state);
+      this.lastCampaignTooltipKey = tooltipKey;
+    }
+
+    this.goldValueEl.textContent = String(state.gold);
+    this.chestValueEl.textContent = String(state.pendingChestCount);
 
     const progress = state.chestProgress;
-    this.chestProgressLabel.innerHTML = `${imgTag(getAssetUrl(ASSETS.ui.chest), 'Próximo baú', 'stat-icon')} ${progress.current}/${progress.target}`;
+    this.chestProgressValueEl.textContent = `${progress.current}/${progress.target}`;
     this.chestProgressLabel.title = 'Vitórias até o próximo baú';
 
     const upgradeCount = countUpgradeItems(state);
     const flags = state.featureFlags;
 
     this.openInventoryBtn.title = `Inventário (${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit})`;
-    this.openInventoryBtn.innerHTML = `
-      <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.inventory)}" alt="" aria-hidden="true" />
-      ${renderIconBadge(upgradeCount > 0 ? upgradeCount : state.storageCapacity.inventoryUsed >= state.storageCapacity.inventoryLimit ? 1 : 0)}
-    `;
+    updateBadge(
+      this.inventoryBadgeEl,
+      upgradeCount > 0
+        ? upgradeCount
+        : state.storageCapacity.inventoryUsed >= state.storageCapacity.inventoryLimit
+          ? 1
+          : 0,
+    );
 
     if (state.storageCapacity.stashUnlocked) {
       this.openStashBtn.classList.remove('hidden');
       this.openStashBtn.title = `Baú (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
-      this.openStashBtn.innerHTML = `
-        <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.chestOpen)}" alt="" aria-hidden="true" />
-        ${renderIconBadge(state.storageCapacity.stashUsed)}
-      `;
+      updateBadge(this.stashBadgeEl, state.storageCapacity.stashUsed);
     } else {
       this.openStashBtn.classList.add('hidden');
+      updateBadge(this.stashBadgeEl, 0);
     }
 
     if (flags.divineForge) {
       this.openForgeBtn.classList.remove('hidden');
       this.openForgeBtn.title = 'Forja Divina';
-      this.openForgeBtn.innerHTML = `
-        <img class="btn-icon" src="${getAssetUrl(ASSETS.ui.forge)}" alt="" aria-hidden="true" />
-      `;
     } else {
       this.openForgeBtn.classList.add('hidden');
     }
@@ -110,7 +227,7 @@ export class GameHudController {
     this.optimizeLoadoutBtn.disabled = !flags.optimizeLoadout || upgradeCount === 0;
     this.optimizeLoadoutBtn.title =
       upgradeCount > 0 ? `Otimizar equipe (↑${upgradeCount})` : 'Otimizar equipe';
-    this.optimizeLoadoutBtn.innerHTML = `⬆${renderIconBadge(upgradeCount)}`;
+    updateBadge(this.optimizeBadgeEl, upgradeCount);
 
     this.openAllChestsBtn.classList.toggle(
       'hidden',
@@ -118,7 +235,7 @@ export class GameHudController {
     );
 
     this.openUpgradesBtn.title = 'Melhorias';
-    this.openUpgradesBtn.innerHTML = `★${renderIconBadge(state.purchasableUpgradeCount)}`;
+    updateBadge(this.upgradesBadgeEl, state.purchasableUpgradeCount);
 
     const hasChests = state.pendingChestCount > 0;
     this.openChestBtn.disabled = !hasChests || options.openingChests;

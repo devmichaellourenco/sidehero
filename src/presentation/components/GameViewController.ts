@@ -28,6 +28,7 @@ import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
 import { bindCampaignTooltip } from './CampaignTooltipBinder';
 import { mountNavArrowIcons } from '../assets/NavArrowPresentation';
+import { hydratePanelIcons } from '../assets/PanelIconHydrator';
 import { buildBattleIntermissionPayload } from './BattleVictoryDetector';
 import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
 import { BattleStripRenderer } from './BattleStripRenderer';
@@ -230,6 +231,7 @@ export class GameViewController {
     );
     this.stateChanges = new GameStateChangeDetector(this.toasts);
     mountNavArrowIcons(root);
+    hydratePanelIcons(root);
     bindCampaignTooltip(this.campaignContextLabel);
 
     this.hud = new GameHudController(

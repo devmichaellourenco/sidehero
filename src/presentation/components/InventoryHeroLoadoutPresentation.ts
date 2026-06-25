@@ -5,6 +5,7 @@ import {
   getGearFrameSprite,
   getGearRaritySprite,
   getGearSlotSprite,
+  getGearSprite,
   getHeroSprite,
   imgTag,
 } from '../assets/AssetCatalog';
@@ -49,7 +50,7 @@ function renderInventoryLoadoutSlot(
   const activeClass = isActiveSlot ? ' inventory-loadout-slot--active' : '';
 
   const icon = gear
-    ? imgTag(getGearSlotSprite(gear.slot), gear.name, 'equipment-slot-icon')
+    ? imgTag(getGearSprite(gear), gear.name, 'equipment-slot-icon')
     : imgTag(getGearSlotSprite(slot), label, 'equipment-slot-icon equipment-slot-empty');
 
   const rarityIcon = gear

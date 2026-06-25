@@ -70,6 +70,7 @@ export interface HeroDto {
     {
       id: string;
       name: string;
+      templateId: string;
       slot: string;
       rarity: string;
       attackBonus: number;
@@ -151,8 +152,11 @@ export interface EnemyDto {
   statusEffects: CombatStatusEffectDto[];
   combatResists: CombatResistSummaryDto;
 }
+
+export interface GearDto {
   id: string;
   name: string;
+  templateId: string;
   slot: string;
   rarity: string;
   attackBonus: number;

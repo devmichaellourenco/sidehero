@@ -3,6 +3,7 @@ import {
   getGearFrameSprite,
   getGearRaritySprite,
   getGearSlotSprite,
+  getGearSprite,
   imgTag,
 } from '../assets/AssetCatalog';
 import {
@@ -69,7 +70,7 @@ export function renderStashGridSlot(
       style="--gear-frame: url('${frameUrl}')"
     >
       <span class="inventory-grid-slot-icon-wrap">
-        ${imgTag(getGearSlotSprite(gear.slot), slotLabel, 'inventory-grid-slot-icon')}
+        ${imgTag(getGearSprite(gear), slotLabel, 'inventory-grid-slot-icon')}
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'inventory-grid-slot-rarity')}
       </span>
       <span class="inventory-gear-tooltip-content hidden">

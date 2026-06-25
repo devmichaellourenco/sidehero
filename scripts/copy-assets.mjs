@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from 'node:fs/promises';
+import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -123,8 +123,28 @@ async function copyAssetBatch(sourceRoot, entries) {
   }
 }
 
+async function copyEquipmentIcons() {
+  const sourceDir = join(
+    resourcesRoot,
+    'Sprites/Component/Icon_EquipmentIcons_(Original)',
+  );
+  const destDir = join(outRoot, 'gear/items');
+  await mkdir(destDir, { recursive: true });
+  const files = await readdir(sourceDir);
+  let copied = 0;
+
+  for (const file of files) {
+    if (!file.endsWith('.png')) continue;
+    await copyFile(join(sourceDir, file), join(destDir, file));
+    copied += 1;
+  }
+
+  return copied;
+}
+
 export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
+  const equipmentIconCount = await copyEquipmentIcons();
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
   await copyAssetBatch(enemiesSpritesRoot, ENEMY_SPRITE_MAP);
   await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
@@ -132,6 +152,7 @@ export async function copyAssets() {
 
   const total =
     ASSET_MAP.length +
+    equipmentIconCount +
     HERO_SPRITE_MAP.length +
     ENEMY_SPRITE_MAP.length +
     SKILL_SPRITE_MAP.length +

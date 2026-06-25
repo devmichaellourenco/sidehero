@@ -5,7 +5,10 @@ import { AscensionId, SkillId } from '../../domain/progression/SkillId';
 import { normalizeAscensionId } from '../../domain/progression/normalizeAscensionId';
 import { Experience } from '../../domain/value-objects/Experience';
 import { Stats } from '../../domain/value-objects/Stats';
-import { Gear, GearSlot } from '../../domain/entities/Gear';
+import { Gear } from '../../domain/entities/Gear';
+import { GearProps } from '../../domain/entities/Gear';
+import { ActiveGearSlot } from '../../domain/gear/GearSlotCatalog';
+import { resolveGearTemplateId } from '../../domain/gear/GearTemplateCatalog';
 import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
 import { inferEnemyType, migrateLegacyEnemyType } from '../../domain/entities/EnemyType';
@@ -298,5 +301,9 @@ export function migrateChest(raw: unknown): Chest {
 }
 
 export function migrateGear(raw: unknown): Gear {
-  return Gear.create(raw as Parameters<typeof Gear.create>[0]);
+  const props = { ...(raw as GearProps) };
+  if (!props.templateId && typeof props.name === 'string' && props.slot) {
+    props.templateId = resolveGearTemplateId(props.name, props.slot as ActiveGearSlot);
+  }
+  return Gear.create(props);
 }
