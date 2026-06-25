@@ -60,7 +60,7 @@ export class GameHudController {
       : '';
 
     this.campaignContextLabel.innerHTML = `
-      ${imgTag(getAssetUrl(ASSETS.ui.stage), 'Campanha', 'stat-icon')}
+      ${imgTag(getAssetUrl(ASSETS.ui.campaign), 'Campanha', 'stat-icon')}
       <span class="campaign-context-compact">${escapeHtml(phaseId)}${escapeHtml(waveSuffix)}</span>
       <span class="campaign-tooltip-content hidden">${renderCampaignTooltipContent(state)}</span>
     `;

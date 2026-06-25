@@ -3,11 +3,11 @@ import { CombatProfile, createCombatProfile } from './CombatProfile';
 
 /** Valores base de combate por classe (nível 1, sem gear). */
 const BASELINES: Record<HeroClass, CombatProfile> = {
-  knight: createCombatProfile({ attackSpeed: 0.9, castSpeed: 1, critChance: 0.025, critDamage: 1.4 }),
-  sorcerer: createCombatProfile({ attackSpeed: 0.55, castSpeed: 1, critChance: 0.05, critDamage: 1.65 }),
-  priest: createCombatProfile({ attackSpeed: 0.9, castSpeed: 1, critChance: 0.02, critDamage: 1.4 }),
-  berserker: createCombatProfile({ attackSpeed: 0.7, castSpeed: 1, critChance: 0.025, critDamage: 1.8 }),
-  paladin: createCombatProfile({ attackSpeed: 0.75, castSpeed: 1, critChance: 0.02, critDamage: 1.4 }),
+  knight: createCombatProfile({ attackSpeed: 0.58, castSpeed: 1, critChance: 0.025, critDamage: 1.4 }),
+  sorcerer: createCombatProfile({ attackSpeed: 0.38, castSpeed: 1, critChance: 0.05, critDamage: 1.65 }),
+  priest: createCombatProfile({ attackSpeed: 0.58, castSpeed: 1, critChance: 0.02, critDamage: 1.4 }),
+  berserker: createCombatProfile({ attackSpeed: 0.45, castSpeed: 1, critChance: 0.025, critDamage: 1.8 }),
+  paladin: createCombatProfile({ attackSpeed: 0.48, castSpeed: 1, critChance: 0.02, critDamage: 1.4 }),
 };
 
 export function getClassCombatBaseline(heroClass: HeroClass): CombatProfile {

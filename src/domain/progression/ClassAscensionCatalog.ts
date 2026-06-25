@@ -13,7 +13,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     requirements: [
       { type: 'hero_level', min: 12 },
       { type: 'attribute', key: 'str', min: 12 },
-      { type: 'skill_rank', skillId: 'shield_bash', minRank: 1 },
+      { type: 'skill_rank', skillId: 'thrust', minRank: 1 },
     ],
     pointsGranted: 2,
   },
@@ -28,7 +28,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
       { type: 'hero_level', min: 12 },
       { type: 'attribute', key: 'str', min: 11 },
       { type: 'attribute', key: 'dex', min: 10 },
-      { type: 'skill_rank', skillId: 'shield_bash', minRank: 1 },
+      { type: 'skill_rank', skillId: 'thrust', minRank: 1 },
     ],
     pointsGranted: 2,
   },

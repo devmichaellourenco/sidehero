@@ -1,6 +1,7 @@
 import { formatCooldownLabel, getCooldownSeconds, getInitialCooldownSeconds } from '../../domain/combat/SkillCooldownTiming';
 import { DAMAGE_ELEMENT_LABELS } from '../../domain/combat/DamageElement';
 import { Hero } from '../../domain/entities/Hero';
+import { getTargetPriorityPercent } from '../../domain/progression/combat/CombatSkillTargeting';
 import { CombatSkillDefinition } from '../../domain/progression/combat/CombatSkillDefinition';
 import { getHeroCombatSkill } from '../../domain/progression/combat/HeroCombatSkillCatalog';
 import { SkillCombatKind } from '../../domain/progression/combat/SkillCombatKind';
@@ -55,7 +56,8 @@ function formatTarget(combat: CombatSkillDefinition): string {
   };
 
   if (combat.targetScope === 'single') {
-    return `${pool} (${priorityLabels[combat.targetPriority]})`;
+    const percent = getTargetPriorityPercent(combat);
+    return `${pool} (${priorityLabels[combat.targetPriority]} · ${percent}%)`;
   }
 
   return pool;

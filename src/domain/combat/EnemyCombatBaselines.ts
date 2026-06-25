@@ -4,11 +4,11 @@ import { EnemyPowerTier } from '../enemies/EnemyRosterCatalog';
 import { CombatProfile, createCombatProfile } from './CombatProfile';
 
 const TIER_BASELINES: Record<EnemyPowerTier, CombatProfile> = {
-  1: createCombatProfile({ attackSpeed: 0.95, critChance: 0.005, critDamage: 1.25 }),
-  2: createCombatProfile({ attackSpeed: 0.9, critChance: 0.01, critDamage: 1.3 }),
-  3: createCombatProfile({ attackSpeed: 0.85, critChance: 0.02, critDamage: 1.4 }),
-  4: createCombatProfile({ attackSpeed: 0.75, critChance: 0.025, critDamage: 1.45 }),
-  5: createCombatProfile({ attackSpeed: 0.65, critChance: 0.03, critDamage: 1.55 }),
+  1: createCombatProfile({ attackSpeed: 0.6, critChance: 0.005, critDamage: 1.25 }),
+  2: createCombatProfile({ attackSpeed: 0.57, critChance: 0.01, critDamage: 1.3 }),
+  3: createCombatProfile({ attackSpeed: 0.54, critChance: 0.02, critDamage: 1.4 }),
+  4: createCombatProfile({ attackSpeed: 0.48, critChance: 0.025, critDamage: 1.45 }),
+  5: createCombatProfile({ attackSpeed: 0.42, critChance: 0.03, critDamage: 1.55 }),
 };
 
 export function getEnemyCombatBaseline(enemyType: EnemyType, isBoss = false): CombatProfile {

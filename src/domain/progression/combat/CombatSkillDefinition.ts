@@ -28,6 +28,11 @@ export interface CombatSkillDefinition {
   targetPool: SkillTargetPool;
   targetScope: SkillTargetScope;
   targetPriority: SkillTargetPriority;
+  /**
+   * Chance (0–100) de mirar no alvo da prioridade em skills de alvo único.
+   * Se falhar, escolhe uniformemente entre os demais candidatos vivos.
+   */
+  targetPriorityPercent?: number;
   /** Maior = preferida quando pronta (ataque básico = 0). */
   usePriority: number;
   /** Turnos até a primeira utilização (legado). */

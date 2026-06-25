@@ -4,9 +4,13 @@ import { Enemy } from '../../entities/Enemy';
 import { Stats } from '../../value-objects/Stats';
 import { SkillCooldownTracker } from './SkillCooldownTracker';
 import { CombatSkillSelector } from './CombatSkillSelector';
+import { SkillTargetResolver } from './SkillTargetResolver';
 
 describe('CombatSkillSelector', () => {
-  const selector = new CombatSkillSelector();
+  const selector = new CombatSkillSelector(
+    undefined,
+    new SkillTargetResolver(() => 0),
+  );
   const enemies = [Enemy.forStage(1)];
   const emptyCooldowns = SkillCooldownTracker.fromMap({});
 

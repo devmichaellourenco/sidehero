@@ -28,7 +28,7 @@ export class CombatProfileProvider {
 
   forEnemy(enemy: Enemy, isBoss = false): CombatProfile {
     const baseline = getEnemyCombatBaseline(enemy.enemyType, isBoss);
-    const stageAspdBonus = Math.min(0.3, enemy.stage * 0.002);
+    const stageAspdBonus = Math.min(0.15, enemy.stage * 0.001);
 
     return createCombatProfile({
       attackSpeed: baseline.attackSpeed + stageAspdBonus,

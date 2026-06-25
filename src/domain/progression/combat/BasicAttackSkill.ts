@@ -10,6 +10,7 @@ export const BASIC_ATTACK_SKILL: CombatSkillDefinition = {
   targetPool: 'enemies',
   targetScope: 'single',
   targetPriority: 'lowest_hp_percent',
+  targetPriorityPercent: 70,
   usePriority: 0,
   initialCooldown: 0,
   cooldownTurns: 0,
@@ -22,4 +23,5 @@ export const BASIC_ATTACK_SKILL: CombatSkillDefinition = {
 export const ENEMY_BASIC_ATTACK_SKILL: CombatSkillDefinition = {
   ...BASIC_ATTACK_SKILL,
   targetPool: 'heroes',
+  targetPriorityPercent: 70,
 };

@@ -1,197 +1,8 @@
-import { damageComponent, standardDamage } from '../../combat/DamageComponentPresets';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
+import { applyEnemyBorrowedCombatSkillOverrides } from './EnemyBorrowedCombatSkillCatalog';
+import { ENEMY_MONSTER_COMBAT_SKILL_CATALOG } from './EnemyMonsterCombatSkillCatalog';
 import { BASIC_ATTACK_SKILL, ENEMY_BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 import { HERO_COMBAT_SKILL_CATALOG } from './HeroCombatSkillCatalog';
-
-/** Skills usadas por monstros (podem ser reutilizadas por heróis no futuro). */
-const MONSTER_COMBAT_SKILLS: CombatSkillDefinition[] = [
-  {
-    skillId: 'wild_bite',
-    kind: 'damage',
-    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 45,
-    initialCooldown: 0,
-    cooldownTurns: 2,
-    basePower: 5,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'goblin_stab',
-    kind: 'damage',
-    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 55,
-    initialCooldown: 0,
-    cooldownTurns: 2,
-    basePower: 6,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'orc_smash',
-    kind: 'damage',
-    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 70,
-    initialCooldown: 1,
-    cooldownTurns: 2,
-    basePower: 8,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'poison_spit',
-    kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 52,
-    initialCooldown: 0,
-    cooldownTurns: 2,
-    basePower: 5,
-    powerPerRank: 0,
-    attributeFactor: 0,
-    onHitDot: { element: 'chaos', damagePerTurn: 3, durationTurns: 3, applyChance: 0.7 },
-  },
-  {
-    skillId: 'ground_slam',
-    kind: 'damage',
-    damageComponents: standardDamage('physical', 'all', { delivery: 'aoe' }),
-    targetPool: 'heroes',
-    targetScope: 'all',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 75,
-    initialCooldown: 1,
-    cooldownTurns: 3,
-    basePower: 7,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'regenerate',
-    kind: 'heal_ally',
-    targetPool: 'enemies',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 60,
-    initialCooldown: 2,
-    cooldownTurns: 4,
-    basePower: 15,
-    powerPerRank: 0,
-    attributeFactor: 0,
-    healConditionThreshold: 0.6,
-  },
-  {
-    skillId: 'slime_acid',
-    kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 40,
-    initialCooldown: 0,
-    cooldownTurns: 2,
-    basePower: 4,
-    powerPerRank: 0,
-    attributeFactor: 0,
-    onHitDot: { element: 'chaos', damagePerTurn: 2, durationTurns: 4, applyChance: 0.85 },
-  },
-  {
-    skillId: 'wraith_drain',
-    kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 75,
-    initialCooldown: 0,
-    cooldownTurns: 2,
-    basePower: 6,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'wraith_curse',
-    kind: 'debuff_defense',
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 68,
-    initialCooldown: 0,
-    cooldownTurns: 3,
-    basePower: 3,
-    powerPerRank: 0,
-    attributeFactor: 0,
-    effectDurationTurns: 2,
-  },
-  {
-    skillId: 'dragon_breath',
-    kind: 'damage',
-    damageComponents: standardDamage('fire', 'all', {
-      extras: [damageComponent('physical', 'aoe', 0.1)],
-    }),
-    targetPool: 'heroes',
-    targetScope: 'all',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 85,
-    initialCooldown: 2,
-    cooldownTurns: 3,
-    basePower: 12,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'dragon_bite',
-    kind: 'damage',
-    damageComponents: standardDamage('physical', 'single', { delivery: 'melee' }),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'highest_hp_percent',
-    usePriority: 80,
-    initialCooldown: 0,
-    cooldownTurns: 2,
-    basePower: 8,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'saci_fire',
-    kind: 'damage',
-    damageComponents: standardDamage('fire', 'single'),
-    targetPool: 'heroes',
-    targetScope: 'single',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 82,
-    initialCooldown: 0,
-    cooldownTurns: 2,
-    basePower: 11,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-  {
-    skillId: 'saci_wind',
-    kind: 'damage',
-    damageComponents: standardDamage('lightning', 'all', { delivery: 'aoe' }),
-    targetPool: 'heroes',
-    targetScope: 'all',
-    targetPriority: 'lowest_hp_percent',
-    usePriority: 78,
-    initialCooldown: 1,
-    cooldownTurns: 3,
-    basePower: 7,
-    powerPerRank: 0,
-    attributeFactor: 0,
-  },
-];
 
 const REGISTRY = new Map<string, CombatSkillDefinition>();
 
@@ -199,7 +10,7 @@ for (const skill of HERO_COMBAT_SKILL_CATALOG) {
   REGISTRY.set(skill.skillId, skill);
 }
 
-for (const skill of MONSTER_COMBAT_SKILLS) {
+for (const skill of ENEMY_MONSTER_COMBAT_SKILL_CATALOG) {
   REGISTRY.set(skill.skillId, skill);
 }
 
@@ -233,19 +44,21 @@ export function resolveCombatSkill(
     return base;
   }
 
-  if (base.targetPool === 'enemies') {
-    return { ...base, targetPool: 'heroes' };
+  const enemySkill = applyEnemyBorrowedCombatSkillOverrides(base);
+
+  if (enemySkill.targetPool === 'enemies') {
+    return { ...enemySkill, targetPool: 'heroes' };
   }
 
-  if (base.targetPool === 'heroes' && base.kind === 'damage') {
-    return base;
+  if (enemySkill.targetPool === 'heroes' && enemySkill.kind === 'damage') {
+    return enemySkill;
   }
 
-  if (base.targetPool === 'heroes') {
-    return { ...base, targetPool: flipTargetPool(base.targetPool) };
+  if (enemySkill.targetPool === 'heroes') {
+    return { ...enemySkill, targetPool: flipTargetPool(enemySkill.targetPool) };
   }
 
-  return base;
+  return enemySkill;
 }
 
 export function listCombatSkillsForEnemy(skillIds: readonly string[]): CombatSkillDefinition[] {
