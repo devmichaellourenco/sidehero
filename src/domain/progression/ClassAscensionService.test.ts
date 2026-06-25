@@ -24,7 +24,7 @@ describe('ClassAscensionService', () => {
       ...knight.toProps(),
       experience: Experience.restore(0, 100, 12),
       allocatedAttributes: { str: 2, dex: 0, int: 0 },
-      skillRanks: { shield_bash: 1 },
+      skillRanks: { thrust: 1 },
     });
 
     expect(service.canAscend(knight, 'knight_military_guerreiro')).toBe(true);

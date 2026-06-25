@@ -1,6 +1,6 @@
 {
   "name": "side-hero-extension",
-  "version": "0.7.0",
+  "version": "0.7.2",
   "private": true,
   "description": "Side Hero — idle RPG no painel lateral do navegador",
   "scripts": {
