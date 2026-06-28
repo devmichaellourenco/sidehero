@@ -274,7 +274,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     level: 1,
     branch: 'heroes',
     name: 'Desbloquear Paladino',
-    description: 'Seraphine entra na reserva — tanque equilibrado.',
+    description: 'Valerius entra na reserva — tanque equilibrado.',
     cost: 200,
     requirements: [
       { type: 'min_stage', value: 4 },

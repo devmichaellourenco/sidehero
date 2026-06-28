@@ -12,7 +12,7 @@ import {
   REWARD_KIND_PRIORITY,
   REWARD_KIND_TIER,
 } from './RewardMomentCatalog';
-import { RewardMoment } from './types/RewardMoment';
+import { rewardHeroPortraitFromClass, rewardHeroPortraitFromDto } from './RewardHeroPortrait';
 
 let momentCounter = 0;
 
@@ -168,7 +168,7 @@ export class RewardMomentDetector {
           title: `${hero.name} entrou na reserva!`,
           subtitle: 'Novo herói disponível na formação',
           tone: 'unlock',
-          heroEmoji: hero.emoji,
+          heroPortrait: rewardHeroPortraitFromDto(hero),
           priority: REWARD_KIND_PRIORITY.feature_unlock,
         }),
       );
@@ -235,11 +235,16 @@ export class RewardMomentDetector {
     const upgrade = getUpgradeById(upgradeId);
     if (!upgrade) return null;
 
+    const heroPortrait = upgrade.unlockHeroClass
+      ? rewardHeroPortraitFromClass(upgrade.unlockHeroClass)
+      : null;
+
     return buildMoment('upgrade_purchased', {
       title: upgrade.name,
       subtitle: upgrade.description,
       tone: 'unlock',
-      iconUrl: this.upgradeIconFor(upgrade.feature),
+      heroPortrait: heroPortrait ?? undefined,
+      iconUrl: heroPortrait ? undefined : this.upgradeIconFor(upgrade.feature),
     });
   }
 

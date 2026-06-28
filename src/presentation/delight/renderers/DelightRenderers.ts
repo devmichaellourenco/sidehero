@@ -1,4 +1,4 @@
-import { getGearSprite, imgTag } from '../../assets/AssetCatalog';
+import { getGearSprite, getHeroSprite, imgTag } from '../../assets/AssetCatalog';
 import { RewardMoment } from '../types/RewardMoment';
 
 export class CelebrationCardRenderer {
@@ -99,6 +99,11 @@ export class CelebrationCardRenderer {
       const sprite = getGearSprite(moment.gear);
       const frameClass = `delight-gear-frame delight-gear-frame--${moment.gear.rarity}`;
       return `<div class="${frameClass}">${imgTag(sprite, moment.gear.name, 'delight-card-gear-sprite')}</div>`;
+    }
+
+    if (moment.heroPortrait) {
+      const sprite = getHeroSprite(moment.heroPortrait);
+      return imgTag(sprite, moment.heroPortrait.name, 'delight-card-hero-portrait');
     }
 
     if (moment.heroEmoji) {

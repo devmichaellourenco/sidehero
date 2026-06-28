@@ -1,4 +1,5 @@
 import { GearDto } from '../../../application/dto/GameStateDto';
+import { RewardHeroPortrait } from '../RewardHeroPortrait';
 import { RewardTier } from './RewardTier';
 
 export type RewardTone =
@@ -39,6 +40,7 @@ export interface RewardMoment {
   detailLines?: string[];
   iconUrl?: string;
   gear?: GearDto;
+  heroPortrait?: RewardHeroPortrait;
   heroEmoji?: string;
   tone: RewardTone;
   cta?: RewardMomentCta;

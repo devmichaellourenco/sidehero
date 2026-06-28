@@ -7,9 +7,9 @@ const UNLOCK_HERO_IDS: Record<(typeof UNLOCKABLE_HERO_CLASSES)[number], string> 
   paladin: 'hero-paladin',
 };
 
-const UNLOCK_HERO_NAMES: Record<(typeof UNLOCKABLE_HERO_CLASSES)[number], string> = {
+export const UNLOCK_HERO_NAMES: Record<(typeof UNLOCKABLE_HERO_CLASSES)[number], string> = {
   berserker: 'Ragnar',
-  paladin: 'Seraphine',
+  paladin: 'Valerius',
 };
 
 export class HeroUnlockService {
