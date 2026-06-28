@@ -31,7 +31,7 @@
         </div>
       </header>
 
-      <section id="pending-actions-bar" class="pending-actions-bar hidden" aria-live="polite"></section>
+      <section id="wow-strip" class="wow-strip" aria-live="polite" aria-label="Recompensas e pendências"></section>
 
       <section id="campaign-context-bar" class="campaign-context-bar" aria-label="Campanha">
         <span
@@ -40,14 +40,6 @@
           data-campaign-tooltip
           tabindex="0"
         ></span>
-      </section>
-
-      <section id="season-complete-banner" class="season-complete-banner hidden" aria-live="polite">
-        <div class="season-complete-copy">
-          <strong>🏆 Temporada concluída!</strong>
-          <span>Você derrotou o boss final. Inicie um novo jogo para recomeçar do zero.</span>
-        </div>
-        <button id="new-game-btn" class="btn primary" type="button">Novo Jogo</button>
       </section>
 
       <section class="battle-strip" aria-label="Campo de batalha">
@@ -59,15 +51,6 @@
         <div id="battle-pause-overlay" class="battle-pause-overlay hidden" aria-live="polite">
           <span class="battle-pause-label">Pausado</span>
         </div>
-        <button
-          id="battle-chest-affordance"
-          type="button"
-          class="battle-chest-affordance hidden"
-          aria-label="Abrir baú"
-          title="Abrir baú"
-        >
-          <span id="battle-chest-badge" class="battle-chest-badge hidden">0</span>
-        </button>
         <div class="strip-floor"></div>
       </section>
 
@@ -209,11 +192,6 @@
           <button type="button" class="gear-destroy-btn" data-forge-confirm-accept>Confirmar</button>
         </footer>
       </div>
-    </div>
-
-    <div id="delight-root" class="delight-root" aria-live="polite">
-      <div id="delight-card-layer" class="delight-card-layer"></div>
-      <div id="delight-macro-layer" class="delight-macro-layer"></div>
     </div>
 
     <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>

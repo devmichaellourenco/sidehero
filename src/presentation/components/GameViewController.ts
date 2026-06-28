@@ -3,13 +3,11 @@ import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import { getDefaultGameClient } from '../../infrastructure/messaging/defaultGameClient';
 import { AutoBattleController } from '../controllers/AutoBattleController';
-import { BattleChestAffordanceController } from '../controllers/BattleChestAffordanceController';
 import { BattleLogPanelController } from '../controllers/BattleLogPanelController';
 import { GearMutationQueue } from '../controllers/GearMutationQueue';
 import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
 import { LootFlowController } from '../controllers/LootFlowController';
-import { PendingActionsBarController } from '../controllers/PendingActionsBarController';
 import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
 import { ChestLootFlow } from '../flows/ChestLootFlow';
@@ -22,7 +20,7 @@ import { ModalView } from '../flows/ModalTypes';
 import { ShopFlow } from '../flows/ShopFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation } from '../helpers/HeroNavigationHelper';
-import { buildPendingActions, PendingActionKind } from '../policies/PendingActionsPolicy';
+import { WowStripController } from '../wow/WowStripController';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
@@ -93,13 +91,11 @@ export class GameViewController {
   private readonly openCampaignBtn: HTMLButtonElement;
   private readonly openShopBtn: HTMLButtonElement;
   private readonly openUpgradesBtn: HTMLButtonElement;
-  private readonly seasonCompleteBanner: HTMLElement;
   private readonly battlePauseOverlay: HTMLElement;
-  private readonly pendingActionsBarEl: HTMLElement;
+  private readonly wowStripEl: HTMLElement;
   private readonly battleLogOverlayEl: HTMLElement;
   private readonly openBattleLogBtn: HTMLButtonElement;
   private readonly heroesContainerEl: HTMLElement;
-  private readonly newGameBtn: HTMLButtonElement;
 
   private readonly battleStripEl: HTMLElement;
   private readonly battleStrip: BattleStripRenderer;
@@ -125,8 +121,7 @@ export class GameViewController {
   private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
   private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
   private readonly hud: GameHudController;
-  private readonly battleChestAffordance: BattleChestAffordanceController;
-  private readonly pendingActionsBar: PendingActionsBarController;
+  private readonly wowStrip: WowStripController;
   private readonly battleLogPanel: BattleLogPanelController;
   private readonly skillCooldownAnimator = new SkillCooldownDisplayAnimator();
 
@@ -164,12 +159,10 @@ export class GameViewController {
     this.openCampaignBtn = root.querySelector('#open-campaign-btn') as HTMLButtonElement;
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
-    this.seasonCompleteBanner = root.querySelector('#season-complete-banner') as HTMLElement;
     this.battlePauseOverlay = root.querySelector('#battle-pause-overlay') as HTMLElement;
-    this.pendingActionsBarEl = root.querySelector('#pending-actions-bar') as HTMLElement;
+    this.wowStripEl = root.querySelector('#wow-strip') as HTMLElement;
     this.battleLogOverlayEl = document.querySelector('#battle-log-overlay') as HTMLElement;
     this.heroesContainerEl = root.querySelector('#heroes-container') as HTMLElement;
-    this.newGameBtn = root.querySelector('#new-game-btn') as HTMLButtonElement;
 
     this.battleStripEl = root.querySelector('.battle-strip') as HTMLElement;
 
@@ -218,7 +211,8 @@ export class GameViewController {
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
     this.divineForgeModal = new DivineForgeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
-    this.rewards = new RewardPresentationController(root);
+    this.wowStrip = new WowStripController(this.wowStripEl);
+    this.rewards = new RewardPresentationController(this.wowStrip);
     this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
       root.querySelector('#destroy-gear-confirm-root')!,
       root.querySelector('#destroy-confirm-body')!,
@@ -249,19 +243,6 @@ export class GameViewController {
       this.pauseLoadoutBtn,
       this.continueLoadoutBtn,
     );
-
-    this.battleChestAffordance = new BattleChestAffordanceController(
-      root.querySelector('#battle-chest-affordance') as HTMLButtonElement,
-      root.querySelector('#battle-chest-badge') as HTMLElement,
-      this.openChestBtn,
-      () => {
-        void this.chestLootFlow.openNextChest();
-      },
-    );
-
-    this.pendingActionsBar = new PendingActionsBarController(this.pendingActionsBarEl, (kind) => {
-      this.handlePendingAction(kind);
-    });
 
     this.battleLogPanel = new BattleLogPanelController(
       this.battleLogOverlayEl,
@@ -412,9 +393,6 @@ export class GameViewController {
     });
     this.openUpgradesBtn.addEventListener('click', () => {
       void this.openUpgradesModal();
-    });
-    this.newGameBtn.addEventListener('click', () => {
-      void this.startNewGame();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -894,25 +872,6 @@ export class GameViewController {
     });
   }
 
-  private handlePendingAction(kind: PendingActionKind): void {
-    switch (kind) {
-      case 'chest':
-        void this.chestLootFlow.openNextChest();
-        return;
-      case 'inventory-upgrade':
-        this.openInventoryModal();
-        return;
-      case 'upgrade-tree':
-        void this.openUpgradesModal();
-        return;
-      case 'hero-points': {
-        const hero = this.state?.heroes.find((entry) => entry.hasUnspentPoints);
-        if (hero) this.openHeroDrawer(hero.id, 'attributes');
-        return;
-      }
-    }
-  }
-
   private navigateHeroDrawer(direction: -1 | 1): void {
     if (!this.state || !this.heroDrawerHeroId) return;
     const navigation = getHeroNavigation(this.state, this.heroDrawerHeroId);
@@ -1328,7 +1287,6 @@ export class GameViewController {
 
     this.state = state;
 
-    this.seasonCompleteBanner.classList.toggle('hidden', !state.seasonCompleted);
     this.syncLoadoutPauseBanner(state);
 
     this.hud.render(state, {
@@ -1336,11 +1294,22 @@ export class GameViewController {
       loadoutPauseActive: this.isManualLoadoutPause(state),
     });
 
-    this.battleChestAffordance.render(state, {
-      openingChests: this.chestLootFlow.openingChests,
+    this.wowStrip.sync(state, {
+      onChestOpen: () => {
+        void this.chestLootFlow.openNextChest();
+      },
+      onInventoryOpen: () => this.openInventoryModal(),
+      onUpgradesOpen: () => {
+        void this.openUpgradesModal();
+      },
+      onHeroPointsOpen: () => {
+        const hero = state.heroes.find((entry) => entry.hasUnspentPoints);
+        if (hero) this.openHeroDrawer(hero.id, 'attributes');
+      },
+      onNewGame: () => {
+        void this.startNewGame();
+      },
     });
-
-    this.pendingActionsBar.render(buildPendingActions(state));
 
     this.battleStrip.render(state);
     this.skillCooldownAnimator.setCombatActive(Boolean(state.phaseRun && !state.canEditParty));

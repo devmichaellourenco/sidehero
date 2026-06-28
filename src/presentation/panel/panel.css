@@ -29,7 +29,6 @@
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
-  --z-delight: 10500;
   --toast-info-bg: linear-gradient(135deg, #0e6b78 0%, #12a0b3 100%);
   --toast-chest-bg: linear-gradient(135deg, #9a7209 0%, #d4a82a 55%, #8a6508 100%);
   --toast-level-bg: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
@@ -5020,36 +5019,6 @@ body.modal-open {
   background: rgba(80, 56, 10, 0.35);
 }
 
-.season-complete-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 0 0 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(245, 197, 66, 0.55);
-  background: linear-gradient(135deg, rgba(80, 52, 10, 0.65), rgba(30, 24, 8, 0.85));
-}
-
-.season-complete-banner.hidden {
-  display: none;
-}
-
-.season-complete-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 11px;
-  color: #f5e6b8;
-}
-
-.season-complete-copy strong {
-  font-size: 13px;
-  color: #ffd86a;
-}
-
 /* --- UX roadmap: battle affordances, drawer, icon bar --- */
 
 .hero-sprite--interactive {
@@ -5063,56 +5032,6 @@ body.modal-open {
 
 .hero-sprite--interactive:hover .hero-image {
   filter: brightness(1.08);
-}
-
-.battle-chest-affordance {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 5;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: none;
-  border-radius: 12px;
-  background: rgba(10, 16, 32, 0.72);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
-  animation: chest-affordance-pulse 1.6s ease-in-out infinite;
-}
-
-.battle-chest-affordance-icon {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.battle-chest-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
-}
-
-@keyframes chest-affordance-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  }
-  50% {
-    transform: scale(1.06);
-    box-shadow: 0 6px 18px rgba(245, 197, 66, 0.35);
-  }
 }
 
 .battle-combat-bar {
@@ -5163,8 +5082,207 @@ body.modal-open {
   cursor: not-allowed;
 }
 
-.pending-actions-bar {
+/* --- Wow strip (recompensas e pendências) --- */
+
+.wow-strip {
+  position: relative;
   flex-shrink: 0;
+  min-height: 104px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(245, 197, 66, 0.22);
+  background: linear-gradient(160deg, rgba(36, 28, 12, 0.92), rgba(18, 14, 8, 0.96));
+  box-shadow:
+    inset 0 0 24px rgba(245, 197, 66, 0.08),
+    0 8px 20px rgba(0, 0, 0, 0.28);
+}
+
+.wow-strip-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(245, 197, 66, 0.16), transparent 52%),
+    radial-gradient(circle at 82% 78%, rgba(233, 69, 96, 0.12), transparent 48%);
+  pointer-events: none;
+}
+
+.wow-banner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 104px;
+  padding: 12px 14px;
+}
+
+.wow-banner--enter {
+  animation: wow-banner-enter 0.32s ease-out both;
+}
+
+@keyframes wow-banner-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.wow-banner-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 30%, rgba(245, 197, 66, 0.1), transparent 60%);
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.wow-banner-visual {
+  position: relative;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wow-banner-icon,
+.wow-banner-hero-portrait {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+}
+
+.wow-banner-hero-portrait {
+  object-position: center bottom;
+}
+
+.wow-banner-emoji,
+.wow-banner-spark {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.wow-banner-gear-frame {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.wow-banner-gear-sprite {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.wow-banner-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.wow-banner-eyebrow {
+  margin: 0 0 2px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.wow-banner-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.wow-banner-subtitle {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.35;
+}
+
+.wow-banner-details {
+  margin: 6px 0 0;
+  padding-left: 14px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.wow-banner-progress {
+  margin-top: 8px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.wow-banner-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d4a82a, #f5c542);
+}
+
+.wow-banner-cta {
+  position: relative;
+  z-index: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 10px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wow-banner-cta:hover {
+  filter: brightness(1.08);
+}
+
+.wow-banner--chest .wow-banner-title {
+  color: #ffe6a8;
+}
+
+.wow-banner--unlock .wow-banner-cta,
+.wow-banner--victory .wow-banner-cta {
+  background: linear-gradient(135deg, #b71c3a, #e94560);
+}
+
+.wow-strip-dots {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 5px;
+}
+
+.wow-strip-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+}
+
+.wow-strip-dot--active {
+  background: var(--gold);
+  transform: scale(1.15);
 }
 
 .pending-actions-inner {
@@ -5411,375 +5529,3 @@ body.modal-open {
   font-size: 0.78rem;
 }
 
-/* ── Player Delight / Reward Celebrations ── */
-
-.delight-root {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: var(--z-delight);
-}
-
-.delight-card-layer,
-.delight-macro-layer {
-  position: absolute;
-  inset: 0;
-}
-
-.delight-card-layer {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 18px 12px 0;
-}
-
-.delight-card {
-  pointer-events: auto;
-  width: min(100%, 320px);
-  opacity: 0;
-  transform: translateY(-18px) scale(0.92);
-  transition:
-    opacity 0.28s ease,
-    transform 0.35s cubic-bezier(0.22, 1.12, 0.36, 1);
-}
-
-.delight-card--visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.delight-card-inner {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 12px;
-  align-items: center;
-  padding: 14px 14px 12px;
-  border-radius: 14px;
-  border: 2px solid var(--accent);
-  background:
-    linear-gradient(145deg, rgba(22, 33, 62, 0.97) 0%, rgba(15, 22, 44, 0.98) 100%);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(233, 69, 96, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-}
-
-.delight-card-glow {
-  position: absolute;
-  inset: -40%;
-  background: radial-gradient(circle at 30% 20%, rgba(233, 69, 96, 0.22), transparent 55%);
-  pointer-events: none;
-  animation: delight-glow-pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes delight-glow-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-}
-
-.delight-card--chest .delight-card-inner {
-  border-color: #d4a82a;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(212, 168, 42, 0.25);
-}
-
-.delight-card--level .delight-card-inner {
-  border-color: #42a5f5;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(66, 165, 245, 0.22);
-}
-
-.delight-card--victory .delight-card-inner {
-  border-color: var(--accent);
-}
-
-.delight-card--loot .delight-card-inner,
-.delight-card--forge .delight-card-inner {
-  border-color: #ab47bc;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(171, 71, 188, 0.22);
-}
-
-.delight-card--unlock .delight-card-inner {
-  border-color: #66bb6a;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(102, 187, 106, 0.2);
-}
-
-.delight-card--idle .delight-card-inner {
-  border-color: #66bb6a;
-}
-
-.delight-card-icon-wrap {
-  position: relative;
-  z-index: 1;
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.delight-card-hero-portrait {
-  width: 54px;
-  height: 54px;
-  object-fit: contain;
-  object-position: center bottom;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
-}
-
-.delight-card-icon {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-}
-
-.delight-card-emoji {
-  font-size: 36px;
-  line-height: 1;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-}
-
-.delight-card-spark {
-  font-size: 28px;
-  color: var(--gold);
-}
-
-.delight-gear-frame {
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.delight-gear-frame--rare {
-  box-shadow: 0 0 12px rgba(66, 165, 245, 0.45);
-}
-
-.delight-gear-frame--epic {
-  box-shadow: 0 0 14px rgba(171, 71, 188, 0.5);
-}
-
-.delight-gear-frame--legendary,
-.delight-gear-frame--mythic {
-  box-shadow: 0 0 16px rgba(245, 197, 66, 0.55);
-  animation: delight-legendary-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes delight-legendary-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.06);
-  }
-}
-
-.delight-card-gear-sprite {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.delight-card-copy {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-}
-
-.delight-card-eyebrow {
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 2px;
-}
-
-.delight-card-title {
-  font-family: var(--font-heading);
-  font-size: 18px;
-  line-height: 1.1;
-  color: #fff;
-  margin-bottom: 2px;
-}
-
-.delight-card-subtitle {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.delight-card-details {
-  margin-top: 6px;
-  padding-left: 14px;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.delight-card-details li + li {
-  margin-top: 2px;
-}
-
-.delight-card-cta {
-  grid-column: 1 / -1;
-  margin-top: 4px;
-  width: 100%;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font-heading);
-  font-size: 11px;
-  cursor: pointer;
-  transition: filter 0.15s ease, transform 0.1s ease;
-}
-
-.delight-card-cta:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-}
-
-.delight-macro {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-  opacity: 0;
-  transition: opacity 0.32s ease;
-}
-
-.delight-macro--visible {
-  opacity: 1;
-}
-
-.delight-macro-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 10, 22, 0.72);
-  backdrop-filter: blur(3px);
-}
-
-.delight-macro-panel {
-  position: relative;
-  z-index: 1;
-  width: min(92%, 340px);
-  padding: 22px 18px 18px;
-  border-radius: 16px;
-  border: 2px solid var(--accent);
-  background: linear-gradient(160deg, rgba(22, 33, 62, 0.98), rgba(12, 18, 36, 0.99));
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.55),
-    0 0 24px rgba(233, 69, 96, 0.2);
-  text-align: center;
-  transform: translateY(12px) scale(0.94);
-  animation: delight-macro-enter 0.38s cubic-bezier(0.22, 1.12, 0.36, 1) forwards;
-}
-
-@keyframes delight-macro-enter {
-  to {
-    transform: translateY(0) scale(1);
-  }
-}
-
-.delight-macro--idle .delight-macro-panel {
-  border-color: #66bb6a;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.55),
-    0 0 24px rgba(102, 187, 106, 0.18);
-}
-
-.delight-macro-icon-wrap {
-  margin-bottom: 10px;
-}
-
-.delight-macro-icon {
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-}
-
-.delight-macro-trophy {
-  font-size: 42px;
-  line-height: 1;
-}
-
-.delight-macro-eyebrow {
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 6px;
-}
-
-.delight-macro-title {
-  font-family: var(--font-heading);
-  font-size: 22px;
-  color: #fff;
-  margin-bottom: 6px;
-}
-
-.delight-macro-subtitle {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.78);
-  margin-bottom: 10px;
-}
-
-.delight-macro-details {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 14px;
-}
-
-.delight-macro-details li {
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(233, 69, 96, 0.18);
-  border: 1px solid rgba(233, 69, 96, 0.35);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.delight-macro--idle .delight-macro-details li {
-  background: rgba(102, 187, 106, 0.16);
-  border-color: rgba(102, 187, 106, 0.35);
-}
-
-.delight-macro-cta {
-  width: 100%;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font-heading);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.delight-macro-cta:hover {
-  filter: brightness(1.08);
-}
