@@ -1,4 +1,5 @@
 import { isExtensionContextValid } from '../../infrastructure/messaging/ExtensionContext';
+import { resolveEnemyDedicatedSpritePath } from './EnemySpriteCatalog';
 import { GearSpriteInput, resolveGearSpritePath } from './GearSpriteCatalog';
 import { getEnemyRosterEntry } from '../../domain/enemies/EnemyRosterCatalog';
 import { HeroSpriteInput, resolveHeroSpritePath } from './HeroSpriteCatalog';
@@ -145,8 +146,13 @@ export function getHeroSpriteByClass(heroClass: string): string {
   return getAssetUrl(HERO_SPRITES[heroClass as HeroClassKey] ?? HERO_SPRITES.knight);
 }
 
-/** Sprite por roster: comuns → goblin; variantes dedicadas; bosses narrativos únicos. */
+/** Sprite por roster: dedicado por id; variantes especiais; fallback comum/chefe. */
 export function getEnemySpriteUrl(enemyType: string, enemyName: string, enemyId?: string): string {
+  const dedicated = resolveEnemyDedicatedSpritePath(enemyType);
+  if (dedicated) {
+    return getAssetUrl(dedicated);
+  }
+
   const entry = getEnemyRosterEntry(enemyType);
 
   if (entry?.spriteVariant === 'vorax' || enemyType === 'vorax') {

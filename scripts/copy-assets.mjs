@@ -63,6 +63,17 @@ const ENEMY_SPRITE_MAP = [
   ['goblin_bombardeiro.png', 'characters/goblin_bomber.png'],
   ['gonodor_boss.png', 'characters/gonodor_boss.png'],
   ['vorax_final_boss.png', 'characters/vorax_boss.png'],
+  ['rato_gigante.png', 'characters/rato_gigante.png'],
+  ['lobo_cinzento.png', 'characters/lobo_cinzento.png'],
+  ['ogro.png', 'characters/ogro.png'],
+  ['homem_lagarto_guerreiro.png', 'characters/homem_lagarto_guerreiro.png'],
+  ['rato_esqueleto_guerreiro.png', 'characters/rato_esqueleto_guerreiro.png'],
+  ['elemental_menor_do_fogo.png', 'characters/elemental_menor_do_fogo.png'],
+  ['gargula.png', 'characters/gargula.png'],
+  ['goblin_xama.png', 'characters/goblin_xama.png'],
+  ['goblin_xama_chefe.png', 'characters/goblin_xama_chefe.png'],
+  ['hidra.png', 'characters/hidra.png'],
+  ['dragao_verde.png', 'characters/dragao_verde.png'],
 ];
 
 /** Sprites de itens customizados em public/sprites/items. */

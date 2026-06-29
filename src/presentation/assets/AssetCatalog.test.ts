@@ -33,9 +33,20 @@ describe('AssetCatalog — sprites de inimigo', () => {
     expect(urls.size).toBe(2);
   });
 
-  it('usa goblin_boss para subchefe/chefe', () => {
+  it('usa sprite dedicado para Ogro das Colinas', () => {
     const url = getEnemySpriteUrl('hill_ogre', 'Ogro das Colinas');
-    expect(url).toContain('characters/goblin_boss.png');
+    expect(url).toContain('characters/ogro.png');
+    expect(url).not.toContain('goblin_boss');
+  });
+
+  it('usa sprite dedicado para Rato Gigante', () => {
+    const url = getEnemySpriteUrl('giant_rat', 'Rato Gigante Lv.2');
+    expect(url).toContain('characters/rato_gigante.png');
+  });
+
+  it('usa sprite dedicado para Xamã Goblin', () => {
+    const url = getEnemySpriteUrl('goblin_shaman', 'Xamã Goblin');
+    expect(url).toContain('characters/goblin_xama.png');
   });
 
   it('usa saci_boss para Saci', () => {
