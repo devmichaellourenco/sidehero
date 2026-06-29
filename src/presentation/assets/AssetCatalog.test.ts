@@ -13,15 +13,20 @@ beforeAll(() => {
 });
 
 describe('AssetCatalog — sprites de inimigo', () => {
-  it('usa goblin para comum', () => {
+  it('usa sprite dedicado para Goblin Saqueador', () => {
     const url = getEnemySpriteUrl('goblin_raider', 'Goblin Saqueador Lv.3');
-    expect(url).toContain('characters/goblin.png');
+    expect(url).toContain('characters/goblin_left.png');
     expect(url).not.toContain('goblin_boss');
+  });
+
+  it('usa goblin genérico para comum sem sprite dedicado', () => {
+    const url = getEnemySpriteUrl('kobold_digger', 'Kobold Escavador Lv.3');
+    expect(url).toContain('characters/goblin.png');
   });
 
   it('usa goblin_arqueiro para Goblin Arqueiro', () => {
     const url = getEnemySpriteUrl('goblin_archer', 'Goblin Arqueiro Lv.3', 'enemy-a');
-    expect(url).toContain('characters/goblin_archer.png');
+    expect(url).toContain('characters/goblin_arqueiro.png');
     expect(url).not.toContain('goblin_boss');
   });
 
@@ -54,9 +59,9 @@ describe('AssetCatalog — sprites de inimigo', () => {
     expect(url).toContain('characters/saci_boss.png');
   });
 
-  it('usa goblin_bomber para Goblin Bombardeiro', () => {
+  it('usa goblin_bombardeiro para Goblin Bombardeiro', () => {
     const url = getEnemySpriteUrl('goblin_bomber', 'Goblin Bombardeiro Lv.5');
-    expect(url).toContain('characters/goblin_bomber.png');
+    expect(url).toContain('characters/goblin_bombardeiro.png');
   });
 
   it('usa gonodor_boss para Gonodor', () => {
@@ -64,8 +69,18 @@ describe('AssetCatalog — sprites de inimigo', () => {
     expect(url).toContain('characters/gonodor_boss.png');
   });
 
-  it('usa vorax_boss para Vorax', () => {
+  it('usa vorax_final_boss para Vorax', () => {
     const url = getEnemySpriteUrl('vorax', 'Vorax');
-    expect(url).toContain('characters/vorax_boss.png');
+    expect(url).toContain('characters/vorax_final_boss.png');
+  });
+
+  it('usa sprite dedicado para Zumbi Putrefato', () => {
+    const url = getEnemySpriteUrl('rot_zombie', 'Zumbi Putrefato');
+    expect(url).toContain('characters/rot_zombie.png');
+  });
+
+  it('usa sprite dedicado para Arquilich', () => {
+    const url = getEnemySpriteUrl('archlich', 'Arquilich');
+    expect(url).toContain('characters/archlich.png');
   });
 });

@@ -1,18 +1,41 @@
-/** Sprites dedicados por id do roster (public/sprites/enemies → characters/). */
-const ENEMY_DEDICATED_SPRITES: Record<string, string> = {
-  giant_rat: 'characters/rato_gigante.png',
-  gray_wolf: 'characters/lobo_cinzento.png',
-  hill_ogre: 'characters/ogro.png',
-  lizardman: 'characters/homem_lagarto_guerreiro.png',
-  skeleton_warrior: 'characters/rato_esqueleto_guerreiro.png',
-  minor_fire_elemental: 'characters/elemental_menor_do_fogo.png',
-  gargoyle: 'characters/gargula.png',
-  goblin_shaman: 'characters/goblin_xama.png',
-  bandit_captain: 'characters/goblin_xama_chefe.png',
-  three_head_hydra: 'characters/hidra.png',
-  young_green_dragon: 'characters/dragao_verde.png',
+/**
+ * Sprites dedicados por id do roster.
+ * Valor = basename do PNG em public/sprites/enemies (copiado para characters/).
+ */
+const ENEMY_SPRITE_FILES: Record<string, string> = {
+  giant_rat: 'rato_gigante',
+  gray_wolf: 'lobo_cinzento',
+  hill_ogre: 'ogro',
+  lizardman: 'homem_lagarto_guerreiro',
+  skeleton_warrior: 'rato_esqueleto_guerreiro',
+  minor_fire_elemental: 'elemental_menor_do_fogo',
+  gargoyle: 'gargula',
+  goblin_shaman: 'goblin_xama',
+  bandit_captain: 'goblin_xama_chefe',
+  three_head_hydra: 'hidra',
+  young_green_dragon: 'dragao_verde',
+  goblin_raider: 'goblin_left',
+  renegade_necromancer: 'denver',
+  rot_zombie: 'rot_zombie',
+  cultist_mage: 'cultist_mage',
+  major_elemental: 'major_elemental',
+  dead_general: 'dead_general',
+  stone_giant: 'stone_giant',
+  frost_giant: 'frost_giant',
+  manticore: 'manticore',
+  lesser_lich: 'lesser_lich',
+  archlich: 'archlich',
+  saci: 'saci_boss',
+  gonodor: 'gonodor_boss',
+  vorax: 'vorax_final_boss',
 };
 
 export function resolveEnemyDedicatedSpritePath(enemyType: string): string | null {
-  return ENEMY_DEDICATED_SPRITES[enemyType] ?? null;
+  const file = ENEMY_SPRITE_FILES[enemyType];
+  if (!file) return null;
+  return `characters/${file}.png`;
+}
+
+export function listEnemyDedicatedSpriteTypes(): string[] {
+  return Object.keys(ENEMY_SPRITE_FILES);
 }

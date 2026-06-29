@@ -53,28 +53,21 @@ const SKILL_SPRITE_MAP = [
   ['evasion.png', 'skills/evasion.png'],
 ];
 
-/** Sprites de inimigos em public/sprites/enemies (sobrescreve placeholders do pack Demo). */
-const ENEMY_SPRITE_MAP = [
-  ['goblin.png', 'characters/goblin.png'],
-  ['goblin_boss.png', 'characters/goblin_boss.png'],
-  ['saci_boss.png', 'characters/saci_boss.png'],
-  ['goblin_arqueiro.png', 'characters/goblin_archer.png'],
-  ['goblin_arqueiro_1.png', 'characters/goblin_archer_alt.png'],
-  ['goblin_bombardeiro.png', 'characters/goblin_bomber.png'],
-  ['gonodor_boss.png', 'characters/gonodor_boss.png'],
-  ['vorax_final_boss.png', 'characters/vorax_boss.png'],
-  ['rato_gigante.png', 'characters/rato_gigante.png'],
-  ['lobo_cinzento.png', 'characters/lobo_cinzento.png'],
-  ['ogro.png', 'characters/ogro.png'],
-  ['homem_lagarto_guerreiro.png', 'characters/homem_lagarto_guerreiro.png'],
-  ['rato_esqueleto_guerreiro.png', 'characters/rato_esqueleto_guerreiro.png'],
-  ['elemental_menor_do_fogo.png', 'characters/elemental_menor_do_fogo.png'],
-  ['gargula.png', 'characters/gargula.png'],
-  ['goblin_xama.png', 'characters/goblin_xama.png'],
-  ['goblin_xama_chefe.png', 'characters/goblin_xama_chefe.png'],
-  ['hidra.png', 'characters/hidra.png'],
-  ['dragao_verde.png', 'characters/dragao_verde.png'],
-];
+/** Copia todos os PNGs de inimigos para characters/ (mesmo basename). */
+async function copyEnemySprites() {
+  const destDir = join(outRoot, 'characters');
+  await mkdir(destDir, { recursive: true });
+  const files = await readdir(enemiesSpritesRoot);
+  let copied = 0;
+
+  for (const file of files) {
+    if (!file.endsWith('.png')) continue;
+    await copyFile(join(enemiesSpritesRoot, file), join(destDir, file));
+    copied += 1;
+  }
+
+  return copied;
+}
 
 /** Sprites de itens customizados em public/sprites/items. */
 const ITEM_WEAPON_SPRITE_MAP = [
@@ -167,7 +160,7 @@ export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
   const equipmentIconCount = await copyEquipmentIcons();
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
-  await copyAssetBatch(enemiesSpritesRoot, ENEMY_SPRITE_MAP);
+  const enemySpriteCount = await copyEnemySprites();
   await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
   await copyAssetBatch(itemsSpritesRoot, ITEM_WEAPON_SPRITE_MAP);
   await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
@@ -176,7 +169,7 @@ export async function copyAssets() {
     ASSET_MAP.length +
     equipmentIconCount +
     HERO_SPRITE_MAP.length +
-    ENEMY_SPRITE_MAP.length +
+    enemySpriteCount +
     SKILL_SPRITE_MAP.length +
     ITEM_WEAPON_SPRITE_MAP.length +
     PUBLIC_ASSET_MAP.length;

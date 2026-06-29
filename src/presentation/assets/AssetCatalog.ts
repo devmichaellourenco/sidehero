@@ -29,11 +29,11 @@ const ENEMY_SPRITE_PATHS = {
   common: 'characters/goblin.png',
   boss: 'characters/goblin_boss.png',
   saci: 'characters/saci_boss.png',
-  goblinArcher: 'characters/goblin_archer.png',
-  goblinArcherAlt: 'characters/goblin_archer_alt.png',
-  goblinBomber: 'characters/goblin_bomber.png',
+  goblinArcher: 'characters/goblin_arqueiro.png',
+  goblinArcherAlt: 'characters/goblin_arqueiro_1.png',
+  goblinBomber: 'characters/goblin_bombardeiro.png',
   gonodor: 'characters/gonodor_boss.png',
-  vorax: 'characters/vorax_boss.png',
+  vorax: 'characters/vorax_final_boss.png',
 } as const;
 
 function pickGoblinArcherSprite(enemyId?: string): string {
