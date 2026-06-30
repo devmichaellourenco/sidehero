@@ -93,7 +93,7 @@ const ASSET_MAP = [
   ['Sprites/Component/Popup/popup_01_frame.png', 'ui/victory-frame.png'],
   ['Sprites/Demo/Demo_Image/image_glow_circle.png', 'ui/victory-glow.png'],
   ['Sprites/Demo/Demo_Image/group_image_wingbadge1.png', 'ui/victory-wings.png'],
-  ['Sprites/Demo/Demo_Icon/icon_color_energy.png', 'ui/energy.png'],
+  ['Sprites/Demo/Demo_Icon/icon_color_gift.png', 'ui/gift.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_flag.png', 'ui/stage.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_map.png', 'ui/campaign.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_shop.png', 'ui/shop.png'],

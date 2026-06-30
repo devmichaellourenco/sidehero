@@ -1,7 +1,6 @@
 import { ASSETS, getAssetUrl } from './AssetCatalog';
 
 const PANEL_ICON_TARGETS: Array<{ selector: string; assetPath: string }> = [
-  { selector: '#brand-icon', assetPath: ASSETS.ui.brand },
   { selector: '#open-campaign-btn .btn-icon', assetPath: ASSETS.ui.campaign },
   { selector: '#open-shop-btn .btn-icon', assetPath: ASSETS.ui.shop },
   { selector: '#open-chest-btn .btn-icon', assetPath: ASSETS.ui.chest },

@@ -76,7 +76,7 @@ export const ASSETS = {
     victoryFrame: 'ui/victory-frame.png',
     victoryGlow: 'ui/victory-glow.png',
     victoryWings: 'ui/victory-wings.png',
-    energy: 'ui/energy.png',
+    energy: 'ui/gift.png',
     stage: 'ui/stage.png',
     campaign: 'ui/campaign.png',
     shop: 'ui/shop.png',
@@ -90,7 +90,7 @@ export const ASSETS = {
   },
   skills: {
     attack: 'ui/attack.png',
-    magic: 'ui/energy.png',
+    magic: 'skills/fireball.png',
     heal: 'skills/heal.png',
     buff: 'ui/defense.png',
     debuff: 'ui/defense.png',
