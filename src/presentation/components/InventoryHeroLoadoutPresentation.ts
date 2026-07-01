@@ -16,6 +16,7 @@ import {
   renderEquipmentSlotTooltip,
 } from './GearPresentation';
 import { InventoryEquipFeedback } from './InventoryEquipFeedback';
+import { gearDragAttr, gearDropTargetAttr } from '../gear/GearDragDropBinder';
 
 export type HeroLoadoutContext = 'inventory' | 'equip-picker';
 
@@ -34,6 +35,7 @@ function renderInventoryLoadoutSlot(
     feedback: InventoryEquipFeedback | null;
     context: HeroLoadoutContext;
     activeSlot?: GearSlotKey;
+    dragDrop?: boolean;
   },
 ): string {
   const label = GEAR_SLOT_LABELS[slot];
@@ -59,9 +61,24 @@ function renderInventoryLoadoutSlot(
 
   let slotAttrs = '';
   let extraClasses = '';
+  const dragDrop = options.dragDrop !== false;
+  const dropClass = dragDrop ? ' gear-drop-target' : '';
+  const dropAttrs = dragDrop ? gearDropTargetAttr(hero.id, slot) : '';
+  const dragAttrs =
+    dragDrop && gear
+      ? gearDragAttr({
+          kind: 'equipped',
+          gearId: gear.id,
+          heroId: hero.id,
+          slot,
+        })
+      : '';
 
   if (options.context === 'inventory') {
-    if (gear) {
+    if (dragDrop) {
+      slotAttrs = `data-hero="${escapeHtml(hero.id)}" data-slot="${slot}"`;
+      extraClasses = ' equipment-slot-clickable';
+    } else if (gear) {
       slotAttrs = `data-inventory-unequip-hero="${escapeHtml(hero.id)}" data-inventory-unequip-slot="${slot}"`;
     }
   } else if (isActiveSlot && gear) {
@@ -80,8 +97,10 @@ function renderInventoryLoadoutSlot(
   return `
     <button
       type="button"
-      class="equipment-slot equipment-slot--icon-only inventory-loadout-slot${gear ? ' inventory-loadout-slot--filled' : ' inventory-loadout-slot--empty'}${highlightClass}${activeClass}${extraClasses} ${gear?.rarity ?? 'empty'}"
+      class="equipment-slot equipment-slot--icon-only inventory-loadout-slot${gear ? ' inventory-loadout-slot--filled' : ' inventory-loadout-slot--empty'}${highlightClass}${activeClass}${extraClasses}${dropClass} ${gear?.rarity ?? 'empty'}"
       ${slotAttrs}
+      ${dropAttrs}
+      ${dragAttrs}
       aria-label="${escapeHtml(ariaLabel)}"
       style="--slot-frame: url('${frameUrl}')"
     >
@@ -101,6 +120,7 @@ export function renderInventoryHeroLoadout(
     heroPulse?: boolean;
     context?: HeroLoadoutContext;
     activeSlot?: GearSlotKey;
+    dragDrop?: boolean;
   } = {},
 ): string {
   const glowUrl = getAssetUrl(ASSETS.characters.glow);
@@ -125,6 +145,7 @@ export function renderInventoryHeroLoadout(
               feedback,
               context,
               activeSlot: options.activeSlot,
+              dragDrop: options.dragDrop,
             }),
           )
           .join('')}

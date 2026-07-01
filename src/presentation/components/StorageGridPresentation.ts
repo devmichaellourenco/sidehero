@@ -12,6 +12,7 @@ import {
   GEAR_SLOT_LABELS,
   GearSlotKey,
 } from './GearPresentation';
+import { gearDragAttr } from '../gear/GearDragDropBinder';
 
 function escapeHtml(text: string): string {
   return text
@@ -59,6 +60,10 @@ export function renderStashGridSlot(
   const frameUrl = getGearFrameSprite(gear.rarity);
   const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
   const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
+  const dragAttrs =
+    options.canWithdraw
+      ? gearDragAttr({ kind: 'stash', gearId: gear.id, slot: gear.slot as GearSlotKey })
+      : '';
 
   return `
     <button
@@ -66,6 +71,7 @@ export function renderStashGridSlot(
       class="inventory-grid-slot inventory-grid-slot--stash ${gear.rarity}${options.canWithdraw ? '' : ' inventory-grid-slot--locked'}"
       data-stash-gear-id="${escapeHtml(gear.id)}"
       data-can-withdraw="${options.canWithdraw ? 'true' : 'false'}"
+      ${dragAttrs}
       aria-label="${escapeHtml(gear.name)} · ${slotLabel} · ${rarityLabel}"
       style="--gear-frame: url('${frameUrl}')"
     >
@@ -95,7 +101,7 @@ export function renderStashGrid(
   }
 
   return `
-    <div class="inventory-grid stash-grid" data-stash-grid>
+    <div class="inventory-grid stash-grid" data-stash-grid data-drop-zone="stash">
       ${gears.map((gear) => renderStashGridSlot(gear, options)).join('')}
     </div>
   `;

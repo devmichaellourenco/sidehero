@@ -27,4 +27,12 @@ export class PartyFlow {
     }
     return response.state;
   }
+
+  async setPartySlot(slotIndex: number, heroId: string): Promise<GameStateDto | null> {
+    const response = await this.client.send({ type: 'SET_PARTY_SLOT', slotIndex, heroId });
+    if (!response.ok) {
+      throw new Error(response.error);
+    }
+    return response.state;
+  }
 }

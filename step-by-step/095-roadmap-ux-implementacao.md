@@ -59,10 +59,10 @@ presentation/
 
 ## Fora de escopo (fase D / B4)
 
-- Equip inline sem modal empilhado
+- ~~Equip inline sem modal empilhado~~ → ver `139-fase-d-ux-inline-drag-drop.md`
 - Carrossel de party
-- Atalhos de teclado documentados
-- Drag-and-drop de equipamento
+- ~~Atalhos de teclado documentados~~ (não implementados)
+- ~~Drag-and-drop de equipamento~~ → ver `139-fase-d-ux-inline-drag-drop.md`
 
 ## Validação manual
 

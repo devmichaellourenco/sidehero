@@ -126,34 +126,54 @@ function renderFormationSwapButton(
 
 function renderFormationActiveSlot(
   hero: HeroDto,
+  index: number,
   state: Pick<PartyPanelState, 'canEditParty' | 'activeParty'>,
 ): string {
+  const dragAttrs = state.canEditParty
+    ? `draggable="true" data-drag-party-hero="${hero.id}" data-party-from-index="${index}"`
+    : '';
+  const dropAttrs = state.canEditParty ? `data-drop-party-slot="${index}"` : '';
+
   return `
-    <article class="formation-slot" data-formation-hero="${hero.id}">
+    <article class="formation-slot" data-formation-hero="${hero.id}" ${dragAttrs} ${dropAttrs}>
       ${renderFormationRemoveButton(hero, state)}
       ${renderFormationSprite(hero)}
     </article>
   `;
 }
 
-function renderFormationActiveRow(state: PartyPanelState): string {
-  if (state.activeParty.length === 0) {
-    return '<p class="empty-state formation-empty">Nenhum herói na equipe.</p>';
-  }
+function renderFormationEmptySlot(index: number, canEditParty: boolean): string {
+  const dropAttrs = canEditParty ? `data-drop-party-slot="${index}"` : '';
 
+  return `
+    <article class="formation-slot formation-slot--empty" ${dropAttrs} aria-label="Slot ${index + 1} vazio">
+      <div class="formation-slot-empty-placeholder" aria-hidden="true">
+        <span class="formation-slot-empty-icon">+</span>
+        <span class="formation-slot-empty-label">Slot ${index + 1}</span>
+      </div>
+    </article>
+  `;
+}
+
+function renderFormationActiveRow(state: PartyPanelState): string {
   const parts: string[] = [];
 
-  state.activeParty.forEach((hero, index) => {
-    parts.push(renderFormationActiveSlot(hero, state));
+  for (let index = 0; index < 3; index += 1) {
+    const hero = state.activeParty[index];
+    if (hero) {
+      parts.push(renderFormationActiveSlot(hero, index, state));
+    } else {
+      parts.push(renderFormationEmptySlot(index, state.canEditParty));
+    }
 
-    if (index < state.activeParty.length - 1) {
+    if (index < 2) {
       parts.push(`
         <div class="formation-swap-cell">
           ${renderFormationSwapButton(index, state.canEditParty)}
         </div>
       `);
     }
-  });
+  }
 
   return parts.join('');
 }
@@ -163,8 +183,10 @@ function renderFormationBenchSlot(
   canEditParty: boolean,
   partyFull: boolean,
 ): string {
+  const dragAttrs = canEditParty ? `draggable="true" data-drag-party-hero="${hero.id}"` : '';
+
   return `
-    <article class="formation-bench-slot" data-bench-hero="${hero.id}">
+    <article class="formation-bench-slot" data-bench-hero="${hero.id}" ${dragAttrs}>
       <div class="formation-bench-sprite" data-hero-tooltip tabindex="0">
         ${imgTag(getHeroSprite(hero), hero.name, 'formation-hero-image')}
         <span class="hero-tooltip-content hidden">${renderHeroFormationTooltipContent(hero)}</span>
@@ -226,7 +248,7 @@ function renderFormationTab(state: PartyPanelState): string {
       </section>
       <section class="formation-section formation-bench-section">
         <h3 class="party-section-title">Reserva</h3>
-        <div class="formation-bench-row">${benchHtml}</div>
+        <div class="formation-bench-row" data-drop-party-bench>${benchHtml}</div>
       </section>
     </div>
   `;

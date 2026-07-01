@@ -25,6 +25,7 @@ import {
   renderGearRequirementLines,
 } from './GearRequirementPresentation';
 import { renderInventoryStorageActions } from './StorageGridPresentation';
+import { gearDragAttr } from '../gear/GearDragDropBinder';
 
 function escapeHtml(text: string): string {
   return text
@@ -132,6 +133,12 @@ export function renderInventoryGridSlot(
     options.canStash !== undefined
       ? renderInventoryStorageActions(gear, { canStash: options.canStash })
       : '';
+  const dragAttrs =
+    equipMode === 'inventory' && canEquip
+      ? gearDragAttr({ kind: 'inventory', gearId: gear.id, slot: gear.slot as GearSlotKey })
+      : equipMode === 'pick' && canEquip
+        ? gearDragAttr({ kind: 'inventory', gearId: gear.id, slot: gear.slot as GearSlotKey })
+        : '';
 
   return `
     <button
@@ -139,6 +146,7 @@ export function renderInventoryGridSlot(
       class="inventory-grid-slot inventory-grid-slot--${options.upgradeStatus}${canEquip ? '' : ' inventory-grid-slot--locked'}${returnedClass} ${gear.rarity}"
       ${inventoryAttrs}
       ${pickAttrs}
+      ${dragAttrs}
       aria-label="${escapeHtml(gear.name)} · ${slotLabel} · ${rarityLabel}"
       style="--gear-frame: url('${frameUrl}')"
     >
@@ -192,7 +200,7 @@ export function renderInventoryGrid(
   const upgradeHeroId = options.upgradeForHeroId ?? selectedHeroId;
 
   return `
-    <div class="inventory-grid" data-inventory-grid>
+    <div class="inventory-grid" data-inventory-grid data-drop-zone="inventory">
       ${gears
         .map((gear) =>
           renderInventoryGridSlot(gear, {

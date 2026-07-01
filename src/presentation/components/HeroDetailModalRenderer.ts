@@ -71,6 +71,7 @@ export class HeroDetailModalRenderer {
         <button type="button" class="hero-tab ${this.activeTab === 'class' ? 'active' : ''}" data-hero-tab="class">Classe</button>
       </nav>
       <div class="hero-detail-panel">${this.renderTabContent(hero)}</div>
+      <div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>
     `;
 
     this.bindInteractions(container, hero, handlers);

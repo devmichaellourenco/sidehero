@@ -21,6 +21,12 @@ import { HeroDetailFlow } from './HeroDetailFlow';
 import { ModalView } from './ModalTypes';
 import { ShopFlow } from './ShopFlow';
 import { DivineForgeFlow } from './DivineForgeFlow';
+import { GearSlotKey } from '../components/GearPresentation';
+
+export type ModalRenderOptions = {
+  inlineActiveSlot?: { heroId: string; slot: GearSlotKey } | null;
+  canEditGear?: boolean;
+};
 
 export class ModalStackController {
   constructor(
@@ -52,6 +58,7 @@ export class ModalStackController {
     private readonly onEquipRecommendedLoot: (gearIds: string[]) => void,
     private readonly onOpenStash: () => void,
     private readonly onOpenInventory: () => void,
+    private readonly onInventoryHeroChange: (heroId: string) => void = () => {},
   ) {}
 
   getModalTitle(view: ModalView, state: GameStateDto): string {
@@ -99,7 +106,7 @@ export class ModalStackController {
     }
   }
 
-  renderTop(stack: ModalView[], state: GameStateDto): void {
+  renderTop(stack: ModalView[], state: GameStateDto, options: ModalRenderOptions = {}): void {
     if (stack.length === 0) return;
 
     const view = stack[stack.length - 1];
@@ -119,7 +126,7 @@ export class ModalStackController {
         return;
       }
       stack.pop();
-      this.renderTop(stack, state);
+      this.renderTop(stack, state, options);
     });
 
     switch (view.type) {
@@ -134,22 +141,31 @@ export class ModalStackController {
             onUnequipGear: (heroId, slot) => {
               void this.gearEquipFlow.unequip(heroId, slot, { fromInventory: true });
             },
-            onFilterChange: () => this.renderTop(stack, state),
-            onSortChange: () => this.renderTop(stack, state),
-            onHeroChange: () => this.renderTop(stack, state),
-            onUpgradesOnlyChange: () => this.renderTop(stack, state),
+            onSlotClick: (heroId, slot) => {
+              this.onEquipPickerFromSlot(heroId, slot);
+            },
+            onFilterChange: () => this.renderTop(stack, state, options),
+            onSortChange: () => this.renderTop(stack, state, options),
+            onHeroChange: (heroId) => {
+              this.onInventoryHeroChange(heroId);
+              this.renderTop(stack, state, options);
+            },
+            onUpgradesOnlyChange: () => this.renderTop(stack, state, options),
             onOptimizeLoadout: () => {
               void this.gearEquipFlow.optimizeLoadout(undefined, { fromInventory: true });
             },
             onOpenStash: () => this.onOpenStash(),
           },
-          { showOptimize: state.featureFlags.optimizeLoadout },
+          { showOptimize: state.featureFlags.optimizeLoadout,
+            inlineActiveSlot: options.inlineActiveSlot ?? null,
+            canEditGear: options.canEditGear,
+          },
         );
         break;
       case 'stash':
         this.stashModal.render(container, state, {
-          onFilterChange: () => this.renderTop(stack, state),
-          onSortChange: () => this.renderTop(stack, state),
+          onFilterChange: () => this.renderTop(stack, state, options),
+          onSortChange: () => this.renderTop(stack, state, options),
           onWithdrawGear: (gearId) => {
             void this.gearStorageFlow.moveFromStash(gearId);
           },
@@ -172,8 +188,8 @@ export class ModalStackController {
           onUnequip: (heroId, slot) => {
             void this.gearEquipFlow.unequip(heroId, slot);
           },
-          onSortChange: () => this.renderTop(stack, state),
-          onUpgradesOnlyChange: () => this.renderTop(stack, state),
+          onSortChange: () => this.renderTop(stack, state, options),
+          onUpgradesOnlyChange: () => this.renderTop(stack, state, options),
         });
         break;
       case 'loot-reveal':
@@ -232,7 +248,7 @@ export class ModalStackController {
         break;
       case 'divine-forge':
         this.divineForgeModal.render(container, state, {
-          onTabChange: () => this.renderTop(stack, state),
+          onTabChange: () => this.renderTop(stack, state, options),
           onSelectionChange: () => this.renderTop(stack, state),
           onFuse: (gearIds) => {
             const gears = state.inventory.filter((entry) => gearIds.includes(entry.id));

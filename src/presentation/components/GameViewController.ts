@@ -58,6 +58,8 @@ import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
 import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
 import { SkillCooldownDisplayAnimator } from './SkillCooldownDisplayAnimator';
 import { DivineForgeFlow } from '../flows/DivineForgeFlow';
+import { InlineEquipController, InlineEquipHandlers } from '../gear/InlineEquipController';
+import { bindGearDragDrop } from '../gear/GearDragDropBinder';
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -134,6 +136,7 @@ export class GameViewController {
   private readonly campaignFlow: CampaignFlow;
   private readonly partyFlow: PartyFlow;
   private readonly modalStackController: ModalStackController;
+  private readonly inlineEquip = new InlineEquipController();
 
   private shownIntermissionKey: string | null = null;
   private intermissionResuming = false;
@@ -345,9 +348,56 @@ export class GameViewController {
       },
       () => this.openStashModal(),
       () => this.openInventoryModal(),
+      (heroId) => {
+        const active = this.inlineEquip.getActiveSlot();
+        if (active && active.heroId !== heroId) {
+          this.inlineEquip.close();
+        }
+      },
     );
 
     bindGearStorageActions(document, this.gearStorageFlow, () => this.state);
+
+    bindGearDragDrop(root, {
+      canEditGear: () => this.canEditGear(),
+      canEditParty: () => this.canEditParty(),
+      onEquip: (heroId, gearId) => {
+        void this.gearEquipFlow.equip(heroId, gearId, { fromInventory: true });
+      },
+      onUnequip: (heroId, slot) => {
+        void this.gearEquipFlow.unequip(heroId, slot, { fromInventory: true });
+      },
+      onMoveToStash: (gearId) => {
+        void this.gearStorageFlow.moveToStash(gearId);
+      },
+      onMoveFromStashThenEquip: (gearId, heroId) => {
+        void (async () => {
+          await this.gearStorageFlow.moveFromStash(gearId);
+          await this.gearEquipFlow.equip(heroId, gearId, { fromInventory: true });
+        })();
+      },
+      onEquippedToStash: (heroId, slot, gearId) => {
+        void (async () => {
+          await this.gearEquipFlow.unequip(heroId, slot, { fromInventory: true });
+          await this.gearStorageFlow.moveToStash(gearId);
+        })();
+      },
+      onMoveEquippedGear: (source, target) => {
+        void (async () => {
+          await this.gearEquipFlow.unequip(source.heroId, source.slot, { fromInventory: true });
+          await this.gearEquipFlow.equip(target.heroId, source.gearId, { fromInventory: true });
+        })();
+      },
+      onPartySlotDrop: (heroId, targetIndex) => {
+        void this.handlePartySlotDrop(heroId, targetIndex);
+      },
+      onPartyActiveToBench: (heroId) => {
+        void this.handlePartyActiveToBench(heroId);
+      },
+      onPartyReorder: (fromIndex, toIndex) => {
+        void this.handlePartyReorder(fromIndex, toIndex);
+      },
+    });
 
     this.prefsController.apply(this.state);
     this.bindHeroPanelDelegation();
@@ -805,6 +855,45 @@ export class GameViewController {
     this.afterStorageMutation(state);
   }
 
+  private canEditGear(): boolean {
+    return this.canEditParty();
+  }
+
+  private canEditParty(): boolean {
+    return Boolean(this.state?.canEditParty || this.isManualLoadoutPause(this.state));
+  }
+
+  private syncInlineEquipHosts(): void {
+    if (!this.state) return;
+
+    const handlers: InlineEquipHandlers = {
+      onSelectGear: (heroId, gearId) => {
+        void this.gearEquipFlow.equip(heroId, gearId, { fromInventory: true });
+      },
+      onSelectHero: (heroId, gearId) => {
+        void this.gearEquipFlow.equip(heroId, gearId, { fromInventory: true });
+      },
+      onUnequip: (heroId, slot) => {
+        void this.gearEquipFlow.unequip(heroId, slot, { fromInventory: true });
+      },
+      onSortChange: () => this.refreshInlineEquipViews(),
+      onUpgradesOnlyChange: () => this.refreshInlineEquipViews(),
+      onClose: () => {
+        this.inlineEquip.close();
+        this.refreshInlineEquipViews();
+      },
+    };
+
+    document.querySelectorAll('[data-inline-equip-host]').forEach((host) => {
+      this.inlineEquip.render(host as HTMLElement, this.state!, handlers);
+    });
+  }
+
+  private refreshInlineEquipViews(): void {
+    this.refreshHeroDrawerIfOpen();
+    this.refreshModalIfOpen();
+  }
+
   private afterGearMutation(state: GameStateDto): void {
     const topView = this.modalStack[this.modalStack.length - 1];
     if (
@@ -819,6 +908,7 @@ export class GameViewController {
     const shouldCloseModal = this.modalStack.length === 0;
     const previousState = this.state;
 
+    this.inlineEquip.close();
     this.render(state, { previousState });
     this.refreshHeroDrawerIfOpen();
     this.refreshModalIfOpen();
@@ -886,6 +976,10 @@ export class GameViewController {
       this.modal.close('action');
     }
 
+    if (this.heroDrawerHeroId !== heroId) {
+      this.inlineEquip.close();
+    }
+
     this.heroDrawerHeroId = heroId;
 
     void this.heroDetailFlow.prepareOpen(heroId, tab).then(() => {
@@ -906,6 +1000,7 @@ export class GameViewController {
       this.heroDetailFlow.bindToModal(container, this.state, heroId, {
         onSlotClick: (id, slot) => this.openEquipPickerFromSlot(id, slot),
       });
+      this.syncInlineEquipHosts();
     });
   }
 
@@ -934,6 +1029,49 @@ export class GameViewController {
     this.heroDetailFlow.bindToModal(this.heroDrawer.getBody(), this.state, heroId, {
       onSlotClick: (id, slot) => this.openEquipPickerFromSlot(id, slot),
     });
+    this.syncInlineEquipHosts();
+  }
+
+  private async handlePartySlotDrop(heroId: string, targetIndex: number): Promise<void> {
+    if (!this.canEditParty()) {
+      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
+      return;
+    }
+
+    try {
+      const next = await this.partyFlow.setPartySlot(targetIndex, heroId);
+      if (next) this.render(next);
+    } catch (error) {
+      this.handleFailedResponse(error instanceof Error ? error.message : 'Erro ao editar party');
+    }
+  }
+
+  private async handlePartyActiveToBench(heroId: string): Promise<void> {
+    if (!this.canEditParty()) {
+      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
+      return;
+    }
+
+    try {
+      const next = await this.partyFlow.removeFromParty(heroId);
+      if (next) this.render(next);
+    } catch (error) {
+      this.handleFailedResponse(error instanceof Error ? error.message : 'Erro ao editar party');
+    }
+  }
+
+  private async handlePartyReorder(fromIndex: number, toIndex: number): Promise<void> {
+    if (!this.canEditParty()) {
+      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
+      return;
+    }
+
+    try {
+      const next = await this.partyFlow.movePartyMember(fromIndex, toIndex);
+      if (next) this.render(next);
+    } catch (error) {
+      this.handleFailedResponse(error instanceof Error ? error.message : 'Erro ao editar party');
+    }
   }
 
   private bindHeroPanelDelegation(): void {
@@ -1180,9 +1318,24 @@ export class GameViewController {
   }
 
   private openEquipPickerFromSlot(heroId: string, slot: string): void {
+    const slotKey = slot as GearSlotKey;
+
+    if (this.heroDrawer.isOpen() && !this.modal.isOpen()) {
+      this.inlineEquip.toggleSlot(heroId, slotKey);
+      this.refreshHeroDrawerIfOpen();
+      return;
+    }
+
+    const topView = this.modalStack[this.modalStack.length - 1];
+    if (topView?.type === 'inventory') {
+      this.inlineEquip.toggleSlot(heroId, slotKey);
+      this.renderModalTop();
+      return;
+    }
+
     const view: ModalView = {
       type: 'equip-picker',
-      mode: { type: 'slot', heroId, slot: slot as GearSlotKey },
+      mode: { type: 'slot', heroId, slot: slotKey },
     };
 
     if (this.modal.isOpen() && this.modalStack.length > 0) {
@@ -1191,7 +1344,8 @@ export class GameViewController {
     }
 
     if (this.heroDrawer.isOpen()) {
-      this.pushModal(view);
+      this.inlineEquip.toggleSlot(heroId, slotKey);
+      this.refreshHeroDrawerIfOpen();
       return;
     }
 
@@ -1200,6 +1354,19 @@ export class GameViewController {
   }
 
   private openEquipPickerFromGear(gearId: string): void {
+    if (this.heroDrawer.isOpen() && !this.modal.isOpen()) {
+      this.inlineEquip.openGear(gearId);
+      this.refreshHeroDrawerIfOpen();
+      return;
+    }
+
+    const topView = this.modalStack[this.modalStack.length - 1];
+    if (topView?.type === 'inventory') {
+      this.inlineEquip.openGear(gearId);
+      this.renderModalTop();
+      return;
+    }
+
     this.pushModal({
       type: 'equip-picker',
       mode: { type: 'gear', gearId },
@@ -1213,7 +1380,11 @@ export class GameViewController {
 
   private renderModalTop(): void {
     if (!this.state || this.modalStack.length === 0) return;
-    this.modalStackController.renderTop(this.modalStack, this.state);
+    this.modalStackController.renderTop(this.modalStack, this.state, {
+      inlineActiveSlot: this.inlineEquip.getActiveSlot(),
+      canEditGear: this.canEditGear(),
+    });
+    this.syncInlineEquipHosts();
   }
 
   private maybeShowIdleSummary(state: GameStateDto): void {

@@ -8,6 +8,8 @@ import {
 } from '../assets/AssetCatalog';
 import { canHeroEquipGear } from '../../application/mappers/GearRequirementPresentationMapper';
 import { renderGearRequirementLines } from './GearRequirementPresentation';
+import { gearDragAttr, gearDropTargetAttr } from '../gear/GearDragDropBinder';
+import { GearDragSource } from '../gear/GearDragDropPolicy';
 
 export const GEAR_SLOTS = ['weapon', 'armor', 'accessory'] as const;
 export type GearSlotKey = (typeof GEAR_SLOTS)[number];
@@ -160,11 +162,24 @@ export function renderEquipmentSlot(
     heroId: string;
     clickable?: boolean;
     variant?: 'default' | 'loadout';
+    dragDrop?: boolean;
   },
 ): string {
   const label = GEAR_SLOT_LABELS[slot];
   const variant = options.variant ?? 'default';
   const clickableClass = options.clickable === false ? '' : ' equipment-slot-clickable';
+  const dragDrop = options.dragDrop !== false;
+  const dropClass = dragDrop ? ' gear-drop-target' : '';
+  const dropAttrs = dragDrop ? gearDropTargetAttr(options.heroId, slot) : '';
+  const dragAttrs =
+    dragDrop && gear
+      ? gearDragAttr({
+          kind: 'equipped',
+          gearId: gear.id,
+          heroId: options.heroId,
+          slot,
+        } satisfies GearDragSource)
+      : '';
   const frameUrl = gear ? getGearFrameSprite(gear.rarity) : getGearFrameSprite('common');
   const iconClass =
     variant === 'loadout' ? 'loadout-slot-icon equipment-slot-icon' : 'equipment-slot-icon';
@@ -183,9 +198,11 @@ export function renderEquipmentSlot(
     return `
       <button
         type="button"
-        class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass} ${gear?.rarity ?? 'empty'}"
+        class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass}${dropClass} ${gear?.rarity ?? 'empty'}"
         data-hero="${options.heroId}"
         data-slot="${slot}"
+        ${dropAttrs}
+        ${dragAttrs}
         aria-label="${escapeHtml(ariaLabel)}"
         style="--slot-frame: url('${frameUrl}')"
       >
@@ -201,9 +218,11 @@ export function renderEquipmentSlot(
   return `
     <button
       type="button"
-      class="equipment-slot equipment-slot--icon-only${clickableClass} ${gear?.rarity ?? 'empty'}"
+      class="equipment-slot equipment-slot--icon-only${clickableClass}${dropClass} ${gear?.rarity ?? 'empty'}"
       data-hero="${options.heroId}"
       data-slot="${slot}"
+      ${dropAttrs}
+      ${dragAttrs}
       aria-label="${escapeHtml(ariaLabel)}"
       style="--slot-frame: url('${frameUrl}')"
     >

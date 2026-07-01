@@ -31,6 +31,11 @@ export type EquipPickerHandlers = {
   onUpgradesOnlyChange?: () => void;
 };
 
+export type EquipPickerRenderOptions = {
+  /** Omitir loadout duplicado — usado no painel inline do inventário/drawer */
+  compact?: boolean;
+};
+
 export class EquipPickerModalRenderer {
   private sortMode: InventorySortMode = 'gain';
   private upgradesOnly = false;
@@ -41,9 +46,10 @@ export class EquipPickerModalRenderer {
     state: GameStateDto,
     mode: EquipPickerMode,
     handlers: EquipPickerHandlers,
+    options: EquipPickerRenderOptions = {},
   ): void {
     if (mode.type === 'slot') {
-      this.renderSlotPicker(container, state, mode.heroId, mode.slot, handlers);
+      this.renderSlotPicker(container, state, mode.heroId, mode.slot, handlers, options);
       return;
     }
 
@@ -56,6 +62,7 @@ export class EquipPickerModalRenderer {
     heroId: string,
     slot: GearSlotKey,
     handlers: EquipPickerHandlers,
+    options: EquipPickerRenderOptions = {},
   ): void {
     hideInventoryGearTooltip();
 
@@ -109,14 +116,22 @@ export class EquipPickerModalRenderer {
           })
         : `<p class="empty-state modal-empty">Nenhum ${slotLabel.toLowerCase()} disponível no inventário.</p>`;
 
-    container.innerHTML = `
-      <div class="inventory-panel equip-picker-panel">
-        <p class="equip-picker-slot-label">Equipar ${slotLabel.toLowerCase()}</p>
-        ${renderInventoryHeroLoadout(hero, {
+    const compact = options.compact === true;
+    const loadoutSection = compact
+      ? ''
+      : renderInventoryHeroLoadout(hero, {
           feedback: equipFeedback,
           context: 'equip-picker',
           activeSlot: slot,
-        })}
+        });
+    const panelClass = compact
+      ? 'inventory-panel equip-picker-panel equip-picker-panel--compact'
+      : 'inventory-panel equip-picker-panel';
+
+    container.innerHTML = `
+      <div class="${panelClass}">
+        ${compact ? '' : `<p class="equip-picker-slot-label">Equipar ${slotLabel.toLowerCase()}</p>`}
+        ${loadoutSection}
         ${sortButtons}
         ${countLabel}
         ${gridSection}

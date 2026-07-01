@@ -42,7 +42,8 @@ export type GameMessage =
   | { type: 'SPEND_ASCENSION_POINT'; heroId: string; skillId: string }
   | { type: 'ADD_TO_PARTY'; heroId: string }
   | { type: 'REMOVE_FROM_PARTY'; heroId: string }
-  | { type: 'MOVE_PARTY_MEMBER'; fromIndex: number; toIndex: number };
+  | { type: 'MOVE_PARTY_MEMBER'; fromIndex: number; toIndex: number }
+  | { type: 'SET_PARTY_SLOT'; slotIndex: number; heroId: string };
 
 export type GameResponse =
   | {

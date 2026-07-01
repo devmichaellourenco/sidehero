@@ -42,4 +42,25 @@ describe('PartyService', () => {
     const locked = GameState.initial().withPhaseRun(PhaseRun.start('1-1'));
     expect(() => service.removeFromActiveParty(locked, 'hero-3')).toThrow();
   });
+
+  it('substitui herói da reserva em slot ocupado da equipe', () => {
+    let state = GameState.initial().withActivePartyIds(['hero-1', 'hero-2', 'hero-3']);
+    state = HeroUnlockService.applyUnlock(state, 'berserker');
+    const next = service.setActivePartySlot(state, 1, 'hero-berserker');
+    expect(next.activePartyIds).toEqual(['hero-1', 'hero-berserker', 'hero-3']);
+    expect(next.activePartyIds).not.toContain('hero-2');
+  });
+
+  it('troca heróis ativos ao soltar em slot ocupado', () => {
+    const state = GameState.initial().withActivePartyIds(['hero-1', 'hero-2', 'hero-3']);
+    const next = service.setActivePartySlot(state, 2, 'hero-1');
+    expect(next.activePartyIds).toEqual(['hero-3', 'hero-2', 'hero-1']);
+  });
+
+  it('preenche slot vazio da equipe', () => {
+    let state = GameState.initial().withActivePartyIds(['hero-1']);
+    state = HeroUnlockService.applyUnlock(state, 'berserker');
+    const next = service.setActivePartySlot(state, 1, 'hero-berserker');
+    expect(next.activePartyIds).toEqual(['hero-1', 'hero-berserker']);
+  });
 });

@@ -24,6 +24,7 @@ export type InventorySortMode = 'gain' | 'name' | 'rarity';
 export type InventoryModalHandlers = {
   onEquipGear: (gearId: string, heroId: string) => void;
   onUnequipGear: (heroId: string, slot: GearSlotKey) => void;
+  onSlotClick: (heroId: string, slot: GearSlotKey) => void;
   onFilterChange: (slot: GearSlotKey | 'all') => void;
   onSortChange: (mode: InventorySortMode) => void;
   onHeroChange: (heroId: string) => void;
@@ -55,7 +56,11 @@ export class InventoryModalRenderer {
     container: HTMLElement,
     state: GameStateDto,
     handlers: InventoryModalHandlers,
-    options: { showOptimize?: boolean } = {},
+    options: {
+      showOptimize?: boolean;
+      inlineActiveSlot?: { heroId: string; slot: GearSlotKey } | null;
+      canEditGear?: boolean;
+    } = {},
   ): void {
     hideInventoryGearTooltip();
 
@@ -83,12 +88,21 @@ export class InventoryModalRenderer {
       state,
       selectedHeroId,
     );
+    const canEditGear = options.canEditGear !== false;
+    const inlineActive = options.inlineActiveSlot;
+    const loadoutContext =
+      inlineActive?.heroId === selectedHeroId ? ('equip-picker' as const) : ('inventory' as const);
     const heroLoadout = selectedHero
       ? renderInventoryHeroLoadout(selectedHero, {
           feedback: equipFeedback,
           heroPulse: this.heroChangePulse,
+          context: loadoutContext,
+          activeSlot:
+            inlineActive?.heroId === selectedHeroId ? inlineActive.slot : undefined,
+          dragDrop: canEditGear,
         })
       : '';
+    const inlineEquipHost = '<div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>';
 
     const optimizeButton =
       options.showOptimize === false
@@ -146,14 +160,24 @@ export class InventoryModalRenderer {
     const canStash =
       state.storageCapacity.stashUnlocked &&
       state.storageCapacity.stashUsed < state.storageCapacity.stashLimit;
+    const inlineSlotPickerOpen = Boolean(
+      inlineActive && inlineActive.heroId === selectedHeroId,
+    );
+    const panelClass = inlineSlotPickerOpen
+      ? 'inventory-panel inventory-panel--slot-picking'
+      : 'inventory-panel';
+    const toolbarSection = inlineSlotPickerOpen
+      ? ''
+      : `${filterButtons}${sortButtons}`;
+    const countSection = inlineSlotPickerOpen ? '' : countLabel;
 
     if (state.inventory.length === 0) {
       container.innerHTML = `
-        <div class="inventory-panel">
+        <div class="${panelClass}">
           ${heroSelector}
           ${heroLoadout}
-          ${filterButtons}
-          ${sortButtons}
+          ${inlineEquipHost}
+          ${toolbarSection}
           <p class="empty-state modal-empty">
             ${imgTag(inventoryIcon, 'Inventário', 'stat-icon')}
             Nenhum item ainda. Derrote inimigos e abra baús!
@@ -168,17 +192,21 @@ export class InventoryModalRenderer {
       return;
     }
 
-    container.innerHTML = `
-      <div class="inventory-panel">
-        ${heroSelector}
-        ${heroLoadout}
-        ${filterButtons}
-        ${sortButtons}
-        ${countLabel}
-        ${renderInventoryGrid(state, sorted, selectedHeroId, {
+    const mainGridSection = inlineSlotPickerOpen
+      ? ''
+      : renderInventoryGrid(state, sorted, selectedHeroId, {
           returnedGearIds: equipFeedback?.returnedGearIds,
           canStash,
-        })}
+        });
+
+    container.innerHTML = `
+      <div class="${panelClass}">
+        ${heroSelector}
+        ${heroLoadout}
+        ${inlineEquipHost}
+        ${toolbarSection}
+        ${countSection}
+        ${mainGridSection}
         <footer class="inventory-footer">${optimizeButton}</footer>
       </div>
     `;
@@ -257,6 +285,16 @@ export class InventoryModalRenderer {
         const slot = button.getAttribute('data-inventory-unequip-slot') as GearSlotKey | null;
         if (!heroId || !slot) return;
         handlers.onUnequipGear(heroId, slot);
+      });
+    });
+
+    container.querySelectorAll('.inventory-loadout-slot[data-hero][data-slot]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const heroId = button.getAttribute('data-hero');
+        const slot = button.getAttribute('data-slot') as GearSlotKey | null;
+        if (!heroId || !slot) return;
+        handlers.onSlotClick(heroId, slot);
       });
     });
 

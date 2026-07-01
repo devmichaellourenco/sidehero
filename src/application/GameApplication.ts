@@ -26,6 +26,7 @@ import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
 import { AddToPartyUseCase } from './use-cases/AddToPartyUseCase';
 import { RemoveFromPartyUseCase } from './use-cases/RemoveFromPartyUseCase';
 import { MovePartyMemberUseCase } from './use-cases/MovePartyMemberUseCase';
+import { SetPartySlotUseCase } from './use-cases/SetPartySlotUseCase';
 import { MoveGearToStashUseCase } from './use-cases/MoveGearToStashUseCase';
 import { MoveGearFromStashUseCase } from './use-cases/MoveGearFromStashUseCase';
 import { DestroyGearUseCase } from './use-cases/DestroyGearUseCase';
@@ -62,6 +63,7 @@ export class GameApplication {
   readonly addToParty: AddToPartyUseCase;
   readonly removeFromParty: RemoveFromPartyUseCase;
   readonly movePartyMember: MovePartyMemberUseCase;
+  readonly setPartySlot: SetPartySlotUseCase;
   readonly moveGearToStash: MoveGearToStashUseCase;
   readonly moveGearFromStash: MoveGearFromStashUseCase;
   readonly destroyGear: DestroyGearUseCase;
@@ -118,6 +120,7 @@ export class GameApplication {
     this.addToParty = new AddToPartyUseCase(repository, partyService, presenter);
     this.removeFromParty = new RemoveFromPartyUseCase(repository, partyService, presenter);
     this.movePartyMember = new MovePartyMemberUseCase(repository, partyService, presenter);
+    this.setPartySlot = new SetPartySlotUseCase(repository, partyService, presenter);
     this.moveGearToStash = new MoveGearToStashUseCase(repository, presenter);
     this.moveGearFromStash = new MoveGearFromStashUseCase(repository, presenter);
     this.destroyGear = new DestroyGearUseCase(repository, presenter);

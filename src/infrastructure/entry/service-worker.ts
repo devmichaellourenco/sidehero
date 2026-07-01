@@ -234,6 +234,10 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.movePartyMember.execute(message.fromIndex, message.toIndex);
       return { ok: true, state };
     }
+    case 'SET_PARTY_SLOT': {
+      const state = await app.setPartySlot.execute(message.slotIndex, message.heroId);
+      return { ok: true, state };
+    }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
   }
