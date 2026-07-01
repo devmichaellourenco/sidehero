@@ -13,6 +13,7 @@ import { PhaseRun } from './PhaseRun';
 import { BenchXpPolicy } from '../party/BenchXpPolicy';
 import { resolvePhase } from './CampaignCatalog';
 import { previousPhaseId } from './CampaignIds';
+import { MetaBonusScope } from '../meta/MetaBonusScope';
 import {
   grantsPhaseChests,
   isPhaseReplay,
@@ -62,7 +63,10 @@ export class PhaseCombatHandlers {
     const phaseId = meta.phaseId;
     const replay = isPhaseReplay(state.campaignProgress, phaseId);
     const baseGold = defeatedEnemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
-    const totalGold = scalePhaseGold(baseGold, state.campaignProgress, phaseId);
+    const legacyBonuses = MetaBonusScope.get();
+    const totalGold = Math.floor(
+      scalePhaseGold(baseGold, state.campaignProgress, phaseId) * legacyBonuses.goldMultiplier,
+    );
     const enemyNames = defeatedEnemies.map((enemy) => enemy.name).join(', ');
     const nextRun = phaseRun.advanceWave();
     const phase = resolvePhase(phaseId);
@@ -122,8 +126,13 @@ export class PhaseCombatHandlers {
     const replay = isPhaseReplay(state.campaignProgress, meta.phaseId);
     const baseGold = defeatedEnemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);
     const baseXp = defeatedEnemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
-    const totalGold = scalePhaseGold(baseGold, state.campaignProgress, meta.phaseId);
-    const totalXp = scalePhaseXp(baseXp, state.campaignProgress, meta.phaseId);
+    const combatMeta = MetaBonusScope.get();
+    const totalGold = Math.floor(
+      scalePhaseGold(baseGold, state.campaignProgress, meta.phaseId) * combatMeta.goldMultiplier,
+    );
+    const totalXp = Math.floor(
+      scalePhaseXp(baseXp, state.campaignProgress, meta.phaseId) * combatMeta.xpMultiplier,
+    );
 
     let progress = state.campaignProgress.markCleared(
       meta.phaseId,

@@ -6,6 +6,7 @@ import { CombatStatusEffectTracker } from '../../domain/services/combat/CombatSt
 import { SkillCooldownMap, SkillCooldownTracker } from '../../domain/services/combat/SkillCooldownTracker';
 import { CombatBattleSkillDto } from '../dto/GameStateDto';
 import { mapSkillCooldownPresentation } from './SkillCooldownPresentationMapper';
+import { getSkillElementLabel, getSkillPrimaryElement } from '../../domain/progression/combat/SkillElementResolver';
 
 const resolver = new CombatSkillBarResolver();
 
@@ -25,6 +26,8 @@ function mapEntryToDto(entry: ReturnType<CombatSkillBarResolver['resolveForHero'
     highlight: entry.highlight,
     cooldownLabel: cooldown.cooldownLabel,
     cooldownRatio: cooldown.cooldownRatio,
+    damageElement: getSkillPrimaryElement(entry.skillId),
+    elementLabel: getSkillElementLabel(entry.skillId),
   };
 }
 

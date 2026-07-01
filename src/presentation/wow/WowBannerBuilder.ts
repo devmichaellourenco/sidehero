@@ -24,6 +24,11 @@ export function buildPersistentWowBanners(state: GameStateDto, handlers: WowPers
   const banners: WowBanner[] = [];
 
   if (state.seasonCompleted) {
+    const sigilHint =
+      state.meta && state.meta.sigils > 0
+        ? `Você tem ${state.meta.sigils} selos de legado para investir.`
+        : 'Conclua a temporada e ganhe selos para a próxima run.';
+
     banners.push({
       id: 'season-complete',
       kind: 'season-complete',
@@ -32,7 +37,7 @@ export function buildPersistentWowBanners(state: GameStateDto, handlers: WowPers
       tone: 'victory',
       eyebrow: 'Conquista',
       title: 'Temporada concluída!',
-      subtitle: 'Derrote o ciclo e comece uma nova run quando quiser.',
+      subtitle: sigilHint,
       iconUrl: getAssetUrl(ASSETS.ui.victoryFrame),
       cta: { label: 'Novo jogo', action: 'new-game' },
     });

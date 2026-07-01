@@ -5,6 +5,7 @@ import { ShopOfferDto } from '../dto/ShopOfferDto';
 import { AscensionOptionDto } from '../dto/AscensionOptionDto';
 import { SkillNodeDto } from '../dto/SkillNodeDto';
 import { UpgradeNodeDto } from '../dto/UpgradeNodeDto';
+import { MetaNodeDto } from '../dto/MetaDto';
 
 export type SpendTargetMessage =
   | { type: 'attribute'; key: 'str' | 'dex' | 'int' }
@@ -33,6 +34,8 @@ export type GameMessage =
   | { type: 'REFRESH_SHOP' }
   | { type: 'GET_UPGRADE_TREE' }
   | { type: 'PURCHASE_UPGRADE'; upgradeId: string }
+  | { type: 'GET_META_TREE' }
+  | { type: 'PURCHASE_META_UPGRADE'; upgradeId: string }
   | { type: 'SPEND_IMPROVEMENT_POINT'; heroId: string; target: SpendTargetMessage }
   | { type: 'GET_HERO_SKILL_TREE'; heroId: string }
   | { type: 'ACTIVATE_SKILL'; heroId: string; skillId: string }
@@ -66,6 +69,10 @@ export type GameResponse =
       ascensionSkillNodes?: SkillNodeDto[];
       purchasableUpgradeCount?: number;
       purchasedUpgradeId?: string;
+      metaNodes?: MetaNodeDto[];
+      purchasableMetaCount?: number;
+      purchasedMetaUpgradeId?: string;
+      sigilsAwarded?: number;
       forgedGear?: GearDto;
       salvageGold?: number;
       campaign?: CampaignOverviewDto;

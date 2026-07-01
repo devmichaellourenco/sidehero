@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCombatResistTooltipLine } from '../../application/mappers/CombatResistMapper';
+import { renderCombatResistPips } from './ElementPipPresentation';
 import { renderEnemyTooltipContent } from './EnemyBattlePresentation';
 import { renderHeroTooltipContent } from './HeroBattlePresentation';
 
@@ -36,28 +36,33 @@ function minimalEnemy() {
 }
 
 describe('battle tooltip resists', () => {
-  it('mostra linha de resistências do herói quando > 0', () => {
+  it('mostra chips elementais do herói com porcentagem', () => {
     const html = renderHeroTooltipContent(minimalHero());
 
-    expect(html).toContain('Resist: Fogo 12% · Caos 5%');
-    expect(html).toContain('hero-tooltip-resist');
+    expect(html).toContain('element-stat--resist');
+    expect(html).toContain('element-stat__pct">−12%<');
+    expect(html).toContain('element-stat__pct">−5%<');
+    expect(html).toContain('hero-tooltip-elements');
   });
 
-  it('mostra linha de resistências do inimigo quando > 0', () => {
+  it('mostra chips elementais do inimigo com porcentagem', () => {
     const html = renderEnemyTooltipContent(minimalEnemy(), 20);
 
-    expect(html).toContain('Resist: Gelo 15%');
-    expect(html).toContain('enemy-tooltip-resist');
+    expect(html).toContain('element-stat--resist');
+    expect(html).toContain('element-stat__pct">−15%<');
+    expect(html).toContain('enemy-tooltip-elements');
   });
 
-  it('omite linha quando não há resistências', () => {
-    const line = formatCombatResistTooltipLine({
+  it('diferencia fraqueza com chip vermelho e sinal positivo', () => {
+    const html = renderCombatResistPips({
       fire: 0,
-      cold: 0,
+      cold: -20,
       lightning: 0,
       chaos: 0,
     });
 
-    expect(line).toBeNull();
+    expect(html).toContain('element-stat--weakness');
+    expect(html).toContain('element-stat__pct">+20%<');
+    expect(html).toContain('title="Vulnerável a Gelo (+20% dano)"');
   });
 });

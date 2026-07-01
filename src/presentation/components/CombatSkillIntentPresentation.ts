@@ -1,6 +1,7 @@
 import { CombatBattleSkillDto } from '../../application/dto/GameStateDto';
 import { getSkillDisplayName, getSkillIconUrl } from '../assets/SkillIconCatalog';
 import { imgTag } from '../assets/AssetCatalog';
+import { renderElementPip } from './ElementPipPresentation';
 import { stampSkillCooldownOverlay } from './SkillCooldownDisplayAnimator';
 
 function escapeHtml(text: string): string {
@@ -29,9 +30,24 @@ function renderSkillCooldownOverlay(skill: CombatBattleSkillDto): string {
   `;
 }
 
+function renderSkillElementBadge(skill: CombatBattleSkillDto): string {
+  if (!skill.elementLabel || !skill.damageElement || skill.damageElement === 'physical') {
+    return '';
+  }
+
+  return renderElementPip(skill.damageElement, {
+    variant: 'skill',
+    title: skill.elementLabel,
+  });
+}
+
 function renderSkillSlot(skill: CombatBattleSkillDto): string {
   const label = getSkillDisplayName(skill.skillId, skill.skillName);
   const iconUrl = getSkillIconUrl(skill.skillId);
+  const elementSuffix =
+    skill.elementLabel && skill.damageElement && skill.damageElement !== 'physical'
+      ? ` · ${skill.elementLabel}`
+      : '';
   const highlightClass =
     skill.highlight === 'next'
       ? ' combat-skill-slot--next'
@@ -45,11 +61,12 @@ function renderSkillSlot(skill: CombatBattleSkillDto): string {
     <div
       class="combat-skill-slot${highlightClass}"
       data-skill-id="${escapeHtml(skill.skillId)}"
-      title="${escapeHtml(label)}"
-      aria-label="${escapeHtml(label)}"
+      title="${escapeHtml(label)}${escapeHtml(elementSuffix)}"
+      aria-label="${escapeHtml(label)}${escapeHtml(elementSuffix)}"
     >
       <span class="combat-skill-icon-wrap">
         ${imgTag(iconUrl, label, 'combat-skill-icon')}
+        ${renderSkillElementBadge(skill)}
         ${renderSkillCooldownOverlay(skill)}
       </span>
     </div>

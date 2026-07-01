@@ -9,6 +9,7 @@ import { ModalController } from '../components/ModalController';
 import { SettingsModalRenderer } from '../components/SettingsModalRenderer';
 import { ShopModalRenderer } from '../components/ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from '../components/UpgradeTreeModalRenderer';
+import { MetaLegacyModalRenderer } from '../components/MetaLegacyModalRenderer';
 import { DivineForgeModalRenderer } from '../components/DivineForgeModalRenderer';
 import { evaluateForgeSelection } from '../components/DivineForgePresentation';
 import { calculateForgeSalvageGold } from '../../domain/forge/ForgeSalvageGoldCatalog';
@@ -20,6 +21,7 @@ import { GearStorageFlow } from './GearStorageFlow';
 import { HeroDetailFlow } from './HeroDetailFlow';
 import { ModalView } from './ModalTypes';
 import { ShopFlow } from './ShopFlow';
+import { MetaLegacyFlow } from './MetaLegacyFlow';
 import { DivineForgeFlow } from './DivineForgeFlow';
 import { GearSlotKey } from '../components/GearPresentation';
 
@@ -40,8 +42,10 @@ export class ModalStackController {
     private readonly settingsModal: SettingsModalRenderer,
     private readonly shopModal: ShopModalRenderer,
     private readonly upgradeTreeModal: UpgradeTreeModalRenderer,
+    private readonly metaLegacyModal: MetaLegacyModalRenderer,
     private readonly divineForgeModal: DivineForgeModalRenderer,
     private readonly shopFlow: ShopFlow,
+    private readonly metaLegacyFlow: MetaLegacyFlow,
     private readonly divineForgeFlow: DivineForgeFlow,
     private readonly gearEquipFlow: GearEquipFlow,
     private readonly gearStorageFlow: GearStorageFlow,
@@ -53,6 +57,7 @@ export class ModalStackController {
       value: GamePreferences[K],
     ) => void,
     private readonly onOpenUpgrades: () => void,
+    private readonly onOpenMetaLegacy: () => void,
     private readonly onEquipPickerFromSlot: (heroId: string, slot: string) => void,
     private readonly onEquipPickerFromGear: (gearId: string) => void,
     private readonly onEquipRecommendedLoot: (gearIds: string[]) => void,
@@ -79,6 +84,8 @@ export class ModalStackController {
         return 'Loja';
       case 'upgrades':
         return 'Melhorias';
+      case 'meta-legacy':
+        return 'Legado';
       case 'divine-forge':
         return 'Forja Divina';
       case 'loot-batch':
@@ -216,12 +223,20 @@ export class ModalStackController {
         this.settingsModal.render(container, state, this.getPreferences(), {
           onPreferenceChange: (key, value) => this.onPreferenceChange(key, value),
           onOpenUpgrades: () => this.onOpenUpgrades(),
+          onOpenMetaLegacy: () => this.onOpenMetaLegacy(),
         });
         break;
       case 'upgrades':
         this.upgradeTreeModal.render(container, state, this.shopFlow.state.upgradeNodes, {
           onPurchase: (upgradeId) => {
             void this.shopFlow.purchaseUpgrade(upgradeId);
+          },
+        });
+        break;
+      case 'meta-legacy':
+        this.metaLegacyModal.render(container, state, this.metaLegacyFlow.metaNodes, {
+          onPurchase: (upgradeId) => {
+            void this.metaLegacyFlow.purchaseUpgrade(upgradeId);
           },
         });
         break;

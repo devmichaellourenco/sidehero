@@ -6,6 +6,8 @@ import { CombatPipeline } from '../../domain/services/combat/CombatPipeline';
 import { SerialTaskRunner } from '../../infrastructure/background/SerialTaskRunner';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
+import { MetaService } from '../../domain/meta/MetaService';
+import { MemoryMetaRepository } from '../testing/MemoryMetaRepository';
 import { EquipGearUseCase } from './EquipGearUseCase';
 import { TickGameUseCase } from './TickGameUseCase';
 
@@ -56,7 +58,13 @@ describe('EquipGearUseCase com fila serial', () => {
     const repository = new SlowMemoryRepository(state);
     const presenter = new GameStatePresenter(new UpgradeService());
     const equip = new EquipGearUseCase(repository, presenter);
-    const tick = new TickGameUseCase(repository, new CombatPipeline(), presenter);
+    const tick = new TickGameUseCase(
+      repository,
+      new MemoryMetaRepository(),
+      new MetaService(),
+      new CombatPipeline(),
+      presenter,
+    );
     const runner = new SerialTaskRunner();
 
     await Promise.all([

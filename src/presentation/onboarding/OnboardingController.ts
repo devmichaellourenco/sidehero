@@ -1,0 +1,154 @@
+import { OnboardingStep } from './OnboardingPolicy';
+import {
+  dismissOnboardingStep,
+  loadDismissedOnboardingSteps,
+  skipAllOnboarding,
+} from './OnboardingStorage';
+
+export type OnboardingHandlers = {
+  onDismissStep: (stepId: OnboardingStep['id']) => void;
+  onSkipAll: () => void;
+};
+
+export class OnboardingController {
+  private readonly root: HTMLElement;
+  private activeStep: OnboardingStep | null = null;
+  private highlightedAnchor: HTMLElement | null = null;
+  private dismissed = loadDismissedOnboardingSteps();
+
+  constructor() {
+    this.root = document.createElement('div');
+    this.root.id = 'onboarding-root';
+    this.root.className = 'onboarding-root hidden';
+    this.root.setAttribute('aria-live', 'polite');
+    document.body.appendChild(this.root);
+
+    window.addEventListener('resize', () => this.reposition());
+    window.addEventListener('scroll', () => this.reposition(), true);
+  }
+
+  getDismissedSteps(): ReadonlySet<OnboardingStep['id']> {
+    return this.dismissed;
+  }
+
+  dismissStep(stepId: OnboardingStep['id']): void {
+    this.dismissed = dismissOnboardingStep(stepId);
+    if (this.activeStep?.id === stepId) {
+      this.hide();
+    }
+  }
+
+  skipAll(): void {
+    skipAllOnboarding();
+    this.dismissed = loadDismissedOnboardingSteps();
+    this.hide();
+  }
+
+  show(step: OnboardingStep, handlers: OnboardingHandlers): void {
+    if (this.activeStep?.id === step.id && !this.root.classList.contains('hidden')) {
+      this.reposition();
+      return;
+    }
+
+    this.activeStep = step;
+    this.root.classList.remove('hidden');
+    this.root.innerHTML = `
+      <div class="onboarding-backdrop" data-onboarding-dismiss></div>
+      <div class="onboarding-card" role="dialog" aria-labelledby="onboarding-title">
+        <p class="onboarding-kicker">Dica</p>
+        <h3 id="onboarding-title" class="onboarding-title">${step.title}</h3>
+        <p class="onboarding-message">${step.message}</p>
+        <footer class="onboarding-actions">
+          <button type="button" class="onboarding-skip" data-onboarding-skip-all>Pular dicas</button>
+          <button type="button" class="primary-btn onboarding-ok" data-onboarding-ok>Entendi</button>
+        </footer>
+      </div>
+    `;
+
+    this.root.querySelector('[data-onboarding-ok]')?.addEventListener('click', () => {
+      handlers.onDismissStep(step.id);
+    });
+
+    this.root.querySelector('[data-onboarding-skip-all]')?.addEventListener('click', () => {
+      handlers.onSkipAll();
+    });
+
+    this.root.querySelector('[data-onboarding-dismiss]')?.addEventListener('click', () => {
+      handlers.onDismissStep(step.id);
+    });
+
+    requestAnimationFrame(() => this.reposition());
+  }
+
+  hide(): void {
+    this.clearHighlight();
+    this.activeStep = null;
+    this.root.classList.add('hidden');
+    this.root.innerHTML = '';
+  }
+
+  destroy(): void {
+    this.hide();
+    this.root.remove();
+  }
+
+  private reposition(): void {
+    if (!this.activeStep) return;
+
+    const anchor = document.querySelector(this.activeStep.anchorSelector) as HTMLElement | null;
+    const card = this.root.querySelector('.onboarding-card') as HTMLElement | null;
+    if (!card) return;
+
+    this.setHighlight(anchor);
+
+    if (!anchor) {
+      card.style.left = '50%';
+      card.style.top = 'auto';
+      card.style.bottom = '96px';
+      card.style.transform = 'translateX(-50%)';
+      card.dataset.placement = 'bottom';
+      return;
+    }
+
+    const rect = anchor.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const margin = 12;
+    const viewportPadding = 8;
+
+    let top = rect.bottom + margin;
+    let placement: 'top' | 'bottom' = 'bottom';
+
+    if (top + cardRect.height > window.innerHeight - viewportPadding) {
+      top = rect.top - cardRect.height - margin;
+      placement = 'top';
+    }
+
+    if (top < viewportPadding) {
+      top = viewportPadding;
+    }
+
+    let left = rect.left + rect.width / 2 - cardRect.width / 2;
+    left = Math.max(
+      viewportPadding,
+      Math.min(left, window.innerWidth - cardRect.width - viewportPadding),
+    );
+
+    card.style.left = `${left}px`;
+    card.style.top = `${top}px`;
+    card.style.bottom = 'auto';
+    card.style.transform = 'none';
+    card.dataset.placement = placement;
+  }
+
+  private setHighlight(anchor: HTMLElement | null): void {
+    this.clearHighlight();
+    if (!anchor) return;
+    anchor.classList.add('onboarding-highlight');
+    this.highlightedAnchor = anchor;
+  }
+
+  private clearHighlight(): void {
+    this.highlightedAnchor?.classList.remove('onboarding-highlight');
+    this.highlightedAnchor = null;
+  }
+}

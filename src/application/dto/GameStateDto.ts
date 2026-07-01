@@ -2,6 +2,7 @@ import { PhaseRunDto } from './CampaignDto';
 import { AttributesDto } from './AttributesDto';
 import { ChestProgressDto } from '../mappers/ChestProgressMapper';
 import { FeatureFlagsDto } from './FeatureFlagsDto';
+import { MetaSummaryDto } from './MetaDto';
 import { GearUpgradeHintDto } from './GearUpgradeHintDto';
 
 export interface GearRequirementsDto {
@@ -122,6 +123,8 @@ export interface CombatBattleSkillDto {
   highlight: 'none' | 'next' | 'queued';
   cooldownLabel: string;
   cooldownRatio: number;
+  damageElement?: string | null;
+  elementLabel?: string | null;
 }
 
 export interface CombatSkillIntentDto {
@@ -251,4 +254,5 @@ export interface GameStateDto {
   chestProgress: ChestProgressDto;
   gearUpgradeHints: Record<string, GearUpgradeHintDto>;
   seasonCompleted: boolean;
+  meta?: MetaSummaryDto;
 }

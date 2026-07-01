@@ -1,5 +1,5 @@
 import { EnemyDto } from '../../application/dto/GameStateDto';
-import { formatCombatResistTooltipLine } from '../../application/mappers/CombatResistMapper';
+import { renderCombatResistPips } from './ElementPipPresentation';
 import { renderBattleActorCard } from './BattleActorCardPresentation';
 import { clampHealthPercent } from './BattleActorHealthPresentation';
 
@@ -29,7 +29,7 @@ function renderEnemySkillLines(enemy: EnemyDto): string {
 export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): string {
   const healthLabel = formatEnemyHealthLabel(enemy);
   const skillLines = renderEnemySkillLines(enemy);
-  const resistLine = formatCombatResistTooltipLine(enemy.combatResists);
+  const elementalPips = renderCombatResistPips(enemy.combatResists);
 
   return `
     <strong class="enemy-tooltip-name">${escapeHtml(enemy.name)}</strong>
@@ -37,7 +37,7 @@ export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): strin
     <span class="enemy-tooltip-line">${healthLabel}</span>
     <span class="enemy-tooltip-line">ATK ${enemy.attack} · DEF ${enemy.defense}</span>
     <span class="enemy-tooltip-line">+${enemy.goldReward} ouro · +${enemy.xpReward} XP</span>
-    ${resistLine ? `<span class="enemy-tooltip-line enemy-tooltip-resist">${escapeHtml(resistLine)}</span>` : ''}
+    ${elementalPips ? `<span class="enemy-tooltip-line enemy-tooltip-elements">${elementalPips}</span>` : ''}
     ${skillLines}
   `;
 }

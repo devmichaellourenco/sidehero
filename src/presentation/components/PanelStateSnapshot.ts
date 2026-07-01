@@ -1,7 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
+import { buildIdleProgress } from './IdleProgressSummary';
 
 const SNAPSHOT_KEY = 'sidehero_panel_snapshot';
-const MIN_IDLE_MS = 8000;
 
 export interface PanelSnapshot {
   at: number;
@@ -45,39 +45,6 @@ export function seedPanelSnapshotIfMissing(state: GameStateDto): void {
 }
 
 export function buildIdleSummary(snapshot: PanelSnapshot, state: GameStateDto): string | null {
-  const idleMs = Date.now() - snapshot.at;
-  if (idleMs < MIN_IDLE_MS) return null;
-
-  const stagesGained = state.stage - snapshot.stage;
-  const goldGained = state.gold - snapshot.gold;
-  const chestsGained = state.pendingChestCount - snapshot.pendingChestCount;
-
-  const levelUps = state.heroes
-    .filter((hero) => {
-      const previousLevel = snapshot.heroLevels[hero.id];
-      return previousLevel !== undefined && hero.level > previousLevel;
-    })
-    .map((hero) => `${hero.name} Lv.${hero.level}`);
-
-  const parts: string[] = [];
-
-  if (stagesGained > 0) {
-    parts.push(`+${stagesGained} stage${stagesGained > 1 ? 's' : ''}`);
-  }
-
-  if (goldGained > 0) {
-    parts.push(`+${goldGained} ouro`);
-  }
-
-  if (chestsGained > 0) {
-    parts.push(`+${chestsGained} baú${chestsGained > 1 ? 's' : ''}`);
-  }
-
-  if (levelUps.length > 0) {
-    parts.push(levelUps.join(', '));
-  }
-
-  if (parts.length === 0) return null;
-
-  return `Enquanto você estava fora: ${parts.join(' · ')}`;
+  const progress = buildIdleProgress(snapshot, state);
+  return progress?.toastLine ?? null;
 }

@@ -8,7 +8,7 @@ Documento de referência com oportunidades de evolução do Side Hero (v0.8+), p
 ~26 de 53 inimigos de campanha têm sprite dedicado; o restante usa goblin genérico. Pipeline pronto (`EnemySpriteCatalog` + cópia automática em `copy-assets.mjs`).
 
 ### 2. Onboarding da primeira sessão
-Sem tutorial guiado. Sugestão: 3–4 tooltips contextuais (primeiro baú, pontos de herói, primeira melhoria).
+Ver `140-onboarding-primeira-sessao.md`. Tooltips contextuais: baú, pausa, pontos de herói, melhorias.
 
 ### 3. Fase D — UX inline e drag-and-drop
 Ver `139-fase-d-ux-inline-drag-drop.md`. Equipar sem modal empilhado; arrastar gear, stash e formação.
@@ -19,21 +19,21 @@ Arquivos como `denver` e `goblin_left` devem bater com o inimigo correto no rost
 ## Dopamina e loop idle
 
 ### 5. Wow Strip mais inteligente
-Prioridade visual clara, evitar repetir banner dispensado, destaque maior para loot raro/epic.
+Ver `141-wow-strip-idle-polish.md`. Prioridade visual clara, evitar repetir banner dispensado, destaque maior para loot raro/epic.
 
 ### 6. Relatório idle enriquecido
-Resumo de sessão na Wow Strip (ouro, fases, baús, level-ups).
+Ver `141-wow-strip-idle-polish.md`. Resumo de sessão na Wow Strip (ouro, fases, baús, level-ups).
 
 ### 7. Meta entre temporadas
-Persistência leve além do wipe (cosmético, bônus, árvore permanente).
+Ver `142-meta-entre-temporadas.md`. Persistência leve além do wipe (selos, bônus permanentes, árvore de legado).
 
 ## Combate e profundidade
 
 ### 8. Ícones de skills
-Várias skills ainda usam placeholder (`attack`/`weapon`).
+Ver `143-skill-icons-elemental-feedback.md`. Resolver inteligente de ícones por elemento/tipo de skill.
 
 ### 9. Feedback elemental na UI
-Resistências e fraquezas visíveis no card do inimigo e nas skills.
+Ver `143-skill-icons-elemental-feedback.md`. Resistências e fraquezas no card do inimigo e nas skills.
 
 ### 10. Bench com propósito
 Sinergia de composição, substituto automático ao cair, XP de reserva mais claro na UI.

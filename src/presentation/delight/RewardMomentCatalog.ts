@@ -44,3 +44,28 @@ export const REWARD_AUTO_DISMISS_MS: Partial<Record<RewardMomentKind, number>> =
 };
 
 export const LOOT_CELEBRATION_RARITIES = new Set(['rare', 'epic', 'legendary', 'mythic']);
+
+export const LOOT_RARITY_PRIORITY_BOOST: Record<string, number> = {
+  rare: 8,
+  epic: 22,
+  legendary: 38,
+  mythic: 52,
+};
+
+export const LOOT_RARITY_DISPLAY_MS: Record<string, number> = {
+  rare: 3200,
+  epic: 4800,
+  legendary: 5800,
+  mythic: 6800,
+};
+
+const LOOT_RARITY_LABELS: Record<string, string> = {
+  rare: 'Raro',
+  epic: 'Épico',
+  legendary: 'Lendário',
+  mythic: 'Mítico',
+};
+
+export function lootRarityLabel(rarity: string): string {
+  return LOOT_RARITY_LABELS[rarity] ?? rarity;
+}

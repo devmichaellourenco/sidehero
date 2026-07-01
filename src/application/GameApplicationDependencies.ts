@@ -4,7 +4,7 @@ import { ICombatService } from '../domain/services/ICombatService';
 import { ILootService } from '../domain/services/ILootService';
 import { LoadoutOptimizer } from '../domain/services/LoadoutOptimizer';
 import { DivineForgeService } from '../domain/services/DivineForgeService';
-import { PartyService } from '../domain/party/PartyService';
+import { MetaService } from '../../domain/meta/MetaService';
 import { ChestService } from '../domain/services/ChestService';
 import { ShopService } from '../domain/services/ShopService';
 import { UpgradeService } from '../domain/upgrades/UpgradeService';
@@ -22,4 +22,5 @@ export interface GameApplicationDependencies {
   partyService: PartyService;
   divineForgeService: DivineForgeService;
   presenter: GameStatePresenter;
+  metaService: MetaService;
 }

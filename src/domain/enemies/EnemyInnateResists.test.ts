@@ -6,6 +6,7 @@ describe('EnemyInnateResists', () => {
     const profile = resolveEnemyInnateResists('minor_fire_elemental');
 
     expect(profile.fire).toBeGreaterThanOrEqual(20);
+    expect(profile.cold).toBeLessThan(0);
   });
 
   it('infere tema por id quando não há override', () => {

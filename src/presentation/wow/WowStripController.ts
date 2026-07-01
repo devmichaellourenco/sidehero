@@ -2,6 +2,7 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { RewardMoment } from '../delight/types/RewardMoment';
 import { buildPersistentWowBanners, WowPersistentHandlers } from './WowBannerBuilder';
 import { mapRewardMomentToWowBanner } from './WowMomentMapper';
+import { filterUndismissedBanners, recordWowBannerDismiss } from './WowStripDismissStore';
 import { WowStripRenderer } from './WowStripRenderer';
 import { buildWowStripSnapshot } from './WowStripRenderPolicy';
 import { WowBanner, WowBannerAction } from './types/WowBanner';
@@ -34,7 +35,7 @@ export class WowStripController {
 
   sync(state: GameStateDto, handlers: WowPersistentHandlers): void {
     this.handlers = handlers;
-    this.persistent = buildPersistentWowBanners(state, handlers);
+    this.persistent = filterUndismissedBanners(buildPersistentWowBanners(state, handlers));
     this.clampActiveIndex();
     this.renderIfNeeded();
     this.ensureRotation();
@@ -43,6 +44,7 @@ export class WowStripController {
   enqueueMoment(moment: RewardMoment): void {
     const banner = mapRewardMomentToWowBanner(moment);
     if (!banner) return;
+    if (this.ephemeral.some((entry) => entry.id === banner.id)) return;
 
     if (moment.cta) {
       banner.cta = {
@@ -52,11 +54,9 @@ export class WowStripController {
       banner.onCtaClick = moment.cta.onClick;
     }
 
-    if (this.ephemeral.some((entry) => entry.id === banner.id)) return;
-
     this.ephemeral.push(banner);
     this.ephemeral.sort((left, right) => right.priority - left.priority);
-    this.clampActiveIndex();
+    this.focusBanner(banner);
     this.renderIfNeeded(true);
     this.ensureRotation();
   }
@@ -74,6 +74,14 @@ export class WowStripController {
 
   private handleClick(event: Event): void {
     const target = event.target as HTMLElement;
+
+    const dismissEl = target.closest('[data-wow-dismiss]') as HTMLElement | null;
+    if (dismissEl) {
+      event.stopPropagation();
+      const active = this.banners[this.activeIndex];
+      if (active) this.dismissBanner(active);
+      return;
+    }
 
     const dot = target.closest('[data-wow-dot]') as HTMLElement | null;
     if (dot) {
@@ -98,7 +106,9 @@ export class WowStripController {
         this.dispatchAction(action);
       }
 
-      if (active?.persistence === 'ephemeral') {
+      if (action === 'dismiss' && active) {
+        this.dismissBanner(active);
+      } else if (active?.persistence === 'ephemeral') {
         this.removeEphemeral(active.id);
       }
       return;
@@ -113,10 +123,36 @@ export class WowStripController {
         } else {
           this.dispatchAction(active.cta.action);
         }
-        if (active.persistence === 'ephemeral') {
+        if (active.cta.action === 'dismiss') {
+          this.dismissBanner(active);
+        } else if (active.persistence === 'ephemeral') {
           this.removeEphemeral(active.id);
         }
       }
+    }
+  }
+
+  private dismissBanner(banner: WowBanner): void {
+    recordWowBannerDismiss(banner);
+
+    if (banner.persistence === 'ephemeral') {
+      this.removeEphemeral(banner.id);
+      return;
+    }
+
+    this.persistent = this.persistent.filter((entry) => entry.id !== banner.id);
+    this.clampActiveIndex();
+    this.renderIfNeeded(true);
+  }
+
+  private focusBanner(banner: WowBanner): void {
+    const merged = this.banners;
+    const index = merged.findIndex((entry) => entry.id === banner.id);
+    if (index === -1) return;
+
+    const current = merged[this.activeIndex];
+    if (!current || banner.priority >= current.priority) {
+      this.activeIndex = index;
     }
   }
 

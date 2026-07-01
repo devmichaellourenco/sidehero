@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCombatResistTooltipLine, mapCombatResistSummary } from './CombatResistMapper';
+import { formatCombatResistTooltipLine, formatCombatWeaknessTooltipLine, mapCombatResistSummary } from './CombatResistMapper';
 
 describe('CombatResistMapper', () => {
   it('agrega all-elemental nas resistências efetivas', () => {
@@ -23,7 +23,7 @@ describe('CombatResistMapper', () => {
       chaos: 0,
     });
 
-    expect(line).toBe('Resist: Fogo 12% · Raio 8%');
+    expect(line).toBe('Resiste: Fogo −12% dano · Raio −8% dano');
   });
 
   it('retorna null quando não há resistências', () => {
@@ -35,5 +35,16 @@ describe('CombatResistMapper', () => {
         chaos: 0,
       }),
     ).toBeNull();
+  });
+
+  it('formata fraquezas negativas', () => {
+    const line = formatCombatWeaknessTooltipLine({
+      fire: 0,
+      cold: -20,
+      lightning: 0,
+      chaos: 0,
+    });
+
+    expect(line).toBe('Vulnerável: Gelo +20% dano');
   });
 });

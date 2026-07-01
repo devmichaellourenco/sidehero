@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { buildPersistentWowBanners } from './WowBannerBuilder';
 import { mapRewardMomentToWowBanner } from './WowMomentMapper';
+import { REWARD_KIND_PRIORITY } from '../delight/RewardMomentCatalog';
+import { RewardMomentDetector } from '../delight/RewardMomentDetector';
 
 const noop = () => undefined;
 
@@ -50,5 +52,44 @@ describe('WowMomentMapper', () => {
     });
 
     expect(banner).toBeNull();
+  });
+
+  it('mapeia relatório idle com CTA de dismiss', () => {
+    const banner = mapRewardMomentToWowBanner({
+      id: 'idle-1',
+      kind: 'idle_report',
+      tier: 'macro',
+      priority: 65,
+      title: 'Progresso Offline',
+      tone: 'idle',
+      detailLines: ['12 min fora', '+2 fases'],
+    });
+
+    expect(banner?.kind).toBe('idle-report');
+    expect(banner?.cta).toEqual({ label: 'Entendi', action: 'dismiss' });
+    expect(banner?.detailLines).toHaveLength(2);
+  });
+});
+
+describe('loot priority', () => {
+  it('eleva prioridade de loot épico acima do raro', () => {
+    const detector = new RewardMomentDetector();
+    const rare = detector.buildLootMoment({
+      id: 'a',
+      name: 'Espada',
+      rarity: 'rare',
+      slot: 'weapon',
+      stats: {},
+    } as GameStateDto['inventory'][number]);
+    const epic = detector.buildLootMoment({
+      id: 'b',
+      name: 'Armadura',
+      rarity: 'epic',
+      slot: 'armor',
+      stats: {},
+    } as GameStateDto['inventory'][number]);
+
+    expect(rare?.priority).toBeLessThan(epic?.priority ?? 0);
+    expect(epic?.priority).toBeGreaterThan(REWARD_KIND_PRIORITY.loot_received);
   });
 });

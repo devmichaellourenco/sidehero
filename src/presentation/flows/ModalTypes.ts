@@ -10,4 +10,5 @@ export type ModalView =
   | { type: 'settings' }
   | { type: 'shop' }
   | { type: 'upgrades' }
+  | { type: 'meta-legacy' }
   | { type: 'divine-forge' };

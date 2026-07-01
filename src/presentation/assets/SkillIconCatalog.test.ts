@@ -14,10 +14,10 @@ describe('SkillIconCatalog', () => {
     expect(getSkillIconPath('blessing')).toBe(ASSETS.skills.blessing);
     expect(getSkillIconPath('thrust')).toBe(ASSETS.skills.thrust);
     expect(getSkillIconPath('shield_bash')).toBe(ASSETS.skills.attack);
-    expect(getSkillIconPath('reaver_cleave')).toBe(ASSETS.skills.attack);
-    expect(getSkillIconPath('reaver_fury')).toBe(ASSETS.skills.attack);
-    expect(getSkillIconPath('guardian_strike')).toBe(ASSETS.skills.weapon);
-    expect(getSkillIconPath('goblin_stab')).toBe(ASSETS.skills.attack);
+    expect(getSkillIconPath('reaver_cleave')).toBe(ASSETS.skills.power_attack);
+    expect(getSkillIconPath('reaver_fury')).toBe(ASSETS.skills.power_attack);
+    expect(getSkillIconPath('guardian_strike')).toBe(ASSETS.skills.power_attack);
+    expect(getSkillIconPath('goblin_stab')).toBe(ASSETS.skills.thrust);
   });
 
   it('resolve nome amigável para tooltip', () => {

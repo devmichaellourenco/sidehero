@@ -18,6 +18,7 @@ import { PartyFlow } from '../flows/PartyFlow';
 import { ModalStackController } from '../flows/ModalStackController';
 import { ModalView } from '../flows/ModalTypes';
 import { ShopFlow } from '../flows/ShopFlow';
+import { MetaLegacyFlow } from '../flows/MetaLegacyFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation } from '../helpers/HeroNavigationHelper';
 import { WowStripController } from '../wow/WowStripController';
@@ -51,6 +52,7 @@ import { GamePreferences } from './GamePreferences';
 import { SettingsModalRenderer } from './SettingsModalRenderer';
 import { ShopModalRenderer } from './ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
+import { MetaLegacyModalRenderer } from './MetaLegacyModalRenderer';
 import { ToastController } from './ToastController';
 import { RewardPresentationController } from '../delight/RewardPresentationController';
 import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
@@ -60,6 +62,8 @@ import { SkillCooldownDisplayAnimator } from './SkillCooldownDisplayAnimator';
 import { DivineForgeFlow } from '../flows/DivineForgeFlow';
 import { InlineEquipController, InlineEquipHandlers } from '../gear/InlineEquipController';
 import { bindGearDragDrop } from '../gear/GearDragDropBinder';
+import { OnboardingController } from '../onboarding/OnboardingController';
+import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -117,6 +121,7 @@ export class GameViewController {
   private readonly settingsModal: SettingsModalRenderer;
   private readonly shopModal: ShopModalRenderer;
   private readonly upgradeTreeModal: UpgradeTreeModalRenderer;
+  private readonly metaLegacyModal: MetaLegacyModalRenderer;
   private readonly divineForgeModal: DivineForgeModalRenderer;
   private readonly toasts: ToastController;
   private readonly rewards: RewardPresentationController;
@@ -129,6 +134,7 @@ export class GameViewController {
 
   private readonly heroDetailFlow: HeroDetailFlow;
   private readonly shopFlow: ShopFlow;
+  private readonly metaLegacyFlow: MetaLegacyFlow;
   private readonly gearEquipFlow: GearEquipFlow;
   private readonly gearStorageFlow: GearStorageFlow;
   private readonly divineForgeFlow: DivineForgeFlow;
@@ -137,6 +143,7 @@ export class GameViewController {
   private readonly partyFlow: PartyFlow;
   private readonly modalStackController: ModalStackController;
   private readonly inlineEquip = new InlineEquipController();
+  private readonly onboarding = new OnboardingController();
 
   private shownIntermissionKey: string | null = null;
   private intermissionResuming = false;
@@ -212,6 +219,7 @@ export class GameViewController {
     this.settingsModal = new SettingsModalRenderer();
     this.shopModal = new ShopModalRenderer();
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
+    this.metaLegacyModal = new MetaLegacyModalRenderer();
     this.divineForgeModal = new DivineForgeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.wowStrip = new WowStripController(this.wowStripEl);
@@ -269,6 +277,13 @@ export class GameViewController {
       (state) => this.render(state),
       () => this.refreshModalIfOpen(),
       () => this.enforceUpgradeGates(),
+    );
+
+    this.metaLegacyFlow = new MetaLegacyFlow(
+      this.client,
+      this.toasts,
+      (state) => this.render(state),
+      () => this.refreshModalIfOpen(),
     );
 
     this.gearEquipFlow = new GearEquipFlow(
@@ -329,8 +344,10 @@ export class GameViewController {
       this.settingsModal,
       this.shopModal,
       this.upgradeTreeModal,
+      this.metaLegacyModal,
       this.divineForgeModal,
       this.shopFlow,
+      this.metaLegacyFlow,
       this.divineForgeFlow,
       this.gearEquipFlow,
       this.gearStorageFlow,
@@ -340,6 +357,9 @@ export class GameViewController {
       (key, value) => this.handlePreferenceChange(key, value),
       () => {
         void this.openUpgradesModal();
+      },
+      () => {
+        void this.openMetaLegacyModal();
       },
       (heroId, slot) => this.openEquipPickerFromSlot(heroId, slot),
       (gearId) => this.openEquipPickerFromGear(gearId),
@@ -416,6 +436,7 @@ export class GameViewController {
     });
 
     this.pauseLoadoutBtn.addEventListener('click', () => {
+      this.dismissOnboardingStep('pause-loadout');
       this.stopAutoBattle();
       void this.pauseForLoadout();
     });
@@ -423,6 +444,7 @@ export class GameViewController {
       void this.continueFromLoadoutPause();
     });
     this.openChestBtn.addEventListener('click', () => {
+      this.dismissOnboardingStep('first-chest');
       void this.chestLootFlow.openNextChest();
     });
     this.openAllChestsBtn.addEventListener('click', () => {
@@ -442,6 +464,7 @@ export class GameViewController {
       void this.openShopModal();
     });
     this.openUpgradesBtn.addEventListener('click', () => {
+      this.dismissOnboardingStep('first-upgrade');
       void this.openUpgradesModal();
     });
 
@@ -537,7 +560,7 @@ export class GameViewController {
     if (this.contextInvalidated) return;
 
     const confirmed = window.confirm(
-      'Iniciar um novo jogo? Todo o progresso atual será apagado.',
+      'Iniciar um novo jogo? O progresso da temporada será apagado, mas seus selos de legado permanecem.',
     );
     if (!confirmed) return;
 
@@ -592,6 +615,7 @@ export class GameViewController {
   private async openUpgradesModal(): Promise<void> {
     if (this.contextInvalidated) return;
 
+    this.dismissOnboardingStep('first-upgrade');
     this.closeHeroDrawer();
     const response = await this.client.send({ type: 'GET_UPGRADE_TREE' });
     if (!response.ok) {
@@ -604,6 +628,18 @@ export class GameViewController {
     this.state = state;
     this.modalStack.length = 0;
     this.pushModal({ type: 'upgrades' });
+  }
+
+  private async openMetaLegacyModal(): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    this.closeHeroDrawer();
+    const state = await this.metaLegacyFlow.loadTree();
+    if (!state) return;
+
+    this.state = state;
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'meta-legacy' });
   }
 
   private syncAutoBattleTimer(): void {
@@ -800,8 +836,12 @@ export class GameViewController {
       return;
     }
 
-    this.render(response.state);
+    this.render(response.state, { previousState: this.state });
     this.showCombatFloats(response.combatFloats);
+
+    if (response.sigilsAwarded && response.sigilsAwarded > 0) {
+      this.toasts.show(`+${response.sigilsAwarded} selos de legado!`, 'victory');
+    }
   }
 
   private showCombatFloats(combatFloats?: CombatFloatingEventDto[]): void {
@@ -978,6 +1018,11 @@ export class GameViewController {
 
     if (this.heroDrawerHeroId !== heroId) {
       this.inlineEquip.close();
+    }
+
+    const hero = this.state?.heroes.find((entry) => entry.id === heroId);
+    if (hero?.hasUnspentPoints) {
+      this.dismissOnboardingStep('hero-points');
     }
 
     this.heroDrawerHeroId = heroId;
@@ -1436,68 +1481,78 @@ export class GameViewController {
     const previous =
       options.previousState !== undefined ? options.previousState : this.state;
 
-    this.showCombatIntermissionOverlay(previous, state);
+    const mergedState =
+      !state.meta && previous?.meta ? { ...state, meta: previous.meta } : state;
 
-    if (!state.combatIntermission) {
+    this.showCombatIntermissionOverlay(previous, mergedState);
+
+    if (!mergedState.combatIntermission) {
       this.shownIntermissionKey = null;
     }
 
     if (previous && !options.skipChestToast) {
       this.rewards.detectStateChange(
         previous,
-        state,
+        mergedState,
         {
           onChestAvailable: () => {
             if (this.isAdvanceBlocked()) return;
             void this.chestLootFlow.openNextChest();
           },
         },
-        { skipVictoryRewards: Boolean(state.combatIntermission) },
+        { skipVictoryRewards: Boolean(mergedState.combatIntermission) },
       );
     }
 
-    this.state = state;
+    this.state = mergedState;
 
-    this.syncLoadoutPauseBanner(state);
+    this.syncLoadoutPauseBanner(mergedState);
 
-    this.hud.render(state, {
+    this.hud.render(mergedState, {
       openingChests: this.chestLootFlow.openingChests,
-      loadoutPauseActive: this.isManualLoadoutPause(state),
+      loadoutPauseActive: this.isManualLoadoutPause(mergedState),
     });
 
-    this.wowStrip.sync(state, {
+    this.wowStrip.sync(mergedState, {
       onChestOpen: () => {
+        this.dismissOnboardingStep('first-chest');
         void this.chestLootFlow.openNextChest();
       },
       onInventoryOpen: () => this.openInventoryModal(),
       onUpgradesOpen: () => {
+        this.dismissOnboardingStep('first-upgrade');
         void this.openUpgradesModal();
       },
       onHeroPointsOpen: () => {
-        const hero = state.heroes.find((entry) => entry.hasUnspentPoints);
-        if (hero) this.openHeroDrawer(hero.id, 'attributes');
+        const hero = mergedState.heroes.find((entry) => entry.hasUnspentPoints);
+        if (hero) {
+          this.dismissOnboardingStep('hero-points');
+          this.openHeroDrawer(hero.id, 'attributes');
+        }
       },
       onNewGame: () => {
         void this.startNewGame();
       },
     });
 
-    this.battleStrip.render(state);
-    this.skillCooldownAnimator.setCombatActive(Boolean(state.phaseRun && !state.canEditParty));
-    if (shouldRenderHeroPanel(previous, state)) {
-      this.heroPanel.render(state);
-    } else if (!state.canEditParty) {
-      this.heroPanel.patchCombatCooldowns(state);
+    this.battleStrip.render(mergedState);
+    this.skillCooldownAnimator.setCombatActive(
+      Boolean(mergedState.phaseRun && !mergedState.canEditParty),
+    );
+    if (shouldRenderHeroPanel(previous, mergedState)) {
+      this.heroPanel.render(mergedState);
+    } else if (!mergedState.canEditParty) {
+      this.heroPanel.patchCombatCooldowns(mergedState);
     }
 
-    this.shopFlow.state.shopRefreshUnlocked = state.featureFlags.shopRefresh;
+    this.shopFlow.state.shopRefreshUnlocked = mergedState.featureFlags.shopRefresh;
     this.shopFlow.state.shopRefreshRemaining = Math.max(
       0,
-      state.shopRefreshLimit - state.shopRefreshUses,
+      mergedState.shopRefreshLimit - mergedState.shopRefreshUses,
     );
 
     const logMessages = filterBattleLogMessages(
-      state.battleLog.map((entry) => entry.message),
+      mergedState.battleLog.map((entry) => entry.message),
       this.prefsController.logFilterImportant,
     );
 
@@ -1508,5 +1563,31 @@ export class GameViewController {
 
     this.enforceUpgradeGates();
     this.chestLootFlow.scheduleAutoOpenChests();
+    this.syncOnboarding(mergedState);
+  }
+
+  private dismissOnboardingStep(stepId: OnboardingStepId): void {
+    this.onboarding.dismissStep(stepId);
+  }
+
+  private syncOnboarding(state: GameStateDto): void {
+    const step = resolveOnboardingStep(state, this.onboarding.getDismissedSteps());
+    if (!step) {
+      this.onboarding.hide();
+      return;
+    }
+
+    this.onboarding.show(step, {
+      onDismissStep: (stepId) => {
+        this.dismissOnboardingStep(stepId);
+        if (this.state) {
+          this.syncOnboarding(this.state);
+        }
+      },
+      onSkipAll: () => {
+        this.onboarding.skipAll();
+        this.onboarding.hide();
+      },
+    });
   }
 }

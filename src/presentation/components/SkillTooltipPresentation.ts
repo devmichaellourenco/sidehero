@@ -1,7 +1,10 @@
 import { HeroActiveSkillStatDto } from '../../application/dto/GameStateDto';
 import { SkillBranchDto } from '../../application/dto/SkillNodeDto';
+import { getSkillElementLabel, getSkillPrimaryElement } from '../../domain/progression/combat/SkillElementResolver';
+import { renderElementPip } from './ElementPipPresentation';
 
 export interface SkillTooltipData {
+  id: string;
   name: string;
   branch: SkillBranchDto;
   branchLabel: string;
@@ -19,6 +22,18 @@ function escapeHtml(text: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function renderSkillElementMeta(skill: SkillTooltipData): string {
+  const element = getSkillPrimaryElement(skill.id);
+  if (!element || element === 'physical') {
+    return '';
+  }
+
+  return ` ${renderElementPip(element, {
+    variant: 'skill',
+    title: getSkillElementLabel(skill.id) ?? undefined,
+  })}`;
 }
 
 function renderBattleStats(battleStats: HeroActiveSkillStatDto[]): string {
@@ -56,7 +71,7 @@ export function renderSkillTooltipContent(skill: SkillTooltipData): string {
     <span class="hero-skill-chip-tooltip" role="tooltip">
       <strong class="hero-skill-chip-tooltip-name">${escapeHtml(skill.name)}</strong>
       <span class="hero-skill-chip-tooltip-meta">
-        ${escapeHtml(skill.branchLabel)} · ${escapeHtml(skill.scopeLabel)} · ${escapeHtml(skill.scalingLabel)}
+        ${escapeHtml(skill.branchLabel)} · ${escapeHtml(skill.scopeLabel)} · ${escapeHtml(skill.scalingLabel)}${renderSkillElementMeta(skill)}
       </span>
       <p class="hero-skill-chip-tooltip-desc">${escapeHtml(skill.description)}</p>
       ${renderBattleStats(skill.battleStats)}

@@ -6,8 +6,12 @@ import {
   detectNewlyUnlockedFeatures,
   getFeatureUnlockMeta,
 } from './FeatureUnlockCatalog';
+import { buildIdleProgress } from '../components/IdleProgressSummary';
 import {
   LOOT_CELEBRATION_RARITIES,
+  LOOT_RARITY_DISPLAY_MS,
+  LOOT_RARITY_PRIORITY_BOOST,
+  lootRarityLabel,
   REWARD_AUTO_DISMISS_MS,
   REWARD_KIND_PRIORITY,
   REWARD_KIND_TIER,
@@ -180,11 +184,16 @@ export class RewardMomentDetector {
   buildLootMoment(gear: GearDto): RewardMoment | null {
     if (!LOOT_CELEBRATION_RARITIES.has(gear.rarity)) return null;
 
+    const rarityBoost = LOOT_RARITY_PRIORITY_BOOST[gear.rarity] ?? 0;
+
     return buildMoment('loot_received', {
       title: gear.name,
-      subtitle: `Item ${gear.rarity} recebido`,
+      subtitle: `${lootRarityLabel(gear.rarity)} recebido`,
       tone: 'loot',
       gear,
+      detailLines: [lootRarityLabel(gear.rarity)],
+      priority: REWARD_KIND_PRIORITY.loot_received + rarityBoost,
+      autoDismissMs: LOOT_RARITY_DISPLAY_MS[gear.rarity] ?? REWARD_AUTO_DISMISS_MS.loot_received,
     });
   }
 
@@ -249,38 +258,17 @@ export class RewardMomentDetector {
   }
 
   buildIdleReport(snapshot: PanelSnapshot, state: GameStateDto): RewardMoment | null {
-    const stagesGained = state.stage - snapshot.stage;
-    const goldGained = state.gold - snapshot.gold;
-    const chestsGained = state.pendingChestCount - snapshot.pendingChestCount;
-
-    const levelUps = state.heroes
-      .filter((hero) => {
-        const previousLevel = snapshot.heroLevels[hero.id];
-        return previousLevel !== undefined && hero.level > previousLevel;
-      })
-      .map((hero) => `${hero.emoji} ${hero.name} Lv.${hero.level}`);
-
-    const detailLines: string[] = [];
-
-    if (stagesGained > 0) {
-      detailLines.push(`+${stagesGained} tier${stagesGained > 1 ? 's' : ''}`);
-    }
-    if (goldGained > 0) {
-      detailLines.push(`+${goldGained} ouro`);
-    }
-    if (chestsGained > 0) {
-      detailLines.push(`+${chestsGained} baú${chestsGained > 1 ? 's' : ''}`);
-    }
-    detailLines.push(...levelUps);
-
-    if (detailLines.length === 0) return null;
+    const progress = buildIdleProgress(snapshot, state);
+    if (!progress) return null;
 
     return buildMoment('idle_report', {
       title: 'Progresso Offline',
       subtitle: 'Sua party continuou avançando',
       tone: 'idle',
       iconUrl: getAssetUrl(ASSETS.ui.energy),
-      detailLines,
+      detailLines: progress.detailLines,
+      priority: REWARD_KIND_PRIORITY.idle_report,
+      autoDismissMs: REWARD_AUTO_DISMISS_MS.idle_report,
     });
   }
 

@@ -1,6 +1,7 @@
+import { ASSETS, getAssetUrl, getGearFrameSprite } from './AssetCatalog';
+import { resolveSkillIconKey } from './SkillIconResolver';
 import { getEnemySkillDisplay } from '../../domain/progression/combat/EnemySkillDisplayCatalog';
 import { getSkillById } from '../../domain/progression/SkillCatalog';
-import { ASSETS, getAssetUrl, getGearFrameSprite } from './AssetCatalog';
 
 export type SkillBranchKey = 'offense' | 'defense' | 'utility';
 
@@ -10,56 +11,8 @@ const SKILL_BRANCH_FRAME: Record<SkillBranchKey, 'common' | 'rare' | 'epic'> = {
   utility: 'epic',
 };
 
-type SkillIconKey = keyof typeof ASSETS.skills;
-
-const SKILL_ICON_BY_ID: Record<string, SkillIconKey> = {
-  basic_attack: 'attack',
-  power_attack: 'power_attack',
-  shield_bash: 'attack',
-  thrust:'thrust',
-  reaver_cleave: 'attack',
-  reaver_fury: 'attack',
-  guardian_strike: 'weapon',
-  goblin_stab: 'attack',
-  orc_smash: 'attack',
-  dragon_bite: 'attack',
-  iron_skin: 'iron_skin',
-  evasion: 'evasion',
-
-  fireball: 'fireball',
-  arcane_bolt: 'arcane_bolt',
-  vitality: 'vitality',
-  smite: 'magic',
-  arcane_touch: 'magic',
-  pyro_inferno: 'magic',
-  pyro_ember: 'magic',
-  arcane_surge: 'magic',
-  arcane_focus: 'magic',
-  inquisitor_judgment: 'magic',
-  inquisitor_flame: 'magic',
-  slime_acid: 'magic',
-  wraith_drain: 'magic',
-  dragon_breath: 'magic',
-  wild_bite: 'attack',
-  poison_spit: 'magic',
-  ground_slam: 'attack',
-  regenerate: 'heal',
-  saci_fire: 'fireball',
-  saci_wind: 'arcane_bolt',
-
-  minor_heal: 'heal',
-  oracle_mend: 'heal',
-  oracle_sanctuary: 'heal',
-  guardian_resolve: 'heal',
-
-  blessing: 'blessing',
-  wraith_curse: 'debuff',
-  mana_shield: 'mana_shield',
-};
-
 export function getSkillIconPath(skillId: string): string {
-  const key = SKILL_ICON_BY_ID[skillId] ?? 'magic';
-  return ASSETS.skills[key];
+  return ASSETS.skills[resolveSkillIconKey(skillId)];
 }
 
 export function getSkillIconUrl(skillId: string): string {

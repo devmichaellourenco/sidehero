@@ -19,6 +19,8 @@ export class WowStripRenderer {
     }
 
     const enterClass = options.animate ? ' wow-banner--enter' : '';
+    const rarityClass = banner.gear ? ` wow-banner--loot-${banner.gear.rarity}` : '';
+    const dismissMarkup = this.buildDismissMarkup(banner);
 
     const dots =
       banners.length > 1
@@ -54,7 +56,8 @@ export class WowStripRenderer {
 
     root.innerHTML = `
       <div class="wow-strip-bg" aria-hidden="true"></div>
-      <article class="wow-banner wow-banner--${banner.tone}${enterClass}" data-wow-banner-id="${banner.id}">
+      <article class="wow-banner wow-banner--${banner.tone}${rarityClass}${enterClass}" data-wow-banner-id="${banner.id}">
+        ${dismissMarkup}
         <div class="wow-banner-glow" aria-hidden="true"></div>
         <div class="wow-banner-visual">${this.buildVisualMarkup(banner)}</div>
         <div class="wow-banner-copy">
@@ -68,6 +71,12 @@ export class WowStripRenderer {
       </article>
       ${dots}
     `;
+  }
+
+  private buildDismissMarkup(banner: WowBanner): string {
+    if (banner.cta) return '';
+
+    return `<button type="button" class="wow-banner-dismiss" data-wow-dismiss aria-label="Dispensar banner">×</button>`;
   }
 
   private buildVisualMarkup(banner: WowBanner): string {

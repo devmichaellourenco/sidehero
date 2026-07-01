@@ -12,12 +12,16 @@ import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { PartyService } from '../../domain/party/PartyService';
 import { GameStatePresenter } from '../../application/presenters/GameStatePresenter';
 import { ChromeStorageGameRepository } from '../storage/ChromeStorageGameRepository';
+import { ChromeStorageMetaRepository } from '../storage/ChromeStorageMetaRepository';
+import { MetaService } from '../../domain/meta/MetaService';
 
 let appInstance: GameApplication | null = null;
 
 function createDependencies(): GameApplicationDependencies {
   const lootService = new LootService();
   const upgradeService = new UpgradeService();
+
+  const metaService = new MetaService();
 
   return {
     combatService: new CombatService(),
@@ -31,13 +35,15 @@ function createDependencies(): GameApplicationDependencies {
     partyService: new PartyService(),
     divineForgeService: new DivineForgeService(lootService),
     presenter: new GameStatePresenter(upgradeService),
+    metaService,
   };
 }
 
 export function createGameApplication(): GameApplication {
   if (!appInstance) {
     const repository = new ChromeStorageGameRepository();
-    appInstance = new GameApplication(repository, createDependencies());
+    const metaRepository = new ChromeStorageMetaRepository();
+    appInstance = new GameApplication(repository, metaRepository, createDependencies());
   }
   return appInstance;
 }

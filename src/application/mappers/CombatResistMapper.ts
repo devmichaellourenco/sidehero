@@ -34,12 +34,29 @@ export function formatCombatResistTooltipLine(summary: CombatResistSummaryDto): 
       return [];
     }
 
-    return [`${DAMAGE_ELEMENT_LABELS[key]} ${Math.round(value)}%`];
+    return [`${DAMAGE_ELEMENT_LABELS[key]} −${Math.round(value)}% dano`];
   });
 
   if (parts.length === 0) {
     return null;
   }
 
-  return `Resist: ${parts.join(' · ')}`;
+  return `Resiste: ${parts.join(' · ')}`;
+}
+
+export function formatCombatWeaknessTooltipLine(summary: CombatResistSummaryDto): string | null {
+  const parts = RESIST_KEYS.flatMap((key) => {
+    const value = summary[key];
+    if (value >= 0) {
+      return [];
+    }
+
+    return [`${DAMAGE_ELEMENT_LABELS[key]} +${Math.abs(Math.round(value))}% dano`];
+  });
+
+  if (parts.length === 0) {
+    return null;
+  }
+
+  return `Vulnerável: ${parts.join(' · ')}`;
 }

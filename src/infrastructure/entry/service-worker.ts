@@ -90,7 +90,12 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         restartCurrentPhase: message.restartCurrentPhase,
       });
       await syncBackgroundTickAlarm(result.state.upgradeLevels);
-      return { ok: true, state: result.state, combatFloats: result.combatFloats };
+      return {
+        ok: true,
+        state: result.state,
+        combatFloats: result.combatFloats,
+        sigilsAwarded: result.sigilsAwarded,
+      };
     }
     case 'RESUME_COMBAT_INTERMISSION': {
       const result = await app.resumeCombatIntermission.execute();
@@ -186,6 +191,25 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         upgradeNodes: result.nodes,
         purchasableUpgradeCount: result.purchasableCount,
         purchasedUpgradeId: result.purchasedUpgradeId,
+      };
+    }
+    case 'GET_META_TREE': {
+      const result = await app.getMetaTree.execute();
+      return {
+        ok: true,
+        state: result.state,
+        metaNodes: result.nodes,
+        purchasableMetaCount: result.purchasableMetaCount,
+      };
+    }
+    case 'PURCHASE_META_UPGRADE': {
+      const result = await app.purchaseMetaUpgrade.execute(message.upgradeId);
+      return {
+        ok: true,
+        state: result.state,
+        metaNodes: result.nodes,
+        purchasableMetaCount: result.purchasableMetaCount,
+        purchasedMetaUpgradeId: result.purchasedMetaUpgradeId,
       };
     }
     case 'SPEND_IMPROVEMENT_POINT': {

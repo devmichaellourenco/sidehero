@@ -33,7 +33,10 @@ import { DestroyGearUseCase } from './use-cases/DestroyGearUseCase';
 import { FuseGearInForgeUseCase } from './use-cases/FuseGearInForgeUseCase';
 import { SalvageGearInForgeUseCase } from './use-cases/SalvageGearInForgeUseCase';
 import { GameApplicationDependencies } from './GameApplicationDependencies';
-import { PartyService } from '../domain/party/PartyService';
+import { GetMetaTreeUseCase } from './use-cases/GetMetaTreeUseCase';
+import { PurchaseMetaUpgradeUseCase } from './use-cases/PurchaseMetaUpgradeUseCase';
+import { MetaService } from '../domain/meta/MetaService';
+import { IMetaProgressRepository } from '../domain/repositories/IMetaProgressRepository';
 
 export class GameApplication {
   readonly getState: GetGameStateUseCase;
@@ -69,8 +72,14 @@ export class GameApplication {
   readonly destroyGear: DestroyGearUseCase;
   readonly fuseGearInForge: FuseGearInForgeUseCase;
   readonly salvageGearInForge: SalvageGearInForgeUseCase;
+  readonly getMetaTree: GetMetaTreeUseCase;
+  readonly purchaseMetaUpgrade: PurchaseMetaUpgradeUseCase;
 
-  constructor(repository: IGameStateRepository, deps: GameApplicationDependencies) {
+  constructor(
+    repository: IGameStateRepository,
+    metaRepository: IMetaProgressRepository,
+    deps: GameApplicationDependencies,
+  ) {
     const {
       combatService,
       chestService,
@@ -82,13 +91,20 @@ export class GameApplication {
       partyService,
       divineForgeService,
       presenter,
+      metaService,
     } = deps;
 
-    this.getState = new GetGameStateUseCase(repository, presenter);
+    this.getState = new GetGameStateUseCase(repository, metaRepository, metaService, presenter);
     this.getCampaignOverview = new GetCampaignOverviewUseCase(repository, presenter);
     this.selectPhase = new SelectPhaseUseCase(repository, presenter);
-    this.newGame = new NewGameUseCase(repository, presenter);
-    this.tick = new TickGameUseCase(repository, combatService, presenter);
+    this.newGame = new NewGameUseCase(repository, metaRepository, metaService, presenter);
+    this.tick = new TickGameUseCase(
+      repository,
+      metaRepository,
+      metaService,
+      combatService,
+      presenter,
+    );
     this.resumeCombatIntermission = new ResumeCombatIntermissionUseCase(repository, presenter);
     this.pauseForLoadout = new PauseForLoadoutUseCase(repository, presenter);
     this.openChest = new OpenChestUseCase(repository, chestService, presenter);
@@ -129,6 +145,18 @@ export class GameApplication {
       repository,
       presenter,
       divineForgeService,
+    );
+    this.getMetaTree = new GetMetaTreeUseCase(
+      repository,
+      metaRepository,
+      metaService,
+      presenter,
+    );
+    this.purchaseMetaUpgrade = new PurchaseMetaUpgradeUseCase(
+      repository,
+      metaRepository,
+      metaService,
+      presenter,
     );
   }
 }

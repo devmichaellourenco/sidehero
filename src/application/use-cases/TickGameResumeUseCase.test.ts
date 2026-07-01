@@ -5,6 +5,8 @@ import { CombatPipeline } from '../../domain/services/combat/CombatPipeline';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
+import { MetaService } from '../../domain/meta/MetaService';
+import { MemoryMetaRepository } from '../testing/MemoryMetaRepository';
 import { TickGameUseCase } from './TickGameUseCase';
 
 class MemoryRepository implements IGameStateRepository {
@@ -21,6 +23,7 @@ class MemoryRepository implements IGameStateRepository {
 
 describe('TickGameUseCase — retomada de pausa', () => {
   const presenter = new GameStatePresenter(new UpgradeService());
+  const metaService = new MetaService();
 
   it('reinicia a fase atual ao continuar pausa manual', async () => {
     const phaseRun = PhaseRun.start('1-1').advanceWave();
@@ -32,7 +35,13 @@ describe('TickGameUseCase — retomada de pausa', () => {
         .withPhaseRestartOnResume(true),
     );
 
-    const tick = new TickGameUseCase(repository, new CombatPipeline(), presenter);
+    const tick = new TickGameUseCase(
+      repository,
+      new MemoryMetaRepository(),
+      metaService,
+      new CombatPipeline(),
+      presenter,
+    );
     const result = await tick.execute(1, { restartCurrentPhase: true });
 
     expect(result.state.loadoutEditOpen).toBe(false);
@@ -50,7 +59,13 @@ describe('TickGameUseCase — retomada de pausa', () => {
         .withPhaseRestartOnResume(true),
     );
 
-    const tick = new TickGameUseCase(repository, new CombatPipeline(), presenter);
+    const tick = new TickGameUseCase(
+      repository,
+      new MemoryMetaRepository(),
+      metaService,
+      new CombatPipeline(),
+      presenter,
+    );
     const result = await tick.execute(1, { restartCurrentPhase: true });
 
     expect(result.state.loadoutEditOpen).toBe(false);
