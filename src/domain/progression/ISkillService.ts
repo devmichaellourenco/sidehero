@@ -7,7 +7,17 @@ export interface ISkillService {
   buildAscensionTree(hero: Hero, unlockedBattleSkillSlots: number): SkillNodeView[];
   allocate(hero: Hero, skillId: SkillId): Hero;
   allocateAscension(hero: Hero, skillId: SkillId): Hero;
-  activate(hero: Hero, skillId: SkillId, unlockedBattleSkillSlots: number): Hero;
+  canAssignSkillToSlot(
+    hero: Hero,
+    skillId: SkillId,
+    slotIndex: number,
+    unlockedBattleSkillSlots: number,
+  ): boolean;
+  assignSkillToSlot(
+    hero: Hero,
+    skillId: SkillId,
+    slotIndex: number,
+    unlockedBattleSkillSlots: number,
+  ): Hero;
   deactivate(hero: Hero, skillId: SkillId): Hero;
-  getActivationCost(hero: Hero, skillId: SkillId): number;
 }

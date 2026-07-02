@@ -1024,6 +1024,7 @@ export function listHeroCombatSkills(hero: Hero): CombatSkillDefinition[] {
   const props = hero.toProps();
 
   return props.equippedSkillIds
+    .filter((skillId): skillId is SkillId => Boolean(skillId))
     .filter((skillId) => (props.skillRanks[skillId] ?? 0) >= 1)
     .map((skillId) => heroSkillMap.get(skillId))
     .filter((skill): skill is CombatSkillDefinition => skill !== undefined);

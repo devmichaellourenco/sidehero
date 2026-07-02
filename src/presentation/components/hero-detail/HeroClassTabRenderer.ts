@@ -142,8 +142,6 @@ function renderAscensionSkillNodes(
     .map((node) =>
       renderSkillCard(node, {
         allocateAttr: 'data-ascension-allocate',
-        activateAttr: 'data-skill-activate',
-        deactivateAttr: 'data-skill-deactivate',
         canAllocate: node.canAllocateRank,
       }),
     )

@@ -1,4 +1,5 @@
 import { Hero } from '../../domain/entities/Hero';
+import { MAX_ACTIVE_BATTLE_SKILLS, toSkillSlotLayout } from '../../domain/progression/SkillBattleSlots';
 import { getSkillById } from '../../domain/progression/SkillCatalog';
 import { HeroActiveSkillDto } from '../dto/GameStateDto';
 import { SkillBranchDto } from '../dto/SkillNodeDto';
@@ -32,6 +33,19 @@ function mapOne(hero: Hero, skillId: string): HeroActiveSkillDto {
   };
 }
 
-export function mapHeroActiveSkills(hero: Hero): HeroActiveSkillDto[] {
-  return hero.toProps().equippedSkillIds.map((skillId) => mapOne(hero, skillId));
+export function mapHeroActiveSkills(
+  hero: Hero,
+  unlockedSlotCount: number,
+): (HeroActiveSkillDto | null)[] {
+  const layout = toSkillSlotLayout(hero.toProps().equippedSkillIds, unlockedSlotCount);
+
+  return Array.from({ length: MAX_ACTIVE_BATTLE_SKILLS }, (_, index) => {
+    if (index >= layout.length) return null;
+    const skillId = layout[index];
+    return skillId ? mapOne(hero, skillId) : null;
+  });
+}
+
+export function mapHeroActiveSkillById(hero: Hero, skillId: string): HeroActiveSkillDto {
+  return mapOne(hero, skillId);
 }

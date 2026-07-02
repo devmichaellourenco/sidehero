@@ -23,7 +23,7 @@ export interface HeroProps {
   unspentImprovementPoints: number;
   unspentAscensionPoints: number;
   skillRanks: Record<SkillId, number>;
-  equippedSkillIds: SkillId[];
+  equippedSkillIds: (SkillId | null)[];
   ascensionId: AscensionId | null;
 }
 
@@ -176,6 +176,10 @@ export class Hero {
 
   activateSkill(skillId: SkillId, maxActiveSlots: number): Hero {
     return this.withProgression(this.progression.activateSkill(skillId, maxActiveSlots));
+  }
+
+  assignSkillToSlot(skillId: SkillId, slotIndex: number, unlockedSlotCount: number): Hero {
+    return this.withProgression(this.progression.assignSkillToSlot(skillId, slotIndex, unlockedSlotCount));
   }
 
   deactivateSkill(skillId: SkillId): Hero {

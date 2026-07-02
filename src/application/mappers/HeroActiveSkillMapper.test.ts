@@ -6,13 +6,13 @@ import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
 describe('HeroActiveSkillMapper', () => {
   it('enriquece ataque básico com descrição e stats de combate', () => {
     const hero = Hero.createStarter('hero-1', 'knight', 'Galneon');
-    const [basicAttack] = mapHeroActiveSkills(hero);
+    const basicAttack = mapHeroActiveSkills(hero, 1)[0];
 
-    expect(basicAttack.id).toBe('basic_attack');
-    expect(basicAttack.name).toBe('Ataque Básico');
-    expect(basicAttack.description).toContain('ATK');
-    expect(basicAttack.battleStats.some((stat) => stat.label === 'Tipo')).toBe(true);
-    expect(basicAttack.battleStats.some((stat) => stat.label === 'Poder' && stat.value.includes('ATK'))).toBe(
+    expect(basicAttack?.id).toBe('basic_attack');
+    expect(basicAttack?.name).toBe('Ataque Básico');
+    expect(basicAttack?.description).toContain('ATK');
+    expect(basicAttack?.battleStats.some((stat) => stat.label === 'Tipo')).toBe(true);
+    expect(basicAttack?.battleStats.some((stat) => stat.label === 'Poder' && stat.value.includes('ATK'))).toBe(
       true,
     );
   });
@@ -28,8 +28,8 @@ describe('HeroActiveSkillMapper', () => {
       equippedSkillIds: [BASIC_ATTACK_SKILL_ID, 'fireball'],
     });
 
-    const fireball = mapHeroActiveSkills(hero).find((skill) => skill.id === 'fireball');
-    expect(fireball).toBeDefined();
+    const fireball = mapHeroActiveSkills(hero, 3)[1];
+    expect(fireball?.id).toBe('fireball');
     expect(fireball?.battleStats.some((stat) => stat.label === 'Poder' && stat.value.startsWith('~'))).toBe(
       true,
     );

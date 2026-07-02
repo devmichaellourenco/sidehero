@@ -1,9 +1,8 @@
 import { Hero } from '../entities/Hero';
-import { calculateSkillActivationCost } from './SkillActivationRules';
 import { HeroRequirementEvaluator } from '../requirements/HeroRequirementEvaluator';
 import { ISkillService } from './ISkillService';
 import { BASIC_ATTACK_SKILL_ID } from './combat/BasicAttackSkill';
-import { hasFreeBattleSkillSlot, MAX_ACTIVE_BATTLE_SKILLS } from './SkillBattleSlots';
+import { MAX_ACTIVE_BATTLE_SKILLS, toSkillSlotLayout } from './SkillBattleSlots';
 import { getSkillById, getSkillsForHero, SKILL_CATALOG } from './SkillCatalog';
 import { SkillDefinition } from './SkillDefinition';
 import { SkillId } from './SkillId';
@@ -16,9 +15,7 @@ export interface SkillNodeView {
   status: SkillNodeStatus;
   isEquipped: boolean;
   canAllocateRank: boolean;
-  canActivate: boolean;
-  canDeactivate: boolean;
-  activationCost: number;
+  canEquip: boolean;
   requirements: { label: string; met: boolean }[];
 }
 
@@ -45,6 +42,7 @@ export class SkillService implements ISkillService {
     const skills = getSkillsForHero(hero.heroClass, props.ascensionId).filter(
       (skill) => skill.pointType === pointType,
     );
+    const equippedLayout = toSkillSlotLayout(props.equippedSkillIds, unlockedBattleSkillSlots);
 
     return skills.map((definition) => {
       const currentRank = props.skillRanks[definition.id] ?? 0;
@@ -60,7 +58,7 @@ export class SkillService implements ISkillService {
         status = 'ready';
       }
 
-      const isEquipped = props.equippedSkillIds.includes(definition.id);
+      const isEquipped = equippedLayout.includes(definition.id);
 
       const canAllocateRank =
         pointType === 'improvement'
@@ -73,13 +71,8 @@ export class SkillService implements ISkillService {
         status,
         isEquipped,
         canAllocateRank,
-        canActivate:
-          definition.id !== BASIC_ATTACK_SKILL_ID &&
-          currentRank > 0 &&
-          !isEquipped &&
-          hasFreeBattleSkillSlot(props.equippedSkillIds, unlockedBattleSkillSlots),
-        canDeactivate: isEquipped && definition.id !== BASIC_ATTACK_SKILL_ID,
-        activationCost: calculateSkillActivationCost(Math.max(1, currentRank + 1)),
+        canEquip:
+          definition.id !== BASIC_ATTACK_SKILL_ID && currentRank > 0,
         requirements,
       };
     });
@@ -126,26 +119,36 @@ export class SkillService implements ISkillService {
     return hero.spendAscensionPointOnSkill(skillId);
   }
 
-  canActivate(hero: Hero, skillId: SkillId, unlockedBattleSkillSlots: number): boolean {
+  canAssignSkillToSlot(
+    hero: Hero,
+    skillId: SkillId,
+    slotIndex: number,
+    unlockedBattleSkillSlots: number,
+  ): boolean {
     if (skillId === BASIC_ATTACK_SKILL_ID) return false;
+    if ((hero.toProps().skillRanks[skillId] ?? 0) < 1) return false;
 
-    const props = hero.toProps();
-    if ((props.skillRanks[skillId] ?? 0) < 1) return false;
-    if (props.equippedSkillIds.includes(skillId)) return false;
-    return hasFreeBattleSkillSlot(props.equippedSkillIds, unlockedBattleSkillSlots);
+    const layout = toSkillSlotLayout(hero.toProps().equippedSkillIds, unlockedBattleSkillSlots);
+    return slotIndex >= 1 && slotIndex < layout.length;
+  }
+
+  assignSkillToSlot(
+    hero: Hero,
+    skillId: SkillId,
+    slotIndex: number,
+    unlockedBattleSkillSlots: number,
+  ): Hero {
+    if (!this.canAssignSkillToSlot(hero, skillId, slotIndex, unlockedBattleSkillSlots)) {
+      throw new Error('Não é possível alocar esta skill no slot');
+    }
+
+    const slotLimit = Math.max(1, Math.min(MAX_ACTIVE_BATTLE_SKILLS, unlockedBattleSkillSlots));
+    return hero.assignSkillToSlot(skillId, slotIndex, slotLimit);
   }
 
   canDeactivate(hero: Hero, skillId: SkillId): boolean {
     if (skillId === BASIC_ATTACK_SKILL_ID) return false;
-    return hero.toProps().equippedSkillIds.includes(skillId);
-  }
-
-  activate(hero: Hero, skillId: SkillId, unlockedBattleSkillSlots: number): Hero {
-    if (!this.canActivate(hero, skillId, unlockedBattleSkillSlots)) {
-      throw new Error('Skill não desbloqueada');
-    }
-    const slotLimit = Math.max(1, Math.min(MAX_ACTIVE_BATTLE_SKILLS, unlockedBattleSkillSlots));
-    return hero.activateSkill(skillId, slotLimit);
+    return hero.toProps().equippedSkillIds.some((id) => id === skillId);
   }
 
   deactivate(hero: Hero, skillId: SkillId): Hero {
@@ -153,11 +156,6 @@ export class SkillService implements ISkillService {
       throw new Error('Esta skill não pode ser desativada');
     }
     return hero.deactivateSkill(skillId);
-  }
-
-  getActivationCost(hero: Hero, skillId: SkillId): number {
-    const rank = (hero.toProps().skillRanks[skillId] ?? 0) + 1;
-    return calculateSkillActivationCost(Math.max(1, rank));
   }
 
   listCatalog(): SkillDefinition[] {

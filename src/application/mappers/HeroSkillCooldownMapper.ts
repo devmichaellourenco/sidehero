@@ -14,7 +14,10 @@ export function mapHeroSkillCooldowns(
   const key = combatantKey('hero', hero.id);
   const tracker = SkillCooldownTracker.fromMap(skillCooldowns);
 
-  return hero.toProps().equippedSkillIds.map((skillId) => {
+  return hero
+    .toProps()
+    .equippedSkillIds.filter((skillId): skillId is string => Boolean(skillId))
+    .map((skillId) => {
     const definition = getHeroCombatSkill(skillId);
     const secondsRemaining = tracker.getRemaining(key, skillId);
     const baseCooldown = definition ? getCooldownSeconds(definition) : 0;

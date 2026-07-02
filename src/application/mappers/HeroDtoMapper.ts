@@ -80,7 +80,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     unspentAscensionPoints: props.unspentAscensionPoints,
     skillRanks: { ...props.skillRanks },
     equippedSkillIds: [...props.equippedSkillIds],
-    activeSkills: mapHeroActiveSkills(hero),
+    activeSkills: mapHeroActiveSkills(hero, getUnlockedBattleSkillSlotCount(upgradeLevels)),
     maxActiveSkills: MAX_ACTIVE_BATTLE_SKILLS,
     unlockedActiveSkillSlots: getUnlockedBattleSkillSlotCount(upgradeLevels),
     ascensionId: props.ascensionId,

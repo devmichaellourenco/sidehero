@@ -38,7 +38,7 @@ export type GameMessage =
   | { type: 'PURCHASE_META_UPGRADE'; upgradeId: string }
   | { type: 'SPEND_IMPROVEMENT_POINT'; heroId: string; target: SpendTargetMessage }
   | { type: 'GET_HERO_SKILL_TREE'; heroId: string }
-  | { type: 'ACTIVATE_SKILL'; heroId: string; skillId: string }
+  | { type: 'ASSIGN_SKILL_SLOT'; heroId: string; skillId: string; slotIndex: number }
   | { type: 'DEACTIVATE_SKILL'; heroId: string; skillId: string }
   | { type: 'ASCEND_CLASS'; heroId: string; ascensionId: string }
   | { type: 'GET_HERO_ASCENSION_TREE'; heroId: string }

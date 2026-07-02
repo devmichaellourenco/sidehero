@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  assignSkillToLayout,
   BASE_UNLOCKED_BATTLE_SKILL_SLOTS,
   getUnlockedBattleSkillSlotCount,
   hasFreeBattleSkillSlot,
+  toSkillSlotLayout,
   trimEquippedSkillIds,
 } from './SkillBattleSlots';
 
@@ -25,5 +27,12 @@ describe('SkillBattleSlots', () => {
     expect(
       trimEquippedSkillIds(['basic_attack', 'power_attack', 'evasion'], 1),
     ).toEqual(['basic_attack']);
+  });
+
+  it('substitui skill em slot específico', () => {
+    const layout = toSkillSlotLayout(['basic_attack', 'power_attack'], 3);
+    const next = assignSkillToLayout(layout, 'evasion', 1);
+
+    expect(next).toEqual(['basic_attack', 'evasion', null]);
   });
 });

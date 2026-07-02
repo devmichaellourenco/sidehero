@@ -98,6 +98,7 @@ export class GameHudController {
   private readonly goldValueEl: HTMLElement;
   private readonly chestValueEl: HTMLElement;
   private readonly chestProgressValueEl: HTMLElement;
+  private readonly heroesBadgeEl: HTMLElement;
   private readonly inventoryBadgeEl: HTMLElement;
   private readonly stashBadgeEl: HTMLElement;
   private readonly optimizeBadgeEl: HTMLElement;
@@ -111,6 +112,8 @@ export class GameHudController {
     private readonly goldLabel: HTMLElement,
     private readonly chestLabel: HTMLElement,
     private readonly chestProgressLabel: HTMLElement,
+    private readonly openHeroesBtn: HTMLButtonElement,
+    private readonly openFormationBtn: HTMLButtonElement,
     private readonly openInventoryBtn: HTMLButtonElement,
     private readonly openStashBtn: HTMLButtonElement,
     private readonly openForgeBtn: HTMLButtonElement,
@@ -137,6 +140,11 @@ export class GameHudController {
       ASSETS.ui.chest,
       'Próximo baú',
     );
+
+    ensureButtonIcon(this.openHeroesBtn, ASSETS.ui.energy);
+    this.heroesBadgeEl = ensureBadge(this.openHeroesBtn);
+
+    ensureButtonIcon(this.openFormationBtn, ASSETS.ui.defense);
 
     ensureButtonIcon(this.openInventoryBtn, ASSETS.ui.inventory);
     this.inventoryBadgeEl = ensureBadge(this.openInventoryBtn);
@@ -192,6 +200,15 @@ export class GameHudController {
 
     const upgradeCount = countUpgradeItems(state);
     const flags = state.featureFlags;
+    const heroPointsCount = state.heroes.filter((hero) => hero.hasUnspentPoints).length;
+
+    this.openHeroesBtn.title =
+      heroPointsCount > 0
+        ? `Heróis (${heroPointsCount} com pontos para gastar)`
+        : 'Heróis';
+    updateBadge(this.heroesBadgeEl, heroPointsCount);
+
+    this.openFormationBtn.title = `Formação (${state.activeParty.length}/3)`;
 
     this.openInventoryBtn.title = `Inventário (${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit})`;
     updateBadge(

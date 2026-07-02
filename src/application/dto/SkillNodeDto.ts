@@ -22,9 +22,7 @@ export interface SkillNodeDto {
   status: SkillNodeStatusDto;
   isEquipped: boolean;
   canAllocateRank: boolean;
-  canActivate: boolean;
-  canDeactivate: boolean;
-  activationCost: number;
+  canEquip: boolean;
   scaling: string;
   scalingLabel: string;
   battleStats: HeroActiveSkillStatDto[];

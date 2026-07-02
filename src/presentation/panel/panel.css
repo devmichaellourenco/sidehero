@@ -1392,8 +1392,7 @@ button.hero-skill-chip:hover {
   line-height: 1;
 }
 
-button.hero-skill-chip > .hero-skill-chip-tooltip,
-.skill-card > .hero-skill-chip-tooltip {
+[data-skill-tooltip] > .hero-skill-chip-tooltip {
   display: none;
 }
 
@@ -1473,6 +1472,34 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.hero-skill-chip-tooltip-status {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.hero-skill-chip-tooltip-reqs {
+  margin: 0;
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-skill-chip-tooltip-req {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.hero-skill-chip-tooltip-req--met {
+  color: #8fd694;
+}
+
+.hero-skill-chip-tooltip-req--unmet {
+  color: #e88a8a;
 }
 
 .skill-chip-tooltip-portal {
@@ -1581,6 +1608,79 @@ button.hero-skill-chip > .hero-skill-chip-tooltip,
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+
+.heroes-panel-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.heroes-panel-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.heroes-formation-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 197, 66, 0.35);
+  background: rgba(245, 197, 66, 0.12);
+  color: #fff8e7;
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.heroes-formation-btn:hover {
+  filter: brightness(1.08);
+}
+
+.heroes-formation-count {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(12, 18, 36, 0.65);
+  color: var(--gold);
+  font-size: 10px;
+}
+
+.heroes-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-roster-card {
+  margin-bottom: 0;
+}
+
+.hero-roster-upgrade {
+  flex-shrink: 0;
+}
+
+.hero-roster-badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero-roster-badge--active {
+  color: #9dffb0;
+  background: rgba(120, 220, 140, 0.18);
+}
+
+.formation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .heroes-panel-tabs {
@@ -4134,15 +4234,16 @@ body.modal-open {
 
 .hero-detail-title {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
 }
 
-.hero-detail-title h3 {
+.hero-detail-title .hero-level {
   font-family: var(--font-heading);
-  font-size: 16px;
+  font-size: 13px;
+  color: var(--gold);
 }
 
 .hero-detail-stats {
@@ -4619,11 +4720,98 @@ body.modal-open {
   font-weight: 700;
 }
 
+.hero-detail-header {
+  flex-shrink: 0;
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(14, 22, 42, 0.98));
+}
+
+.hero-detail-header .hero-detail {
+  margin-bottom: 0;
+}
+
 .hero-detail-tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(14, 22, 42, 0.98));
+}
+
+.hero-detail-loadout {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
+}
+
+.hero-detail-loadout .hero-loadout-strip--featured {
+  margin-top: 0;
+}
+
+.hero-detail-loadout-hint {
+  margin: 8px 0 0;
+}
+
+.hero-detail-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.hero-detail-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px 16px;
+}
+
+.hero-detail-panel:has(.hero-skills-tab) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.hero-skills-tab {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.hero-skills-tab-header {
+  flex-shrink: 0;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
+}
+
+.hero-skills-tab-meta {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
+}
+
+.hero-skills-tab-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px 16px;
+}
+
+.hero-skills-tab-scroll .skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .hero-tab {
@@ -4694,14 +4882,261 @@ body.modal-open {
 
 .skill-list {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .skill-card {
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(12, 18, 36, 0.55);
+}
+
+.skill-card--compact {
+  padding: 8px;
+}
+
+.skill-card-compact {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.skill-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.skill-card-essentials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.skill-card--compact .skill-card-visual {
+  flex: 0 0 52px;
+}
+
+.skill-card--compact .skill-card-icon-wrap {
+  min-height: 48px;
+  --slot-frame-size: 3px;
+}
+
+.skill-card-icon-wrap--locked .skill-card-icon {
+  opacity: 0.45;
+  filter: grayscale(0.35) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
+}
+
+.skill-card-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 12, 20, 0.35);
+  pointer-events: none;
+}
+
+.skill-card-lock .loadout-slot-lock {
+  font-size: 14px;
+}
+
+.skill-card--compact .skill-card-icon {
+  width: 44px;
+}
+
+.hero-detail-layout .skill-card--compact .skill-card-visual {
+  flex: 0 0 42px;
+}
+
+.hero-detail-layout .skill-card--compact .skill-card-icon-wrap {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  --slot-frame-size: 4px;
+}
+
+.hero-detail-layout .skill-card--compact .skill-card-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.hero-detail-layout .skill-card--compact .skill-card-lock .loadout-slot-lock {
+  font-size: 12px;
+}
+
+.skill-card--compact .skill-card-header h4 {
+  font-size: 12px;
+}
+
+.skill-actions--compact button {
+  min-height: 26px;
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
+.skill-card--compact:focus-visible {
+  outline: 2px solid rgba(245, 197, 66, 0.55);
+  outline-offset: 2px;
+}
+
+.hero-skill-slot-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 0;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 16, 32, 0.55);
+}
+
+.hero-skill-slot-bar-label {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.hero-skill-slot-bar-slots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-skill-slot-bar__slot {
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.hero-skill-slot-bar__slot--fixed {
+  cursor: help;
+  opacity: 0.95;
+}
+
+.hero-skill-slot-bar__slot--fixed:hover {
+  filter: brightness(1.08);
+}
+
+.hero-skill-slot-bar-hint {
+  margin: 0;
+}
+
+.skill-slot-instruction {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 197, 66, 0.45);
+  background: rgba(245, 197, 66, 0.12);
+  color: #f8e6a8;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  animation: skill-slot-instruction-in 0.2s ease;
+}
+
+.skill-slot-instruction[hidden] {
+  display: none;
+}
+
+@keyframes skill-slot-instruction-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-detail-layout.hero-skills-tab--skill-picked .hero-skill-slot-bar__slot--pick-target {
+  animation: skill-slot-pulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 0 2px rgba(126, 231, 135, 0.65);
+}
+
+.hero-detail-layout.hero-skills-tab--slot-picked .skill-card--pick-target {
+  box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.55);
+  transform: translateY(-1px);
+}
+
+@keyframes skill-slot-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(126, 231, 135, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(126, 231, 135, 0.85);
+  }
+}
+
+.hero-skill-slot-bar__plus {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(126, 231, 135, 0.75);
+  pointer-events: none;
+}
+
+.hero-skill-slot-bar__remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 138, 138, 0.65);
+  background: rgba(40, 12, 16, 0.95);
+  color: #f0b0b0;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hero-skill-slot-bar__remove:hover {
+  background: rgba(120, 28, 36, 0.95);
+  color: #fff;
+}
+
+.skill-card-equip-hint {
+  font-size: 9px;
+  color: rgba(126, 231, 135, 0.85);
+  letter-spacing: 0.02em;
+}
+
+.hero-skill-slot-bar__slot--selected {
+  outline: 2px solid rgba(245, 197, 66, 0.75);
+  outline-offset: 2px;
+}
+
+.hero-skill-slot-bar__slot--drop-target {
+  filter: brightness(1.2);
+  box-shadow: 0 0 0 2px rgba(126, 231, 135, 0.55);
+}
+
+.skill-card--equippable {
+  cursor: grab;
+}
+
+.skill-card--dragging {
+  opacity: 0.55;
+}
+
+.skill-card--equippable:focus-visible {
+  outline: 2px solid rgba(126, 231, 135, 0.55);
+  outline-offset: 2px;
 }
 
 .skill-card--offense {
@@ -4745,6 +5180,7 @@ body.modal-open {
 }
 
 .skill-card-icon-wrap {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4782,6 +5218,11 @@ body.modal-open {
   font-weight: 600;
   color: var(--gold);
   white-space: nowrap;
+}
+
+.skill-card-rank--muted {
+  color: var(--muted);
+  font-weight: 500;
 }
 
 .skill-card-badges {
@@ -5569,24 +6010,24 @@ body.modal-open {
 }
 
 .actions-icon-bar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
   width: 100%;
 }
 
 .action-icon-btn {
   position: relative;
-  width: 42px;
-  height: 42px;
+  width: 100%;
+  height: auto;
+  min-height: 42px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   background: rgba(18, 28, 48, 0.92);
   color: #fff8e7;
   font-size: 16px;
-  line-height: 42px;
+  line-height: 1.2;
   text-align: center;
   cursor: pointer;
 }
@@ -5596,29 +6037,28 @@ body.modal-open {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  width: 54px;
-  height: auto;
-  min-height: 50px;
-  padding: 6px 4px 5px;
+  gap: 6px;
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 8px 10px;
   line-height: 1;
 }
 
 .action-icon-btn--menu .btn-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
 }
 
 .action-icon-btn--menu .action-icon-glyph {
-  font-size: 20px;
+  font-size: 28px;
 }
 
 .action-icon-label {
-  max-width: 52px;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -5627,6 +6067,14 @@ body.modal-open {
 
 .action-icon-btn--campaign {
   border-color: rgba(120, 180, 255, 0.35);
+}
+
+.action-icon-btn--heroes {
+  border-color: rgba(255, 180, 120, 0.4);
+}
+
+.action-icon-btn--formation {
+  border-color: rgba(120, 200, 255, 0.38);
 }
 
 .action-icon-btn--shop {
@@ -5792,8 +6240,10 @@ body.modal-open {
 .hero-drawer-body {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  padding: 10px 12px 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
 }
 
 .hero-drawer-close {

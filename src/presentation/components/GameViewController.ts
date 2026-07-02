@@ -34,7 +34,6 @@ import { BattleStripRenderer } from './BattleStripRenderer';
 import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
 import { GearSlotKey } from './GearPresentation';
 import { HeroDetailModalRenderer, HeroDetailTab } from './HeroDetailModalRenderer';
-import { HeroPanelRenderer } from './HeroPanelRenderer';
 import { shouldRenderHeroPanel } from './HeroPanelRenderPolicy';
 import { InventoryModalRenderer } from './InventoryModalRenderer';
 import { StashModalRenderer } from './StashModalRenderer';
@@ -101,6 +100,8 @@ export class GameViewController {
   private readonly wowStripEl: HTMLElement;
   private readonly battleLogOverlayEl: HTMLElement;
   private readonly openBattleLogBtn: HTMLButtonElement;
+  private readonly openHeroesBtn: HTMLButtonElement;
+  private readonly openFormationBtn: HTMLButtonElement;
   private readonly heroesContainerEl: HTMLElement;
 
   private readonly battleStripEl: HTMLElement;
@@ -108,8 +109,6 @@ export class GameViewController {
   private readonly battleFloats: BattleFloatingTextController;
   private readonly battleImpacts: BattleImpactFeedbackController;
   private readonly victoryFlow: BattleVictoryFlow;
-  private readonly heroPanelsEl: HTMLElement;
-  private readonly heroPanel: HeroPanelRenderer;
   private readonly modal: ModalController;
   private readonly heroDrawer: SideDrawerController;
   private readonly inventoryModal: InventoryModalRenderer;
@@ -157,6 +156,8 @@ export class GameViewController {
     this.chestProgressLabel = root.querySelector('#chest-progress-label')!;
     this.battleLog = document.querySelector('#battle-log')!;
     this.openBattleLogBtn = root.querySelector('#open-battle-log-btn') as HTMLButtonElement;
+    this.openHeroesBtn = root.querySelector('#open-heroes-btn') as HTMLButtonElement;
+    this.openFormationBtn = root.querySelector('#open-formation-btn') as HTMLButtonElement;
     this.pauseLoadoutBtn = root.querySelector('#pause-loadout-btn') as HTMLButtonElement;
     this.continueLoadoutBtn = root.querySelector('#continue-loadout-btn') as HTMLButtonElement;
     this.openChestBtn = root.querySelector('#open-chest-btn') as HTMLButtonElement;
@@ -194,9 +195,6 @@ export class GameViewController {
       this.battleStripEl,
       new BattleVictoryOverlayRenderer(),
     );
-
-    this.heroPanelsEl = root.querySelector('#hero-panels')!;
-    this.heroPanel = new HeroPanelRenderer(this.heroPanelsEl);
 
     this.modal = new ModalController(
       root.querySelector('#modal-root')!,
@@ -244,6 +242,8 @@ export class GameViewController {
       this.goldLabel,
       this.chestLabel,
       this.chestProgressLabel,
+      this.openHeroesBtn,
+      this.openFormationBtn,
       this.openInventoryBtn,
       this.openStashBtn,
       this.openForgeBtn,
@@ -457,6 +457,13 @@ export class GameViewController {
       void this.gearEquipFlow.optimizeLoadout();
     });
     this.openSettingsBtn.addEventListener('click', () => this.openSettingsModal());
+    this.openHeroesBtn.addEventListener('click', () => {
+      this.dismissOnboardingStep('hero-points');
+      this.openHeroesModal();
+    });
+    this.openFormationBtn.addEventListener('click', () => {
+      this.openFormationModal();
+    });
     this.openCampaignBtn.addEventListener('click', () => {
       void this.openCampaignModal();
     });
@@ -1121,12 +1128,15 @@ export class GameViewController {
   }
 
   private bindHeroPanelDelegation(): void {
-    this.heroPanelsEl.addEventListener('click', (event) => {
-      const partyTarget = (event.target as HTMLElement).closest(
+    this.modal.getBody().addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      const topView = this.modalStack[this.modalStack.length - 1];
+
+      const partyTarget = target.closest(
         '[data-party-add], [data-party-remove], [data-party-swap]',
       ) as HTMLElement | null;
 
-      if (partyTarget) {
+      if (partyTarget && topView?.type === 'formation') {
         event.preventDefault();
         event.stopPropagation();
         if (partyTarget instanceof HTMLButtonElement && partyTarget.disabled) return;
@@ -1134,20 +1144,22 @@ export class GameViewController {
         return;
       }
 
-      const target = (event.target as HTMLElement).closest(
+      if (topView?.type !== 'heroes') return;
+
+      const heroPanelTarget = target.closest(
         '.equipment-slot-clickable, [data-hero-skills-open], [data-open-upgrades], [data-hero-open]',
       ) as HTMLElement | null;
 
-      if (!target) return;
+      if (!heroPanelTarget) return;
 
-      if (target.hasAttribute('data-open-upgrades')) {
+      if (heroPanelTarget.hasAttribute('data-open-upgrades')) {
         event.preventDefault();
         event.stopPropagation();
         void this.openUpgradesModal();
         return;
       }
 
-      const skillsHeroId = target.getAttribute('data-hero-skills-open');
+      const skillsHeroId = heroPanelTarget.getAttribute('data-hero-skills-open');
       if (skillsHeroId) {
         event.preventDefault();
         event.stopPropagation();
@@ -1155,22 +1167,46 @@ export class GameViewController {
         return;
       }
 
-      if (target.classList.contains('equipment-slot-clickable')) {
+      if (heroPanelTarget.classList.contains('equipment-slot-clickable')) {
         event.preventDefault();
         event.stopPropagation();
-        const heroId = target.getAttribute('data-hero');
-        const slot = target.getAttribute('data-slot');
+        const heroId = heroPanelTarget.getAttribute('data-hero');
+        const slot = heroPanelTarget.getAttribute('data-slot');
         if (heroId && slot) {
           this.openEquipPickerFromSlot(heroId, slot);
         }
         return;
       }
 
-      const heroId = target.getAttribute('data-hero-open');
+      const heroId = heroPanelTarget.getAttribute('data-hero-open');
       if (heroId) {
         this.openHeroDetailModal(heroId);
       }
     });
+  }
+
+  private openHeroesModal(): void {
+    if (
+      this.modal.isOpen() &&
+      this.modalStack[this.modalStack.length - 1]?.type === 'heroes'
+    ) {
+      return;
+    }
+
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'heroes' });
+  }
+
+  private openFormationModal(): void {
+    if (
+      this.modal.isOpen() &&
+      this.modalStack[this.modalStack.length - 1]?.type === 'formation'
+    ) {
+      return;
+    }
+
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'formation' });
   }
 
   private async handlePartyPanelAction(target: HTMLElement): Promise<void> {
@@ -1540,11 +1576,6 @@ export class GameViewController {
     this.skillCooldownAnimator.setCombatActive(
       Boolean(mergedState.phaseRun && !mergedState.canEditParty),
     );
-    if (shouldRenderHeroPanel(previous, mergedState)) {
-      this.heroPanel.render(mergedState);
-    } else if (!mergedState.canEditParty) {
-      this.heroPanel.patchCombatCooldowns(mergedState);
-    }
 
     this.shopFlow.state.shopRefreshUnlocked = mergedState.featureFlags.shopRefresh;
     this.shopFlow.state.shopRefreshRemaining = Math.max(
@@ -1571,6 +1602,19 @@ export class GameViewController {
       this.modalStack[this.modalStack.length - 1]?.type === 'shop'
     ) {
       void this.shopFlow.ensureFreshOffers(mergedState);
+    }
+    if (
+      this.modal.isOpen() &&
+      this.modalStack[this.modalStack.length - 1]?.type === 'formation'
+    ) {
+      this.renderModalTop();
+    }
+    if (
+      this.modal.isOpen() &&
+      this.modalStack[this.modalStack.length - 1]?.type === 'heroes' &&
+      shouldRenderHeroPanel(previous, mergedState)
+    ) {
+      this.renderModalTop();
     }
     this.syncOnboarding(mergedState);
   }

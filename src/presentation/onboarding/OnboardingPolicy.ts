@@ -36,8 +36,8 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
   'hero-points': {
     title: 'Pontos de herói',
     message:
-      'Um herói tem pontos para gastar. Abra o card do herói e vá em Progressão para distribuir atributos.',
-    anchorSelector: '#hero-panels',
+      'Um herói tem pontos para gastar. Toque em Heróis, abra o card e vá em Progressão para distribuir atributos.',
+    anchorSelector: '#open-heroes-btn',
   },
   'first-upgrade': {
     title: 'Melhorias do acampamento',

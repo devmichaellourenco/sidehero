@@ -220,8 +220,12 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const result = await app.getHeroSkillTree.execute(message.heroId);
       return { ok: true, state: result.state, skillNodes: result.nodes };
     }
-    case 'ACTIVATE_SKILL': {
-      const state = await app.activateSkill.execute(message.heroId, message.skillId);
+    case 'ASSIGN_SKILL_SLOT': {
+      const state = await app.assignSkillSlot.execute(
+        message.heroId,
+        message.skillId,
+        message.slotIndex,
+      );
       return { ok: true, state };
     }
     case 'DEACTIVATE_SKILL': {

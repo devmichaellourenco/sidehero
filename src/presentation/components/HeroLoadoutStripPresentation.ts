@@ -1,28 +1,63 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
-import { renderHeroActiveSkillSlots } from './HeroActiveSkillsPresentation';
 import { renderHeroEquipmentLoadout } from './GearPresentation';
+import {
+  HeroSkillSlotBarOptions,
+  renderHeroSkillSlotsRow,
+} from './HeroActiveSkillsPresentation';
 
 export type HeroLoadoutStripVariant = 'default' | 'featured';
 
 export function renderHeroLoadoutStrip(
   hero: HeroDto,
-  options: { variant?: HeroLoadoutStripVariant } = {},
+  options: {
+    variant?: HeroLoadoutStripVariant;
+    skillSlotMode?: HeroSkillSlotBarOptions['mode'];
+    heroId?: string;
+    showSkills?: boolean;
+    showGear?: boolean;
+  } = {},
 ): string {
   const variantClass =
     options.variant === 'featured' ? ' hero-loadout-strip--featured' : '';
+  const skillSlotMode = options.skillSlotMode ?? 'loadout';
+  const heroId = options.heroId ?? hero.id;
+  const showSkills = options.showSkills ?? true;
+  const showGear = options.showGear ?? true;
+  const equippedSkillCount = hero.activeSkills.filter(Boolean).length;
 
-  return `
-    <div
-      class="hero-loadout-strip${variantClass}"
-      aria-label="Loadout de batalha: ${hero.activeSkills.length}/${hero.maxActiveSkills} skills"
-    >
+  const skillsSection = showSkills
+    ? `
       <div class="hero-loadout-group hero-loadout-skills">
-        ${renderHeroActiveSkillSlots(hero)}
+        ${renderHeroSkillSlotsRow(hero, { mode: skillSlotMode, heroId })}
       </div>
-      <div class="hero-loadout-divider" aria-hidden="true"></div>
+    `
+    : '';
+
+  const divider =
+    showSkills && showGear
+      ? '<div class="hero-loadout-divider" aria-hidden="true"></div>'
+      : '';
+
+  const gearSection = showGear
+    ? `
       <div class="hero-loadout-group hero-loadout-gear">
         ${renderHeroEquipmentLoadout(hero)}
       </div>
+    `
+    : '';
+
+  const ariaLabel =
+    showSkills && showGear
+      ? `Loadout de batalha: ${equippedSkillCount}/${hero.maxActiveSkills} skills`
+      : showSkills
+        ? `Skills equipadas: ${equippedSkillCount}/${hero.maxActiveSkills}`
+        : 'Equipamento';
+
+  return `
+    <div class="hero-loadout-strip${variantClass}" aria-label="${ariaLabel}">
+      ${skillsSection}
+      ${divider}
+      ${gearSection}
     </div>
   `;
 }

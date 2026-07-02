@@ -1,6 +1,12 @@
 import { addAttributes, Attributes, AttributeKey, createAttributes } from '../progression/Attributes';
 import { BASIC_ATTACK_SKILL_ID } from '../progression/combat/BasicAttackSkill';
-import { MAX_ACTIVE_BATTLE_SKILLS } from '../progression/SkillBattleSlots';
+import {
+  assignSkillToLayout,
+  clearSkillSlot,
+  compactSkillSlotStorage,
+  MAX_ACTIVE_BATTLE_SKILLS,
+  toSkillSlotLayout,
+} from '../progression/SkillBattleSlots';
 import { AscensionId, SkillId } from '../progression/SkillId';
 
 export interface HeroProgressionProps {
@@ -8,7 +14,7 @@ export interface HeroProgressionProps {
   unspentImprovementPoints: number;
   unspentAscensionPoints: number;
   skillRanks: Record<SkillId, number>;
-  equippedSkillIds: SkillId[];
+  equippedSkillIds: (SkillId | null)[];
   ascensionId: AscensionId | null;
 }
 
@@ -26,7 +32,7 @@ export class HeroProgression {
   readonly unspentImprovementPoints: number;
   readonly unspentAscensionPoints: number;
   readonly skillRanks: Record<SkillId, number>;
-  readonly equippedSkillIds: SkillId[];
+  readonly equippedSkillIds: (SkillId | null)[];
   readonly ascensionId: AscensionId | null;
 
   private constructor(props: HeroProgressionProps) {
@@ -98,20 +104,27 @@ export class HeroProgression {
   }
 
   activateSkill(skillId: SkillId, maxActiveSlots: number): HeroProgression {
+    const layout = toSkillSlotLayout(this.equippedSkillIds, maxActiveSlots);
+    const firstEmptySlot = layout.findIndex((entry, index) => index > 0 && entry === null);
+    if (firstEmptySlot < 0) {
+      throw new Error(`Limite de ${layout.length} skills ativas na batalha`);
+    }
+
+    return this.assignSkillToSlot(skillId, firstEmptySlot, maxActiveSlots);
+  }
+
+  assignSkillToSlot(skillId: SkillId, slotIndex: number, unlockedSlotCount: number): HeroProgression {
     if ((this.skillRanks[skillId] ?? 0) < 1) {
       throw new Error('Skill não desbloqueada');
     }
-    if (this.equippedSkillIds.includes(skillId)) {
-      return this;
-    }
-    const slotLimit = Math.max(1, Math.min(MAX_ACTIVE_BATTLE_SKILLS, maxActiveSlots));
-    if (this.equippedSkillIds.length >= slotLimit) {
-      throw new Error(`Limite de ${slotLimit} skills ativas na batalha`);
-    }
+
+    const slotLimit = Math.max(1, Math.min(MAX_ACTIVE_BATTLE_SKILLS, unlockedSlotCount));
+    const layout = toSkillSlotLayout(this.equippedSkillIds, slotLimit);
+    const nextLayout = assignSkillToLayout(layout, skillId, slotIndex);
 
     return new HeroProgression({
       ...this.toProps(),
-      equippedSkillIds: [...this.equippedSkillIds, skillId],
+      equippedSkillIds: compactSkillSlotStorage(nextLayout),
     });
   }
 
@@ -120,9 +133,16 @@ export class HeroProgression {
       throw new Error('Ataque Básico não pode ser desativado');
     }
 
+    const layout = toSkillSlotLayout(this.equippedSkillIds, MAX_ACTIVE_BATTLE_SKILLS);
+    const slotIndex = layout.findIndex((entry) => entry === skillId);
+    if (slotIndex < 0) {
+      throw new Error('Esta skill não pode ser desativada');
+    }
+
+    const nextLayout = clearSkillSlot(layout, slotIndex);
     return new HeroProgression({
       ...this.toProps(),
-      equippedSkillIds: this.equippedSkillIds.filter((id) => id !== skillId),
+      equippedSkillIds: compactSkillSlotStorage(nextLayout),
     });
   }
 

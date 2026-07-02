@@ -11,6 +11,14 @@ import { ShopModalRenderer } from '../components/ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from '../components/UpgradeTreeModalRenderer';
 import { MetaLegacyModalRenderer } from '../components/MetaLegacyModalRenderer';
 import { DivineForgeModalRenderer } from '../components/DivineForgeModalRenderer';
+import {
+  bindFormationPanelInteractions,
+  renderFormationPanel,
+} from '../components/FormationPanelPresentation';
+import {
+  bindHeroesPanelInteractions,
+  renderHeroesPanel,
+} from '../components/HeroesPanelPresentation';
 import { evaluateForgeSelection } from '../components/DivineForgePresentation';
 import { calculateForgeSalvageGold } from '../../domain/forge/ForgeSalvageGoldCatalog';
 import { GamePreferences } from '../components/GamePreferences';
@@ -88,6 +96,10 @@ export class ModalStackController {
         return 'Legado';
       case 'divine-forge':
         return 'Forja Divina';
+      case 'formation':
+        return 'Formação';
+      case 'heroes':
+        return 'Heróis';
       case 'loot-batch':
         return `Loot dos baús (${view.gearIds.length})`;
       case 'loot-reveal': {
@@ -278,6 +290,14 @@ export class ModalStackController {
             void this.divineForgeFlow.salvage(gear, goldPreview);
           },
         });
+        break;
+      case 'formation':
+        container.innerHTML = renderFormationPanel(state);
+        bindFormationPanelInteractions(container);
+        break;
+      case 'heroes':
+        container.innerHTML = renderHeroesPanel(state);
+        bindHeroesPanelInteractions(container);
         break;
     }
   }

@@ -82,11 +82,14 @@ export class HeroDetailFlow {
       onAllocateSkill: (id, skillId) => {
         void this.allocateSkillPoint(id, skillId);
       },
-      onActivateSkill: (id, skillId) => {
-        void this.activateSkill(id, skillId);
+      onAssignSkillSlot: (id, skillId, slotIndex) => {
+        void this.assignSkillSlot(id, skillId, slotIndex);
       },
-      onDeactivateSkill: (id, skillId) => {
-        void this.deactivateSkill(id, skillId);
+      onClearSkillSlot: (id, skillId) => {
+        void this.clearSkillSlot(id, skillId);
+      },
+      onEquipSkillFirstAvailable: (id, skillId) => {
+        void this.equipSkillFirstAvailable(id, skillId);
       },
       onAscendClass: (id, ascensionId) => {
         void this.ascendClass(id, ascensionId);
@@ -133,20 +136,40 @@ export class HeroDetailFlow {
     this.afterMutation(response.state);
   }
 
-  private async activateSkill(heroId: string, skillId: string): Promise<void> {
-    const response = await this.client.send({ type: 'ACTIVATE_SKILL', heroId, skillId });
+  private async assignSkillSlot(heroId: string, skillId: string, slotIndex: number): Promise<void> {
+    const response = await this.client.send({
+      type: 'ASSIGN_SKILL_SLOT',
+      heroId,
+      skillId,
+      slotIndex,
+    });
     if (!response.ok) {
-      this.toasts.show(response.error ?? 'Falha ao ativar', 'info');
+      this.toasts.show(response.error ?? 'Falha ao alocar skill', 'info');
       return;
     }
     await Promise.all([this.loadSkillTree(heroId), this.loadAscensionTree(heroId)]);
     this.afterMutation(response.state);
   }
 
-  private async deactivateSkill(heroId: string, skillId: string): Promise<void> {
+  private async clearSkillSlot(heroId: string, skillId: string): Promise<void> {
     const response = await this.client.send({ type: 'DEACTIVATE_SKILL', heroId, skillId });
     if (!response.ok) {
-      this.toasts.show(response.error ?? 'Falha ao desativar', 'info');
+      this.toasts.show(response.error ?? 'Falha ao remover skill', 'info');
+      return;
+    }
+    await Promise.all([this.loadSkillTree(heroId), this.loadAscensionTree(heroId)]);
+    this.afterMutation(response.state);
+  }
+
+  private async equipSkillFirstAvailable(heroId: string, skillId: string): Promise<void> {
+    const response = await this.client.send({
+      type: 'ASSIGN_SKILL_SLOT',
+      heroId,
+      skillId,
+      slotIndex: -1,
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Falha ao equipar skill', 'info');
       return;
     }
     await Promise.all([this.loadSkillTree(heroId), this.loadAscensionTree(heroId)]);

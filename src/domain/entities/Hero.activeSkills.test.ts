@@ -29,12 +29,18 @@ describe('Hero.activateSkill', () => {
     expect(hero.toProps().equippedSkillIds).toEqual(['basic_attack']);
   });
 
-  it('permite até 3 skills ativas quando há slots desbloqueados', () => {
+  it('permite atribuir skill a um slot específico', () => {
     let hero = heroWithSkills(['basic_attack']);
-    hero = hero.activateSkill('power_attack', 3);
-    hero = hero.activateSkill('evasion', 3);
 
-    expect(hero.toProps().equippedSkillIds).toHaveLength(MAX_ACTIVE_BATTLE_SKILLS);
+    hero = hero.assignSkillToSlot('power_attack', 1, 3);
+    expect(hero.toProps().equippedSkillIds).toEqual(['basic_attack', 'power_attack']);
+  });
+
+  it('substitui skill existente no slot escolhido', () => {
+    let hero = heroWithSkills(['basic_attack', 'power_attack']);
+
+    hero = hero.assignSkillToSlot('evasion', 1, 3);
+    expect(hero.toProps().equippedSkillIds).toEqual(['basic_attack', 'evasion']);
   });
 
   it('rejeita skill além do limite de slots desbloqueados', () => {

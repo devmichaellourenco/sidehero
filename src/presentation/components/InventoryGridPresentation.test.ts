@@ -65,4 +65,17 @@ describe('InventoryGridPresentation', () => {
     expect(html).toContain('data-inventory-equip="g1"');
     expect(html).toContain('inventory-grid-badge--upgrade');
   });
+
+  it('inclui drag quando o item pode ser equipado no inventário', () => {
+    const state = minimalState();
+    const hero = state.heroes[0];
+    const html = renderInventoryGridSlot(gear('g1'), {
+      hero,
+      upgradeStatus: 'upgrade',
+      equipMode: 'inventory',
+    });
+
+    expect(html).toContain('data-drag-gear=');
+    expect(html).toContain('draggable="true"');
+  });
 });

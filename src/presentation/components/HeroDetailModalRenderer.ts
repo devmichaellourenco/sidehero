@@ -4,10 +4,13 @@ import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
+import { bindSkillSlotAssignment } from '../skills/SkillSlotAssignmentBinder';
 import { renderHeroAttributesTab } from './hero-detail/HeroAttributesTabRenderer';
 import { renderHeroClassTab } from './hero-detail/HeroClassTabRenderer';
+import { renderHeroDetailHeader } from './hero-detail/HeroDetailHeaderRenderer';
 import { renderHeroSheetTab } from './hero-detail/HeroSheetTabRenderer';
 import { renderHeroSkillsTab } from './hero-detail/HeroSkillsTabRenderer';
+import { renderHeroLoadoutStrip } from './HeroLoadoutStripPresentation';
 
 export type HeroDetailTab = 'sheet' | 'attributes' | 'skills' | 'class';
 
@@ -15,8 +18,9 @@ export type HeroDetailModalHandlers = {
   onSlotClick: (heroId: string, slot: string) => void;
   onSpendAttribute: (heroId: string, attr: 'str' | 'dex' | 'int') => void;
   onAllocateSkill: (heroId: string, skillId: string) => void;
-  onActivateSkill: (heroId: string, skillId: string) => void;
-  onDeactivateSkill: (heroId: string, skillId: string) => void;
+  onAssignSkillSlot: (heroId: string, skillId: string, slotIndex: number) => void;
+  onClearSkillSlot: (heroId: string, skillId: string) => void;
+  onEquipSkillFirstAvailable: (heroId: string, skillId: string) => void;
   onAscendClass: (heroId: string, ascensionId: string) => void;
   onAllocateAscensionSkill: (heroId: string, skillId: string) => void;
   onTabChange: (heroId: string, tab: HeroDetailTab) => void;
@@ -63,15 +67,46 @@ export class HeroDetailModalRenderer {
       ? '<span class="inventory-upgrade-badge">!</span>'
       : '';
 
+    const showGearLoadout = this.activeTab === 'sheet';
+    const showSkillsLoadout = this.activeTab === 'skills';
+    const loadoutSection =
+      showGearLoadout || showSkillsLoadout
+        ? `
+        <div class="hero-detail-loadout">
+          ${renderHeroLoadoutStrip(hero, {
+            variant: 'featured',
+            skillSlotMode: 'skills-tab',
+            heroId: hero.id,
+            showSkills: showSkillsLoadout,
+            showGear: showGearLoadout,
+          })}
+          ${
+            showSkillsLoadout
+              ? '<p class="skill-slot-instruction" data-skill-slot-instruction hidden></p>'
+              : ''
+          }
+          ${
+            showSkillsLoadout
+              ? '<p class="hero-detail-hint hero-detail-loadout-hint">Toque em uma skill para equipar · arraste até um slot · × remove do slot</p>'
+              : ''
+          }
+        </div>
+      `
+        : '';
+
     container.innerHTML = `
-      <nav class="hero-detail-tabs">
-        <button type="button" class="hero-tab ${this.activeTab === 'sheet' ? 'active' : ''}" data-hero-tab="sheet">Loadout</button>
-        <button type="button" class="hero-tab ${this.activeTab === 'attributes' ? 'active' : ''}" data-hero-tab="attributes">Progressão${badge}</button>
-        <button type="button" class="hero-tab ${this.activeTab === 'skills' ? 'active' : ''}" data-hero-tab="skills">Skills</button>
-        <button type="button" class="hero-tab ${this.activeTab === 'class' ? 'active' : ''}" data-hero-tab="class">Classe</button>
-      </nav>
-      <div class="hero-detail-panel">${this.renderTabContent(hero)}</div>
-      <div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>
+      <div class="hero-detail-layout">
+        <header class="hero-detail-header">${renderHeroDetailHeader(hero)}</header>
+        <nav class="hero-detail-tabs">
+          <button type="button" class="hero-tab ${this.activeTab === 'sheet' ? 'active' : ''}" data-hero-tab="sheet">Loadout</button>
+          <button type="button" class="hero-tab ${this.activeTab === 'attributes' ? 'active' : ''}" data-hero-tab="attributes">Progressão${badge}</button>
+          <button type="button" class="hero-tab ${this.activeTab === 'skills' ? 'active' : ''}" data-hero-tab="skills">Skills</button>
+          <button type="button" class="hero-tab ${this.activeTab === 'class' ? 'active' : ''}" data-hero-tab="class">Classe</button>
+        </nav>
+        ${loadoutSection}
+        <div class="hero-detail-panel game-scroll">${this.renderTabContent(hero)}</div>
+        <div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>
+      </div>
     `;
 
     this.bindInteractions(container, hero, handlers);
@@ -85,12 +120,7 @@ export class HeroDetailModalRenderer {
       case 'attributes':
         return renderHeroAttributesTab(hero);
       case 'skills':
-        return renderHeroSkillsTab(
-          this.skillNodes,
-          hero.unspentImprovementPoints,
-          hero.activeSkills.length,
-          hero.maxActiveSkills,
-        );
+        return renderHeroSkillsTab(hero, this.skillNodes, hero.unspentImprovementPoints);
       case 'class':
         return renderHeroClassTab({
           hero,
@@ -99,7 +129,7 @@ export class HeroDetailModalRenderer {
           ascensionSkillNodes: this.ascensionSkillNodes,
         });
       default:
-        return renderHeroSheetTab(hero);
+        return renderHeroSheetTab();
     }
   }
 
@@ -133,23 +163,19 @@ export class HeroDetailModalRenderer {
       });
     });
 
-    container.querySelectorAll('[data-skill-activate]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const skillId = button.getAttribute('data-skill-activate');
-        if (skillId && !(button as HTMLButtonElement).disabled) {
-          handlers.onActivateSkill(hero.id, skillId);
-        }
+    if (this.activeTab === 'skills' || (this.activeTab === 'class' && this.ascensionSkillNodes.length > 0)) {
+      bindSkillSlotAssignment(container, {
+        onAssign: (skillId, slotIndex) => {
+          handlers.onAssignSkillSlot(hero.id, skillId, slotIndex);
+        },
+        onClear: (skillId) => {
+          handlers.onClearSkillSlot(hero.id, skillId);
+        },
+        onEquipFirstAvailable: (skillId) => {
+          handlers.onEquipSkillFirstAvailable(hero.id, skillId);
+        },
       });
-    });
-
-    container.querySelectorAll('[data-skill-deactivate]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const skillId = button.getAttribute('data-skill-deactivate');
-        if (skillId && !(button as HTMLButtonElement).disabled) {
-          handlers.onDeactivateSkill(hero.id, skillId);
-        }
-      });
-    });
+    }
 
     container.querySelectorAll('[data-ascend]').forEach((button) => {
       button.addEventListener('click', () => {

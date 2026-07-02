@@ -1,12 +1,7 @@
-import { HeroActiveSkillStatDto } from '../../application/dto/GameStateDto';
-import {
-  SkillNodeDto,
-  SkillNodeStatusDto,
-  SKILL_BRANCH_LABELS,
-} from '../../application/dto/SkillNodeDto';
+import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { imgTag } from '../assets/AssetCatalog';
 import { getSkillBranchFrameUrl, getSkillIconUrl } from '../assets/SkillIconCatalog';
-import { renderSkillRankLabel, renderSkillTooltipContent } from './SkillTooltipPresentation';
+import { renderSkillLockIcon, renderSkillRankDisplay, renderSkillRankLabel, renderSkillTooltipContent } from './SkillTooltipPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -18,13 +13,11 @@ function escapeHtml(text: string): string {
 
 export interface SkillCardOptions {
   allocateAttr: string;
-  activateAttr: string;
-  deactivateAttr: string;
   allocateLabel?: string;
   canAllocate: boolean;
 }
 
-const SKILL_STATUS_LABELS: Record<SkillNodeStatusDto, string> = {
+const SKILL_STATUS_LABELS: Record<SkillNodeDto['status'], string> = {
   locked: 'Bloqueada',
   ready: 'Disponível',
   owned: 'Desbloqueada',
@@ -35,86 +28,60 @@ function renderSkillBadge(label: string, modifier: string): string {
   return `<span class="skill-card-badge skill-card-badge--${modifier}">${escapeHtml(label)}</span>`;
 }
 
-function renderBattleStats(stats: HeroActiveSkillStatDto[]): string {
-  if (stats.length === 0) return '';
+function renderEssentialBadges(node: SkillNodeDto): string {
+  const equipLabel = node.isEquipped ? 'Ativa' : 'Inativa';
+  const badges = [
+    renderSkillBadge(node.branchLabel, node.branch),
+    renderSkillBadge(equipLabel, node.isEquipped ? 'equipped' : 'unequipped'),
+  ];
 
-  const rows = stats
-    .map(
-      (stat) => `
-        <span class="skill-card-combat-item">
-          <span class="skill-card-combat-label">${escapeHtml(stat.label)}</span>
-          <span class="skill-card-combat-value">${escapeHtml(stat.value)}</span>
-        </span>
-      `,
-    )
-    .join('<span class="skill-card-combat-sep" aria-hidden="true">·</span>');
+  if (node.status === 'ready') {
+    badges.push(renderSkillBadge(SKILL_STATUS_LABELS[node.status], node.status));
+  }
 
-  return `
-    <p class="skill-card-combat" aria-label="Efeitos em combate">
-      <span class="skill-card-combat-title">Combate:</span>
-      ${rows}
-    </p>
-  `;
-}
-
-function renderRequirements(node: SkillNodeDto): string {
-  if (node.requirements.length === 0) return '';
-
-  const items = node.requirements
-    .map(
-      (req) =>
-        `<li class="skill-card-req skill-card-req--${req.met ? 'met' : 'unmet'}">${escapeHtml(req.label)}</li>`,
-    )
-    .join('');
-
-  return `<ul class="skill-card-reqs" aria-label="Requisitos">${items}</ul>`;
+  return badges.join('');
 }
 
 export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): string {
-  const rankLabel = renderSkillRankLabel(node.currentRank, node.maxRank);
-  const equipLabel = node.isEquipped ? 'Ativa' : 'Inativa';
   const frameUrl = getSkillBranchFrameUrl(node.branch);
   const iconUrl = getSkillIconUrl(node.id);
-  const branchLabel = SKILL_BRANCH_LABELS[node.branch] ?? node.branchLabel;
-
-  const badges = [
-    renderSkillBadge(branchLabel, node.branch),
-    renderSkillBadge(node.scopeLabel, 'scope'),
-    renderSkillBadge(node.scalingLabel, 'scaling'),
-    renderSkillBadge(equipLabel, node.isEquipped ? 'equipped' : 'unequipped'),
-  ].join('');
+  const isLocked = node.status === 'locked';
+  const iconWrapClass = `skill-card-icon-wrap skill-card-icon-wrap--${node.branch}${isLocked ? ' skill-card-icon-wrap--locked' : ''}`;
+  const lockOverlay = isLocked ? renderSkillLockIcon() : '';
+  const equipAttrs = node.canEquip
+    ? `data-skill-equip="${node.id}" data-skill-equip-name="${escapeHtml(node.name)}" draggable="true"`
+    : '';
+  const equipClass = node.canEquip ? ' skill-card--equippable' : '';
 
   return `
-    <article class="skill-card skill-card-${node.status} skill-card--${node.branch}" data-skill-tooltip>
-      <div class="skill-card-top">
+    <article class="skill-card skill-card-${node.status} skill-card--${node.branch} skill-card--compact${equipClass}" data-skill-tooltip tabindex="0" ${equipAttrs} aria-label="${escapeHtml(node.name)} — ${escapeHtml(renderSkillRankLabel(node.currentRank, node.maxRank, node.status))}">
+      <div class="skill-card-compact">
         <div class="skill-card-visual">
           <span
-            class="skill-card-icon-wrap skill-card-icon-wrap--${node.branch}"
+            class="${iconWrapClass}"
             style="--slot-frame: url('${frameUrl}')"
           >
             ${imgTag(iconUrl, node.name, 'skill-card-icon')}
+            ${lockOverlay}
           </span>
         </div>
-        <div class="skill-card-summary">
+        <div class="skill-card-body">
           <header class="skill-card-header">
             <h4>${escapeHtml(node.name)}</h4>
-            <span class="skill-card-rank">${escapeHtml(rankLabel)}</span>
+            ${renderSkillRankDisplay(node.currentRank, node.maxRank, node.status)}
           </header>
-          <div class="skill-card-badges">${badges}</div>
+          <div class="skill-card-essentials">${renderEssentialBadges(node)}</div>
+          ${node.canEquip ? '<span class="skill-card-equip-hint">Toque para equipar · arraste até um slot</span>' : ''}
+          <div class="skill-actions skill-actions--compact">
+            <button type="button" ${options.allocateAttr}="${node.id}" ${options.canAllocate ? '' : 'disabled'}>${options.allocateLabel ?? '+1 rank'}</button>
+          </div>
         </div>
       </div>
-      <div class="skill-card-details">
-        <p class="skill-card-desc">${escapeHtml(node.description)}</p>
-        ${renderBattleStats(node.battleStats)}
-        ${renderRequirements(node)}
-        <div class="skill-actions">
-          <button type="button" ${options.allocateAttr}="${node.id}" ${options.canAllocate ? '' : 'disabled'}>${options.allocateLabel ?? '+1 rank'}</button>
-          <button type="button" ${options.activateAttr}="${node.id}" ${node.canActivate ? '' : 'disabled'}>Ativar (${node.activationCost} ouro)</button>
-          <button type="button" ${options.deactivateAttr}="${node.id}" ${node.canDeactivate ? '' : 'disabled'}>Desativar</button>
-          <span class="skill-equip-status skill-card-status-hint">${escapeHtml(SKILL_STATUS_LABELS[node.status])}</span>
-        </div>
-      </div>
-      ${renderSkillTooltipContent(node)}
+      ${renderSkillTooltipContent({
+        ...node,
+        status: node.status,
+        statusLabel: SKILL_STATUS_LABELS[node.status],
+      })}
     </article>
   `;
 }

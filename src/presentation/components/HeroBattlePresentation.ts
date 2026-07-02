@@ -37,10 +37,11 @@ function renderGearTooltipLine(label: string, gearName: string | null): string {
 }
 
 export function renderHeroFormationTooltipContent(hero: HeroDto): string {
+  const equippedSkills = hero.activeSkills.filter(
+    (skill): skill is NonNullable<typeof skill> => Boolean(skill),
+  );
   const skillNames =
-    hero.activeSkills.length > 0
-      ? hero.activeSkills.map((skill) => skill.name).join(', ')
-      : '—';
+    equippedSkills.length > 0 ? equippedSkills.map((skill) => skill.name).join(', ') : '—';
 
   return `
     ${renderHeroTooltipContent(hero)}

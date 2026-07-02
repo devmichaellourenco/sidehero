@@ -1,5 +1,5 @@
 import { HeroActiveSkillStatDto } from '../../application/dto/GameStateDto';
-import { SkillBranchDto } from '../../application/dto/SkillNodeDto';
+import { SkillBranchDto, SkillNodeStatusDto, SkillRequirementDto } from '../../application/dto/SkillNodeDto';
 import { getSkillElementLabel, getSkillPrimaryElement } from '../../domain/progression/combat/SkillElementResolver';
 import { renderElementPip } from './ElementPipPresentation';
 
@@ -14,6 +14,9 @@ export interface SkillTooltipData {
   currentRank: number;
   maxRank: number;
   battleStats: HeroActiveSkillStatDto[];
+  requirements?: SkillRequirementDto[];
+  status?: SkillNodeStatusDto;
+  statusLabel?: string;
 }
 
 function escapeHtml(text: string): string {
@@ -58,14 +61,66 @@ function renderBattleStats(battleStats: HeroActiveSkillStatDto[]): string {
   `;
 }
 
-export function renderSkillRankLabel(currentRank: number, maxRank: number): string {
-  if (maxRank <= 1) return 'Rank único';
-  if (currentRank <= 0) return `Não desbloqueada (máx. ${maxRank})`;
+function renderRequirements(requirements: SkillRequirementDto[]): string {
+  if (requirements.length === 0) return '';
+
+  const items = requirements
+    .map(
+      (req) =>
+        `<li class="hero-skill-chip-tooltip-req hero-skill-chip-tooltip-req--${req.met ? 'met' : 'unmet'}">${escapeHtml(req.label)}</li>`,
+    )
+    .join('');
+
+  return `
+    <div class="hero-skill-chip-tooltip-section">
+      <span class="hero-skill-chip-tooltip-section-title">Requisitos</span>
+      <ul class="hero-skill-chip-tooltip-reqs">${items}</ul>
+    </div>
+  `;
+}
+
+export function renderSkillLockIcon(className = 'loadout-slot-lock'): string {
+  return `<span class="skill-card-lock" aria-hidden="true"><span class="${className}">🔒</span></span>`;
+}
+
+export function renderSkillRankLabel(
+  currentRank: number,
+  maxRank: number,
+  status?: SkillNodeStatusDto,
+): string {
+  if (maxRank <= 1) {
+    if (currentRank > 0) return 'Rank único';
+    return status === 'locked' ? 'Bloqueada' : 'Disponível';
+  }
+
+  if (currentRank <= 0) {
+    if (status === 'locked') return `Bloqueada (máx. ${maxRank})`;
+    if (status === 'ready') return `0/${maxRank}`;
+    return `Não desbloqueada (máx. ${maxRank})`;
+  }
+
   return `Rank ${currentRank}/${maxRank}`;
 }
 
+export function renderSkillRankDisplay(
+  currentRank: number,
+  maxRank: number,
+  status: SkillNodeStatusDto,
+): string {
+  if (status === 'locked') {
+    if (maxRank <= 1) return '';
+    return `<span class="skill-card-rank skill-card-rank--muted">máx. ${maxRank}</span>`;
+  }
+
+  const label = renderSkillRankLabel(currentRank, maxRank, status);
+  return `<span class="skill-card-rank">${escapeHtml(label)}</span>`;
+}
+
 export function renderSkillTooltipContent(skill: SkillTooltipData): string {
-  const rankLabel = renderSkillRankLabel(skill.currentRank, skill.maxRank);
+  const rankLabel = renderSkillRankLabel(skill.currentRank, skill.maxRank, skill.status);
+  const statusLine = skill.statusLabel
+    ? `<span class="hero-skill-chip-tooltip-status">${escapeHtml(skill.statusLabel)}</span>`
+    : '';
 
   return `
     <span class="hero-skill-chip-tooltip" role="tooltip">
@@ -75,7 +130,9 @@ export function renderSkillTooltipContent(skill: SkillTooltipData): string {
       </span>
       <p class="hero-skill-chip-tooltip-desc">${escapeHtml(skill.description)}</p>
       ${renderBattleStats(skill.battleStats)}
+      ${renderRequirements(skill.requirements ?? [])}
       <span class="hero-skill-chip-tooltip-rank">${escapeHtml(rankLabel)}</span>
+      ${statusLine}
     </span>
   `;
 }

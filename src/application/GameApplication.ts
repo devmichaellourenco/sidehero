@@ -1,5 +1,5 @@
 import { IGameStateRepository } from '../domain/repositories/IGameStateRepository';
-import { ActivateSkillUseCase } from './use-cases/ActivateSkillUseCase';
+import { AssignSkillSlotUseCase } from './use-cases/AssignSkillSlotUseCase';
 import { AscendClassUseCase } from './use-cases/AscendClassUseCase';
 import { BuyShopOfferUseCase } from './use-cases/BuyShopOfferUseCase';
 import { DeactivateSkillUseCase } from './use-cases/DeactivateSkillUseCase';
@@ -58,7 +58,7 @@ export class GameApplication {
   readonly purchaseUpgrade: PurchaseUpgradeUseCase;
   readonly spendImprovementPoint: SpendImprovementPointUseCase;
   readonly getHeroSkillTree: GetHeroSkillTreeUseCase;
-  readonly activateSkill: ActivateSkillUseCase;
+  readonly assignSkillSlot: AssignSkillSlotUseCase;
   readonly deactivateSkill: DeactivateSkillUseCase;
   readonly ascendClass: AscendClassUseCase;
   readonly getHeroAscensionTree: GetHeroAscensionTreeUseCase;
@@ -123,7 +123,7 @@ export class GameApplication {
       skillService,
     );
     this.getHeroSkillTree = new GetHeroSkillTreeUseCase(repository, presenter, skillService);
-    this.activateSkill = new ActivateSkillUseCase(repository, presenter, skillService);
+    this.assignSkillSlot = new AssignSkillSlotUseCase(repository, presenter, skillService);
     this.deactivateSkill = new DeactivateSkillUseCase(repository, presenter, skillService);
     this.ascendClass = new AscendClassUseCase(repository, presenter, ascensionService);
     this.getHeroAscensionTree = new GetHeroAscensionTreeUseCase(
