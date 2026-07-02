@@ -5,6 +5,11 @@ import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
 import { bindSkillSlotAssignment } from '../skills/SkillSlotAssignmentBinder';
+import {
+  captureHeroDetailScroll,
+  restoreHeroDetailScroll,
+  scrollHeroDetailSkillCardIntoView,
+} from './hero-detail/HeroDetailScrollPresentation';
 import { renderHeroAttributesTab } from './hero-detail/HeroAttributesTabRenderer';
 import { renderHeroClassTab } from './hero-detail/HeroClassTabRenderer';
 import { renderHeroDetailHeader } from './hero-detail/HeroDetailHeaderRenderer';
@@ -32,6 +37,7 @@ export class HeroDetailModalRenderer {
   private ascensionOptions: AscensionOptionDto[] = [];
   private ascensionName: string | null = null;
   private ascensionSkillNodes: SkillNodeDto[] = [];
+  private pendingScrollAnchorSkillId: string | null = null;
 
   setSkillNodes(nodes: SkillNodeDto[]): void {
     this.skillNodes = nodes;
@@ -94,6 +100,9 @@ export class HeroDetailModalRenderer {
       `
         : '';
 
+    const scrollState = captureHeroDetailScroll(container);
+    const scrollAnchorSkillId = this.pendingScrollAnchorSkillId;
+
     container.innerHTML = `
       <div class="hero-detail-layout">
         <header class="hero-detail-header">${renderHeroDetailHeader(hero)}</header>
@@ -113,6 +122,23 @@ export class HeroDetailModalRenderer {
     bindBarTooltips(container);
     bindEquipmentTooltips(container);
     bindSkillChipTooltips(container);
+    this.restoreScrollAfterRender(container, scrollState, scrollAnchorSkillId);
+  }
+
+  private restoreScrollAfterRender(
+    container: HTMLElement,
+    scrollState: ReturnType<typeof captureHeroDetailScroll>,
+    anchorSkillId: string | null,
+  ): void {
+    requestAnimationFrame(() => {
+      if (anchorSkillId && scrollHeroDetailSkillCardIntoView(container, anchorSkillId)) {
+        this.pendingScrollAnchorSkillId = null;
+        return;
+      }
+
+      restoreHeroDetailScroll(container, scrollState);
+      this.pendingScrollAnchorSkillId = null;
+    });
   }
 
   private renderTabContent(hero: HeroDto): string {
@@ -158,6 +184,7 @@ export class HeroDetailModalRenderer {
       button.addEventListener('click', () => {
         const skillId = button.getAttribute('data-skill-allocate');
         if (skillId && !(button as HTMLButtonElement).disabled) {
+          this.pendingScrollAnchorSkillId = skillId;
           handlers.onAllocateSkill(hero.id, skillId);
         }
       });
@@ -190,6 +217,7 @@ export class HeroDetailModalRenderer {
       button.addEventListener('click', () => {
         const skillId = button.getAttribute('data-ascension-allocate');
         if (skillId && !(button as HTMLButtonElement).disabled) {
+          this.pendingScrollAnchorSkillId = skillId;
           handlers.onAllocateAscensionSkill(hero.id, skillId);
         }
       });

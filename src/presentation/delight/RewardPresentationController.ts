@@ -2,12 +2,12 @@ import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { PanelSnapshot } from '../components/PanelStateSnapshot';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 import { RewardMomentDetector, StateChangeDetectOptions, StateChangeHandlers } from '../delight/RewardMomentDetector';
-import { WowStripController } from '../wow/WowStripController';
+import { WowCelebrationController } from '../wow/WowCelebrationController';
 
 export class RewardPresentationController implements RewardCelebrationPort {
   private readonly detector = new RewardMomentDetector();
 
-  constructor(private readonly wowStrip: WowStripController) {}
+  constructor(private readonly wowCelebration: WowCelebrationController) {}
 
   detectStateChange(
     previous: GameStateDto | null,
@@ -17,25 +17,25 @@ export class RewardPresentationController implements RewardCelebrationPort {
   ): void {
     const moments = this.detector.detect(previous, next, handlers, options);
     for (const moment of moments) {
-      this.wowStrip.enqueueMoment(moment);
+      this.wowCelebration.enqueueMoment(moment);
     }
   }
 
   celebrateUpgradePurchased(upgradeId: string): void {
     const moment = this.detector.buildUpgradePurchasedMoment(upgradeId);
-    if (moment) this.wowStrip.enqueueMoment(moment);
+    if (moment) this.wowCelebration.enqueueMoment(moment);
   }
 
   celebrateShopPurchase(gear: GearDto): void {
-    this.wowStrip.enqueueMoment(this.detector.buildShopPurchaseMoment(gear));
+    this.wowCelebration.enqueueMoment(this.detector.buildShopPurchaseMoment(gear));
   }
 
   celebrateForgeCreated(gear: GearDto): void {
-    this.wowStrip.enqueueMoment(this.detector.buildForgeCreatedMoment(gear));
+    this.wowCelebration.enqueueMoment(this.detector.buildForgeCreatedMoment(gear));
   }
 
   celebrateAscension(heroName: string, heroEmoji: string): void {
-    this.wowStrip.enqueueMoment(this.detector.buildAscensionMoment(heroName, heroEmoji));
+    this.wowCelebration.enqueueMoment(this.detector.buildAscensionMoment(heroName, heroEmoji));
   }
 
   celebrateBatchLoot(gears: GearDto[]): void {
@@ -44,17 +44,17 @@ export class RewardPresentationController implements RewardCelebrationPort {
       void this.celebrateLoot(gears[0]);
       return;
     }
-    this.wowStrip.enqueueMoment(this.detector.buildBatchLootMoment(gears));
+    this.wowCelebration.enqueueMoment(this.detector.buildBatchLootMoment(gears));
   }
 
   async celebrateLoot(gear: GearDto): Promise<void> {
     const moment = this.detector.buildLootMoment(gear);
     if (!moment) return;
-    this.wowStrip.enqueueMoment(moment);
+    this.wowCelebration.enqueueMoment(moment);
   }
 
   showIdleReport(snapshot: PanelSnapshot, state: GameStateDto): void {
     const moment = this.detector.buildIdleReport(snapshot, state);
-    if (moment) this.wowStrip.enqueueMoment(moment);
+    if (moment) this.wowCelebration.enqueueMoment(moment);
   }
 }

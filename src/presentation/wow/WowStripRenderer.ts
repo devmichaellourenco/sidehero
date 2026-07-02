@@ -1,8 +1,11 @@
 import { getGearSprite, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { WowBanner } from './types/WowBanner';
 
+export type WowBannerVariant = 'center' | 'compact';
+
 export interface WowStripRenderOptions {
   animate?: boolean;
+  variant?: WowBannerVariant;
 }
 
 export class WowStripRenderer {
@@ -18,13 +21,14 @@ export class WowStripRenderer {
       return;
     }
 
+    const variant = options.variant ?? 'compact';
     const enterClass = options.animate ? ' wow-banner--enter' : '';
     const rarityClass = banner.gear ? ` wow-banner--loot-${banner.gear.rarity}` : '';
-    const dismissMarkup = this.buildDismissMarkup(banner);
+    const dismissMarkup = this.buildDismissMarkup(banner, variant);
 
     const dots =
       banners.length > 1
-        ? `<div class="wow-strip-dots" role="tablist" aria-label="Banners">
+        ? `<div class="wow-strip-dots" role="tablist" aria-label="Celebrações">
             ${banners
               .map(
                 (_, index) => `
@@ -32,7 +36,7 @@ export class WowStripRenderer {
                     type="button"
                     class="wow-strip-dot${index === activeIndex ? ' wow-strip-dot--active' : ''}"
                     data-wow-dot="${index}"
-                    aria-label="Banner ${index + 1}"
+                    aria-label="Celebração ${index + 1}"
                     aria-selected="${index === activeIndex}"
                   ></button>
                 `,
@@ -56,10 +60,10 @@ export class WowStripRenderer {
 
     root.innerHTML = `
       <div class="wow-strip-bg" aria-hidden="true"></div>
-      <article class="wow-banner wow-banner--${banner.tone}${rarityClass}${enterClass}" data-wow-banner-id="${banner.id}">
+      <article class="wow-banner wow-banner--${banner.tone} wow-banner--${variant}${rarityClass}${enterClass}" data-wow-banner-id="${banner.id}">
         ${dismissMarkup}
         <div class="wow-banner-glow" aria-hidden="true"></div>
-        <div class="wow-banner-visual">${this.buildVisualMarkup(banner)}</div>
+        <div class="wow-banner-visual">${this.buildVisualMarkup(banner, variant)}</div>
         <div class="wow-banner-copy">
           ${banner.eyebrow ? `<p class="wow-banner-eyebrow">${banner.eyebrow}</p>` : ''}
           <h3 class="wow-banner-title">${banner.title}</h3>
@@ -73,31 +77,38 @@ export class WowStripRenderer {
     `;
   }
 
-  private buildDismissMarkup(banner: WowBanner): string {
+  private buildDismissMarkup(banner: WowBanner, variant: WowBannerVariant): string {
+    if (banner.cta && variant === 'center') {
+      return `<button type="button" class="wow-banner-dismiss" data-wow-dismiss aria-label="Fechar celebração">×</button>`;
+    }
+
     if (banner.cta) return '';
 
-    return `<button type="button" class="wow-banner-dismiss" data-wow-dismiss aria-label="Dispensar banner">×</button>`;
+    return `<button type="button" class="wow-banner-dismiss" data-wow-dismiss aria-label="Dispensar celebração">×</button>`;
   }
 
-  private buildVisualMarkup(banner: WowBanner): string {
+  private buildVisualMarkup(banner: WowBanner, variant: WowBannerVariant): string {
+    const visualClass =
+      variant === 'center' ? 'wow-banner-visual--center' : 'wow-banner-visual--compact';
+
     if (banner.gear) {
       const sprite = getGearSprite(banner.gear);
-      return `<div class="wow-banner-gear-frame wow-banner-gear-frame--${banner.gear.rarity}">${imgTag(sprite, banner.gear.name, 'wow-banner-gear-sprite')}</div>`;
+      return `<div class="wow-banner-gear-frame wow-banner-gear-frame--${banner.gear.rarity} ${visualClass}">${imgTag(sprite, banner.gear.name, 'wow-banner-gear-sprite')}</div>`;
     }
 
     if (banner.heroPortrait) {
       const sprite = getHeroSprite(banner.heroPortrait);
-      return imgTag(sprite, banner.heroPortrait.name, 'wow-banner-hero-portrait');
+      return imgTag(sprite, banner.heroPortrait.name, `wow-banner-hero-portrait ${visualClass}`);
     }
 
     if (banner.heroEmoji) {
-      return `<span class="wow-banner-emoji">${banner.heroEmoji}</span>`;
+      return `<span class="wow-banner-emoji wow-banner-emoji--${variant}">${banner.heroEmoji}</span>`;
     }
 
     if (banner.iconUrl) {
-      return imgTag(banner.iconUrl, '', 'wow-banner-icon');
+      return imgTag(banner.iconUrl, '', `wow-banner-icon wow-banner-icon--${variant}`);
     }
 
-    return '<span class="wow-banner-spark" aria-hidden="true">✦</span>';
+    return '<span class="wow-banner-spark wow-banner-spark--center" aria-hidden="true">✦</span>';
   }
 }

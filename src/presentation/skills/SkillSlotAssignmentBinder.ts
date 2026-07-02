@@ -1,3 +1,6 @@
+import { hideSkillChipTooltip } from '../components/SkillChipTooltipBinder';
+import { beginSkillDragSession, endSkillDragSession } from './SkillDragPresentation';
+
 const SKILL_MIME = 'application/x-side-hero-skill';
 
 export interface SkillDragPayload {
@@ -140,8 +143,15 @@ export function bindSkillSlotAssignment(
       selectSlot(slotIndex);
     });
 
+    element.addEventListener('dragenter', (event) => {
+      event.preventDefault();
+    });
+
     element.addEventListener('dragover', (event) => {
       event.preventDefault();
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'move';
+      }
       element.classList.add('hero-skill-slot-bar__slot--drop-target');
     });
 
@@ -181,14 +191,18 @@ export function bindSkillSlotAssignment(
 
     element.addEventListener('dragstart', (event) => {
       const dragEvent = event as DragEvent;
+      hideSkillChipTooltip();
       dragEvent.dataTransfer?.setData(SKILL_MIME, serializeSkillDragPayload({ skillId }));
       dragEvent.dataTransfer?.setData('text/plain', skillId);
       if (dragEvent.dataTransfer) dragEvent.dataTransfer.effectAllowed = 'move';
+      beginSkillDragSession(dragEvent, element);
       element.classList.add('skill-card--dragging');
       clearPlacementMode();
     });
 
     element.addEventListener('dragend', () => {
+      endSkillDragSession();
+      hideSkillChipTooltip();
       element.classList.remove('skill-card--dragging');
     });
 

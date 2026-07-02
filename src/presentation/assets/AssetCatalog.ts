@@ -77,6 +77,7 @@ export const ASSETS = {
     victoryGlow: 'ui/victory-glow.png',
     victoryWings: 'ui/victory-wings.png',
     energy: 'ui/gift.png',
+    heroes: 'ui/heroes.png',
     campaign: 'ui/campaign.png',
     shop: 'ui/shop.png',
     attack: 'ui/attack.png',

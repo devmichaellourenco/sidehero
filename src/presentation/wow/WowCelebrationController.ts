@@ -1,0 +1,304 @@
+import { RewardMoment } from '../delight/types/RewardMoment';
+import { isCelebrationMoment } from './WowCelebrationPolicy';
+import { mapRewardMomentToWowBanner } from './WowMomentMapper';
+import { recordWowBannerDismiss } from './WowStripDismissStore';
+import { WowStripRenderer } from './WowStripRenderer';
+import { buildWowStripSnapshot } from './WowStripRenderPolicy';
+import { WowBanner, WowBannerAction } from './types/WowBanner';
+
+const EPHEMERAL_DEFAULT_MS = 5200;
+
+export class WowCelebrationController {
+  private readonly renderer = new WowStripRenderer();
+  private readonly inbox: WowBanner[] = [];
+  private readonly displayQueue: WowBanner[] = [];
+  private activeCelebration: WowBanner | null = null;
+  private inboxOpen = false;
+  private inboxActiveIndex = 0;
+  private celebrationTimer: number | null = null;
+  private celebrationSnapshot: string | null = null;
+  private inboxSnapshot: string | null = null;
+  private lastCelebrationBannerId: string | null = null;
+
+  constructor(
+    private readonly celebrationRoot: HTMLElement,
+    private readonly celebrationStage: HTMLElement,
+    private readonly inboxRoot: HTMLElement,
+    private readonly inboxPanel: HTMLElement,
+    private readonly inboxButton: HTMLButtonElement,
+  ) {
+    this.celebrationRoot.addEventListener('click', (event) => this.handleCelebrationClick(event));
+    this.inboxPanel.addEventListener('click', (event) => this.handleInboxClick(event));
+    this.inboxButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.toggleInbox();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!this.inboxOpen) return;
+      const target = event.target as HTMLElement;
+      if (
+        this.inboxRoot.contains(target) ||
+        this.inboxButton.contains(target)
+      ) {
+        return;
+      }
+      this.closeInbox();
+    });
+  }
+
+  enqueueMoment(moment: RewardMoment): void {
+    if (!isCelebrationMoment(moment)) return;
+
+    const banner = mapRewardMomentToWowBanner(moment);
+    if (!banner) return;
+
+    if (moment.cta) {
+      banner.cta = {
+        label: moment.cta.label,
+        action: 'dismiss',
+      };
+      banner.onCtaClick = moment.cta.onClick;
+    }
+
+    if (this.inbox.some((entry) => entry.id === banner.id)) return;
+
+    this.inbox.push(banner);
+    this.inbox.sort((left, right) => right.priority - left.priority);
+    this.displayQueue.push(banner);
+    this.displayQueue.sort((left, right) => right.priority - left.priority);
+
+    this.updateInboxChrome();
+    this.pumpCelebrationQueue();
+  }
+
+  destroy(): void {
+    this.stopCelebrationTimer();
+  }
+
+  toggleInbox(): void {
+    if (this.inboxOpen) {
+      this.closeInbox();
+      return;
+    }
+    this.openInbox();
+  }
+
+  private openInbox(): void {
+    if (this.inbox.length === 0) return;
+
+    this.inboxOpen = true;
+    this.inboxRoot.classList.remove('hidden');
+    this.inboxRoot.setAttribute('aria-hidden', 'false');
+    this.inboxButton.classList.add('stat-pill--wow-inbox-open');
+    this.inboxButton.setAttribute('aria-expanded', 'true');
+    this.clampInboxIndex();
+    this.renderInbox(true);
+  }
+
+  private closeInbox(): void {
+    this.inboxOpen = false;
+    this.inboxRoot.classList.add('hidden');
+    this.inboxRoot.setAttribute('aria-hidden', 'true');
+    this.inboxButton.classList.remove('stat-pill--wow-inbox-open');
+    this.inboxButton.setAttribute('aria-expanded', 'false');
+  }
+
+  private pumpCelebrationQueue(): void {
+    if (this.activeCelebration || this.displayQueue.length === 0) return;
+
+    const next = this.displayQueue.shift()!;
+    this.showCelebration(next);
+  }
+
+  private showCelebration(banner: WowBanner): void {
+    this.activeCelebration = banner;
+    this.celebrationRoot.classList.remove('hidden');
+    this.celebrationRoot.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('wow-celebration-open');
+    this.renderCelebration(true);
+    this.scheduleCelebrationExpiry(banner);
+  }
+
+  private finishCelebration(): void {
+    this.stopCelebrationTimer();
+    this.activeCelebration = null;
+    this.celebrationRoot.classList.add('hidden');
+    this.celebrationRoot.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('wow-celebration-open');
+    this.celebrationStage.innerHTML = '';
+    this.celebrationSnapshot = null;
+    this.pumpCelebrationQueue();
+  }
+
+  private handleCelebrationClick(event: Event): void {
+    const target = event.target as HTMLElement;
+
+    if (target.closest('[data-wow-celebration-close]')) {
+      event.preventDefault();
+      this.dismissActiveCelebration();
+      return;
+    }
+
+    this.handleBannerInteraction(target, this.activeCelebration, () => {
+      this.dismissActiveCelebration();
+    });
+  }
+
+  private handleInboxClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const active = this.inbox[this.inboxActiveIndex];
+
+    const dot = target.closest('[data-wow-dot]') as HTMLElement | null;
+    if (dot) {
+      const index = Number(dot.getAttribute('data-wow-dot'));
+      if (!Number.isNaN(index)) {
+        this.inboxActiveIndex = index;
+        this.renderInbox(true);
+      }
+      return;
+    }
+
+    this.handleBannerInteraction(target, active, () => {
+      if (active) this.removeFromInbox(active);
+    });
+  }
+
+  private handleBannerInteraction(
+    target: HTMLElement,
+    active: WowBanner | null,
+    onDismiss: () => void,
+  ): void {
+    if (!active) return;
+
+    const dismissEl = target.closest('[data-wow-dismiss]');
+    if (dismissEl) {
+      onDismiss();
+      return;
+    }
+
+    const actionEl = target.closest('[data-wow-action]') as HTMLElement | null;
+    if (actionEl) {
+      const action = actionEl.getAttribute('data-wow-action') as WowBannerAction | null;
+      if (!action) return;
+
+      if (active.onCtaClick) {
+        active.onCtaClick();
+      }
+
+      if (action === 'dismiss') {
+        onDismiss();
+      }
+      return;
+    }
+
+    const bannerEl = target.closest('[data-wow-banner-id]');
+    if (bannerEl && active.cta && !actionEl) {
+      if (active.onCtaClick) {
+        active.onCtaClick();
+      } else if (active.cta.action === 'dismiss') {
+        onDismiss();
+      }
+    }
+  }
+
+  private dismissActiveCelebration(): void {
+    if (!this.activeCelebration) {
+      this.finishCelebration();
+      return;
+    }
+
+    this.finishCelebration();
+    this.updateInboxChrome();
+    if (this.inboxOpen) {
+      this.renderInbox(true);
+    }
+  }
+
+  private removeFromInbox(banner: WowBanner): void {
+    recordWowBannerDismiss(banner);
+    const index = this.inbox.findIndex((entry) => entry.id === banner.id);
+    if (index !== -1) {
+      this.inbox.splice(index, 1);
+    }
+    this.clampInboxIndex();
+    this.updateInboxChrome();
+    this.renderInbox(true);
+
+    if (this.inbox.length === 0) {
+      this.closeInbox();
+    }
+  }
+
+  private clampInboxIndex(): void {
+    if (this.inbox.length === 0) {
+      this.inboxActiveIndex = 0;
+      return;
+    }
+    if (this.inboxActiveIndex >= this.inbox.length) {
+      this.inboxActiveIndex = 0;
+    }
+  }
+
+  private renderCelebration(force = false): void {
+    if (!this.activeCelebration) return;
+
+    const snapshot = buildWowStripSnapshot([this.activeCelebration], 0);
+    if (!force && snapshot === this.celebrationSnapshot) return;
+
+    const animate = this.activeCelebration.id !== this.lastCelebrationBannerId;
+    this.renderer.render(this.celebrationStage, [this.activeCelebration], 0, {
+      animate,
+      variant: 'center',
+    });
+    this.celebrationSnapshot = snapshot;
+    this.lastCelebrationBannerId = this.activeCelebration.id;
+  }
+
+  private renderInbox(force = false): void {
+    const snapshot = buildWowStripSnapshot(this.inbox, this.inboxActiveIndex);
+    if (!force && snapshot === this.inboxSnapshot) return;
+
+    this.renderer.render(this.inboxPanel, this.inbox, this.inboxActiveIndex, {
+      animate: force,
+      variant: 'compact',
+    });
+    this.inboxSnapshot = snapshot;
+  }
+
+  private updateInboxChrome(): void {
+    const count = this.inbox.length;
+    const countEl = this.inboxButton.querySelector('.wow-inbox-btn-count');
+
+    this.inboxButton.classList.toggle('hidden', count === 0);
+    this.inboxButton.disabled = count === 0;
+    this.inboxButton.title =
+      count > 0 ? `Celebrações recentes (${count})` : 'Sem celebrações recentes';
+
+    if (countEl) {
+      countEl.textContent = count > 0 ? String(count) : '';
+    }
+
+    if (count === 0) {
+      this.closeInbox();
+      this.inboxPanel.innerHTML = '';
+      this.inboxSnapshot = null;
+    }
+  }
+
+  private scheduleCelebrationExpiry(banner: WowBanner): void {
+    this.stopCelebrationTimer();
+    const duration = banner.displayMs ?? EPHEMERAL_DEFAULT_MS;
+    this.celebrationTimer = window.setTimeout(() => {
+      if (this.activeCelebration?.id === banner.id) {
+        this.dismissActiveCelebration();
+      }
+    }, duration);
+  }
+
+  private stopCelebrationTimer(): void {
+    if (this.celebrationTimer === null) return;
+    window.clearTimeout(this.celebrationTimer);
+    this.celebrationTimer = null;
+  }
+}

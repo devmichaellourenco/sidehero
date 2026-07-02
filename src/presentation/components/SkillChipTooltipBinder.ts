@@ -75,6 +75,7 @@ function bindAnchor(anchor: HTMLElement): void {
   anchor.addEventListener('mouseleave', onHide);
   anchor.addEventListener('focus', onShow);
   anchor.addEventListener('blur', onHide);
+  anchor.addEventListener('dragstart', onHide);
 }
 
 export function bindSkillChipTooltips(container: HTMLElement): void {

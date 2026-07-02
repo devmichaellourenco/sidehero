@@ -21,7 +21,7 @@ import { ShopFlow } from '../flows/ShopFlow';
 import { MetaLegacyFlow } from '../flows/MetaLegacyFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation } from '../helpers/HeroNavigationHelper';
-import { WowStripController } from '../wow/WowStripController';
+import { WowCelebrationController } from '../wow/WowCelebrationController';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
@@ -63,6 +63,7 @@ import { InlineEquipController, InlineEquipHandlers } from '../gear/InlineEquipC
 import { bindGearDragDrop } from '../gear/GearDragDropBinder';
 import { OnboardingController } from '../onboarding/OnboardingController';
 import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
+import { bindBattleChromeLayout } from '../layout/BattleChromeLayout';
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -97,7 +98,11 @@ export class GameViewController {
   private readonly openShopBtn: HTMLButtonElement;
   private readonly openUpgradesBtn: HTMLButtonElement;
   private readonly battlePauseOverlay: HTMLElement;
-  private readonly wowStripEl: HTMLElement;
+  private readonly wowCelebrationRoot: HTMLElement;
+  private readonly wowCelebrationStage: HTMLElement;
+  private readonly wowInboxRoot: HTMLElement;
+  private readonly wowInboxPanel: HTMLElement;
+  private readonly openWowInboxBtn: HTMLButtonElement;
   private readonly battleLogOverlayEl: HTMLElement;
   private readonly openBattleLogBtn: HTMLButtonElement;
   private readonly openHeroesBtn: HTMLButtonElement;
@@ -127,7 +132,7 @@ export class GameViewController {
   private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
   private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
   private readonly hud: GameHudController;
-  private readonly wowStrip: WowStripController;
+  private readonly wowCelebration: WowCelebrationController;
   private readonly battleLogPanel: BattleLogPanelController;
   private readonly skillCooldownAnimator = new SkillCooldownDisplayAnimator();
 
@@ -171,7 +176,11 @@ export class GameViewController {
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
     this.battlePauseOverlay = root.querySelector('#battle-pause-overlay') as HTMLElement;
-    this.wowStripEl = root.querySelector('#wow-strip') as HTMLElement;
+    this.wowCelebrationRoot = root.querySelector('#wow-celebration-root') as HTMLElement;
+    this.wowCelebrationStage = root.querySelector('#wow-celebration-stage') as HTMLElement;
+    this.wowInboxRoot = root.querySelector('#wow-inbox-root') as HTMLElement;
+    this.wowInboxPanel = root.querySelector('#wow-inbox-panel') as HTMLElement;
+    this.openWowInboxBtn = root.querySelector('#open-wow-inbox-btn') as HTMLButtonElement;
     this.battleLogOverlayEl = document.querySelector('#battle-log-overlay') as HTMLElement;
     this.heroesContainerEl = root.querySelector('#heroes-container') as HTMLElement;
 
@@ -220,8 +229,14 @@ export class GameViewController {
     this.metaLegacyModal = new MetaLegacyModalRenderer();
     this.divineForgeModal = new DivineForgeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
-    this.wowStrip = new WowStripController(this.wowStripEl);
-    this.rewards = new RewardPresentationController(this.wowStrip);
+    this.wowCelebration = new WowCelebrationController(
+      this.wowCelebrationRoot,
+      this.wowCelebrationStage,
+      this.wowInboxRoot,
+      this.wowInboxPanel,
+      this.openWowInboxBtn,
+    );
+    this.rewards = new RewardPresentationController(this.wowCelebration);
     this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
       root.querySelector('#destroy-gear-confirm-root')!,
       root.querySelector('#destroy-confirm-body')!,
@@ -236,6 +251,10 @@ export class GameViewController {
     mountNavArrowIcons(root);
     hydratePanelIcons(root);
     bindCampaignTooltip(this.campaignContextLabel);
+    bindBattleChromeLayout(
+      root.querySelector('.battle-combat-bar') as HTMLElement,
+      root.querySelector('#app'),
+    );
 
     this.hud = new GameHudController(
       this.campaignContextLabel,
@@ -1186,6 +1205,8 @@ export class GameViewController {
   }
 
   private openHeroesModal(): void {
+    this.closeHeroDrawer();
+
     if (
       this.modal.isOpen() &&
       this.modalStack[this.modalStack.length - 1]?.type === 'heroes'
@@ -1396,7 +1417,34 @@ export class GameViewController {
   }
 
   private openHeroDetailModal(heroId: string, tab: HeroDetailTab = 'sheet'): void {
-    this.openHeroDrawer(heroId, tab);
+    if (this.heroDrawerHeroId !== heroId) {
+      this.inlineEquip.close();
+    }
+
+    void this.heroDetailFlow.prepareOpen(heroId, tab).then(() => {
+      if (!this.state) return;
+
+      const hero = this.state.heroes.find((entry) => entry.id === heroId);
+      if (hero?.hasUnspentPoints) {
+        this.dismissOnboardingStep('hero-points');
+      }
+
+      this.closeHeroDrawer();
+
+      const view: ModalView = { type: 'hero-detail', heroId, tab };
+      const topView = this.modalStack[this.modalStack.length - 1];
+
+      if (this.modal.isOpen()) {
+        if (topView?.type === 'hero-detail') {
+          this.modalStack[this.modalStack.length - 1] = view;
+        } else {
+          this.pushModal(view);
+        }
+      } else {
+        this.modalStack.length = 0;
+        this.pushModal(view);
+      }
+    });
   }
 
   private openEquipPickerFromSlot(heroId: string, slot: string): void {
@@ -1409,6 +1457,12 @@ export class GameViewController {
     }
 
     const topView = this.modalStack[this.modalStack.length - 1];
+    if (topView?.type === 'hero-detail') {
+      this.inlineEquip.toggleSlot(heroId, slotKey);
+      this.renderModalTop();
+      return;
+    }
+
     if (topView?.type === 'inventory') {
       this.inlineEquip.toggleSlot(heroId, slotKey);
       this.renderModalTop();
@@ -1550,28 +1604,6 @@ export class GameViewController {
       loadoutPauseActive: this.isManualLoadoutPause(mergedState),
     });
 
-    this.wowStrip.sync(mergedState, {
-      onChestOpen: () => {
-        this.dismissOnboardingStep('first-chest');
-        void this.chestLootFlow.openNextChest();
-      },
-      onInventoryOpen: () => this.openInventoryModal(),
-      onUpgradesOpen: () => {
-        this.dismissOnboardingStep('first-upgrade');
-        void this.openUpgradesModal();
-      },
-      onHeroPointsOpen: () => {
-        const hero = mergedState.heroes.find((entry) => entry.hasUnspentPoints);
-        if (hero) {
-          this.dismissOnboardingStep('hero-points');
-          this.openHeroDrawer(hero.id, 'attributes');
-        }
-      },
-      onNewGame: () => {
-        void this.startNewGame();
-      },
-    });
-
     this.battleStrip.render(mergedState);
     this.skillCooldownAnimator.setCombatActive(
       Boolean(mergedState.phaseRun && !mergedState.canEditParty),
@@ -1611,7 +1643,8 @@ export class GameViewController {
     }
     if (
       this.modal.isOpen() &&
-      this.modalStack[this.modalStack.length - 1]?.type === 'heroes' &&
+      (this.modalStack[this.modalStack.length - 1]?.type === 'heroes' ||
+        this.modalStack[this.modalStack.length - 1]?.type === 'hero-detail') &&
       shouldRenderHeroPanel(previous, mergedState)
     ) {
       this.renderModalTop();

@@ -35,6 +35,7 @@
   --toast-victory-bg: linear-gradient(135deg, #b71c3a 0%, #f0627a 100%);
   --toast-loot-bg: linear-gradient(135deg, #6a1b9a 0%, #ab47bc 100%);
   --toast-idle-bg: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
+  --panel-sheet-top: 42%;
 }
 
 * {
@@ -71,23 +72,6 @@ body {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-}
-
-.settings-btn {
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(18, 28, 48, 0.92);
-  color: #fff8e7;
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.settings-btn:hover {
-  filter: brightness(1.08);
 }
 
 h1 {
@@ -280,6 +264,8 @@ h2 {
 }
 
 .battle-pause-label {
+  width: 100%;
+  text-align: center;
   font-family: var(--font-heading);
   font-size: clamp(26px, 8vw, 40px);
   font-weight: 700;
@@ -1198,11 +1184,11 @@ h2 {
 }
 
 .health-fill.hero {
-  background-image: url('assets/sliders/fill-hero.png');
+  background: linear-gradient(90deg, #2d7a3e 0%, #4caf6a 55%, #8be8a8 100%);
 }
 
 .health-fill.enemy {
-  background-image: url('assets/sliders/fill-enemy.png');
+  background: linear-gradient(90deg, #2d7a3e 0%, #4caf6a 55%, #8be8a8 100%);
 }
 
 .hero-bars {
@@ -1398,6 +1384,10 @@ button.hero-skill-chip:hover {
 
 .skill-card[data-skill-tooltip] {
   cursor: help;
+}
+
+.skill-card--equippable[data-skill-tooltip] {
+  cursor: grab;
 }
 
 .skill-card[data-skill-tooltip] .skill-card-header h4 {
@@ -2728,9 +2718,6 @@ button.hero-skill-chip:hover {
 }
 
 .battle-log-overlay {
-  position: fixed;
-  inset: 0;
-  bottom: 56px;
   z-index: 9000;
   display: flex;
   align-items: flex-end;
@@ -2746,7 +2733,6 @@ button.hero-skill-chip:hover {
 .battle-log-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(6, 10, 22, 0.42);
 }
 
 .battle-log-floating {
@@ -3883,9 +3869,27 @@ body.modal-open {
   overflow: hidden;
 }
 
-.modal-root {
+/* Painéis secundários ocupam só a área abaixo da batalha; wow celebração fica fora deste grupo. */
+.modal-root,
+.hero-drawer-root,
+.confirm-dialog-root,
+.battle-log-overlay {
   position: fixed;
-  inset: 0;
+  top: var(--panel-sheet-top);
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.modal-backdrop,
+.hero-drawer-backdrop,
+.confirm-dialog-backdrop,
+.battle-log-backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.modal-root {
   z-index: 1400;
   display: flex;
   align-items: stretch;
@@ -3897,8 +3901,6 @@ body.modal-open {
 }
 
 .confirm-dialog-root {
-  position: fixed;
-  inset: 0;
   z-index: 1700;
   display: flex;
   align-items: center;
@@ -3913,8 +3915,6 @@ body.modal-open {
 .confirm-dialog-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(6, 10, 22, 0.78);
-  backdrop-filter: blur(3px);
 }
 
 .confirm-dialog {
@@ -4078,8 +4078,6 @@ body.modal-open {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(6, 10, 22, 0.72);
-  backdrop-filter: blur(2px);
 }
 
 .modal-dialog {
@@ -4091,9 +4089,10 @@ body.modal-open {
   max-width: 100%;
   max-height: 100%;
   margin: 0;
+  border-radius: 12px 12px 0 0;
   background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(12, 18, 36, 0.98));
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
   align-self: stretch;
 }
 
@@ -4157,6 +4156,13 @@ body.modal-open {
   min-height: 0;
   overflow-y: auto;
   padding: 12px;
+}
+
+.modal-body:has(.hero-detail-layout) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
 }
 
 .modal-filters {
@@ -5130,6 +5136,32 @@ body.modal-open {
   cursor: grab;
 }
 
+.skill-card--equippable.skill-card--dragging {
+  cursor: grabbing;
+}
+
+body.skill-drag-active,
+body.skill-drag-active * {
+  cursor: grabbing !important;
+}
+
+.skill-drag-preview {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  width: 42px;
+  height: 42px;
+  pointer-events: none;
+}
+
+.skill-drag-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+}
+
 .skill-card--dragging {
   opacity: 0.55;
 }
@@ -5722,13 +5754,48 @@ body.modal-open {
   cursor: not-allowed;
 }
 
-/* --- Wow strip (recompensas e pendências) --- */
+/* --- Wow celebrações --- */
 
-.wow-strip {
-  position: relative;
+.stat-pill--wow-inbox {
+  gap: 4px;
+  cursor: pointer;
+  border-color: rgba(245, 197, 66, 0.45);
+  background: rgba(54, 42, 18, 0.92);
+  color: #ffe6a8;
+}
+
+.stat-pill--wow-inbox:hover {
+  filter: brightness(1.08);
+}
+
+.stat-pill--wow-inbox-open {
+  box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.45);
+}
+
+.wow-inbox-btn-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.wow-inbox-btn-count {
+  min-width: 14px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.wow-inbox-root {
   flex-shrink: 0;
-  min-height: 104px;
   margin-bottom: 8px;
+}
+
+.wow-inbox-root.hidden {
+  display: none;
+}
+
+.wow-inbox-panel {
+  position: relative;
+  min-height: 88px;
   border-radius: 12px;
   overflow: hidden;
   border: 2px solid rgba(245, 197, 66, 0.22);
@@ -5736,6 +5803,45 @@ body.modal-open {
   box-shadow:
     inset 0 0 24px rgba(245, 197, 66, 0.08),
     0 8px 20px rgba(0, 0, 0, 0.28);
+}
+
+body.wow-celebration-open {
+  overflow: hidden;
+}
+
+.wow-celebration-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1850;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.wow-celebration-root.hidden {
+  display: none !important;
+}
+
+.wow-celebration-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 10, 22, 0.78);
+}
+
+.wow-celebration-stage {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 440px);
+  min-height: min(72vh, 540px);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(245, 197, 66, 0.35);
+  background: linear-gradient(165deg, rgba(36, 28, 12, 0.98), rgba(12, 10, 6, 0.98));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    inset 0 0 40px rgba(245, 197, 66, 0.1);
 }
 
 .wow-strip-bg {
@@ -5754,20 +5860,37 @@ body.modal-open {
   grid-template-columns: auto 1fr auto;
   gap: 10px;
   align-items: center;
-  min-height: 104px;
+  min-height: 88px;
   padding: 12px 14px;
 }
 
+.wow-banner--center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: min(72vh, 540px);
+  padding: 32px 24px 28px;
+  text-align: center;
+}
+
+.wow-banner--compact {
+  min-height: 88px;
+}
+
 .wow-banner--enter {
-  animation: wow-banner-enter 0.32s ease-out both;
+  animation: wow-banner-enter 0.38s ease-out both;
 }
 
 @keyframes wow-banner-enter {
   from {
     opacity: 0;
+    transform: translateY(12px) scale(0.98);
   }
   to {
     opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -5789,12 +5912,25 @@ body.modal-open {
   justify-content: center;
 }
 
+.wow-banner--center .wow-banner-visual {
+  width: 120px;
+  height: 120px;
+}
+
 .wow-banner-icon,
 .wow-banner-hero-portrait {
   width: 52px;
   height: 52px;
   object-fit: contain;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+}
+
+.wow-banner-icon--center,
+.wow-banner-hero-portrait.wow-banner-visual--center,
+.wow-banner--center .wow-banner-icon,
+.wow-banner--center .wow-banner-hero-portrait {
+  width: 108px;
+  height: 108px;
 }
 
 .wow-banner-hero-portrait {
@@ -5807,6 +5943,13 @@ body.modal-open {
   line-height: 1;
 }
 
+.wow-banner-emoji--center,
+.wow-banner-spark--center,
+.wow-banner--center .wow-banner-emoji,
+.wow-banner--center .wow-banner-spark {
+  font-size: 72px;
+}
+
 .wow-banner-gear-frame {
   width: 52px;
   height: 52px;
@@ -5817,16 +5960,31 @@ body.modal-open {
   background: rgba(0, 0, 0, 0.25);
 }
 
+.wow-banner--center .wow-banner-gear-frame {
+  width: 108px;
+  height: 108px;
+  border-radius: 14px;
+}
+
 .wow-banner-gear-sprite {
   width: 40px;
   height: 40px;
   object-fit: contain;
 }
 
+.wow-banner--center .wow-banner-gear-sprite {
+  width: 84px;
+  height: 84px;
+}
+
 .wow-banner-copy {
   position: relative;
   z-index: 1;
   min-width: 0;
+}
+
+.wow-banner--center .wow-banner-copy {
+  max-width: 340px;
 }
 
 .wow-banner-eyebrow {
@@ -5837,12 +5995,22 @@ body.modal-open {
   color: var(--gold);
 }
 
+.wow-banner--center .wow-banner-eyebrow {
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
 .wow-banner-title {
   margin: 0;
   font-family: var(--font-heading);
   font-size: 15px;
   line-height: 1.15;
   color: #fff;
+}
+
+.wow-banner--center .wow-banner-title {
+  font-size: clamp(28px, 7vw, 38px);
+  line-height: 1.1;
 }
 
 .wow-banner-subtitle {
@@ -5852,11 +6020,21 @@ body.modal-open {
   line-height: 1.35;
 }
 
+.wow-banner--center .wow-banner-subtitle {
+  font-size: 14px;
+  margin-top: 8px;
+}
+
 .wow-banner-details {
+  list-style: none;
   margin: 6px 0 0;
-  padding-left: 14px;
+  padding: 0;
   font-size: 10px;
   color: rgba(255, 255, 255, 0.82);
+}
+
+.wow-banner-details li + li {
+  margin-top: 2px;
 }
 
 .wow-banner-progress {
@@ -5888,6 +6066,12 @@ body.modal-open {
   cursor: pointer;
 }
 
+.wow-banner--center .wow-banner-cta {
+  margin-top: 4px;
+  padding: 12px 20px;
+  font-size: 12px;
+}
+
 .wow-banner-cta:hover {
   filter: brightness(1.08);
 }
@@ -5911,6 +6095,14 @@ body.modal-open {
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
+}
+
+.wow-banner--center .wow-banner-dismiss {
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
 }
 
 .wow-banner-dismiss:hover {
@@ -6109,6 +6301,10 @@ body.modal-open {
   border-color: rgba(245, 197, 66, 0.35);
 }
 
+.action-icon-btn--settings {
+  border-color: rgba(180, 190, 210, 0.35);
+}
+
 .action-icon-btn:hover:not(:disabled) {
   filter: brightness(1.08);
 }
@@ -6165,8 +6361,6 @@ body.modal-open {
 }
 
 .hero-drawer-root {
-  position: fixed;
-  inset: 0;
   z-index: 1300;
   display: flex;
   align-items: flex-end;
@@ -6180,7 +6374,6 @@ body.modal-open {
 .hero-drawer-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(6, 10, 22, 0.45);
 }
 
 .hero-drawer-panel {
@@ -6189,9 +6382,10 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 72%;
+  max-height: 100%;
+  border-radius: 12px 12px 0 0;
   background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(12, 18, 36, 0.98));
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
 }
 

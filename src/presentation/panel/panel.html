@@ -13,13 +13,23 @@
           <span id="gold-label" class="stat-pill">0</span>
           <span id="chest-label" class="stat-pill">0</span>
           <span id="chest-progress-label" class="stat-pill">0/3</span>
+          <button
+            id="open-wow-inbox-btn"
+            type="button"
+            class="stat-pill stat-pill--wow-inbox hidden"
+            title="Celebrações recentes"
+            aria-label="Celebrações recentes"
+            aria-expanded="false"
+          >
+            <span class="wow-inbox-btn-icon" aria-hidden="true">✦</span>
+            <span class="wow-inbox-btn-count"></span>
+          </button>
         </div>
-        <button id="open-settings-btn" class="settings-btn" type="button" aria-label="Configurações" title="Configurações">
-          ⚙
-        </button>
       </header>
 
-      <section id="wow-strip" class="wow-strip" aria-live="polite" aria-label="Recompensas e pendências"></section>
+      <div id="wow-inbox-root" class="wow-inbox-root hidden" aria-hidden="true">
+        <div id="wow-inbox-panel" class="wow-inbox-panel" aria-label="Celebrações recentes"></div>
+      </div>
 
       <section id="campaign-context-bar" class="campaign-context-bar" aria-label="Campanha">
         <span
@@ -37,7 +47,7 @@
         <div id="battle-float-layer" class="battle-float-layer" aria-hidden="true"></div>
         <div id="battle-victory-overlay" class="battle-victory-overlay hidden" aria-live="polite"></div>
         <div id="battle-pause-overlay" class="battle-pause-overlay hidden" aria-live="polite">
-          <span class="battle-pause-label">No acampamento</span>
+          <span class="battle-pause-label">Acampamento</span>
         </div>
         <div class="strip-floor"></div>
       </section>
@@ -68,7 +78,7 @@
       <footer class="actions">
         <div class="actions-icon-bar" aria-label="Sistemas do jogo">
           <button id="open-heroes-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--heroes" type="button" title="Heróis" aria-label="Heróis">
-            <img class="btn-icon" src="assets/ui/gift.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <img class="btn-icon" src="assets/ui/heroes.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
             <span class="action-icon-label">Heróis</span>
           </button>
           <button id="open-formation-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--formation" type="button" title="Formação da equipe" aria-label="Formação">
@@ -115,8 +125,24 @@
             <img class="btn-icon" src="assets/ui/chest-open.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
             <span class="action-icon-label">Todos</span>
           </button>
+          <button id="open-settings-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--settings" type="button" title="Configurações" aria-label="Configurações">
+            <span class="action-icon-glyph" aria-hidden="true">⚙</span>
+            <span class="action-icon-label">Config</span>
+          </button>
         </div>
       </footer>
+    </div>
+
+    <div id="wow-celebration-root" class="wow-celebration-root hidden" aria-hidden="true">
+      <div class="wow-celebration-backdrop" data-wow-celebration-close></div>
+      <div
+        id="wow-celebration-stage"
+        class="wow-celebration-stage"
+        role="dialog"
+        aria-modal="true"
+        aria-live="assertive"
+        aria-label="Celebração"
+      ></div>
     </div>
 
     <div id="battle-log-overlay" class="battle-log-overlay hidden" aria-hidden="true">

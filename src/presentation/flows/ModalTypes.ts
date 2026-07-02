@@ -1,9 +1,10 @@
 import { EquipPickerMode } from '../components/EquipPickerModalRenderer';
+import { HeroDetailTab } from '../components/HeroDetailModalRenderer';
 
 export type ModalView =
   | { type: 'inventory' }
   | { type: 'stash' }
-  | { type: 'hero-detail'; heroId: string }
+  | { type: 'hero-detail'; heroId: string; tab?: HeroDetailTab }
   | { type: 'equip-picker'; mode: EquipPickerMode }
   | { type: 'loot-reveal'; gearId: string }
   | { type: 'loot-batch'; gearIds: string[] }

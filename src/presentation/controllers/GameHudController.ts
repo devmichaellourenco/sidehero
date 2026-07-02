@@ -141,7 +141,7 @@ export class GameHudController {
       'Próximo baú',
     );
 
-    ensureButtonIcon(this.openHeroesBtn, ASSETS.ui.energy);
+    ensureButtonIcon(this.openHeroesBtn, ASSETS.ui.heroes);
     this.heroesBadgeEl = ensureBadge(this.openHeroesBtn);
 
     ensureButtonIcon(this.openFormationBtn, ASSETS.ui.defense);
