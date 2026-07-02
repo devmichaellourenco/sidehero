@@ -28,9 +28,9 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
     anchorSelector: '#open-chest-btn',
   },
   'pause-loadout': {
-    title: 'Pause para ajustar',
+    title: 'Acampamento',
     message:
-      'Use Pausar para editar equipe, inventário e skills com calma. A fase reinicia ao continuar.',
+      'Use Acampamento para editar equipe, inventário e skills com calma. A fase reinicia ao partir.',
     anchorSelector: '#pause-loadout-btn',
   },
   'hero-points': {
@@ -40,8 +40,9 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
     anchorSelector: '#hero-panels',
   },
   'first-upgrade': {
-    title: 'Melhorias da vila',
-    message: 'Há uma melhoria disponível com o ouro acumulado. Toque na estrela ★ para abrir a árvore.',
+    title: 'Melhorias do acampamento',
+    message:
+      'Há uma melhoria disponível com o ouro acumulado. Toque na estrela ★ para abrir a árvore.',
     anchorSelector: '#open-upgrades-btn',
   },
 };

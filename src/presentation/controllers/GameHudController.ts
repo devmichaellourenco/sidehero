@@ -69,18 +69,6 @@ function ensureBadge(button: HTMLButtonElement): HTMLElement {
   return badge;
 }
 
-function ensureGlyph(button: HTMLButtonElement, glyph: string): HTMLElement {
-  let glyphEl = button.querySelector<HTMLElement>(':scope > .action-icon-glyph');
-  if (!glyphEl) {
-    glyphEl = document.createElement('span');
-    glyphEl.className = 'action-icon-glyph';
-    glyphEl.setAttribute('aria-hidden', 'true');
-    button.replaceChildren(glyphEl);
-  }
-  glyphEl.textContent = glyph;
-  return glyphEl;
-}
-
 function setupStatPill(
   container: HTMLElement,
   assetPath: string,
@@ -114,6 +102,8 @@ export class GameHudController {
   private readonly stashBadgeEl: HTMLElement;
   private readonly optimizeBadgeEl: HTMLElement;
   private readonly upgradesBadgeEl: HTMLElement;
+  private readonly chestBadgeEl: HTMLElement;
+  private readonly openAllChestsBadgeEl: HTMLElement;
   private lastCampaignTooltipKey = '';
 
   constructor(
@@ -156,11 +146,17 @@ export class GameHudController {
 
     ensureButtonIcon(this.openForgeBtn, ASSETS.ui.forge);
 
-    ensureGlyph(this.optimizeLoadoutBtn, '⬆');
+    ensureButtonIcon(this.optimizeLoadoutBtn, ASSETS.ui.attack);
     this.optimizeBadgeEl = ensureBadge(this.optimizeLoadoutBtn);
 
-    ensureGlyph(this.openUpgradesBtn, '★');
+    ensureButtonIcon(this.openUpgradesBtn, ASSETS.ui.stage);
     this.upgradesBadgeEl = ensureBadge(this.openUpgradesBtn);
+
+    ensureButtonIcon(this.openChestBtn, ASSETS.ui.chest);
+    this.chestBadgeEl = ensureBadge(this.openChestBtn);
+
+    ensureButtonIcon(this.openAllChestsBtn, ASSETS.ui.chestOpen);
+    this.openAllChestsBadgeEl = ensureBadge(this.openAllChestsBtn);
   }
 
   render(
@@ -209,7 +205,7 @@ export class GameHudController {
 
     if (state.storageCapacity.stashUnlocked) {
       this.openStashBtn.classList.remove('hidden');
-      this.openStashBtn.title = `Baú (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
+      this.openStashBtn.title = `Cofre (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
       updateBadge(this.stashBadgeEl, state.storageCapacity.stashUsed);
     } else {
       this.openStashBtn.classList.add('hidden');
@@ -234,7 +230,7 @@ export class GameHudController {
       !flags.openAllChests || state.pendingChestCount < 2,
     );
 
-    this.openUpgradesBtn.title = 'Melhorias';
+    this.openUpgradesBtn.title = 'Melhorias do acampamento';
     updateBadge(this.upgradesBadgeEl, state.purchasableUpgradeCount);
 
     const hasChests = state.pendingChestCount > 0;
@@ -242,6 +238,11 @@ export class GameHudController {
     this.openAllChestsBtn.disabled =
       !flags.openAllChests || state.pendingChestCount < 2 || options.openingChests;
     this.openChestBtn.classList.toggle('chest-available', hasChests);
+    updateBadge(this.chestBadgeEl, hasChests ? state.pendingChestCount : 0);
+    updateBadge(
+      this.openAllChestsBadgeEl,
+      flags.openAllChests && state.pendingChestCount >= 2 ? state.pendingChestCount : 0,
+    );
     this.openChestBtn.title = hasChests
       ? `Abrir baú (${state.pendingChestCount})`
       : 'Nenhum baú disponível';

@@ -37,7 +37,7 @@ export class TickGameUseCase {
 
     if (options.restartCurrentPhase) {
       if (!state.loadoutEditOpen || !state.phaseRestartOnResume) {
-        throw new Error('Não há pausa ativa para reiniciar a fase');
+        throw new Error('Não há missão pausada no acampamento');
       }
 
       const restarted = state.phaseRun

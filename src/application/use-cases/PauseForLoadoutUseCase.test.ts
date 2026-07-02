@@ -43,6 +43,6 @@ describe('PauseForLoadoutUseCase', () => {
   it('rejeita pausa sem fase em andamento', async () => {
     const repository = new MemoryRepository(GameState.initial());
     const useCase = new PauseForLoadoutUseCase(repository, presenter);
-    await expect(useCase.execute()).rejects.toThrow('Não há fase em andamento');
+    await expect(useCase.execute()).rejects.toThrow('Não há missão ativa para voltar ao acampamento');
   });
 });

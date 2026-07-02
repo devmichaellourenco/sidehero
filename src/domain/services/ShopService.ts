@@ -29,6 +29,18 @@ const BASE_PRICE: Record<GearRarity, number> = {
 
 const REFRESH_BASE_COST = 15;
 
+export function parseShopOfferCatalogKey(
+  offerId: string,
+): { stage: number; seed: number } | null {
+  const match = offerId.match(/^shop-(\d+)-(\d+)-/);
+  if (!match) return null;
+
+  return {
+    stage: Number(match[1]),
+    seed: Number(match[2]),
+  };
+}
+
 export class ShopService {
   constructor(private readonly lootService: LootService) {}
 
@@ -63,7 +75,14 @@ export class ShopService {
   }
 
   findOffer(stage: number, refreshSeed: number, offerId: string): ShopOffer | null {
-    return this.generateOffers(stage, refreshSeed).find((offer) => offer.id === offerId) ?? null;
+    const catalog = parseShopOfferCatalogKey(offerId);
+    const resolvedStage = catalog?.stage ?? stage;
+    const resolvedSeed = catalog?.seed ?? refreshSeed;
+
+    return (
+      this.generateOffers(resolvedStage, resolvedSeed).find((offer) => offer.id === offerId) ??
+      null
+    );
   }
 
   calculateRefreshCost(stage: number): number {

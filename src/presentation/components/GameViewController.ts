@@ -545,6 +545,7 @@ export class GameViewController {
   }
 
   private isAdvanceBlocked(state: GameStateDto | null = this.state): boolean {
+    if (this.onboarding.isActive()) return true;
     if (this.victoryFlow.isBlockingAdvance()) return true;
     if (this.pausingLoadout) return true;
     return this.isManualLoadoutPause(state);
@@ -741,7 +742,7 @@ export class GameViewController {
       }
 
       this.render(response.state);
-      this.toasts.show('Pausa ativa — ajuste sua equipe', 'info');
+      this.toasts.show('No acampamento — ajuste sua equipe', 'info');
     } finally {
       this.pausingLoadout = false;
     }
@@ -1079,7 +1080,7 @@ export class GameViewController {
 
   private async handlePartySlotDrop(heroId: string, targetIndex: number): Promise<void> {
     if (!this.canEditParty()) {
-      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
       return;
     }
 
@@ -1093,7 +1094,7 @@ export class GameViewController {
 
   private async handlePartyActiveToBench(heroId: string): Promise<void> {
     if (!this.canEditParty()) {
-      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
       return;
     }
 
@@ -1107,7 +1108,7 @@ export class GameViewController {
 
   private async handlePartyReorder(fromIndex: number, toIndex: number): Promise<void> {
     if (!this.canEditParty()) {
-      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
       return;
     }
 
@@ -1174,7 +1175,7 @@ export class GameViewController {
 
   private async handlePartyPanelAction(target: HTMLElement): Promise<void> {
     if (!this.state?.canEditParty && !this.isManualLoadoutPause(this.state)) {
-      this.toasts.show('Pause o jogo para ajustar party e loadout', 'info');
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
       return;
     }
 
@@ -1562,7 +1563,15 @@ export class GameViewController {
       .join('');
 
     this.enforceUpgradeGates();
-    this.chestLootFlow.scheduleAutoOpenChests();
+    if (!this.onboarding.isActive()) {
+      this.chestLootFlow.scheduleAutoOpenChests();
+    }
+    if (
+      this.modal.isOpen() &&
+      this.modalStack[this.modalStack.length - 1]?.type === 'shop'
+    ) {
+      void this.shopFlow.ensureFreshOffers(mergedState);
+    }
     this.syncOnboarding(mergedState);
   }
 
@@ -1574,6 +1583,7 @@ export class GameViewController {
     const step = resolveOnboardingStep(state, this.onboarding.getDismissedSteps());
     if (!step) {
       this.onboarding.hide();
+      this.syncAutoBattleTimer();
       return;
     }
 
@@ -1583,11 +1593,17 @@ export class GameViewController {
         if (this.state) {
           this.syncOnboarding(this.state);
         }
+        this.syncAutoBattleTimer();
       },
       onSkipAll: () => {
         this.onboarding.skipAll();
         this.onboarding.hide();
+        this.syncAutoBattleTimer();
       },
     });
+
+    if (this.onboarding.isActive()) {
+      this.stopAutoBattle();
+    }
   }
 }

@@ -16,7 +16,7 @@ export class PauseForLoadoutUseCase {
     }
 
     if (!state.phaseRun) {
-      throw new Error('Não há fase em andamento para pausar');
+      throw new Error('Não há missão ativa para voltar ao acampamento');
     }
 
     if (state.campaignProgress.seasonCompleted) {
@@ -27,7 +27,7 @@ export class PauseForLoadoutUseCase {
       .withCombat(null)
       .withLoadoutEditOpen(true)
       .withPhaseRestartOnResume(true)
-      .addLog('⏸ Pausa para ajustes — a fase reiniciará ao continuar');
+      .addLog('🏕 Retorno ao acampamento — a fase reiniciará ao partir');
 
     await this.repository.save(nextState);
     return this.presenter.present(nextState);

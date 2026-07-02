@@ -37,7 +37,7 @@
         <div id="battle-float-layer" class="battle-float-layer" aria-hidden="true"></div>
         <div id="battle-victory-overlay" class="battle-victory-overlay hidden" aria-live="polite"></div>
         <div id="battle-pause-overlay" class="battle-pause-overlay hidden" aria-live="polite">
-          <span class="battle-pause-label">Pausado</span>
+          <span class="battle-pause-label">No acampamento</span>
         </div>
         <div class="strip-floor"></div>
       </section>
@@ -47,21 +47,21 @@
           id="pause-loadout-btn"
           class="combat-bar-btn"
           type="button"
-          aria-label="Pausar para ajustes"
-          title="Pausar para ajustes — a fase reinicia ao continuar"
+          aria-label="Voltar ao acampamento"
+          title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao partir."
         >
-          <span class="combat-bar-btn-icon" aria-hidden="true">⏸</span>
-          <span class="combat-bar-btn-label">Pausar</span>
+          <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
+          <span class="combat-bar-btn-label">Acampamento</span>
         </button>
         <button
           id="continue-loadout-btn"
           class="combat-bar-btn combat-bar-btn--continue hidden"
           type="button"
-          aria-label="Continuar batalha"
-          title="Continuar batalha — a fase reinicia do início"
+          aria-label="Partir do acampamento"
+          title="Sair do acampamento e reiniciar a fase do início"
         >
           <span class="combat-bar-btn-icon" aria-hidden="true">▶</span>
-          <span class="combat-bar-btn-label">Continuar</span>
+          <span class="combat-bar-btn-label">Partir</span>
         </button>
       </div>
 
@@ -72,35 +72,45 @@
 
       <footer class="actions">
         <div class="actions-icon-bar" aria-label="Sistemas do jogo">
-          <button id="open-battle-log-btn" class="action-icon-btn" type="button" title="Log de batalha" aria-label="Log de batalha" aria-expanded="false">
+          <button id="open-battle-log-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--log" type="button" title="Log de batalha" aria-label="Log de batalha" aria-expanded="false">
             <span class="action-icon-glyph" aria-hidden="true">📜</span>
+            <span class="action-icon-label">Log</span>
           </button>
-          <button id="open-campaign-btn" class="action-icon-btn" type="button" title="Campanha" aria-label="Campanha">
+          <button id="open-campaign-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--campaign" type="button" title="Campanha" aria-label="Campanha">
             <img class="btn-icon" src="assets/ui/campaign.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Campanha</span>
           </button>
-          <button id="open-shop-btn" class="action-icon-btn" type="button" title="Loja" aria-label="Loja">
+          <button id="open-shop-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--shop" type="button" title="Loja" aria-label="Loja">
             <img class="btn-icon" src="assets/ui/shop.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Loja</span>
           </button>
-          <button id="open-inventory-btn" class="action-icon-btn" type="button" title="Inventário" aria-label="Inventário">
+          <button id="open-inventory-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--inventory" type="button" title="Inventário" aria-label="Inventário">
             <img class="btn-icon" src="assets/ui/inventory.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Inventário</span>
           </button>
-          <button id="open-stash-btn" class="action-icon-btn hidden" type="button" title="Baú de itens" aria-label="Baú de itens">
+          <button id="open-stash-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--stash hidden" type="button" title="Cofre de itens" aria-label="Cofre de itens">
             <img class="btn-icon" src="assets/ui/chest-open.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Cofre</span>
           </button>
-          <button id="open-forge-btn" class="action-icon-btn hidden" type="button" title="Forja Divina" aria-label="Forja Divina">
+          <button id="open-forge-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--forge hidden" type="button" title="Forja Divina" aria-label="Forja Divina">
             <img class="btn-icon" src="assets/ui/forge.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Forja</span>
           </button>
-          <button id="optimize-loadout-btn" class="action-icon-btn hidden" type="button" title="Otimizar equipe" aria-label="Otimizar equipe">
-            ⬆
+          <button id="optimize-loadout-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--optimize hidden" type="button" title="Otimizar equipe" aria-label="Otimizar equipe">
+            <img class="btn-icon" src="assets/ui/attack.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Otimizar</span>
           </button>
-          <button id="open-upgrades-btn" class="action-icon-btn" type="button" title="Melhorias" aria-label="Melhorias">
-            ★
+          <button id="open-upgrades-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--upgrades" type="button" title="Melhorias do acampamento" aria-label="Melhorias do acampamento">
+            <img class="btn-icon" src="assets/ui/stage.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Melhorias</span>
           </button>
-          <button id="open-chest-btn" class="action-icon-btn action-icon-btn--chest" type="button" disabled title="Abrir baú" aria-label="Abrir baú">
+          <button id="open-chest-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--chest" type="button" disabled title="Abrir baú" aria-label="Abrir baú">
             <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Baús</span>
           </button>
-          <button id="open-all-chests-btn" class="action-icon-btn hidden" type="button" title="Abrir todos os baús" aria-label="Abrir todos os baús">
-            <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+          <button id="open-all-chests-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--chest-all hidden" type="button" title="Abrir todos os baús" aria-label="Abrir todos os baús">
+            <img class="btn-icon" src="assets/ui/chest-open.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
+            <span class="action-icon-label">Todos</span>
           </button>
         </div>
       </footer>

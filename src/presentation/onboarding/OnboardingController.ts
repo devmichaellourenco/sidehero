@@ -11,10 +11,13 @@ export type OnboardingHandlers = {
 };
 
 export class OnboardingController {
+  static readonly STEP_GAP_MS = 1500;
+
   private readonly root: HTMLElement;
   private activeStep: OnboardingStep | null = null;
   private highlightedAnchor: HTMLElement | null = null;
   private dismissed = loadDismissedOnboardingSteps();
+  private stepCooldownUntil = 0;
 
   constructor() {
     this.root = document.createElement('div');
@@ -31,6 +34,14 @@ export class OnboardingController {
     return this.dismissed;
   }
 
+  isActive(): boolean {
+    return this.activeStep !== null && !this.root.classList.contains('hidden');
+  }
+
+  getActiveStepId(): OnboardingStep['id'] | null {
+    return this.activeStep?.id ?? null;
+  }
+
   dismissStep(stepId: OnboardingStep['id']): void {
     this.dismissed = dismissOnboardingStep(stepId);
     if (this.activeStep?.id === stepId) {
@@ -45,6 +56,19 @@ export class OnboardingController {
   }
 
   show(step: OnboardingStep, handlers: OnboardingHandlers): void {
+    if (
+      this.activeStep &&
+      this.activeStep.id !== step.id &&
+      !this.root.classList.contains('hidden')
+    ) {
+      this.reposition();
+      return;
+    }
+
+    if (!this.activeStep && Date.now() < this.stepCooldownUntil) {
+      return;
+    }
+
     if (this.activeStep?.id === step.id && !this.root.classList.contains('hidden')) {
       this.reposition();
       return;
@@ -82,6 +106,9 @@ export class OnboardingController {
 
   hide(): void {
     this.clearHighlight();
+    if (this.activeStep) {
+      this.stepCooldownUntil = Date.now() + OnboardingController.STEP_GAP_MS;
+    }
     this.activeStep = null;
     this.root.classList.add('hidden');
     this.root.innerHTML = '';

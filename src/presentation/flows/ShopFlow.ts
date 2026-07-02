@@ -1,6 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { IGameClient } from '../../application/ports/IGameClient';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
+import { IGameClient } from '../../application/ports/IGameClient';
+import { parseShopOfferCatalogKey } from '../../domain/services/ShopService';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { ToastController } from '../components/ToastController';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
@@ -83,10 +84,12 @@ export class ShopFlow {
       return;
     }
 
-    this.state.offers = this.state.offers.map((offer) => ({
-      ...offer,
-      canAfford: response.state.gold >= offer.price,
-    }));
+    this.state.offers = this.state.offers
+      .filter((offer) => offer.id !== offerId)
+      .map((offer) => ({
+        ...offer,
+        canAfford: response.state.gold >= offer.price,
+      }));
     this.state.canAffordRefresh = response.state.gold >= this.state.refreshCost;
     this.state.shopRefreshRemaining = Math.max(
       0,
@@ -99,6 +102,17 @@ export class ShopFlow {
       this.rewards.celebrateShopPurchase(response.purchasedGear);
     }
 
+    this.refreshModal();
+  }
+
+  async ensureFreshOffers(state: GameStateDto): Promise<void> {
+    const sampleOfferId = this.state.offers[0]?.id;
+    if (!sampleOfferId) return;
+
+    const catalog = parseShopOfferCatalogKey(sampleOfferId);
+    if (!catalog || catalog.stage === state.difficultyTier) return;
+
+    await this.loadShop();
     this.refreshModal();
   }
 

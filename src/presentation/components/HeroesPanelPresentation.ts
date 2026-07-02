@@ -205,7 +205,7 @@ function renderFormationBenchSlot(
 function renderPartyLockNotice(canEditParty: boolean): string {
   if (canEditParty) return '';
 
-  return `<p class="party-lock-notice" title="Use o botão ⏸ acima da batalha para pausar e editar party e loadout.">🔒 Formação bloqueada durante a fase</p>`;
+  return `<p class="party-lock-notice" title="Use Acampamento acima da batalha para editar party e loadout.">🔒 Formação bloqueada durante a missão</p>`;
 }
 
 function renderBattlingTab(state: PartyPanelState, battlingHeroIndex: number): string {
