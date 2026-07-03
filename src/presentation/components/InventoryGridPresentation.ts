@@ -14,7 +14,7 @@ import {
   getGearUpgradeInfoForHero,
 } from './GearComparison';
 import {
-  formatGearBonuses,
+  renderGearBonusLines,
   GEAR_RARITY_LABELS,
   GEAR_SLOT_LABELS,
   GearSlotKey,
@@ -160,7 +160,7 @@ export function renderInventoryGridSlot(
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}</span>
         <span class="inventory-gear-tooltip-equipped">Equipado: ${equipped ? escapeHtml(equipped.name) : '—'}</span>
-        <span class="inventory-gear-tooltip-stats">${formatGearBonuses(gear)}</span>
+        <span class="inventory-gear-tooltip-stats">${renderGearBonusLines(gear)}</span>
         ${requirementLines}
         <span class="inventory-gear-tooltip-hero">Comparado com ${escapeHtml(options.hero.name)}</span>
         <span class="inventory-gear-tooltip-delta">

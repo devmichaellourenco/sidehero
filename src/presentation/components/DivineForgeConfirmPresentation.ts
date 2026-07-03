@@ -7,7 +7,7 @@ import {
   imgTag,
 } from '../assets/AssetCatalog';
 import {
-  formatGearBonuses,
+  renderGearBonusLines,
   GEAR_RARITY_LABELS,
   GEAR_SLOT_LABELS,
   GearSlotKey,
@@ -39,7 +39,7 @@ function renderGearConfirmCard(gear: GearDto, compact = false): string {
         ${
           compact
             ? ''
-            : `<span class="destroy-confirm-gear-stats">${formatGearBonuses(gear)}</span>`
+            : `<span class="destroy-confirm-gear-stats">${renderGearBonusLines(gear)}</span>`
         }
       </div>
     </div>

@@ -12,7 +12,8 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 ## Critérios de aceite
 
 - [x] Tick avança combate quando não pausado; respeita `combatIntermission` e pausa de loadout
-- [x] Wave intermediária: ouro parcial, sem XP de boss; boss concede XP, ouro, progresso de fase
+- [x] Recompensas por kill: ouro, XP e loot ao derrotar cada inimigo (tabela por mundo/monstro)
+- [x] Boss: loot garantido na 1ª vitória da fase; replay com chance reduzida; progresso de fase no fim
 - [x] Wipe na fase: cura completa + reinicia wave 1 da mesma fase
 - [x] Seleção de fase: apenas desbloqueadas ou já concluídas (replay)
 - [x] Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase
@@ -41,7 +42,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 
 ## Testes obrigatórios
 
-- [x] `PhaseCombatHandlers.test.ts`
+- [x] `PhaseCombatHandlers.test.ts`, `EnemyKillRewardService.test.ts`, `EnemyLootTable.test.ts`
 - [x] `CombatTurnPhase.test.ts`, `CombatActionExecutor.test.ts`
 - [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`
 - [x] `BattleVictoryFlow.test.ts`

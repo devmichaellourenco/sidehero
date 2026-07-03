@@ -9,7 +9,7 @@ import {
   imgTag,
 } from '../assets/AssetCatalog';
 import {
-  formatGearBonuses,
+  renderGearBonusLines,
   GEAR_RARITY_LABELS,
   GEAR_SLOT_LABELS,
   GearSlotKey,
@@ -94,7 +94,7 @@ function renderForgeSlot(
       <span class="inventory-gear-tooltip-content hidden">
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}</span>
-        <span class="inventory-gear-tooltip-stats">${formatGearBonuses(gear)}</span>
+        <span class="inventory-gear-tooltip-stats">${renderGearBonusLines(gear)}</span>
         ${
           options.tab === 'salvage'
             ? `<span class="forge-salvage-preview">+${calculateForgeSalvageGold(gear.rarity as GearDto['rarity'], options.stage)} ouro</span>`

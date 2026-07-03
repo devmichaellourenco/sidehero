@@ -2,7 +2,8 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
 import { ASSETS, getAssetUrl, getGearFrameSprite, getGearRaritySprite, getGearSprite, imgTag } from '../assets/AssetCatalog';
 import {
-  formatGearBonuses,
+  listGearBonusLines,
+  renderGearBonusLines,
   GEAR_RARITY_LABELS,
   GEAR_SLOT_LABELS,
   GearSlotKey,
@@ -38,7 +39,7 @@ function formatCompactGearStats(gear: ShopOfferDto['gear']): string {
   if (parts.length > 0) {
     return parts.slice(0, 2).join(' · ');
   }
-  return formatGearBonuses(gear).split(' · ').slice(0, 2).join(' · ');
+  return listGearBonusLines(gear).slice(0, 2).join(' · ');
 }
 
 function renderShopOfferTile(offer: ShopOfferDto): string {
@@ -49,7 +50,7 @@ function renderShopOfferTile(offer: ShopOfferDto): string {
   const disabledAttr = offer.canAfford ? '' : 'disabled';
   const affordClass = offer.canAfford ? '' : ' shop-offer-unaffordable';
   const compactStats = formatCompactGearStats(gear);
-  const fullStats = formatGearBonuses(gear);
+  const fullStats = renderGearBonusLines(gear);
 
   return `
     <article class="shop-offer-tile ${gear.rarity}${affordClass}" data-shop-offer="${offer.id}">
@@ -73,7 +74,7 @@ function renderShopOfferTile(offer: ShopOfferDto): string {
           Comprar
         </button>
       </div>
-      <span class="shop-offer-tooltip" role="tooltip">${escapeHtml(fullStats)}</span>
+      <span class="shop-offer-tooltip" role="tooltip">${fullStats}</span>
     </article>
   `;
 }

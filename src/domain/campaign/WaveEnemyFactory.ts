@@ -55,9 +55,8 @@ function createEnemyFromSlot(
   const defense = Math.floor(4 * scaling.atk * roleScale.stat);
   const maxHealth = Math.floor(60 * scaling.hp * roleScale.stat);
   const goldReward = Math.floor(8 * scaling.gold * roleScale.reward * context.goldMultiplier);
-  const xpReward = context.isBossWave
-    ? Math.floor(15 * scaling.exp * roleScale.reward)
-    : 0;
+  const xpBase = slot.role === 'boss' ? 8 : slot.role === 'elite' ? 5 : 2;
+  const xpReward = Math.floor(xpBase * scaling.exp * roleScale.reward);
 
   const rosterEntry = getEnemyRosterEntry(slot.enemyType);
   const baseName = rosterEntry?.name ?? slot.enemyType;
@@ -78,5 +77,6 @@ function createEnemyFromSlot(
     stats: Stats.fromBase(attack, defense, maxHealth),
     goldReward,
     xpReward,
+    role: slot.role,
   });
 }

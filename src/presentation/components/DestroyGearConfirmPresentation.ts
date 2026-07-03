@@ -7,7 +7,7 @@ import {
   imgTag,
 } from '../assets/AssetCatalog';
 import {
-  formatGearBonuses,
+  renderGearBonusLines,
   GEAR_RARITY_LABELS,
   GEAR_SLOT_LABELS,
   GearSlotKey,
@@ -35,7 +35,7 @@ export function renderDestroyGearConfirmContent(gear: GearDto): string {
       <div class="destroy-confirm-gear-info">
         <strong class="destroy-confirm-gear-name">${escapeHtml(gear.name)}</strong>
         <span class="destroy-confirm-gear-meta">${slotLabel} · ${rarityLabel}</span>
-        <span class="destroy-confirm-gear-stats">${formatGearBonuses(gear)}</span>
+        <span class="destroy-confirm-gear-stats">${renderGearBonusLines(gear)}</span>
       </div>
     </div>
     <p class="destroy-confirm-warning">

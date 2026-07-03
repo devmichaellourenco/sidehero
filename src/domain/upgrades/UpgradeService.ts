@@ -1,9 +1,16 @@
 import { GameState } from '../entities/GameState';
-import { getFeatureLevel, UpgradeLevels } from './FeatureKey';
+import { FeatureKey, getFeatureLevel, UpgradeLevels } from './FeatureKey';
 import { HeroUnlockService } from '../party/HeroUnlockService';
 import { UpgradeRequirementEvaluator } from '../requirements/UpgradeRequirementEvaluator';
 import { getUpgradeById, UPGRADE_CATALOG } from './UpgradeCatalog';
 import { UpgradeDefinition } from './UpgradeDefinition';
+
+function minCatalogLevelForFeature(feature: FeatureKey): number {
+  const levels = UPGRADE_CATALOG.filter((entry) => entry.feature === feature).map(
+    (entry) => entry.level,
+  );
+  return levels.length > 0 ? Math.min(...levels) : 1;
+}
 
 export type UpgradeNodeStatus = 'locked' | 'ready' | 'available' | 'owned';
 
@@ -75,7 +82,7 @@ export class UpgradeService {
       return 'owned';
     }
 
-    if (currentLevel !== definition.level - 1) {
+    if (!this.hasRequiredPriorFeatureLevel(state, definition)) {
       return 'locked';
     }
 
@@ -95,10 +102,36 @@ export class UpgradeService {
   }
 
   private areParentsOwned(state: GameState, definition: UpgradeDefinition): boolean {
+    if (definition.parents.length === 0) {
+      return true;
+    }
+
     return definition.parents.every((parentId) => {
       const parent = getUpgradeById(parentId);
       if (!parent) return true;
       return getFeatureLevel(state.upgradeLevels, parent.feature) >= parent.level;
     });
+  }
+
+  /**
+   * Ex.: auto_battle começa em 1x grátis (nível implícito 1); o primeiro nó comprável é nível 2.
+   */
+  private hasRequiredPriorFeatureLevel(
+    state: GameState,
+    definition: UpgradeDefinition,
+  ): boolean {
+    const currentLevel = getFeatureLevel(state.upgradeLevels, definition.feature);
+    const priorLevel = definition.level - 1;
+
+    if (priorLevel <= 0) {
+      return currentLevel === 0;
+    }
+
+    if (currentLevel >= priorLevel) {
+      return true;
+    }
+
+    const minCatalogLevel = minCatalogLevelForFeature(definition.feature);
+    return currentLevel === 0 && minCatalogLevel === definition.level;
   }
 }

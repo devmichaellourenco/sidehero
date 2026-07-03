@@ -14,7 +14,7 @@ Desbloquear automações e QoL comprando nós na **árvore única** com ouro, de
 - [x] Canvas único: pan, zoom, legenda por ramo
 - [x] Cada nó tem `parents[]` válidos; `UpgradeService.areParentsOwned` bloqueia compra
 - [x] Layout colinear (H/V/45°) em `UpgradeTreeLayout.ts`
-- [x] Ramos integrados ao núcleo `auto_battle_2`: tick, slots, loja, heróis; log via `auto_battle_3`
+- [x] Ramos integrados à raiz `optimize_loadout_1`: combate, baús, slots, loja, heróis; log via `auto_battle_3`
 - [x] Compra aplica `feature` level + `unlockHeroClass` quando aplicável
 - [x] Tooltip com requisitos e botão comprar
 
@@ -38,10 +38,10 @@ Desbloquear automações e QoL comprando nós na **árvore única** com ouro, de
 
 ## Testes obrigatórios
 
-- [x] `UpgradeCatalog.test.ts`, `UpgradeTreeLayout.test.ts`
+- [x] `UpgradeCatalog.test.ts`, `UpgradeTreeLayout.test.ts`, `UpgradeService.test.ts`
 - [x] `UpgradeTreeGraphPresentation.test.ts`
 - [x] `UpgradeTreeModalRenderer.test.ts`, `UpgradeTreeViewportBinder.test.ts`
 
 ## Notas
 
-- `auto_open_chests_1` e `optimize_loadout_1` permanecem raízes sem `parents` (desbloqueio independente no tier inicial)
+- `optimize_loadout_1` é a **única raiz** (`parents: []`); demais ramos partem dela ou de descendentes

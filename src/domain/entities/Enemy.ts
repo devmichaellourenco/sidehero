@@ -1,3 +1,4 @@
+import { EnemyRole } from '../campaign/WaveDefinition';
 import { Stats } from '../value-objects/Stats';
 import { EnemyType, enemyNameForStage, enemyTypeForStage } from './EnemyType';
 
@@ -9,6 +10,7 @@ export interface EnemyProps {
   stats: Stats;
   goldReward: number;
   xpReward: number;
+  role?: EnemyRole;
 }
 
 export class Enemy {
@@ -19,6 +21,7 @@ export class Enemy {
   readonly stats: Stats;
   readonly goldReward: number;
   readonly xpReward: number;
+  readonly role: EnemyRole;
 
   private constructor(props: EnemyProps) {
     this.id = props.id;
@@ -28,6 +31,7 @@ export class Enemy {
     this.stats = props.stats;
     this.goldReward = props.goldReward;
     this.xpReward = props.xpReward;
+    this.role = props.role ?? 'trash';
   }
 
   static restore(props: EnemyProps): Enemy {
@@ -48,7 +52,8 @@ export class Enemy {
         Math.floor(60 * scale),
       ),
       goldReward: Math.floor(8 * scale),
-      xpReward: Math.floor(15 * scale),
+      xpReward: Math.floor(2 * scale),
+      role: 'trash',
     });
   }
 
@@ -72,6 +77,7 @@ export class Enemy {
       stats: this.stats,
       goldReward: this.goldReward,
       xpReward: this.xpReward,
+      role: this.role,
     };
   }
 }

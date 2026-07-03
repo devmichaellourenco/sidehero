@@ -30,4 +30,4 @@ description: Árvore de melhorias com grafo, layout e UI no Side Hero. Use para 
 
 ## Núcleo
 
-Ramo principal parte de `auto_battle_2`; integrar novos ramos com `parents` explícitos.
+Ramo principal parte de `optimize_loadout_1`; integrar novos ramos com `parents` explícitos.

@@ -5,6 +5,7 @@ import { Enemy } from '../../entities/Enemy';
 import { Stats } from '../../value-objects/Stats';
 import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
+import { EnemyKillRewardService } from '../../campaign/EnemyKillRewardService';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
 import { elementalDamageProfileFromHeroEquipment } from '../../combat/ElementalDamageProfileAggregator';
 import { elementalDamageFlatFromHeroEquipment } from '../../combat/ElementalDamageFlatProfileAggregator';
@@ -42,6 +43,7 @@ export class CombatTurnPhase {
     private readonly actionTimers = new ActionTimerService(),
     private readonly profiles = new CombatProfileProvider(),
     private readonly phaseHandlers = new PhaseCombatHandlers(),
+    private readonly killRewards = new EnemyKillRewardService(),
   ) {}
 
   execute(state: GameState): CombatTurnPhaseResult {
@@ -202,6 +204,7 @@ export class CombatTurnPhase {
     floatingEvents: CombatFloatingEvent[];
     usedSkillId: string | null;
   } {
+    const enemiesBeforeStrike = combat.enemies;
     let heroes = state.activeHeroes();
     let enemies = combat.enemies;
     const events: string[] = [];
@@ -394,13 +397,26 @@ export class CombatTurnPhase {
       usedSkill,
     );
 
+    let nextState = state.withHeroes(heroes);
+    let nextCombat = combat
+      .withEnemies(enemies)
+      .withSkillCooldowns(updatedCooldowns)
+      .withStatusEffects(statusEffects.toMap())
+      .withActionTimers(updatedTimers);
+
+    const killBatch = this.killRewards.applyKillRewards(
+      nextState,
+      nextCombat,
+      enemiesBeforeStrike,
+      enemies,
+    );
+    nextState = killBatch.state;
+    nextCombat = killBatch.combat;
+    events.push(...killBatch.events);
+
     return {
-      state: state.withHeroes(heroes),
-      combat: combat
-        .withEnemies(enemies)
-        .withSkillCooldowns(updatedCooldowns)
-        .withStatusEffects(statusEffects.toMap())
-        .withActionTimers(updatedTimers),
+      state: nextState,
+      combat: nextCombat,
       events,
       floatingEvents,
       usedSkillId,

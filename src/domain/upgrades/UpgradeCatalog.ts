@@ -9,7 +9,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-batalha II',
     description: 'Desbloqueia velocidade 2x na auto-batalha.',
     cost: 120,
-    parents: [],
+    parents: ['optimize_loadout_1'],
     requirements: [
       { type: 'min_stage', value: 2 },
       { type: 'min_battles_won', value: 10 },
@@ -62,7 +62,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-abrir baús I',
     description: 'Abre baús automaticamente quando disponíveis.',
     cost: 60,
-    parents: [],
+    parents: ['optimize_loadout_1'],
     requirements: [{ type: 'min_stage', value: 3 }],
   },
   {
@@ -258,7 +258,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Slot de skill II',
     description: 'Desbloqueia o 2º slot de skill ativa na batalha.',
     cost: 60,
-    parents: ['auto_battle_2'],
+    parents: ['optimize_loadout_1'],
     requirements: [{ type: 'min_hero_level', value: 3 }],
   },
   {
@@ -298,8 +298,9 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Desbloquear Paladino',
     description: 'Valerius entra na reserva — tanque equilibrado.',
     cost: 200,
-    parents: ['hero_unlock_berserker', 'optimize_loadout_1'],
+    parents: ['hero_unlock_berserker'],
     requirements: [
+      { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
       { type: 'min_stage', value: 4 },
       { type: 'min_hero_level', value: 5 },
     ],

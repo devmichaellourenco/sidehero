@@ -135,9 +135,9 @@ function formatPercent(value: number): string {
   return `${Math.round(value * 1000) / 10}%`;
 }
 
-export function formatGearBonuses(
+export function listGearBonusLines(
   gear: Partial<GearDto> & Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
-): string {
+): string[] {
   const stats = {
     attackPercentBonus: gear.attackPercentBonus ?? 0,
     defensePercentBonus: gear.defensePercentBonus ?? 0,
@@ -171,11 +171,11 @@ export function formatGearBonuses(
     damageReductionBonus: gear.damageReductionBonus ?? 0,
   };
 
-  const parts = [
-    `+${gear.attackBonus} ATK`,
-    `+${gear.defenseBonus} DEF`,
-    `+${gear.healthBonus} HP`,
-  ];
+  const parts: string[] = [];
+
+  if (gear.attackBonus !== 0) parts.push(`+${gear.attackBonus} ATK`);
+  if (gear.defenseBonus !== 0) parts.push(`+${gear.defenseBonus} DEF`);
+  if (gear.healthBonus !== 0) parts.push(`+${gear.healthBonus} HP`);
 
   if (stats.attackPercentBonus !== 0) {
     parts.push(formatSigned(stats.attackPercentBonus, '%', 'ATK'));
@@ -202,7 +202,28 @@ export function formatGearBonuses(
   parts.push(...formatResistBonuses(stats));
   parts.push(...formatElementalDamageBonuses(stats));
 
-  return parts.join(' · ');
+  return parts;
+}
+
+export function formatGearBonuses(
+  gear: Partial<GearDto> & Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
+): string {
+  return listGearBonusLines(gear).join(' · ');
+}
+
+export function renderGearBonusLines(
+  gear: Partial<GearDto> & Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
+): string {
+  const lines = listGearBonusLines(gear);
+  if (lines.length === 0) {
+    return '<span class="gear-stat-lines"><span class="gear-stat-line gear-stat-line--empty">Sem bônus</span></span>';
+  }
+
+  const rendered = lines
+    .map((line) => `<span class="gear-stat-line">${escapeHtml(line)}</span>`)
+    .join('');
+
+  return `<span class="gear-stat-lines">${rendered}</span>`;
 }
 
 export function renderEquipmentSlotTooltip(
@@ -218,7 +239,7 @@ export function renderEquipmentSlotTooltip(
       <span class="equipment-slot-tooltip" role="tooltip">
         <strong class="equipment-slot-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="equipment-slot-tooltip-meta">${slotLabel} · ${rarityLabel}</span>
-        <span class="equipment-slot-tooltip-stats">${formatGearBonuses(gear)}</span>
+        <span class="equipment-slot-tooltip-stats">${renderGearBonusLines(gear)}</span>
       </span>
     `;
   }

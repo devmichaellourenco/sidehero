@@ -19,6 +19,7 @@ export interface CombatStateProps {
   statusEffects: StatusEffectMap;
   encounterMeta: EncounterMeta | null;
   pendingSkillActions?: PendingSkillAction[];
+  rewardedEnemyIds?: string[];
   /** Legado — ignorado após migração temporal. */
   turnQueue?: CombatantRef[];
   turnIndex?: number;
@@ -33,6 +34,7 @@ export class CombatState {
   readonly statusEffects: StatusEffectMap;
   readonly encounterMeta: EncounterMeta | null;
   readonly pendingSkillActions: PendingSkillAction[];
+  readonly rewardedEnemyIds: string[];
 
   private constructor(props: CombatStateProps) {
     this.enemies = props.enemies.map((enemy) => Enemy.restore(enemy));
@@ -42,6 +44,7 @@ export class CombatState {
     this.statusEffects = props.statusEffects ?? {};
     this.encounterMeta = props.encounterMeta ?? null;
     this.pendingSkillActions = [...(props.pendingSkillActions ?? [])];
+    this.rewardedEnemyIds = [...(props.rewardedEnemyIds ?? [])];
   }
 
   static restore(props: CombatStateProps): CombatState {
@@ -69,6 +72,7 @@ export class CombatState {
       statusEffects: {},
       encounterMeta,
       pendingSkillActions: [],
+      rewardedEnemyIds: [],
     });
   }
 
@@ -96,6 +100,17 @@ export class CombatState {
 
   livingEnemies(): Enemy[] {
     return this.enemies.filter((enemy) => enemy.isAlive());
+  }
+
+  hasRewardedEnemy(enemyId: string): boolean {
+    return this.rewardedEnemyIds.includes(enemyId);
+  }
+
+  withRewardedEnemy(enemyId: string): CombatState {
+    if (this.hasRewardedEnemy(enemyId)) {
+      return this;
+    }
+    return this.clone({ rewardedEnemyIds: [...this.rewardedEnemyIds, enemyId] });
   }
 
   /** Congela o campo com todos os inimigos derrotados (overlay de vitória). */
@@ -146,6 +161,7 @@ export class CombatState {
       statusEffects: structuredClone(this.statusEffects),
       encounterMeta: this.encounterMeta ? { ...this.encounterMeta } : null,
       pendingSkillActions: [...this.pendingSkillActions],
+      rewardedEnemyIds: [...this.rewardedEnemyIds],
     };
   }
 

@@ -1909,6 +1909,22 @@ button.hero-skill-chip:hover {
   font-size: 10px;
 }
 
+.gear-stat-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gear-stat-line {
+  display: block;
+  line-height: 1.35;
+}
+
+.gear-stat-line--empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
 .gear-tooltip-portal {
   position: fixed;
   z-index: 1500;
@@ -1991,6 +2007,10 @@ button.hero-skill-chip:hover {
   color: var(--text);
   font-size: 10px;
   line-height: 1.4;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-tooltip-stats .gear-stat-lines {
+  gap: 3px;
 }
 
 #inventory-gear-tooltip-portal .inventory-gear-tooltip-delta {
@@ -2475,6 +2495,10 @@ button.hero-skill-chip:hover {
 .inventory-gear-tooltip-stats {
   display: block;
   margin-top: 2px;
+}
+
+.inventory-gear-tooltip-stats .gear-stat-lines {
+  gap: 2px;
 }
 
 .inventory-gear-tooltip-delta {
@@ -3024,6 +3048,14 @@ button.hero-skill-chip:hover {
   transform: translateY(4px);
   transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
   pointer-events: none;
+}
+
+.shop-offer-tooltip .gear-stat-lines {
+  gap: 2px;
+}
+
+.destroy-confirm-gear-stats .gear-stat-lines {
+  gap: 2px;
 }
 
 .shop-offer-card {

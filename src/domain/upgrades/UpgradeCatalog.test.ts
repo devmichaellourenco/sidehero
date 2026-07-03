@@ -56,16 +56,25 @@ describe('UpgradeCatalog', () => {
     expect(berserker?.unlockHeroClass).toBe('berserker');
 
     expect(paladin?.branch).toBe('heroes');
-    expect(paladin?.parents).toEqual(['hero_unlock_berserker', 'optimize_loadout_1']);
+    expect(paladin?.parents).toEqual(['hero_unlock_berserker']);
     expect(paladin?.unlockHeroClass).toBe('paladin');
   });
 
-  it('combate integra tick idle e slots de skill na árvore principal', () => {
+  it('tem uma única raiz: Otimizar equipe I', () => {
+    const roots = UPGRADE_CATALOG.filter((entry) => entry.parents.length === 0);
+    expect(roots.map((entry) => entry.id)).toEqual(['optimize_loadout_1']);
+  });
+
+  it('combate integra tick idle e slots de skill a partir da raiz', () => {
     const tick = UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1');
     const skillSlot = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_skill_slot_2');
+    const autoBattle = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_battle_2');
+    const autoChests = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_open_chests_1');
 
+    expect(autoBattle?.parents).toEqual(['optimize_loadout_1']);
+    expect(autoChests?.parents).toEqual(['optimize_loadout_1']);
     expect(tick?.parents).toEqual(['auto_battle_2']);
-    expect(skillSlot?.parents).toEqual(['auto_battle_2']);
+    expect(skillSlot?.parents).toEqual(['optimize_loadout_1']);
   });
 
   it('economia integra renovar loja na árvore principal', () => {
