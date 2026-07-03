@@ -2987,6 +2987,75 @@ button.hero-skill-chip:hover {
   gap: 10px;
 }
 
+.upgrade-tree-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.upgrade-tree-focus-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(18, 28, 48, 0.92);
+  color: #fff8e7;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.upgrade-tree-focus-btn:hover {
+  filter: brightness(1.08);
+}
+
+.upgrade-tree-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.upgrade-tree-legend-item {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.upgrade-tree-legend-item--combat {
+  color: #ff9f9f;
+  border-color: rgba(229, 57, 53, 0.35);
+}
+
+.upgrade-tree-legend-item--chests {
+  color: #ffe6a8;
+  border-color: rgba(245, 197, 66, 0.35);
+}
+
+.upgrade-tree-legend-item--equipment {
+  color: #9fd4ff;
+  border-color: rgba(66, 165, 245, 0.35);
+}
+
+.upgrade-tree-legend-item--economy {
+  color: #9dffb0;
+  border-color: rgba(102, 187, 106, 0.35);
+}
+
+.upgrade-tree-legend-item--heroes {
+  color: #d8b4ff;
+  border-color: rgba(171, 71, 188, 0.35);
+}
+
+.upgrade-tree-legend-item--qol {
+  color: #c5d0e4;
+  border-color: rgba(141, 153, 174, 0.35);
+}
+
 .upgrade-branch-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -3045,18 +3114,32 @@ button.hero-skill-chip:hover {
 }
 
 .upgrade-tree-viewport {
-  display: flex;
-  justify-content: center;
+  position: relative;
   width: 100%;
   max-width: 100%;
-  min-height: 180px;
-  padding: 12px;
+  height: min(52vh, 420px);
+  min-height: 220px;
+  padding: 0;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
     radial-gradient(circle at 50% 0%, rgba(233, 69, 96, 0.08), transparent 55%),
     linear-gradient(180deg, rgba(10, 16, 32, 0.95), rgba(8, 12, 24, 0.98));
-  overflow: auto;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.upgrade-tree-viewport--panning {
+  cursor: grabbing;
+}
+
+.upgrade-tree-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
 .upgrade-tree-canvas {
@@ -3070,6 +3153,7 @@ button.hero-skill-chip:hover {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 0;
 }
 
 .upgrade-tree-edge {
@@ -3077,6 +3161,7 @@ button.hero-skill-chip:hover {
   stroke: rgba(255, 255, 255, 0.16);
   stroke-width: 2;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .upgrade-tree-edge--active {
@@ -3087,6 +3172,7 @@ button.hero-skill-chip:hover {
 .upgrade-tree-nodes {
   position: absolute;
   inset: 0;
+  z-index: 2;
 }
 
 .upgrade-node {
@@ -3163,6 +3249,30 @@ button.hero-skill-chip:hover {
     opacity: 1;
     transform: scale(1.08);
   }
+}
+
+.upgrade-node--branch-combat .upgrade-node-ring {
+  border-color: rgba(229, 57, 53, 0.45);
+}
+
+.upgrade-node--branch-chests .upgrade-node-ring {
+  border-color: rgba(245, 197, 66, 0.45);
+}
+
+.upgrade-node--branch-equipment .upgrade-node-ring {
+  border-color: rgba(66, 165, 245, 0.45);
+}
+
+.upgrade-node--branch-economy .upgrade-node-ring {
+  border-color: rgba(102, 187, 106, 0.45);
+}
+
+.upgrade-node--branch-heroes .upgrade-node-ring {
+  border-color: rgba(171, 71, 188, 0.55);
+}
+
+.upgrade-node--branch-qol .upgrade-node-ring {
+  border-color: rgba(141, 153, 174, 0.45);
 }
 
 .upgrade-node--available .upgrade-node-ring {

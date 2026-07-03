@@ -1,5 +1,6 @@
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
-import { getUpgradeById, UPGRADE_CATALOG } from '../../domain/upgrades/UpgradeCatalog';
+import { getUpgradeById } from '../../domain/upgrades/UpgradeCatalog';
+import { UPGRADE_CATALOG } from '../../domain/upgrades/UpgradeCatalog';
 import { FeatureKey } from '../../domain/upgrades/FeatureKey';
 import { UpgradeRequirement } from '../../domain/upgrades/UpgradeRequirement';
 import { getUpgradeNodePosition, UPGRADE_TREE_VIEWBOX } from './UpgradeTreeLayout';
@@ -15,9 +16,22 @@ export interface PositionedUpgradeNode {
   y: number;
 }
 
+const NODE_RADIUS = 28;
+const AXIS_EPSILON = 14;
+const ROUTE_PADDING = 18;
+
+interface Point {
+  x: number;
+  y: number;
+}
+
 export function resolveUpgradeParentIds(upgradeId: string): string[] {
   const definition = getUpgradeById(upgradeId);
   if (!definition) return [];
+
+  if (definition.parents.length > 0) {
+    return definition.parents;
+  }
 
   return definition.requirements
     .filter((requirement): requirement is Extract<UpgradeRequirement, { type: 'upgrade_level' }> => {
@@ -31,7 +45,7 @@ function findUpgradeIdByFeatureLevel(feature: FeatureKey, level: number): string
   return UPGRADE_CATALOG.find((entry) => entry.feature === feature && entry.level === level)?.id;
 }
 
-export function buildBranchEdges(nodes: UpgradeNodeDto[]): UpgradeTreeEdge[] {
+export function buildUpgradeTreeEdges(nodes: UpgradeNodeDto[]): UpgradeTreeEdge[] {
   const nodeIds = new Set(nodes.map((node) => node.id));
   const edges: UpgradeTreeEdge[] = [];
 
@@ -45,46 +59,113 @@ export function buildBranchEdges(nodes: UpgradeNodeDto[]): UpgradeTreeEdge[] {
   return edges;
 }
 
-export function buildPositionedNodes(branch: UpgradeNodeDto['branch'], nodes: UpgradeNodeDto[]): PositionedUpgradeNode[] {
+/** @deprecated use buildUpgradeTreeEdges */
+export const buildBranchEdges = buildUpgradeTreeEdges;
+
+export function buildPositionedNodes(nodes: UpgradeNodeDto[]): PositionedUpgradeNode[] {
   return nodes
     .map((node) => {
-      const position = getUpgradeNodePosition(branch, node.id);
+      const position = getUpgradeNodePosition(node.id);
       if (!position) return null;
       return { node, x: position.x, y: position.y };
     })
     .filter((entry): entry is PositionedUpgradeNode => Boolean(entry));
 }
 
+function anchorOnNode(node: PositionedUpgradeNode, toward: Point): Point {
+  const dx = toward.x - node.x;
+  const dy = toward.y - node.y;
+  const distance = Math.hypot(dx, dy) || 1;
+
+  return {
+    x: node.x + (dx / distance) * NODE_RADIUS,
+    y: node.y + (dy / distance) * NODE_RADIUS,
+  };
+}
+
+function laneOffset(edgeKey: string): number {
+  let hash = 0;
+  for (let index = 0; index < edgeKey.length; index += 1) {
+    hash = (hash + edgeKey.charCodeAt(index) * (index + 1)) % 5;
+  }
+  return (hash - 2) * 4;
+}
+
+function shiftPoint(point: Point, dx: number, dy: number): Point {
+  return { x: point.x + dx, y: point.y + dy };
+}
+
 export function buildEdgePath(
   from: PositionedUpgradeNode,
   to: PositionedUpgradeNode,
-  viewBox: { width: number; height: number },
+  _viewBox: { width: number; height: number } = UPGRADE_TREE_VIEWBOX,
 ): string {
-  const startX = from.x;
-  const startY = from.y;
-  const endX = to.x;
-  const endY = to.y;
-  const midY = (startY + endY) / 2;
+  const fromCenter = { x: from.x, y: from.y };
+  const toCenter = { x: to.x, y: to.y };
+  const start = anchorOnNode(from, toCenter);
+  const end = anchorOnNode(to, fromCenter);
 
-  if (Math.abs(startY - endY) < 8) {
-    return `M ${startX} ${startY} L ${endX} ${endY}`;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const offset = laneOffset(`${from.node.id}->${to.node.id}`);
+
+  if (Math.abs(dy) <= AXIS_EPSILON) {
+    const shiftedStart = shiftPoint(start, 0, offset);
+    const shiftedEnd = shiftPoint(end, 0, offset);
+    return `M ${shiftedStart.x} ${shiftedStart.y} L ${shiftedEnd.x} ${shiftedEnd.y}`;
   }
 
-  return `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
+  if (Math.abs(dx) <= AXIS_EPSILON) {
+    const shiftedStart = shiftPoint(start, offset, 0);
+    const shiftedEnd = shiftPoint(end, offset, 0);
+    return `M ${shiftedStart.x} ${shiftedStart.y} L ${shiftedEnd.x} ${shiftedEnd.y}`;
+  }
+
+  const verticalFirst = Math.abs(dy) >= Math.abs(dx);
+  const routeAbove = toCenter.y < fromCenter.y;
+
+  if (verticalFirst) {
+    const laneX = start.x + offset;
+    const elbowY = routeAbove
+      ? Math.min(start.y, end.y) - ROUTE_PADDING
+      : Math.max(start.y, end.y) + ROUTE_PADDING;
+
+    return [
+      `M ${start.x} ${start.y}`,
+      `L ${laneX} ${start.y}`,
+      `L ${laneX} ${elbowY}`,
+      `L ${end.x + offset} ${elbowY}`,
+      `L ${end.x + offset} ${end.y}`,
+      `L ${end.x} ${end.y}`,
+    ].join(' ');
+  }
+
+  const laneY = start.y + offset;
+  const elbowX = dx > 0 ? Math.max(start.x, end.x) + ROUTE_PADDING : Math.min(start.x, end.x) - ROUTE_PADDING;
+
+  return [
+    `M ${start.x} ${start.y}`,
+    `L ${start.x} ${laneY}`,
+    `L ${elbowX} ${laneY}`,
+    `L ${elbowX} ${end.y + offset}`,
+    `L ${end.x} ${end.y + offset}`,
+    `L ${end.x} ${end.y}`,
+  ].join(' ');
 }
 
-export function getBranchViewBox(branch: UpgradeNodeDto['branch']): { width: number; height: number } {
-  return UPGRADE_TREE_VIEWBOX[branch];
+export function getUnifiedViewBox(): { width: number; height: number } {
+  return UPGRADE_TREE_VIEWBOX;
 }
 
-export function pickDefaultBranch(nodes: UpgradeNodeDto[]): UpgradeNodeDto['branch'] {
+export function findFocusNodeId(nodes: UpgradeNodeDto[]): string | null {
   const available = nodes.find((node) => node.status === 'available');
-  if (available) return available.branch;
+  if (available) return available.id;
 
   const ready = nodes.find((node) => node.status === 'ready');
-  if (ready) return ready.branch;
+  if (ready) return ready.id;
 
-  return nodes[0]?.branch ?? 'combat';
+  const locked = nodes.find((node) => node.status === 'locked');
+  return locked?.id ?? nodes[0]?.id ?? null;
 }
 
 export function upgradeNodeShortLabel(node: UpgradeNodeDto): string {
@@ -93,6 +174,12 @@ export function upgradeNodeShortLabel(node: UpgradeNodeDto): string {
   }
 
   if (node.feature === 'divine_forge') return '⚒';
+
+  if (node.feature === 'background_tick') return '⏱';
+
+  if (node.feature === 'battle_skill_slots') return '✦';
+
+  if (node.feature === 'shop_refresh') return '🛒';
 
   if (node.level > 1) {
     return toRoman(node.level);

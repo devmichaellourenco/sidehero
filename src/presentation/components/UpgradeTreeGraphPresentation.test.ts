@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import {
-  buildBranchEdges,
   buildPositionedNodes,
-  pickDefaultBranch,
+  buildUpgradeTreeEdges,
+  findFocusNodeId,
   resolveUpgradeParentIds,
 } from './UpgradeTreeGraphPresentation';
 
@@ -22,41 +22,62 @@ function node(partial: Partial<UpgradeNodeDto> & Pick<UpgradeNodeDto, 'id' | 'br
 }
 
 describe('UpgradeTreeGraphPresentation', () => {
-  it('resolve pais via requisito upgrade_level', () => {
+  it('resolve pais via parents explícitos ou requisito upgrade_level', () => {
     expect(resolveUpgradeParentIds('auto_battle_3')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('open_all_chests_1')).toEqual(['auto_open_chests_1']);
+    expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['auto_battle_2']);
+    expect(resolveUpgradeParentIds('hero_unlock_paladin')).toEqual([
+      'hero_unlock_berserker',
+      'optimize_loadout_1',
+    ]);
+    expect(resolveUpgradeParentIds('background_tick_1')).toEqual(['auto_battle_2']);
+    expect(resolveUpgradeParentIds('battle_skill_slot_2')).toEqual(['auto_battle_2']);
+    expect(resolveUpgradeParentIds('shop_refresh_1')).toEqual(['auto_battle_2']);
   });
 
-  it('monta arestas apenas entre nodos do mesmo ramo visível', () => {
+  it('monta arestas entre nodos visíveis, inclusive entre ramos', () => {
     const nodes = [
-      node({ id: 'auto_open_chests_1', branch: 'chests' }),
-      node({ id: 'open_all_chests_1', branch: 'chests' }),
-      node({ id: 'open_all_chests_2', branch: 'chests' }),
+      node({ id: 'auto_battle_2', branch: 'combat' }),
+      node({ id: 'background_tick_1', branch: 'combat' }),
+      node({ id: 'battle_skill_slot_2', branch: 'combat' }),
+      node({ id: 'hero_unlock_berserker', branch: 'heroes' }),
+      node({ id: 'optimize_loadout_1', branch: 'equipment' }),
+      node({ id: 'hero_unlock_paladin', branch: 'heroes' }),
     ];
 
-    expect(buildBranchEdges(nodes)).toEqual([
-      { fromId: 'auto_open_chests_1', toId: 'open_all_chests_1' },
-      { fromId: 'open_all_chests_1', toId: 'open_all_chests_2' },
+    expect(buildUpgradeTreeEdges(nodes)).toEqual([
+      { fromId: 'auto_battle_2', toId: 'background_tick_1' },
+      { fromId: 'auto_battle_2', toId: 'battle_skill_slot_2' },
+      { fromId: 'auto_battle_2', toId: 'hero_unlock_berserker' },
+      { fromId: 'hero_unlock_berserker', toId: 'hero_unlock_paladin' },
+      { fromId: 'optimize_loadout_1', toId: 'hero_unlock_paladin' },
     ]);
   });
 
-  it('posiciona nodos com layout do ramo', () => {
+  it('posiciona nodos com layout unificado', () => {
     const nodes = [
       node({ id: 'auto_battle_2', branch: 'combat' }),
       node({ id: 'auto_battle_3', branch: 'combat' }),
     ];
 
-    const positioned = buildPositionedNodes('combat', nodes);
+    const positioned = buildPositionedNodes(nodes);
     expect(positioned).toHaveLength(2);
     expect(positioned[0].x).toBeLessThan(positioned[1].x);
   });
 
-  it('prioriza ramo com melhoria disponível', () => {
+  it('foca primeiro nodo disponível, depois pronto, depois bloqueado', () => {
     const nodes = [
       node({ id: 'auto_battle_2', branch: 'combat', status: 'locked' }),
       node({ id: 'auto_open_chests_1', branch: 'chests', status: 'available' }),
+      node({ id: 'shop_refresh_1', branch: 'economy', status: 'ready' }),
     ];
 
-    expect(pickDefaultBranch(nodes)).toBe('chests');
+    expect(findFocusNodeId(nodes)).toBe('auto_open_chests_1');
+
+    const onlyReady = [
+      node({ id: 'auto_battle_2', branch: 'combat', status: 'locked' }),
+      node({ id: 'shop_refresh_1', branch: 'economy', status: 'ready' }),
+    ];
+    expect(findFocusNodeId(onlyReady)).toBe('shop_refresh_1');
   });
 });

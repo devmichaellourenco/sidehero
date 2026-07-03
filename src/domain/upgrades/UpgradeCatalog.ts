@@ -9,6 +9,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-batalha II',
     description: 'Desbloqueia velocidade 2x na auto-batalha.',
     cost: 120,
+    parents: [],
     requirements: [
       { type: 'min_stage', value: 2 },
       { type: 'min_battles_won', value: 10 },
@@ -22,6 +23,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-batalha III',
     description: 'Desbloqueia velocidade 3x na auto-batalha.',
     cost: 300,
+    parents: ['auto_battle_2'],
     requirements: [
       { type: 'upgrade_level', feature: 'auto_battle', minLevel: 2 },
       { type: 'min_stage', value: 6 },
@@ -35,6 +37,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Tick idle I',
     description: 'O jogo avança em background mesmo com o painel fechado.',
     cost: 80,
+    parents: ['auto_battle_2'],
     requirements: [{ type: 'min_stage', value: 3 }],
   },
   {
@@ -45,6 +48,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Tick idle II',
     description: 'Tick em background 2x mais frequente.',
     cost: 200,
+    parents: ['background_tick_1'],
     requirements: [
       { type: 'upgrade_level', feature: 'background_tick', minLevel: 1 },
       { type: 'min_stage', value: 5 },
@@ -58,6 +62,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-abrir baús I',
     description: 'Abre baús automaticamente quando disponíveis.',
     cost: 60,
+    parents: [],
     requirements: [{ type: 'min_stage', value: 3 }],
   },
   {
@@ -68,6 +73,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Abrir todos I',
     description: 'Desbloqueia o botão Abrir Todos no footer.',
     cost: 100,
+    parents: ['auto_open_chests_1'],
     requirements: [{ type: 'upgrade_level', feature: 'auto_open_chests', minLevel: 1 }],
   },
   {
@@ -78,6 +84,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Abrir todos II',
     description: 'Auto-abrir prioriza abrir todos quando há 2+ baús.',
     cost: 180,
+    parents: ['open_all_chests_1'],
     requirements: [
       { type: 'upgrade_level', feature: 'open_all_chests', minLevel: 1 },
       { type: 'min_chests_opened', value: 5 },
@@ -91,6 +98,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Otimizar equipe I',
     description: 'Desbloqueia o botão Otimizar equipe.',
     cost: 90,
+    parents: [],
     requirements: [
       { type: 'min_stage', value: 3 },
       { type: 'min_battles_won', value: 8 },
@@ -104,6 +112,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Otimizar equipe II',
     description: 'Otimização disponível no loot em lote dos baús.',
     cost: 220,
+    parents: ['optimize_loadout_1'],
     requirements: [
       { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
       { type: 'min_stage', value: 5 },
@@ -117,6 +126,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-equipar I',
     description: 'Equipa loot recomendado sem abrir modal.',
     cost: 150,
+    parents: ['optimize_loadout_1'],
     requirements: [{ type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 }],
   },
   {
@@ -127,6 +137,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-equipar II',
     description: 'Auto-equipar sem notificações (silencioso).',
     cost: 280,
+    parents: ['auto_equip_loot_1', 'open_all_chests_1'],
     requirements: [
       { type: 'upgrade_level', feature: 'auto_equip_loot', minLevel: 1 },
       { type: 'upgrade_level', feature: 'auto_open_chests', minLevel: 1 },
@@ -140,6 +151,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Baú de itens I',
     description: 'Desbloqueia o baú para guardar itens extras (24 slots).',
     cost: 110,
+    parents: ['auto_open_chests_1'],
     requirements: [
       { type: 'min_stage', value: 2 },
       { type: 'min_battles_won', value: 6 },
@@ -153,6 +165,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Baú de itens II',
     description: 'Aumenta a capacidade do baú para 36 slots.',
     cost: 200,
+    parents: ['item_stash_1'],
     requirements: [
       { type: 'upgrade_level', feature: 'item_stash', minLevel: 1 },
       { type: 'min_stage', value: 4 },
@@ -166,6 +179,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Baú de itens III',
     description: 'Aumenta a capacidade do baú para 48 slots.',
     cost: 320,
+    parents: ['item_stash_2'],
     requirements: [
       { type: 'upgrade_level', feature: 'item_stash', minLevel: 2 },
       { type: 'min_stage', value: 6 },
@@ -180,6 +194,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     description:
       'Desbloqueia a Forja Divina: fundir 9 itens da mesma raridade em um item superior, ou destruir itens por ouro.',
     cost: 180,
+    parents: ['optimize_loadout_1', 'item_stash_1'],
     requirements: [
       { type: 'min_stage', value: 4 },
       { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
@@ -193,6 +208,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Log resumido I',
     description: 'Filtra o log para eventos importantes.',
     cost: 35,
+    parents: [],
     requirements: [{ type: 'min_stage', value: 2 }],
   },
   {
@@ -203,6 +219,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Renovar loja I',
     description: 'Desbloqueia renovar loja (2x por stage).',
     cost: 70,
+    parents: ['auto_battle_2'],
     requirements: [{ type: 'min_stage', value: 4 }],
   },
   {
@@ -213,6 +230,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Renovar loja II',
     description: 'Até 5 renovações por stage.',
     cost: 160,
+    parents: ['shop_refresh_1'],
     requirements: [
       { type: 'upgrade_level', feature: 'shop_refresh', minLevel: 1 },
       { type: 'min_stage', value: 6 },
@@ -226,6 +244,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Renovar loja III',
     description: 'Até 8 renovações por stage com 15% de desconto.',
     cost: 320,
+    parents: ['shop_refresh_2'],
     requirements: [
       { type: 'upgrade_level', feature: 'shop_refresh', minLevel: 2 },
       { type: 'min_battles_won', value: 20 },
@@ -239,6 +258,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Slot de skill II',
     description: 'Desbloqueia o 2º slot de skill ativa na batalha.',
     cost: 60,
+    parents: ['auto_battle_2'],
     requirements: [{ type: 'min_hero_level', value: 3 }],
   },
   {
@@ -249,6 +269,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Slot de skill III',
     description: 'Desbloqueia o 3º slot de skill ativa na batalha.',
     cost: 150,
+    parents: ['battle_skill_slot_2'],
     requirements: [
       { type: 'upgrade_level', feature: 'battle_skill_slots', minLevel: 1 },
       { type: 'min_hero_level', value: 6 },
@@ -262,6 +283,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Desbloquear Berserker',
     description: 'Ragnar entra na reserva — alto dano corpo a corpo.',
     cost: 150,
+    parents: ['auto_battle_2'],
     requirements: [
       { type: 'min_stage', value: 3 },
       { type: 'min_battles_won', value: 8 },
@@ -276,6 +298,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Desbloquear Paladino',
     description: 'Valerius entra na reserva — tanque equilibrado.',
     cost: 200,
+    parents: ['hero_unlock_berserker', 'optimize_loadout_1'],
     requirements: [
       { type: 'min_stage', value: 4 },
       { type: 'min_hero_level', value: 5 },

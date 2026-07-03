@@ -12,6 +12,8 @@ export interface UpgradeDefinition {
   name: string;
   description: string;
   cost: number;
+  /** Nós pais no grafo — todos precisam estar comprados antes deste. */
+  parents: string[];
   requirements: UpgradeRequirement[];
   unlockHeroClass?: HeroClass;
 }

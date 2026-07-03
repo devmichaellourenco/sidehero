@@ -1,16 +1,17 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { UpgradeBranchDto, UPGRADE_BRANCH_LABELS, UPGRADE_BRANCH_ORDER } from '../../application/dto/UpgradeBranchDto';
+import { UPGRADE_BRANCH_LABELS } from '../../application/dto/UpgradeBranchDto';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import {
-  buildBranchEdges,
   buildEdgePath,
   buildPositionedNodes,
-  getBranchViewBox,
-  pickDefaultBranch,
+  buildUpgradeTreeEdges,
+  findFocusNodeId,
+  getUnifiedViewBox,
   PositionedUpgradeNode,
   upgradeNodeShortLabel,
 } from './UpgradeTreeGraphPresentation';
+import { bindUpgradeTreeViewport, focusUpgradeTreeNode } from './UpgradeTreeViewportBinder';
 
 export type UpgradeTreeHandlers = {
   onPurchase: (upgradeId: string) => void;
@@ -18,9 +19,9 @@ export type UpgradeTreeHandlers = {
 
 const TOOLTIP_PORTAL_ID = 'upgrade-node-tooltip-portal';
 let tooltipHideTimer: number | null = null;
+let unbindViewport: (() => void) | null = null;
 
 export class UpgradeTreeModalRenderer {
-  private activeBranch: UpgradeBranchDto | null = null;
   private nodeById = new Map<string, UpgradeNodeDto>();
 
   render(
@@ -29,66 +30,17 @@ export class UpgradeTreeModalRenderer {
     nodes: UpgradeNodeDto[],
     handlers: UpgradeTreeHandlers,
   ): void {
+    unbindViewport?.();
+    unbindViewport = null;
+
     this.nodeById = new Map(nodes.map((node) => [node.id, node]));
 
-    if (!this.activeBranch || !nodes.some((node) => node.branch === this.activeBranch)) {
-      this.activeBranch = pickDefaultBranch(nodes);
-    }
-
     const goldIcon = imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'shop-gold-icon');
-    const tabs = this.renderBranchTabs(nodes);
-    const canvas = this.renderBranchCanvas(this.activeBranch, nodes);
-
-    container.innerHTML = `
-      <p class="upgrade-intro">
-        Passe o mouse nos nodos para ver detalhes. Compras são permanentes — ligue/desligue em Configurações.
-      </p>
-      <p class="upgrade-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
-      <div class="upgrade-tree-shell">
-        ${tabs}
-        ${canvas}
-      </div>
-    `;
-
-    this.bindBranchTabs(container, nodes, state, handlers);
-    this.bindNodeTooltips(container, handlers);
-  }
-
-  private renderBranchTabs(nodes: UpgradeNodeDto[]): string {
-    const tabs = UPGRADE_BRANCH_ORDER.map((branch) => {
-      const branchNodes = nodes.filter((node) => node.branch === branch);
-      if (branchNodes.length === 0) return '';
-
-      const availableCount = branchNodes.filter((node) => node.status === 'available').length;
-      const ownedCount = branchNodes.filter((node) => node.status === 'owned').length;
-      const active = branch === this.activeBranch ? ' upgrade-branch-tab--active' : '';
-      const badge =
-        availableCount > 0
-          ? `<span class="upgrade-branch-tab-badge">${availableCount}</span>`
-          : '';
-
-      return `
-        <button
-          type="button"
-          class="upgrade-branch-tab${active}"
-          data-upgrade-branch-tab="${branch}"
-          aria-pressed="${branch === this.activeBranch}"
-        >
-          <span class="upgrade-branch-tab-label">${UPGRADE_BRANCH_LABELS[branch]}</span>
-          <span class="upgrade-branch-tab-meta">${ownedCount}/${branchNodes.length}${badge}</span>
-        </button>
-      `;
-    }).join('');
-
-    return `<div class="upgrade-branch-tabs" role="tablist" aria-label="Ramos de melhorias">${tabs}</div>`;
-  }
-
-  private renderBranchCanvas(branch: UpgradeBranchDto, nodes: UpgradeNodeDto[]): string {
-    const branchNodes = nodes.filter((node) => node.branch === branch);
-    const positioned = buildPositionedNodes(branch, branchNodes);
-    const viewBox = getBranchViewBox(branch);
-    const edges = buildBranchEdges(branchNodes);
+    const positioned = buildPositionedNodes(nodes);
+    const viewBox = getUnifiedViewBox();
+    const edges = buildUpgradeTreeEdges(nodes);
     const positionedById = new Map(positioned.map((entry) => [entry.node.id, entry]));
+    const focusNodeId = findFocusNodeId(nodes);
 
     const edgeMarkup = edges
       .map((edge) => {
@@ -102,28 +54,71 @@ export class UpgradeTreeModalRenderer {
       })
       .join('');
 
-    const nodeMarkup = positioned.map((entry) => this.renderNode(entry)).join('');
+    const nodeMarkup = positioned.map((entry) => this.renderNode(entry, viewBox)).join('');
 
-    return `
-      <div class="upgrade-tree-viewport" data-upgrade-branch-panel="${branch}">
-        <div
-          class="upgrade-tree-canvas"
-          style="width: ${viewBox.width}px; height: ${viewBox.height}px;"
-        >
-          <svg
-            class="upgrade-tree-edges"
-            viewBox="0 0 ${viewBox.width} ${viewBox.height}"
-            aria-hidden="true"
-          >
-            ${edgeMarkup}
-          </svg>
-          <div class="upgrade-tree-nodes">${nodeMarkup}</div>
+    container.innerHTML = `
+      <p class="upgrade-intro">
+        Arraste para mover · scroll para zoom. Passe o mouse nos nodos para detalhes e compra.
+      </p>
+      <p class="upgrade-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
+      <div class="upgrade-tree-shell">
+        <div class="upgrade-tree-toolbar">
+          <button type="button" class="upgrade-tree-focus-btn" data-upgrade-focus-available>
+            Ir para disponível
+          </button>
+          ${this.renderLegend()}
         </div>
+        <div class="upgrade-tree-viewport" data-upgrade-tree-viewport>
+          <div
+            class="upgrade-tree-stage"
+            style="width: ${viewBox.width}px; height: ${viewBox.height}px;"
+          >
+            <svg
+              class="upgrade-tree-edges"
+              viewBox="0 0 ${viewBox.width} ${viewBox.height}"
+              aria-hidden="true"
+            >
+              ${edgeMarkup}
+            </svg>
+            <div class="upgrade-tree-nodes">${nodeMarkup}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const viewport = container.querySelector('[data-upgrade-tree-viewport]') as HTMLElement;
+    unbindViewport = bindUpgradeTreeViewport(viewport);
+
+    if (focusNodeId) {
+      requestAnimationFrame(() => focusUpgradeTreeNode(viewport, focusNodeId));
+    }
+
+    container.querySelector('[data-upgrade-focus-available]')?.addEventListener('click', () => {
+      const nextFocus = findFocusNodeId(nodes);
+      if (nextFocus) focusUpgradeTreeNode(viewport, nextFocus);
+    });
+
+    this.bindNodeTooltips(container, handlers);
+  }
+
+  private renderLegend(): string {
+    const branches = ['combat', 'chests', 'equipment', 'economy', 'heroes', 'qol'] as const;
+    return `
+      <div class="upgrade-tree-legend" aria-label="Ramos da árvore">
+        ${branches
+          .map(
+            (branch) =>
+              `<span class="upgrade-tree-legend-item upgrade-tree-legend-item--${branch}">${UPGRADE_BRANCH_LABELS[branch]}</span>`,
+          )
+          .join('')}
       </div>
     `;
   }
 
-  private renderNode(entry: PositionedUpgradeNode): string {
+  private renderNode(
+    entry: PositionedUpgradeNode,
+    viewBox: { width: number; height: number },
+  ): string {
     const { node, x, y } = entry;
     const label = upgradeNodeShortLabel(node);
     const statusClass = `upgrade-node--${node.status}`;
@@ -131,10 +126,10 @@ export class UpgradeTreeModalRenderer {
     return `
       <button
         type="button"
-        class="upgrade-node ${statusClass}"
+        class="upgrade-node ${statusClass} upgrade-node--branch-${node.branch}"
         data-upgrade-node="${node.id}"
         data-upgrade-status="${node.status}"
-        style="left: ${(x / getBranchViewBox(node.branch).width) * 100}%; top: ${(y / getBranchViewBox(node.branch).height) * 100}%;"
+        style="left: ${(x / viewBox.width) * 100}%; top: ${(y / viewBox.height) * 100}%;"
         aria-label="${node.name}"
       >
         <span class="upgrade-node-ring" aria-hidden="true"></span>
@@ -143,22 +138,6 @@ export class UpgradeTreeModalRenderer {
         ${node.status === 'available' ? '<span class="upgrade-node-pulse" aria-hidden="true"></span>' : ''}
       </button>
     `;
-  }
-
-  private bindBranchTabs(
-    container: HTMLElement,
-    nodes: UpgradeNodeDto[],
-    state: GameStateDto,
-    handlers: UpgradeTreeHandlers,
-  ): void {
-    container.querySelectorAll('[data-upgrade-branch-tab]').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const branch = tab.getAttribute('data-upgrade-branch-tab') as UpgradeBranchDto | null;
-        if (!branch) return;
-        this.activeBranch = branch;
-        this.render(container, state, nodes, handlers);
-      });
-    });
   }
 
   private bindNodeTooltips(container: HTMLElement, handlers: UpgradeTreeHandlers): void {

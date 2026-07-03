@@ -79,6 +79,10 @@ export class UpgradeService {
       return 'locked';
     }
 
+    if (!this.areParentsOwned(state, definition)) {
+      return 'locked';
+    }
+
     if (!this.evaluator.allMet(state, definition.requirements)) {
       return 'locked';
     }
@@ -88,5 +92,13 @@ export class UpgradeService {
     }
 
     return 'available';
+  }
+
+  private areParentsOwned(state: GameState, definition: UpgradeDefinition): boolean {
+    return definition.parents.every((parentId) => {
+      const parent = getUpgradeById(parentId);
+      if (!parent) return true;
+      return getFeatureLevel(state.upgradeLevels, parent.feature) >= parent.level;
+    });
   }
 }
