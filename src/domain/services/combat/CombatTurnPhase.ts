@@ -6,6 +6,9 @@ import { Stats } from '../../value-objects/Stats';
 import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
+import { elementalDamageProfileFromHeroEquipment } from '../../combat/ElementalDamageProfileAggregator';
+import { elementalDamageFlatFromHeroEquipment } from '../../combat/ElementalDamageFlatProfileAggregator';
+import { physicalDamagePercentFromHeroEquipment } from '../../combat/GearStatAggregator';
 import {
   COMBAT_DELTA_SECONDS,
   MAX_ACTIONS_PER_TICK,
@@ -239,7 +242,13 @@ export class CombatTurnPhase {
         heroes,
         enemies,
         statusEffects,
-        { attackerProfile, stageLevel },
+        {
+          attackerProfile,
+          stageLevel,
+          attackerElementalBonus: elementalDamageProfileFromHeroEquipment(hero.toProps().equipment),
+          attackerElementalFlat: elementalDamageFlatFromHeroEquipment(hero.toProps().equipment),
+          attackerPhysicalDamagePercent: physicalDamagePercentFromHeroEquipment(hero.toProps().equipment),
+        },
       );
       heroes = result.heroes;
       enemies = result.enemies;

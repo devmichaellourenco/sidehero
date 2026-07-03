@@ -393,7 +393,12 @@ export class CombatActionExecutor {
       components,
       buildMitigationTarget(targetDefense, stageLevel, targetResistances, defensive),
       profile,
-      { rng: context?.rng },
+      {
+        rng: context?.rng,
+        attackerElementalBonus: context?.attackerElementalBonus,
+        attackerElementalFlat: context?.attackerElementalFlat,
+        attackerPhysicalDamagePercent: context?.attackerPhysicalDamagePercent,
+      },
     );
   }
 

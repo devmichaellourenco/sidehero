@@ -127,21 +127,27 @@ export class Hero {
     const gearBonus = this.sumGear((g) => g.attackBonus);
     const levelBonus = (this.level - 1) * 2;
     const attrBonus = Math.floor(this.totalAttributes.str * 0.5 + this.totalAttributes.dex * 0.3);
-    return this.baseAttack + gearBonus + levelBonus + attrBonus;
+    const raw = this.baseAttack + gearBonus + levelBonus + attrBonus;
+    const percent = this.sumGear((g) => g.attackPercentBonus);
+    return Math.max(0, Math.floor(raw * (1 + percent / 100)));
   }
 
   get defense(): number {
     const gearBonus = this.sumGear((g) => g.defenseBonus);
     const levelBonus = (this.level - 1) * 2;
     const attrBonus = Math.floor(this.totalAttributes.dex * 0.5 + this.totalAttributes.str * 0.2);
-    return this.baseDefense + gearBonus + levelBonus + attrBonus;
+    const raw = this.baseDefense + gearBonus + levelBonus + attrBonus;
+    const percent = this.sumGear((g) => g.defensePercentBonus);
+    return Math.max(0, Math.floor(raw * (1 + percent / 100)));
   }
 
   get maxHealth(): number {
     const gearBonus = this.sumGear((g) => g.healthBonus);
     const levelBonus = (this.level - 1) * 10;
     const attrBonus = this.totalAttributes.str * 2;
-    return this.baseMaxHealth + gearBonus + levelBonus + attrBonus;
+    const raw = this.baseMaxHealth + gearBonus + levelBonus + attrBonus;
+    const percent = this.sumGear((g) => g.healthPercentBonus);
+    return Math.max(1, Math.floor(raw * (1 + percent / 100)));
   }
 
   isAlive(): boolean {

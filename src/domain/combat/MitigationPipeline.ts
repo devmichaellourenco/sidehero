@@ -1,6 +1,16 @@
 import { DamageComponent } from './DamageComponent';
 import { DamageElement } from './DamageElement';
 import { DefensiveMitigation, ZERO_DEFENSIVE } from './DefensiveMitigation';
+import {
+  ElementalDamageFlatProfile,
+  getEffectiveElementalDamageFlat,
+  ZERO_ELEMENTAL_DAMAGE_FLAT,
+} from './ElementalDamageFlatProfile';
+import {
+  ElementalDamageProfile,
+  getEffectiveElementalDamageBonus,
+  ZERO_ELEMENTAL_DAMAGE,
+} from './ElementalDamageProfile';
 import { getEffectiveResistance, ResistanceProfile } from './ResistanceProfile';
 import { mitigatePhysicalDamage } from '../services/combat/CombatDamageResolver';
 
@@ -37,8 +47,18 @@ export function resolveComponentDamage(
   rawPower: number,
   component: DamageComponent,
   target: MitigationTarget,
+  attackerElementalBonus: ElementalDamageProfile = ZERO_ELEMENTAL_DAMAGE,
+  attackerElementalFlat: ElementalDamageFlatProfile = ZERO_ELEMENTAL_DAMAGE_FLAT,
+  attackerPhysicalDamagePercent = 0,
 ): number {
-  const portion = rawPower * component.weight;
+  const bonusPercent =
+    component.element === 'physical'
+      ? attackerPhysicalDamagePercent
+      : getEffectiveElementalDamageBonus(attackerElementalBonus, component.element);
+  const bonusFlat =
+    component.element === 'physical' ? 0 : getEffectiveElementalDamageFlat(attackerElementalFlat, component.element);
+  const portion =
+    rawPower * component.weight * (1 + bonusPercent / 100) + bonusFlat * component.weight;
   return mitigateElementalDamage(portion, component.element, target);
 }
 
@@ -46,9 +66,21 @@ export function resolveMultiComponentDamage(
   rawPower: number,
   components: DamageComponent[],
   target: MitigationTarget,
+  attackerElementalBonus: ElementalDamageProfile = ZERO_ELEMENTAL_DAMAGE,
+  attackerElementalFlat: ElementalDamageFlatProfile = ZERO_ELEMENTAL_DAMAGE_FLAT,
+  attackerPhysicalDamagePercent = 0,
 ): number {
   const total = components.reduce(
-    (sum, component) => sum + resolveComponentDamage(rawPower, component, target),
+    (sum, component) =>
+      sum +
+      resolveComponentDamage(
+        rawPower,
+        component,
+        target,
+        attackerElementalBonus,
+        attackerElementalFlat,
+        attackerPhysicalDamagePercent,
+      ),
     0,
   );
 

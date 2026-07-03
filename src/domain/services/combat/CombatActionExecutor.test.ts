@@ -190,6 +190,64 @@ describe('CombatActionExecutor', () => {
     expect(mitigated.heroes[0].currentHealth).toBeGreaterThan(baseline.heroes[0].currentHealth);
   });
 
+  it('bônus de dano elemental em arma amplifica skill do mesmo elemento', () => {
+    const sorcerer = Hero.createStarter('s1', 'sorcerer', 'Nix');
+    const withFireWeapon = sorcerer.equip(
+      Gear.create({
+        id: 'w-fire',
+        name: 'Espada Ígnea',
+        templateId: 'flame_brand',
+        slot: 'weapon',
+        rarity: 'rare',
+        attackBonus: 8,
+        defenseBonus: 0,
+        healthBonus: 0,
+        fireDamageBonus: 25,
+      }),
+    );
+    const enemy = Enemy.forStage(1);
+
+    const baseline = executor.execute(
+      {
+        skillId: 'fireball',
+        skillName: 'Bola de Fogo',
+        kind: 'damage',
+        damageComponents: [{ element: 'fire', delivery: 'projectile', weight: 1 }],
+        targeting: 'single_enemy',
+        power: 30,
+        targetEnemyId: enemy.id,
+      },
+      'Nix',
+      [sorcerer],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      { attackerProfile: { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 }, stageLevel: 1 },
+    );
+
+    const boosted = executor.execute(
+      {
+        skillId: 'fireball',
+        skillName: 'Bola de Fogo',
+        kind: 'damage',
+        damageComponents: [{ element: 'fire', delivery: 'projectile', weight: 1 }],
+        targeting: 'single_enemy',
+        power: 30,
+        targetEnemyId: enemy.id,
+      },
+      'Nix',
+      [withFireWeapon],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      {
+        attackerProfile: { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 },
+        stageLevel: 1,
+        attackerElementalBonus: { fire: 25, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+      },
+    );
+
+    expect(boosted.enemies[0].stats.currentHealth).toBeLessThan(baseline.enemies[0].stats.currentHealth);
+  });
+
   it('esquiva de gear evita dano recebido', () => {
     const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const withDodge = knight.equip(

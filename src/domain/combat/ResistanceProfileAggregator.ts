@@ -3,10 +3,10 @@ import { ResistanceProfile, ZERO_RESISTANCES } from './ResistanceProfile';
 
 export function resistanceProfileFromGear(gear: Gear): ResistanceProfile {
   return {
-    fire: gear.fireResistBonus,
-    cold: gear.coldResistBonus,
-    lightning: gear.lightningResistBonus,
-    chaos: gear.chaosResistBonus,
+    fire: gear.fireResistBonus + gear.fireResistFlat,
+    cold: gear.coldResistBonus + gear.coldResistFlat,
+    lightning: gear.lightningResistBonus + gear.lightningResistFlat,
+    chaos: gear.chaosResistBonus + gear.chaosResistFlat,
     allElemental: gear.allElementalResistBonus,
   };
 }

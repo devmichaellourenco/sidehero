@@ -1,3 +1,4 @@
+import { GearRarity } from '../entities/Gear';
 import { ActiveGearSlot } from './GearSlotCatalog';
 import {
   GALNEON_HERO_ID,
@@ -5,6 +6,8 @@ import {
   GALNEON_STANDARD_SWORD_SPRITES,
   GALNEON_STANDARD_SWORD_TEMPLATE_ID,
 } from './GalneonGearCatalog';
+
+export type GearElementTheme = 'fire' | 'cold' | 'lightning' | 'chaos';
 
 export interface GearTemplateDefinition {
   id: string;
@@ -16,6 +19,8 @@ export interface GearTemplateDefinition {
   spriteByRarity?: Partial<Record<GearRarity, string>>;
   /** Quando definido, só o herói com este id pode equipar. */
   exclusiveHeroId?: string;
+  /** Tema elemental — afixa dano/resistência coerente no loot. */
+  elementTheme?: GearElementTheme;
 }
 
 export const GEAR_TEMPLATES: GearTemplateDefinition[] = [
@@ -90,6 +95,90 @@ export const GEAR_TEMPLATES: GearTemplateDefinition[] = [
     baseName: 'Badge Extensão',
     slot: 'accessory',
     sprite: 'gear/items/equip_gem_red.png',
+  },
+  {
+    id: 'flame_brand',
+    baseName: 'Espada Ígnea',
+    slot: 'weapon',
+    sprite: 'gear/items/equip_gem_red.png',
+    elementTheme: 'fire',
+  },
+  {
+    id: 'frostbite_blade',
+    baseName: 'Lâmina Gelada',
+    slot: 'weapon',
+    sprite: 'gear/items/equip_ring_blue.png',
+    elementTheme: 'cold',
+  },
+  {
+    id: 'storm_rod',
+    baseName: 'Vara do Trovão',
+    slot: 'weapon',
+    sprite: 'gear/items/equip_hammer_1.png',
+    elementTheme: 'lightning',
+  },
+  {
+    id: 'venom_fang',
+    baseName: 'Presa Venenosa',
+    slot: 'weapon',
+    sprite: 'gear/items/equip_dragon_tooth.png',
+    elementTheme: 'chaos',
+  },
+  {
+    id: 'ember_plate',
+    baseName: 'Couraça das Brasa',
+    slot: 'armor',
+    sprite: 'gear/items/equip_hard_tooth.png',
+    elementTheme: 'fire',
+  },
+  {
+    id: 'glacial_mail',
+    baseName: 'Malha Glacial',
+    slot: 'armor',
+    sprite: 'gear/items/equip_shield_blue.png',
+    elementTheme: 'cold',
+  },
+  {
+    id: 'stormguard',
+    baseName: 'Couraça Trovão',
+    slot: 'armor',
+    sprite: 'gear/items/equip_leaf.png',
+    elementTheme: 'lightning',
+  },
+  {
+    id: 'void_shroud',
+    baseName: 'Manto do Caos',
+    slot: 'armor',
+    sprite: 'gear/items/equip_shield_wood.png',
+    elementTheme: 'chaos',
+  },
+  {
+    id: 'ruby_signet',
+    baseName: 'Anel Rubi',
+    slot: 'accessory',
+    sprite: 'gear/items/equip_gem_red.png',
+    elementTheme: 'fire',
+  },
+  {
+    id: 'sapphire_charm',
+    baseName: 'Amuleto Safira',
+    slot: 'accessory',
+    sprite: 'gear/items/equip_ring_blue.png',
+    elementTheme: 'cold',
+  },
+  {
+    id: 'voltaic_loop',
+    baseName: 'Bracelete Voltaico',
+    slot: 'accessory',
+    sprite: 'gear/items/equip_bracelet.png',
+    elementTheme: 'lightning',
+  },
+  {
+    id: 'entropy_pendant',
+    baseName: 'Pingente Entropia',
+    slot: 'accessory',
+    sprite: 'gear/items/equip_dragon_tooth.png',
+    elementTheme: 'chaos',
   },
   {
     id: GALNEON_STANDARD_SWORD_TEMPLATE_ID,

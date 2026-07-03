@@ -1,8 +1,6 @@
 import { Hero } from '../../domain/entities/Hero';
 import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
 import { resistanceProfileFromHeroEquipment } from '../../domain/combat/ResistanceProfileAggregator';
-
-const combatProfiles = new CombatProfileProvider();
 import {
   getUnlockedBattleSkillSlotCount,
   MAX_ACTIVE_BATTLE_SKILLS,
@@ -10,8 +8,11 @@ import {
 import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { AttributesDto } from '../dto/AttributesDto';
 import { HeroDto } from '../dto/GameStateDto';
-import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
 import { mapCombatResistSummary } from './CombatResistMapper';
+import { mapGearToDto } from './GearDtoMapper';
+import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
+
+const combatProfiles = new CombatProfileProvider();
 
 function mapAttributes(attrs: { str: number; dex: number; int: number }): AttributesDto {
   return { str: attrs.str, dex: attrs.dex, int: attrs.int };
@@ -25,36 +26,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
 
   for (const slot of slots) {
     const gear = heroEquipment[slot];
-    equipment[slot] = gear
-      ? {
-          id: gear.id,
-          name: gear.name,
-          templateId: gear.templateId,
-          slot: gear.slot,
-          rarity: gear.rarity,
-          attackBonus: gear.attackBonus,
-          defenseBonus: gear.defenseBonus,
-          healthBonus: gear.healthBonus,
-          attackSpeedBonus: gear.attackSpeedBonus,
-          castSpeedBonus: gear.castSpeedBonus,
-          critChanceBonus: gear.critChanceBonus,
-          critDamageBonus: gear.critDamageBonus,
-          fireResistBonus: gear.fireResistBonus,
-          coldResistBonus: gear.coldResistBonus,
-          lightningResistBonus: gear.lightningResistBonus,
-          chaosResistBonus: gear.chaosResistBonus,
-          allElementalResistBonus: gear.allElementalResistBonus,
-          requirements: gear.requirements
-            ? {
-                minLevel: gear.requirements.minLevel,
-                str: gear.requirements.str,
-                dex: gear.requirements.dex,
-                int: gear.requirements.int,
-                heroId: gear.requirements.heroId,
-              }
-            : { minLevel: 1 },
-        }
-      : null;
+    equipment[slot] = gear ? mapGearToDto(gear) : null;
   }
 
   return {

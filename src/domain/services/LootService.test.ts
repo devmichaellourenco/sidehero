@@ -92,4 +92,36 @@ describe('LootService', () => {
 
     vi.restoreAllMocks();
   });
+
+  it('generateGearFromTemplate com tema elemental aplica bônus temático', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+
+    const gear = lootService.generateGearFromTemplate('flame_brand', 10, 'rare', 'themed-fire');
+
+    expect(gear.templateId).toBe('flame_brand');
+    expect(gear.fireDamageBonus).toBeGreaterThan(0);
+
+    vi.restoreAllMocks();
+  });
+
+  it('template de armadura temática aplica resistência', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+
+    const gear = lootService.generateGearFromTemplate('glacial_mail', 10, 'epic', 'themed-cold');
+
+    expect(gear.coldResistBonus).toBeGreaterThan(0);
+
+    vi.restoreAllMocks();
+  });
+
+  it('template de acessório temático aplica dano e resistência', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+
+    const gear = lootService.generateGearFromTemplate('ruby_signet', 12, 'legendary', 'themed-ring');
+
+    expect(gear.fireDamageBonus).toBeGreaterThan(0);
+    expect(gear.fireResistBonus).toBeGreaterThan(0);
+
+    vi.restoreAllMocks();
+  });
 });

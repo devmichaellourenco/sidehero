@@ -47,6 +47,47 @@ export interface EquippedGearDto {
   lightningResistBonus?: number;
   chaosResistBonus?: number;
   allElementalResistBonus?: number;
+  fireDamageBonus?: number;
+  coldDamageBonus?: number;
+  lightningDamageBonus?: number;
+  chaosDamageBonus?: number;
+  allElementalDamageBonus?: number;
+}
+
+function formatSigned(value: number, suffix: string, label: string): string {
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${value}${suffix} ${label}`;
+}
+
+function formatElementalDamageBonuses(
+  gear: Pick<
+    GearDto,
+    | 'fireDamageBonus'
+    | 'coldDamageBonus'
+    | 'lightningDamageBonus'
+    | 'chaosDamageBonus'
+    | 'allElementalDamageBonus'
+    | 'fireDamageFlat'
+    | 'coldDamageFlat'
+    | 'lightningDamageFlat'
+    | 'chaosDamageFlat'
+  >,
+): string[] {
+  const parts: string[] = [];
+  if (gear.fireDamageBonus !== 0) parts.push(formatSigned(gear.fireDamageBonus, '%', 'Dano Fogo'));
+  if (gear.coldDamageBonus !== 0) parts.push(formatSigned(gear.coldDamageBonus, '%', 'Dano Gelo'));
+  if (gear.lightningDamageBonus !== 0) {
+    parts.push(formatSigned(gear.lightningDamageBonus, '%', 'Dano Raio'));
+  }
+  if (gear.chaosDamageBonus !== 0) parts.push(formatSigned(gear.chaosDamageBonus, '%', 'Dano Caos'));
+  if (gear.allElementalDamageBonus !== 0) {
+    parts.push(formatSigned(gear.allElementalDamageBonus, '%', 'Dano Elemental'));
+  }
+  if (gear.fireDamageFlat !== 0) parts.push(formatSigned(gear.fireDamageFlat, '', 'Dano Fogo'));
+  if (gear.coldDamageFlat !== 0) parts.push(formatSigned(gear.coldDamageFlat, '', 'Dano Gelo'));
+  if (gear.lightningDamageFlat !== 0) parts.push(formatSigned(gear.lightningDamageFlat, '', 'Dano Raio'));
+  if (gear.chaosDamageFlat !== 0) parts.push(formatSigned(gear.chaosDamageFlat, '', 'Dano Caos'));
+  return parts;
 }
 
 function formatResistBonuses(
@@ -57,14 +98,28 @@ function formatResistBonuses(
     | 'lightningResistBonus'
     | 'chaosResistBonus'
     | 'allElementalResistBonus'
+    | 'fireResistFlat'
+    | 'coldResistFlat'
+    | 'lightningResistFlat'
+    | 'chaosResistFlat'
   >,
 ): string[] {
   const parts: string[] = [];
-  if (gear.fireResistBonus > 0) parts.push(`+${gear.fireResistBonus}% Fogo`);
-  if (gear.coldResistBonus > 0) parts.push(`+${gear.coldResistBonus}% Gelo`);
-  if (gear.lightningResistBonus > 0) parts.push(`+${gear.lightningResistBonus}% Raio`);
-  if (gear.chaosResistBonus > 0) parts.push(`+${gear.chaosResistBonus}% Caos`);
-  if (gear.allElementalResistBonus > 0) parts.push(`+${gear.allElementalResistBonus}% Elemental`);
+  if (gear.fireResistBonus !== 0) parts.push(formatSigned(gear.fireResistBonus, '%', 'Res. Fogo'));
+  if (gear.coldResistBonus !== 0) parts.push(formatSigned(gear.coldResistBonus, '%', 'Res. Gelo'));
+  if (gear.lightningResistBonus !== 0) {
+    parts.push(formatSigned(gear.lightningResistBonus, '%', 'Res. Raio'));
+  }
+  if (gear.chaosResistBonus !== 0) parts.push(formatSigned(gear.chaosResistBonus, '%', 'Res. Caos'));
+  if (gear.allElementalResistBonus !== 0) {
+    parts.push(formatSigned(gear.allElementalResistBonus, '%', 'Res. Elemental'));
+  }
+  if (gear.fireResistFlat !== 0) parts.push(formatSigned(gear.fireResistFlat, '', 'Res. Fogo'));
+  if (gear.coldResistFlat !== 0) parts.push(formatSigned(gear.coldResistFlat, '', 'Res. Gelo'));
+  if (gear.lightningResistFlat !== 0) {
+    parts.push(formatSigned(gear.lightningResistFlat, '', 'Res. Raio'));
+  }
+  if (gear.chaosResistFlat !== 0) parts.push(formatSigned(gear.chaosResistFlat, '', 'Res. Caos'));
   return parts;
 }
 
@@ -81,41 +136,71 @@ function formatPercent(value: number): string {
 }
 
 export function formatGearBonuses(
-  gear: Pick<
-    GearDto,
-    | 'attackBonus'
-    | 'defenseBonus'
-    | 'healthBonus'
-    | 'attackSpeedBonus'
-    | 'castSpeedBonus'
-    | 'critChanceBonus'
-    | 'critDamageBonus'
-    | 'fireResistBonus'
-    | 'coldResistBonus'
-    | 'lightningResistBonus'
-    | 'chaosResistBonus'
-    | 'allElementalResistBonus'
-    | 'dodgeChanceBonus'
-    | 'blockChanceBonus'
-    | 'damageReductionBonus'
-  >,
+  gear: Partial<GearDto> & Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
 ): string {
+  const stats = {
+    attackPercentBonus: gear.attackPercentBonus ?? 0,
+    defensePercentBonus: gear.defensePercentBonus ?? 0,
+    healthPercentBonus: gear.healthPercentBonus ?? 0,
+    physicalDamagePercentBonus: gear.physicalDamagePercentBonus ?? 0,
+    attackSpeedBonus: gear.attackSpeedBonus ?? 0,
+    castSpeedBonus: gear.castSpeedBonus ?? 0,
+    cooldownReductionBonus: gear.cooldownReductionBonus ?? 0,
+    critChanceBonus: gear.critChanceBonus ?? 0,
+    critDamageBonus: gear.critDamageBonus ?? 0,
+    fireResistBonus: gear.fireResistBonus ?? 0,
+    coldResistBonus: gear.coldResistBonus ?? 0,
+    lightningResistBonus: gear.lightningResistBonus ?? 0,
+    chaosResistBonus: gear.chaosResistBonus ?? 0,
+    allElementalResistBonus: gear.allElementalResistBonus ?? 0,
+    fireResistFlat: gear.fireResistFlat ?? 0,
+    coldResistFlat: gear.coldResistFlat ?? 0,
+    lightningResistFlat: gear.lightningResistFlat ?? 0,
+    chaosResistFlat: gear.chaosResistFlat ?? 0,
+    fireDamageBonus: gear.fireDamageBonus ?? 0,
+    coldDamageBonus: gear.coldDamageBonus ?? 0,
+    lightningDamageBonus: gear.lightningDamageBonus ?? 0,
+    chaosDamageBonus: gear.chaosDamageBonus ?? 0,
+    allElementalDamageBonus: gear.allElementalDamageBonus ?? 0,
+    fireDamageFlat: gear.fireDamageFlat ?? 0,
+    coldDamageFlat: gear.coldDamageFlat ?? 0,
+    lightningDamageFlat: gear.lightningDamageFlat ?? 0,
+    chaosDamageFlat: gear.chaosDamageFlat ?? 0,
+    dodgeChanceBonus: gear.dodgeChanceBonus ?? 0,
+    blockChanceBonus: gear.blockChanceBonus ?? 0,
+    damageReductionBonus: gear.damageReductionBonus ?? 0,
+  };
+
   const parts = [
     `+${gear.attackBonus} ATK`,
     `+${gear.defenseBonus} DEF`,
     `+${gear.healthBonus} HP`,
   ];
 
-  if (gear.attackSpeedBonus > 0) parts.push(`+${gear.attackSpeedBonus.toFixed(2)} ASPD`);
-  if (gear.castSpeedBonus > 0) parts.push(`+${gear.castSpeedBonus.toFixed(2)} Cast`);
-  if (gear.critChanceBonus > 0) parts.push(`+${formatPercent(gear.critChanceBonus)} Crít`);
-  if (gear.critDamageBonus > 0) parts.push(`+${formatPercent(gear.critDamageBonus)} Crít Dmg`);
-  if (gear.dodgeChanceBonus > 0) parts.push(`+${formatPercent(gear.dodgeChanceBonus)} Esquiva`);
-  if (gear.blockChanceBonus > 0) parts.push(`+${formatPercent(gear.blockChanceBonus)} Bloqueio`);
-  if (gear.damageReductionBonus > 0) {
-    parts.push(`+${formatPercent(gear.damageReductionBonus)} Red. Dano`);
+  if (stats.attackPercentBonus !== 0) {
+    parts.push(formatSigned(stats.attackPercentBonus, '%', 'ATK'));
   }
-  parts.push(...formatResistBonuses(gear));
+  if (stats.defensePercentBonus !== 0) {
+    parts.push(formatSigned(stats.defensePercentBonus, '%', 'DEF'));
+  }
+  if (stats.healthPercentBonus !== 0) parts.push(formatSigned(stats.healthPercentBonus, '%', 'HP'));
+  if (stats.physicalDamagePercentBonus !== 0) {
+    parts.push(formatSigned(stats.physicalDamagePercentBonus, '%', 'Dano Físico'));
+  }
+  if (stats.attackSpeedBonus !== 0) parts.push(formatSigned(stats.attackSpeedBonus, '', 'ASPD'));
+  if (stats.castSpeedBonus !== 0) parts.push(formatSigned(stats.castSpeedBonus, '', 'Cast'));
+  if (stats.cooldownReductionBonus !== 0) {
+    parts.push(formatSigned(stats.cooldownReductionBonus, '%', 'Red. CD'));
+  }
+  if (stats.critChanceBonus > 0) parts.push(`+${formatPercent(stats.critChanceBonus)} Crít`);
+  if (stats.critDamageBonus > 0) parts.push(`+${formatPercent(stats.critDamageBonus)} Crít Dmg`);
+  if (stats.dodgeChanceBonus > 0) parts.push(`+${formatPercent(stats.dodgeChanceBonus)} Esquiva`);
+  if (stats.blockChanceBonus > 0) parts.push(`+${formatPercent(stats.blockChanceBonus)} Bloqueio`);
+  if (stats.damageReductionBonus > 0) {
+    parts.push(`+${formatPercent(stats.damageReductionBonus)} Red. Dano`);
+  }
+  parts.push(...formatResistBonuses(stats));
+  parts.push(...formatElementalDamageBonuses(stats));
 
   return parts.join(' · ');
 }
@@ -326,6 +411,16 @@ export function renderEquippedGearCard(
       castSpeedBonus: gear.castSpeedBonus ?? 0,
       critChanceBonus: gear.critChanceBonus ?? 0,
       critDamageBonus: gear.critDamageBonus ?? 0,
+      fireResistBonus: gear.fireResistBonus ?? 0,
+      coldResistBonus: gear.coldResistBonus ?? 0,
+      lightningResistBonus: gear.lightningResistBonus ?? 0,
+      chaosResistBonus: gear.chaosResistBonus ?? 0,
+      allElementalResistBonus: gear.allElementalResistBonus ?? 0,
+      fireDamageBonus: gear.fireDamageBonus ?? 0,
+      coldDamageBonus: gear.coldDamageBonus ?? 0,
+      lightningDamageBonus: gear.lightningDamageBonus ?? 0,
+      chaosDamageBonus: gear.chaosDamageBonus ?? 0,
+      allElementalDamageBonus: gear.allElementalDamageBonus ?? 0,
       requirements: { minLevel: 1 },
     },
     {

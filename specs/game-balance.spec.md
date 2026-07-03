@@ -104,6 +104,8 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-002 | Média | Elemento `cold` sem fonte ofensiva no catálogo | Elementos | ✅ Resolvido |
 | BAL-003 | Baixa | Dodge/block/DR aplicados na soma total, não por componente | Combate | Aberto |
 | BAL-004 | Baixa | `debuff_defense` só afeta componente físico (intencional — documentar in-game?) | Combate | Aberto |
+| BAL-005 | Média | Gear sem dano/resist elemental visível no loot | Gear/Loot | ✅ Resolvido |
+| BAL-006 | Média | Gear sem flat/%, velocidade negativa e redução de CD | Gear/Loot | ✅ Resolvido |
 
 ## Referências
 

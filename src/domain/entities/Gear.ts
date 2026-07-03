@@ -41,6 +41,24 @@ export interface GearProps {
   lightningResistBonus?: number;
   chaosResistBonus?: number;
   allElementalResistBonus?: number;
+  fireDamageBonus?: number;
+  coldDamageBonus?: number;
+  lightningDamageBonus?: number;
+  chaosDamageBonus?: number;
+  allElementalDamageBonus?: number;
+  fireDamageFlat?: number;
+  coldDamageFlat?: number;
+  lightningDamageFlat?: number;
+  chaosDamageFlat?: number;
+  fireResistFlat?: number;
+  coldResistFlat?: number;
+  lightningResistFlat?: number;
+  chaosResistFlat?: number;
+  attackPercentBonus?: number;
+  defensePercentBonus?: number;
+  healthPercentBonus?: number;
+  physicalDamagePercentBonus?: number;
+  cooldownReductionBonus?: number;
   dodgeChanceBonus?: number;
   blockChanceBonus?: number;
   damageReductionBonus?: number;
@@ -67,6 +85,24 @@ export class Gear {
   readonly lightningResistBonus: number;
   readonly chaosResistBonus: number;
   readonly allElementalResistBonus: number;
+  readonly fireDamageBonus: number;
+  readonly coldDamageBonus: number;
+  readonly lightningDamageBonus: number;
+  readonly chaosDamageBonus: number;
+  readonly allElementalDamageBonus: number;
+  readonly fireDamageFlat: number;
+  readonly coldDamageFlat: number;
+  readonly lightningDamageFlat: number;
+  readonly chaosDamageFlat: number;
+  readonly fireResistFlat: number;
+  readonly coldResistFlat: number;
+  readonly lightningResistFlat: number;
+  readonly chaosResistFlat: number;
+  readonly attackPercentBonus: number;
+  readonly defensePercentBonus: number;
+  readonly healthPercentBonus: number;
+  readonly physicalDamagePercentBonus: number;
+  readonly cooldownReductionBonus: number;
   readonly dodgeChanceBonus: number;
   readonly blockChanceBonus: number;
   readonly damageReductionBonus: number;
@@ -90,6 +126,24 @@ export class Gear {
     this.lightningResistBonus = props.lightningResistBonus ?? 0;
     this.chaosResistBonus = props.chaosResistBonus ?? 0;
     this.allElementalResistBonus = props.allElementalResistBonus ?? 0;
+    this.fireDamageBonus = props.fireDamageBonus ?? 0;
+    this.coldDamageBonus = props.coldDamageBonus ?? 0;
+    this.lightningDamageBonus = props.lightningDamageBonus ?? 0;
+    this.chaosDamageBonus = props.chaosDamageBonus ?? 0;
+    this.allElementalDamageBonus = props.allElementalDamageBonus ?? 0;
+    this.fireDamageFlat = props.fireDamageFlat ?? 0;
+    this.coldDamageFlat = props.coldDamageFlat ?? 0;
+    this.lightningDamageFlat = props.lightningDamageFlat ?? 0;
+    this.chaosDamageFlat = props.chaosDamageFlat ?? 0;
+    this.fireResistFlat = props.fireResistFlat ?? 0;
+    this.coldResistFlat = props.coldResistFlat ?? 0;
+    this.lightningResistFlat = props.lightningResistFlat ?? 0;
+    this.chaosResistFlat = props.chaosResistFlat ?? 0;
+    this.attackPercentBonus = props.attackPercentBonus ?? 0;
+    this.defensePercentBonus = props.defensePercentBonus ?? 0;
+    this.healthPercentBonus = props.healthPercentBonus ?? 0;
+    this.physicalDamagePercentBonus = props.physicalDamagePercentBonus ?? 0;
+    this.cooldownReductionBonus = props.cooldownReductionBonus ?? 0;
     this.dodgeChanceBonus = props.dodgeChanceBonus ?? 0;
     this.blockChanceBonus = props.blockChanceBonus ?? 0;
     this.damageReductionBonus = props.damageReductionBonus ?? 0;
@@ -119,6 +173,24 @@ export class Gear {
       lightningResistBonus: this.lightningResistBonus,
       chaosResistBonus: this.chaosResistBonus,
       allElementalResistBonus: this.allElementalResistBonus,
+      fireDamageBonus: this.fireDamageBonus,
+      coldDamageBonus: this.coldDamageBonus,
+      lightningDamageBonus: this.lightningDamageBonus,
+      chaosDamageBonus: this.chaosDamageBonus,
+      allElementalDamageBonus: this.allElementalDamageBonus,
+      fireDamageFlat: this.fireDamageFlat,
+      coldDamageFlat: this.coldDamageFlat,
+      lightningDamageFlat: this.lightningDamageFlat,
+      chaosDamageFlat: this.chaosDamageFlat,
+      fireResistFlat: this.fireResistFlat,
+      coldResistFlat: this.coldResistFlat,
+      lightningResistFlat: this.lightningResistFlat,
+      chaosResistFlat: this.chaosResistFlat,
+      attackPercentBonus: this.attackPercentBonus,
+      defensePercentBonus: this.defensePercentBonus,
+      healthPercentBonus: this.healthPercentBonus,
+      physicalDamagePercentBonus: this.physicalDamagePercentBonus,
+      cooldownReductionBonus: this.cooldownReductionBonus,
       dodgeChanceBonus: this.dodgeChanceBonus,
       blockChanceBonus: this.blockChanceBonus,
       damageReductionBonus: this.damageReductionBonus,

@@ -5,6 +5,11 @@ import {
   MitigationTarget,
   resolveMultiComponentDamage,
 } from '../../combat/MitigationPipeline';
+import { ElementalDamageProfile, ZERO_ELEMENTAL_DAMAGE } from '../../combat/ElementalDamageProfile';
+import {
+  ElementalDamageFlatProfile,
+  ZERO_ELEMENTAL_DAMAGE_FLAT,
+} from '../../combat/ElementalDamageFlatProfile';
 import { ResistanceProfile, ZERO_RESISTANCES } from '../../combat/ResistanceProfile';
 import { resolveEffectiveAttack, resolveEffectiveDefense } from './CombatStatResolver';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
@@ -18,6 +23,9 @@ export interface ResolvedDamage {
 
 export interface DamageRollOptions {
   rng?: () => number;
+  attackerElementalBonus?: ElementalDamageProfile;
+  attackerElementalFlat?: ElementalDamageFlatProfile;
+  attackerPhysicalDamagePercent?: number;
 }
 
 export function mitigatePhysicalDamage(
@@ -79,7 +87,14 @@ export function resolveOutgoingDamage(
     { rng },
   );
   const powered = Math.max(1, Math.floor(rawPower * multiplier));
-  const componentDamage = resolveMultiComponentDamage(powered, normalized, target);
+  const componentDamage = resolveMultiComponentDamage(
+    powered,
+    normalized,
+    target,
+    options.attackerElementalBonus ?? ZERO_ELEMENTAL_DAMAGE,
+    options.attackerElementalFlat ?? ZERO_ELEMENTAL_DAMAGE_FLAT,
+    options.attackerPhysicalDamagePercent ?? 0,
+  );
   const defensive = applyDefensiveLayers(
     componentDamage,
     target.defensive ?? ZERO_DEFENSIVE,

@@ -15,10 +15,18 @@ describe('GearTemplateCatalog', () => {
     expect(resolveGearTemplateId('Anel de Cobre (common)', 'accessory')).toBe('copper_ring');
   });
 
-  it('lista quatro templates por slot ativo', () => {
-    expect(listGearTemplatesForSlot('weapon')).toHaveLength(4);
-    expect(listGearTemplatesForSlot('armor')).toHaveLength(4);
-    expect(listGearTemplatesForSlot('accessory')).toHaveLength(4);
+  it('lista oito templates por slot ativo (genéricos + elementais)', () => {
+    expect(listGearTemplatesForSlot('weapon')).toHaveLength(8);
+    expect(listGearTemplatesForSlot('armor')).toHaveLength(8);
+    expect(listGearTemplatesForSlot('accessory')).toHaveLength(8);
+  });
+
+  it('inclui templates temáticos elementais em cada slot', () => {
+    expect(listGearTemplatesForSlot('weapon').some((entry) => entry.elementTheme === 'fire')).toBe(true);
+    expect(listGearTemplatesForSlot('armor').some((entry) => entry.elementTheme === 'cold')).toBe(true);
+    expect(listGearTemplatesForSlot('accessory').some((entry) => entry.elementTheme === 'lightning')).toBe(
+      true,
+    );
   });
 
   it('não inclui itens exclusivos de herói no loot aleatório', () => {
