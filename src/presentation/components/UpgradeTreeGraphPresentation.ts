@@ -17,8 +17,7 @@ export interface PositionedUpgradeNode {
 }
 
 const NODE_RADIUS = 28;
-const AXIS_EPSILON = 14;
-const ROUTE_PADDING = 18;
+const AXIS_EPSILON = 8;
 
 interface Point {
   x: number;
@@ -83,16 +82,10 @@ function anchorOnNode(node: PositionedUpgradeNode, toward: Point): Point {
   };
 }
 
-function laneOffset(edgeKey: string): number {
-  let hash = 0;
-  for (let index = 0; index < edgeKey.length; index += 1) {
-    hash = (hash + edgeKey.charCodeAt(index) * (index + 1)) % 5;
-  }
-  return (hash - 2) * 4;
-}
-
-function shiftPoint(point: Point, dx: number, dy: number): Point {
-  return { x: point.x + dx, y: point.y + dy };
+export function isStraightBranchEdge(from: Point, to: Point): boolean {
+  const dx = Math.abs(to.x - from.x);
+  const dy = Math.abs(to.y - from.y);
+  return dx <= AXIS_EPSILON || dy <= AXIS_EPSILON || Math.abs(dx - dy) <= AXIS_EPSILON;
 }
 
 export function buildEdgePath(
@@ -105,52 +98,7 @@ export function buildEdgePath(
   const start = anchorOnNode(from, toCenter);
   const end = anchorOnNode(to, fromCenter);
 
-  const dx = end.x - start.x;
-  const dy = end.y - start.y;
-  const offset = laneOffset(`${from.node.id}->${to.node.id}`);
-
-  if (Math.abs(dy) <= AXIS_EPSILON) {
-    const shiftedStart = shiftPoint(start, 0, offset);
-    const shiftedEnd = shiftPoint(end, 0, offset);
-    return `M ${shiftedStart.x} ${shiftedStart.y} L ${shiftedEnd.x} ${shiftedEnd.y}`;
-  }
-
-  if (Math.abs(dx) <= AXIS_EPSILON) {
-    const shiftedStart = shiftPoint(start, offset, 0);
-    const shiftedEnd = shiftPoint(end, offset, 0);
-    return `M ${shiftedStart.x} ${shiftedStart.y} L ${shiftedEnd.x} ${shiftedEnd.y}`;
-  }
-
-  const verticalFirst = Math.abs(dy) >= Math.abs(dx);
-  const routeAbove = toCenter.y < fromCenter.y;
-
-  if (verticalFirst) {
-    const laneX = start.x + offset;
-    const elbowY = routeAbove
-      ? Math.min(start.y, end.y) - ROUTE_PADDING
-      : Math.max(start.y, end.y) + ROUTE_PADDING;
-
-    return [
-      `M ${start.x} ${start.y}`,
-      `L ${laneX} ${start.y}`,
-      `L ${laneX} ${elbowY}`,
-      `L ${end.x + offset} ${elbowY}`,
-      `L ${end.x + offset} ${end.y}`,
-      `L ${end.x} ${end.y}`,
-    ].join(' ');
-  }
-
-  const laneY = start.y + offset;
-  const elbowX = dx > 0 ? Math.max(start.x, end.x) + ROUTE_PADDING : Math.min(start.x, end.x) - ROUTE_PADDING;
-
-  return [
-    `M ${start.x} ${start.y}`,
-    `L ${start.x} ${laneY}`,
-    `L ${elbowX} ${laneY}`,
-    `L ${elbowX} ${end.y + offset}`,
-    `L ${end.x} ${end.y + offset}`,
-    `L ${end.x} ${end.y}`,
-  ].join(' ');
+  return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
 }
 
 export function getUnifiedViewBox(): { width: number; height: number } {
