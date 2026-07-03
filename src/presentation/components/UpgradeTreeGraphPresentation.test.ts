@@ -33,6 +33,7 @@ describe('UpgradeTreeGraphPresentation', () => {
     expect(resolveUpgradeParentIds('background_tick_1')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('battle_skill_slot_2')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('shop_refresh_1')).toEqual(['auto_battle_2']);
+    expect(resolveUpgradeParentIds('log_filter_1')).toEqual(['auto_battle_3']);
   });
 
   it('monta arestas entre nodos visíveis, inclusive entre ramos', () => {

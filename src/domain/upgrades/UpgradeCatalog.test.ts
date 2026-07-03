@@ -74,4 +74,11 @@ describe('UpgradeCatalog', () => {
     expect(shop?.branch).toBe('economy');
     expect(shop?.parents).toEqual(['auto_battle_2']);
   });
+
+  it('qol integra log resumido na árvore principal de combate', () => {
+    const logFilter = UPGRADE_CATALOG.find((entry) => entry.id === 'log_filter_1');
+
+    expect(logFilter?.branch).toBe('qol');
+    expect(logFilter?.parents).toEqual(['auto_battle_3']);
+  });
 });

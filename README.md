@@ -11,10 +11,8 @@ npm run build
 
 Carregue a pasta `dist/` em `chrome://extensions` (modo desenvolvedor).
 
-## Estrutura
+## Histórico de desenvolvimento
 
-- `src/domain` — regras de negócio (DDD)
-- `src/application` — casos de uso
-- `src/infrastructure` — storage, messaging
-- `src/presentation` — UI, content script, service worker
 - `step-by-step/` — histórico de desenvolvimento
+- `specs/` — specs SDD por feature (fonte de verdade)
+- `.cursor/AGENTS.md` — agents e skills do projeto

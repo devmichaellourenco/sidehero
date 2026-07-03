@@ -129,6 +129,8 @@ export function upgradeNodeShortLabel(node: UpgradeNodeDto): string {
 
   if (node.feature === 'shop_refresh') return '🛒';
 
+  if (node.feature === 'log_filter') return '📋';
+
   if (node.level > 1) {
     return toRoman(node.level);
   }

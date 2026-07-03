@@ -2919,9 +2919,111 @@ button.hero-skill-chip:hover {
 }
 
 .shop-offers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.shop-offer-tile {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+  min-height: 0;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 20, 38, 0.72);
+}
+
+.shop-offer-tile:hover .shop-offer-tooltip,
+.shop-offer-tile:focus-within .shop-offer-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.shop-offer-icon-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  background-image: var(--gear-frame);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.shop-offer-icon {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+}
+
+.shop-offer-rarity {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 14px;
+  height: 14px;
+}
+
+.shop-offer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: center;
+}
+
+.shop-offer-name {
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-offer-meta {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.shop-offer-stats-compact {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.shop-offer-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.shop-offer-tooltip {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(100% + 4px);
+  z-index: 4;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 14, 28, 0.96);
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  pointer-events: none;
 }
 
 .shop-offer-card {
@@ -2945,18 +3047,22 @@ button.hero-skill-chip:hover {
   gap: 8px;
 }
 
+.shop-buy-btn {
+  flex-shrink: 0;
+  width: 100%;
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
 .shop-offer-price {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   font-family: var(--font-heading);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--gold);
-}
-
-.shop-buy-btn {
-  flex-shrink: 0;
 }
 
 .shop-refresh-locked {

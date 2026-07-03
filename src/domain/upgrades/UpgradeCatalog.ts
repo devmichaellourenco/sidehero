@@ -208,7 +208,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Log resumido I',
     description: 'Filtra o log para eventos importantes.',
     cost: 35,
-    parents: [],
+    parents: ['auto_battle_3'],
     requirements: [{ type: 'min_stage', value: 2 }],
   },
   {

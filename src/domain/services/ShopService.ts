@@ -1,8 +1,11 @@
-import { Gear, GearRarity, GearSlot } from '../entities/Gear';
+import { Gear, GearRarity } from '../entities/Gear';
 import {
-  GALNEON_STANDARD_SWORD_SHOP_RARITIES,
-  GALNEON_STANDARD_SWORD_TEMPLATE_ID,
-} from '../gear/GalneonGearCatalog';
+  buildShopOfferId,
+  pickUniqueShopTemplateId,
+  rollShopRarity,
+  SHOP_OFFER_COUNT,
+  SHOP_SLOT_BY_INDEX,
+} from '../shop/ShopCatalog';
 import { LootService } from './LootService';
 
 export interface ShopOffer {
@@ -11,20 +14,22 @@ export interface ShopOffer {
   price: number;
 }
 
-const SHOP_ACCESSORY_SLOTS: GearSlot[] = ['armor', 'accessory'];
-
-const SHOP_RARITIES: Record<'armor' | 'accessory', GearRarity> = {
-  armor: 'rare',
-  accessory: 'epic',
+const BASE_PRICE: Record<GearRarity, number> = {
+  common: 20,
+  uncommon: 38,
+  rare: 65,
+  epic: 120,
+  legendary: 220,
+  mythic: 380,
 };
 
-const BASE_PRICE: Record<GearRarity, number> = {
-  common: 25,
-  uncommon: 40,
-  rare: 55,
-  epic: 110,
-  legendary: 180,
-  mythic: 300,
+const RARITY_PRICE_SCALE: Record<GearRarity, number> = {
+  common: 4,
+  uncommon: 6,
+  rare: 9,
+  epic: 14,
+  legendary: 22,
+  mythic: 32,
 };
 
 const REFRESH_BASE_COST = 15;
@@ -44,53 +49,58 @@ export function parseShopOfferCatalogKey(
 export class ShopService {
   constructor(private readonly lootService: LootService) {}
 
-  generateOffers(stage: number, refreshSeed = 0): ShopOffer[] {
-    const galneonSwords = GALNEON_STANDARD_SWORD_SHOP_RARITIES.map((rarity) => {
+  generateOffers(tier: number, refreshSeed = 0): ShopOffer[] {
+    const usedTemplateKeys = new Set<string>();
+    const offers: ShopOffer[] = [];
+
+    for (let offerIndex = 0; offerIndex < SHOP_OFFER_COUNT; offerIndex += 1) {
+      const slot = SHOP_SLOT_BY_INDEX[offerIndex];
+      const rarity = rollShopRarity(tier, refreshSeed, offerIndex);
+      const templateId = pickUniqueShopTemplateId(
+        slot,
+        tier,
+        refreshSeed,
+        offerIndex,
+        usedTemplateKeys,
+      );
+      usedTemplateKeys.add(`${slot}:${templateId}`);
+
+      const gearId = `shop-gear-${tier}-${refreshSeed}-${offerIndex}`;
       const gear = this.lootService.generateGearFromTemplate(
-        GALNEON_STANDARD_SWORD_TEMPLATE_ID,
-        stage,
+        templateId,
+        tier,
         rarity,
-        `shop-galneon-sword-${stage}-${refreshSeed}-${rarity}`,
+        gearId,
+        offerIndex % 3,
       );
 
-      return {
-        id: `shop-${stage}-${refreshSeed}-galneon-sword-${rarity}`,
+      offers.push({
+        id: buildShopOfferId(tier, refreshSeed, offerIndex),
         gear,
-        price: this.calculateItemPrice(stage, rarity),
-      };
-    });
+        price: this.calculateItemPrice(tier, rarity),
+      });
+    }
 
-    const genericOffers = SHOP_ACCESSORY_SLOTS.map((slot) => {
-      const rarity = SHOP_RARITIES[slot];
-      const gear = this.lootService.generateDeterministicGearForSlot(stage, slot, rarity, refreshSeed);
-
-      return {
-        id: `shop-${stage}-${refreshSeed}-${slot}`,
-        gear,
-        price: this.calculateItemPrice(stage, rarity),
-      };
-    });
-
-    return [...galneonSwords, ...genericOffers];
+    return offers;
   }
 
-  findOffer(stage: number, refreshSeed: number, offerId: string): ShopOffer | null {
+  findOffer(tier: number, refreshSeed: number, offerId: string): ShopOffer | null {
     const catalog = parseShopOfferCatalogKey(offerId);
-    const resolvedStage = catalog?.stage ?? stage;
+    const resolvedTier = catalog?.stage ?? tier;
     const resolvedSeed = catalog?.seed ?? refreshSeed;
 
     return (
-      this.generateOffers(resolvedStage, resolvedSeed).find((offer) => offer.id === offerId) ??
+      this.generateOffers(resolvedTier, resolvedSeed).find((offer) => offer.id === offerId) ??
       null
     );
   }
 
-  calculateRefreshCost(stage: number): number {
-    return REFRESH_BASE_COST + Math.max(0, stage - 1) * 5;
+  calculateRefreshCost(tier: number): number {
+    return REFRESH_BASE_COST + Math.max(0, tier - 1) * 5;
   }
 
-  private calculateItemPrice(stage: number, rarity: GearRarity): number {
-    const stageBonus = Math.max(0, stage - 1) * (rarity === 'epic' ? 12 : rarity === 'rare' ? 8 : 5);
-    return BASE_PRICE[rarity] + stageBonus;
+  calculateItemPrice(tier: number, rarity: GearRarity): number {
+    const tierBonus = Math.max(0, tier - 1) * RARITY_PRICE_SCALE[rarity];
+    return BASE_PRICE[rarity] + tierBonus;
   }
 }

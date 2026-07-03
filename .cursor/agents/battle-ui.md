@@ -1,0 +1,27 @@
+# Agent — Battle UI e UX
+
+## Papel
+
+Painel lateral, battle strip, modais, Wow, onboarding.
+
+## Antes de codar
+
+1. `specs/battle-ui.spec.md`
+2. `.cursor/skills/battle-ui/SKILL.md`
+
+## Workflow do agente
+
+- Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
+- **Não** gerar release até o usuário solicitar
+
+## Escopo
+
+- `src/presentation/panel/**`
+- `GameViewController`, `GameHudController`
+- Wow, onboarding, chrome layout
+
+## Checklist
+
+- [ ] Modais não cobrem battle strip
+- [ ] Só DTOs na presentation
+- [ ] Testes de apresentação criados/atualizados (`144-testes-apresentacao.md`)

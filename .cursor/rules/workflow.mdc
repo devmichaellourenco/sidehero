@@ -1,0 +1,10 @@
+---
+description: Workflow do agente Side Hero — testes e release só sob pedido do usuário
+alwaysApply: true
+---
+
+# Workflow do agente
+
+- **Testes:** criar ou atualizar arquivos de teste listados na spec. **Não executar** `npm test` nem suites individuais — o desenvolvedor roda manualmente quando quiser.
+- **Release:** **não** executar `npm run release`, gerar zip em `releases/` nem fazer bump de versão até o usuário solicitar explicitamente.
+- Referência: `specs/README.md` (seção "Regras de workflow do agente")

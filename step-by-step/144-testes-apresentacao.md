@@ -13,6 +13,7 @@ Cobrir com testes as camadas de HTML/markup e políticas visuais que mais regred
 | Wow Strip | `WowBannerBuilder.test.ts`, `WowStripRenderPolicy.test.ts`, `WowStripDismissStore.test.ts`, `WowStripPresentation.test.ts` |
 | Sprites | `EnemySpriteCatalog.test.ts`, `AssetCatalog.test.ts` |
 | Drag-and-drop | `GearDragDropPolicy.test.ts`, `GearDragDropPresentation.test.ts`, `PartyDragDropPresentation.test.ts`, `InventoryGridPresentation.test.ts` |
+| Árvore de melhorias | `UpgradeTreeLayout.test.ts`, `UpgradeTreeGraphPresentation.test.ts`, `UpgradeTreeModalRenderer.test.ts`, `UpgradeTreeViewportBinder.test.ts`, `UpgradeCatalog.test.ts` |
 
 ## Fora do escopo
 

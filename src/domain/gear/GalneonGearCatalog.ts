@@ -7,19 +7,7 @@ export const GALNEON_STANDARD_SWORD_TEMPLATE_ID = 'galneon_standard_sword';
 
 export const GALNEON_STANDARD_SWORD_BASE_NAME = 'Espada Padrão';
 
-/** Versões da espada padrão disponíveis na loja. */
-export const GALNEON_STANDARD_SWORD_SHOP_RARITIES: GearRarity[] = [
-  'common',
-  'uncommon',
-  'rare',
-  'epic',
-  'legendary',
-];
-
-export const GALNEON_STANDARD_SWORD_SPRITES: Record<
-  (typeof GALNEON_STANDARD_SWORD_SHOP_RARITIES)[number],
-  string
-> = {
+export const GALNEON_STANDARD_SWORD_SPRITES: Partial<Record<GearRarity, string>> = {
   common: 'gear/items/standard_common_sword.png',
   uncommon: 'gear/items/standard_uncommon_sword.png',
   rare: 'gear/items/standard_rare_sword.png',
