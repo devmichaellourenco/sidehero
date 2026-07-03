@@ -14,8 +14,9 @@ Detalhes: `specs/README.md` · regra Cursor: `.cursor/rules/workflow.mdc`
 1. Identifique a feature → leia `specs/<feature>.spec.md`
 2. Siga `.cursor/skills/<feature>/SKILL.md`
 3. Implemente: `domain` → `application` → `presentation` → `infrastructure`
-4. Crie ou atualize testes listados na spec (sem executar)
-5. Documente entregas em `step-by-step/` quando relevante
+4. Se envolver números/curva → consulte `specs/game-balance.spec.md` e skill `game-balance`
+5. Crie ou atualize testes listados na spec (sem executar)
+6. Documente entregas em `step-by-step/` quando relevante
 
 ## Arquitetura (todas as features)
 
@@ -42,6 +43,7 @@ Regra crítica: `presentation/` **não** importa `domain/` diretamente.
 | [meta-legacy](agents/meta-legacy.md) | selos, temporada | `specs/meta-legacy.spec.md` | `domain/meta` |
 | [battle-ui](agents/battle-ui.md) | strip, modais, wow, UX | `specs/battle-ui.spec.md` | `presentation/panel`, controllers |
 | [chrome-infra](agents/chrome-infra.md) | extension, build, storage | `specs/chrome-infra.spec.md` | `infrastructure`, `manifest.json` |
+| [game-balance](agents/game-balance.md) | curva, fórmulas, auditoria | `specs/game-balance.spec.md` | `domain/combat`, scaling, catálogos numéricos |
 
 ## Comandos (desenvolvedor — agente não executa test/release automaticamente)
 

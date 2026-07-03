@@ -10,6 +10,8 @@ const SKILL_TARGET_PRIORITY_OVERRIDES: Record<string, number> = {
   mil_cap_lance: 80,
   fireball: 78,
   arcane_bolt: 75,
+  frost_shard: 76,
+  blizzard: 74,
   minor_heal: 95,
   inquisitor_judgment: 88,
   sag_san_judgment: 88,

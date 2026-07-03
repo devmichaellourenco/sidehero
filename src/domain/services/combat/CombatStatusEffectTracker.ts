@@ -1,6 +1,11 @@
 import { CombatStatusEffect, StatusEffectMap } from './CombatStatusEffect';
 import { DamageElement } from '../../combat/DamageElement';
 
+export interface DotTickEntry {
+  magnitude: number;
+  dotElement?: DamageElement;
+}
+
 export interface DotTickResult {
   damage: number;
   dotElement?: DamageElement;
@@ -69,10 +74,19 @@ export class CombatStatusEffectTracker {
   }
 
   tickDotDamage(combatantKey: string): DotTickResult {
-    const dots = (this.effects[combatantKey] ?? []).filter((effect) => effect.kind === 'dot');
+    const dots = this.listDotTicks(combatantKey);
     const damage = dots.reduce((sum, effect) => sum + effect.magnitude, 0);
     const dotElement = dots[0]?.dotElement;
     return { damage, dotElement, tracker: this };
+  }
+
+  listDotTicks(combatantKey: string): DotTickEntry[] {
+    return (this.effects[combatantKey] ?? [])
+      .filter((effect) => effect.kind === 'dot')
+      .map((effect) => ({
+        magnitude: effect.magnitude,
+        dotElement: effect.dotElement,
+      }));
   }
 
   getAttackBonus(combatantKey: string): number {

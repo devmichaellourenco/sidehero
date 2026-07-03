@@ -6,7 +6,6 @@ import { Stats } from '../../value-objects/Stats';
 import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
-import { scaledDotDamage } from '../../combat/DifficultyCombatScaling';
 import {
   COMBAT_DELTA_SECONDS,
   MAX_ACTIONS_PER_TICK,
@@ -20,6 +19,11 @@ import { CombatFloatingEvent, createDamageEvent } from './CombatFloatingEvent';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
+import {
+  applyMitigatedDotTicks,
+  buildDotMitigationTargetForEnemy,
+  buildDotMitigationTargetForHero,
+} from './DotTickResolver';
 import { CombatantRef } from './TurnOrderService';
 
 export interface CombatTurnPhaseResult {
@@ -283,55 +287,84 @@ export class CombatTurnPhase {
       });
     }
 
-    const dotTick = statusEffects.tickDotDamage(actorKey);
-    if (dotTick.damage > 0) {
-      const dotDamage = scaledDotDamage(dotTick.damage, stageLevel);
+    const dotEntries = statusEffects.listDotTicks(actorKey);
+    if (dotEntries.length > 0) {
       if (actor.side === 'hero') {
         const hero = heroes.find((entry) => entry.id === actor.id);
         if (hero?.isAlive()) {
           const beforeHealth = hero.currentHealth;
-          heroes = heroes.map((entry) =>
-            entry.id === actor.id
-              ? Hero.restore({
-                  ...entry.toProps(),
-                  currentHealth: Math.max(0, entry.currentHealth - dotDamage),
-                })
-              : entry,
+          const dotBatch = applyMitigatedDotTicks(
+            dotEntries,
+            buildDotMitigationTargetForHero(hero, actorKey, statusEffects, stageLevel),
+            stageLevel,
           );
-          const after = heroes.find((entry) => entry.id === actor.id)!;
-          const damageEvent = createDamageEvent(
-            'hero',
-            actor.id,
-            beforeHealth,
-            after.currentHealth,
-            false,
-            dotTick.dotElement,
-          );
-          if (damageEvent) floatingEvents.push(damageEvent);
-          events.push(`${hero.name} sofre ${dotDamage} de dano contínuo`);
+          if (dotBatch.totalDamage > 0 || dotBatch.dodgedAny) {
+            heroes = heroes.map((entry) =>
+              entry.id === actor.id
+                ? Hero.restore({
+                    ...entry.toProps(),
+                    currentHealth: Math.max(0, entry.currentHealth - dotBatch.totalDamage),
+                  })
+                : entry,
+            );
+            const after = heroes.find((entry) => entry.id === actor.id)!;
+            if (dotBatch.totalDamage > 0) {
+              const damageEvent = createDamageEvent(
+                'hero',
+                actor.id,
+                beforeHealth,
+                after.currentHealth,
+                false,
+                dotBatch.primaryElement,
+              );
+              if (damageEvent) floatingEvents.push(damageEvent);
+            }
+            const mitigationTag =
+              dotBatch.dodgedAny && dotBatch.totalDamage === 0
+                ? ' (esquivou)'
+                : dotBatch.blockedAny
+                  ? ' (bloqueio parcial)'
+                  : '';
+            events.push(`${hero.name} sofre ${dotBatch.totalDamage} de dano contínuo${mitigationTag}`);
+          }
         }
       } else {
         const enemy = enemies.find((entry) => entry.id === actor.id);
         if (enemy?.isAlive()) {
           const beforeHealth = enemy.stats.currentHealth;
-          const updated = Enemy.restore({
-            ...enemy.toProps(),
-            stats: Stats.create({
-              ...enemy.stats.toProps(),
-              currentHealth: Math.max(0, enemy.stats.currentHealth - dotDamage),
-            }),
-          });
-          enemies = enemies.map((entry) => (entry.id === actor.id ? updated : entry));
-          const damageEvent = createDamageEvent(
-            'enemy',
-            actor.id,
-            beforeHealth,
-            updated.stats.currentHealth,
-            false,
-            dotTick.dotElement,
+          const dotBatch = applyMitigatedDotTicks(
+            dotEntries,
+            buildDotMitigationTargetForEnemy(enemy, actorKey, statusEffects),
+            stageLevel,
           );
-          if (damageEvent) floatingEvents.push(damageEvent);
-          events.push(`${enemy.name} sofre ${dotDamage} de dano contínuo`);
+          if (dotBatch.totalDamage > 0 || dotBatch.dodgedAny) {
+            const updated = Enemy.restore({
+              ...enemy.toProps(),
+              stats: Stats.create({
+                ...enemy.stats.toProps(),
+                currentHealth: Math.max(0, enemy.stats.currentHealth - dotBatch.totalDamage),
+              }),
+            });
+            enemies = enemies.map((entry) => (entry.id === actor.id ? updated : entry));
+            if (dotBatch.totalDamage > 0) {
+              const damageEvent = createDamageEvent(
+                'enemy',
+                actor.id,
+                beforeHealth,
+                updated.stats.currentHealth,
+                false,
+                dotBatch.primaryElement,
+              );
+              if (damageEvent) floatingEvents.push(damageEvent);
+            }
+            const mitigationTag =
+              dotBatch.dodgedAny && dotBatch.totalDamage === 0
+                ? ' (esquivou)'
+                : dotBatch.blockedAny
+                  ? ' (bloqueio parcial)'
+                  : '';
+            events.push(`${enemy.name} sofre ${dotBatch.totalDamage} de dano contínuo${mitigationTag}`);
+          }
         }
       }
     }

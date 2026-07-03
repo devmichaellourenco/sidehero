@@ -16,9 +16,11 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [meta-legacy](meta-legacy.spec.md) | 5/5 | 1/1 | — |
 | [battle-ui](battle-ui.spec.md) | 7/7 | 5/5 | — |
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
+| [game-balance](game-balance.spec.md) | 4/8 | 8/8 | curva ouro/fases (auditoria) |
 
-**Total aceite:** 55/55 (100%)  
-**Total testes listados nas specs:** 38/38 (100%)
+**Total aceite (features):** 55/55 (100%)  
+**Balanceamento transversal:** 4/8  
+**Total testes listados nas specs:** 48/48 (100%)
 
 ## Regras de workflow do agente
 
@@ -50,6 +52,7 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [meta-legacy](meta-legacy.spec.md) | Meta entre temporadas | `.cursor/agents/meta-legacy.md` | `.cursor/skills/meta-legacy/` |
 | [battle-ui](battle-ui.spec.md) | Battle strip, modais, Wow, UX | `.cursor/agents/battle-ui.md` | `.cursor/skills/battle-ui/` |
 | [chrome-infra](chrome-infra.spec.md) | Extension, storage, SW, panel | `.cursor/agents/chrome-infra.md` | `.cursor/skills/chrome-infra/` |
+| [game-balance](game-balance.spec.md) | Curva, fórmulas, auditoria transversal | `.cursor/agents/game-balance.md` | `.cursor/skills/game-balance/` |
 
 ## Arquitetura global
 
@@ -61,3 +64,7 @@ presentation/ → panel, renderers, controllers
 ```
 
 Regra: `presentation` não importa `domain` diretamente — use DTOs e flags em `GameStateDto`.
+
+## Balanceamento transversal
+
+Mudanças numéricas ou de curva devem consultar [`game-balance.spec.md`](game-balance.spec.md) em conjunto com a spec da feature. Ver backlog `BAL-*`.

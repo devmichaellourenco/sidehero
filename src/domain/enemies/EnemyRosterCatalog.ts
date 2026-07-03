@@ -93,7 +93,7 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
 
   // Nível 4 — Especialista
   { id: 'stone_giant', name: 'Gigante da Pedra', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'ground_slam'] },
-  { id: 'frost_giant', name: 'Gigante do Gelo', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'ground_slam', 'arcane_bolt'], innateResists: { cold: 25 } },
+  { id: 'frost_giant', name: 'Gigante do Gelo', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'ground_slam', 'frost_breath'], innateResists: { cold: 25 } },
   { id: 'chimera', name: 'Quimera', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'dragon_breath', 'wild_bite'] },
   { id: 'manticore', name: 'Mantícora', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'poison_spit', 'wild_bite'] },
   { id: 'infernal_devil', name: 'Diabo Infernal', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'pyro_inferno', 'wraith_curse'] },
