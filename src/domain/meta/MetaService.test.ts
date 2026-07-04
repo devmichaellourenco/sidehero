@@ -4,10 +4,12 @@ import { MetaService, baseSeasonSigils } from './MetaService';
 import { MetaBonusScope } from './MetaBonusScope';
 import { emptyMetaBonuses } from './MetaBonuses';
 import { GameState } from '../entities/GameState';
+import { EnemyKillRewardService } from '../campaign/EnemyKillRewardService';
 import { PhaseCombatHandlers } from '../campaign/PhaseCombatHandlers';
 import { PhaseRun } from '../campaign/PhaseRun';
 import { buildPhaseId } from '../campaign/CampaignIds';
 import { Enemy } from '../entities/Enemy';
+import { Stats } from '../value-objects/Stats';
 
 describe('MetaService', () => {
   const service = new MetaService();
@@ -33,21 +35,22 @@ describe('MetaService', () => {
 
   it('aplica bônus de ouro no combate via MetaBonusScope', () => {
     const handlers = new PhaseCombatHandlers();
+    const killRewards = new EnemyKillRewardService();
     const phaseId = buildPhaseId(1, 1);
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial().withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
 
-    const enemy = state.combat!.enemies[0];
-    const defeated = [
-      Enemy.restore({
-        ...enemy.toProps(),
-        stats: {
-          ...enemy.stats.toProps(),
-          currentHealth: 0,
-        },
-      }),
-    ];
+    const combat = state.combat!;
+    const enemy = combat.enemies[0];
+    const defeated = combat.enemies.map((entry) =>
+      entry.id === enemy.id
+        ? Enemy.restore({
+            ...entry.toProps(),
+            stats: Stats.create({ ...entry.stats.toProps(), currentHealth: 0 }),
+          })
+        : entry,
+    );
 
     MetaBonusScope.set({
       ...emptyMetaBonuses(),
@@ -57,16 +60,10 @@ describe('MetaService', () => {
       seasonSigilBonus: 0,
     });
 
-    const cleared = handlers.onWaveCleared(
-      state,
-      defeated,
-      state.activeHeroes(),
-      state.combat!.encounterMeta!,
-      phaseRun,
-    );
+    const rewarded = killRewards.applyKillRewards(state, combat, combat.enemies, defeated);
 
     MetaBonusScope.clear();
 
-    expect(cleared.state.gold.amount).toBeGreaterThan(0);
+    expect(rewarded.state.gold.amount).toBeGreaterThan(0);
   });
 });
