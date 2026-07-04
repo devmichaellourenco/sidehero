@@ -65,11 +65,14 @@ describe('CampaignModalRenderer', () => {
   it('renderiza abas bloqueadas e painel de um mapa por vez', () => {
     const html = renderer.render(buildOverview(), 'stendra');
 
+    expect(html).toContain('campaign-hero-banner');
+    expect(html).toContain('campaign-global-progress');
     expect(html).toContain('campaign-map-tabs');
     expect(html).toContain('data-campaign-map-tab="gondonor"');
     expect(html).toContain('disabled');
-    expect(html).toContain('🔒');
+    expect(html).toContain('campaign-map-tab--locked');
     expect(html).toContain('Guardião das Esgotos');
+    expect(html).toContain('campaign-phase-here');
     expect(html).not.toContain('data-phase-id="2-1"');
   });
 
@@ -80,5 +83,6 @@ describe('CampaignModalRenderer', () => {
 
     expect(html).toContain('campaign-map-locked');
     expect(html).toContain('Gondonor');
+    expect(html).toContain('Guardião Elemental');
   });
 });

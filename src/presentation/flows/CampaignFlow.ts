@@ -29,6 +29,7 @@ export class CampaignFlow {
     this.activeMapId = resolveInitialMapId(response.campaign);
     modalBody.innerHTML = this.renderer.render(this.campaign, this.activeMapId);
     this.bindInteractions(modalBody, onState);
+    this.scrollSelectedPhaseIntoView(modalBody);
   }
 
   private bindInteractions(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
@@ -58,9 +59,23 @@ export class CampaignFlow {
       button.addEventListener('click', () => {
         const phaseId = button.dataset.phaseId;
         if (!phaseId || button.disabled) return;
-        void this.selectPhase(phaseId, onState);
+        void this.selectPhase(phaseId, button, onState);
       });
     });
+  }
+
+  private scrollSelectedPhaseIntoView(modalBody: HTMLElement): void {
+    requestAnimationFrame(() => {
+      modalBody.querySelector('.campaign-phase--selected')?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    });
+  }
+
+  private syncCampaignTheme(modalBody: HTMLElement): void {
+    modalBody.querySelector('.campaign-modal')?.setAttribute('data-campaign-theme', this.activeMapId);
+    modalBody.querySelector('[data-campaign-map-panel]')?.setAttribute('data-campaign-theme', this.activeMapId);
   }
 
   private refreshMapView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
@@ -79,13 +94,28 @@ export class CampaignFlow {
       panelHost.setAttribute('aria-label', activeMap.name);
     }
 
+    this.syncCampaignTheme(modalBody);
     this.bindMapTabs(modalBody, onState);
     this.bindPhaseButtons(modalBody, onState);
+    this.scrollSelectedPhaseIntoView(modalBody);
   }
 
-  private async selectPhase(phaseId: string, onState: (state: GameStateDto) => void): Promise<void> {
+  private async selectPhase(
+    phaseId: string,
+    button: HTMLButtonElement,
+    onState: (state: GameStateDto) => void,
+  ): Promise<void> {
+    if (button.classList.contains('campaign-phase--selecting')) return;
+
+    button.classList.add('campaign-phase--selecting');
+    await new Promise((resolve) => window.setTimeout(resolve, 180));
+
     const response = await this.client.send({ type: 'SELECT_PHASE', phaseId });
-    if (!response.ok) return;
+    if (!response.ok) {
+      button.classList.remove('campaign-phase--selecting');
+      return;
+    }
+
     onState(response.state);
     this.modal.close();
   }
