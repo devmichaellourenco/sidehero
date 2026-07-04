@@ -5010,6 +5010,22 @@ body.modal-open {
   margin: 8px 0 0;
 }
 
+.hero-detail-loadout .inline-equip-host {
+  margin-top: 8px;
+}
+
+.hero-inventory-host {
+  min-height: 0;
+}
+
+.hero-inventory-host .inventory-panel--embedded {
+  gap: 8px;
+}
+
+.hero-inventory-host .inventory-panel--embedded .inventory-footer {
+  margin-top: 4px;
+}
+
 .hero-detail-layout {
   display: flex;
   flex-direction: column;
@@ -6611,8 +6627,8 @@ body.wow-celebration-open {
 .hero-drawer-root {
   z-index: 1300;
   display: flex;
-  align-items: flex-end;
-  justify-content: stretch;
+  align-items: stretch;
+  justify-content: center;
 }
 
 .hero-drawer-root.hidden {
@@ -6630,7 +6646,10 @@ body.wow-celebration-open {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 100%;
   max-height: 100%;
+  margin: 0;
+  align-self: stretch;
   border-radius: 12px 12px 0 0;
   background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(12, 18, 36, 0.98));
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -6644,6 +6663,8 @@ body.wow-celebration-open {
   gap: 6px;
   padding: 10px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  min-height: 52px;
 }
 
 .hero-drawer-title {

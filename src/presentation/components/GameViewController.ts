@@ -20,7 +20,7 @@ import { ModalView } from '../flows/ModalTypes';
 import { ShopFlow } from '../flows/ShopFlow';
 import { MetaLegacyFlow } from '../flows/MetaLegacyFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
-import { getHeroNavigation } from '../helpers/HeroNavigationHelper';
+import { getHeroNavigation, listNavigableHeroIds } from '../helpers/HeroNavigationHelper';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
@@ -35,7 +35,8 @@ import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
 import { GearSlotKey } from './GearPresentation';
 import { HeroDetailModalRenderer, HeroDetailTab } from './HeroDetailModalRenderer';
 import { shouldRenderHeroPanel } from './HeroPanelRenderPolicy';
-import { InventoryModalRenderer } from './InventoryModalRenderer';
+import { InventoryModalHandlers, InventoryModalRenderer } from './InventoryModalRenderer';
+import { resolveDefaultInventoryHeroId } from './InventoryGridPresentation';
 import { StashModalRenderer } from './StashModalRenderer';
 import { LootBatchModalRenderer } from './LootBatchModalRenderer';
 import { LootModalRenderer } from './LootModalRenderer';
@@ -288,6 +289,11 @@ export class GameViewController {
       (state) => this.afterHeroProgressionMutation(state),
       () => this.refreshHeroDetailViews(),
     );
+    this.heroDetailFlow.setTabWillChangeListener((tab) => {
+      if (tab !== 'sheet') {
+        this.inlineEquip.close();
+      }
+    });
 
     this.shopFlow = new ShopFlow(
       this.client,
@@ -952,7 +958,60 @@ export class GameViewController {
     };
 
     document.querySelectorAll('[data-inline-equip-host]').forEach((host) => {
+      if (
+        this.heroDrawer.isOpen() &&
+        this.heroDrawer.getBody().contains(host) &&
+        this.heroDetailModal.getActiveTab() !== 'sheet'
+      ) {
+        return;
+      }
+
       this.inlineEquip.render(host as HTMLElement, this.state!, handlers);
+    });
+  }
+
+  private buildInventoryHandlers(onRefresh: () => void): InventoryModalHandlers {
+    return {
+      onEquipGear: (gearId, heroId) => {
+        void this.gearEquipFlow.equip(heroId, gearId, { fromInventory: true });
+      },
+      onUnequipGear: (heroId, slot) => {
+        void this.gearEquipFlow.unequip(heroId, slot, { fromInventory: true });
+      },
+      onSlotClick: (heroId, slot) => {
+        this.openEquipPickerFromSlot(heroId, slot);
+      },
+      onFilterChange: onRefresh,
+      onSortChange: onRefresh,
+      onHeroChange: () => {},
+      onUpgradesOnlyChange: onRefresh,
+      onOptimizeLoadout: () => {
+        void this.gearEquipFlow.optimizeLoadout(undefined, { fromInventory: true });
+      },
+      onOpenStash: () => this.openStashModal(),
+    };
+  }
+
+  private mountHeroEmbeddedInventory(host: HTMLElement, heroId: string): void {
+    if (!this.state || this.heroDetailModal.getActiveTab() !== 'sheet') return;
+
+    this.inventoryModal.renderEmbedded(
+      host,
+      this.state,
+      heroId,
+      this.buildInventoryHandlers(() => this.refreshHeroDrawerIfOpen()),
+      {
+        showOptimize: this.state.featureFlags.optimizeLoadout,
+        inlineActiveSlot: this.inlineEquip.getActiveSlot(),
+        canEditGear: this.canEditGear(),
+      },
+    );
+  }
+
+  private bindHeroDetailDrawer(container: HTMLElement, heroId: string): void {
+    this.heroDetailFlow.bindToModal(container, this.state!, heroId, {
+      onSlotClick: (id, slot) => this.openEquipPickerFromSlot(id, slot),
+      mountInventory: (host) => this.mountHeroEmbeddedInventory(host, heroId),
     });
   }
 
@@ -1034,7 +1093,7 @@ export class GameViewController {
     const navigation = getHeroNavigation(this.state, this.heroDrawerHeroId);
     const nextId = direction < 0 ? navigation.prevId : navigation.nextId;
     if (!nextId) return;
-    this.openHeroDrawer(nextId);
+    this.openHeroDrawer(nextId, this.heroDetailModal.getActiveTab());
   }
 
   private openHeroDrawer(heroId: string, tab: HeroDetailTab = 'sheet'): void {
@@ -1069,9 +1128,7 @@ export class GameViewController {
         next: navigation.nextId !== null,
       });
 
-      this.heroDetailFlow.bindToModal(container, this.state, heroId, {
-        onSlotClick: (id, slot) => this.openEquipPickerFromSlot(id, slot),
-      });
+      this.bindHeroDetailDrawer(container, heroId);
       this.syncInlineEquipHosts();
     });
   }
@@ -1098,9 +1155,7 @@ export class GameViewController {
       next: navigation.nextId !== null,
     });
 
-    this.heroDetailFlow.bindToModal(this.heroDrawer.getBody(), this.state, heroId, {
-      onSlotClick: (id, slot) => this.openEquipPickerFromSlot(id, slot),
-    });
+    this.bindHeroDetailDrawer(this.heroDrawer.getBody(), heroId);
     this.syncInlineEquipHosts();
   }
 
@@ -1205,17 +1260,16 @@ export class GameViewController {
   }
 
   private openHeroesModal(): void {
-    this.closeHeroDrawer();
+    if (!this.state) return;
 
-    if (
-      this.modal.isOpen() &&
-      this.modalStack[this.modalStack.length - 1]?.type === 'heroes'
-    ) {
+    const heroIds = listNavigableHeroIds(this.state);
+    const firstId = heroIds[0] ?? this.state.heroes[0]?.id;
+    if (!firstId) {
+      this.toasts.show('Nenhum herói disponível', 'info');
       return;
     }
 
-    this.modalStack.length = 0;
-    this.pushModal({ type: 'heroes' });
+    this.openHeroDrawer(firstId, 'sheet');
   }
 
   private openFormationModal(): void {
@@ -1379,10 +1433,9 @@ export class GameViewController {
   }
 
   private openInventoryModal(): void {
-    if (this.contextInvalidated) return;
-    this.closeHeroDrawer();
-    this.modalStack.length = 0;
-    this.pushModal({ type: 'inventory' });
+    if (this.contextInvalidated || !this.state) return;
+    const heroId = resolveDefaultInventoryHeroId(this.state);
+    this.openHeroDrawer(heroId, 'sheet');
   }
 
   private openStashModal(): void {
@@ -1417,34 +1470,7 @@ export class GameViewController {
   }
 
   private openHeroDetailModal(heroId: string, tab: HeroDetailTab = 'sheet'): void {
-    if (this.heroDrawerHeroId !== heroId) {
-      this.inlineEquip.close();
-    }
-
-    void this.heroDetailFlow.prepareOpen(heroId, tab).then(() => {
-      if (!this.state) return;
-
-      const hero = this.state.heroes.find((entry) => entry.id === heroId);
-      if (hero?.hasUnspentPoints) {
-        this.dismissOnboardingStep('hero-points');
-      }
-
-      this.closeHeroDrawer();
-
-      const view: ModalView = { type: 'hero-detail', heroId, tab };
-      const topView = this.modalStack[this.modalStack.length - 1];
-
-      if (this.modal.isOpen()) {
-        if (topView?.type === 'hero-detail') {
-          this.modalStack[this.modalStack.length - 1] = view;
-        } else {
-          this.pushModal(view);
-        }
-      } else {
-        this.modalStack.length = 0;
-        this.pushModal(view);
-      }
-    });
+    this.openHeroDrawer(heroId, tab);
   }
 
   private openEquipPickerFromSlot(heroId: string, slot: string): void {

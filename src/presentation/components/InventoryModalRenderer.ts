@@ -52,6 +52,21 @@ export class InventoryModalRenderer {
     return resolveDefaultInventoryHeroId(state);
   }
 
+  renderEmbedded(
+    container: HTMLElement,
+    state: GameStateDto,
+    heroId: string,
+    handlers: InventoryModalHandlers,
+    options: {
+      showOptimize?: boolean;
+      inlineActiveSlot?: { heroId: string; slot: GearSlotKey } | null;
+      canEditGear?: boolean;
+    } = {},
+  ): void {
+    this.selectedHeroId = heroId;
+    this.renderPanel(container, state, heroId, handlers, { ...options, embedded: true });
+  }
+
   render(
     container: HTMLElement,
     state: GameStateDto,
@@ -66,6 +81,22 @@ export class InventoryModalRenderer {
 
     const selectedHeroId = this.getSelectedHeroId(state);
     this.selectedHeroId = selectedHeroId;
+    this.renderPanel(container, state, selectedHeroId, handlers, options);
+  }
+
+  private renderPanel(
+    container: HTMLElement,
+    state: GameStateDto,
+    selectedHeroId: string,
+    handlers: InventoryModalHandlers,
+    options: {
+      showOptimize?: boolean;
+      inlineActiveSlot?: { heroId: string; slot: GearSlotKey } | null;
+      canEditGear?: boolean;
+      embedded?: boolean;
+    } = {},
+  ): void {
+    const embedded = options.embedded === true;
 
     const inventoryIcon = getAssetUrl(ASSETS.ui.inventory);
     const filteredBySlot =
@@ -92,17 +123,20 @@ export class InventoryModalRenderer {
     const inlineActive = options.inlineActiveSlot;
     const loadoutContext =
       inlineActive?.heroId === selectedHeroId ? ('equip-picker' as const) : ('inventory' as const);
-    const heroLoadout = selectedHero
-      ? renderInventoryHeroLoadout(selectedHero, {
-          feedback: equipFeedback,
-          heroPulse: this.heroChangePulse,
-          context: loadoutContext,
-          activeSlot:
-            inlineActive?.heroId === selectedHeroId ? inlineActive.slot : undefined,
-          dragDrop: canEditGear,
-        })
-      : '';
-    const inlineEquipHost = '<div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>';
+    const heroLoadout =
+      !embedded && selectedHero
+        ? renderInventoryHeroLoadout(selectedHero, {
+            feedback: equipFeedback,
+            heroPulse: this.heroChangePulse,
+            context: loadoutContext,
+            activeSlot:
+              inlineActive?.heroId === selectedHeroId ? inlineActive.slot : undefined,
+            dragDrop: canEditGear,
+          })
+        : '';
+    const inlineEquipHost = embedded
+      ? ''
+      : '<div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>';
 
     const optimizeButton =
       options.showOptimize === false
@@ -155,7 +189,7 @@ export class InventoryModalRenderer {
       </div>
     `;
 
-    const heroSelector = renderInventoryHeroSelector(state, selectedHeroId);
+    const heroSelector = embedded ? '' : renderInventoryHeroSelector(state, selectedHeroId);
     const countLabel = `<p class="inventory-count">${state.storageCapacity.inventoryUsed} / ${state.storageCapacity.inventoryLimit} itens · ${filtered.length} visíveis</p>`;
     const canStash =
       state.storageCapacity.stashUnlocked &&
@@ -163,9 +197,13 @@ export class InventoryModalRenderer {
     const inlineSlotPickerOpen = Boolean(
       inlineActive && inlineActive.heroId === selectedHeroId,
     );
-    const panelClass = inlineSlotPickerOpen
-      ? 'inventory-panel inventory-panel--slot-picking'
-      : 'inventory-panel';
+    const panelClass = [
+      'inventory-panel',
+      embedded ? 'inventory-panel--embedded' : '',
+      inlineSlotPickerOpen ? 'inventory-panel--slot-picking' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
     const toolbarSection = inlineSlotPickerOpen
       ? ''
       : `${filterButtons}${sortButtons}`;
@@ -187,7 +225,7 @@ export class InventoryModalRenderer {
       `;
       this.previousRenderState = state;
       this.heroChangePulse = false;
-      this.bind(container, handlers);
+      this.bind(container, handlers, embedded);
       bindEquipmentTooltips(container);
       return;
     }
@@ -213,7 +251,7 @@ export class InventoryModalRenderer {
 
     this.previousRenderState = state;
     this.heroChangePulse = false;
-    this.bind(container, handlers);
+    this.bind(container, handlers, embedded);
     bindInventoryGearTooltips(container);
     bindEquipmentTooltips(container);
   }
@@ -240,7 +278,7 @@ export class InventoryModalRenderer {
     return [...gears].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR'));
   }
 
-  private bind(container: HTMLElement, handlers: InventoryModalHandlers): void {
+  private bind(container: HTMLElement, handlers: InventoryModalHandlers, embedded = false): void {
     container.querySelectorAll('[data-filter]').forEach((button) => {
       button.addEventListener('click', () => {
         const filter = button.getAttribute('data-filter') as GearSlotKey | 'all';
@@ -257,17 +295,19 @@ export class InventoryModalRenderer {
       });
     });
 
-    container.querySelectorAll('[data-inventory-hero]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const heroId = button.getAttribute('data-inventory-hero');
-        if (!heroId) return;
-        if (heroId !== this.selectedHeroId) {
-          this.heroChangePulse = true;
-        }
-        this.selectedHeroId = heroId;
-        handlers.onHeroChange(heroId);
+    if (!embedded) {
+      container.querySelectorAll('[data-inventory-hero]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const heroId = button.getAttribute('data-inventory-hero');
+          if (!heroId) return;
+          if (heroId !== this.selectedHeroId) {
+            this.heroChangePulse = true;
+          }
+          this.selectedHeroId = heroId;
+          handlers.onHeroChange(heroId);
+        });
       });
-    });
+    }
 
     container.querySelector('[data-upgrades-only]')?.addEventListener('click', () => {
       this.upgradesOnly = !this.upgradesOnly;

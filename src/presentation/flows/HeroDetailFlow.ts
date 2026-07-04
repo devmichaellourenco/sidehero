@@ -21,6 +21,12 @@ export class HeroDetailFlow {
     private readonly refreshModal: () => void,
   ) {}
 
+  private onTabWillChange: ((tab: HeroDetailTab) => void) | null = null;
+
+  setTabWillChangeListener(listener: (tab: HeroDetailTab) => void): void {
+    this.onTabWillChange = listener;
+  }
+
   async prepareOpen(heroId: string, tab: HeroDetailTab): Promise<void> {
     this.heroDetailModal.setActiveTab(tab);
 
@@ -49,6 +55,7 @@ export class HeroDetailFlow {
   }
 
   async changeTab(heroId: string, tab: HeroDetailTab): Promise<void> {
+    this.onTabWillChange?.(tab);
     this.heroDetailModal.setActiveTab(tab);
     if (tab === 'skills') {
       await this.loadSkillTree(heroId);
@@ -65,6 +72,7 @@ export class HeroDetailFlow {
     heroId: string,
     handlers: {
       onSlotClick: (heroId: string, slot: string) => void;
+      mountInventory?: (host: HTMLElement) => void;
     },
   ): void {
     this.heroDetailModal.setSkillNodes(this.skillNodes);
@@ -100,6 +108,7 @@ export class HeroDetailFlow {
       onTabChange: (id, tab) => {
         void this.changeTab(id, tab);
       },
+      onMountInventory: handlers.mountInventory,
     });
   }
 

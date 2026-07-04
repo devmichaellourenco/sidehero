@@ -29,6 +29,7 @@ export type HeroDetailModalHandlers = {
   onAscendClass: (heroId: string, ascensionId: string) => void;
   onAllocateAscensionSkill: (heroId: string, skillId: string) => void;
   onTabChange: (heroId: string, tab: HeroDetailTab) => void;
+  onMountInventory?: (host: HTMLElement) => void;
 };
 
 export class HeroDetailModalRenderer {
@@ -57,6 +58,10 @@ export class HeroDetailModalRenderer {
     this.activeTab = tab;
   }
 
+  getActiveTab(): HeroDetailTab {
+    return this.activeTab;
+  }
+
   render(
     container: HTMLElement,
     state: GameStateDto,
@@ -75,27 +80,32 @@ export class HeroDetailModalRenderer {
 
     const showGearLoadout = this.activeTab === 'sheet';
     const showSkillsLoadout = this.activeTab === 'skills';
-    const loadoutSection =
-      showGearLoadout || showSkillsLoadout
+    const loadoutSection = showGearLoadout
+      ? `
+        <div class="hero-detail-loadout">
+          ${renderHeroLoadoutStrip(hero, {
+            variant: 'featured',
+            skillSlotMode: 'skills-tab',
+            heroId: hero.id,
+            showSkills: false,
+            showGear: true,
+          })}
+          <p class="hero-detail-hint hero-detail-loadout-hint">Toque em um slot de equipamento para trocar o item.</p>
+          <div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>
+        </div>
+      `
+      : showSkillsLoadout
         ? `
         <div class="hero-detail-loadout">
           ${renderHeroLoadoutStrip(hero, {
             variant: 'featured',
             skillSlotMode: 'skills-tab',
             heroId: hero.id,
-            showSkills: showSkillsLoadout,
-            showGear: showGearLoadout,
+            showSkills: true,
+            showGear: false,
           })}
-          ${
-            showSkillsLoadout
-              ? '<p class="skill-slot-instruction" data-skill-slot-instruction hidden></p>'
-              : ''
-          }
-          ${
-            showSkillsLoadout
-              ? '<p class="hero-detail-hint hero-detail-loadout-hint">Toque em uma skill para equipar · arraste até um slot · × remove do slot</p>'
-              : ''
-          }
+          <p class="skill-slot-instruction" data-skill-slot-instruction hidden></p>
+          <p class="hero-detail-hint hero-detail-loadout-hint">Toque em uma skill para equipar · arraste até um slot · × remove do slot</p>
         </div>
       `
         : '';
@@ -107,14 +117,13 @@ export class HeroDetailModalRenderer {
       <div class="hero-detail-layout">
         <header class="hero-detail-header">${renderHeroDetailHeader(hero)}</header>
         <nav class="hero-detail-tabs">
-          <button type="button" class="hero-tab ${this.activeTab === 'sheet' ? 'active' : ''}" data-hero-tab="sheet">Loadout</button>
+          <button type="button" class="hero-tab ${this.activeTab === 'sheet' ? 'active' : ''}" data-hero-tab="sheet">Inventário</button>
           <button type="button" class="hero-tab ${this.activeTab === 'attributes' ? 'active' : ''}" data-hero-tab="attributes">Progressão${badge}</button>
           <button type="button" class="hero-tab ${this.activeTab === 'skills' ? 'active' : ''}" data-hero-tab="skills">Skills</button>
           <button type="button" class="hero-tab ${this.activeTab === 'class' ? 'active' : ''}" data-hero-tab="class">Classe</button>
         </nav>
         ${loadoutSection}
         <div class="hero-detail-panel game-scroll">${this.renderTabContent(hero)}</div>
-        <div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>
       </div>
     `;
 
@@ -122,6 +131,12 @@ export class HeroDetailModalRenderer {
     bindBarTooltips(container);
     bindEquipmentTooltips(container);
     bindSkillChipTooltips(container);
+    if (this.activeTab === 'sheet' && handlers.onMountInventory) {
+      const inventoryHost = container.querySelector('[data-hero-inventory-host]');
+      if (inventoryHost) {
+        handlers.onMountInventory(inventoryHost as HTMLElement);
+      }
+    }
     this.restoreScrollAfterRender(container, scrollState, scrollAnchorSkillId);
   }
 
