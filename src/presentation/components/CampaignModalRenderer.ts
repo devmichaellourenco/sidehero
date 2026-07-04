@@ -5,10 +5,12 @@ import {
   mapProgress,
   parseMapIndex,
   renderCampaignHeroBanner,
+  renderCampaignPath,
   renderLockedMapPanel,
   renderMapProgressBar,
+  renderMapTabBiomeIcon,
   renderMapTabRing,
-  renderPhaseButton,
+  renderPhasePreviewFooter,
   tierRangeForMap,
 } from './CampaignMapPresentation';
 
@@ -35,7 +37,6 @@ export class CampaignModalRenderer {
       .map((map) => {
         const active = map.id === activeMapId ? ' campaign-map-tab--active' : '';
         const progress = mapProgress(map);
-        const mapIndex = parseMapIndex(map);
         const locked = !isMapUnlocked(map);
         const tabState = locked ? ' campaign-map-tab--locked' : '';
         const disabled = locked ? ' disabled' : '';
@@ -54,6 +55,8 @@ export class CampaignModalRenderer {
           >
             <span class="campaign-map-tab-visual">
               ${locked ? '<span class="campaign-map-tab-lock" aria-hidden="true"></span>' : renderMapTabRing(progress.cleared, progress.total)}
+              ${renderMapTabBiomeIcon(map.id)}
+              ${locked ? '<span class="campaign-map-tab-fog" aria-hidden="true"></span>' : ''}
             </span>
             <span class="campaign-map-tab-copy">
               <span class="campaign-map-tab-name">${escapeHtml(map.name)}</span>
@@ -65,34 +68,38 @@ export class CampaignModalRenderer {
       .join('');
   }
 
-  renderMapPanel(map: CampaignMapDto): string {
+  renderMapPanel(map: CampaignMapDto, pendingPhaseId: string | null): string {
     if (!isMapUnlocked(map)) {
       return renderLockedMapPanel(map);
     }
 
     const mapIndex = parseMapIndex(map);
     const theme = getCampaignMapTheme(map.id);
-    const phases = map.phases.map((phase) => renderPhaseButton(phase, mapIndex)).join('');
 
     return `
-      <header class="campaign-map-header">
-        <div class="campaign-map-header-main">
-          <h3 class="campaign-map-title">${escapeHtml(map.name)}</h3>
-          <p class="campaign-map-biome">${escapeHtml(theme.biomeLabel)} · ${tierRangeForMap(mapIndex)}</p>
+      <div class="campaign-map-body">
+        <header class="campaign-map-header">
+          <div class="campaign-map-header-main">
+            <h3 class="campaign-map-title">${escapeHtml(map.name)}</h3>
+            <p class="campaign-map-biome">${escapeHtml(theme.biomeLabel)} · ${tierRangeForMap(mapIndex)}</p>
+          </div>
+          ${renderMapProgressBar(map, mapIndex)}
+        </header>
+        <div class="campaign-path-scroll game-scroll">
+          ${renderCampaignPath(map, mapIndex, pendingPhaseId)}
         </div>
-        ${renderMapProgressBar(map, mapIndex)}
-      </header>
-      <div class="campaign-phase-grid">${phases}</div>
+        ${renderPhasePreviewFooter(map, mapIndex, pendingPhaseId)}
+      </div>
     `;
   }
 
-  render(campaign: CampaignOverviewDto, activeMapId: string): string {
+  render(campaign: CampaignOverviewDto, activeMapId: string, pendingPhaseId: string | null): string {
     const activeMap = campaign.maps.find((map) => map.id === activeMapId) ?? campaign.maps[0];
 
     return `
       <div class="campaign-modal" data-campaign-theme="${escapeHtml(activeMapId)}">
         ${renderCampaignHeroBanner(campaign)}
-        <p class="campaign-modal-hint">Toque em uma fase desbloqueada. Bosses aparecem a cada 50 fases.</p>
+        <p class="campaign-modal-hint">Escolha uma fase na trilha e confirme em Iniciar fase.</p>
         <div class="campaign-map-tabs" data-campaign-map-tabs role="tablist" aria-label="Mapas">
           ${this.renderTabs(campaign, activeMapId)}
         </div>
@@ -103,7 +110,7 @@ export class CampaignModalRenderer {
           role="tabpanel"
           aria-label="${escapeHtml(activeMap?.name ?? 'Mapa')}"
         >
-          ${activeMap ? this.renderMapPanel(activeMap) : '<p class="empty-state">Nenhum mapa disponível.</p>'}
+          ${activeMap ? this.renderMapPanel(activeMap, pendingPhaseId) : '<p class="empty-state">Nenhum mapa disponível.</p>'}
         </section>
       </div>
     `;

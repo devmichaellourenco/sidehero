@@ -9,6 +9,8 @@ export interface CampaignPhaseDto {
   playable: boolean;
   milestoneBoss: boolean;
   seasonFinale: boolean;
+  actNumber: number;
+  featuredEnemyTypes: string[];
 }
 
 export interface CampaignMapDto {

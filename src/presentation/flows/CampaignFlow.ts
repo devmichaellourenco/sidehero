@@ -6,11 +6,13 @@ import {
   isMapUnlocked,
   resolveInitialMapId,
 } from '../components/CampaignModalRenderer';
+import { resolveInitialPendingPhaseId } from '../components/CampaignMapPresentation';
 import { ModalController } from '../components/ModalController';
 
 export class CampaignFlow {
   private campaign: CampaignOverviewDto | null = null;
   private activeMapId = 'stendra';
+  private pendingPhaseId: string | null = null;
 
   constructor(
     private readonly client: IGameClient,
@@ -27,14 +29,23 @@ export class CampaignFlow {
 
     this.campaign = response.campaign;
     this.activeMapId = resolveInitialMapId(response.campaign);
-    modalBody.innerHTML = this.renderer.render(this.campaign, this.activeMapId);
+    this.pendingPhaseId = this.resolvePendingForActiveMap();
+    modalBody.innerHTML = this.renderer.render(this.campaign, this.activeMapId, this.pendingPhaseId);
     this.bindInteractions(modalBody, onState);
-    this.scrollSelectedPhaseIntoView(modalBody);
+    this.scrollPendingPhaseIntoView(modalBody);
+  }
+
+  private resolvePendingForActiveMap(): string | null {
+    if (!this.campaign) return null;
+    const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
+    if (!activeMap) return null;
+    return resolveInitialPendingPhaseId(activeMap);
   }
 
   private bindInteractions(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
     this.bindMapTabs(modalBody, onState);
     this.bindPhaseButtons(modalBody, onState);
+    this.bindStartButton(modalBody, onState);
   }
 
   private bindMapTabs(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
@@ -49,6 +60,7 @@ export class CampaignFlow {
         if (!map || !isMapUnlocked(map)) return;
 
         this.activeMapId = mapId;
+        this.pendingPhaseId = resolveInitialPendingPhaseId(map);
         this.refreshMapView(modalBody, onState);
       });
     });
@@ -59,17 +71,30 @@ export class CampaignFlow {
       button.addEventListener('click', () => {
         const phaseId = button.dataset.phaseId;
         if (!phaseId || button.disabled) return;
-        void this.selectPhase(phaseId, button, onState);
+        this.pendingPhaseId = phaseId;
+        this.refreshMapView(modalBody, onState);
       });
     });
   }
 
-  private scrollSelectedPhaseIntoView(modalBody: HTMLElement): void {
-    requestAnimationFrame(() => {
-      modalBody.querySelector('.campaign-phase--selected')?.scrollIntoView({
-        block: 'nearest',
-        behavior: 'smooth',
+  private bindStartButton(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-start-phase]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const phaseId = button.dataset.campaignStartPhase;
+        if (!phaseId || button.disabled) return;
+        void this.confirmPhase(phaseId, button, onState);
       });
+    });
+  }
+
+  private scrollPendingPhaseIntoView(modalBody: HTMLElement): void {
+    requestAnimationFrame(() => {
+      modalBody
+        .querySelector('.campaign-path-node--pending, .campaign-path-node--current')
+        ?.scrollIntoView({
+          block: 'nearest',
+          behavior: 'smooth',
+        });
     });
   }
 
@@ -90,29 +115,32 @@ export class CampaignFlow {
     }
 
     if (panelHost && activeMap) {
-      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap);
+      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, this.pendingPhaseId);
       panelHost.setAttribute('aria-label', activeMap.name);
     }
 
     this.syncCampaignTheme(modalBody);
     this.bindMapTabs(modalBody, onState);
     this.bindPhaseButtons(modalBody, onState);
-    this.scrollSelectedPhaseIntoView(modalBody);
+    this.bindStartButton(modalBody, onState);
+    this.scrollPendingPhaseIntoView(modalBody);
   }
 
-  private async selectPhase(
+  private async confirmPhase(
     phaseId: string,
     button: HTMLButtonElement,
     onState: (state: GameStateDto) => void,
   ): Promise<void> {
-    if (button.classList.contains('campaign-phase--selecting')) return;
+    if (button.classList.contains('campaign-phase-preview-start--loading')) return;
 
-    button.classList.add('campaign-phase--selecting');
+    button.classList.add('campaign-phase-preview-start--loading');
+    button.disabled = true;
     await new Promise((resolve) => window.setTimeout(resolve, 180));
 
     const response = await this.client.send({ type: 'SELECT_PHASE', phaseId });
     if (!response.ok) {
-      button.classList.remove('campaign-phase--selecting');
+      button.classList.remove('campaign-phase-preview-start--loading');
+      button.disabled = false;
       return;
     }
 

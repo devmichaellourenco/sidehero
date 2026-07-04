@@ -7,20 +7,23 @@ export type CampaignMapThemeId = (typeof CAMPAIGN_MAPS)[number]['id'];
 export interface CampaignMapTheme {
   id: CampaignMapThemeId;
   biomeLabel: string;
+  biomeIcon: string;
 }
 
 const MAP_THEMES: Record<CampaignMapThemeId, CampaignMapTheme> = {
-  stendra: { id: 'stendra', biomeLabel: 'Planícies verdes' },
-  gondonor: { id: 'gondonor', biomeLabel: 'Minas profundas' },
-  valdris: { id: 'valdris', biomeLabel: 'Ruínas espectrais' },
-  morthaven: { id: 'morthaven', biomeLabel: 'Castelo sombrio' },
-  broken_sky: { id: 'broken_sky', biomeLabel: 'Céu fragmentado' },
-  crimson_abyss: { id: 'crimson_abyss', biomeLabel: 'Abismo ardente' },
-  eternal_forge: { id: 'eternal_forge', biomeLabel: 'Forja ancestral' },
-  ancient_grove: { id: 'ancient_grove', biomeLabel: 'Bosque antigo' },
-  twilight_tower: { id: 'twilight_tower', biomeLabel: 'Torre crepuscular' },
-  void_throne: { id: 'void_throne', biomeLabel: 'Trono do vazio' },
+  stendra: { id: 'stendra', biomeLabel: 'Planícies verdes', biomeIcon: ASSETS.ui.stage },
+  gondonor: { id: 'gondonor', biomeLabel: 'Minas profundas', biomeIcon: ASSETS.ui.chest },
+  valdris: { id: 'valdris', biomeLabel: 'Ruínas espectrais', biomeIcon: ASSETS.ui.defense },
+  morthaven: { id: 'morthaven', biomeLabel: 'Castelo sombrio', biomeIcon: ASSETS.ui.attack },
+  broken_sky: { id: 'broken_sky', biomeLabel: 'Céu fragmentado', biomeIcon: ASSETS.ui.campaign },
+  crimson_abyss: { id: 'crimson_abyss', biomeLabel: 'Abismo ardente', biomeIcon: ASSETS.ui.attack },
+  eternal_forge: { id: 'eternal_forge', biomeLabel: 'Forja ancestral', biomeIcon: ASSETS.ui.forge },
+  ancient_grove: { id: 'ancient_grove', biomeLabel: 'Bosque antigo', biomeIcon: ASSETS.ui.stage },
+  twilight_tower: { id: 'twilight_tower', biomeLabel: 'Torre crepuscular', biomeIcon: ASSETS.ui.campaign },
+  void_throne: { id: 'void_throne', biomeLabel: 'Trono do vazio', biomeIcon: ASSETS.ui.victoryFrame },
 };
+
+const ACT_ROMAN = ['I', 'II', 'III', 'IV', 'V'];
 
 const MILESTONE_BOSS_BY_MAP_INDEX: Record<
   number,
@@ -84,6 +87,194 @@ export function tierRangeForMap(mapIndex: number): string {
 
 export function getMilestoneBossForMapIndex(mapIndex: number) {
   return MILESTONE_BOSS_BY_MAP_INDEX[mapIndex] ?? null;
+}
+
+export function resolvePhaseNumber(phaseId: string): number {
+  return Number.parseInt(phaseId.split('-')[1] ?? '0', 10) || 0;
+}
+
+export function findPhaseById(map: CampaignMapDto, phaseId: string | null): CampaignPhaseDto | null {
+  if (!phaseId) return null;
+  return map.phases.find((phase) => phase.id === phaseId) ?? null;
+}
+
+export function resolveInitialPendingPhaseId(map: CampaignMapDto): string | null {
+  const selected = map.phases.find((phase) => phase.selected && phase.playable);
+  if (selected) return selected.id;
+
+  const playable = map.phases.find((phase) => phase.playable);
+  if (playable) return playable.id;
+
+  const latestCleared = [...map.phases].reverse().find((phase) => phase.cleared);
+  return latestCleared?.id ?? map.phases[0]?.id ?? null;
+}
+
+export function renderMapTabBiomeIcon(mapId: string): string {
+  const theme = getCampaignMapTheme(mapId);
+  return imgTag(getAssetUrl(theme.biomeIcon), theme.biomeLabel, 'campaign-map-tab-biome-icon');
+}
+
+function renderFeaturedEnemies(phase: CampaignPhaseDto): string {
+  if (phase.featuredEnemyTypes.length === 0) return '';
+
+  const icons = phase.featuredEnemyTypes
+    .map((enemyType) =>
+      imgTag(
+        getEnemySpriteUrl(enemyType, enemyType),
+        enemyType,
+        'campaign-phase-preview-enemy-icon',
+      ),
+    )
+    .join('');
+
+  return `<div class="campaign-phase-preview-enemies" aria-label="Inimigos em destaque">${icons}</div>`;
+}
+
+function renderPathCheckpoint(phaseNumber: number): string {
+  const chestIcon = getAssetUrl(ASSETS.ui.chestOpen);
+  return `
+    <div class="campaign-path-checkpoint" aria-hidden="true">
+      ${imgTag(chestIcon, 'Checkpoint', 'campaign-path-checkpoint-icon')}
+      <span class="campaign-path-checkpoint-label">Marco ${phaseNumber}</span>
+    </div>
+  `;
+}
+
+function renderPathPhaseNode(
+  phase: CampaignPhaseDto,
+  mapIndex: number,
+  pendingPhaseId: string | null,
+  side: 'left' | 'right',
+): string {
+  const phaseNumber = resolvePhaseNumber(phase.id);
+  const isPending = phase.id === pendingPhaseId;
+  const isCurrent = phase.selected;
+  const disabled = phase.playable ? '' : ' disabled';
+  const pendingClass = isPending ? ' campaign-path-node--pending' : '';
+  const currentClass = isCurrent ? ' campaign-path-node--current' : '';
+  const milestoneClass = phase.milestoneBoss ? ' campaign-path-node--milestone' : '';
+  const finaleClass = phase.seasonFinale ? ' campaign-path-node--finale' : '';
+  const clearedClass = phase.cleared ? ' campaign-path-node--cleared' : '';
+  const lockedClass = !phase.unlocked && !phase.cleared ? ' campaign-path-node--locked' : '';
+  const roleLabel = phase.seasonFinale
+    ? 'Final da temporada'
+    : phase.milestoneBoss
+      ? 'Boss do mapa'
+      : `Fase ${phaseNumber}`;
+  const bossVisual = phase.milestoneBoss || phase.seasonFinale ? renderBossVisual(mapIndex, phase) : '';
+  const compactBody =
+    phase.milestoneBoss || phase.seasonFinale
+      ? `
+        ${bossVisual}
+        <span class="campaign-path-node-name">${escapeHtml(phase.displayName)}</span>
+        <span class="campaign-path-node-meta">${roleLabel} · ${phase.waveCount} waves · T${phase.difficultyTier}</span>
+      `
+      : `
+        <span class="campaign-path-node-number">${phaseNumber}</span>
+        <span class="campaign-path-node-tier">T${phase.difficultyTier}</span>
+      `;
+
+  const markers = [
+    isCurrent ? '<span class="campaign-path-node-marker campaign-path-node-marker--current">Atual</span>' : '',
+    isPending ? '<span class="campaign-path-node-marker campaign-path-node-marker--pending">Escolhida</span>' : '',
+  ]
+    .filter(Boolean)
+    .join('');
+
+  return `
+    <button
+      type="button"
+      class="campaign-path-node campaign-path-node--${side}${pendingClass}${currentClass}${milestoneClass}${finaleClass}${clearedClass}${lockedClass}"
+      data-phase-id="${escapeHtml(phase.id)}"
+      title="${escapeHtml(phase.displayName)} · ${roleLabel} · T${phase.difficultyTier}"
+      ${disabled}
+    >
+      ${markers}
+      ${renderPhaseStatus(phase)}
+      ${compactBody}
+    </button>
+  `;
+}
+
+export function renderCampaignPath(
+  map: CampaignMapDto,
+  mapIndex: number,
+  pendingPhaseId: string | null,
+): string {
+  const acts = Array.from({ length: 5 }, (_, index) => {
+    const actNumber = index + 1;
+    const actPhases = map.phases.filter((phase) => phase.actNumber === actNumber);
+    if (actPhases.length === 0) return '';
+
+    const actStart = (actNumber - 1) * 10 + 1;
+    const actEnd = actNumber * 10;
+    const nodes = actPhases
+      .map((phase, nodeIndex) => {
+        const phaseNumber = resolvePhaseNumber(phase.id);
+        const side: 'left' | 'right' = nodeIndex % 2 === 0 ? 'left' : 'right';
+        const checkpoint =
+          phaseNumber % 10 === 0 && !phase.milestoneBoss ? renderPathCheckpoint(phaseNumber) : '';
+        return `${checkpoint}${renderPathPhaseNode(phase, mapIndex, pendingPhaseId, side)}`;
+      })
+      .join('');
+
+    return `
+      <section class="campaign-path-act" data-campaign-path-act="${actNumber}">
+        <header class="campaign-path-act-header">
+          <span class="campaign-path-act-title">Ato ${ACT_ROMAN[index] ?? actNumber}</span>
+          <span class="campaign-path-act-range">Fases ${actStart}–${actEnd}</span>
+        </header>
+        <div class="campaign-path-act-track">${nodes}</div>
+      </section>
+    `;
+  }).join('');
+
+  return `<div class="campaign-path">${acts}</div>`;
+}
+
+export function renderPhasePreviewFooter(
+  map: CampaignMapDto,
+  mapIndex: number,
+  pendingPhaseId: string | null,
+): string {
+  const phase = findPhaseById(map, pendingPhaseId);
+  if (!phase) {
+    return `
+      <footer class="campaign-phase-preview campaign-phase-preview--empty">
+        <p class="campaign-phase-preview-empty">Selecione uma fase desbloqueada na trilha.</p>
+      </footer>
+    `;
+  }
+
+  const roleLabel = phase.seasonFinale
+    ? 'Final da temporada'
+    : phase.milestoneBoss
+      ? 'Boss do mapa'
+      : `Fase ${resolvePhaseNumber(phase.id)}`;
+  const canStart = phase.playable;
+  const boss = phase.milestoneBoss || phase.seasonFinale ? renderBossVisual(mapIndex, phase) : '';
+
+  return `
+    <footer class="campaign-phase-preview" data-campaign-phase-preview>
+      <div class="campaign-phase-preview-main">
+        ${boss}
+        <div class="campaign-phase-preview-copy">
+          <p class="campaign-phase-preview-eyebrow">${escapeHtml(roleLabel)}</p>
+          <h4 class="campaign-phase-preview-title">${escapeHtml(phase.displayName)}</h4>
+          <p class="campaign-phase-preview-meta">${phase.waveCount} waves · Tier ${phase.difficultyTier}</p>
+          ${renderFeaturedEnemies(phase)}
+        </div>
+      </div>
+      <button
+        type="button"
+        class="campaign-phase-preview-start"
+        data-campaign-start-phase="${escapeHtml(phase.id)}"
+        ${canStart ? '' : 'disabled'}
+      >
+        Iniciar fase
+      </button>
+    </footer>
+  `;
 }
 
 function renderPhaseStatus(phase: CampaignPhaseDto): string {
@@ -206,43 +397,6 @@ export function renderMapProgressBar(map: CampaignMapDto, mapIndex: number): str
         <span>${tierRangeForMap(mapIndex)}</span>
       </p>
     </div>
-  `;
-}
-
-export function renderPhaseButton(phase: CampaignPhaseDto, mapIndex: number): string {
-  const selected = phase.selected ? ' campaign-phase--selected' : '';
-  const disabled = phase.playable ? '' : ' disabled';
-  const milestoneClass = phase.milestoneBoss ? ' campaign-phase--milestone' : '';
-  const finaleClass = phase.seasonFinale ? ' campaign-phase--finale' : '';
-  const clearedClass = phase.cleared ? ' campaign-phase--cleared' : '';
-  const lockedClass = !phase.unlocked && !phase.cleared ? ' campaign-phase--locked' : '';
-  const phaseNumber = phase.id.split('-')[1] ?? phase.displayName;
-  const bossVisual = renderBossVisual(mapIndex, phase);
-  const hereBadge = phase.selected
-    ? '<span class="campaign-phase-here">Aqui</span>'
-    : '';
-  const roleLabel = phase.seasonFinale
-    ? 'Final da temporada'
-    : phase.milestoneBoss
-      ? 'Boss do mapa'
-      : `Fase ${phaseNumber}`;
-
-  return `
-    <button
-      type="button"
-      class="campaign-phase${selected}${milestoneClass}${finaleClass}${clearedClass}${lockedClass}"
-      data-phase-id="${escapeHtml(phase.id)}"
-      title="${escapeHtml(phase.displayName)} · ${roleLabel} · T${phase.difficultyTier}"
-      ${disabled}
-    >
-      ${hereBadge}
-      ${renderPhaseStatus(phase)}
-      ${bossVisual}
-      <span class="campaign-phase-name">${escapeHtml(phase.displayName)}</span>
-      <span class="campaign-phase-meta">
-        ${roleLabel} · ${phase.waveCount} waves · T${phase.difficultyTier}
-      </span>
-    </button>
   `;
 }
 
