@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CampaignOverviewDto } from '../../application/dto/CampaignDto';
 import {
+  getMapFlavorText,
   resolveInitialPendingPhaseId,
 } from './CampaignMapPresentation';
 import { CampaignModalRenderer, resolveInitialMapId } from './CampaignModalRenderer';
@@ -35,7 +36,7 @@ function phase(
 function buildOverview(): CampaignOverviewDto {
   return {
     id: 'apprentice',
-    name: 'Campanha do Aprendiz',
+    name: 'Ascensão de Nix',
     maps: [
       {
         id: 'stendra',
@@ -73,22 +74,52 @@ describe('CampaignModalRenderer', () => {
     expect(resolveInitialPendingPhaseId(map)).toBe('1-50');
   });
 
-  it('renderiza trilha, preview e abas bloqueadas', () => {
+  it('renderiza trilha, preview e abas bloqueadas no modo região', () => {
     const overview = buildOverview();
     const pendingId = resolveInitialPendingPhaseId(overview.maps[0]);
-    const html = renderer.render(overview, 'stendra', pendingId);
+    const html = renderer.render(overview, 'stendra', pendingId, 'region');
 
-    expect(html).toContain('campaign-hero-banner');
+    expect(html).not.toContain('campaign-hero-banner');
+    expect(html).toContain('campaign-view-toggle');
+    expect(html).toContain('data-campaign-view="world"');
+    expect(html).toContain('data-campaign-tooltip');
+    expect(html).toContain('Ascensão de Nix');
+    expect(html).toContain('Nix e seus companheiros rumo a Vorax');
+    expect(html).toContain('data-campaign-view="region"');
     expect(html).toContain('campaign-path');
     expect(html).toContain('campaign-phase-preview');
     expect(html).toContain('data-campaign-start-phase="1-50"');
     expect(html).toContain('campaign-map-tabs');
     expect(html).toContain('data-campaign-map-tab="gondonor"');
-    expect(html).toContain('disabled');
+    expect(html).toContain('aria-disabled="true"');
     expect(html).toContain('campaign-map-tab--locked');
     expect(html).toContain('Guardião das Esgotos');
     expect(html).toContain('campaign-path-node--pending');
+    expect(html).toContain('campaign-map-progress');
+    expect(html).toContain(getMapFlavorText('stendra'));
+    expect(html).not.toContain('campaign-map-flavor');
     expect(html).not.toContain('data-phase-id="2-1"');
+  });
+
+  it('renderiza mapa-mundo com nós de região', () => {
+    const overview = buildOverview();
+    const html = renderer.render(overview, 'stendra', null, 'world');
+
+    expect(html).toContain('data-campaign-view="world"');
+    expect(html).toContain('campaign-world-map');
+    expect(html).toContain('data-campaign-world-map="stendra"');
+    expect(html).toContain('data-campaign-world-map="gondonor"');
+    expect(html).toContain('campaign-map-panel--world');
+    expect(html).not.toContain('campaign-map-tabs');
+    expect(html).not.toContain('campaign-path');
+  });
+
+  it('mostra banner de desbloqueio quando solicitado', () => {
+    const overview = buildOverview();
+    const html = renderer.renderMapPanel(overview.maps[0], '1-50', { showUnlockBanner: true });
+
+    expect(html).toContain('campaign-unlock-banner');
+    expect(html).toContain('Nova região');
   });
 
   it('mostra mensagem de mapa bloqueado no painel', () => {
@@ -99,5 +130,6 @@ describe('CampaignModalRenderer', () => {
     expect(html).toContain('campaign-map-locked');
     expect(html).toContain('Gondonor');
     expect(html).toContain('Guardião Elemental');
+    expect(html).toContain('data-campaign-biome="mine"');
   });
 });

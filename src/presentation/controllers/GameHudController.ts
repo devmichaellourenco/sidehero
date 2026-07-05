@@ -1,5 +1,11 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
+import {
+  countClearedPhasesForMap,
+  getCampaignMapTheme,
+  getMapFlavorText,
+  phaseCountForMap,
+} from '../components/CampaignMapPresentation';
 import { countUpgradeItems } from '../components/GearComparison';
 
 function escapeHtml(text: string): string {
@@ -14,14 +20,32 @@ function renderCampaignTooltipContent(state: GameStateDto): string {
   const waveLine = state.phaseRun
     ? `Wave ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' (Boss)' : ''}`
     : 'Wave —';
+  const theme = getCampaignMapTheme(state.mapId);
+  const cleared = countClearedPhasesForMap(state.campaignProgress.clearedPhaseIds, state.mapId);
+  const total = phaseCountForMap(state.mapId);
+  const fillPct = total > 0 ? Math.round((cleared / total) * 100) : 0;
 
   return `
-    <strong class="campaign-tooltip-title">Progresso</strong>
+    <strong class="campaign-tooltip-title">${escapeHtml(state.mapName)}</strong>
+    <span class="campaign-tooltip-line campaign-tooltip-biome">${escapeHtml(theme.biomeLabel)}</span>
+    <span class="campaign-tooltip-line campaign-tooltip-flavor">${escapeHtml(getMapFlavorText(state.mapId))}</span>
     <span class="campaign-tooltip-line">Campanha: ${escapeHtml(state.campaignName)}</span>
-    <span class="campaign-tooltip-line">Mapa: ${escapeHtml(state.mapName)}</span>
     <span class="campaign-tooltip-line">Fase: ${escapeHtml(state.phaseLabel)}</span>
     <span class="campaign-tooltip-line">${escapeHtml(waveLine)}</span>
     <span class="campaign-tooltip-line">Tier ${state.stage}</span>
+    <div
+      class="campaign-tooltip-progress"
+      role="progressbar"
+      aria-valuenow="${cleared}"
+      aria-valuemin="0"
+      aria-valuemax="${total}"
+      aria-label="Progresso do mapa"
+    >
+      <div class="campaign-tooltip-progress-track">
+        <div class="campaign-tooltip-progress-fill" style="width: ${fillPct}%"></div>
+      </div>
+      <span class="campaign-tooltip-progress-label">${cleared}/${total} concluídas</span>
+    </div>
   `;
 }
 
@@ -29,7 +53,8 @@ function buildCampaignTooltipKey(state: GameStateDto): string {
   const waveKey = state.phaseRun
     ? `${state.phaseRun.waveIndex}/${state.phaseRun.waveCount}/${state.phaseRun.isBossWave}`
     : 'none';
-  return `${state.campaignName}|${state.mapName}|${state.phaseLabel}|${waveKey}|${state.stage}`;
+  const cleared = countClearedPhasesForMap(state.campaignProgress.clearedPhaseIds, state.mapId);
+  return `${state.mapId}|${state.campaignName}|${state.mapName}|${state.phaseLabel}|${waveKey}|${state.stage}|${cleared}`;
 }
 
 function createIcon(assetPath: string, alt: string, className: string): HTMLImageElement {
@@ -178,8 +203,12 @@ export class GameHudController {
     const waveSuffix = state.phaseRun
       ? ` · ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
       : '';
+    const cleared = countClearedPhasesForMap(state.campaignProgress.clearedPhaseIds, state.mapId);
+    const total = phaseCountForMap(state.mapId);
 
-    this.campaignCompactEl.textContent = `${phaseId}${waveSuffix}`;
+    this.campaignContextLabel.setAttribute('data-campaign-theme', state.mapId);
+    this.campaignCompactEl.textContent = `${state.mapName} · ${phaseId}${waveSuffix}`;
+    this.campaignCompactEl.title = `${state.mapName} · ${cleared}/${total} concluídas`;
     this.campaignContextLabel.setAttribute(
       'aria-label',
       `${state.campaignName}, ${state.mapName}, ${state.phaseLabel}`,

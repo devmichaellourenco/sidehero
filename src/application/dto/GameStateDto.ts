@@ -4,6 +4,7 @@ import { ChestProgressDto } from '../mappers/ChestProgressMapper';
 import { FeatureFlagsDto } from './FeatureFlagsDto';
 import { MetaSummaryDto } from './MetaDto';
 import { GearUpgradeHintDto } from './GearUpgradeHintDto';
+import { HeroCombatStatSectionDto } from './HeroCombatStatSheetDto';
 
 export interface GearRequirementsDto {
   minLevel: number;
@@ -113,6 +114,7 @@ export interface HeroDto {
   combatSkillCooldowns: HeroSkillCooldownDto[];
   statusEffects: CombatStatusEffectDto[];
   combatResists: CombatResistSummaryDto;
+  combatStatSheet: HeroCombatStatSectionDto[];
 }
 
 export interface HeroSkillCooldownDto {
@@ -267,6 +269,7 @@ export interface GameStateDto {
   activeTurn: ActiveTurnDto | null;
   combatRound: number;
   campaignName: string;
+  mapId: string;
   mapName: string;
   phaseLabel: string;
   phaseRun: PhaseRunDto | null;

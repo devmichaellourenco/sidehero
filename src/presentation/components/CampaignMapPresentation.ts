@@ -1,26 +1,105 @@
 import { CampaignMapDto, CampaignOverviewDto, CampaignPhaseDto } from '../../application/dto/CampaignDto';
-import { CAMPAIGN_MAPS, TOTAL_CAMPAIGN_PHASES } from '../../domain/campaign/CampaignMaps';
+import {
+  CAMPAIGN_MAPS,
+  mapDefinitionById,
+  TOTAL_CAMPAIGN_PHASES,
+} from '../../domain/campaign/CampaignMaps';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, imgTag } from '../assets/AssetCatalog';
+import { CampaignViewMode } from '../campaign/CampaignViewStorage';
 
 export type CampaignMapThemeId = (typeof CAMPAIGN_MAPS)[number]['id'];
+
+export type CampaignBiomeKind =
+  | 'forest'
+  | 'mine'
+  | 'ruins'
+  | 'castle'
+  | 'sky'
+  | 'abyss'
+  | 'forge'
+  | 'grove'
+  | 'twilight'
+  | 'void';
 
 export interface CampaignMapTheme {
   id: CampaignMapThemeId;
   biomeLabel: string;
   biomeIcon: string;
+  biomeKind: CampaignBiomeKind;
+  flavorText: string;
 }
 
 const MAP_THEMES: Record<CampaignMapThemeId, CampaignMapTheme> = {
-  stendra: { id: 'stendra', biomeLabel: 'Planícies verdes', biomeIcon: ASSETS.ui.stage },
-  gondonor: { id: 'gondonor', biomeLabel: 'Minas profundas', biomeIcon: ASSETS.ui.chest },
-  valdris: { id: 'valdris', biomeLabel: 'Ruínas espectrais', biomeIcon: ASSETS.ui.defense },
-  morthaven: { id: 'morthaven', biomeLabel: 'Castelo sombrio', biomeIcon: ASSETS.ui.attack },
-  broken_sky: { id: 'broken_sky', biomeLabel: 'Céu fragmentado', biomeIcon: ASSETS.ui.campaign },
-  crimson_abyss: { id: 'crimson_abyss', biomeLabel: 'Abismo ardente', biomeIcon: ASSETS.ui.attack },
-  eternal_forge: { id: 'eternal_forge', biomeLabel: 'Forja ancestral', biomeIcon: ASSETS.ui.forge },
-  ancient_grove: { id: 'ancient_grove', biomeLabel: 'Bosque antigo', biomeIcon: ASSETS.ui.stage },
-  twilight_tower: { id: 'twilight_tower', biomeLabel: 'Torre crepuscular', biomeIcon: ASSETS.ui.campaign },
-  void_throne: { id: 'void_throne', biomeLabel: 'Trono do vazio', biomeIcon: ASSETS.ui.victoryFrame },
+  stendra: {
+    id: 'stendra',
+    biomeLabel: 'Planícies verdes',
+    biomeIcon: ASSETS.ui.stage,
+    biomeKind: 'forest',
+    flavorText: 'Campos outrora pacíficos agora fervilham de goblins e bandoleiros.',
+  },
+  gondonor: {
+    id: 'gondonor',
+    biomeLabel: 'Minas profundas',
+    biomeIcon: ASSETS.ui.chest,
+    biomeKind: 'mine',
+    flavorText: 'Túneis antigos escondem riquezas — e o eco de passos famintos.',
+  },
+  valdris: {
+    id: 'valdris',
+    biomeLabel: 'Ruínas espectrais',
+    biomeIcon: ASSETS.ui.defense,
+    biomeKind: 'ruins',
+    flavorText: 'Sombras dançam entre colunas quebradas; os mortos não descansam aqui.',
+  },
+  morthaven: {
+    id: 'morthaven',
+    biomeLabel: 'Castelo sombrio',
+    biomeIcon: ASSETS.ui.attack,
+    biomeKind: 'castle',
+    flavorText: 'Muralhas decadentes guardam segredos e lordes que preferem a escuridão.',
+  },
+  broken_sky: {
+    id: 'broken_sky',
+    biomeLabel: 'Céu fragmentado',
+    biomeIcon: ASSETS.ui.campaign,
+    biomeKind: 'sky',
+    flavorText: 'Ilhas de rocha flutuam sobre um abismo sem fim; só os ousados avançam.',
+  },
+  crimson_abyss: {
+    id: 'crimson_abyss',
+    biomeLabel: 'Abismo ardente',
+    biomeIcon: ASSETS.ui.attack,
+    biomeKind: 'abyss',
+    flavorText: 'Lava e fúria derretem a carne e a coragem dos incautos.',
+  },
+  eternal_forge: {
+    id: 'eternal_forge',
+    biomeLabel: 'Forja ancestral',
+    biomeIcon: ASSETS.ui.forge,
+    biomeKind: 'forge',
+    flavorText: 'Martelos ecoam eternamente; cada faísca pode ser a última.',
+  },
+  ancient_grove: {
+    id: 'ancient_grove',
+    biomeLabel: 'Bosque antigo',
+    biomeIcon: ASSETS.ui.stage,
+    biomeKind: 'grove',
+    flavorText: 'Raízes milenares sussurram profecias — e convocam guardiões colossais.',
+  },
+  twilight_tower: {
+    id: 'twilight_tower',
+    biomeLabel: 'Torre crepuscular',
+    biomeIcon: ASSETS.ui.campaign,
+    biomeKind: 'twilight',
+    flavorText: 'No limiar entre dia e noite, magia instável distorce tempo e destino.',
+  },
+  void_throne: {
+    id: 'void_throne',
+    biomeLabel: 'Trono do vazio',
+    biomeIcon: ASSETS.ui.victoryFrame,
+    biomeKind: 'void',
+    flavorText: 'O fim da jornada aguarda. Apenas os heróis dignos chegarão ao trono.',
+  },
 };
 
 const ACT_ROMAN = ['I', 'II', 'III', 'IV', 'V'];
@@ -51,6 +130,30 @@ export function escapeHtml(text: string): string {
 
 export function getCampaignMapTheme(mapId: string): CampaignMapTheme {
   return MAP_THEMES[mapId as CampaignMapThemeId] ?? MAP_THEMES.stendra;
+}
+
+export function getMapBiomeKind(mapId: string): CampaignBiomeKind {
+  return getCampaignMapTheme(mapId).biomeKind;
+}
+
+export function getMapFlavorText(mapId: string): string {
+  return getCampaignMapTheme(mapId).flavorText;
+}
+
+export function resolveMapIdFromPhaseId(phaseId: string): CampaignMapThemeId {
+  const mapIndex = Number.parseInt(phaseId.split('-')[0] ?? '1', 10) || 1;
+  return CAMPAIGN_MAPS.find((map) => map.mapIndex === mapIndex)?.id ?? 'stendra';
+}
+
+export function countClearedPhasesForMap(clearedPhaseIds: readonly string[], mapId: string): number {
+  const mapIndex = mapDefinitionById(mapId as CampaignMapThemeId)?.mapIndex;
+  if (!mapIndex) return 0;
+  const prefix = `${mapIndex}-`;
+  return clearedPhaseIds.filter((id) => id.startsWith(prefix)).length;
+}
+
+export function phaseCountForMap(mapId: string): number {
+  return mapDefinitionById(mapId as CampaignMapThemeId)?.phaseCount ?? 50;
 }
 
 export function mapProgress(map: CampaignMapDto): { cleared: number; unlocked: number; total: number } {
@@ -181,10 +284,15 @@ function renderPathPhaseNode(
     .filter(Boolean)
     .join('');
 
+  const epicPendingClass =
+    isPending && (phase.milestoneBoss || phase.seasonFinale)
+      ? ' campaign-path-node--epic-pending'
+      : '';
+
   return `
     <button
       type="button"
-      class="campaign-path-node campaign-path-node--${side}${pendingClass}${currentClass}${milestoneClass}${finaleClass}${clearedClass}${lockedClass}"
+      class="campaign-path-node campaign-path-node--${side}${pendingClass}${currentClass}${milestoneClass}${finaleClass}${clearedClass}${lockedClass}${epicPendingClass}"
       data-phase-id="${escapeHtml(phase.id)}"
       title="${escapeHtml(phase.displayName)} · ${roleLabel} · T${phase.difficultyTier}"
       ${disabled}
@@ -254,8 +362,11 @@ export function renderPhasePreviewFooter(
   const canStart = phase.playable;
   const boss = phase.milestoneBoss || phase.seasonFinale ? renderBossVisual(mapIndex, phase) : '';
 
+  const delightClass =
+    phase.milestoneBoss || phase.seasonFinale ? ' campaign-phase-preview--epic' : '';
+
   return `
-    <footer class="campaign-phase-preview" data-campaign-phase-preview>
+    <footer class="campaign-phase-preview${delightClass}" data-campaign-phase-preview>
       <div class="campaign-phase-preview-main">
         ${boss}
         <div class="campaign-phase-preview-copy">
@@ -320,41 +431,43 @@ function renderBossVisual(mapIndex: number, phase: CampaignPhaseDto): string {
   `;
 }
 
-export function renderCampaignHeroBanner(campaign: CampaignOverviewDto): string {
+export function renderCampaignOverviewTooltipContent(campaign: CampaignOverviewDto): string {
   const { cleared, total } = campaignGlobalProgress(campaign);
   const fillPct = total > 0 ? Math.round((cleared / total) * 100) : 0;
-  const campaignIcon = getAssetUrl(ASSETS.ui.campaign);
-  const frameIcon = getAssetUrl(ASSETS.ui.victoryFrame);
 
   return `
-    <header class="campaign-hero-banner">
-      <div class="campaign-hero-banner-frame" aria-hidden="true">
-        ${imgTag(frameIcon, '', 'campaign-hero-banner-frame-img')}
+    <strong class="campaign-tooltip-title">${escapeHtml(campaign.name)}</strong>
+    <span class="campaign-tooltip-line">Nix e seus companheiros rumo a Vorax</span>
+    <div
+      class="campaign-tooltip-progress"
+      role="progressbar"
+      aria-valuenow="${cleared}"
+      aria-valuemin="0"
+      aria-valuemax="${total}"
+      aria-label="Progresso da campanha"
+    >
+      <div class="campaign-tooltip-progress-track">
+        <div class="campaign-tooltip-progress-fill" style="width: ${fillPct}%"></div>
       </div>
-      <div class="campaign-hero-banner-main">
-        ${imgTag(campaignIcon, 'Campanha', 'campaign-hero-banner-icon')}
-        <div class="campaign-hero-banner-copy">
-          <h2 class="campaign-hero-banner-title">${escapeHtml(campaign.name)}</h2>
-          <p class="campaign-hero-banner-subtitle">Escolha uma fase e avance pela jornada</p>
-        </div>
-      </div>
-      <div class="campaign-global-progress">
-        <div class="campaign-global-progress-labels">
-          <span class="campaign-global-progress-title">Progresso total</span>
-          <span class="campaign-global-progress-value">${cleared}/${total}</span>
-        </div>
-        <div
-          class="campaign-global-progress-track"
-          role="progressbar"
-          aria-valuenow="${cleared}"
-          aria-valuemin="0"
-          aria-valuemax="${total}"
-          aria-label="Progresso da campanha"
-        >
-          <div class="campaign-global-progress-fill" style="width: ${fillPct}%"></div>
-        </div>
-      </div>
-    </header>
+      <span class="campaign-tooltip-progress-label">${cleared}/${total} fases concluídas</span>
+    </div>
+  `;
+}
+
+export function renderMapRegionTooltipContent(map: CampaignMapDto, mapIndex: number): string {
+  const theme = getCampaignMapTheme(map.id);
+  const locked = !map.unlocked;
+  const previousBoss = locked ? getMilestoneBossForMapIndex(mapIndex - 1) : null;
+  const flavor = locked
+    ? previousBoss
+      ? `Derrote ${previousBoss.bossLabel} na fase 50 do mapa anterior para desbloquear.`
+      : `Conclua o mapa anterior para desbloquear ${map.name}.`
+    : theme.flavorText;
+
+  return `
+    <strong class="campaign-tooltip-title">${escapeHtml(map.name)}</strong>
+    <span class="campaign-tooltip-line campaign-tooltip-biome">${escapeHtml(theme.biomeLabel)} · ${tierRangeForMap(mapIndex)}</span>
+    <span class="campaign-tooltip-line campaign-tooltip-flavor">${escapeHtml(flavor)}</span>
   `;
 }
 
@@ -450,5 +563,123 @@ export function renderMapTabRing(cleared: number, total: number): string {
         style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset}"
       />
     </svg>
+  `;
+}
+
+export function renderCampaignViewToggle(
+  campaign: CampaignOverviewDto,
+  viewMode: CampaignViewMode,
+): string {
+  const campaignTooltip = renderCampaignOverviewTooltipContent(campaign);
+
+  return `
+    <div class="campaign-view-toggle" role="tablist" aria-label="Visão da campanha">
+      <button
+        type="button"
+        class="campaign-view-toggle-btn ${viewMode === 'world' ? 'active' : ''}"
+        data-campaign-view="world"
+        data-campaign-tooltip
+        role="tab"
+        aria-selected="${viewMode === 'world'}"
+      >
+        Mapa-mundo
+        <span class="campaign-tooltip-content hidden">${campaignTooltip}</span>
+      </button>
+      <button
+        type="button"
+        class="campaign-view-toggle-btn ${viewMode === 'region' ? 'active' : ''}"
+        data-campaign-view="region"
+        role="tab"
+        aria-selected="${viewMode === 'region'}"
+      >
+        Trilha
+      </button>
+    </div>
+  `;
+}
+
+function renderWorldMapNode(
+  map: CampaignMapDto,
+  activeMapId: string,
+  nodeIndex: number,
+): string {
+  const theme = getCampaignMapTheme(map.id);
+  const progress = mapProgress(map);
+  const mapIndex = parseMapIndex(map);
+  const locked = !map.unlocked;
+  const active = map.id === activeMapId;
+  const side = nodeIndex % 2 === 0 ? 'left' : 'right';
+  const boss = locked ? getMilestoneBossForMapIndex(mapIndex - 1) : getMilestoneBossForMapIndex(mapIndex);
+  const bossTeaser =
+    locked && boss
+      ? imgTag(
+          getEnemySpriteUrl(boss.enemyType, boss.displayName),
+          boss.bossLabel,
+          'campaign-world-node-boss-teaser',
+        )
+      : renderMapTabBiomeIcon(map.id);
+
+  return `
+    <button
+      type="button"
+      class="campaign-world-node campaign-world-node--${side}${active ? ' campaign-world-node--active' : ''}${locked ? ' campaign-world-node--locked' : ''}"
+      data-campaign-world-map="${escapeHtml(map.id)}"
+      ${locked ? 'disabled' : ''}
+      title="${locked ? `Bloqueado · ${escapeHtml(theme.biomeLabel)}` : escapeHtml(map.name)}"
+    >
+      <span class="campaign-world-node-visual">
+        ${locked ? '' : renderMapTabRing(progress.cleared, progress.total)}
+        ${bossTeaser}
+        ${locked ? '<span class="campaign-map-tab-fog" aria-hidden="true"></span>' : ''}
+      </span>
+      <span class="campaign-world-node-copy">
+        <span class="campaign-world-node-name">${escapeHtml(map.name)}</span>
+        <span class="campaign-world-node-meta">${escapeHtml(theme.biomeLabel)} · ${progress.cleared}/${progress.total}</span>
+      </span>
+    </button>
+  `;
+}
+
+export function renderCampaignWorldMap(campaign: CampaignOverviewDto, activeMapId: string): string {
+  const nodes = campaign.maps
+    .map((map, index) => renderWorldMapNode(map, activeMapId, index))
+    .join('');
+
+  return `
+    <div class="campaign-world-map">
+      <p class="campaign-world-map-intro">Escolha uma região desbloqueada para ver a trilha de fases.</p>
+      <div class="campaign-world-map-spine" aria-hidden="true"></div>
+      <div class="campaign-world-map-nodes">${nodes}</div>
+    </div>
+  `;
+}
+
+export function renderMapUnlockBanner(map: CampaignMapDto): string {
+  return `
+    <div class="campaign-unlock-banner" data-campaign-unlock-banner>
+      ${imgTag(getAssetUrl(ASSETS.ui.victoryGlow), '', 'campaign-unlock-banner-glow')}
+      <div class="campaign-unlock-banner-copy">
+        <p class="campaign-unlock-banner-eyebrow">Nova região · ${escapeHtml(map.name)}</p>
+      </div>
+    </div>
+  `;
+}
+
+export function renderMapFlavorHeader(
+  map: CampaignMapDto,
+  mapIndex: number,
+  options: { includeFlavor?: boolean } = {},
+): string {
+  const theme = getCampaignMapTheme(map.id);
+  const flavor = options.includeFlavor !== false
+    ? `<p class="campaign-map-flavor">${escapeHtml(theme.flavorText)}</p>`
+    : '';
+
+  return `
+    <div class="campaign-map-header-main">
+      <h3 class="campaign-map-title">${escapeHtml(map.name)}</h3>
+      <p class="campaign-map-biome">${escapeHtml(theme.biomeLabel)} · ${tierRangeForMap(mapIndex)}</p>
+      ${flavor}
+    </div>
   `;
 }

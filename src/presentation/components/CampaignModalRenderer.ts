@@ -1,15 +1,20 @@
 import { CampaignMapDto, CampaignOverviewDto } from '../../application/dto/CampaignDto';
+import { CampaignViewMode } from '../campaign/CampaignViewStorage';
 import {
   escapeHtml,
   getCampaignMapTheme,
+  getMapBiomeKind,
   mapProgress,
   parseMapIndex,
-  renderCampaignHeroBanner,
   renderCampaignPath,
+  renderCampaignViewToggle,
+  renderCampaignWorldMap,
   renderLockedMapPanel,
   renderMapProgressBar,
+  renderMapRegionTooltipContent,
   renderMapTabBiomeIcon,
   renderMapTabRing,
+  renderMapUnlockBanner,
   renderPhasePreviewFooter,
   tierRangeForMap,
 } from './CampaignMapPresentation';
@@ -39,8 +44,10 @@ export class CampaignModalRenderer {
         const progress = mapProgress(map);
         const locked = !isMapUnlocked(map);
         const tabState = locked ? ' campaign-map-tab--locked' : '';
-        const disabled = locked ? ' disabled' : '';
+        const disabled = locked ? ' aria-disabled="true"' : '';
         const theme = getCampaignMapTheme(map.id);
+        const mapIndex = parseMapIndex(map);
+        const regionTooltip = renderMapRegionTooltipContent(map, mapIndex);
 
         return `
           <button
@@ -48,10 +55,10 @@ export class CampaignModalRenderer {
             class="campaign-map-tab${active}${tabState}"
             data-campaign-map-tab="${escapeHtml(map.id)}"
             data-campaign-theme="${escapeHtml(map.id)}"
+            data-campaign-tooltip
             data-map-unlocked="${map.unlocked}"
             aria-selected="${map.id === activeMapId}"
             ${disabled}
-            title="${locked ? 'Conclua o boss do mapa anterior para desbloquear' : escapeHtml(map.name)}"
           >
             <span class="campaign-map-tab-visual">
               ${locked ? '<span class="campaign-map-tab-lock" aria-hidden="true"></span>' : renderMapTabRing(progress.cleared, progress.total)}
@@ -62,27 +69,35 @@ export class CampaignModalRenderer {
               <span class="campaign-map-tab-name">${escapeHtml(map.name)}</span>
               <span class="campaign-map-tab-meta">${escapeHtml(theme.biomeLabel)} · ${progress.cleared}/${progress.total}</span>
             </span>
+            <span class="campaign-tooltip-content hidden">${regionTooltip}</span>
           </button>
         `;
       })
       .join('');
   }
 
-  renderMapPanel(map: CampaignMapDto, pendingPhaseId: string | null): string {
+  renderMapPanel(
+    map: CampaignMapDto,
+    pendingPhaseId: string | null,
+    options: { showUnlockBanner?: boolean } = {},
+  ): string {
+    const biomeKind = getMapBiomeKind(map.id);
+
     if (!isMapUnlocked(map)) {
-      return renderLockedMapPanel(map);
+      return `
+        <div class="campaign-map-body" data-campaign-biome="${biomeKind}">
+          ${renderLockedMapPanel(map)}
+        </div>
+      `;
     }
 
     const mapIndex = parseMapIndex(map);
-    const theme = getCampaignMapTheme(map.id);
+    const unlockBanner = options.showUnlockBanner ? renderMapUnlockBanner(map) : '';
 
     return `
-      <div class="campaign-map-body">
+      <div class="campaign-map-body" data-campaign-biome="${biomeKind}">
+        ${unlockBanner}
         <header class="campaign-map-header">
-          <div class="campaign-map-header-main">
-            <h3 class="campaign-map-title">${escapeHtml(map.name)}</h3>
-            <p class="campaign-map-biome">${escapeHtml(theme.biomeLabel)} · ${tierRangeForMap(mapIndex)}</p>
-          </div>
           ${renderMapProgressBar(map, mapIndex)}
         </header>
         <div class="campaign-path-scroll game-scroll">
@@ -93,24 +108,53 @@ export class CampaignModalRenderer {
     `;
   }
 
-  render(campaign: CampaignOverviewDto, activeMapId: string, pendingPhaseId: string | null): string {
+  renderWorldPanel(campaign: CampaignOverviewDto, activeMapId: string): string {
+    return `
+      <div class="campaign-map-body campaign-map-body--world" data-campaign-biome="world">
+        ${renderCampaignWorldMap(campaign, activeMapId)}
+      </div>
+    `;
+  }
+
+  render(
+    campaign: CampaignOverviewDto,
+    activeMapId: string,
+    pendingPhaseId: string | null,
+    viewMode: CampaignViewMode,
+    options: { showUnlockBanner?: boolean } = {},
+  ): string {
     const activeMap = campaign.maps.find((map) => map.id === activeMapId) ?? campaign.maps[0];
+    const regionPanel = activeMap
+      ? this.renderMapPanel(activeMap, pendingPhaseId, options)
+      : '<p class="empty-state">Nenhum mapa disponível.</p>';
 
     return `
-      <div class="campaign-modal" data-campaign-theme="${escapeHtml(activeMapId)}">
-        ${renderCampaignHeroBanner(campaign)}
-        <p class="campaign-modal-hint">Escolha uma fase na trilha e confirme em Iniciar fase.</p>
-        <div class="campaign-map-tabs" data-campaign-map-tabs role="tablist" aria-label="Mapas">
-          ${this.renderTabs(campaign, activeMapId)}
-        </div>
+      <div class="campaign-modal" data-campaign-theme="${escapeHtml(activeMapId)}" data-campaign-view="${viewMode}">
+        ${renderCampaignViewToggle(campaign, viewMode)}
+        <p class="campaign-modal-hint">
+          ${
+            viewMode === 'world'
+              ? 'Toque em uma região para abrir a trilha de fases.'
+              : 'Toque em uma fase desbloqueada para voltar a jogá-la.'
+          }
+        </p>
+        ${
+          viewMode === 'region'
+            ? `
+          <div class="campaign-map-tabs" data-campaign-map-tabs role="tablist" aria-label="Mapas">
+            ${this.renderTabs(campaign, activeMapId)}
+          </div>
+        `
+            : ''
+        }
         <section
-          class="campaign-map-panel"
+          class="campaign-map-panel${viewMode === 'world' ? ' campaign-map-panel--world' : ''}"
           data-campaign-map-panel
           data-campaign-theme="${escapeHtml(activeMapId)}"
           role="tabpanel"
-          aria-label="${escapeHtml(activeMap?.name ?? 'Mapa')}"
+          aria-label="${viewMode === 'world' ? 'Mapa-mundo' : escapeHtml(activeMap?.name ?? 'Mapa')}"
         >
-          ${activeMap ? this.renderMapPanel(activeMap, pendingPhaseId) : '<p class="empty-state">Nenhum mapa disponível.</p>'}
+          ${viewMode === 'world' ? this.renderWorldPanel(campaign, activeMapId) : regionPanel}
         </section>
       </div>
     `;

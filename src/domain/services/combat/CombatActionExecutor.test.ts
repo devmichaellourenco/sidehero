@@ -94,7 +94,6 @@ describe('CombatActionExecutor', () => {
   });
 
   it('debuff de defesa aumenta dano recebido pelo herói', () => {
-    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
     const enemy = Enemy.forStage(1);
     const statusEffects = CombatStatusEffectTracker.fromMap({}).apply({
       combatantKey: 'hero:k1',
@@ -103,6 +102,7 @@ describe('CombatActionExecutor', () => {
       magnitude: 8,
       durationTurns: 2,
     });
+    const damageContext = { rng: () => 0.5 };
 
     const withoutDebuff = executor.execute(
       {
@@ -115,9 +115,10 @@ describe('CombatActionExecutor', () => {
         targetHeroId: 'k1',
       },
       'Wraith',
-      [knight],
+      [Hero.createStarter('k1', 'knight', 'Galneon')],
       [enemy],
       CombatStatusEffectTracker.fromMap({}),
+      damageContext,
     );
 
     const withDebuff = executor.execute(
@@ -131,9 +132,10 @@ describe('CombatActionExecutor', () => {
         targetHeroId: 'k1',
       },
       'Wraith',
-      [knight],
+      [Hero.createStarter('k1', 'knight', 'Galneon')],
       [enemy],
       statusEffects,
+      damageContext,
     );
 
     const healthWithout = withoutDebuff.heroes[0].currentHealth;

@@ -2,17 +2,26 @@ import { CampaignOverviewDto } from '../../application/dto/CampaignDto';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import {
+  CampaignViewMode,
+  getStoredCampaignViewMode,
+  isMapNewToPlayer,
+  markMapSeen,
+  setStoredCampaignViewMode,
+} from '../campaign/CampaignViewStorage';
+import {
   CampaignModalRenderer,
   isMapUnlocked,
   resolveInitialMapId,
 } from '../components/CampaignModalRenderer';
 import { resolveInitialPendingPhaseId } from '../components/CampaignMapPresentation';
+import { bindCampaignTooltips, hideCampaignTooltip } from '../components/CampaignTooltipBinder';
 import { ModalController } from '../components/ModalController';
 
 export class CampaignFlow {
   private campaign: CampaignOverviewDto | null = null;
   private activeMapId = 'stendra';
   private pendingPhaseId: string | null = null;
+  private viewMode: CampaignViewMode = 'region';
 
   constructor(
     private readonly client: IGameClient,
@@ -30,9 +39,18 @@ export class CampaignFlow {
     this.campaign = response.campaign;
     this.activeMapId = resolveInitialMapId(response.campaign);
     this.pendingPhaseId = this.resolvePendingForActiveMap();
-    modalBody.innerHTML = this.renderer.render(this.campaign, this.activeMapId, this.pendingPhaseId);
+    this.viewMode = this.resolveInitialViewMode(response.campaign);
+    this.renderModal(modalBody);
     this.bindInteractions(modalBody, onState);
     this.scrollPendingPhaseIntoView(modalBody);
+  }
+
+  private resolveInitialViewMode(campaign: CampaignOverviewDto): CampaignViewMode {
+    const stored = getStoredCampaignViewMode();
+    if (stored) return stored;
+
+    const unlockedCount = campaign.maps.filter((map) => map.unlocked).length;
+    return unlockedCount > 1 ? 'world' : 'region';
   }
 
   private resolvePendingForActiveMap(): string | null {
@@ -42,16 +60,78 @@ export class CampaignFlow {
     return resolveInitialPendingPhaseId(activeMap);
   }
 
+  private shouldShowUnlockBanner(): boolean {
+    if (!this.campaign || this.viewMode !== 'region') return false;
+    const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
+    if (!activeMap || !activeMap.unlocked) return false;
+    return isMapNewToPlayer(activeMap.id, activeMap.unlocked);
+  }
+
+  private renderModal(modalBody: HTMLElement): void {
+    if (!this.campaign) return;
+
+    modalBody.innerHTML = this.renderer.render(
+      this.campaign,
+      this.activeMapId,
+      this.pendingPhaseId,
+      this.viewMode,
+      { showUnlockBanner: this.shouldShowUnlockBanner() },
+    );
+
+    if (this.viewMode === 'region' && this.shouldShowUnlockBanner()) {
+      markMapSeen(this.activeMapId);
+    }
+
+    bindCampaignTooltips(modalBody);
+  }
+
   private bindInteractions(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+    hideCampaignTooltip();
+    this.bindViewToggle(modalBody, onState);
+    this.bindWorldMapNodes(modalBody, onState);
     this.bindMapTabs(modalBody, onState);
     this.bindPhaseButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
   }
 
+  private bindViewToggle(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-view]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const mode = button.dataset.campaignView as CampaignViewMode | undefined;
+        if (!mode || mode === this.viewMode) return;
+        this.viewMode = mode;
+        setStoredCampaignViewMode(mode);
+        this.renderModal(modalBody);
+        this.bindInteractions(modalBody, onState);
+        this.scrollPendingPhaseIntoView(modalBody);
+      });
+    });
+  }
+
+  private bindWorldMapNodes(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-world-map]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const mapId = button.dataset.campaignWorldMap;
+        if (!mapId || button.disabled || !this.campaign) return;
+
+        const map = this.campaign.maps.find((entry) => entry.id === mapId);
+        if (!map || !isMapUnlocked(map)) return;
+
+        this.activeMapId = mapId;
+        this.pendingPhaseId = resolveInitialPendingPhaseId(map);
+        this.viewMode = 'region';
+        setStoredCampaignViewMode('region');
+        this.renderModal(modalBody);
+        this.bindInteractions(modalBody, onState);
+        this.scrollPendingPhaseIntoView(modalBody);
+      });
+    });
+  }
+
   private bindMapTabs(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
     modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-map-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
-        if (tab.disabled) return;
+        if (tab.getAttribute('aria-disabled') === 'true') return;
 
         const mapId = tab.dataset.campaignMapTab;
         if (!mapId || mapId === this.activeMapId || !this.campaign) return;
@@ -61,7 +141,7 @@ export class CampaignFlow {
 
         this.activeMapId = mapId;
         this.pendingPhaseId = resolveInitialPendingPhaseId(map);
-        this.refreshMapView(modalBody, onState);
+        this.refreshRegionView(modalBody, onState);
       });
     });
   }
@@ -71,8 +151,7 @@ export class CampaignFlow {
       button.addEventListener('click', () => {
         const phaseId = button.dataset.phaseId;
         if (!phaseId || button.disabled) return;
-        this.pendingPhaseId = phaseId;
-        this.refreshMapView(modalBody, onState);
+        void this.confirmPhase(phaseId, button, onState);
       });
     });
   }
@@ -90,7 +169,7 @@ export class CampaignFlow {
   private scrollPendingPhaseIntoView(modalBody: HTMLElement): void {
     requestAnimationFrame(() => {
       modalBody
-        .querySelector('.campaign-path-node--pending, .campaign-path-node--current')
+        .querySelector('.campaign-path-node--pending, .campaign-path-node--current, .campaign-world-node--active')
         ?.scrollIntoView({
           block: 'nearest',
           behavior: 'smooth',
@@ -103,7 +182,7 @@ export class CampaignFlow {
     modalBody.querySelector('[data-campaign-map-panel]')?.setAttribute('data-campaign-theme', this.activeMapId);
   }
 
-  private refreshMapView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+  private refreshRegionView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
     if (!this.campaign) return;
 
     const tabsHost = modalBody.querySelector('[data-campaign-map-tabs]');
@@ -112,11 +191,17 @@ export class CampaignFlow {
 
     if (tabsHost) {
       tabsHost.innerHTML = this.renderer.renderTabs(this.campaign, this.activeMapId);
+      bindCampaignTooltips(tabsHost);
     }
 
     if (panelHost && activeMap) {
-      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, this.pendingPhaseId);
+      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, this.pendingPhaseId, {
+        showUnlockBanner: isMapNewToPlayer(activeMap.id, activeMap.unlocked),
+      });
       panelHost.setAttribute('aria-label', activeMap.name);
+      if (isMapNewToPlayer(activeMap.id, activeMap.unlocked)) {
+        markMapSeen(activeMap.id);
+      }
     }
 
     this.syncCampaignTheme(modalBody);
@@ -131,15 +216,18 @@ export class CampaignFlow {
     button: HTMLButtonElement,
     onState: (state: GameStateDto) => void,
   ): Promise<void> {
-    if (button.classList.contains('campaign-phase-preview-start--loading')) return;
+    const loadingClass = button.hasAttribute('data-phase-id')
+      ? 'campaign-path-node--selecting'
+      : 'campaign-phase-preview-start--loading';
+    if (button.classList.contains(loadingClass)) return;
 
-    button.classList.add('campaign-phase-preview-start--loading');
+    button.classList.add(loadingClass);
     button.disabled = true;
     await new Promise((resolve) => window.setTimeout(resolve, 180));
 
     const response = await this.client.send({ type: 'SELECT_PHASE', phaseId });
     if (!response.ok) {
-      button.classList.remove('campaign-phase-preview-start--loading');
+      button.classList.remove(loadingClass);
       button.disabled = false;
       return;
     }

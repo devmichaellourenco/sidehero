@@ -16,6 +16,7 @@ function baseState(partial: Partial<GameStateDto> = {}): GameStateDto {
     activeTurn: null,
     combatRound: 1,
     campaignName: 'Temporada I',
+    mapId: 'stendra',
     mapName: 'Estrenda',
     phaseLabel: 'Fase 1-2',
     phaseRun: null,

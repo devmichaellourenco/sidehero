@@ -3,6 +3,7 @@ import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
+import { bindHeroStatTooltips } from './HeroStatTooltipBinder';
 import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
 import { bindSkillSlotAssignment } from '../skills/SkillSlotAssignmentBinder';
 import {
@@ -131,6 +132,9 @@ export class HeroDetailModalRenderer {
     bindBarTooltips(container);
     bindEquipmentTooltips(container);
     bindSkillChipTooltips(container);
+    if (this.activeTab === 'attributes') {
+      bindHeroStatTooltips(container);
+    }
     if (this.activeTab === 'sheet' && handlers.onMountInventory) {
       const inventoryHost = container.querySelector('[data-hero-inventory-host]');
       if (inventoryHost) {

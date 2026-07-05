@@ -95,6 +95,7 @@ export class GameStatePresenter {
       activeTurn: activeActor ? { side: activeActor.side, id: activeActor.id } : null,
       combatRound: state.combat?.round ?? 1,
       campaignName: campaignLabels.campaignName,
+      mapId: campaignLabels.mapId,
       mapName: campaignLabels.mapName,
       phaseLabel: campaignLabels.phaseLabel,
       phaseRun,
@@ -213,6 +214,7 @@ function mapEnemyToDto(
 
 function mapCampaignLabels(state: GameState): {
   campaignName: string;
+  mapId: string;
   mapName: string;
   phaseLabel: string;
 } {
@@ -227,6 +229,7 @@ function mapCampaignLabels(state: GameState): {
 
   return {
     campaignName: campaign.name,
+    mapId: map?.id ?? 'stendra',
     mapName: map?.name ?? 'Estrenda',
     phaseLabel: phase?.displayName ?? phaseId,
   };

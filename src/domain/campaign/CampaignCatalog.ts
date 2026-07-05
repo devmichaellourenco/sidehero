@@ -17,7 +17,7 @@ export interface CampaignInfo {
 
 const CAMPAIGN: CampaignInfo = {
   id: 'apprentice',
-  name: 'Campanha do Aprendiz',
+  name: 'Ascensão de Nix',
   maps: CAMPAIGN_MAPS.map((map) => ({
     id: map.id,
     name: map.name,

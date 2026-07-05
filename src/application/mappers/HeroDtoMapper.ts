@@ -8,9 +8,11 @@ import {
 import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { AttributesDto } from '../dto/AttributesDto';
 import { HeroDto } from '../dto/GameStateDto';
+import { HeroCombatStatSectionDto } from '../dto/HeroCombatStatSheetDto';
 import { mapCombatResistSummary } from './CombatResistMapper';
 import { mapGearToDto } from './GearDtoMapper';
 import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
+import { mapHeroCombatStatSheet } from './HeroCombatStatSheetMapper';
 
 const combatProfiles = new CombatProfileProvider();
 
@@ -65,5 +67,6 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     combatResists: mapCombatResistSummary(
       resistanceProfileFromHeroEquipment(props.equipment),
     ),
+    combatStatSheet: mapHeroCombatStatSheet(hero),
   };
 }

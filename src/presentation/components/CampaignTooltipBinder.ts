@@ -46,9 +46,21 @@ function showPortal(anchor: HTMLElement): void {
   if (!tooltip) return;
 
   const portal = ensurePortal();
+  const theme = anchor.getAttribute('data-campaign-theme');
   portal.className = 'campaign-tooltip-portal';
+  if (theme) {
+    portal.setAttribute('data-campaign-theme', theme);
+  } else {
+    portal.removeAttribute('data-campaign-theme');
+  }
   portal.innerHTML = tooltip.innerHTML;
   positionPortal(portal, anchor.getBoundingClientRect());
+}
+
+export function bindCampaignTooltips(container: HTMLElement): void {
+  container.querySelectorAll<HTMLElement>('[data-campaign-tooltip]').forEach((anchor) => {
+    bindCampaignTooltip(anchor);
+  });
 }
 
 export function bindCampaignTooltip(anchor: HTMLElement): void {
