@@ -5115,8 +5115,158 @@ body.modal-open {
   flex-wrap: wrap;
   flex-shrink: 0;
   padding: 10px 12px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
   background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(14, 22, 42, 0.98));
+}
+
+.hero-detail-improvement-bar {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
+}
+
+.hero-improvement-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 200, 87, 0.28);
+  background: linear-gradient(160deg, rgba(255, 200, 87, 0.1), rgba(12, 18, 36, 0.72));
+  cursor: help;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.hero-improvement-points:hover,
+.hero-improvement-points:focus-visible {
+  border-color: rgba(255, 200, 87, 0.55);
+  box-shadow: 0 0 0 1px rgba(255, 200, 87, 0.2);
+  outline: none;
+}
+
+.hero-improvement-points--available {
+  border-color: rgba(255, 200, 87, 0.62);
+  background: linear-gradient(160deg, rgba(255, 200, 87, 0.22), rgba(32, 24, 8, 0.88));
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 87, 0.24),
+    0 0 18px rgba(255, 200, 87, 0.14);
+  animation: hero-improvement-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes hero-improvement-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 200, 87, 0.24),
+      0 0 14px rgba(255, 200, 87, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 200, 87, 0.42),
+      0 0 22px rgba(255, 200, 87, 0.22);
+  }
+}
+
+.hero-improvement-points-icon {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(255, 200, 87, 0.45));
+}
+
+.hero-improvement-points-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hero-improvement-points-label {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffe8b8;
+}
+
+.hero-improvement-points-value {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  line-height: 1;
+  color: #fff8e7;
+  text-shadow: 0 0 10px rgba(255, 200, 87, 0.35);
+}
+
+.hero-improvement-points--available .hero-improvement-points-value {
+  color: #ffd56a;
+}
+
+.hero-improvement-tooltip-content {
+  display: none;
+}
+
+.hero-improvement-tooltip-portal {
+  position: fixed;
+  z-index: 10050;
+  min-width: 200px;
+  max-width: 280px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 200, 87, 0.35);
+  background: rgba(12, 20, 38, 0.97);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.48);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-improvement-tooltip-portal.hidden {
+  display: none;
+}
+
+.hero-improvement-tooltip-title {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  color: #ffe8b8;
+  margin-bottom: 2px;
+}
+
+.hero-improvement-tooltip-line {
+  font-size: 10px;
+  color: #b8c8e8;
+  line-height: 1.45;
+}
+
+.hero-improvement-tooltip-section {
+  margin-top: 4px;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffd56a;
+  font-weight: 700;
+}
+
+.hero-improvement-tooltip-note {
+  margin-top: 4px;
+  font-style: italic;
+  color: #98aac8;
+}
+
+.hero-improvement-tooltip-line strong {
+  color: #fff8e7;
+  font-weight: 700;
 }
 
 .hero-detail-loadout {

@@ -3,6 +3,7 @@ import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
+import { bindHeroImprovementTooltips, hideHeroImprovementTooltip } from './HeroImprovementTooltipBinder';
 import { bindHeroStatTooltips } from './HeroStatTooltipBinder';
 import { bindSkillChipTooltips } from './SkillChipTooltipBinder';
 import { bindSkillSlotAssignment } from '../skills/SkillSlotAssignmentBinder';
@@ -14,6 +15,7 @@ import {
 import { renderHeroAttributesTab } from './hero-detail/HeroAttributesTabRenderer';
 import { renderHeroClassTab } from './hero-detail/HeroClassTabRenderer';
 import { renderHeroDetailHeader } from './hero-detail/HeroDetailHeaderRenderer';
+import { renderHeroImprovementPoints } from './hero-detail/HeroImprovementPointsPresentation';
 import { renderHeroSheetTab } from './hero-detail/HeroSheetTabRenderer';
 import { renderHeroSkillsTab } from './hero-detail/HeroSkillsTabRenderer';
 import { renderHeroLoadoutStrip } from './HeroLoadoutStripPresentation';
@@ -114,6 +116,8 @@ export class HeroDetailModalRenderer {
     const scrollState = captureHeroDetailScroll(container);
     const scrollAnchorSkillId = this.pendingScrollAnchorSkillId;
 
+    hideHeroImprovementTooltip();
+
     container.innerHTML = `
       <div class="hero-detail-layout">
         <header class="hero-detail-header">${renderHeroDetailHeader(hero)}</header>
@@ -123,6 +127,9 @@ export class HeroDetailModalRenderer {
           <button type="button" class="hero-tab ${this.activeTab === 'skills' ? 'active' : ''}" data-hero-tab="skills">Skills</button>
           <button type="button" class="hero-tab ${this.activeTab === 'class' ? 'active' : ''}" data-hero-tab="class">Classe</button>
         </nav>
+        <div class="hero-detail-improvement-bar">
+          ${renderHeroImprovementPoints(hero)}
+        </div>
         ${loadoutSection}
         <div class="hero-detail-panel game-scroll">${this.renderTabContent(hero)}</div>
       </div>
@@ -132,6 +139,7 @@ export class HeroDetailModalRenderer {
     bindBarTooltips(container);
     bindEquipmentTooltips(container);
     bindSkillChipTooltips(container);
+    bindHeroImprovementTooltips(container);
     if (this.activeTab === 'attributes') {
       bindHeroStatTooltips(container);
     }
@@ -165,7 +173,7 @@ export class HeroDetailModalRenderer {
       case 'attributes':
         return renderHeroAttributesTab(hero);
       case 'skills':
-        return renderHeroSkillsTab(hero, this.skillNodes, hero.unspentImprovementPoints);
+        return renderHeroSkillsTab(hero, this.skillNodes);
       case 'class':
         return renderHeroClassTab({
           hero,

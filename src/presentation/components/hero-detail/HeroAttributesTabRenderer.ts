@@ -1,4 +1,5 @@
 import { HeroDto } from '../../../application/dto/GameStateDto';
+import { improvementSpendLabel } from './HeroImprovementPointsPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -26,7 +27,7 @@ function renderAttributeChip(
         type="button"
         class="hero-attr-add"
         data-attr-spend="${key}"
-        title="Gastar 1 ponto em ${label}"
+        title="${improvementSpendLabel(label)}"
         aria-label="Aumentar ${label}"
         ${canSpend ? '' : 'disabled'}
       >+</button>
@@ -65,14 +66,10 @@ function renderStatSection(section: HeroDto['combatStatSheet'][number]): string 
 }
 
 export function renderHeroAttributesTab(hero: HeroDto): string {
-  const points = hero.unspentImprovementPoints;
-  const canSpend = points >= 1;
+  const canSpend = hero.unspentImprovementPoints >= 1;
 
   return `
     <section class="hero-attributes-tab">
-      <p class="hero-detail-hint hero-attributes-points">
-        Pontos de aprimoramento: <strong>${points}</strong>
-      </p>
       <div class="hero-attr-row">
         ${renderAttributeChip('str', 'STR', hero.totalAttributes.str, hero.allocatedAttributes.str, canSpend)}
         ${renderAttributeChip('dex', 'DEX', hero.totalAttributes.dex, hero.allocatedAttributes.dex, canSpend)}

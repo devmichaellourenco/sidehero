@@ -85,6 +85,7 @@ export const ASSETS = {
     health: 'ui/health.png',
     inventory: 'ui/inventory.png',
     forge: 'ui/forge.png',
+    improvement: 'ui/improvement.png',
     stage: 'ui/stage.png',
     arrowPrev: 'ui/arrow-prev.png',
     arrowNext: 'ui/arrow-next.png',

@@ -99,6 +99,7 @@ const ASSET_MAP = [
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_map.png', 'ui/campaign.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_shop.png', 'ui/shop.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_anvil.png', 'ui/forge.png'],
+  ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_star.png', 'ui/improvement.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_battle.png', 'ui/attack.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_shield.png', 'ui/defense.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_life.png', 'ui/health.png'],

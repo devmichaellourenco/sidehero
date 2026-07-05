@@ -1,0 +1,75 @@
+import { describe, expect, it } from 'vitest';
+import { HeroDto } from '../../application/dto/GameStateDto';
+import {
+  improvementSpendLabel,
+  renderHeroImprovementPoints,
+} from './HeroImprovementPointsPresentation';
+
+function minimalHero(overrides: Partial<HeroDto> = {}): HeroDto {
+  return {
+    id: 'h1',
+    name: 'Nix',
+    heroClass: 'sorcerer',
+    emoji: '🔮',
+    level: 3,
+    experience: 0,
+    experienceToNextLevel: 100,
+    attack: 24,
+    defense: 8,
+    attackSpeed: 0.4,
+    castSpeed: 1,
+    critChance: 0.05,
+    critDamage: 1.65,
+    health: 80,
+    maxHealth: 90,
+    baseAttributes: { str: 5, dex: 8, int: 14 },
+    allocatedAttributes: { str: 0, dex: 0, int: 0 },
+    totalAttributes: { str: 5, dex: 8, int: 14 },
+    unspentImprovementPoints: 2,
+    unspentAscensionPoints: 0,
+    skillRanks: { basic_attack: 1 },
+    equippedSkillIds: ['basic_attack'],
+    activeSkills: [null, null, null],
+    maxActiveSkills: 3,
+    unlockedActiveSkillSlots: 1,
+    ascensionId: null,
+    hasUnspentPoints: true,
+    equipment: { weapon: null, armor: null, accessory: null },
+    combatIntent: null,
+    combatSkills: [],
+    combatSkillCooldowns: [],
+    statusEffects: [],
+    combatResists: { fire: 0, cold: 0, lightning: 0, chaos: 0 },
+    combatStatSheet: [],
+    ...overrides,
+  } as HeroDto;
+}
+
+describe('renderHeroImprovementPoints', () => {
+  it('renderiza chip unificado Aprimoramento com tooltip', () => {
+    const html = renderHeroImprovementPoints(minimalHero());
+
+    expect(html).toContain('hero-improvement-points');
+    expect(html).toContain('hero-improvement-points--available');
+    expect(html).toContain('Aprimoramento');
+    expect(html).toContain('>2<');
+    expect(html).toContain('data-hero-improvement-tooltip');
+    expect(html).toContain('hero-improvement-tooltip-content');
+    expect(html).toContain('Progressão');
+    expect(html).toContain('Skills');
+    expect(html).toContain('O mesmo saldo vale para atributos e skills');
+  });
+
+  it('omite destaque quando não há saldo', () => {
+    const html = renderHeroImprovementPoints(
+      minimalHero({ unspentImprovementPoints: 0, hasUnspentPoints: false }),
+    );
+
+    expect(html).not.toContain('hero-improvement-points--available');
+    expect(html).toContain('>0<');
+  });
+
+  it('rotula gasto de atributo como Aprimoramento', () => {
+    expect(improvementSpendLabel('STR')).toBe('Gastar 1 Aprimoramento em STR');
+  });
+});
