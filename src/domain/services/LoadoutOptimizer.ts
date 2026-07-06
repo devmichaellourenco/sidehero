@@ -37,10 +37,34 @@ export class LoadoutOptimizer {
 
   previewUpgradeForGear(state: GameState, gear: Gear): GearUpgradePreview | null {
     if (state.heroes.length === 0) return null;
+    return this.previewUpgradeForHeroes(state.heroes, gear);
+  }
 
+  previewUpgradeForActiveParty(state: GameState, gear: Gear): GearUpgradePreview | null {
+    const party = state.activeHeroes();
+    if (party.length === 0) return null;
+    return this.previewUpgradeForHeroes(party, gear);
+  }
+
+  countActivePartyUpgrades(state: GameState): number {
+    const party = state.activeHeroes();
+    if (party.length === 0 || state.inventory.length === 0) return 0;
+
+    let count = 0;
+    for (const gear of state.inventory) {
+      const preview = this.previewUpgradeForActiveParty(state, gear);
+      if (preview?.status === 'upgrade') {
+        count += 1;
+      }
+    }
+
+    return count;
+  }
+
+  private previewUpgradeForHeroes(heroes: readonly Hero[], gear: Gear): GearUpgradePreview | null {
     let best: { hero: Hero; gain: number; equipped: Gear | null } | null = null;
 
-    for (const hero of state.heroes) {
+    for (const hero of heroes) {
       if (!this.requirementChecker.meets(hero, gear)) continue;
 
       const equipped = hero.toProps().equipment?.[gear.slot] ?? null;

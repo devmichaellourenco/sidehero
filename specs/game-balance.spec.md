@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 4/8 (50%) · auditoria 2026-07-03  
-**Testes obrigatórios:** 8/8
+**Aceite:** 8/8 (100%) · auditoria 2026-07-06  
+**Testes obrigatórios:** 8/8 + `BalanceAudit.test.ts`
 
 ## Objetivo
 
@@ -28,7 +28,7 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
 | **Waves e fases** | HP/ATK/DEF inimigos por tier; boss vs trash; handcrafted | `combat-campaign` | `StageScalingCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
 | **Skills e progressão** | `basePower`, cooldowns, ranks, ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `HeroLevelXpCatalog` |
-| **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
+| **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
 | **Integração** | Mudança num domínio não quebra curva global | todas | esta spec + checklist abaixo |
 
@@ -50,10 +50,10 @@ Poder × crítico → split damageComponents[]
 - [x] Matriz de coordenação com specs de feature documentada
 - [x] DOT (`CombatTurnPhase`) mitigado por elemento + defesas como hit instantâneo
 - [x] Ciclo elemental completo: skills `frost_shard`, `blizzard` e `frost_breath` (gelo)
-- [ ] Auditoria documentada de curva tier 1–25 (early), 26–60 (mid), 61+ (late)
-- [ ] Loja, loot e baús validados contra renda de ouro por fase (sem trivializar nem starvation)
-- [ ] Waves/boss: tempo médio para clear dentro de faixa alvo por tier (ver skill)
-- [ ] Backlog de balanceamento revisado após cada entrega numérica relevante
+- [x] Auditoria documentada de curva tier 1–25 (early), 26–60 (mid), 61+ (late)
+- [x] Loja, loot e baús validados contra renda de ouro por fase (sem trivializar nem starvation)
+- [x] Waves/boss: tempo médio para clear dentro de faixa alvo por tier (ver skill)
+- [x] Backlog de balanceamento revisado após cada entrega numérica relevante
 
 ## Coordenação com outros agents
 
@@ -95,6 +95,8 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `EnemyInnateResists.test.ts` — temas e fraquezas
 - [x] `ShopService.test.ts` — cap de raridade por tier, preços
 - [x] `DotTickResolver.test.ts` — DOT mitigado (equivalente a turn phase)
+- [x] `BalanceAudit.test.ts` — curva por tier, economia loja/forja, tempo de clear
+- [x] `MilestoneGoldCap.test.ts` — teto de ouro em milestones (BAL-007)
 
 ## Backlog conhecido (auditoria 2026-07-03)
 
@@ -102,12 +104,15 @@ Criar ou atualizar; **não executar** automaticamente.
 |----|------------|-----------|---------|--------|
 | BAL-001 | Alta | DOT ignora `MitigationPipeline` e defesas | Combate | ✅ Resolvido |
 | BAL-002 | Média | Elemento `cold` sem fonte ofensiva no catálogo | Elementos | ✅ Resolvido |
-| BAL-003 | Baixa | Dodge/block/DR aplicados na soma total, não por componente | Combate | Aberto |
-| BAL-004 | Baixa | `debuff_defense` só afeta componente físico (intencional — documentar in-game?) | Combate | Aberto |
+| BAL-003 | Baixa | Dodge/block/DR aplicados na soma total, não por componente | Combate | Aberto (aceito) |
+| BAL-004 | Baixa | `debuff_defense` só afeta componente físico | Combate | Aberto (intencional — ver tooltip in-game) |
 | BAL-005 | Média | Gear sem dano/resist elemental visível no loot | Gear/Loot | ✅ Resolvido |
 | BAL-006 | Média | Gear sem flat/%, velocidade negativa e redução de CD | Gear/Loot | ✅ Resolvido |
+| BAL-007 | Média | Milestones (ex. 2-50) pagam ouro muito acima da renda de referência — épico na loja fica trivial nessas fases | Economia | ✅ Resolvido (`MilestoneGoldCap`) |
 
 ## Referências
 
 - `step-by-step/129-combate-elementos.md`
 - `step-by-step/148-game-balance-specialist.md`
+- `step-by-step/149-balance-audit-curva-economia.md`
+- `step-by-step/150-bal-007-milestone-gold-cap.md`

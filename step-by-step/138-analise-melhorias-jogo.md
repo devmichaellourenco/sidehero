@@ -11,11 +11,12 @@ Documento de referência histórica (v0.8+). Itens já entregues permanecem link
 | 5–6 | Wow Strip + relatório idle | `141-wow-strip-idle-polish.md` |
 | 7 | Meta entre temporadas | `142-meta-entre-temporadas.md` |
 | 8–9 | Ícones de skills + feedback elemental | `143-skill-icons-elemental-feedback.md` |
+| 14 | Testes de apresentação | `144-testes-apresentacao.md` |
+| 12 | Performance do side panel | `151-performance-side-panel.md` |
 
 ## Em foco (esteira ativa)
 
-### 14. Testes de apresentação
-Ver `144-testes-apresentacao.md`. Wow Strip, sprites, drag-and-drop — evitar regressões de markup e políticas visuais.
+_Nenhum item obrigatório no momento._
 
 ## Fora da esteira
 
@@ -27,7 +28,6 @@ Itens abaixo foram avaliados e **não** entram no plano ativo:
 | 4 | Revisar aliases de sprite | Mesmo bloco de arte, sem prioridade |
 | 10 | Bench com propósito | Comportamento atual da reserva está correto |
 | 11 | Chrome Web Store | Sem ação planejada |
-| 12 | Performance do side panel | Sem ação planejada |
 | 13 | Atualizar docs step-by-step | Manutenção pontual, não é feature |
 
 ### Detalhe do item 10 (arquivado)

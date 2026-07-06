@@ -58,6 +58,24 @@ describe('LoadoutOptimizer.previewUpgradeForGear', () => {
   });
 });
 
+describe('LoadoutOptimizer.countActivePartyUpgrades', () => {
+  it('conta upgrades apenas para a party ativa', () => {
+    const heroA = heroAtLevel('hero-1', 'knight', 'Galneon', 5);
+    const heroB = heroAtLevel('hero-2', 'sorcerer', 'Mage', 5);
+    const partyGear = createGear('party-gear', 12, 1);
+    const benchOnlyGear = createGear('bench-gear', 30, 20);
+    const state = GameState.restore({
+      ...GameState.initial().toProps(),
+      heroes: [heroA, heroB],
+      activePartyIds: [heroA.id],
+      inventory: [partyGear, benchOnlyGear],
+    });
+    const optimizer = new LoadoutOptimizer();
+
+    expect(optimizer.countActivePartyUpgrades(state)).toBe(1);
+  });
+});
+
 describe('LoadoutOptimizer.optimizeLoadout', () => {
   it('equipa em rodadas até estabilizar e redistribui itens substituídos', () => {
     const heroA = heroAtLevel('hero-1', 'knight', 'Galneon', 5);

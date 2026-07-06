@@ -115,6 +115,10 @@ export function renderUpgradeBadge(status: GearUpgradeStatus): string {
 }
 
 export function countUpgradeItems(state: GameStateDto): number {
+  if (typeof state.activePartyUpgradeCount === 'number') {
+    return state.activePartyUpgradeCount;
+  }
+
   return state.inventory.filter(
     (gear) => getGearUpgradeInfoForActiveParty(state, gear).status === 'upgrade',
   ).length;

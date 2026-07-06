@@ -14,13 +14,13 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
 | [upgrade-tree](upgrade-tree.spec.md) | 6/6 | 5/5 | — |
 | [meta-legacy](meta-legacy.spec.md) | 5/5 | 1/1 | — |
-| [battle-ui](battle-ui.spec.md) | 7/7 | 5/5 | — |
+| [battle-ui](battle-ui.spec.md) | 7/7 | 6/6 | — |
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
-| [game-balance](game-balance.spec.md) | 4/8 | 8/8 | curva ouro/fases (auditoria) |
+| [game-balance](game-balance.spec.md) | 8/8 | 10/10 | — |
 
 **Total aceite (features):** 55/55 (100%)  
-**Balanceamento transversal:** 4/8  
-**Total testes listados nas specs:** 48/48 (100%)
+**Balanceamento transversal:** 8/8  
+**Total testes listados nas specs:** 51/51 (100%)
 
 ## Regras de workflow do agente
 

@@ -101,9 +101,7 @@ export class CampaignFlow {
         if (!mode || mode === this.viewMode) return;
         this.viewMode = mode;
         setStoredCampaignViewMode(mode);
-        this.renderModal(modalBody);
-        this.bindInteractions(modalBody, onState);
-        this.scrollPendingPhaseIntoView(modalBody);
+        this.refreshViewMode(modalBody, onState);
       });
     });
   }
@@ -121,9 +119,7 @@ export class CampaignFlow {
         this.pendingPhaseId = resolveInitialPendingPhaseId(map);
         this.viewMode = 'region';
         setStoredCampaignViewMode('region');
-        this.renderModal(modalBody);
-        this.bindInteractions(modalBody, onState);
-        this.scrollPendingPhaseIntoView(modalBody);
+        this.refreshViewMode(modalBody, onState);
       });
     });
   }
@@ -180,6 +176,82 @@ export class CampaignFlow {
   private syncCampaignTheme(modalBody: HTMLElement): void {
     modalBody.querySelector('.campaign-modal')?.setAttribute('data-campaign-theme', this.activeMapId);
     modalBody.querySelector('[data-campaign-map-panel]')?.setAttribute('data-campaign-theme', this.activeMapId);
+  }
+
+  private updateViewToggleUi(modalBody: HTMLElement): void {
+    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-view]').forEach((button) => {
+      const mode = button.dataset.campaignView as CampaignViewMode | undefined;
+      const active = mode === this.viewMode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+
+    modalBody.querySelector('.campaign-modal')?.setAttribute('data-campaign-view', this.viewMode);
+
+    const hint = modalBody.querySelector('.campaign-modal-hint');
+    if (hint) {
+      hint.textContent =
+        this.viewMode === 'world'
+          ? 'Toque em uma região para abrir a trilha de fases.'
+          : 'Toque em uma fase desbloqueada para voltar a jogá-la.';
+    }
+  }
+
+  private refreshViewMode(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+    if (!this.campaign) return;
+
+    hideCampaignTooltip();
+    this.updateViewToggleUi(modalBody);
+
+    const panelHost = modalBody.querySelector('[data-campaign-map-panel]') as HTMLElement | null;
+    let tabsHost = modalBody.querySelector('[data-campaign-map-tabs]');
+
+    if (this.viewMode === 'world') {
+      tabsHost?.remove();
+      if (panelHost) {
+        panelHost.classList.add('campaign-map-panel--world');
+        panelHost.setAttribute('aria-label', 'Mapa-mundo');
+        panelHost.setAttribute('data-campaign-theme', this.activeMapId);
+        panelHost.innerHTML = this.renderer.renderWorldPanel(this.campaign, this.activeMapId);
+        bindCampaignTooltips(panelHost);
+      }
+      this.bindWorldMapNodes(modalBody, onState);
+      this.scrollPendingPhaseIntoView(modalBody);
+      return;
+    }
+
+    if (!tabsHost) {
+      panelHost?.insertAdjacentHTML(
+        'beforebegin',
+        `<div class="campaign-map-tabs" data-campaign-map-tabs role="tablist" aria-label="Mapas"></div>`,
+      );
+      tabsHost = modalBody.querySelector('[data-campaign-map-tabs]');
+    }
+
+    if (tabsHost) {
+      tabsHost.innerHTML = this.renderer.renderTabs(this.campaign, this.activeMapId);
+      bindCampaignTooltips(tabsHost);
+    }
+
+    const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
+    if (panelHost && activeMap) {
+      panelHost.classList.remove('campaign-map-panel--world');
+      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, this.pendingPhaseId, {
+        showUnlockBanner: this.shouldShowUnlockBanner(),
+      });
+      panelHost.setAttribute('aria-label', activeMap.name);
+      panelHost.setAttribute('data-campaign-theme', this.activeMapId);
+      if (this.shouldShowUnlockBanner()) {
+        markMapSeen(this.activeMapId);
+      }
+      bindCampaignTooltips(panelHost);
+    }
+
+    this.syncCampaignTheme(modalBody);
+    this.bindMapTabs(modalBody, onState);
+    this.bindPhaseButtons(modalBody, onState);
+    this.bindStartButton(modalBody, onState);
+    this.scrollPendingPhaseIntoView(modalBody);
   }
 
   private refreshRegionView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {

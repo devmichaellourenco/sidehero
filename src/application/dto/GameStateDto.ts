@@ -292,6 +292,7 @@ export interface GameStateDto {
   featureFlags: FeatureFlagsDto;
   chestProgress: ChestProgressDto;
   gearUpgradeHints: Record<string, GearUpgradeHintDto>;
+  activePartyUpgradeCount: number;
   seasonCompleted: boolean;
   meta?: MetaSummaryDto;
 }

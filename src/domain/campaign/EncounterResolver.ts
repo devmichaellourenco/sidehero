@@ -1,4 +1,5 @@
 import { Enemy } from '../entities/Enemy';
+import { milestoneGoldScaleForPhase } from '../balance/MilestoneGoldCap';
 import { resolvePhase } from './CampaignCatalog';
 import { PhaseId } from './CampaignIds';
 import { PhaseDefinition } from './PhaseDefinition';
@@ -26,12 +27,14 @@ export class EncounterResolver {
 
     const wave = phase.waves[waveIndex];
     const isBossWave = waveIndex === phase.waves.length - 1;
+    const milestoneGoldScale = milestoneGoldScaleForPhase(phase);
     const enemies = spawnEnemiesForWave(wave, {
       phaseId,
       waveIndex,
       difficultyTier: phase.difficultyTier,
       isBossWave,
       statMultiplier: phase.statMultiplier ?? 1,
+      milestoneGoldScale,
     });
 
     return {

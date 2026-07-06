@@ -11,6 +11,7 @@ export interface WaveSpawnContext {
   difficultyTier: number;
   isBossWave: boolean;
   statMultiplier?: number;
+  milestoneGoldScale?: number;
 }
 
 const ROLE_SCALE: Record<EnemyRole, { stat: number; reward: number }> = {
@@ -54,7 +55,9 @@ function createEnemyFromSlot(
   const attack = Math.floor(10 * scaling.atk * roleScale.stat);
   const defense = Math.floor(4 * scaling.atk * roleScale.stat);
   const maxHealth = Math.floor(60 * scaling.hp * roleScale.stat);
-  const goldReward = Math.floor(8 * scaling.gold * roleScale.reward * context.goldMultiplier);
+  const goldReward = Math.floor(
+    8 * scaling.gold * roleScale.reward * context.goldMultiplier * (context.milestoneGoldScale ?? 1),
+  );
   const xpBase = slot.role === 'boss' ? 8 : slot.role === 'elite' ? 5 : 2;
   const xpReward = Math.floor(xpBase * scaling.exp * roleScale.reward);
 

@@ -23,6 +23,7 @@ import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation, listNavigableHeroIds } from '../helpers/HeroNavigationHelper';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
 import { filterBattleLogMessages } from './BattleLogFilter';
+import { BattleLogRenderer } from './BattleLogRenderer';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
 import { bindCampaignTooltip } from './CampaignTooltipBinder';
@@ -135,6 +136,7 @@ export class GameViewController {
   private readonly hud: GameHudController;
   private readonly wowCelebration: WowCelebrationController;
   private readonly battleLogPanel: BattleLogPanelController;
+  private readonly battleLogRenderer = new BattleLogRenderer();
   private readonly skillCooldownAnimator = new SkillCooldownDisplayAnimator();
 
   private readonly heroDetailFlow: HeroDetailFlow;
@@ -557,6 +559,10 @@ export class GameViewController {
 
     if (key === 'autoOpenChests' && value === true) {
       this.chestLootFlow.scheduleAutoOpenChests();
+    }
+
+    if (key === 'logFilterImportant') {
+      this.battleLogRenderer.reset();
     }
 
     if (result.autoBattleChanged) {
@@ -1646,10 +1652,7 @@ export class GameViewController {
       this.prefsController.logFilterImportant,
     );
 
-    this.battleLog.innerHTML = [...logMessages]
-      .reverse()
-      .map((message) => `<li>${message}</li>`)
-      .join('');
+    this.battleLogRenderer.render(this.battleLog, logMessages);
 
     this.enforceUpgradeGates();
     if (!this.onboarding.isActive()) {

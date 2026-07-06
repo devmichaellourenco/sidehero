@@ -6,6 +6,7 @@ import {
   SHOP_OFFER_COUNT,
   SHOP_SLOT_BY_INDEX,
 } from '../shop/ShopCatalog';
+import { calculateShopItemPrice, calculateShopRefreshCost } from '../shop/ShopPricing';
 import { LootService } from './LootService';
 
 export interface ShopOffer {
@@ -14,25 +15,7 @@ export interface ShopOffer {
   price: number;
 }
 
-const BASE_PRICE: Record<GearRarity, number> = {
-  common: 20,
-  uncommon: 38,
-  rare: 65,
-  epic: 120,
-  legendary: 220,
-  mythic: 380,
-};
-
-const RARITY_PRICE_SCALE: Record<GearRarity, number> = {
-  common: 4,
-  uncommon: 6,
-  rare: 9,
-  epic: 14,
-  legendary: 22,
-  mythic: 32,
-};
-
-const REFRESH_BASE_COST = 15;
+export { calculateShopItemPrice, calculateShopRefreshCost } from '../shop/ShopPricing';
 
 export function parseShopOfferCatalogKey(
   offerId: string,
@@ -96,11 +79,10 @@ export class ShopService {
   }
 
   calculateRefreshCost(tier: number): number {
-    return REFRESH_BASE_COST + Math.max(0, tier - 1) * 5;
+    return calculateShopRefreshCost(tier);
   }
 
   calculateItemPrice(tier: number, rarity: GearRarity): number {
-    const tierBonus = Math.max(0, tier - 1) * RARITY_PRICE_SCALE[rarity];
-    return BASE_PRICE[rarity] + tierBonus;
+    return calculateShopItemPrice(tier, rarity);
   }
 }

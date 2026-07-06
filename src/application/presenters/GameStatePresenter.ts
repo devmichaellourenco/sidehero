@@ -9,6 +9,7 @@ import { mapHeroToDto as mapHeroBaseToDto } from '../mappers/HeroDtoMapper';
 import { Hero } from '../../domain/entities/Hero';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
 import { buildInventoryUpgradeHints } from '../mappers/GearUpgradePreviewMapper';
+import { LoadoutOptimizer } from '../../domain/services/LoadoutOptimizer';
 import { getCampaignInfo, resolvePhase } from '../../domain/campaign/CampaignCatalog';
 import { parsePhaseId } from '../../domain/campaign/CampaignIds';
 import { mapDefinitionByIndex } from '../../domain/campaign/CampaignMaps';
@@ -31,7 +32,10 @@ import { resolveEnemyInnateResists } from '../../domain/enemies/EnemyInnateResis
 import { StorageCapacityPolicy } from '../../domain/storage/StorageCapacityPolicy';
 
 export class GameStatePresenter {
-  constructor(private readonly upgradeService: UpgradeService) {}
+  constructor(
+    private readonly upgradeService: UpgradeService,
+    private readonly loadoutOptimizer = new LoadoutOptimizer(),
+  ) {}
 
   present(state: GameState): GameStateDto {
     const upgradeLevels = { ...state.upgradeLevels };
@@ -139,6 +143,7 @@ export class GameStatePresenter {
       featureFlags: mapFeatureFlags(state.upgradeLevels),
       chestProgress: mapChestProgress(state.totalBattlesWon),
       gearUpgradeHints: buildInventoryUpgradeHints(state),
+      activePartyUpgradeCount: this.loadoutOptimizer.countActivePartyUpgrades(state),
     };
   }
 }
