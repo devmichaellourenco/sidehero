@@ -25,8 +25,14 @@ description: Árvore de melhorias com grafo, layout e UI no Side Hero. Use para 
 ## UI
 
 - `UpgradeTreeModalRenderer` — canvas único
-- `UpgradeTreeViewportBinder` — pan/zoom
+- `UpgradeTreeViewportBinder` — pan/zoom; exporta `UpgradeTreeViewportState`
 - `buildEdgePath` — linha reta entre nodos
+
+## Viewport após compra
+
+Ao comprar melhoria, **preservar** pan/zoom (não resetar canvas). Auto-foco (`findFocusNodeId`) só na **abertura** do modal; botão "Ir para disponível" continua manual. Ver critério pendente em `specs/upgrade-tree.spec.md`.
+
+Padrão: `beginSession()` na abertura → capturar estado antes do re-render → `bindUpgradeTreeViewport(..., { initialState })`.
 
 ## Núcleo
 

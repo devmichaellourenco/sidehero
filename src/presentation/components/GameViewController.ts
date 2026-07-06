@@ -665,6 +665,7 @@ export class GameViewController {
     const state = response.state;
 
     this.state = state;
+    this.upgradeTreeModal.beginSession();
     this.modalStack.length = 0;
     this.pushModal({ type: 'upgrades' });
   }

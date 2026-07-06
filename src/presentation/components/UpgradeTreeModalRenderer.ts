@@ -11,7 +11,12 @@ import {
   PositionedUpgradeNode,
   upgradeNodeShortLabel,
 } from './UpgradeTreeGraphPresentation';
-import { bindUpgradeTreeViewport, focusUpgradeTreeNode } from './UpgradeTreeViewportBinder';
+import {
+  bindUpgradeTreeViewport,
+  captureUpgradeTreeViewport,
+  focusUpgradeTreeNode,
+  type UpgradeTreeViewportState,
+} from './UpgradeTreeViewportBinder';
 
 export type UpgradeTreeHandlers = {
   onPurchase: (upgradeId: string) => void;
@@ -23,6 +28,14 @@ let unbindViewport: (() => void) | null = null;
 
 export class UpgradeTreeModalRenderer {
   private nodeById = new Map<string, UpgradeNodeDto>();
+  private preservedViewport: UpgradeTreeViewportState | null = null;
+  private autoFocusPending = true;
+
+  /** Chamar ao abrir o modal de melhorias (nova sessão). */
+  beginSession(): void {
+    this.preservedViewport = null;
+    this.autoFocusPending = true;
+  }
 
   render(
     container: HTMLElement,
@@ -30,6 +43,11 @@ export class UpgradeTreeModalRenderer {
     nodes: UpgradeNodeDto[],
     handlers: UpgradeTreeHandlers,
   ): void {
+    const existingViewport = container.querySelector('[data-upgrade-tree-viewport]') as HTMLElement | null;
+    if (existingViewport) {
+      this.preservedViewport = captureUpgradeTreeViewport(existingViewport) ?? this.preservedViewport;
+    }
+
     unbindViewport?.();
     unbindViewport = null;
 
@@ -87,15 +105,34 @@ export class UpgradeTreeModalRenderer {
     `;
 
     const viewport = container.querySelector('[data-upgrade-tree-viewport]') as HTMLElement;
-    unbindViewport = bindUpgradeTreeViewport(viewport);
+    const shouldAutoFocus = this.autoFocusPending;
+    unbindViewport = bindUpgradeTreeViewport(viewport, {
+      initialState: this.preservedViewport,
+      onTransformChange: (next) => {
+        this.preservedViewport = next;
+      },
+    });
 
-    if (focusNodeId) {
-      requestAnimationFrame(() => focusUpgradeTreeNode(viewport, focusNodeId));
+    if (shouldAutoFocus && focusNodeId) {
+      requestAnimationFrame(() => {
+        const focused = focusUpgradeTreeNode(viewport, focusNodeId);
+        if (focused) {
+          this.preservedViewport = focused;
+        }
+        this.autoFocusPending = false;
+      });
+    } else {
+      this.autoFocusPending = false;
     }
 
     container.querySelector('[data-upgrade-focus-available]')?.addEventListener('click', () => {
       const nextFocus = findFocusNodeId(nodes);
-      if (nextFocus) focusUpgradeTreeNode(viewport, nextFocus);
+      if (nextFocus) {
+        const focused = focusUpgradeTreeNode(viewport, nextFocus);
+        if (focused) {
+          this.preservedViewport = focused;
+        }
+      }
     });
 
     this.bindNodeTooltips(container, handlers);

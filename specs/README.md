@@ -12,15 +12,15 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [gear-loot](gear-loot.spec.md) | 5/5 | 5/5 | — |
 | [stash-forge](stash-forge.spec.md) | 5/5 | 3/3 | — |
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
-| [upgrade-tree](upgrade-tree.spec.md) | 6/6 | 5/5 | — |
+| [upgrade-tree](upgrade-tree.spec.md) | 7/7 | 7/7 | — |
 | [meta-legacy](meta-legacy.spec.md) | 5/5 | 1/1 | — |
 | [battle-ui](battle-ui.spec.md) | 7/7 | 6/6 | — |
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
 | [game-balance](game-balance.spec.md) | 8/8 | 10/10 | — |
 
-**Total aceite (features):** 57/57 (100%)  
+**Total aceite (features):** 58/58 (100%)  
 **Balanceamento transversal:** 8/8  
-**Total testes listados nas specs:** 52/52 (100%)
+**Total testes listados nas specs:** 54/54 (100%)
 
 ## Próxima feature sugerida
 

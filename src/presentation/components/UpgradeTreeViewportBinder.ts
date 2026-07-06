@@ -8,24 +8,47 @@ export interface UpgradeTreeViewportState {
   panY: number;
 }
 
+export function parseUpgradeTreeViewportTransform(transform: string): UpgradeTreeViewportState | null {
+  const translateMatch = transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+  const scaleMatch = transform.match(/scale\(([-\d.]+)\)/);
+  if (!translateMatch || !scaleMatch) return null;
+
+  return {
+    panX: Number(translateMatch[1]),
+    panY: Number(translateMatch[2]),
+    scale: Number(scaleMatch[1]),
+  };
+}
+
+export function captureUpgradeTreeViewport(viewport: HTMLElement): UpgradeTreeViewportState | null {
+  const stage = viewport.querySelector('.upgrade-tree-stage') as HTMLElement | null;
+  if (!stage?.style.transform) return null;
+  return parseUpgradeTreeViewportTransform(stage.style.transform);
+}
+
+function formatUpgradeTreeViewportTransform(state: UpgradeTreeViewportState): string {
+  return `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+}
+
 export function bindUpgradeTreeViewport(
   viewport: HTMLElement,
   options: {
+    initialState?: UpgradeTreeViewportState | null;
     onTransformChange?: (state: UpgradeTreeViewportState) => void;
   } = {},
 ): () => void {
   const stage = viewport.querySelector('.upgrade-tree-stage') as HTMLElement | null;
   if (!stage) return () => undefined;
 
-  let scale = 1;
-  let panX = 0;
-  let panY = 0;
+  let scale = options.initialState?.scale ?? 1;
+  let panX = options.initialState?.panX ?? 0;
+  let panY = options.initialState?.panY ?? 0;
   let dragging = false;
   let lastPointerX = 0;
   let lastPointerY = 0;
 
   const applyTransform = () => {
-    stage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    stage.style.transform = formatUpgradeTreeViewportTransform({ scale, panX, panY });
     options.onTransformChange?.({ scale, panX, panY });
   };
 
@@ -98,17 +121,17 @@ export function bindUpgradeTreeViewport(
   };
 }
 
-export function focusUpgradeTreeNode(viewport: HTMLElement, nodeId: string): void {
+export function focusUpgradeTreeNode(viewport: HTMLElement, nodeId: string): UpgradeTreeViewportState | null {
   const stage = viewport.querySelector('.upgrade-tree-stage') as HTMLElement | null;
   const node = viewport.querySelector(`[data-upgrade-node="${nodeId}"]`) as HTMLElement | null;
-  if (!stage || !node) return;
+  if (!stage || !node) return null;
 
   const viewportRect = viewport.getBoundingClientRect();
   const nodeRect = node.getBoundingClientRect();
   const stageRect = stage.getBoundingClientRect();
 
-  const scaleMatch = stage.style.transform.match(/scale\(([^)]+)\)/);
-  const scale = scaleMatch ? Number(scaleMatch[1]) : 1;
+  const current = captureUpgradeTreeViewport(viewport);
+  const scale = current?.scale ?? 1;
 
   const nodeCenterX = nodeRect.left + nodeRect.width / 2 - stageRect.left;
   const nodeCenterY = nodeRect.top + nodeRect.height / 2 - stageRect.top;
@@ -116,7 +139,9 @@ export function focusUpgradeTreeNode(viewport: HTMLElement, nodeId: string): voi
   const panX = viewportRect.width / 2 - nodeCenterX * scale;
   const panY = viewportRect.height / 2 - nodeCenterY * scale;
 
-  stage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+  const state = { panX, panY, scale };
+  stage.style.transform = formatUpgradeTreeViewportTransform(state);
+  return state;
 }
 
 function clamp(value: number, min: number, max: number): number {

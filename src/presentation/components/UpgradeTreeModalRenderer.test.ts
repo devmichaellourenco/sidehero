@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
+import * as UpgradeTreeViewportBinder from './UpgradeTreeViewportBinder';
 
 function node(partial: Partial<UpgradeNodeDto> & Pick<UpgradeNodeDto, 'id' | 'branch'>): UpgradeNodeDto {
   return {
@@ -71,5 +72,33 @@ describe('UpgradeTreeModalRenderer', () => {
     buyButton.click();
 
     expect(onPurchase).toHaveBeenCalledWith('auto_open_chests_1');
+  });
+
+  it('preserva viewport no segundo render após compra simulada', () => {
+    const container = document.createElement('div');
+    const nodes = [
+      node({ id: 'auto_battle_2', branch: 'combat', status: 'owned', name: 'Auto-batalha II' }),
+      node({ id: 'auto_battle_3', branch: 'combat', status: 'available', name: 'Auto-batalha III' }),
+    ];
+    const focusSpy = vi.spyOn(UpgradeTreeViewportBinder, 'focusUpgradeTreeNode');
+
+    renderer.beginSession();
+    renderer.render(container, minimalState(), nodes, { onPurchase: vi.fn() });
+
+    const stage = container.querySelector('.upgrade-tree-stage') as HTMLElement;
+    stage.style.transform = 'translate(120px, 80px) scale(1.2)';
+
+    const ownedNodes = [
+      node({ id: 'auto_battle_2', branch: 'combat', status: 'owned', name: 'Auto-batalha II' }),
+      node({ id: 'auto_battle_3', branch: 'combat', status: 'owned', name: 'Auto-batalha III' }),
+    ];
+    focusSpy.mockClear();
+    renderer.render(container, minimalState(400), ownedNodes, { onPurchase: vi.fn() });
+
+    const nextStage = container.querySelector('.upgrade-tree-stage') as HTMLElement;
+    expect(nextStage.style.transform).toBe('translate(120px, 80px) scale(1.2)');
+    expect(focusSpy).not.toHaveBeenCalled();
+
+    focusSpy.mockRestore();
   });
 });

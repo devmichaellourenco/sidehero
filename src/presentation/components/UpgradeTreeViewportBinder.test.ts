@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { describe, expect, it, vi } from 'vitest';
-import { bindUpgradeTreeViewport, focusUpgradeTreeNode } from './UpgradeTreeViewportBinder';
+import { bindUpgradeTreeViewport, captureUpgradeTreeViewport, focusUpgradeTreeNode } from './UpgradeTreeViewportBinder';
 
 function buildViewport(): HTMLElement {
   const viewport = document.createElement('div');
@@ -108,10 +108,38 @@ describe('UpgradeTreeViewportBinder', () => {
     const viewport = buildViewport();
     const stage = viewport.querySelector('.upgrade-tree-stage') as HTMLElement;
 
-    focusUpgradeTreeNode(viewport, 'auto_battle_2');
+    const state = focusUpgradeTreeNode(viewport, 'auto_battle_2');
 
+    expect(state).not.toBeNull();
     expect(stage.style.transform).toContain('translate(');
     expect(stage.style.transform).toContain('scale(');
+    viewport.remove();
+  });
+
+  it('restaura estado inicial ao re-bind', () => {
+    const viewport = buildViewport();
+    const stage = viewport.querySelector('.upgrade-tree-stage') as HTMLElement;
+    const initialState = { panX: 120, panY: 80, scale: 1.2 };
+
+    const unbind = bindUpgradeTreeViewport(viewport, { initialState });
+
+    expect(stage.style.transform).toBe('translate(120px, 80px) scale(1.2)');
+
+    unbind();
+    viewport.remove();
+  });
+
+  it('captura pan e zoom do stage', () => {
+    const viewport = buildViewport();
+    const stage = viewport.querySelector('.upgrade-tree-stage') as HTMLElement;
+    stage.style.transform = 'translate(45px, 30px) scale(1.16)';
+
+    expect(captureUpgradeTreeViewport(viewport)).toEqual({
+      panX: 45,
+      panY: 30,
+      scale: 1.16,
+    });
+
     viewport.remove();
   });
 

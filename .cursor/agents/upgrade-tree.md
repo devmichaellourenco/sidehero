@@ -17,10 +17,11 @@ Catálogo de upgrades, grafo, layout e UI da árvore.
 ## Escopo
 
 - `UpgradeCatalog`, `UpgradeService`, `UpgradeDefinition`
-- `UpgradeTreeLayout`, `UpgradeTreeModalRenderer`, `UpgradeTreeGraphPresentation`
+- `UpgradeTreeLayout`, `UpgradeTreeModalRenderer`, `UpgradeTreeGraphPresentation`, `UpgradeTreeViewportBinder`
 
 ## Checklist
 
 - [ ] Todo nó novo: `parents`, posição no layout, teste catálogo
 - [ ] Arestas retas (H/V/45°)
 - [ ] `FeatureAccessPolicy` se nova `FeatureKey`
+- [ ] Compra de melhoria: viewport (pan/zoom) preservado — `beginSession()` + `captureUpgradeTreeViewport`
