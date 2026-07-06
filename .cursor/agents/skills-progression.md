@@ -18,10 +18,11 @@
 
 - `src/domain/progression/**`
 - Skill/ascension use cases
-- `SkillCardPresentation`, `HeroSkillsTabRenderer`
+- `SkillCardPresentation`, `HeroSkillsTabRenderer`, `HeroDetailModalRenderer`, `HeroDetailScrollPresentation`
 
 ## Checklist
 
 - [ ] Allocate no `SkillService`, gate no use case
 - [ ] Catálogo em `SkillCatalog` / `HeroCombatSkillCatalog`
 - [ ] Testes allocate + ascension + `SkillBattleSlots`
+- [ ] Mudança na lista de skills: preservar scroll ao `+` rank

@@ -13,6 +13,6 @@ Carregue a pasta `dist/` em `chrome://extensions` (modo desenvolvedor).
 
 ## Histórico de desenvolvimento
 
-- `step-by-step/` — histórico de desenvolvimento
 - `specs/` — specs SDD por feature (fonte de verdade)
-- `.cursor/AGENTS.md` — agents e skills do projeto
+- `.cursor/AGENTS.md` — agents, skills e rules do projeto
+- `releases/` — notas e zips de versão publicada

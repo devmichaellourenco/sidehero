@@ -35,6 +35,17 @@ Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara 
 
 - Trading entre jogadores
 
+## Backlog (Fase 2 — não implementado)
+
+Adicionar critérios `[ ]` aqui antes de codar:
+
+- Busca textual no grid de inventário
+- Favoritar itens
+- Vender/descartar lixo em lote
+- Compare side-by-side
+- Aba inventário no drawer do herói
+- Virtualização para 500+ itens
+
 ## Testes obrigatórios
 
 - [x] `LootService.test.ts`

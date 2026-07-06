@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 7/7 (100%) · auditoria 2026-07-03  
-**Testes obrigatórios:** 5/5 presentes na suite
+**Aceite:** 8/8 (100%) · auditoria 2026-07-06  
+**Testes obrigatórios:** 6/6 grupos presentes na suite
 
 ## Objetivo
 
@@ -26,7 +26,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 |--------|-------|
 | Domain | `src/domain/campaign/*`, `src/domain/services/combat/*`, `src/domain/combat/*` |
 | Application | `TickGameUseCase`, `ResumeCombatIntermissionUseCase`, `SelectPhaseUseCase`, `GetCampaignOverviewUseCase` |
-| Presentation | `BattleStripRenderer`, `BattleVictoryFlow`, controllers de combate |
+| Presentation | `BattleStripRenderer`, `BattleVictoryFlow`, `CampaignMapPresentation`, `CampaignModalRenderer`, `CampaignTooltipBinder`, `CampaignFlow` |
 
 ## Invariantes
 
@@ -46,3 +46,4 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] `CombatTurnPhase.test.ts`, `CombatActionExecutor.test.ts`
 - [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`
 - [x] `BattleVictoryFlow.test.ts`
+- [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips

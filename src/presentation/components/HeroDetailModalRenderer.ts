@@ -10,7 +10,7 @@ import { bindSkillSlotAssignment } from '../skills/SkillSlotAssignmentBinder';
 import {
   captureHeroDetailScroll,
   restoreHeroDetailScroll,
-  scrollHeroDetailSkillCardIntoView,
+  type HeroDetailScrollState,
 } from './hero-detail/HeroDetailScrollPresentation';
 import { renderHeroAttributesTab } from './hero-detail/HeroAttributesTabRenderer';
 import { renderHeroClassTab } from './hero-detail/HeroClassTabRenderer';
@@ -41,7 +41,7 @@ export class HeroDetailModalRenderer {
   private ascensionOptions: AscensionOptionDto[] = [];
   private ascensionName: string | null = null;
   private ascensionSkillNodes: SkillNodeDto[] = [];
-  private pendingScrollAnchorSkillId: string | null = null;
+  private preservedScrollState: HeroDetailScrollState | null = null;
 
   setSkillNodes(nodes: SkillNodeDto[]): void {
     this.skillNodes = nodes;
@@ -113,8 +113,7 @@ export class HeroDetailModalRenderer {
       `
         : '';
 
-    const scrollState = captureHeroDetailScroll(container);
-    const scrollAnchorSkillId = this.pendingScrollAnchorSkillId;
+    const scrollState = this.preservedScrollState ?? captureHeroDetailScroll(container);
 
     hideHeroImprovementTooltip();
 
@@ -149,23 +148,23 @@ export class HeroDetailModalRenderer {
         handlers.onMountInventory(inventoryHost as HTMLElement);
       }
     }
-    this.restoreScrollAfterRender(container, scrollState, scrollAnchorSkillId);
+    this.restoreScrollAfterRender(container, scrollState);
   }
 
   private restoreScrollAfterRender(
     container: HTMLElement,
     scrollState: ReturnType<typeof captureHeroDetailScroll>,
-    anchorSkillId: string | null,
   ): void {
     requestAnimationFrame(() => {
-      if (anchorSkillId && scrollHeroDetailSkillCardIntoView(container, anchorSkillId)) {
-        this.pendingScrollAnchorSkillId = null;
-        return;
-      }
-
-      restoreHeroDetailScroll(container, scrollState);
-      this.pendingScrollAnchorSkillId = null;
+      requestAnimationFrame(() => {
+        restoreHeroDetailScroll(container, scrollState);
+        this.preservedScrollState = null;
+      });
     });
+  }
+
+  private pinScrollBeforeMutation(container: HTMLElement): void {
+    this.preservedScrollState = captureHeroDetailScroll(container);
   }
 
   private renderTabContent(hero: HeroDto): string {
@@ -202,6 +201,7 @@ export class HeroDetailModalRenderer {
       button.addEventListener('click', () => {
         const attr = button.getAttribute('data-attr-spend') as 'str' | 'dex' | 'int';
         if (attr && !(button as HTMLButtonElement).disabled) {
+          this.pinScrollBeforeMutation(container);
           handlers.onSpendAttribute(hero.id, attr);
         }
       });
@@ -211,7 +211,7 @@ export class HeroDetailModalRenderer {
       button.addEventListener('click', () => {
         const skillId = button.getAttribute('data-skill-allocate');
         if (skillId && !(button as HTMLButtonElement).disabled) {
-          this.pendingScrollAnchorSkillId = skillId;
+          this.pinScrollBeforeMutation(container);
           handlers.onAllocateSkill(hero.id, skillId);
         }
       });
@@ -244,7 +244,7 @@ export class HeroDetailModalRenderer {
       button.addEventListener('click', () => {
         const skillId = button.getAttribute('data-ascension-allocate');
         if (skillId && !(button as HTMLButtonElement).disabled) {
-          this.pendingScrollAnchorSkillId = skillId;
+          this.pinScrollBeforeMutation(container);
           handlers.onAllocateAscensionSkill(hero.id, skillId);
         }
       });

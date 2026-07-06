@@ -42,4 +42,4 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `BattleChromeLayout.test.ts`, `WowBannerBuilder.test.ts`, `WowStripRenderPolicy.test.ts`
 - [x] `OnboardingPolicy.test.ts`, `IdleProgressSummary.test.ts`
 - [x] `BattleLogRenderer.test.ts` — log incremental no painel
-- [x] Ver `step-by-step/144-testes-apresentacao.md`, `step-by-step/151-performance-side-panel.md`
+- [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts` (campanha — ver também `combat-campaign.spec.md`)

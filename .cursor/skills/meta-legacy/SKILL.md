@@ -29,7 +29,3 @@ description: Meta progressão e legado entre temporadas no Side Hero. Use para m
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
 - **Não** gerar release até o usuário solicitar
-
-## Referência
-
-`step-by-step/142-meta-entre-temporadas.md`

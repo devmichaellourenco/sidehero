@@ -21,6 +21,6 @@ Ofertas, compra e renovação da loja.
 
 ## Checklist
 
-- [ ] ID de oferta estável no tier (`step-by-step` loja tier)
+- [ ] ID de oferta estável no tier (seed determinístico por tier)
 - [ ] `ShopService.test.ts` atualizado
 - [ ] Cota refresh via `shop_refresh` feature level

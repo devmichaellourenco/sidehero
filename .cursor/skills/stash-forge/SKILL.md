@@ -21,10 +21,6 @@ description: Baú de itens e Forja Divina no Side Hero. Use para stash, baú de 
 - 9 itens mesma raridade → 1 superior (`GearRarityProgression`)
 - Confirm destroy fora da modal stack principal
 
-## Referência
-
-`step-by-step/134-forja-divina.md`, `step-by-step/128-item-stash.md`
-
 ## Workflow do agente
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito

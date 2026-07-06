@@ -36,19 +36,3 @@ export function restoreHeroDetailScroll(container: HTMLElement, state: HeroDetai
     }
   }
 }
-
-export function scrollHeroDetailSkillCardIntoView(
-  container: HTMLElement,
-  skillId: string,
-): boolean {
-  const card = container
-    .querySelector(`[data-skill-allocate="${skillId}"], [data-ascension-allocate="${skillId}"]`)
-    ?.closest('.skill-card');
-
-  if (!card || typeof (card as HTMLElement).scrollIntoView !== 'function') {
-    return false;
-  }
-
-  (card as HTMLElement).scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  return true;
-}

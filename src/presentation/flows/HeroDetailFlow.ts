@@ -114,7 +114,6 @@ export class HeroDetailFlow {
 
   private afterMutation(state: GameStateDto): void {
     this.onStateUpdated(state);
-    this.refreshModal();
   }
 
   private async spendAttributePoint(heroId: string, attr: 'str' | 'dex' | 'int'): Promise<void> {

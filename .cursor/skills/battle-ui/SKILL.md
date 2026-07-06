@@ -26,13 +26,9 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 
 ## Testes de apresentação
 
-Ver `step-by-step/144-testes-apresentacao.md` — criar ou atualizar testes ao mudar markup/CSS crítico (não executar `npm test` automaticamente).
+Listados em `specs/battle-ui.spec.md` — criar ou atualizar ao mudar markup/CSS crítico (não executar `npm test` automaticamente).
 
 ## Workflow do agente
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
 - **Não** gerar release até o usuário solicitar
-
-## Referência UX
-
-`step-by-step/095-roadmap-ux-implementacao.md`

@@ -2,13 +2,13 @@
 
 Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho novo começa pela spec; implementação e testes devem rastrear critérios de aceite aqui.
 
-## Painel de status (auditoria 2026-07-03)
+## Painel de status (auditoria 2026-07-06)
 
 | Feature | Aceite | Testes spec | Pendências |
 |---------|--------|-------------|------------|
-| [combat-campaign](combat-campaign.spec.md) | 7/7 | 5/5 | — |
+| [combat-campaign](combat-campaign.spec.md) | 8/8 | 6/6 | — |
 | [heroes-party](heroes-party.spec.md) | 5/5 | 5/5 | — |
-| [skills-progression](skills-progression.spec.md) | 5/5 | 6/6 | — |
+| [skills-progression](skills-progression.spec.md) | 6/6 | 7/7 | — |
 | [gear-loot](gear-loot.spec.md) | 5/5 | 5/5 | — |
 | [stash-forge](stash-forge.spec.md) | 5/5 | 3/3 | — |
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
@@ -18,9 +18,13 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
 | [game-balance](game-balance.spec.md) | 8/8 | 10/10 | — |
 
-**Total aceite (features):** 55/55 (100%)  
+**Total aceite (features):** 57/57 (100%)  
 **Balanceamento transversal:** 8/8  
-**Total testes listados nas specs:** 51/51 (100%)
+**Total testes listados nas specs:** 52/52 (100%)
+
+## Próxima feature sugerida
+
+Inventário Fase 2 — backlog em [`gear-loot.spec.md`](gear-loot.spec.md). Adicionar critérios `[ ]` na spec antes de implementar.
 
 ## Regras de workflow do agente
 
@@ -35,7 +39,6 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 3. Implementar nas camadas corretas (domain → application → presentation)
 4. Criar ou atualizar testes listados na spec (não executar npm test)
 5. Marcar [x] nos critérios entregues
-6. Registrar em step-by-step/ se for entrega relevante
 ```
 
 ## Mapa de features

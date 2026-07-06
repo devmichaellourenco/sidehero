@@ -16,7 +16,6 @@ Detalhes: `specs/README.md` · regra Cursor: `.cursor/rules/workflow.mdc`
 3. Implemente: `domain` → `application` → `presentation` → `infrastructure`
 4. Se envolver números/curva → consulte `specs/game-balance.spec.md` e skill `game-balance`
 5. Crie ou atualize testes listados na spec (sem executar)
-6. Documente entregas em `step-by-step/` quando relevante
 
 ## Arquitetura (todas as features)
 
@@ -57,4 +56,4 @@ npm run release       # zip — só quando o usuário pedir
 
 - Código e identificadores: inglês
 - Textos de UI do jogo: português
-- Specs, step-by-step e commits: português
+- Specs e commits: português

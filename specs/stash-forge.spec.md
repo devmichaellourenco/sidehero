@@ -23,7 +23,7 @@ Guardar gear extra no **baú** (capacidade por melhoria) e usar a **Forja Divina
 |--------|-------|
 | Domain | `DivineForgeService`, `DivineForgePolicy`, `GameState` stash fields |
 | Application | `MoveGearToStashUseCase`, `MoveGearFromStashUseCase`, `FuseGearInForgeUseCase`, `SalvageGearInForgeUseCase`, `DestroyGearUseCase` |
-| Presentation | `StorageGridPresentation`, modal Forja, `step-by-step/134-forja-divina.md` |
+| Presentation | `StorageGridPresentation`, `DivineForgeModalRenderer`, modal Forja |
 
 ## Invariantes
 

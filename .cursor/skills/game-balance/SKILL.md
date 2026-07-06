@@ -72,8 +72,3 @@ Ver lista em `specs/game-balance.spec.md`. Criar/atualizar arquivos; não execut
 1. Auditoria curva ouro: recompensa por wave vs preço loja/forja
 2. BAL-003 — dodge/block/DR por componente (opcional)
 3. Playtest documentado tier 1–25 / 26–60 / 61+
-
-## Referências
-
-- `step-by-step/129-combate-elementos.md`
-- `step-by-step/148-game-balance-specialist.md`

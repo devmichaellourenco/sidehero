@@ -1,9 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import {
-  captureHeroDetailScroll,
-  restoreHeroDetailScroll,
-  scrollHeroDetailSkillCardIntoView,
-} from './HeroDetailScrollPresentation';
+import { describe, expect, it } from 'vitest';
+import { captureHeroDetailScroll, restoreHeroDetailScroll } from './HeroDetailScrollPresentation';
 
 describe('HeroDetailScrollPresentation', () => {
   it('captura e restaura scroll da lista de skills', () => {
@@ -20,18 +16,17 @@ describe('HeroDetailScrollPresentation', () => {
     expect(skillsScroll.scrollTop).toBe(180);
   });
 
-  it('ancora o card da skill após re-render', () => {
-    const scrollIntoView = vi.fn();
-    const card = { className: 'skill-card', scrollIntoView };
-    const button = {
-      getAttribute: (name: string) => (name === 'data-skill-allocate' ? 'fireball' : null),
-      closest: () => card,
-    };
+  it('captura e restaura scroll do painel quando não há lista de skills', () => {
+    const panel = { scrollTop: 240, className: 'hero-detail-panel' };
     const container = {
-      querySelector: () => button,
+      querySelector: (selector: string) =>
+        selector === '.hero-skills-tab-scroll' ? null : selector === '.hero-detail-panel' ? panel : null,
     } as unknown as HTMLElement;
 
-    expect(scrollHeroDetailSkillCardIntoView(container, 'fireball')).toBe(true);
-    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest' });
+    const state = captureHeroDetailScroll(container);
+    panel.scrollTop = 0;
+
+    restoreHeroDetailScroll(container, state);
+    expect(panel.scrollTop).toBe(240);
   });
 });

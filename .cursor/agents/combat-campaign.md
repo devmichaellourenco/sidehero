@@ -20,9 +20,11 @@ Especialista em loop de combate, campanha por fases/waves, scaling e intermissõ
 - `src/domain/services/combat/**`
 - `src/domain/combat/**`
 - `TickGameUseCase`, `ResumeCombatIntermissionUseCase`, `SelectPhaseUseCase`
+- Apresentação campanha: `CampaignMapPresentation`, `CampaignModalRenderer`, `CampaignTooltipBinder`, `CampaignFlow`
 
 ## Checklist
 
 - [ ] Regras no domínio, não no renderer
 - [ ] Testes em `PhaseCombatHandlers`, `CombatTurnPhase`, `CombatActionExecutor`
 - [ ] Intermissão não inicia próxima wave até `RESUME_COMBAT_INTERMISSION`
+- [ ] UI campanha: testes em `CampaignMapPresentation`, `CampaignTooltipBinder`, `CampaignModalRenderer`

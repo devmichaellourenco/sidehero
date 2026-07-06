@@ -109,10 +109,3 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-005 | Média | Gear sem dano/resist elemental visível no loot | Gear/Loot | ✅ Resolvido |
 | BAL-006 | Média | Gear sem flat/%, velocidade negativa e redução de CD | Gear/Loot | ✅ Resolvido |
 | BAL-007 | Média | Milestones (ex. 2-50) pagam ouro muito acima da renda de referência — épico na loja fica trivial nessas fases | Economia | ✅ Resolvido (`MilestoneGoldCap`) |
-
-## Referências
-
-- `step-by-step/129-combate-elementos.md`
-- `step-by-step/148-game-balance-specialist.md`
-- `step-by-step/149-balance-audit-curva-economia.md`
-- `step-by-step/150-bal-007-milestone-gold-cap.md`
