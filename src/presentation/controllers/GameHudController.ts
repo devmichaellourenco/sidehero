@@ -233,7 +233,7 @@ export class GameHudController {
 
     this.openHeroesBtn.title =
       heroPointsCount > 0
-        ? `Heróis (${heroPointsCount} com pontos para gastar)`
+        ? `Heróis (${heroPointsCount} com Aprimoramento)`
         : 'Heróis';
     updateBadge(this.heroesBadgeEl, heroPointsCount);
 

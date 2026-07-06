@@ -30,7 +30,7 @@ describe('OnboardingPolicy', () => {
     expect(step?.id).toBe('pause-loadout');
   });
 
-  it('detecta pontos de herói', () => {
+  it('detecta Aprimoramento pendente', () => {
     const dismissed = new Set(['first-chest', 'pause-loadout'] as const);
     const step = resolveOnboardingStep(
       mockState({

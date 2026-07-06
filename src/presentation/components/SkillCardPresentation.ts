@@ -13,7 +13,6 @@ function escapeHtml(text: string): string {
 
 export interface SkillCardOptions {
   allocateAttr: string;
-  allocateLabel?: string;
   canAllocate: boolean;
 }
 
@@ -40,6 +39,29 @@ function renderEssentialBadges(node: SkillNodeDto): string {
   }
 
   return badges.join('');
+}
+
+function renderSkillRankUpButton(node: SkillNodeDto, options: SkillCardOptions): string {
+  if (node.status === 'maxed' || node.currentRank >= node.maxRank) return '';
+
+  const canAllocate = options.canAllocate && node.canAllocateRank;
+  const nextRank = Math.min(node.currentRank + 1, node.maxRank);
+  const tooltip = canAllocate
+    ? `Subir para rank ${nextRank}/${node.maxRank} · Gasta 1 Aprimoramento`
+    : node.currentRank <= 0
+      ? 'Desbloqueie a skill para subir rank'
+      : 'Requisitos não atendidos ou sem Aprimoramento';
+
+  return `
+    <button
+      type="button"
+      class="skill-card-rank-up${canAllocate ? ' skill-card-rank-up--available' : ''}"
+      ${options.allocateAttr}="${node.id}"
+      title="${escapeHtml(tooltip)}"
+      aria-label="${escapeHtml(tooltip)}"
+      ${canAllocate ? '' : 'disabled'}
+    >+</button>
+  `;
 }
 
 export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): string {
@@ -70,11 +92,11 @@ export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): 
             <h4>${escapeHtml(node.name)}</h4>
             ${renderSkillRankDisplay(node.currentRank, node.maxRank, node.status)}
           </header>
-          <div class="skill-card-essentials">${renderEssentialBadges(node)}</div>
-          ${node.canEquip ? '<span class="skill-card-equip-hint">Toque para equipar · arraste até um slot</span>' : ''}
-          <div class="skill-actions skill-actions--compact">
-            <button type="button" ${options.allocateAttr}="${node.id}" ${options.canAllocate ? '' : 'disabled'}>${options.allocateLabel ?? '+1 rank'}</button>
+          <div class="skill-card-essentials-row">
+            <div class="skill-card-essentials">${renderEssentialBadges(node)}</div>
+            ${renderSkillRankUpButton(node, options)}
           </div>
+          ${node.canEquip ? '<span class="skill-card-equip-hint">Toque para equipar · arraste até um slot</span>' : ''}
         </div>
       </div>
       ${renderSkillTooltipContent({

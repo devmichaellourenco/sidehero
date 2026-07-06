@@ -5596,6 +5596,52 @@ body.modal-open {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.skill-card-essentials-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.skill-card-rank-up {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  margin: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.skill-card-rank-up--available {
+  opacity: 1;
+  cursor: pointer;
+  border-color: rgba(110, 207, 138, 0.55);
+  background: linear-gradient(180deg, rgba(110, 207, 138, 0.28), rgba(70, 160, 100, 0.18));
+  color: #9dffb0;
+  box-shadow: 0 0 0 1px rgba(110, 207, 138, 0.16);
+}
+
+.skill-card-rank-up--available:hover:not(:disabled) {
+  border-color: rgba(110, 207, 138, 0.75);
+  background: linear-gradient(180deg, rgba(110, 207, 138, 0.38), rgba(70, 160, 100, 0.24));
+  color: #c8ffd4;
+}
+
+.skill-card-rank-up:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .skill-card--compact .skill-card-visual {
@@ -5652,12 +5698,6 @@ body.modal-open {
 
 .skill-card--compact .skill-card-header h4 {
   font-size: 12px;
-}
-
-.skill-actions--compact button {
-  min-height: 26px;
-  padding: 3px 8px;
-  font-size: 10px;
 }
 
 .skill-card--compact:focus-visible {
@@ -7213,10 +7253,17 @@ body.skill-drag-active * {
 
 .campaign-world-node--locked {
   opacity: 0.5;
-  cursor: not-allowed;
 }
 
-.campaign-world-node:hover:not(:disabled) {
+.campaign-world-node[data-campaign-tooltip] {
+  cursor: help;
+}
+
+.campaign-world-node[aria-disabled='true'] {
+  pointer-events: auto;
+}
+
+.campaign-world-node:hover:not([aria-disabled='true']) {
   transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.22);
 }

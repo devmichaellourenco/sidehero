@@ -64,7 +64,7 @@ function mapPendingAction(
     chest: { label: 'Abrir baú', action: 'chest' },
     'inventory-upgrade': { label: 'Ver inventário', action: 'inventory-upgrade' },
     'upgrade-tree': { label: 'Ver melhorias', action: 'upgrade-tree' },
-    'hero-points': { label: 'Distribuir pontos', action: 'hero-points' },
+    'hero-points': { label: 'Usar Aprimoramento', action: 'hero-points' },
   };
 
   const toneMap: Record<typeof kind, WowBanner['tone']> = {
@@ -78,7 +78,7 @@ function mapPendingAction(
     chest: getAssetUrl(ASSETS.ui.chest),
     'inventory-upgrade': getAssetUrl(ASSETS.ui.inventory),
     'upgrade-tree': getAssetUrl(ASSETS.ui.stage),
-    'hero-points': getAssetUrl(ASSETS.ui.energy),
+    'hero-points': getAssetUrl(ASSETS.ui.improvement),
   };
 
   void handlers;

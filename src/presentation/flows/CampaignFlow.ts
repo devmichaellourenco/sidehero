@@ -112,7 +112,7 @@ export class CampaignFlow {
     modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-world-map]').forEach((button) => {
       button.addEventListener('click', () => {
         const mapId = button.dataset.campaignWorldMap;
-        if (!mapId || button.disabled || !this.campaign) return;
+        if (!mapId || button.getAttribute('aria-disabled') === 'true' || !this.campaign) return;
 
         const map = this.campaign.maps.find((entry) => entry.id === mapId);
         if (!map || !isMapUnlocked(map)) return;

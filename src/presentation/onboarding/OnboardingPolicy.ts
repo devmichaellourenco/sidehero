@@ -34,9 +34,9 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
     anchorSelector: '#pause-loadout-btn',
   },
   'hero-points': {
-    title: 'Pontos de herói',
+    title: 'Aprimoramento',
     message:
-      'Um herói tem pontos para gastar. Toque em Heróis, abra o card e vá em Progressão para distribuir atributos.',
+      'Você ganhou Aprimoramento ao subir de nível. Abra Heróis e gaste em Progressão (atributos) ou Skills (rank).',
     anchorSelector: '#open-heroes-btn',
   },
   'first-upgrade': {

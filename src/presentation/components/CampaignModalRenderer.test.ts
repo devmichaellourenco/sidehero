@@ -101,7 +101,7 @@ describe('CampaignModalRenderer', () => {
     expect(html).not.toContain('data-phase-id="2-1"');
   });
 
-  it('renderiza mapa-mundo com nós de região', () => {
+  it('renderiza mapa-mundo com nós de região e tooltips', () => {
     const overview = buildOverview();
     const html = renderer.render(overview, 'stendra', null, 'world');
 
@@ -109,6 +109,8 @@ describe('CampaignModalRenderer', () => {
     expect(html).toContain('campaign-world-map');
     expect(html).toContain('data-campaign-world-map="stendra"');
     expect(html).toContain('data-campaign-world-map="gondonor"');
+    expect(html).toContain('data-campaign-tooltip');
+    expect(html).toContain(getMapFlavorText('stendra'));
     expect(html).toContain('campaign-map-panel--world');
     expect(html).not.toContain('campaign-map-tabs');
     expect(html).not.toContain('campaign-path');

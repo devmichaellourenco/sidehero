@@ -40,7 +40,7 @@ export function buildPendingActions(state: GameStateDto): PendingActionItem[] {
   const heroesWithPoints = state.heroes.filter((hero) => hero.hasUnspentPoints);
   if (heroesWithPoints.length > 0) {
     const names = heroesWithPoints.map((hero) => hero.name).join(', ');
-    actions.push({ kind: 'hero-points', label: `Pontos pendentes: ${names}` });
+    actions.push({ kind: 'hero-points', label: `Aprimoramento: ${names}` });
   }
 
   return actions;

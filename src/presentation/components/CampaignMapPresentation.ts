@@ -618,14 +618,17 @@ function renderWorldMapNode(
           'campaign-world-node-boss-teaser',
         )
       : renderMapTabBiomeIcon(map.id);
+  const disabled = locked ? ' aria-disabled="true"' : '';
+  const regionTooltip = renderMapRegionTooltipContent(map, mapIndex);
 
   return `
     <button
       type="button"
       class="campaign-world-node campaign-world-node--${side}${active ? ' campaign-world-node--active' : ''}${locked ? ' campaign-world-node--locked' : ''}"
       data-campaign-world-map="${escapeHtml(map.id)}"
-      ${locked ? 'disabled' : ''}
-      title="${locked ? `Bloqueado · ${escapeHtml(theme.biomeLabel)}` : escapeHtml(map.name)}"
+      data-campaign-theme="${escapeHtml(map.id)}"
+      data-campaign-tooltip
+      ${disabled}
     >
       <span class="campaign-world-node-visual">
         ${locked ? '' : renderMapTabRing(progress.cleared, progress.total)}
@@ -636,6 +639,7 @@ function renderWorldMapNode(
         <span class="campaign-world-node-name">${escapeHtml(map.name)}</span>
         <span class="campaign-world-node-meta">${escapeHtml(theme.biomeLabel)} · ${progress.cleared}/${progress.total}</span>
       </span>
+      <span class="campaign-tooltip-content hidden">${regionTooltip}</span>
     </button>
   `;
 }

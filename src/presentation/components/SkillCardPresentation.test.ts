@@ -42,6 +42,9 @@ describe('SkillCardPresentation', () => {
     expect(html).not.toContain('skill-card-reqs');
     expect(html).not.toContain('Ativar');
     expect(html).not.toContain('Desativar');
+    expect(html).not.toContain('+1 rank');
+    expect(html).toContain('skill-card-rank-up');
+    expect(html).toContain('skill-card-rank-up--available');
     expect(html).toContain('Toque para equipar');
   });
 

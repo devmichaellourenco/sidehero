@@ -124,7 +124,7 @@ export class HeroDetailFlow {
       target: { type: 'attribute', key: attr },
     });
     if (!response.ok) {
-      this.toasts.show(response.error ?? 'Falha ao investir ponto', 'info');
+      this.toasts.show(response.error ?? 'Falha ao gastar Aprimoramento', 'info');
       return;
     }
     this.afterMutation(response.state);
