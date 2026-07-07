@@ -34,6 +34,7 @@ function rawPhaseGoldTotal(phase: PhaseDefinition): number {
       isBossWave,
       statMultiplier: phase.statMultiplier ?? 1,
       milestoneGoldScale: 1,
+      applyPhaseGoldBudget: false,
     });
 
     total += enemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);

@@ -77,4 +77,21 @@ describe('HeroDetailModalRenderer', () => {
     expect(container.innerHTML).not.toContain('hero-detail-loadout-hint');
     expect(container.innerHTML).not.toContain('Toque em um slot de equipamento');
   });
+
+  it('destaca slot ativo no loadout quando em modo equipar', () => {
+    const container = document.createElement('div');
+    const renderer = new HeroDetailModalRenderer();
+    renderer.setActiveTab('sheet');
+    renderer.setInlineActiveSlot({ heroId: 'h1', slot: 'weapon' });
+
+    renderer.render(
+      container,
+      { heroes: [minimalHero()] } as GameStateDto,
+      'h1',
+      noopHandlers(),
+    );
+
+    expect(container.innerHTML).toContain('loadout-slot--active');
+    expect(container.innerHTML).toContain('data-slot="weapon"');
+  });
 });

@@ -20,6 +20,7 @@ import { renderHeroImprovementPoints } from './hero-detail/HeroImprovementPoints
 import { renderHeroSheetTab } from './hero-detail/HeroSheetTabRenderer';
 import { renderHeroSkillsTab } from './hero-detail/HeroSkillsTabRenderer';
 import { renderHeroLoadoutStrip } from './HeroLoadoutStripPresentation';
+import { GearSlotKey } from './GearPresentation';
 
 export type HeroDetailTab = 'sheet' | 'attributes' | 'skills' | 'class';
 
@@ -43,6 +44,11 @@ export class HeroDetailModalRenderer {
   private ascensionName: string | null = null;
   private ascensionSkillNodes: SkillNodeDto[] = [];
   private preservedScrollState: HeroDetailScrollState | null = null;
+  private inlineActiveSlot: { heroId: string; slot: GearSlotKey } | null = null;
+
+  setInlineActiveSlot(slot: { heroId: string; slot: GearSlotKey } | null): void {
+    this.inlineActiveSlot = slot;
+  }
 
   setSkillNodes(nodes: SkillNodeDto[]): void {
     this.skillNodes = nodes;
@@ -84,6 +90,10 @@ export class HeroDetailModalRenderer {
 
     const showGearLoadout = this.activeTab === 'sheet';
     const showSkillsLoadout = this.activeTab === 'skills';
+    const equipPickerMode =
+      showGearLoadout &&
+      this.inlineActiveSlot !== null &&
+      this.inlineActiveSlot.heroId === hero.id;
     const loadoutSection = showGearLoadout
       ? `
         <div class="hero-detail-loadout">
@@ -93,6 +103,8 @@ export class HeroDetailModalRenderer {
             heroId: hero.id,
             showSkills: false,
             showGear: true,
+            activeEquipSlot: equipPickerMode ? this.inlineActiveSlot?.slot : undefined,
+            equipPickerMode,
           })}
           <div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>
         </div>

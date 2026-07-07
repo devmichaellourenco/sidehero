@@ -14,13 +14,13 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
 | [upgrade-tree](upgrade-tree.spec.md) | 8/8 | 7/7 | — |
 | [meta-legacy](meta-legacy.spec.md) | 5/5 | 1/1 | — |
-| [battle-ui](battle-ui.spec.md) | 8/8 | 7/7 | — |
+| [battle-ui](battle-ui.spec.md) | 9/9 | 8/8 | — |
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
-| [game-balance](game-balance.spec.md) | 8/8 | 10/10 | — |
+| [game-balance](game-balance.spec.md) | 9/9 | 11/11 | — |
 
-**Total aceite (features):** 70/70 (100%)  
-**Balanceamento transversal:** 8/8  
-**Total testes listados nas specs:** 67/67 (100%)
+**Total aceite (features):** 72/72 (100%)  
+**Balanceamento transversal:** 9/9  
+**Total testes listados nas specs:** 69/69 (100%)
 
 ## Próxima feature sugerida
 

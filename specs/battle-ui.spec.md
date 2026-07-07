@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 8/8 (100%) · auditoria 2026-07-07  
-**Testes obrigatórios:** 7/7 presentes na suite
+**Aceite:** 9/9 (100%) · auditoria 2026-07-07  
+**Testes obrigatórios:** 8/8 presentes na suite
 
 ## Objetivo
 
@@ -19,13 +19,14 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Footer em ícones com badges (baús, pendências)
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)
 - [x] Barras de vida verdes; HP na strip
+- [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
 
 ## Camadas e arquivos-chave
 
 | Camada | Paths |
 |--------|-------|
 | Presentation | `panel/panel.html`, `panel.css`, `GameViewController`, `GameHudController` |
-| Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy` |
+| Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy`, `DonationCardPresentation` |
 | Presentation | `ModalStackController`, `BattleChestAffordanceController` |
 
 ## Invariantes
@@ -44,3 +45,4 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `OnboardingPolicy.test.ts`, `IdleProgressSummary.test.ts`
 - [x] `BattleLogRenderer.test.ts` — log incremental no painel
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts` (campanha — ver também `combat-campaign.spec.md`)
+- [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe

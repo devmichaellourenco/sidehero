@@ -269,6 +269,8 @@ export function renderEquipmentSlot(
     clickable?: boolean;
     variant?: 'default' | 'loadout';
     dragDrop?: boolean;
+    activeSlot?: GearSlotKey;
+    equipPickerMode?: boolean;
   },
 ): string {
   const label = GEAR_SLOT_LABELS[slot];
@@ -296,17 +298,29 @@ export function renderEquipmentSlot(
   const rarityClass =
     variant === 'loadout' ? 'loadout-slot-rarity equipment-slot-rarity' : 'equipment-slot-rarity';
   const rarityIcon = gear ? imgTag(getGearRaritySprite(gear.rarity), gear.rarity, rarityClass) : '';
+  const isActiveSlot = options.equipPickerMode && options.activeSlot === slot;
+  const activeClass = isActiveSlot ? ' loadout-slot--active' : '';
   const ariaLabel = gear
-    ? `${gear.name} · ${label}`
+    ? isActiveSlot
+      ? `Desequipar ${gear.name}`
+      : `${gear.name} · ${label}`
     : `${label}: vazio — clique para equipar`;
+
+  let slotAttrs = `data-hero="${options.heroId}" data-slot="${slot}"`;
+  if (options.equipPickerMode) {
+    if (isActiveSlot && gear) {
+      slotAttrs = `data-unequip-hero="${options.heroId}" data-unequip-slot="${slot}"`;
+    } else if (!isActiveSlot) {
+      slotAttrs = `data-hero="${options.heroId}" data-slot="${slot}"`;
+    }
+  }
 
   if (variant === 'loadout') {
     return `
       <button
         type="button"
-        class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass}${dropClass} ${gear?.rarity ?? 'empty'}"
-        data-hero="${options.heroId}"
-        data-slot="${slot}"
+        class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass}${activeClass}${dropClass} ${gear?.rarity ?? 'empty'}"
+        ${slotAttrs}
         ${dropAttrs}
         ${dragAttrs}
         aria-label="${escapeHtml(ariaLabel)}"
@@ -325,8 +339,7 @@ export function renderEquipmentSlot(
     <button
       type="button"
       class="equipment-slot equipment-slot--icon-only${clickableClass}${dropClass} ${gear?.rarity ?? 'empty'}"
-      data-hero="${options.heroId}"
-      data-slot="${slot}"
+      ${slotAttrs}
       ${dropAttrs}
       ${dragAttrs}
       aria-label="${escapeHtml(ariaLabel)}"
@@ -353,11 +366,19 @@ export function renderHeroEquipmentRow(hero: HeroDto): string {
   `;
 }
 
-export function renderHeroEquipmentLoadout(hero: HeroDto): string {
+export function renderHeroEquipmentLoadout(
+  hero: HeroDto,
+  options: {
+    activeSlot?: GearSlotKey;
+    equipPickerMode?: boolean;
+  } = {},
+): string {
   return GEAR_SLOTS.map((slot) =>
     renderEquipmentSlot(slot, getHeroEquipment(hero, slot), {
       heroId: hero.id,
       variant: 'loadout',
+      activeSlot: options.activeSlot,
+      equipPickerMode: options.equipPickerMode,
     }),
   ).join('');
 }

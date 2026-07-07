@@ -160,11 +160,10 @@ export class ModalStackController {
             onUnequipGear: (heroId, slot) => {
               void this.gearEquipFlow.unequip(heroId, slot, { fromInventory: true });
             },
-            onSlotClick: (heroId, slot) => {
-              this.onEquipPickerFromSlot(heroId, slot);
-            },
-            onFilterChange: () => this.renderTop(stack, state, options),
-            onSortChange: () => this.renderTop(stack, state, options),
+      onSlotClick: (heroId, slot) => {
+        this.openEquipPickerFromSlot(heroId, slot);
+      },
+      onSortChange: () => this.renderTop(stack, state, options),
             onHeroChange: (heroId) => {
               this.onInventoryHeroChange(heroId);
               this.renderTop(stack, state, options);

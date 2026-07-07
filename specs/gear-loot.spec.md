@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 6/6 (100%) · auditoria 2026-07-07  
-**Testes obrigatórios:** 6/6
+**Aceite:** 7/7 (100%)  
+**Testes obrigatórios:** 7/7
 
 ## Objetivo
 
@@ -17,6 +17,7 @@ Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara 
 - [x] Equipar valida slot, nível e classe (`GearRequirementChecker`)
 - [x] Otimizar equipe sugere upgrades por herói (`LoadoutOptimizer`)
 - [x] Comparação visual no picker/modal (setas ▲)
+- [x] Inventário (global e embedded): filtro por categoria exclusivamente pelos ícones do loadout; toolbar de ordenação única; sem painel inline duplicado para escolha por slot
 
 ## Camadas e arquivos-chave
 
@@ -45,7 +46,6 @@ Adicionar critérios `[ ]` aqui antes de codar:
 - Favoritar itens
 - Vender/descartar lixo em lote
 - Compare side-by-side
-- Aba inventário no drawer do herói
 - Virtualização para 500+ itens
 
 ## Testes obrigatórios

@@ -1,5 +1,5 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
-import { renderHeroEquipmentLoadout } from './GearPresentation';
+import { GearSlotKey, renderHeroEquipmentLoadout } from './GearPresentation';
 import {
   HeroSkillSlotBarOptions,
   renderHeroSkillSlotsRow,
@@ -15,6 +15,8 @@ export function renderHeroLoadoutStrip(
     heroId?: string;
     showSkills?: boolean;
     showGear?: boolean;
+    activeEquipSlot?: GearSlotKey;
+    equipPickerMode?: boolean;
   } = {},
 ): string {
   const variantClass =
@@ -41,7 +43,10 @@ export function renderHeroLoadoutStrip(
   const gearSection = showGear
     ? `
       <div class="hero-loadout-group hero-loadout-gear">
-        ${renderHeroEquipmentLoadout(hero)}
+        ${renderHeroEquipmentLoadout(hero, {
+          activeSlot: options.activeEquipSlot,
+          equipPickerMode: options.equipPickerMode,
+        })}
       </div>
     `
     : '';

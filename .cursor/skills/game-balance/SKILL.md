@@ -37,6 +37,7 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | DOT tick | `onHitDot` | **Deve** usar pipeline (backlog BAL-001) | `CombatTurnPhase.ts` |
 | Inimigo stats | tier, role | `StageScalingCatalog` | `WaveEnemyFactory.ts` |
 | Loot primário | tier, raridade | `lootPrimaryStatScale` | `DifficultyCombatScaling.ts` |
+| Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → referência | `PhaseGoldBudget.ts`, `EconomyReference.ts` |
 | Loja | tier, seed | cap raridade + pesos | `ShopCatalog.ts` |
 
 ## Faixas alvo (orientação — calibrar com playtest)
@@ -69,6 +70,6 @@ Ver lista em `specs/game-balance.spec.md`. Criar/atualizar arquivos; não execut
 
 ## Próximos itens sugeridos (backlog)
 
-1. Auditoria curva ouro: recompensa por wave vs preço loja/forja
+1. ~~Auditoria curva ouro: recompensa por wave vs preço loja/forja~~ (`PhaseGoldBudget`)
 2. BAL-003 — dodge/block/DR por componente (opcional)
 3. Playtest documentado tier 1–25 / 26–60 / 61+

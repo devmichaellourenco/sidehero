@@ -21,6 +21,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 |------|----------|
 | Strip | `BattleStripRenderer`, `BattleActorCardPresentation` |
 | Modais | `ModalStackController`, `GameViewController` |
+| Apoio | `DonationPromptController`, `DonationCardPresentation`, `DonationConfig` |
 | Wow | `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator` |
 | Onboarding | `OnboardingPolicy` |
 

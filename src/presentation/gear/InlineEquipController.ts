@@ -3,7 +3,7 @@ import {
   EquipPickerModalRenderer,
   EquipPickerMode,
 } from '../components/EquipPickerModalRenderer';
-import { GEAR_SLOT_LABELS, GearSlotKey } from '../components/GearPresentation';
+import { GearSlotKey } from '../components/GearPresentation';
 
 export type InlineEquipTarget =
   | { kind: 'slot'; heroId: string; slot: GearSlotKey }
@@ -65,22 +65,17 @@ export class InlineEquipController {
 
   render(host: HTMLElement, state: GameStateDto, handlers: InlineEquipHandlers): void {
     const mode = this.toPickerMode();
-    if (!mode) {
+    if (!mode || mode.type !== 'gear') {
       host.innerHTML = '';
       host.classList.add('hidden');
       return;
     }
 
     host.classList.remove('hidden');
-    const title =
-      mode.type === 'slot'
-        ? `${GEAR_SLOT_LABELS[mode.slot]} — escolha um item`
-        : 'Escolha o herói';
-
     host.innerHTML = `
       <div class="inline-equip-panel">
         <div class="inline-equip-header">
-          <span class="inline-equip-title">${title}</span>
+          <span class="inline-equip-title">Escolha o herói</span>
           <button type="button" class="inline-equip-close" data-inline-equip-close aria-label="Fechar">✕</button>
         </div>
         <div class="inline-equip-body" data-inline-equip-body></div>
@@ -98,6 +93,6 @@ export class InlineEquipController {
       onUnequip: handlers.onUnequip,
       onSortChange: handlers.onSortChange,
       onUpgradesOnlyChange: handlers.onUpgradesOnlyChange,
-    }, { compact: mode.type === 'slot' });
+    });
   }
 }

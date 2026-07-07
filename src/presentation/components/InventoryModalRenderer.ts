@@ -3,9 +3,10 @@ import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
 import {
   countUpgradeItems,
   getGearUpgradeInfoForActiveParty,
+  getGearUpgradeInfoForHero,
   sortGearForHero,
 } from './GearComparison';
-import { GEAR_SLOTS, GEAR_SLOT_LABELS, GearSlotKey } from './GearPresentation';
+import { GEAR_SLOT_LABELS, GearSlotKey } from './GearPresentation';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import {
   bindInventoryGearTooltips,
@@ -25,7 +26,6 @@ export type InventoryModalHandlers = {
   onEquipGear: (gearId: string, heroId: string) => void;
   onUnequipGear: (heroId: string, slot: GearSlotKey) => void;
   onSlotClick: (heroId: string, slot: GearSlotKey) => void;
-  onFilterChange: (slot: GearSlotKey | 'all') => void;
   onSortChange: (mode: InventorySortMode) => void;
   onHeroChange: (heroId: string) => void;
   onUpgradesOnlyChange: (enabled: boolean) => void;
@@ -34,7 +34,6 @@ export type InventoryModalHandlers = {
 };
 
 export class InventoryModalRenderer {
-  private activeFilter: GearSlotKey | 'all' = 'all';
   private sortMode: InventorySortMode = 'gain';
   private selectedHeroId: string | null = null;
   private upgradesOnly = false;
@@ -97,17 +96,21 @@ export class InventoryModalRenderer {
     } = {},
   ): void {
     const embedded = options.embedded === true;
+    const inlineActive = options.inlineActiveSlot;
+    const slotPicking =
+      Boolean(inlineActive) && inlineActive!.heroId === selectedHeroId;
+    const activeSlot = slotPicking ? inlineActive!.slot : null;
 
     const inventoryIcon = getAssetUrl(ASSETS.ui.inventory);
-    const filteredBySlot =
-      this.activeFilter === 'all'
-        ? state.inventory
-        : state.inventory.filter((gear) => gear.slot === this.activeFilter);
+    const filteredBySlot = activeSlot
+      ? state.inventory.filter((gear) => gear.slot === activeSlot)
+      : state.inventory;
 
     const filtered = this.upgradesOnly
-      ? filteredBySlot.filter(
-          (gear) =>
-            getGearUpgradeInfoForActiveParty(state, gear).status === 'upgrade',
+      ? filteredBySlot.filter((gear) =>
+          activeSlot
+            ? getGearUpgradeInfoForHero(state, gear, selectedHeroId).status === 'upgrade'
+            : getGearUpgradeInfoForActiveParty(state, gear).status === 'upgrade',
         )
       : filteredBySlot;
 
@@ -120,17 +123,14 @@ export class InventoryModalRenderer {
       selectedHeroId,
     );
     const canEditGear = options.canEditGear !== false;
-    const inlineActive = options.inlineActiveSlot;
-    const loadoutContext =
-      inlineActive?.heroId === selectedHeroId ? ('equip-picker' as const) : ('inventory' as const);
+    const loadoutContext = slotPicking ? ('equip-picker' as const) : ('inventory' as const);
     const heroLoadout =
       !embedded && selectedHero
         ? renderInventoryHeroLoadout(selectedHero, {
             feedback: equipFeedback,
             heroPulse: this.heroChangePulse,
             context: loadoutContext,
-            activeSlot:
-              inlineActive?.heroId === selectedHeroId ? inlineActive.slot : undefined,
+            activeSlot: activeSlot ?? undefined,
             dragDrop: canEditGear,
           })
         : '';
@@ -150,19 +150,6 @@ export class InventoryModalRenderer {
       >
         Otimizar equipe${upgradeCount > 0 ? ` (↑${upgradeCount})` : ''}
       </button>
-    `;
-
-    const filterButtons = `
-      <div class="modal-filters inventory-filters">
-        <button type="button" class="filter-btn ${this.activeFilter === 'all' ? 'active' : ''}" data-filter="all">Todos</button>
-        ${GEAR_SLOTS.map(
-          (slot) => `
-            <button type="button" class="filter-btn ${this.activeFilter === slot ? 'active' : ''}" data-filter="${slot}">
-              ${GEAR_SLOT_LABELS[slot]}
-            </button>
-          `,
-        ).join('')}
-      </div>
     `;
 
     const sortButtons = `
@@ -190,24 +177,23 @@ export class InventoryModalRenderer {
     `;
 
     const heroSelector = embedded ? '' : renderInventoryHeroSelector(state, selectedHeroId);
-    const countLabel = `<p class="inventory-count">${state.storageCapacity.inventoryUsed} / ${state.storageCapacity.inventoryLimit} itens · ${filtered.length} visíveis</p>`;
+    const slotLabel = activeSlot ? GEAR_SLOT_LABELS[activeSlot] : null;
+    const countLabel = activeSlot
+      ? `<p class="inventory-count">${filtered.length} ${slotLabel!.toLowerCase()}${filtered.length === 1 ? '' : 's'} disponíve${filtered.length === 1 ? 'l' : 'is'}</p>`
+      : `<p class="inventory-count">${state.storageCapacity.inventoryUsed} / ${state.storageCapacity.inventoryLimit} itens · ${filtered.length} visíveis</p>`;
+    const slotContextHeader = activeSlot
+      ? `<p class="inventory-slot-context">Escolha ${slotLabel!.toLowerCase()}</p>`
+      : '';
     const canStash =
       state.storageCapacity.stashUnlocked &&
       state.storageCapacity.stashUsed < state.storageCapacity.stashLimit;
-    const inlineSlotPickerOpen = Boolean(
-      inlineActive && inlineActive.heroId === selectedHeroId,
-    );
     const panelClass = [
       'inventory-panel',
       embedded ? 'inventory-panel--embedded' : '',
-      inlineSlotPickerOpen ? 'inventory-panel--slot-picking' : '',
+      slotPicking ? 'inventory-panel--slot-active' : '',
     ]
       .filter(Boolean)
       .join(' ');
-    const toolbarSection = inlineSlotPickerOpen
-      ? ''
-      : `${filterButtons}${sortButtons}`;
-    const countSection = inlineSlotPickerOpen ? '' : countLabel;
 
     if (state.inventory.length === 0) {
       container.innerHTML = `
@@ -215,7 +201,7 @@ export class InventoryModalRenderer {
           ${heroSelector}
           ${heroLoadout}
           ${inlineEquipHost}
-          ${toolbarSection}
+          ${sortButtons}
           <p class="empty-state modal-empty">
             ${imgTag(inventoryIcon, 'Inventário', 'stat-icon')}
             Nenhum item ainda. Derrote inimigos e abra baús!
@@ -230,20 +216,26 @@ export class InventoryModalRenderer {
       return;
     }
 
-    const mainGridSection = inlineSlotPickerOpen
-      ? ''
-      : renderInventoryGrid(state, sorted, selectedHeroId, {
-          returnedGearIds: equipFeedback?.returnedGearIds,
-          canStash,
-        });
+    const mainGridSection =
+      sorted.length > 0
+        ? renderInventoryGrid(state, sorted, selectedHeroId, {
+            returnedGearIds: equipFeedback?.returnedGearIds,
+            equipMode: slotPicking ? 'pick' : 'inventory',
+            upgradeForHeroId: slotPicking ? selectedHeroId : undefined,
+            canStash: slotPicking ? undefined : canStash,
+          })
+        : activeSlot
+          ? `<p class="empty-state modal-empty">Nenhum ${slotLabel!.toLowerCase()} disponível no inventário.</p>`
+          : '';
 
     container.innerHTML = `
       <div class="${panelClass}">
         ${heroSelector}
         ${heroLoadout}
         ${inlineEquipHost}
-        ${toolbarSection}
-        ${countSection}
+        ${slotContextHeader}
+        ${sortButtons}
+        ${countLabel}
         ${mainGridSection}
         <footer class="inventory-footer">${optimizeButton}</footer>
       </div>
@@ -279,14 +271,6 @@ export class InventoryModalRenderer {
   }
 
   private bind(container: HTMLElement, handlers: InventoryModalHandlers, embedded = false): void {
-    container.querySelectorAll('[data-filter]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const filter = button.getAttribute('data-filter') as GearSlotKey | 'all';
-        this.activeFilter = filter;
-        handlers.onFilterChange(filter);
-      });
-    });
-
     container.querySelectorAll('[data-sort]').forEach((button) => {
       button.addEventListener('click', () => {
         const sort = button.getAttribute('data-sort') as InventorySortMode;
@@ -355,7 +339,6 @@ export class InventoryModalRenderer {
   }
 
   resetFilter(): void {
-    this.activeFilter = 'all';
     this.sortMode = 'gain';
     this.selectedHeroId = null;
     this.upgradesOnly = false;

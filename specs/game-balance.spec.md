@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 8/8 (100%) · auditoria 2026-07-06  
-**Testes obrigatórios:** 8/8 + `BalanceAudit.test.ts`
+**Aceite:** 9/9 (100%) · auditoria 2026-07-07  
+**Testes obrigatórios:** 9/9 + `BalanceAudit.test.ts`
 
 ## Objetivo
 
@@ -28,7 +28,7 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
 | **Waves e fases** | HP/ATK/DEF inimigos por tier; boss vs trash; handcrafted | `combat-campaign` | `StageScalingCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
 | **Skills e progressão** | `basePower`, cooldowns, ranks, ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `HeroLevelXpCatalog` |
-| **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
+| **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
 | **Integração** | Mudança num domínio não quebra curva global | todas | esta spec + checklist abaixo |
 
@@ -52,6 +52,7 @@ Poder × crítico → split damageComponents[]
 - [x] Ciclo elemental completo: skills `frost_shard`, `blizzard` e `frost_breath` (gelo)
 - [x] Auditoria documentada de curva tier 1–25 (early), 26–60 (mid), 61+ (late)
 - [x] Loja, loot e baús validados contra renda de ouro por fase (sem trivializar nem starvation)
+- [x] Ouro de combate em fases normais limitado à renda de referência do tier (`PhaseGoldBudget`)
 - [x] Waves/boss: tempo médio para clear dentro de faixa alvo por tier (ver skill)
 - [x] Backlog de balanceamento revisado após cada entrega numérica relevante
 
@@ -96,6 +97,7 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `ShopService.test.ts` — cap de raridade por tier, preços
 - [x] `DotTickResolver.test.ts` — DOT mitigado (equivalente a turn phase)
 - [x] `BalanceAudit.test.ts` — curva por tier, economia loja/forja, tempo de clear
+- [x] `PhaseGoldBudget.test.ts` — teto de ouro por fase normal alinhado à referência
 - [x] `MilestoneGoldCap.test.ts` — teto de ouro em milestones (BAL-007)
 
 ## Backlog conhecido (auditoria 2026-07-03)
@@ -109,3 +111,4 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-005 | Média | Gear sem dano/resist elemental visível no loot | Gear/Loot | ✅ Resolvido |
 | BAL-006 | Média | Gear sem flat/%, velocidade negativa e redução de CD | Gear/Loot | ✅ Resolvido |
 | BAL-007 | Média | Milestones (ex. 2-50) pagam ouro muito acima da renda de referência — épico na loja fica trivial nessas fases | Economia | ✅ Resolvido (`MilestoneGoldCap`) |
+| BAL-008 | Média | Ouro por fase normal escalava acima da renda de referência em fases multi-inimigo (épico trivial cedo) | Economia | ✅ Resolvido (`PhaseGoldBudget`) |

@@ -22,6 +22,7 @@ import { MetaLegacyFlow } from '../flows/MetaLegacyFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation, listNavigableHeroIds } from '../helpers/HeroNavigationHelper';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
+import { DonationPromptController } from '../support/DonationPromptController';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleLogRenderer } from './BattleLogRenderer';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
@@ -133,6 +134,7 @@ export class GameViewController {
   private readonly rewards: RewardPresentationController;
   private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
   private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
+  private readonly donationPrompt: DonationPromptController;
   private readonly hud: GameHudController;
   private readonly wowCelebration: WowCelebrationController;
   private readonly battleLogPanel: BattleLogPanelController;
@@ -250,6 +252,11 @@ export class GameViewController {
       root.querySelector('#forge-confirm-title')!,
       root.querySelector('#forge-confirm-body')!,
       root.querySelector('[data-forge-confirm-accept]') as HTMLButtonElement,
+    );
+    this.donationPrompt = new DonationPromptController(
+      root.querySelector('#donation-prompt-root')!,
+      root.querySelector('#donation-card-body')!,
+      root.querySelector('#support-btn') as HTMLButtonElement,
     );
     mountNavArrowIcons(root);
     hydratePanelIcons(root);
@@ -988,7 +995,6 @@ export class GameViewController {
       onSlotClick: (heroId, slot) => {
         this.openEquipPickerFromSlot(heroId, slot);
       },
-      onFilterChange: onRefresh,
       onSortChange: onRefresh,
       onHeroChange: () => {},
       onUpgradesOnlyChange: onRefresh,
@@ -1016,6 +1022,10 @@ export class GameViewController {
   }
 
   private bindHeroDetailDrawer(container: HTMLElement, heroId: string): void {
+    const activeSlot = this.inlineEquip.getActiveSlot();
+    this.heroDetailModal.setInlineActiveSlot(
+      activeSlot?.heroId === heroId ? activeSlot : null,
+    );
     this.heroDetailFlow.bindToModal(container, this.state!, heroId, {
       onSlotClick: (id, slot) => this.openEquipPickerFromSlot(id, slot),
       mountInventory: (host) => this.mountHeroEmbeddedInventory(host, heroId),

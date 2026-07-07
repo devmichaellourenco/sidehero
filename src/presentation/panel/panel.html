@@ -25,6 +25,17 @@
             <span class="wow-inbox-btn-count"></span>
           </button>
         </div>
+        <button
+          id="support-btn"
+          type="button"
+          class="header-support-btn"
+          aria-label="Apoiar o Side Hero"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="donation-prompt-root"
+        >
+          Apoiar
+        </button>
       </header>
 
       <div id="wow-inbox-root" class="wow-inbox-root hidden" aria-hidden="true">
@@ -223,6 +234,26 @@
     </div>
 
     <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="donation-prompt-root" class="confirm-dialog-root donation-prompt-root hidden" aria-hidden="true">
+      <div class="confirm-dialog-backdrop" data-donation-dismiss></div>
+      <div
+        class="confirm-dialog donation-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="donation-card-title"
+        aria-describedby="donation-card-body"
+      >
+        <header class="confirm-dialog-header donation-card__header">
+          <span class="donation-card__eyebrow">Apoio voluntário</span>
+          <h2 id="donation-card-title" class="confirm-dialog-title donation-card__title">Apoie o Side Hero</h2>
+        </header>
+        <div id="donation-card-body" class="confirm-dialog-body donation-card__body"></div>
+        <footer class="confirm-dialog-actions donation-card__actions">
+          <button type="button" class="donation-card__ghost" data-donation-dismiss>Agora não</button>
+        </footer>
+      </div>
+    </div>
 
     <script type="module" src="panel.js"></script>
   </body>
