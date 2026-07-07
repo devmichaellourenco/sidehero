@@ -1,8 +1,9 @@
 import { HeroDto } from '../../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../../assets/AssetCatalog';
 import { renderHeroBars } from '../HeroBarsPresentation';
+import { formatHeroLevelClassLine } from './HeroClassLinePresentation';
 
-export function renderHeroDetailHeader(hero: HeroDto): string {
+export function renderHeroDetailHeader(hero: HeroDto, ascensionName: string | null = null): string {
   const glowUrl = getAssetUrl(ASSETS.characters.glow);
   const attackIcon = getAssetUrl(ASSETS.ui.attack);
   const defenseIcon = getAssetUrl(ASSETS.ui.defense);
@@ -16,7 +17,7 @@ export function renderHeroDetailHeader(hero: HeroDto): string {
       </div>
       <div class="hero-detail-info">
         <div class="hero-detail-title">
-          <span class="hero-level">Lv.${hero.level}</span>
+          <span class="hero-level hero-level-class-line">${formatHeroLevelClassLine(hero, ascensionName)}</span>
         </div>
         <div class="hero-stats hero-detail-stats">
           ${imgTag(attackIcon, 'Ataque', 'stat-icon')} ${hero.attack}

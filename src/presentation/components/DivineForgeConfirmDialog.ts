@@ -50,12 +50,12 @@ export class DivineForgeConfirmDialog {
       this.titleEl.textContent = 'Destruir por ouro';
       this.bodyEl.innerHTML = renderForgeSalvageConfirmContent(input.gear, input.goldPreview);
       this.acceptBtn.textContent = `Destruir (+${input.goldPreview} ouro)`;
-      this.acceptBtn.className = 'gear-destroy-btn';
+      this.acceptBtn.className = 'forge-game-btn forge-game-btn--salvage forge-confirm-accept';
     } else {
-      this.titleEl.textContent = 'Criar item';
+      this.titleEl.textContent = 'Fundir itens';
       this.bodyEl.innerHTML = renderForgeFuseConfirmContent(input.gears, input.nextRarityLabel);
-      this.acceptBtn.textContent = 'Criar item';
-      this.acceptBtn.className = 'primary-btn forge-confirm-accept';
+      this.acceptBtn.textContent = 'Fundir itens';
+      this.acceptBtn.className = 'forge-game-btn forge-game-btn--fuse forge-confirm-accept';
     }
 
     this.root.classList.remove('hidden');
@@ -73,7 +73,7 @@ export class DivineForgeConfirmDialog {
     this.root.classList.add('hidden');
     this.root.setAttribute('aria-hidden', 'true');
     this.bodyEl.innerHTML = '';
-    this.acceptBtn.className = 'gear-destroy-btn';
+    this.acceptBtn.className = 'forge-game-btn forge-game-btn--fuse forge-confirm-accept';
     this.acceptBtn.textContent = 'Confirmar';
 
     const resolve = this.resolve;

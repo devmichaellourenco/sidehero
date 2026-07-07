@@ -75,9 +75,6 @@ export class UpgradeTreeModalRenderer {
     const nodeMarkup = positioned.map((entry) => this.renderNode(entry, viewBox)).join('');
 
     container.innerHTML = `
-      <p class="upgrade-intro">
-        Arraste para mover · scroll para zoom. Passe o mouse nos nodos para detalhes e compra.
-      </p>
       <p class="upgrade-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
       <div class="upgrade-tree-shell">
         <div class="upgrade-tree-toolbar">

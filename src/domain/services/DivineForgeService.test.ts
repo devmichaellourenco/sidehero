@@ -95,6 +95,34 @@ describe('DivineForgeService', () => {
     expect(result.state.battleLog.at(-1)?.message).toContain('fundidos');
   });
 
+  it('fuse aceita itens do inventário e do baú', () => {
+    const created = forgeGear('fused-result', 'uncommon');
+    const service = createService(created);
+    const inventory = Array.from({ length: 4 }, (_, i) => forgeGear(`inv-${i}`, 'common'));
+    const stash = Array.from({ length: 5 }, (_, i) => forgeGear(`stash-${i}`, 'common'));
+    const ids = [...inventory, ...stash].map((gear) => gear.id);
+    const state = stateWithForgeUnlocked(inventory).withStash(stash);
+
+    const result = service.fuse(state, ids);
+
+    expect(result.state.inventory).toHaveLength(1);
+    expect(result.state.stash).toHaveLength(0);
+    expect(result.state.inventory[0].id).toBe('fused-result');
+  });
+
+  it('salvage remove item do baú e concede ouro', () => {
+    const service = createService();
+    const item = forgeGear('stash-salvage', 'rare');
+    const state = stateWithForgeUnlocked([]).withStash([item]);
+    const expectedGold = calculateForgeSalvageGold('rare', state.stage);
+
+    const result = service.salvage(state, 'stash-salvage');
+
+    expect(result.goldGained).toBe(expectedGold);
+    expect(result.state.stash).toHaveLength(0);
+    expect(result.state.gold.amount).toBe(expectedGold);
+  });
+
   it('salvage exige forja desbloqueada', () => {
     const service = createService();
 

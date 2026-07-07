@@ -71,7 +71,7 @@ export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): 
   const iconWrapClass = `skill-card-icon-wrap skill-card-icon-wrap--${node.branch}${isLocked ? ' skill-card-icon-wrap--locked' : ''}`;
   const lockOverlay = isLocked ? renderSkillLockIcon() : '';
   const equipAttrs = node.canEquip
-    ? `data-skill-equip="${node.id}" data-skill-equip-name="${escapeHtml(node.name)}" draggable="true"`
+    ? `data-skill-equip="${node.id}" draggable="true"`
     : '';
   const equipClass = node.canEquip ? ' skill-card--equippable' : '';
 
@@ -96,7 +96,6 @@ export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): 
             <div class="skill-card-essentials">${renderEssentialBadges(node)}</div>
             ${renderSkillRankUpButton(node, options)}
           </div>
-          ${node.canEquip ? '<span class="skill-card-equip-hint">Toque para equipar · arraste até um slot</span>' : ''}
         </div>
       </div>
       ${renderSkillTooltipContent({

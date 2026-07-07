@@ -25,21 +25,21 @@ function renderGearConfirmCard(gear: GearDto, compact = false): string {
   const frameUrl = getGearFrameSprite(gear.rarity);
   const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
   const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
-  const cardClass = compact ? 'destroy-confirm-gear destroy-confirm-gear--compact' : 'destroy-confirm-gear';
+  const cardClass = compact ? 'forge-confirm-gear forge-confirm-gear--compact' : 'forge-confirm-gear';
 
   return `
     <div class="${cardClass} ${gear.rarity}" style="--gear-frame: url('${frameUrl}')">
-      <span class="destroy-confirm-gear-icon-wrap">
-        ${imgTag(getGearSprite(gear), slotLabel, 'destroy-confirm-gear-icon')}
-        ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'destroy-confirm-gear-rarity')}
+      <span class="forge-confirm-gear-icon-wrap">
+        ${imgTag(getGearSprite(gear), slotLabel, 'forge-confirm-gear-icon')}
+        ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'forge-confirm-gear-rarity')}
       </span>
-      <div class="destroy-confirm-gear-info">
-        <strong class="destroy-confirm-gear-name">${escapeHtml(gear.name)}</strong>
-        <span class="destroy-confirm-gear-meta">${slotLabel} · ${rarityLabel}</span>
+      <div class="forge-confirm-gear-info">
+        <strong class="forge-confirm-gear-name">${escapeHtml(gear.name)}</strong>
+        <span class="forge-confirm-gear-meta">${slotLabel} · ${rarityLabel}</span>
         ${
           compact
             ? ''
-            : `<span class="destroy-confirm-gear-stats">${renderGearBonusLines(gear)}</span>`
+            : `<span class="forge-confirm-gear-stats">${renderGearBonusLines(gear)}</span>`
         }
       </div>
     </div>
@@ -48,13 +48,16 @@ function renderGearConfirmCard(gear: GearDto, compact = false): string {
 
 export function renderForgeSalvageConfirmContent(gear: GearDto, goldPreview: number): string {
   return `
-    ${renderGearConfirmCard(gear)}
-    <p class="forge-confirm-reward">
-      Receberá <strong>+${goldPreview} ouro</strong> ao destruir este item na Forja Divina.
-    </p>
-    <p class="destroy-confirm-warning">
-      Este item será removido permanentemente. Esta ação não pode ser desfeita.
-    </p>
+    <div class="forge-confirm-body-inner">
+      ${renderGearConfirmCard(gear)}
+      <div class="forge-confirm-reward-card">
+        <span class="forge-confirm-reward-label">Recompensa</span>
+        <strong class="forge-confirm-reward-value">+${goldPreview} ouro</strong>
+      </div>
+      <p class="forge-confirm-warning">
+        Este item será removido permanentemente. Esta ação não pode ser desfeita.
+      </p>
+    </div>
   `;
 }
 
@@ -63,14 +66,21 @@ export function renderForgeFuseConfirmContent(
   nextRarityLabel: string,
 ): string {
   return `
-    <p class="forge-confirm-intro">
-      Fundir estes ${gears.length} itens em um item aleatório <strong>${escapeHtml(nextRarityLabel)}</strong>?
-    </p>
-    <div class="forge-confirm-grid">
-      ${gears.map((gear) => renderGearConfirmCard(gear, true)).join('')}
+    <div class="forge-confirm-body-inner">
+      <div class="forge-confirm-ritual" aria-hidden="true">
+        <span class="forge-confirm-ritual__input">${gears.length} itens</span>
+        <span class="forge-confirm-ritual__arrow">→</span>
+        <span class="forge-confirm-ritual__output">1 ${escapeHtml(nextRarityLabel)}</span>
+      </div>
+      <p class="forge-confirm-intro">
+        Fundir estes ${gears.length} itens em um item aleatório <strong>${escapeHtml(nextRarityLabel)}</strong>?
+      </p>
+      <div class="forge-confirm-grid">
+        ${gears.map((gear) => renderGearConfirmCard(gear, true)).join('')}
+      </div>
+      <p class="forge-confirm-warning">
+        Os ${gears.length} itens serão consumidos permanentemente. Esta ação não pode ser desfeita.
+      </p>
     </div>
-    <p class="destroy-confirm-warning">
-      Os ${gears.length} itens serão consumidos permanentemente. Esta ação não pode ser desfeita.
-    </p>
   `;
 }

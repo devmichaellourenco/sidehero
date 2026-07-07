@@ -28,16 +28,9 @@ export function mapRewardMomentToWowBanner(moment: RewardMoment): WowBanner | nu
           label: moment.cta.label,
           action: 'dismiss',
         }
-      : ephemeralDismissCta(moment.kind),
+      : { label: 'Entendi', action: 'dismiss' },
     displayMs: moment.autoDismissMs ?? 4200,
   };
-}
-
-function ephemeralDismissCta(kind: RewardMoment['kind']): WowBanner['cta'] | undefined {
-  if (kind === 'idle_report') {
-    return { label: 'Entendi', action: 'dismiss' };
-  }
-  return undefined;
 }
 
 function mapKind(kind: RewardMoment['kind']): WowBanner['kind'] {

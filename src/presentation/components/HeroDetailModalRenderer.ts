@@ -2,6 +2,7 @@ import { AscensionOptionDto } from '../../application/dto/AscensionOptionDto';
 import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { bindBarTooltips } from './BarTooltipBinder';
+import { bindAscensionMomentTooltips, hideAscensionMomentTooltip } from './HeroAscensionMomentTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import { bindHeroImprovementTooltips, hideHeroImprovementTooltip } from './HeroImprovementTooltipBinder';
 import { bindHeroStatTooltips } from './HeroStatTooltipBinder';
@@ -93,7 +94,6 @@ export class HeroDetailModalRenderer {
             showSkills: false,
             showGear: true,
           })}
-          <p class="hero-detail-hint hero-detail-loadout-hint">Toque em um slot de equipamento para trocar o item.</p>
           <div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>
         </div>
       `
@@ -107,8 +107,6 @@ export class HeroDetailModalRenderer {
             showSkills: true,
             showGear: false,
           })}
-          <p class="skill-slot-instruction" data-skill-slot-instruction hidden></p>
-          <p class="hero-detail-hint hero-detail-loadout-hint">Toque em uma skill para equipar · arraste até um slot · × remove do slot</p>
         </div>
       `
         : '';
@@ -116,10 +114,11 @@ export class HeroDetailModalRenderer {
     const scrollState = this.preservedScrollState ?? captureHeroDetailScroll(container);
 
     hideHeroImprovementTooltip();
+    hideAscensionMomentTooltip();
 
     container.innerHTML = `
       <div class="hero-detail-layout">
-        <header class="hero-detail-header">${renderHeroDetailHeader(hero)}</header>
+        <header class="hero-detail-header">${renderHeroDetailHeader(hero, this.ascensionName)}</header>
         <nav class="hero-detail-tabs">
           <button type="button" class="hero-tab ${this.activeTab === 'sheet' ? 'active' : ''}" data-hero-tab="sheet">Inventário</button>
           <button type="button" class="hero-tab ${this.activeTab === 'attributes' ? 'active' : ''}" data-hero-tab="attributes">Progressão${badge}</button>
@@ -139,6 +138,7 @@ export class HeroDetailModalRenderer {
     bindEquipmentTooltips(container);
     bindSkillChipTooltips(container);
     bindHeroImprovementTooltips(container);
+    bindAscensionMomentTooltips(container);
     if (this.activeTab === 'attributes') {
       bindHeroStatTooltips(container);
     }

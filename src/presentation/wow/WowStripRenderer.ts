@@ -1,4 +1,5 @@
 import { getGearSprite, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { resolveWowBannerCta } from './WowBannerCtaPresentation';
 import { WowBanner } from './types/WowBanner';
 
 export type WowBannerVariant = 'center' | 'compact';
@@ -24,7 +25,8 @@ export class WowStripRenderer {
     const variant = options.variant ?? 'compact';
     const enterClass = options.animate ? ' wow-banner--enter' : '';
     const rarityClass = banner.gear ? ` wow-banner--loot-${banner.gear.rarity}` : '';
-    const dismissMarkup = this.buildDismissMarkup(banner, variant);
+    const cta = resolveWowBannerCta(banner);
+    const dismissMarkup = this.buildDismissMarkup(variant, cta);
 
     const dots =
       banners.length > 1
@@ -54,9 +56,7 @@ export class WowStripRenderer {
       ? `<ul class="wow-banner-details">${banner.detailLines.map((line) => `<li>${line}</li>`).join('')}</ul>`
       : '';
 
-    const ctaMarkup = banner.cta
-      ? `<button type="button" class="wow-banner-cta" data-wow-action="${banner.cta.action}">${banner.cta.label}</button>`
-      : '';
+    const ctaMarkup = `<button type="button" class="wow-banner-cta" data-wow-action="${cta.action}">${cta.label}</button>`;
 
     root.innerHTML = `
       <div class="wow-strip-bg" aria-hidden="true"></div>
@@ -77,14 +77,16 @@ export class WowStripRenderer {
     `;
   }
 
-  private buildDismissMarkup(banner: WowBanner, variant: WowBannerVariant): string {
-    if (banner.cta && variant === 'center') {
+  private buildDismissMarkup(variant: WowBannerVariant, cta: WowBannerCta): string {
+    if (cta.action === 'dismiss') {
+      return '';
+    }
+
+    if (variant === 'center') {
       return `<button type="button" class="wow-banner-dismiss" data-wow-dismiss aria-label="Fechar celebração">×</button>`;
     }
 
-    if (banner.cta) return '';
-
-    return `<button type="button" class="wow-banner-dismiss" data-wow-dismiss aria-label="Dispensar celebração">×</button>`;
+    return '';
   }
 
   private buildVisualMarkup(banner: WowBanner, variant: WowBannerVariant): string {

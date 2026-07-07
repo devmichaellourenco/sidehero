@@ -18,12 +18,13 @@ description: Gear, inventário, baús e equipamento no Side Hero. Use para loot,
 ## Padrões
 
 - Abrir baú: `ChestService` via use cases
+- Abrir todos: preenche inventário, depois baú de itens; restante fica pendente (`GearStorageService.resolveLootDestination`)
 - Badge ▲ = upgrade para party (`getGearUpgradeInfoForActiveParty`)
 - Inline equip no drawer sem modal empilhado quando possível
 
 ## Testes
 
-`GearEquipService.test.ts`, `GearDragDropPolicy.test.ts`, `EquipGearRace.test.ts` — criar ou atualizar; não executar automaticamente.
+`GearEquipService.test.ts`, `GearDragDropPolicy.test.ts`, `EquipGearRace.test.ts`, `ChestService.test.ts` — criar ou atualizar; não executar automaticamente.
 
 ## Workflow do agente
 

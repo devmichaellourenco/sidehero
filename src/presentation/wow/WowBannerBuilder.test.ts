@@ -32,6 +32,8 @@ describe('WowBannerBuilder', () => {
     const banners = buildPersistentWowBanners(baseState(), handlers);
     expect(banners.length).toBeGreaterThan(0);
     expect(banners.some((banner) => banner.kind === 'chest-progress')).toBe(true);
+    const progress = banners.find((banner) => banner.kind === 'chest-progress');
+    expect(progress?.cta).toEqual({ label: 'Entendi', action: 'dismiss' });
   });
 
   it('prioriza baú pendente acima do fallback', () => {

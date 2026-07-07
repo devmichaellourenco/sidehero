@@ -3232,7 +3232,6 @@ button.hero-skill-chip:hover {
   opacity: 0.85;
 }
 
-.upgrade-intro,
 .upgrade-balance {
   margin: 0 0 10px;
   font-size: 12px;
@@ -4396,20 +4395,203 @@ body.modal-open {
   color: rgba(255, 180, 120, 0.95);
 }
 
-.forge-confirm-dialog .confirm-dialog-body {
-  overflow-y: auto;
+.forge-confirm-dialog {
+  width: min(100%, 380px);
+  border-color: rgba(245, 197, 66, 0.42);
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(245, 197, 66, 0.14), transparent 58%),
+    linear-gradient(180deg, rgba(28, 20, 12, 0.98), rgba(12, 10, 18, 0.98));
+  box-shadow:
+    0 0 0 1px rgba(255, 200, 87, 0.08) inset,
+    0 18px 44px rgba(0, 0, 0, 0.55);
+}
+
+.forge-confirm-dialog__header {
+  padding: 14px 16px 0;
+}
+
+.forge-confirm-dialog__eyebrow {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 197, 66, 0.4);
+  background: rgba(245, 197, 66, 0.1);
+  font-family: var(--font-heading);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffe8a8;
+}
+
+.forge-confirm-dialog__title {
+  color: #fff6dc;
+  text-shadow: 0 2px 10px rgba(245, 197, 66, 0.2);
+}
+
+.forge-confirm-dialog__body {
+  padding-top: 10px;
+}
+
+.forge-confirm-dialog__actions {
+  justify-content: stretch;
+}
+
+.forge-confirm-dialog__actions .forge-game-btn {
+  flex: 1;
+}
+
+.forge-confirm-body-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.forge-confirm-ritual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 197, 66, 0.28);
+  background: rgba(245, 197, 66, 0.08);
+  font-family: var(--font-heading);
+  font-size: 12px;
+  color: #fff4d8;
+}
+
+.forge-confirm-ritual__arrow {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+.forge-confirm-reward-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 197, 66, 0.35);
+  background: rgba(245, 197, 66, 0.1);
+}
+
+.forge-confirm-reward-label {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.forge-confirm-reward-value {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--gold);
+}
+
+.forge-confirm-gear {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.forge-confirm-gear-icon-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background-image: var(--gear-frame);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.forge-confirm-gear-icon {
+  position: absolute;
+  inset: 8px;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  object-fit: contain;
+}
+
+.forge-confirm-gear-rarity {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 14px;
+  height: 14px;
+}
+
+.forge-confirm-gear-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.forge-confirm-gear-name {
+  font-size: 13px;
+  color: #fff;
+}
+
+.forge-confirm-gear-meta {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.forge-confirm-gear-stats {
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.forge-confirm-gear--compact {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px;
+  gap: 6px;
+}
+
+.forge-confirm-gear--compact .forge-confirm-gear-info {
+  align-items: center;
+}
+
+.forge-confirm-gear--compact .forge-confirm-gear-name {
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.forge-confirm-gear--compact .forge-confirm-gear-meta {
+  font-size: 9px;
 }
 
 .forge-confirm-intro,
 .forge-confirm-reward {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 12px;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.88);
 }
 
+.forge-confirm-intro strong,
 .forge-confirm-reward strong {
   color: var(--gold);
+}
+
+.forge-confirm-warning {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 140, 80, 0.35);
+  background: rgba(120, 40, 20, 0.22);
+  font-size: 11px;
+  line-height: 1.45;
+  color: #ffc9a0;
 }
 
 .forge-confirm-grid {
@@ -4418,29 +4600,8 @@ body.modal-open {
   gap: 8px;
 }
 
-.destroy-confirm-gear--compact {
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 8px;
-  gap: 6px;
-}
-
-.destroy-confirm-gear--compact .destroy-confirm-gear-info {
-  align-items: center;
-}
-
-.destroy-confirm-gear--compact .destroy-confirm-gear-name {
-  font-size: 10px;
-  line-height: 1.2;
-}
-
-.destroy-confirm-gear--compact .destroy-confirm-gear-meta {
-  font-size: 9px;
-}
-
 .forge-confirm-accept {
-  min-width: 120px;
+  min-width: 0;
 }
 
 .destroy-gear-confirm-dialog .gear-destroy-btn {
@@ -4622,6 +4783,13 @@ body.modal-open {
   font-family: var(--font-heading);
   font-size: 13px;
   color: var(--gold);
+}
+
+.hero-detail-title .hero-level-class-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .hero-detail-stats {
@@ -5280,10 +5448,6 @@ body.modal-open {
   margin-top: 0;
 }
 
-.hero-detail-loadout-hint {
-  margin: 8px 0 0;
-}
-
 .hero-detail-loadout .inline-equip-host {
   margin-top: 8px;
 }
@@ -5328,21 +5492,6 @@ body.modal-open {
   flex: 1;
   min-height: 0;
   height: 100%;
-}
-
-.hero-skills-tab-header {
-  flex-shrink: 0;
-  padding: 10px 12px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
-}
-
-.hero-skills-tab-meta {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 10px 12px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
 }
 
 .hero-skills-tab-scroll {
@@ -5746,38 +5895,6 @@ body.modal-open {
   filter: brightness(1.08);
 }
 
-.hero-skill-slot-bar-hint {
-  margin: 0;
-}
-
-.skill-slot-instruction {
-  margin: 0 0 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(245, 197, 66, 0.45);
-  background: rgba(245, 197, 66, 0.12);
-  color: #f8e6a8;
-  font-size: 11px;
-  line-height: 1.4;
-  text-align: center;
-  animation: skill-slot-instruction-in 0.2s ease;
-}
-
-.skill-slot-instruction[hidden] {
-  display: none;
-}
-
-@keyframes skill-slot-instruction-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .hero-detail-layout.hero-skills-tab--skill-picked .hero-skill-slot-bar__slot--pick-target {
   animation: skill-slot-pulse 1.2s ease-in-out infinite;
   box-shadow: 0 0 0 2px rgba(126, 231, 135, 0.65);
@@ -5830,12 +5947,6 @@ body.modal-open {
 .hero-skill-slot-bar__remove:hover {
   background: rgba(120, 28, 36, 0.95);
   color: #fff;
-}
-
-.skill-card-equip-hint {
-  font-size: 9px;
-  color: rgba(126, 231, 135, 0.85);
-  letter-spacing: 0.02em;
 }
 
 .hero-skill-slot-bar__slot--selected {
@@ -6140,6 +6251,391 @@ body.skill-drag-active * {
   gap: 10px;
 }
 
+/* —— Aba Classe: momento de ascensão —— */
+.hero-class-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 0 8px;
+}
+
+.ascension-moment-header {
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.ascension-moment-header__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  line-height: 1.2;
+  color: #fff6dc;
+  cursor: help;
+}
+
+.ascension-moment-header--upgrade .ascension-moment-header__title {
+  color: #eef6ff;
+}
+
+.ascension-moment-header__hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ascension-moment-tooltip-content {
+  display: none;
+}
+
+.ascension-moment-tooltip-portal {
+  position: fixed;
+  z-index: var(--z-toast);
+  max-width: min(260px, calc(100vw - 24px));
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 197, 66, 0.45);
+  background: linear-gradient(180deg, rgba(28, 22, 48, 0.98), rgba(14, 18, 36, 0.98));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.ascension-moment-tooltip-portal.hidden {
+  display: none;
+}
+
+.ascension-moment-tooltip-title {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffe8a8;
+}
+
+.ascension-moment-tooltip-line {
+  display: block;
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ascension-moment-tooltip-section {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ascension-path-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.ascension-path-grid--fork {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ascension-path-card {
+  position: relative;
+  min-width: 0;
+}
+
+.ascension-path-card__glow {
+  position: absolute;
+  inset: 8px 10px auto;
+  height: 56%;
+  border-radius: 12px;
+  opacity: 0.55;
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.ascension-path-card__frame {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(22, 26, 44, 0.96), rgba(12, 14, 28, 0.98));
+  overflow: hidden;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.ascension-path-card--ready .ascension-path-card__frame:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
+}
+
+.ascension-path-card__ribbon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.ascension-path-card__showcase {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 108px;
+  padding: 18px 10px 8px;
+  overflow: hidden;
+}
+
+.ascension-path-card__spark {
+  position: absolute;
+  inset: 10% 8% 18%;
+  border-radius: 50%;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.ascension-path-card__sprite {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-height: 96px;
+  width: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.45));
+}
+
+.ascension-path-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 10px 10px;
+  flex: 1;
+}
+
+.ascension-path-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ascension-path-card__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  line-height: 1.2;
+  color: #fff4dc;
+}
+
+.ascension-path-card__points {
+  flex-shrink: 0;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff8e8;
+  background: rgba(245, 197, 66, 0.22);
+  border: 1px solid rgba(245, 197, 66, 0.45);
+}
+
+.ascension-path-card__desc {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.ascension-path-card__reqs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ascension-path-card__reqs-empty {
+  margin: 0;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.ascension-req {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  line-height: 1.2;
+  border: 1px solid transparent;
+}
+
+.ascension-req--met {
+  color: #b8f0c8;
+  background: rgba(76, 175, 80, 0.16);
+  border-color: rgba(126, 231, 135, 0.35);
+}
+
+.ascension-req--unmet {
+  color: #f0b8b8;
+  background: rgba(180, 60, 60, 0.14);
+  border-color: rgba(232, 138, 138, 0.28);
+}
+
+.ascension-req__icon {
+  font-size: 8px;
+  line-height: 1;
+}
+
+.ascension-path-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+.ascension-path-card__status {
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.ascension-path-card__cta {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: not-allowed;
+}
+
+.ascension-path-card--ready .ascension-path-card__status {
+  color: #b8f0c8;
+}
+
+.ascension-path-card--ready .ascension-path-card__cta {
+  border-color: rgba(245, 197, 66, 0.65);
+  background: linear-gradient(180deg, rgba(245, 197, 66, 0.34), rgba(180, 120, 20, 0.42));
+  color: #fff8e8;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(245, 197, 66, 0.22);
+}
+
+.ascension-path-card--ready .ascension-path-card__cta:hover {
+  filter: brightness(1.08);
+}
+
+.ascension-path-card--military .ascension-path-card__glow,
+.ascension-path-card--military .ascension-path-card__spark {
+  background: radial-gradient(circle, rgba(66, 120, 200, 0.55), transparent 70%);
+}
+
+.ascension-path-card--military .ascension-path-card__frame {
+  border-color: rgba(90, 140, 220, 0.45);
+}
+
+.ascension-path-card--military .ascension-path-card__title {
+  color: #dcecff;
+}
+
+.ascension-path-card--martial .ascension-path-card__glow,
+.ascension-path-card--martial .ascension-path-card__spark {
+  background: radial-gradient(circle, rgba(220, 90, 70, 0.55), transparent 70%);
+}
+
+.ascension-path-card--martial .ascension-path-card__frame {
+  border-color: rgba(220, 110, 80, 0.45);
+}
+
+.ascension-path-card--martial .ascension-path-card__title {
+  color: #ffe0d8;
+}
+
+.ascension-path-card--arcane .ascension-path-card__glow,
+.ascension-path-card--arcane .ascension-path-card__spark {
+  background: radial-gradient(circle, rgba(150, 90, 220, 0.55), transparent 70%);
+}
+
+.ascension-path-card--arcane .ascension-path-card__frame {
+  border-color: rgba(171, 71, 188, 0.45);
+}
+
+.ascension-path-card--arcane .ascension-path-card__title {
+  color: #f0dcff;
+}
+
+.ascension-path-card--innate .ascension-path-card__glow,
+.ascension-path-card--innate .ascension-path-card__spark {
+  background: radial-gradient(circle, rgba(60, 190, 210, 0.55), transparent 70%);
+}
+
+.ascension-path-card--innate .ascension-path-card__frame {
+  border-color: rgba(60, 190, 210, 0.45);
+}
+
+.ascension-path-card--innate .ascension-path-card__title {
+  color: #d8f8ff;
+}
+
+.ascension-path-card--sacred .ascension-path-card__glow,
+.ascension-path-card--sacred .ascension-path-card__spark {
+  background: radial-gradient(circle, rgba(245, 210, 100, 0.55), transparent 70%);
+}
+
+.ascension-path-card--sacred .ascension-path-card__frame {
+  border-color: rgba(245, 197, 66, 0.5);
+}
+
+.ascension-path-card--life .ascension-path-card__glow,
+.ascension-path-card--life .ascension-path-card__spark {
+  background: radial-gradient(circle, rgba(90, 200, 120, 0.55), transparent 70%);
+}
+
+.ascension-path-card--life .ascension-path-card__frame {
+  border-color: rgba(90, 200, 120, 0.45);
+}
+
+.ascension-path-card--life .ascension-path-card__title {
+  color: #dcffe8;
+}
+
+.ascension-path-card--default .ascension-path-card__glow,
+.ascension-path-card--default .ascension-path-card__spark {
+  background: radial-gradient(circle, rgba(245, 197, 66, 0.35), transparent 70%);
+}
+
+/* legado — mantido para previews antigos */
 .ascension-card {
   padding: 12px;
   border-radius: 10px;
@@ -6246,6 +6742,10 @@ body.skill-drag-active * {
   margin: 12px 0 6px;
   font-size: 12px;
   color: #d8e4ff;
+}
+
+.hero-class-subtitle--skills {
+  margin-top: 4px;
 }
 
 .campaign-modal-hint {
@@ -8255,71 +8755,224 @@ body.wow-celebration-open {
 }
 
 /* Forja Divina */
-.forge-panel-intro {
-  margin: 0 0 10px;
-  font-size: 0.85rem;
-  color: var(--text-muted, #9aa3b2);
-  line-height: 1.4;
+.forge-panel--game {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  height: 100%;
 }
 
 .forge-tabs {
   display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .forge-tab {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
   padding: 8px 10px;
-  border: 1px solid var(--border-subtle, #3a4254);
-  border-radius: 6px;
-  background: var(--surface-raised, #1e2433);
-  color: var(--text-primary, #e8ecf4);
-  font-size: 0.82rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(12, 18, 36, 0.82);
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.04em;
   cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.1s ease;
+}
+
+.forge-tab:hover {
+  border-color: rgba(245, 197, 66, 0.28);
+  color: #fff8e7;
 }
 
 .forge-tab--active {
-  border-color: var(--accent, #6b8cff);
-  background: color-mix(in srgb, var(--accent, #6b8cff) 18%, transparent);
+  color: #fff6dc;
+  border-color: rgba(245, 197, 66, 0.5);
+  background:
+    radial-gradient(120% 140% at 50% 0%, rgba(245, 197, 66, 0.18), transparent 60%),
+    rgba(40, 28, 12, 0.92);
+  box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.12) inset;
 }
 
-.forge-action-panel {
+.forge-tab-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.forge-capacity-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.forge-capacity-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.forge-capacity-chip strong {
+  color: #fff8e7;
+}
+
+.forge-grid-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.forge-dock {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--surface-inset, #151a26);
-  border: 1px solid var(--border-subtle, #3a4254);
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(245, 197, 66, 0.28);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(245, 197, 66, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(24, 18, 10, 0.96), rgba(12, 10, 18, 0.98));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
 }
 
-.forge-selection-count {
+.forge-dock-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.forge-dock-status--warn .forge-dock-badge {
+  border-color: rgba(255, 140, 80, 0.45);
+  color: #ffc9a0;
+}
+
+.forge-dock-status--ready .forge-dock-badge {
+  border-color: rgba(245, 197, 66, 0.55);
+  color: var(--gold);
+}
+
+.forge-dock-badge {
+  flex-shrink: 0;
+  min-width: 44px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
+  font-family: var(--font-heading);
+  font-size: 12px;
+  text-align: center;
+  color: #fff8e7;
+}
+
+.forge-dock-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.forge-dock-line {
   margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.forge-dock-line--highlight {
+  color: var(--gold);
+  font-family: var(--font-heading);
+}
+
+.forge-game-btn {
+  width: 100%;
+  min-height: 38px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease,
+    opacity 0.15s ease;
+}
+
+.forge-game-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.forge-game-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.forge-game-btn--fuse {
+  border-color: rgba(245, 197, 66, 0.65);
+  background: linear-gradient(180deg, rgba(245, 197, 66, 0.38), rgba(160, 90, 20, 0.55));
+  color: #fff8e8;
+  box-shadow: 0 4px 14px rgba(245, 197, 66, 0.18);
+}
+
+.forge-game-btn--salvage {
+  border-color: rgba(229, 115, 115, 0.55);
+  background: linear-gradient(180deg, rgba(183, 28, 28, 0.42), rgba(100, 18, 18, 0.62));
+  color: #ffe8e8;
+  box-shadow: 0 4px 14px rgba(183, 28, 28, 0.18);
+}
+
+.forge-game-btn--ghost {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.82);
+  text-transform: none;
+  letter-spacing: 0.02em;
   font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.forge-hint,
-.forge-result-hint {
-  margin: 0;
-  font-size: 0.82rem;
-  color: var(--text-muted, #9aa3b2);
-}
-
-.forge-hint--warn {
-  color: #f0a060;
-}
-
-.forge-fuse-btn,
-.forge-salvage-btn {
-  align-self: flex-start;
 }
 
 .forge-grid-slot--selected {
-  outline: 2px solid var(--accent, #6b8cff);
+  outline: 2px solid rgba(245, 197, 66, 0.8);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(245, 197, 66, 0.14);
+}
+
+.forge-grid-slot--stash::after {
+  content: 'Baú';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 8px;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+.forge-grid-slot {
+  position: relative;
 }
 
 .forge-salvage-preview {

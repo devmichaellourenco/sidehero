@@ -23,7 +23,7 @@ export class OpenAllChestsUseCase {
 
     const dto = this.presenter.present(nextState);
     const lootIds = new Set(loots.map((loot) => loot.id));
-    const openedGears = dto.inventory.filter((gear) => lootIds.has(gear.id));
+    const openedGears = [...dto.inventory, ...dto.stash].filter((gear) => lootIds.has(gear.id));
 
     return { state: dto, openedGears };
   }

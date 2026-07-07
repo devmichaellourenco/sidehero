@@ -69,6 +69,25 @@ export class GearStorageService {
     }
   }
 
+  resolveLootDestination(
+    levels: GameState['upgradeLevels'],
+    inventoryCount: number,
+    stashCount: number,
+  ): GearStorageLocation | null {
+    if (StorageCapacityPolicy.canAddToInventory(inventoryCount)) {
+      return 'inventory';
+    }
+
+    if (
+      StorageCapacityPolicy.isStashUnlocked(levels) &&
+      StorageCapacityPolicy.canAddToStash(levels, stashCount)
+    ) {
+      return 'stash';
+    }
+
+    return null;
+  }
+
   private findGear(
     state: GameState,
     gearId: string,

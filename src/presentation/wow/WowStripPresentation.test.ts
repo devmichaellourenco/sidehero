@@ -72,5 +72,6 @@ describe('WowStripPresentation', () => {
     expect(mapped?.kind).toBe('loot-received');
     expect(mapped?.gear?.rarity).toBe('epic');
     expect(mapped?.eyebrow).toBe('Novo Item');
+    expect(mapped?.cta).toEqual({ label: 'Entendi', action: 'dismiss' });
   });
 });

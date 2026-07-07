@@ -21,10 +21,12 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 - Slot 0 = Ataque Básico (fixo)
 - Slots extras = `getUnlockedBattleSkillSlotCount(upgradeLevels)`
 - Scroll ao `+1 rank`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`
+- Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltips nos cards
+- Aba Classe: sem retrato/classe atual (vai no header); banner + cards temáticos (`HeroClassAscensionPresentation`) + skills de evolução
 
 ## Testes
 
-`SkillService.allocate.test.ts`, `SkillService.ascension.test.ts`, `SkillBattleSlots.test.ts`, `HeroDetailScrollPresentation.test.ts` — criar ou atualizar; não executar automaticamente.
+`SkillService.allocate.test.ts`, `SkillService.ascension.test.ts`, `SkillBattleSlots.test.ts`, `HeroDetailScrollPresentation.test.ts`, `HeroSkillsTabRenderer.test.ts` — criar ou atualizar; não executar automaticamente.
 
 ## Workflow do agente
 

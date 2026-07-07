@@ -20,10 +20,13 @@ description: Gerencia heróis, party ativa, reserva, unlock e formação no Side
 - Edição só com pausa loadout (`PauseForLoadoutUseCase`)
 - Herói imutável: `Hero` com `toProps()` / métodos que retornam novo `Hero`
 - Modal de herói via pilha de modais (`GameViewController`)
+- Aba Inventário: sem hint de texto nos slots; equipar via clique no slot + picker inline
+- Header do modal: `Lv.{n} {Classe} - {Evolução}` via `HeroClassLinePresentation`
+- Aba Classe: título compacto + tooltip (`HeroAscensionMomentTooltipBinder`) + cards temáticos (`HeroClassAscensionPresentation`)
 
 ## Testes
 
-`PartyService.test.ts`, `PartyDragDropPresentation.test.ts`, `HeroUnlockService.test.ts` — criar ou atualizar; não executar automaticamente.
+`PartyService.test.ts`, `PartyDragDropPresentation.test.ts`, `HeroUnlockService.test.ts`, `HeroDetailModalRenderer.test.ts` — criar ou atualizar; não executar automaticamente.
 
 ## Workflow do agente
 

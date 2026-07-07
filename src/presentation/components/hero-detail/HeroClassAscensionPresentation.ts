@@ -1,0 +1,174 @@
+import { AscensionOptionDto } from '../../../application/dto/AscensionOptionDto';
+import { HeroDto } from '../../../application/dto/GameStateDto';
+import { getHeroSprite, imgTag } from '../../assets/AssetCatalog';
+
+export type AscensionPathTheme =
+  | 'military'
+  | 'martial'
+  | 'arcane'
+  | 'innate'
+  | 'sacred'
+  | 'life'
+  | 'default';
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+export function resolveAscensionPathTheme(
+  ascensionId: string,
+  pathLabel?: string,
+): AscensionPathTheme {
+  const label = pathLabel?.toLowerCase() ?? '';
+  const id = ascensionId.toLowerCase();
+
+  if (id.includes('military') || label.includes('militar')) return 'military';
+  if (id.includes('martial') || label.includes('marcial')) return 'martial';
+  if (id.includes('arcane') || label.includes('arcano')) return 'arcane';
+  if (id.includes('innate') || label.includes('inato')) return 'innate';
+  if (id.includes('sacred') || label.includes('sagrado')) return 'sacred';
+  if (id.includes('life') || label.includes('vida')) return 'life';
+  return 'default';
+}
+
+export function renderAscensionMomentBanner(isUpgrade: boolean, heroName: string): string {
+  if (isUpgrade) {
+    return `
+      <div class="ascension-moment-header ascension-moment-header--upgrade">
+        <h3
+          class="ascension-moment-header__title"
+          data-ascension-moment-tooltip
+          tabindex="0"
+          aria-label="Próximo capítulo — passe o mouse para detalhes"
+        >
+          Próximo capítulo
+          <span class="ascension-moment-header__hint" aria-hidden="true">ⓘ</span>
+        </h3>
+        <span class="ascension-moment-tooltip-content hidden">
+          <strong class="ascension-moment-tooltip-title">Evolução iminente</strong>
+          <span class="ascension-moment-tooltip-line">
+            ${escapeHtml(heroName)} está pronto para avançar — nova forma, novas skills e mais poder de ascensão.
+          </span>
+        </span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="ascension-moment-header ascension-moment-header--fork">
+      <h3
+        class="ascension-moment-header__title"
+        data-ascension-moment-tooltip
+        tabindex="0"
+        aria-label="Escolha seu destino — passe o mouse para detalhes"
+      >
+        Escolha seu destino
+        <span class="ascension-moment-header__hint" aria-hidden="true">ⓘ</span>
+      </h3>
+      <span class="ascension-moment-tooltip-content hidden">
+        <strong class="ascension-moment-tooltip-title">Momento decisivo</strong>
+        <span class="ascension-moment-tooltip-line">
+          Uma evolução permanente transforma o visual de ${escapeHtml(heroName)} e abre skills exclusivas de caminho.
+        </span>
+        <span class="ascension-moment-tooltip-line ascension-moment-tooltip-section">Benefícios</span>
+        <span class="ascension-moment-tooltip-line">· Novo visual</span>
+        <span class="ascension-moment-tooltip-line">· Skills de caminho</span>
+        <span class="ascension-moment-tooltip-line">· Pontos de ascensão</span>
+      </span>
+    </div>
+  `;
+}
+
+function renderAscensionRequirements(requirements: AscensionOptionDto['requirements']): string {
+  if (requirements.length === 0) {
+    return '<p class="ascension-path-card__reqs-empty">Sem requisitos adicionais</p>';
+  }
+
+  const items = requirements
+    .map((req) => {
+      const stateClass = req.met ? 'ascension-req--met' : 'ascension-req--unmet';
+      const icon = req.met ? '✓' : '○';
+      return `
+        <li class="ascension-req ${stateClass}">
+          <span class="ascension-req__icon" aria-hidden="true">${icon}</span>
+          <span class="ascension-req__label">${escapeHtml(req.label)}</span>
+        </li>
+      `;
+    })
+    .join('');
+
+  return `<ul class="ascension-path-card__reqs">${items}</ul>`;
+}
+
+export function renderAscensionPathCard(
+  hero: HeroDto,
+  option: AscensionOptionDto,
+  isUpgrade: boolean,
+): string {
+  const theme = resolveAscensionPathTheme(option.id, option.pathLabel);
+  const stateClass = option.canAscend ? 'ascension-path-card--ready' : 'ascension-path-card--locked';
+  const pathLabel = option.pathLabel
+    ? `<span class="ascension-path-card__ribbon">${escapeHtml(option.pathLabel)}</span>`
+    : '';
+  const ctaLabel = isUpgrade ? 'Evoluir agora' : 'Seguir este caminho';
+  const ctaHint = option.canAscend
+    ? 'Pronto para ascender'
+    : 'Complete os requisitos para desbloquear';
+
+  return `
+    <article
+      class="ascension-path-card ascension-path-card--${theme} ${stateClass}"
+      data-ascension-theme="${theme}"
+    >
+      <div class="ascension-path-card__glow" aria-hidden="true"></div>
+      <div class="ascension-path-card__frame">
+        ${pathLabel}
+        <div class="ascension-path-card__showcase">
+          <div class="ascension-path-card__spark" aria-hidden="true"></div>
+          ${imgTag(
+            getHeroSprite({ id: hero.id, heroClass: hero.heroClass, ascensionId: option.id }),
+            option.name,
+            'ascension-path-card__sprite',
+          )}
+        </div>
+        <div class="ascension-path-card__body">
+          <header class="ascension-path-card__header">
+            <h4 class="ascension-path-card__title">${escapeHtml(option.name)}</h4>
+            <span class="ascension-path-card__points">+${option.pointsGranted} pts</span>
+          </header>
+          <p class="ascension-path-card__desc">${escapeHtml(option.description)}</p>
+          ${renderAscensionRequirements(option.requirements)}
+          <footer class="ascension-path-card__footer">
+            <span class="ascension-path-card__status">${ctaHint}</span>
+            <button
+              type="button"
+              class="ascension-path-card__cta"
+              data-ascend="${option.id}"
+              ${option.canAscend ? '' : 'disabled'}
+            >
+              ${ctaLabel}
+            </button>
+          </footer>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+export function renderAscensionPathGrid(
+  hero: HeroDto,
+  options: AscensionOptionDto[],
+  isUpgrade: boolean,
+): string {
+  const cards = options.map((option) => renderAscensionPathCard(hero, option, isUpgrade)).join('');
+
+  return `
+    <div class="ascension-path-grid${options.length > 1 ? ' ascension-path-grid--fork' : ''}">
+      ${cards}
+    </div>
+  `;
+}

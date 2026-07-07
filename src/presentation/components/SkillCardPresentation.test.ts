@@ -45,7 +45,9 @@ describe('SkillCardPresentation', () => {
     expect(html).not.toContain('+1 rank');
     expect(html).toContain('skill-card-rank-up');
     expect(html).toContain('skill-card-rank-up--available');
-    expect(html).toContain('Toque para equipar');
+    expect(html).not.toContain('Toque para equipar');
+    expect(html).not.toContain('arraste até um slot');
+    expect(html).not.toContain('skill-card-equip-hint');
   });
 
   it('mantém detalhes no tooltip oculto', () => {

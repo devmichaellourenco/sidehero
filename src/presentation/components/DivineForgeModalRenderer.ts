@@ -4,9 +4,15 @@ import {
   hideInventoryGearTooltip,
 } from './InventoryGearTooltipBinder';
 import {
+  captureForgeGridScroll,
+  restoreForgeGridScroll,
+} from './ForgeGridScrollPresentation';
+import {
   DivineForgeTab,
   evaluateForgeSelection,
+  listForgeEligibleGear,
   renderCreateTabPanel,
+  renderForgeCapacityBar,
   renderForgeGrid,
   renderForgeTabs,
   renderSalvageTabPanel,
@@ -47,10 +53,12 @@ export class DivineForgeModalRenderer {
       return;
     }
 
-    const selectionStatus = evaluateForgeSelection(this.selectedIds, state.inventory);
+    const forgeGear = listForgeEligibleGear(state);
+    const stashGearIds = new Set(state.stash.map((gear) => gear.id));
+    const selectionStatus = evaluateForgeSelection(this.selectedIds, forgeGear);
     const selectedSalvageGear =
       this.salvageGearId !== null
-        ? state.inventory.find((gear) => gear.id === this.salvageGearId) ?? null
+        ? forgeGear.find((gear) => gear.id === this.salvageGearId) ?? null
         : null;
 
     const tabPanel =
@@ -58,24 +66,36 @@ export class DivineForgeModalRenderer {
         ? renderCreateTabPanel(selectionStatus)
         : renderSalvageTabPanel(selectedSalvageGear, state.stage);
 
+    const scrollTop = captureForgeGridScroll(container);
+
     container.innerHTML = `
-      <div class="forge-panel inventory-panel">
-        <p class="forge-panel-intro">
-          Combine 9 itens da mesma raridade em um item aleatório superior, ou destrua itens por ouro.
-        </p>
+      <div class="forge-panel forge-panel--game inventory-panel">
         ${renderForgeTabs(this.activeTab)}
+        ${renderForgeCapacityBar(
+          forgeGear.length,
+          state.storageCapacity.inventoryUsed,
+          state.storageCapacity.inventoryLimit,
+          state.storageCapacity.stashUsed,
+          state.storageCapacity.stashLimit,
+        )}
+        <div class="forge-grid-scroll game-scroll">
+          ${renderForgeGrid(forgeGear, {
+            tab: this.activeTab,
+            selectedIds:
+              this.activeTab === 'create'
+                ? this.selectedIds
+                : new Set(selectedSalvageGear ? [selectedSalvageGear.id] : []),
+            stage: state.stage,
+            stashGearIds,
+          })}
+        </div>
         ${tabPanel}
-        <p class="inventory-count">${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit} no inventário</p>
-        ${renderForgeGrid(state.inventory, {
-          tab: this.activeTab,
-          selectedIds: this.activeTab === 'create' ? this.selectedIds : new Set(selectedSalvageGear ? [selectedSalvageGear.id] : []),
-          stage: state.stage,
-        })}
       </div>
     `;
 
     this.bind(container, handlers);
     bindInventoryGearTooltips(container);
+    restoreForgeGridScroll(container, scrollTop);
   }
 
   private bind(container: HTMLElement, handlers: DivineForgeModalHandlers): void {

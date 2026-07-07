@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 7/7 (100%) · auditoria 2026-07-03  
-**Testes obrigatórios:** 6/6 presentes na suite
+**Aceite:** 8/8 (100%) · auditoria 2026-07-07  
+**Testes obrigatórios:** 7/7 presentes na suite
 
 ## Objetivo
 
@@ -13,6 +13,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 - [x] Modais de inventário/heróis/melhorias limitados abaixo da combat bar (`--panel-sheet-top`)
 - [x] Wow: celebrações centrais; inbox no header (✦); strip dismiss sem repetir
+- [x] Todo card Wow exibe botão de rodapé (padrão **Entendi** para dispensar); o [×] só aparece em CTAs de ação no modo center
 - [x] Baú flutuante na batalha quando pendente
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
 - [x] Footer em ícones com badges (baús, pendências)
@@ -24,7 +25,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 | Camada | Paths |
 |--------|-------|
 | Presentation | `panel/panel.html`, `panel.css`, `GameViewController`, `GameHudController` |
-| Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `RewardOrchestrator`, `OnboardingPolicy` |
+| Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy` |
 | Presentation | `ModalStackController`, `BattleChestAffordanceController` |
 
 ## Invariantes
@@ -39,7 +40,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 ## Testes obrigatórios
 
-- [x] `BattleChromeLayout.test.ts`, `WowBannerBuilder.test.ts`, `WowStripRenderPolicy.test.ts`
+- [x] `BattleChromeLayout.test.ts`, `WowBannerBuilder.test.ts`, `WowBannerCtaPresentation.test.ts`, `WowStripRenderPolicy.test.ts`
 - [x] `OnboardingPolicy.test.ts`, `IdleProgressSummary.test.ts`
 - [x] `BattleLogRenderer.test.ts` — log incremental no painel
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts` (campanha — ver também `combat-campaign.spec.md`)

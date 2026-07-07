@@ -45,6 +45,8 @@ describe('UpgradeTreeModalRenderer', () => {
     expect(container.querySelector('[data-upgrade-focus-available]')).not.toBeNull();
     expect(container.querySelectorAll('[data-upgrade-node]')).toHaveLength(3);
     expect(container.querySelector('.upgrade-tree-edge')).not.toBeNull();
+    expect(container.innerHTML).not.toContain('upgrade-intro');
+    expect(container.innerHTML).not.toContain('Arraste para mover');
     expect(container.innerHTML).not.toContain('upgrade-branch-tab');
   });
 

@@ -1,4 +1,5 @@
 import { Hero } from '../entities/Hero';
+import { getSkillById } from '../progression/SkillCatalog';
 import { ProgressionRequirement } from '../progression/ProgressionRequirement';
 import {
   getKnightEvolution,
@@ -61,8 +62,10 @@ export class HeroRequirementEvaluator {
         return `Level ${requirement.min}`;
       case 'attribute':
         return `${requirement.key.toUpperCase()} ${requirement.min}`;
-      case 'skill_rank':
-        return `Skill ${requirement.skillId} rank ${requirement.minRank}`;
+      case 'skill_rank': {
+        const skillName = getSkillById(requirement.skillId)?.name ?? requirement.skillId;
+        return `Skill ${skillName} rank ${requirement.minRank}`;
+      }
       case 'hero_class':
         return `Classe ${requirement.heroClass}`;
       case 'ascension': {

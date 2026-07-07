@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 7/7 (100%) · auditoria 2026-07-06  
+**Aceite:** 8/8 (100%) · auditoria 2026-07-06  
 **Testes obrigatórios:** 7/7 presentes na suite
 
 ## Objetivo
@@ -18,6 +18,7 @@ Desbloquear automações e QoL comprando nós na **árvore única** com ouro, de
 - [x] Compra aplica `feature` level + `unlockHeroClass` quando aplicável
 - [x] Tooltip com requisitos e botão comprar
 - [x] **Viewport estável após compra:** ao habilitar uma melhoria (botão Comprar no tooltip), o canvas **mantém** pan e zoom atuais — a visão não volta ao início nem recentraliza sozinha
+- [x] Modal **sem** hint estático de pan/zoom/hover; legenda, nodos com tooltip e botão **Ir para disponível** comunicam a interação
 
 ## Comportamento esperado do viewport
 
@@ -56,7 +57,7 @@ O tooltip/card de compra deve continuar aparecendo e fechando normalmente; apena
 - [x] `UpgradeTreeGraphPresentation.test.ts`
 - [x] `UpgradeTreeModalRenderer.test.ts`, `UpgradeTreeViewportBinder.test.ts`
 - [x] `UpgradeTreeViewportBinder.test.ts` — restaurar `UpgradeTreeViewportState` (`scale`, `panX`, `panY`) após re-bind
-- [x] `UpgradeTreeModalRenderer.test.ts` — segundo `render()` após compra simulada **não** chama foco automático nem reseta transform do stage
+- [x] `UpgradeTreeModalRenderer.test.ts` — segundo `render()` após compra simulada **não** chama foco automático nem reseta transform do stage; **sem** parágrafo `upgrade-intro`
 
 ## Notas de implementação (orientação)
 

@@ -7,20 +7,20 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | Feature | Aceite | Testes spec | Pendências |
 |---------|--------|-------------|------------|
 | [combat-campaign](combat-campaign.spec.md) | 8/8 | 6/6 | — |
-| [heroes-party](heroes-party.spec.md) | 5/5 | 5/5 | — |
-| [skills-progression](skills-progression.spec.md) | 6/6 | 7/7 | — |
-| [gear-loot](gear-loot.spec.md) | 5/5 | 5/5 | — |
-| [stash-forge](stash-forge.spec.md) | 5/5 | 3/3 | — |
+| [heroes-party](heroes-party.spec.md) | 9/9 | 10/10 | — |
+| [skills-progression](skills-progression.spec.md) | 9/9 | 10/10 | — |
+| [gear-loot](gear-loot.spec.md) | 6/6 | 6/6 | — |
+| [stash-forge](stash-forge.spec.md) | 8/8 | 7/7 | — |
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
-| [upgrade-tree](upgrade-tree.spec.md) | 7/7 | 7/7 | — |
+| [upgrade-tree](upgrade-tree.spec.md) | 8/8 | 7/7 | — |
 | [meta-legacy](meta-legacy.spec.md) | 5/5 | 1/1 | — |
-| [battle-ui](battle-ui.spec.md) | 7/7 | 6/6 | — |
+| [battle-ui](battle-ui.spec.md) | 8/8 | 7/7 | — |
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
 | [game-balance](game-balance.spec.md) | 8/8 | 10/10 | — |
 
-**Total aceite (features):** 58/58 (100%)  
+**Total aceite (features):** 70/70 (100%)  
 **Balanceamento transversal:** 8/8  
-**Total testes listados nas specs:** 54/54 (100%)
+**Total testes listados nas specs:** 67/67 (100%)
 
 ## Próxima feature sugerida
 

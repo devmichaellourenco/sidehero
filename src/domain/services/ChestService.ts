@@ -58,23 +58,50 @@ export class ChestService {
     const loots: Gear[] = [];
     let updatedChests = [...state.chests];
     let inventory = [...state.inventory];
+    let stash = [...state.stash];
     const logs: string[] = [];
 
     for (const chest of pendingChests) {
-      this.gearStorageService.assertInventoryHasRoom(inventory.length);
+      const destination = this.gearStorageService.resolveLootDestination(
+        state.upgradeLevels,
+        inventory.length,
+        stash.length,
+      );
+
+      if (!destination) {
+        break;
+      }
+
       const loot = this.lootService.generateGearForChest(chest.chestType, chest.stageEarned);
       updatedChests = updatedChests.map((entry) =>
         entry.id === chest.id ? entry.open(loot) : entry,
       );
-      inventory = [...inventory, loot];
+
+      if (destination === 'inventory') {
+        inventory = [...inventory, loot];
+      } else {
+        stash = [...stash, loot];
+      }
+
       loots.push(loot);
       logs.push(loot.name);
     }
 
+    if (loots.length === 0) {
+      return { state, loots: [] };
+    }
+
+    const remaining = pendingChests.length - loots.length;
+    const logMessage =
+      remaining > 0
+        ? `Abriu ${loots.length} baús (${remaining} pendentes — sem espaço): ${logs.join(', ')}`
+        : `Abriu ${loots.length} baús: ${logs.join(', ')}`;
+
     const nextState = state
       .withChests(updatedChests)
       .withInventory(inventory)
-      .addLog(`Abriu ${loots.length} baús: ${logs.join(', ')}`);
+      .withStash(stash)
+      .addLog(logMessage);
 
     return { state: nextState, loots };
   }

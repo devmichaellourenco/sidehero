@@ -42,9 +42,9 @@ export class DivineForgeService {
     }
 
     const gears = gearIds.map((id) => {
-      const gear = state.inventory.find((entry) => entry.id === id);
+      const gear = this.findGear(state, id);
       if (!gear) {
-        throw new Error('Selecione apenas itens do inventário');
+        throw new Error('Item não encontrado no inventário ou no baú');
       }
       return gear;
     });
@@ -63,14 +63,16 @@ export class DivineForgeService {
       throw new Error('Raridade máxima — não é possível fundir');
     }
 
-    const remaining = state.inventory.filter((gear) => !uniqueIds.has(gear.id));
-    this.gearStorage.assertInventoryHasRoom(remaining.length, 1);
+    const remainingInventory = state.inventory.filter((gear) => !uniqueIds.has(gear.id));
+    const remainingStash = state.stash.filter((gear) => !uniqueIds.has(gear.id));
+    this.gearStorage.assertInventoryHasRoom(remainingInventory.length, 1);
 
     const slot = ACTIVE_GEAR_SLOTS[Math.floor(Math.random() * ACTIVE_GEAR_SLOTS.length)];
     const created = this.lootService.generateGearForSlot(state.stage, slot, nextRarity);
 
     const nextState = state
-      .withInventory([...remaining, created])
+      .withInventory([...remainingInventory, created])
+      .withStash(remainingStash)
       .addLog(
         `Forja Divina: ${FORGE_FUSE_REQUIRED_COUNT} itens fundidos em ${created.name} (${nextRarity}).`,
       );
@@ -83,17 +85,22 @@ export class DivineForgeService {
       throw new Error('Forja Divina não desbloqueada');
     }
 
-    const gear = state.inventory.find((entry) => entry.id === gearId);
+    const gear = this.findGear(state, gearId);
     if (!gear) {
-      throw new Error('Item não encontrado no inventário');
+      throw new Error('Item não encontrado no inventário ou no baú');
     }
 
     const goldGained = calculateForgeSalvageGold(gear.rarity, state.stage);
     const nextState = state
       .withInventory(state.inventory.filter((entry) => entry.id !== gearId))
+      .withStash(state.stash.filter((entry) => entry.id !== gearId))
       .withGold(state.gold.add(goldGained))
       .addLog(`Forja Divina: ${gear.name} destruído por +${goldGained} ouro.`);
 
     return { state: nextState, goldGained };
+  }
+
+  private findGear(state: GameState, gearId: string): Gear | null {
+    return state.inventory.find((entry) => entry.id === gearId) ?? state.stash.find((entry) => entry.id === gearId) ?? null;
   }
 }

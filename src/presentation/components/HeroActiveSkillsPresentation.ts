@@ -180,16 +180,10 @@ export function renderHeroSkillSlotsRow(hero: HeroDto, options: HeroSkillSlotBar
 export function renderHeroSkillSlotBar(hero: HeroDto, options: HeroSkillSlotBarOptions): string {
   const slots = renderHeroSkillSlotsRow(hero, options);
 
-  const hint =
-    options.mode === 'skills-tab'
-      ? 'Toque em uma skill para equipar · arraste até um slot · × remove do slot'
-      : '';
-
   return `
     <div class="hero-skill-slot-bar hero-skill-slot-bar--${options.mode}">
       ${options.mode === 'skills-tab' ? `<p class="hero-skill-slot-bar-label">Skills ativas</p>` : ''}
       <div class="hero-skill-slot-bar-slots">${slots}</div>
-      ${hint ? `<p class="hero-detail-hint hero-skill-slot-bar-hint">${hint}</p>` : ''}
     </div>
   `;
 }

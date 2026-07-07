@@ -111,5 +111,6 @@ function buildChestProgressBanner(state: GameStateDto): WowBanner {
     subtitle: 'Continue batalhando para ganhar um baú',
     iconUrl: getAssetUrl(ASSETS.ui.chest),
     progressRatio: progress.ratio,
+    cta: { label: 'Entendi', action: 'dismiss' },
   };
 }

@@ -72,7 +72,7 @@ export const SKILL_CATALOG: SkillDefinition[] = [
     maxRank: 3,
     requirements: [
       { type: 'hero_class', heroClass: 'knight' },
-      { type: 'skill_rank', skillId: 'shield_bash', minRank: 1 },
+      { type: 'skill_rank', skillId: 'thrust', minRank: 1 },
     ],
     scaling: 'str',
     pointType: 'improvement',

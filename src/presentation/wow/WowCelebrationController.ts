@@ -1,5 +1,6 @@
 import { RewardMoment } from '../delight/types/RewardMoment';
 import { isCelebrationMoment } from './WowCelebrationPolicy';
+import { resolveWowBannerCta } from './WowBannerCtaPresentation';
 import { mapRewardMomentToWowBanner } from './WowMomentMapper';
 import { recordWowBannerDismiss } from './WowStripDismissStore';
 import { WowStripRenderer } from './WowStripRenderer';
@@ -193,10 +194,11 @@ export class WowCelebrationController {
     }
 
     const bannerEl = target.closest('[data-wow-banner-id]');
-    if (bannerEl && active.cta && !actionEl) {
+    const cta = resolveWowBannerCta(active);
+    if (bannerEl && !actionEl) {
       if (active.onCtaClick) {
         active.onCtaClick();
-      } else if (active.cta.action === 'dismiss') {
+      } else if (cta.action === 'dismiss') {
         onDismiss();
       }
     }

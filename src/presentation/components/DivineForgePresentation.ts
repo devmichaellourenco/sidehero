@@ -47,8 +47,12 @@ export interface ForgeSelectionStatus {
   mixedRarity: boolean;
 }
 
-export function evaluateForgeSelection(selectedIds: Set<string>, inventory: GearDto[]): ForgeSelectionStatus {
-  const selected = inventory.filter((gear) => selectedIds.has(gear.id));
+export function listForgeEligibleGear(state: GameStateDto): GearDto[] {
+  return [...state.inventory, ...state.stash];
+}
+
+export function evaluateForgeSelection(selectedIds: Set<string>, gears: GearDto[]): ForgeSelectionStatus {
+  const selected = gears.filter((gear) => selectedIds.has(gear.id));
   const count = selected.length;
   const rarities = new Set(selected.map((gear) => gear.rarity));
   const rarity = rarities.size === 1 ? selected[0]?.rarity ?? null : null;
@@ -72,7 +76,7 @@ export function evaluateForgeSelection(selectedIds: Set<string>, inventory: Gear
 
 function renderForgeSlot(
   gear: GearDto,
-  options: { selected: boolean; tab: DivineForgeTab; stage: number },
+  options: { selected: boolean; tab: DivineForgeTab; stage: number; inStash: boolean },
 ): string {
   const frameUrl = getGearFrameSprite(gear.rarity);
   const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
@@ -81,7 +85,7 @@ function renderForgeSlot(
   return `
     <button
       type="button"
-      class="inventory-grid-slot forge-grid-slot ${gear.rarity}${options.selected ? ' forge-grid-slot--selected' : ''}"
+      class="inventory-grid-slot forge-grid-slot ${gear.rarity}${options.selected ? ' forge-grid-slot--selected' : ''}${options.inStash ? ' forge-grid-slot--stash' : ''}"
       data-forge-gear-id="${escapeHtml(gear.id)}"
       aria-pressed="${options.selected ? 'true' : 'false'}"
       aria-label="${escapeHtml(gear.name)} · ${slotLabel} · ${rarityLabel}"
@@ -93,7 +97,7 @@ function renderForgeSlot(
       </span>
       <span class="inventory-gear-tooltip-content hidden">
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
-        <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}</span>
+        <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}${options.inStash ? ' · Baú' : ''}</span>
         <span class="inventory-gear-tooltip-stats">${renderGearBonusLines(gear)}</span>
         ${
           options.tab === 'salvage'
@@ -106,18 +110,20 @@ function renderForgeSlot(
 }
 
 export function renderForgeGrid(
-  inventory: GearDto[],
+  gears: GearDto[],
   options: {
     tab: DivineForgeTab;
     selectedIds: Set<string>;
     stage: number;
+    stashGearIds?: Set<string>;
   },
 ): string {
-  if (inventory.length === 0) {
-    return '<p class="empty-state modal-empty">Inventário vazio — obtenha itens nos baús.</p>';
+  if (gears.length === 0) {
+    return '<p class="empty-state modal-empty">Nenhum item no inventário ou no baú.</p>';
   }
 
-  const sorted = [...inventory].sort((left, right) => {
+  const stashGearIds = options.stashGearIds ?? new Set<string>();
+  const sorted = [...gears].sort((left, right) => {
     const leftRank = RARITY_ORDER.indexOf(left.rarity as (typeof RARITY_ORDER)[number]);
     const rightRank = RARITY_ORDER.indexOf(right.rarity as (typeof RARITY_ORDER)[number]);
     if (rightRank !== leftRank) return rightRank - leftRank;
@@ -132,6 +138,7 @@ export function renderForgeGrid(
             selected: options.selectedIds.has(gear.id),
             tab: options.tab,
             stage: options.stage,
+            inStash: stashGearIds.has(gear.id),
           }),
         )
         .join('')}
@@ -139,35 +146,54 @@ export function renderForgeGrid(
   `;
 }
 
+export function renderForgeCapacityBar(
+  totalItems: number,
+  inventoryUsed: number,
+  inventoryLimit: number,
+  stashUsed: number,
+  stashLimit: number,
+): string {
+  return `
+    <div class="forge-capacity-bar" aria-label="Itens disponíveis na forja">
+      <span class="forge-capacity-chip">Itens <strong>${totalItems}</strong></span>
+      <span class="forge-capacity-chip">Inventário <strong>${inventoryUsed}/${inventoryLimit}</strong></span>
+      <span class="forge-capacity-chip">Baú <strong>${stashUsed}/${stashLimit}</strong></span>
+    </div>
+  `;
+}
+
 export function renderCreateTabPanel(
   status: ForgeSelectionStatus,
 ): string {
-  const rarityHint =
-    status.mixedRarity
-      ? '<p class="forge-hint forge-hint--warn">Selecione itens da mesma raridade.</p>'
-      : status.rarity
-        ? `<p class="forge-hint">Raridade selecionada: <strong>${GEAR_RARITY_LABELS[status.rarity] ?? status.rarity}</strong></p>`
-        : '<p class="forge-hint">Selecione 9 itens da mesma raridade no inventário.</p>';
+  const statusCopy = status.mixedRarity
+    ? 'Selecione itens da mesma raridade.'
+    : status.rarity
+      ? `Raridade: ${GEAR_RARITY_LABELS[status.rarity] ?? status.rarity}`
+      : 'Selecione 9 itens da mesma raridade.';
 
-  const resultHint =
+  const resultCopy =
     status.canFuse && status.nextRarityLabel
-      ? `<p class="forge-result-hint">Resultado: item aleatório <strong>${status.nextRarityLabel}</strong></p>`
+      ? `Resultado: item aleatório ${status.nextRarityLabel}`
       : status.count === status.requiredCount && !status.canFuse
-        ? '<p class="forge-hint forge-hint--warn">Não é possível fundir esta combinação (raridade máxima ou mista).</p>'
+        ? 'Combinação inválida para fusão.'
         : '';
 
   return `
-    <div class="forge-action-panel">
-      <p class="forge-selection-count">${status.count}/${status.requiredCount} selecionados</p>
-      ${rarityHint}
-      ${resultHint}
+    <div class="forge-dock">
+      <div class="forge-dock-status${status.mixedRarity || (status.count === status.requiredCount && !status.canFuse) ? ' forge-dock-status--warn' : ''}">
+        <span class="forge-dock-badge">${status.count}/${status.requiredCount}</span>
+        <div class="forge-dock-copy">
+          <p class="forge-dock-line">${statusCopy}</p>
+          ${resultCopy ? `<p class="forge-dock-line forge-dock-line--highlight">${resultCopy}</p>` : ''}
+        </div>
+      </div>
       <button
         type="button"
-        class="primary-btn forge-fuse-btn"
+        class="forge-game-btn forge-game-btn--fuse"
         data-forge-fuse
         ${status.canFuse ? '' : 'disabled'}
       >
-        Criar item
+        Fundir itens
       </button>
     </div>
   `;
@@ -182,16 +208,21 @@ export function renderSalvageTabPanel(
     : 0;
 
   return `
-    <div class="forge-action-panel">
-      <p class="forge-hint">Selecione um item do inventário para destruir e receber ouro.</p>
-      ${
-        selectedGear
-          ? `<p class="forge-result-hint">${escapeHtml(selectedGear.name)} → <strong>+${goldPreview} ouro</strong></p>`
-          : '<p class="forge-selection-count">Nenhum item selecionado</p>'
-      }
+    <div class="forge-dock">
+      <div class="forge-dock-status${selectedGear ? ' forge-dock-status--ready' : ''}">
+        <span class="forge-dock-badge">${selectedGear ? '+💰' : '—'}</span>
+        <div class="forge-dock-copy">
+          ${
+            selectedGear
+              ? `<p class="forge-dock-line">${escapeHtml(selectedGear.name)}</p>
+                 <p class="forge-dock-line forge-dock-line--highlight">+${goldPreview} ouro</p>`
+              : '<p class="forge-dock-line">Selecione um item para destruir.</p>'
+          }
+        </div>
+      </div>
       <button
         type="button"
-        class="primary-btn forge-salvage-btn"
+        class="forge-game-btn forge-game-btn--salvage"
         data-forge-salvage
         ${selectedGear ? '' : 'disabled'}
       >
@@ -206,21 +237,23 @@ export function renderForgeTabs(activeTab: DivineForgeTab): string {
     <div class="forge-tabs" role="tablist" aria-label="Modos da Forja Divina">
       <button
         type="button"
-        class="forge-tab ${activeTab === 'create' ? 'forge-tab--active' : ''}"
+        class="forge-tab${activeTab === 'create' ? ' forge-tab--active' : ''}"
         data-forge-tab="create"
         role="tab"
         aria-selected="${activeTab === 'create' ? 'true' : 'false'}"
       >
-        Criar item
+        <span class="forge-tab-icon" aria-hidden="true">⚒</span>
+        <span class="forge-tab-label">Fundir</span>
       </button>
       <button
         type="button"
-        class="forge-tab ${activeTab === 'salvage' ? 'forge-tab--active' : ''}"
+        class="forge-tab${activeTab === 'salvage' ? ' forge-tab--active' : ''}"
         data-forge-tab="salvage"
         role="tab"
         aria-selected="${activeTab === 'salvage' ? 'true' : 'false'}"
       >
-        Destruir por ouro
+        <span class="forge-tab-icon" aria-hidden="true">💰</span>
+        <span class="forge-tab-label">Destruir</span>
       </button>
     </div>
   `;

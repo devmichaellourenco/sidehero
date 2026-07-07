@@ -19,7 +19,7 @@ import {
   bindHeroesPanelInteractions,
   renderHeroesPanel,
 } from '../components/HeroesPanelPresentation';
-import { evaluateForgeSelection } from '../components/DivineForgePresentation';
+import { evaluateForgeSelection, listForgeEligibleGear } from '../components/DivineForgePresentation';
 import { calculateForgeSalvageGold } from '../../domain/forge/ForgeSalvageGoldCatalog';
 import { GamePreferences } from '../components/GamePreferences';
 import { LootFlowController } from '../controllers/LootFlowController';
@@ -278,13 +278,14 @@ export class ModalStackController {
           onTabChange: () => this.renderTop(stack, state, options),
           onSelectionChange: () => this.renderTop(stack, state),
           onFuse: (gearIds) => {
-            const gears = state.inventory.filter((entry) => gearIds.includes(entry.id));
-            const status = evaluateForgeSelection(new Set(gearIds), state.inventory);
+            const forgeGear = listForgeEligibleGear(state);
+            const gears = forgeGear.filter((entry) => gearIds.includes(entry.id));
+            const status = evaluateForgeSelection(new Set(gearIds), forgeGear);
             if (!status.canFuse || !status.nextRarityLabel) return;
             void this.divineForgeFlow.fuse(gearIds, gears, status.nextRarityLabel);
           },
           onSalvage: (gearId) => {
-            const gear = state.inventory.find((entry) => entry.id === gearId);
+            const gear = listForgeEligibleGear(state).find((entry) => entry.id === gearId);
             if (!gear) return;
             const goldPreview = calculateForgeSalvageGold(gear.rarity, state.stage);
             void this.divineForgeFlow.salvage(gear, goldPreview);

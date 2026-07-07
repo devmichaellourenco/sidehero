@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 5/5 (100%) · auditoria 2026-07-03  
-**Testes obrigatórios:** 5/5 presentes na suite
+**Aceite:** 9/9 (100%) · auditoria 2026-07-06  
+**Testes obrigatórios:** 10/10 presentes na suite
 
 ## Objetivo
 
@@ -16,6 +16,9 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] Unlock de herói via melhoria (`hero_unlock_*`) adiciona à reserva
 - [x] XP de batalha para party ativa; bench segue `BenchXpPolicy`
 - [x] Detalhe do herói: modal com abas Loadout / Progressão / Skills / Classe
+- [x] Aba Inventário do herói **sem** hint estático de equipamento; slots clicáveis e picker inline comunicam a ação
+- [x] Header do modal exibe `Lv.{n} {Classe} - {Evolução}` (ex.: `Lv.2 Priest - Aprendiz`); aba Classe **sem** retrato/classe atual — só próxima(s) ascensão(ões) e skills de evolução
+- [x] Aba Classe apresenta título compacto **Escolha seu destino** + cards temáticos; detalhes do momento de ascensão ficam no tooltip do título
 
 ## Camadas e arquivos-chave
 
@@ -40,3 +43,8 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 
 - [x] `PartyService.test.ts`, `PartyEditPolicy.test.ts`, `PartyValidator.test.ts`
 - [x] `HeroUnlockService.test.ts`, `PartyDragDropPresentation.test.ts`
+- [x] `HeroDetailModalRenderer.test.ts` — aba Inventário sem parágrafo “Toque em um slot de equipamento…”
+- [x] `HeroDetailHeaderRenderer.test.ts` — linha `Lv.{n} {Classe} - {Evolução}` no topo
+- [x] `HeroClassTabRenderer.test.ts` — aba Classe sem retrato/classe atual; só ascensões disponíveis
+- [x] `HeroClassLinePresentation.test.ts` — formatação da linha classe/evolução
+- [x] `HeroClassAscensionPresentation.test.ts` — banner, tema visual e cards de ascensão

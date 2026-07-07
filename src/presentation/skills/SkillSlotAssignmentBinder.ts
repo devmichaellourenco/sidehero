@@ -45,8 +45,6 @@ export function bindSkillSlotAssignment(
   let pendingSkillId: string | null = null;
   let pendingSlotIndex: number | null = null;
 
-  const instruction = layoutRoot.querySelector('[data-skill-slot-instruction]') as HTMLElement | null;
-
   const clearPlacementMode = () => {
     pendingSkillId = null;
     pendingSlotIndex = null;
@@ -57,22 +55,12 @@ export function bindSkillSlotAssignment(
     layoutRoot.querySelectorAll('.skill-card--pick-target').forEach((element) => {
       element.classList.remove('skill-card--pick-target');
     });
-    if (instruction) {
-      instruction.hidden = true;
-      instruction.textContent = '';
-    }
-  };
-
-  const showInstruction = (message: string) => {
-    if (!instruction) return;
-    instruction.hidden = false;
-    instruction.textContent = message;
   };
 
   const listEmptySlotElements = (): HTMLElement[] =>
     Array.from(layoutRoot.querySelectorAll(EMPTY_SKILL_SLOT_SELECTOR)) as HTMLElement[];
 
-  const selectSkill = (skillId: string, skillName: string) => {
+  const selectSkill = (skillId: string) => {
     if (pendingSkillId === skillId) {
       clearPlacementMode();
       return;
@@ -90,8 +78,6 @@ export function bindSkillSlotAssignment(
     layoutRoot.querySelectorAll(SKILL_SLOT_SELECTOR).forEach((element) => {
       element.classList.add('hero-skill-slot-bar__slot--pick-target');
     });
-
-    showInstruction(`↑ Toque em um slot acima para equipar “${skillName}” (ou arraste o card até o slot)`);
   };
 
   const selectSlot = (slotIndex: number) => {
@@ -112,8 +98,6 @@ export function bindSkillSlotAssignment(
     layoutRoot.querySelectorAll('[data-skill-equip]').forEach((element) => {
       element.classList.add('skill-card--pick-target');
     });
-
-    showInstruction('↓ Toque em uma skill abaixo para equipar neste slot (ou arraste até o slot)');
   };
 
   layoutRoot.querySelectorAll('[data-skill-slot-index]').forEach((element) => {
@@ -186,7 +170,6 @@ export function bindSkillSlotAssignment(
 
   layoutRoot.querySelectorAll('[data-skill-equip]').forEach((element) => {
     const skillId = element.getAttribute('data-skill-equip');
-    const skillName = element.getAttribute('data-skill-equip-name') ?? 'skill';
     if (!skillId) return;
 
     element.addEventListener('dragstart', (event) => {
@@ -233,7 +216,7 @@ export function bindSkillSlotAssignment(
         }
       }
 
-      selectSkill(skillId, skillName);
+      selectSkill(skillId);
     });
   });
 

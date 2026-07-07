@@ -210,13 +210,14 @@
         aria-labelledby="forge-confirm-title"
         aria-describedby="forge-confirm-body"
       >
-        <header class="confirm-dialog-header">
-          <h2 id="forge-confirm-title" class="confirm-dialog-title"></h2>
+        <header class="confirm-dialog-header forge-confirm-dialog__header">
+          <span class="forge-confirm-dialog__eyebrow">Forja Divina</span>
+          <h2 id="forge-confirm-title" class="confirm-dialog-title forge-confirm-dialog__title"></h2>
         </header>
-        <div id="forge-confirm-body" class="confirm-dialog-body"></div>
-        <footer class="confirm-dialog-actions">
-          <button type="button" class="gear-unequip-btn" data-forge-confirm-cancel>Cancelar</button>
-          <button type="button" class="gear-destroy-btn" data-forge-confirm-accept>Confirmar</button>
+        <div id="forge-confirm-body" class="confirm-dialog-body forge-confirm-dialog__body"></div>
+        <footer class="confirm-dialog-actions forge-confirm-dialog__actions">
+          <button type="button" class="forge-game-btn forge-game-btn--ghost" data-forge-confirm-cancel>Cancelar</button>
+          <button type="button" class="forge-game-btn forge-game-btn--fuse forge-confirm-accept" data-forge-confirm-accept>Confirmar</button>
         </footer>
       </div>
     </div>

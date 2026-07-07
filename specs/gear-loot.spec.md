@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 5/5 (100%) · auditoria 2026-07-03  
-**Testes obrigatórios:** 5/5
+**Aceite:** 6/6 (100%) · auditoria 2026-07-07  
+**Testes obrigatórios:** 6/6
 
 ## Objetivo
 
@@ -12,6 +12,7 @@ Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara 
 ## Critérios de aceite
 
 - [x] Baú a cada N vitórias; abrir 1 ou todos (se melhoria desbloqueada)
+- [x] **Abrir todos** preenche inventário vazio, depois baú de itens (se desbloqueado); baús restantes ficam pendentes — nunca falha em silêncio por falta de espaço total
 - [x] Loot procedural por raridade/template (`LootService`, `GearTemplateCatalog`)
 - [x] Equipar valida slot, nível e classe (`GearRequirementChecker`)
 - [x] Otimizar equipe sugere upgrades por herói (`LoadoutOptimizer`)
@@ -21,13 +22,14 @@ Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara 
 
 | Camada | Paths |
 |--------|-------|
-| Domain | `src/domain/entities/Gear.ts`, `LootService`, `GearEquipService`, `LoadoutOptimizer` |
+| Domain | `src/domain/entities/Gear.ts`, `LootService`, `GearEquipService`, `LoadoutOptimizer`, `ChestService`, `GearStorageService` |
 | Application | `OpenChestUseCase`, `EquipGearUseCase`, `EquipBestLoadoutUseCase`, `UnequipGearUseCase` |
 | Presentation | `InventoryGridPresentation`, `GearPresentation`, `GearDragDrop*`, `GearComparison` |
 
 ## Invariantes
 
 - IDs de gear únicos no inventário
+- Abrir todos consome espaço disponível (inventário → baú de itens) antes de parar
 - Equipar fora da pausa só via auto-equip se melhoria ativa
 - Race de equip: `EquipGearRace` / fila de mutação no UI
 
@@ -52,3 +54,4 @@ Adicionar critérios `[ ]` aqui antes de codar:
 - [x] `GearEquipService.test.ts`, `LoadoutOptimizer.test.ts`
 - [x] `GearDragDropPolicy.test.ts`, `InventoryGridPresentation.test.ts`
 - [x] `EquipGearRace.test.ts`
+- [x] `ChestService.test.ts` — abrir todos parcial (inventário + baú de itens)
