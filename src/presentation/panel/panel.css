@@ -582,7 +582,49 @@ h2 {
   pointer-events: none;
   transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0);
   animation: battle-skill-vfx-travel var(--vfx-duration, 520ms) ease-out forwards;
+}
+
+.battle-skill-vfx--fire {
   filter: drop-shadow(0 0 10px rgba(255, 120, 32, 0.55));
+}
+
+.battle-skill-vfx--lightning {
+  filter: drop-shadow(0 0 14px rgba(80, 200, 255, 0.85));
+}
+
+.battle-skill-vfx--heal {
+  filter: drop-shadow(0 0 14px rgba(96, 255, 140, 0.7));
+  animation: battle-skill-vfx-heal var(--vfx-duration, 760ms) ease-out forwards;
+}
+
+.battle-skill-vfx--melee {
+  animation: battle-skill-vfx-melee var(--vfx-duration, 380ms) ease-out forwards;
+}
+
+.battle-skill-vfx--slash {
+  filter: drop-shadow(0 0 12px rgba(160, 120, 255, 0.75));
+}
+
+.battle-skill-vfx--melee-rtl {
+  transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scaleX(-1);
+  animation-name: battle-skill-vfx-melee-rtl;
+}
+
+.battle-skill-vfx--column {
+  animation: battle-skill-vfx-column var(--vfx-duration, 1400ms) linear forwards;
+}
+
+.battle-skill-vfx--column .battle-skill-vfx__svg {
+  object-fit: cover;
+  object-position: var(--vfx-object-position, 58% 100%);
+}
+
+.battle-skill-vfx--aoe {
+  animation: battle-skill-vfx-aoe var(--vfx-duration, 980ms) ease-out forwards;
+}
+
+.battle-skill-vfx--cold {
+  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.85));
 }
 
 .battle-skill-vfx--rtl {
@@ -594,11 +636,23 @@ h2 {
   animation-name: battle-skill-vfx-pulse;
 }
 
+.battle-skill-vfx--impact {
+  animation: battle-skill-vfx-impact var(--vfx-duration, 580ms) ease-out forwards;
+  filter: drop-shadow(0 0 16px rgba(255, 96, 32, 0.75));
+}
+
 .battle-skill-vfx__svg {
   display: block;
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.battle-skill-vfx__rotator {
+  width: 100%;
+  height: 100%;
+  transform: rotate(var(--vfx-rotation, 0deg));
+  transform-origin: center center;
 }
 
 @keyframes battle-skill-vfx-travel {
@@ -624,6 +678,104 @@ h2 {
   }
   100% {
     transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes battle-skill-vfx-heal {
+  0% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(0.5);
+    opacity: 0.25;
+  }
+  22% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.08);
+    opacity: 0;
+  }
+}
+
+@keyframes battle-skill-vfx-melee {
+  0% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(0.55) rotate(-8deg);
+    opacity: 0.2;
+  }
+  12% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.08) rotate(4deg);
+    opacity: 0;
+  }
+}
+
+@keyframes battle-skill-vfx-melee-rtl {
+  0% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(0.55) scaleX(-1) rotate(-8deg);
+    opacity: 0.2;
+  }
+  12% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1) scaleX(-1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.08) scaleX(-1) rotate(4deg);
+    opacity: 0;
+  }
+}
+
+@keyframes battle-skill-vfx-aoe {
+  0% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(0.42);
+    opacity: 0.15;
+  }
+  14% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(0.98);
+    opacity: 1;
+  }
+  72% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.04);
+    opacity: 0.82;
+  }
+  100% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes battle-skill-vfx-column {
+  0% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0);
+    opacity: 0;
+  }
+  6% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0);
+    opacity: 1;
+  }
+  88% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0);
+    opacity: 0;
+  }
+}
+
+@keyframes battle-skill-vfx-impact {
+  0% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(0.45);
+    opacity: 0.35;
+  }
+  18% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.15);
     opacity: 0;
   }
 }

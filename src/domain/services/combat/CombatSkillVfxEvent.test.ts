@@ -3,7 +3,7 @@ import { CombatAction } from './CombatAction';
 import { createSkillVfxEvent } from './CombatSkillVfxEvent';
 
 describe('createSkillVfxEvent', () => {
-  it('ignora auto-ataque', () => {
+  it('cria melee para basic_attack em inimigo', () => {
     const action: CombatAction = {
       skillId: 'basic_attack',
       skillName: 'Ataque',
@@ -11,9 +11,17 @@ describe('createSkillVfxEvent', () => {
       targeting: 'single_enemy',
       power: 5,
       targetEnemyId: 'e1',
+      damageComponents: [{ element: 'physical', delivery: 'melee', weight: 1 }],
     };
 
-    expect(createSkillVfxEvent('basic_attack', 'hero', 'h1', action)).toBeNull();
+    expect(createSkillVfxEvent('basic_attack', 'hero', 'h1', action)).toEqual({
+      skillId: 'basic_attack',
+      vfxKind: 'melee',
+      attackerSide: 'hero',
+      attackerId: 'h1',
+      targetSide: 'enemy',
+      targetId: 'e1',
+    });
   });
 
   it('cria projétil para fireball em inimigo', () => {
@@ -30,6 +38,27 @@ describe('createSkillVfxEvent', () => {
     expect(createSkillVfxEvent('fireball', 'hero', 'h1', action)).toEqual({
       skillId: 'fireball',
       vfxKind: 'projectile',
+      attackerSide: 'hero',
+      attackerId: 'h1',
+      targetSide: 'enemy',
+      targetId: 'e1',
+    });
+  });
+
+  it('cria aoe para blizzard em inimigos', () => {
+    const action: CombatAction = {
+      skillId: 'blizzard',
+      skillName: 'Nevasca',
+      kind: 'damage',
+      targeting: 'all_enemies',
+      power: 20,
+      targetEnemyIds: ['e1', 'e2'],
+      damageComponents: [{ element: 'cold', delivery: 'aoe', weight: 1 }],
+    };
+
+    expect(createSkillVfxEvent('blizzard', 'hero', 'h1', action)).toEqual({
+      skillId: 'blizzard',
+      vfxKind: 'aoe',
       attackerSide: 'hero',
       attackerId: 'h1',
       targetSide: 'enemy',

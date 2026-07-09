@@ -1,4 +1,3 @@
-import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill';
 import { CombatAction } from './CombatAction';
 
 export type CombatSkillVfxKind = 'projectile' | 'melee' | 'aoe' | 'self';
@@ -18,10 +17,6 @@ export function createSkillVfxEvent(
   attackerId: string,
   action: CombatAction,
 ): CombatSkillVfxEvent | null {
-  if (skillId === BASIC_ATTACK_SKILL_ID) {
-    return null;
-  }
-
   if (action.targetEnemyId) {
     return {
       skillId,
