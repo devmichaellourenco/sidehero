@@ -21,13 +21,13 @@ describe('CampaignViewStorage', () => {
   });
 
   it('rastreia mapas vistos para banner de desbloqueio', () => {
-    expect(isMapSeen('gondonor')).toBe(false);
-    expect(isMapNewToPlayer('gondonor', true)).toBe(true);
+    expect(isMapSeen('gruftall')).toBe(false);
+    expect(isMapNewToPlayer('gruftall', true)).toBe(true);
 
-    markMapSeen('gondonor');
+    markMapSeen('gruftall');
 
-    expect(isMapSeen('gondonor')).toBe(true);
-    expect(isMapNewToPlayer('gondonor', true)).toBe(false);
-    expect(isMapNewToPlayer('gondonor', false)).toBe(false);
+    expect(isMapSeen('gruftall')).toBe(true);
+    expect(isMapNewToPlayer('gruftall', true)).toBe(false);
+    expect(isMapNewToPlayer('gruftall', false)).toBe(false);
   });
 });

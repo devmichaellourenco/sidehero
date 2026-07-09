@@ -6,6 +6,7 @@ const STATUS_EFFECT_ICON_PATH: Record<CombatStatusEffectDto['kind'], string> = {
   buff_attack: 'ui/defense.png',
   debuff_defense: 'ui/defense.png',
   dot: 'skills/magic.png',
+  heal_block: 'ui/health.png',
 };
 
 const DOT_ELEMENT_ICON_PATH: Partial<Record<DamageElement, string>> = {

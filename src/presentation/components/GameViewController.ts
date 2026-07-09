@@ -1,4 +1,5 @@
 import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEventDto';
+import { CombatSkillVfxDto } from '../../application/dto/CombatSkillVfxDto';
 import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import { getDefaultGameClient } from '../../infrastructure/messaging/defaultGameClient';
@@ -27,6 +28,7 @@ import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleLogRenderer } from './BattleLogRenderer';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
+import { BattleSkillVfxController } from './BattleSkillVfxController';
 import { bindCampaignTooltip } from './CampaignTooltipBinder';
 import { mountNavArrowIcons } from '../assets/NavArrowPresentation';
 import { hydratePanelIcons } from '../assets/PanelIconHydrator';
@@ -58,6 +60,7 @@ import { MetaLegacyModalRenderer } from './MetaLegacyModalRenderer';
 import { ToastController } from './ToastController';
 import { RewardPresentationController } from '../delight/RewardPresentationController';
 import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
+import { AscendClassConfirmDialog } from './AscendClassConfirmDialog';
 import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
 import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
 import { SkillCooldownDisplayAnimator } from './SkillCooldownDisplayAnimator';
@@ -116,6 +119,7 @@ export class GameViewController {
   private readonly battleStrip: BattleStripRenderer;
   private readonly battleFloats: BattleFloatingTextController;
   private readonly battleImpacts: BattleImpactFeedbackController;
+  private readonly battleSkillVfx: BattleSkillVfxController;
   private readonly victoryFlow: BattleVictoryFlow;
   private readonly modal: ModalController;
   private readonly heroDrawer: SideDrawerController;
@@ -133,6 +137,7 @@ export class GameViewController {
   private readonly toasts: ToastController;
   private readonly rewards: RewardPresentationController;
   private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
+  private readonly ascendClassConfirmDialog: AscendClassConfirmDialog;
   private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
   private readonly donationPrompt: DonationPromptController;
   private readonly hud: GameHudController;
@@ -156,6 +161,7 @@ export class GameViewController {
 
   private shownIntermissionKey: string | null = null;
   private intermissionResuming = false;
+  private deferredRewardBaseline: GameStateDto | null = null;
 
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
     this.client = client;
@@ -195,12 +201,18 @@ export class GameViewController {
       this.heroesContainerEl,
       root.querySelector('#enemy-container')!,
       this.battleStripEl,
+      root.querySelector('[data-strip-bg]')!,
+      this.battleStripEl.querySelector('.strip-floor')!,
     );
     this.battleFloats = new BattleFloatingTextController(
       root.querySelector('#battle-float-layer')!,
       this.battleStripEl,
     );
     this.battleImpacts = new BattleImpactFeedbackController(
+      root.querySelector('#battle-float-layer')!,
+      this.battleStripEl,
+    );
+    this.battleSkillVfx = new BattleSkillVfxController(
       root.querySelector('#battle-float-layer')!,
       this.battleStripEl,
     );
@@ -253,6 +265,12 @@ export class GameViewController {
       root.querySelector('#forge-confirm-body')!,
       root.querySelector('[data-forge-confirm-accept]') as HTMLButtonElement,
     );
+    this.ascendClassConfirmDialog = new AscendClassConfirmDialog(
+      root.querySelector('#ascend-confirm-root')!,
+      root.querySelector('#ascend-confirm-title')!,
+      root.querySelector('#ascend-confirm-body')!,
+      root.querySelector('[data-ascend-confirm-accept]') as HTMLButtonElement,
+    );
     this.donationPrompt = new DonationPromptController(
       root.querySelector('#donation-prompt-root')!,
       root.querySelector('#donation-card-body')!,
@@ -295,6 +313,7 @@ export class GameViewController {
       this.heroDetailModal,
       this.toasts,
       this.rewards,
+      this.ascendClassConfirmDialog,
       (state) => this.afterHeroProgressionMutation(state),
       () => this.refreshHeroDetailViews(),
     );
@@ -804,7 +823,7 @@ export class GameViewController {
     }
 
     this.render(response.state);
-    this.showCombatFloats(response.combatFloats);
+    this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
     this.syncAutoBattleTimer();
   }
 
@@ -821,11 +840,20 @@ export class GameViewController {
 
       this.shownIntermissionKey = null;
       this.render(response.state);
-      this.showCombatFloats(response.combatFloats);
+      this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
+      this.flushDeferredVictoryRewards();
       this.syncAutoBattleTimer();
     } finally {
       this.intermissionResuming = false;
     }
+  }
+
+  private flushDeferredVictoryRewards(): void {
+    const baseline = this.deferredRewardBaseline;
+    this.deferredRewardBaseline = null;
+    if (!baseline || !this.state) return;
+
+    this.rewards.celebratePhaseMilestoneRewards(baseline, this.state);
   }
 
   private buildIntermissionKey(state: GameStateDto): string | null {
@@ -849,6 +877,13 @@ export class GameViewController {
 
     this.shownIntermissionKey = key;
     const payload = buildBattleIntermissionPayload(state.combatIntermission, state, previous);
+    if (
+      payload.variant === 'phase-clear' &&
+      previous &&
+      payload.milestoneVictory?.isMilestone
+    ) {
+      this.deferredRewardBaseline = previous;
+    }
     this.stopAutoBattle();
     this.victoryFlow.show(payload, () => {
       void this.resumeCombatIntermission();
@@ -884,20 +919,28 @@ export class GameViewController {
     }
 
     this.render(response.state, { previousState: this.state });
-    this.showCombatFloats(response.combatFloats);
+    this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
 
     if (response.sigilsAwarded && response.sigilsAwarded > 0) {
       this.toasts.show(`+${response.sigilsAwarded} selos de legado!`, 'victory');
     }
   }
 
-  private showCombatFloats(combatFloats?: CombatFloatingEventDto[]): void {
-    if (!combatFloats?.length) return;
+  private showCombatFloats(
+    combatFloats?: CombatFloatingEventDto[],
+    combatSkillVfx?: CombatSkillVfxDto[],
+  ): void {
+    if (!combatFloats?.length && !combatSkillVfx?.length) return;
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        this.battleFloats.show(combatFloats);
-        this.battleImpacts.show(combatFloats);
+        if (combatSkillVfx?.length) {
+          this.battleSkillVfx.show(combatSkillVfx);
+        }
+        if (combatFloats?.length) {
+          this.battleFloats.show(combatFloats);
+          this.battleImpacts.show(combatFloats);
+        }
       });
     });
   }

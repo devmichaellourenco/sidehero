@@ -3,6 +3,10 @@ import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { bindAscensionMomentTooltips, hideAscensionMomentTooltip } from './HeroAscensionMomentTooltipBinder';
+import {
+  bindAscensionPathCardTooltips,
+  hideAscensionPathCardTooltip,
+} from './AscensionPathCardTooltipBinder';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import { bindHeroImprovementTooltips, hideHeroImprovementTooltip } from './HeroImprovementTooltipBinder';
 import { bindHeroStatTooltips } from './HeroStatTooltipBinder';
@@ -127,6 +131,7 @@ export class HeroDetailModalRenderer {
 
     hideHeroImprovementTooltip();
     hideAscensionMomentTooltip();
+    hideAscensionPathCardTooltip();
 
     container.innerHTML = `
       <div class="hero-detail-layout">
@@ -151,6 +156,9 @@ export class HeroDetailModalRenderer {
     bindSkillChipTooltips(container);
     bindHeroImprovementTooltips(container);
     bindAscensionMomentTooltips(container);
+    if (this.activeTab === 'class') {
+      bindAscensionPathCardTooltips(container);
+    }
     if (this.activeTab === 'attributes') {
       bindHeroStatTooltips(container);
     }
@@ -243,12 +251,22 @@ export class HeroDetailModalRenderer {
       });
     }
 
-    container.querySelectorAll('[data-ascend]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const ascensionId = button.getAttribute('data-ascend');
-        if (ascensionId && !(button as HTMLButtonElement).disabled) {
+    container.querySelectorAll('[data-ascension-select]').forEach((card) => {
+      const triggerAscend = () => {
+        const ascensionId = card.getAttribute('data-ascension-select');
+        if (ascensionId) {
           handlers.onAscendClass(hero.id, ascensionId);
         }
+      };
+
+      card.addEventListener('click', () => {
+        triggerAscend();
+      });
+
+      card.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        triggerAscend();
       });
     });
 

@@ -26,6 +26,7 @@ import {
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { StatusApplication } from './CombatStatusEffect';
 import { combatantKey } from './SkillCooldownTracker';
+import { resolveUniqueOnHitEnemyEffects } from '../../unique-effects/UniqueEffectOnHitResolver';
 
 export interface CombatExecutionResult {
   heroes: Hero[];
@@ -53,6 +54,9 @@ export class CombatActionExecutor {
     }
 
     if (action.kind === 'heal_ally') {
+      if (action.targetEnemyId || (action.targetEnemyIds?.length ?? 0) > 0) {
+        return this.applyEnemyHeal(action, actorName, heroes, enemies, statusEffects);
+      }
       return this.applyHeal(action, actorName, heroes, enemies);
     }
 
@@ -166,7 +170,7 @@ export class CombatActionExecutor {
         hero.id === heroId ? hero.heal(action.power) : hero,
       );
       const healed = updatedHeroes.find((hero) => hero.id === heroId)!;
-      const healEvent = createHealEvent(heroId, beforeHealth, healed.currentHealth);
+      const healEvent = createHealEvent('hero', heroId, beforeHealth, healed.currentHealth);
       if (healEvent) floatingEvents.push(healEvent);
     }
 
@@ -180,6 +184,73 @@ export class CombatActionExecutor {
     return {
       heroes: updatedHeroes,
       enemies,
+      event,
+      floatingEvents,
+      statusApplications: [],
+    };
+  }
+
+  private applyEnemyHeal(
+    action: CombatAction,
+    actorName: string,
+    heroes: Hero[],
+    enemies: Enemy[],
+    statusEffects: CombatStatusEffectTracker,
+  ): CombatExecutionResult {
+    const targetIds =
+      action.targeting === 'all_enemies'
+        ? (action.targetEnemyIds ?? [])
+        : action.targetEnemyId
+          ? [action.targetEnemyId]
+          : [];
+
+    if (targetIds.length === 0) {
+      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
+    }
+
+    const floatingEvents: CombatFloatingEvent[] = [];
+    let updatedEnemies = enemies;
+    let blockedAny = false;
+
+    for (const enemyId of targetIds) {
+      const target = updatedEnemies.find((enemy) => enemy.id === enemyId);
+      if (!target || !target.isAlive()) continue;
+
+      const enemyKey = combatantKey('enemy', enemyId);
+      if (statusEffects.isHealBlocked(enemyKey)) {
+        blockedAny = true;
+        continue;
+      }
+
+      const beforeHealth = target.stats.currentHealth;
+      const healed = Enemy.restore({
+        ...target.toProps(),
+        stats: Stats.create({
+          ...target.stats.toProps(),
+          currentHealth: Math.min(target.stats.maxHealth, target.stats.currentHealth + action.power),
+        }),
+      });
+      updatedEnemies = updatedEnemies.map((enemy) => (enemy.id === enemyId ? healed : enemy));
+      const healEvent = createHealEvent('enemy', enemyId, beforeHealth, healed.stats.currentHealth);
+      if (healEvent) {
+        floatingEvents.push(healEvent);
+      }
+    }
+
+    const healedAmount = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
+    const scope =
+      action.targeting === 'all_enemies'
+        ? `curou todos os inimigos (+${healedAmount} HP total)`
+        : healedAmount > 0
+          ? `(+${healedAmount} HP)`
+          : blockedAny
+            ? '(cura bloqueada)'
+            : '';
+    const event = `${actorName} usou ${action.skillName} ${scope}`.trim();
+
+    return {
+      heroes,
+      enemies: updatedEnemies,
       event,
       floatingEvents,
       statusApplications: [],
@@ -346,6 +417,11 @@ export class CombatActionExecutor {
 
       statusApplications.push(
         ...this.collectOnHitDot(action, enemyKey, resolved, context),
+        ...resolveUniqueOnHitEnemyEffects({
+          attackerEquipment: context?.attackerEquipment,
+          targetEnemyKey: enemyKey,
+          resolved,
+        }),
       );
     }
 
@@ -398,6 +474,7 @@ export class CombatActionExecutor {
         attackerElementalBonus: context?.attackerElementalBonus,
         attackerElementalFlat: context?.attackerElementalFlat,
         attackerPhysicalDamagePercent: context?.attackerPhysicalDamagePercent,
+        attackerElementalPenetration: context?.attackerElementalPenetration,
       },
     );
   }

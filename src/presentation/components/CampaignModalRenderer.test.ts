@@ -53,8 +53,8 @@ function buildOverview(): CampaignOverviewDto {
         ],
       },
       {
-        id: 'gondonor',
-        name: 'Gondonor',
+        id: 'gruftall',
+        name: 'Gruftall',
         unlocked: false,
         phases: [phase('2-1')],
       },
@@ -80,6 +80,8 @@ describe('CampaignModalRenderer', () => {
     const html = renderer.render(overview, 'stendra', pendingId, 'region');
 
     expect(html).not.toContain('campaign-hero-banner');
+    expect(html).not.toContain('campaign-region-banner');
+    expect(html).not.toContain('campaign_stendra_banner.png');
     expect(html).toContain('campaign-view-toggle');
     expect(html).toContain('data-campaign-view="world"');
     expect(html).toContain('data-campaign-tooltip');
@@ -90,7 +92,7 @@ describe('CampaignModalRenderer', () => {
     expect(html).toContain('campaign-phase-preview');
     expect(html).toContain('data-campaign-start-phase="1-50"');
     expect(html).toContain('campaign-map-tabs');
-    expect(html).toContain('data-campaign-map-tab="gondonor"');
+    expect(html).toContain('data-campaign-map-tab="gruftall"');
     expect(html).toContain('aria-disabled="true"');
     expect(html).toContain('campaign-map-tab--locked');
     expect(html).toContain('Guardião das Esgotos');
@@ -108,7 +110,10 @@ describe('CampaignModalRenderer', () => {
     expect(html).toContain('data-campaign-view="world"');
     expect(html).toContain('campaign-world-map');
     expect(html).toContain('data-campaign-world-map="stendra"');
-    expect(html).toContain('data-campaign-world-map="gondonor"');
+    expect(html).toContain('data-campaign-world-map="gruftall"');
+    expect(html).toContain('campaign-world-node--illustrated');
+    expect(html).toContain('campaign-world-node-banner');
+    expect(html).toContain('campaign_stendra_banner.png');
     expect(html).toContain('data-campaign-tooltip');
     expect(html).toContain(getMapFlavorText('stendra'));
     expect(html).toContain('campaign-map-panel--world');
@@ -130,8 +135,8 @@ describe('CampaignModalRenderer', () => {
     const html = renderer.renderMapPanel(lockedMap, null);
 
     expect(html).toContain('campaign-map-locked');
-    expect(html).toContain('Gondonor');
+    expect(html).toContain('Gruftall');
     expect(html).toContain('Guardião Elemental');
-    expect(html).toContain('data-campaign-biome="mine"');
+    expect(html).toContain('data-campaign-biome="ruins"');
   });
 });

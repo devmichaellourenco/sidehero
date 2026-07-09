@@ -1,8 +1,14 @@
 import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import { PanelSnapshot } from '../components/PanelStateSnapshot';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
+import { RewardMomentKind } from '../delight/types/RewardMoment';
 import { RewardMomentDetector, StateChangeDetectOptions, StateChangeHandlers } from '../delight/RewardMomentDetector';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
+
+const PHASE_MILESTONE_CELEBRATION_KINDS = new Set<RewardMomentKind>([
+  'milestone_boss_defeated',
+  'named_legendary_received',
+]);
 
 export class RewardPresentationController implements RewardCelebrationPort {
   private readonly detector = new RewardMomentDetector();
@@ -18,6 +24,16 @@ export class RewardPresentationController implements RewardCelebrationPort {
     const moments = this.detector.detect(previous, next, handlers, options);
     for (const moment of moments) {
       this.wowCelebration.enqueueMoment(moment);
+    }
+  }
+
+  /** Após boss final de área (X-50): só marco e lendário nomeado viram tela wow. */
+  celebratePhaseMilestoneRewards(previous: GameStateDto, next: GameStateDto): void {
+    const moments = this.detector.detect(previous, next);
+    for (const moment of moments) {
+      if (PHASE_MILESTONE_CELEBRATION_KINDS.has(moment.kind)) {
+        this.wowCelebration.enqueueMoment(moment);
+      }
     }
   }
 

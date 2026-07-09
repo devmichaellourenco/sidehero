@@ -8,7 +8,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'knight',
     name: 'Guerreiro',
     pathLabel: 'Caminho Militar',
-    description: 'Disciplina de campo — golpes firmes e presença na linha de frente.',
+    description: 'Disciplina de campo. Golpes firmes e presença na linha de frente.',
     prerequisiteAscensionId: null,
     requirements: [
       { type: 'hero_level', min: 12 },
@@ -22,7 +22,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'knight',
     name: 'Gladiador',
     pathLabel: 'Caminho Marcial',
-    description: 'Combate de arena — velocidade, pressão e golpes precisos.',
+    description: 'Combate de arena. Velocidade, pressão e golpes precisos.',
     prerequisiteAscensionId: null,
     requirements: [
       { type: 'hero_level', min: 12 },
@@ -37,7 +37,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'knight',
     name: 'Capitão',
     pathLabel: 'Caminho Militar',
-    description: 'Liderança tática — fortalece a equipe e domina o ritmo da batalha.',
+    description: 'Liderança tática. Fortalece a equipe e domina o ritmo da batalha.',
     prerequisiteAscensionId: 'knight_military_guerreiro',
     requirements: [
       { type: 'hero_level', min: 22 },
@@ -52,7 +52,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'knight',
     name: 'Mestre Marcial',
     pathLabel: 'Caminho Marcial',
-    description: 'Maestria corporal — fluxo ofensivo e punição imediata.',
+    description: 'Maestria corporal. Fluxo ofensivo e punição imediata.',
     prerequisiteAscensionId: 'knight_martial_gladiador',
     requirements: [
       { type: 'hero_level', min: 22 },
@@ -68,7 +68,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'knight',
     name: 'General',
     pathLabel: 'Caminho Militar',
-    description: 'Comando supremo — devastador em campo e ícone da vanguarda.',
+    description: 'Comando supremo. Devastador em campo e ícone da vanguarda.',
     prerequisiteAscensionId: 'knight_military_capitao',
     requirements: [
       { type: 'hero_level', min: 35 },
@@ -83,7 +83,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'knight',
     name: 'Campeão',
     pathLabel: 'Caminho Marcial',
-    description: 'Ápice do duelo — velocidade letal e domínio absoluto da arena.',
+    description: 'Ápice do duelo. Velocidade letal e domínio absoluto da arena.',
     prerequisiteAscensionId: 'knight_martial_mestre',
     requirements: [
       { type: 'hero_level', min: 35 },
@@ -99,7 +99,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'sorcerer',
     name: 'Maga',
     pathLabel: 'Caminho Arcano',
-    description: 'Estudo arcano — rajadas precisas e controle mágico.',
+    description: 'Estudo arcano. Rajadas precisas e controle mágico.',
     prerequisiteAscensionId: null,
     requirements: [
       { type: 'hero_level', min: 12 },
@@ -113,7 +113,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'sorcerer',
     name: 'Feiticeira',
     pathLabel: 'Caminho Inato',
-    description: 'Magia inata — instinto, velocidade e fogo interior.',
+    description: 'Magia inata. Instinto, velocidade e fogo interior.',
     prerequisiteAscensionId: null,
     requirements: [
       { type: 'hero_level', min: 12 },
@@ -128,7 +128,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'sorcerer',
     name: 'Arquimaga',
     pathLabel: 'Caminho Arcano',
-    description: 'Domínio profundo — explosões arcanas e aprisionamento.',
+    description: 'Domínio profundo. Explosões arcanas e aprisionamento.',
     prerequisiteAscensionId: 'sorcerer_arcane_maga',
     requirements: [
       { type: 'hero_level', min: 22 },
@@ -143,7 +143,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'sorcerer',
     name: 'Soberana Astral',
     pathLabel: 'Caminho Inato',
-    description: 'Poder celestial — cometas e véus de energia estelar.',
+    description: 'Poder celestial. Cometas e véus de energia estelar.',
     prerequisiteAscensionId: 'sorcerer_innate_feiticeira',
     requirements: [
       { type: 'hero_level', min: 22 },
@@ -159,7 +159,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'sorcerer',
     name: 'Imperatriz Arcana',
     pathLabel: 'Caminho Arcano',
-    description: 'Ápice do arcano — decretos devastadores e tempestades imperiais.',
+    description: 'Ápice do arcano. Decretos devastadores e tempestades imperiais.',
     prerequisiteAscensionId: 'sorcerer_arcane_arquimaga',
     requirements: [
       { type: 'hero_level', min: 35 },
@@ -174,7 +174,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'sorcerer',
     name: 'Filha do Éter',
     pathLabel: 'Caminho Inato',
-    description: 'União com o éter — tormentas e ascensão transcendente.',
+    description: 'União com o éter. Tormentas e ascensão transcendente.',
     prerequisiteAscensionId: 'sorcerer_innate_soberana',
     requirements: [
       { type: 'hero_level', min: 35 },
@@ -190,7 +190,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'priest',
     name: 'Clériga Sagrada',
     pathLabel: 'Caminho Sagrado',
-    description: 'Fé e castigo — luz divina e proteção sagrada.',
+    description: 'Fé e castigo. Luz divina e proteção sagrada.',
     prerequisiteAscensionId: null,
     requirements: [
       { type: 'hero_level', min: 12 },
@@ -204,7 +204,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'priest',
     name: 'Clériga da Vida',
     pathLabel: 'Caminho da Vida',
-    description: 'Cura e renovação — vitalidade para aliados feridos.',
+    description: 'Cura e renovação. Vitalidade para aliados feridos.',
     prerequisiteAscensionId: null,
     requirements: [
       { type: 'hero_level', min: 12 },
@@ -219,7 +219,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'priest',
     name: 'Alta Sacerdotisa',
     pathLabel: 'Caminho Sagrado',
-    description: 'Autoridade sagrada — radiância e santificação em combate.',
+    description: 'Autoridade sagrada. Radiância e santificação em combate.',
     prerequisiteAscensionId: 'priest_sacred_cleriga',
     requirements: [
       { type: 'hero_level', min: 22 },
@@ -234,7 +234,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'priest',
     name: 'Guardiã da Vida',
     pathLabel: 'Caminho da Vida',
-    description: 'Proteção vital — égides e fontes de cura sustentada.',
+    description: 'Proteção vital. Égides e fontes de cura sustentada.',
     prerequisiteAscensionId: 'priest_life_cleriga',
     requirements: [
       { type: 'hero_level', min: 22 },
@@ -250,7 +250,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'priest',
     name: 'Santa',
     pathLabel: 'Caminho Sagrado',
-    description: 'Ápice da fé — graça divina e julgamento final.',
+    description: 'Ápice da fé. Graça divina e julgamento final.',
     prerequisiteAscensionId: 'priest_sacred_alta_sacerdotisa',
     requirements: [
       { type: 'hero_level', min: 35 },
@@ -265,7 +265,7 @@ export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
     heroClass: 'priest',
     name: 'Filha da Aurora',
     pathLabel: 'Caminho da Vida',
-    description: 'Luz da aurora — renascimento e cura transcendente.',
+    description: 'Luz da aurora. Renascimento e cura transcendente.',
     prerequisiteAscensionId: 'priest_life_guardia',
     requirements: [
       { type: 'hero_level', min: 35 },

@@ -10,6 +10,7 @@ import { CombatantRef } from '../services/combat/TurnOrderService';
 import { StatusEffectMap } from '../services/combat/CombatStatusEffect';
 import { EncounterMeta } from '../campaign/EncounterResolver';
 import { PendingSkillAction } from '../services/combat/PendingSkillAction';
+import { UniqueEffectId } from '../unique-effects/UniqueEffectCatalog';
 
 export interface CombatStateProps {
   enemies: EnemyProps[];
@@ -20,6 +21,7 @@ export interface CombatStateProps {
   encounterMeta: EncounterMeta | null;
   pendingSkillActions?: PendingSkillAction[];
   rewardedEnemyIds?: string[];
+  spentBattleUniqueEffects?: UniqueEffectId[];
   /** Legado — ignorado após migração temporal. */
   turnQueue?: CombatantRef[];
   turnIndex?: number;
@@ -35,6 +37,7 @@ export class CombatState {
   readonly encounterMeta: EncounterMeta | null;
   readonly pendingSkillActions: PendingSkillAction[];
   readonly rewardedEnemyIds: string[];
+  readonly spentBattleUniqueEffects: UniqueEffectId[];
 
   private constructor(props: CombatStateProps) {
     this.enemies = props.enemies.map((enemy) => Enemy.restore(enemy));
@@ -45,6 +48,7 @@ export class CombatState {
     this.encounterMeta = props.encounterMeta ?? null;
     this.pendingSkillActions = [...(props.pendingSkillActions ?? [])];
     this.rewardedEnemyIds = [...(props.rewardedEnemyIds ?? [])];
+    this.spentBattleUniqueEffects = [...(props.spentBattleUniqueEffects ?? [])];
   }
 
   static restore(props: CombatStateProps): CombatState {
@@ -73,6 +77,7 @@ export class CombatState {
       encounterMeta,
       pendingSkillActions: [],
       rewardedEnemyIds: [],
+      spentBattleUniqueEffects: [],
     });
   }
 
@@ -148,6 +153,19 @@ export class CombatState {
     return this.clone({ statusEffects });
   }
 
+  hasSpentBattleUniqueEffect(effectId: UniqueEffectId): boolean {
+    return this.spentBattleUniqueEffects.includes(effectId);
+  }
+
+  withSpentBattleUniqueEffect(effectId: UniqueEffectId): CombatState {
+    if (this.hasSpentBattleUniqueEffect(effectId)) {
+      return this;
+    }
+    return this.clone({
+      spentBattleUniqueEffects: [...this.spentBattleUniqueEffects, effectId],
+    });
+  }
+
   withPendingSkillActions(pendingSkillActions: PendingSkillAction[]): CombatState {
     return this.clone({ pendingSkillActions: [...pendingSkillActions] });
   }
@@ -162,6 +180,7 @@ export class CombatState {
       encounterMeta: this.encounterMeta ? { ...this.encounterMeta } : null,
       pendingSkillActions: [...this.pendingSkillActions],
       rewardedEnemyIds: [...this.rewardedEnemyIds],
+      spentBattleUniqueEffects: [...this.spentBattleUniqueEffects],
     };
   }
 

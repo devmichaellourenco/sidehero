@@ -11,6 +11,7 @@ import { ActiveGearSlot } from '../../domain/gear/GearSlotCatalog';
 import { resolveGearTemplateId } from '../../domain/gear/GearTemplateCatalog';
 import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
+import { EnemyRole } from '../../domain/campaign/WaveDefinition';
 import { inferEnemyType, migrateLegacyEnemyType } from '../../domain/entities/EnemyType';
 import { Chest, ChestProps } from '../../domain/entities/Chest';
 import { CombatState } from '../../domain/entities/CombatState';
@@ -208,6 +209,14 @@ export function migrateHero(raw: unknown): Hero {
   });
 }
 
+function migrateEnemyRole(role: unknown): EnemyRole {
+  if (role === 'boss' || role === 'elite' || role === 'trash') {
+    return role;
+  }
+
+  return 'trash';
+}
+
 export function migrateEnemy(raw: unknown): Enemy | null {
   if (!raw || typeof raw !== 'object') return null;
 
@@ -238,6 +247,7 @@ export function migrateEnemy(raw: unknown): Enemy | null {
     }),
     goldReward: e.goldReward,
     xpReward: e.xpReward,
+    role: migrateEnemyRole(e.role),
   });
 }
 

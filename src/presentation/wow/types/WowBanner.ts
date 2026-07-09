@@ -14,6 +14,7 @@ export type WowBannerKind =
   | 'feature-unlock'
   | 'upgrade-purchased'
   | 'loot-received'
+  | 'milestone-victory'
   | 'shop-purchase'
   | 'forge-created'
   | 'hero-unlock'

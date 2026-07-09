@@ -22,6 +22,8 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 - Slots extras = `getUnlockedBattleSkillSlotCount(upgradeLevels)`
 - Scroll ao `+1 rank`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`
 - Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltips nos cards
+- Cards da lista: estado equipado = fundo verde; sem badge Disponível (botão `[+]` basta)
+- Cards de ascensão: requisitos/CTA no tooltip; clique no card disponível abre confirmação
 - Aba Classe: sem retrato/classe atual (vai no header); banner + cards temáticos (`HeroClassAscensionPresentation`) + skills de evolução
 
 ## Testes

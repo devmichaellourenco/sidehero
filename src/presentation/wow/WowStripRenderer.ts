@@ -25,6 +25,8 @@ export class WowStripRenderer {
     const variant = options.variant ?? 'compact';
     const enterClass = options.animate ? ' wow-banner--enter' : '';
     const rarityClass = banner.gear ? ` wow-banner--loot-${banner.gear.rarity}` : '';
+    const kindClass =
+      banner.kind === 'milestone-victory' ? ' wow-banner--milestone-victory' : '';
     const cta = resolveWowBannerCta(banner);
     const dismissMarkup = this.buildDismissMarkup(variant, cta);
 
@@ -60,7 +62,7 @@ export class WowStripRenderer {
 
     root.innerHTML = `
       <div class="wow-strip-bg" aria-hidden="true"></div>
-      <article class="wow-banner wow-banner--${banner.tone} wow-banner--${variant}${rarityClass}${enterClass}" data-wow-banner-id="${banner.id}">
+      <article class="wow-banner wow-banner--${banner.tone} wow-banner--${variant}${rarityClass}${kindClass}${enterClass}" data-wow-banner-id="${banner.id}">
         ${dismissMarkup}
         <div class="wow-banner-glow" aria-hidden="true"></div>
         <div class="wow-banner-visual">${this.buildVisualMarkup(banner, variant)}</div>

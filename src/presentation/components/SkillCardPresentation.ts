@@ -28,17 +28,7 @@ function renderSkillBadge(label: string, modifier: string): string {
 }
 
 function renderEssentialBadges(node: SkillNodeDto): string {
-  const equipLabel = node.isEquipped ? 'Ativa' : 'Inativa';
-  const badges = [
-    renderSkillBadge(node.branchLabel, node.branch),
-    renderSkillBadge(equipLabel, node.isEquipped ? 'equipped' : 'unequipped'),
-  ];
-
-  if (node.status === 'ready') {
-    badges.push(renderSkillBadge(SKILL_STATUS_LABELS[node.status], node.status));
-  }
-
-  return badges.join('');
+  return renderSkillBadge(node.branchLabel, node.branch);
 }
 
 function renderSkillRankUpButton(node: SkillNodeDto, options: SkillCardOptions): string {
@@ -74,9 +64,11 @@ export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): 
     ? `data-skill-equip="${node.id}" draggable="true"`
     : '';
   const equipClass = node.canEquip ? ' skill-card--equippable' : '';
+  const equippedClass = node.isEquipped ? ' skill-card--equipped-active' : '';
+  const ariaEquipped = node.isEquipped ? ', equipada na batalha' : '';
 
   return `
-    <article class="skill-card skill-card-${node.status} skill-card--${node.branch} skill-card--compact${equipClass}" data-skill-tooltip tabindex="0" ${equipAttrs} aria-label="${escapeHtml(node.name)} — ${escapeHtml(renderSkillRankLabel(node.currentRank, node.maxRank, node.status))}">
+    <article class="skill-card skill-card-${node.status} skill-card--${node.branch} skill-card--compact${equipClass}${equippedClass}" data-skill-tooltip tabindex="0" ${equipAttrs} aria-label="${escapeHtml(node.name)}${ariaEquipped} — ${escapeHtml(renderSkillRankLabel(node.currentRank, node.maxRank, node.status))}">
       <div class="skill-card-compact">
         <div class="skill-card-visual">
           <span
@@ -101,7 +93,10 @@ export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): 
       ${renderSkillTooltipContent({
         ...node,
         status: node.status,
-        statusLabel: SKILL_STATUS_LABELS[node.status],
+        statusLabel:
+          node.canAllocateRank && node.status === 'ready'
+            ? undefined
+            : SKILL_STATUS_LABELS[node.status],
       })}
     </article>
   `;

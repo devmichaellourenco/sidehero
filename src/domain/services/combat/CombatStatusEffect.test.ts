@@ -25,4 +25,16 @@ describe('CombatStatusEffect labels', () => {
     expect(statusEffectLabel(effect)).toBe('DEF-8');
     expect(statusEffectTooltip(effect)).toBe('DEF-8 · 1 turno restante');
   });
+
+  it('formata heal_block como debuff persistente', () => {
+    const effect = {
+      skillId: 'vorpal_lupnus_heal_block',
+      kind: 'heal_block' as const,
+      magnitude: 0,
+      remainingTurns: 999,
+    };
+
+    expect(statusEffectLabel(effect)).toBe('Cura bloqueada');
+    expect(statusEffectTooltip(effect)).toBe('Cura bloqueada · dura até o fim da batalha');
+  });
 });

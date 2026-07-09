@@ -158,6 +158,7 @@ describe('CombatActionExecutor', () => {
       }),
     );
     const enemy = Enemy.forStage(1);
+    const damageContext = { rng: () => 0.99 };
 
     const baseline = executor.execute(
       {
@@ -172,6 +173,8 @@ describe('CombatActionExecutor', () => {
       'Saci',
       [knight],
       [enemy],
+      undefined,
+      damageContext,
     );
 
     const mitigated = executor.execute(
@@ -187,6 +190,8 @@ describe('CombatActionExecutor', () => {
       'Saci',
       [withResist],
       [enemy],
+      undefined,
+      damageContext,
     );
 
     expect(mitigated.heroes[0].currentHealth).toBeGreaterThan(baseline.heroes[0].currentHealth);
@@ -317,5 +322,74 @@ describe('CombatActionExecutor', () => {
       durationTurns: 3,
       dotElement: 'fire',
     });
+  });
+
+  it('aplica heal_block ao acertar inimigo com Vorpal Lupnus equipada', () => {
+    const sword = Gear.create({
+      id: 'vorpal',
+      name: 'Vorpal Lupnus',
+      templateId: 'sword_vorpal_lupnus',
+      slot: 'weapon',
+      rarity: 'legendary',
+      attackBonus: 30,
+      defenseBonus: 0,
+      healthBonus: 0,
+    });
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon').equip(sword);
+    const enemy = Enemy.forStage(1);
+
+    const result = executor.execute(
+      {
+        skillId: 'basic_attack',
+        skillName: 'Ataque',
+        kind: 'damage',
+        targeting: 'single_enemy',
+        power: 20,
+        targetEnemyId: enemy.id,
+      },
+      'Galneon',
+      [knight],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      {
+        attackerProfile: { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 },
+        stageLevel: 1,
+        attackerEquipment: knight.toProps().equipment,
+        rng: () => 0,
+      },
+    );
+
+    expect(result.statusApplications.some((entry) => entry.kind === 'heal_block')).toBe(true);
+  });
+
+  it('bloqueia cura em inimigo com heal_block', () => {
+    const enemy = Enemy.forStage(1).takeDamage(20);
+    const hpBefore = enemy.stats.currentHealth;
+    const statusEffects = CombatStatusEffectTracker.fromMap({}).apply({
+      combatantKey: `enemy:${enemy.id}`,
+      skillId: 'vorpal_lupnus_heal_block',
+      kind: 'heal_block',
+      magnitude: 0,
+      durationTurns: 999,
+    });
+
+    const result = executor.execute(
+      {
+        skillId: 'regenerate',
+        skillName: 'Regenerar',
+        kind: 'heal_ally',
+        targeting: 'single_enemy',
+        power: 15,
+        targetEnemyId: enemy.id,
+      },
+      'Slime',
+      [],
+      [enemy],
+      statusEffects,
+    );
+
+    expect(result.enemies[0].stats.currentHealth).toBe(hpBefore);
+    expect(result.floatingEvents).toHaveLength(0);
+    expect(result.event).toContain('cura bloqueada');
   });
 });

@@ -52,7 +52,12 @@
       </section>
 
       <section class="battle-strip" aria-label="Campo de batalha">
-        <div class="strip-bg"></div>
+        <div class="strip-bg" data-strip-bg>
+          <div class="strip-bg__sky" aria-hidden="true"></div>
+          <div class="strip-bg__center" aria-hidden="true"></div>
+          <div class="strip-bg__left" aria-hidden="true"></div>
+          <div class="strip-bg__right" aria-hidden="true"></div>
+        </div>
         <div id="heroes-container" class="heroes-row"></div>
         <div id="enemy-container" class="enemy-slot"></div>
         <div id="battle-float-layer" class="battle-float-layer" aria-hidden="true"></div>
@@ -229,6 +234,27 @@
         <footer class="confirm-dialog-actions forge-confirm-dialog__actions">
           <button type="button" class="forge-game-btn forge-game-btn--ghost" data-forge-confirm-cancel>Cancelar</button>
           <button type="button" class="forge-game-btn forge-game-btn--fuse forge-confirm-accept" data-forge-confirm-accept>Confirmar</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="ascend-confirm-root" class="confirm-dialog-root hidden" aria-hidden="true">
+      <div class="confirm-dialog-backdrop" data-ascend-confirm-cancel></div>
+      <div
+        class="confirm-dialog ascend-confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="ascend-confirm-title"
+        aria-describedby="ascend-confirm-body"
+      >
+        <header class="confirm-dialog-header ascend-confirm-dialog__header">
+          <span class="ascend-confirm-dialog__eyebrow">Ascensão</span>
+          <h2 id="ascend-confirm-title" class="confirm-dialog-title ascend-confirm-dialog__title"></h2>
+        </header>
+        <div id="ascend-confirm-body" class="confirm-dialog-body ascend-confirm-dialog__body"></div>
+        <footer class="confirm-dialog-actions ascend-confirm-dialog__actions">
+          <button type="button" class="gear-unequip-btn" data-ascend-confirm-cancel>Cancelar</button>
+          <button type="button" class="gear-equip-btn" data-ascend-confirm-accept>Confirmar</button>
         </footer>
       </div>
     </div>

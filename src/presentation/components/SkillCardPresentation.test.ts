@@ -35,6 +35,7 @@ describe('SkillCardPresentation', () => {
     const html = renderSkillCard(skillNode(), cardOptions);
 
     expect(html).toContain('skill-card--compact');
+    expect(html).toContain('skill-card--equipped-active');
     expect(html).toContain('Bola de Fogo');
     expect(html).toContain('skill-card-essentials');
     expect(html).not.toContain('skill-card-desc');
@@ -42,12 +43,32 @@ describe('SkillCardPresentation', () => {
     expect(html).not.toContain('skill-card-reqs');
     expect(html).not.toContain('Ativar');
     expect(html).not.toContain('Desativar');
+    expect(html).not.toContain('Ativa');
+    expect(html).not.toContain('Inativa');
     expect(html).not.toContain('+1 rank');
     expect(html).toContain('skill-card-rank-up');
     expect(html).toContain('skill-card-rank-up--available');
     expect(html).not.toContain('Toque para equipar');
     expect(html).not.toContain('arraste até um slot');
     expect(html).not.toContain('skill-card-equip-hint');
+  });
+
+  it('não exibe badge Disponível quando rank pode subir', () => {
+    const html = renderSkillCard(
+      skillNode({ status: 'ready', currentRank: 0, isEquipped: false, canAllocateRank: true }),
+      cardOptions,
+    );
+
+    expect(html).toContain('skill-card-rank-up--available');
+    expect(html).not.toContain('skill-card-badge--ready');
+    expect(html).not.toContain('>Disponível<');
+  });
+
+  it('não aplica fundo verde quando a skill não está equipada', () => {
+    const html = renderSkillCard(skillNode({ isEquipped: false }), cardOptions);
+
+    expect(html).not.toContain('skill-card--equipped-active');
+    expect(html).not.toContain('Inativa');
   });
 
   it('mantém detalhes no tooltip oculto', () => {

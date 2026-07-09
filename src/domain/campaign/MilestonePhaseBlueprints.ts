@@ -48,7 +48,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
     ],
   },
   [buildPhaseId(2, 50)]: {
-    displayName: 'Capitão da Mina',
+    displayName: 'Centelha de Gonodor',
     majorMilestone: true,
     statMultiplier: 1.55,
     waves: [

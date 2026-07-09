@@ -160,6 +160,125 @@ describe('RewardMomentDetector', () => {
     expect(moments).toHaveLength(0);
   });
 
+  it('ainda detecta tier_up no estado, mas não vira tela wow', () => {
+    const previous = baseState({ stage: 1 });
+    const next = baseState({ stage: 2 });
+
+    const moments = detector.detect(previous, next);
+    expect(moments.some((moment) => moment.kind === 'tier_up')).toBe(true);
+  });
+
+  it('celebra marco X-50 com momento dedicado', () => {
+    const previous = baseState({
+      campaignProgress: {
+        selectedPhaseId: '1-50',
+        unlockedPhaseIds: ['1-1', '1-50'],
+        clearedPhaseIds: [],
+        highestTierReached: 1,
+        seasonCompleted: false,
+      },
+    });
+    const next = baseState({
+      campaignProgress: {
+        selectedPhaseId: '2-1',
+        unlockedPhaseIds: ['1-1', '1-50', '2-1'],
+        clearedPhaseIds: ['1-50'],
+        highestTierReached: 50,
+        seasonCompleted: false,
+      },
+    });
+
+    const moments = detector.detect(previous, next);
+    expect(moments.some((moment) => moment.kind === 'milestone_boss_defeated')).toBe(true);
+    expect(moments.some((moment) => moment.kind === 'phase_cleared')).toBe(false);
+    expect(moments.find((moment) => moment.kind === 'milestone_boss_defeated')?.title).toContain(
+      'Capítulo',
+    );
+  });
+
+  it('fase normal limpa gera phase_cleared, não marco', () => {
+    const previous = baseState({
+      campaignProgress: {
+        selectedPhaseId: '1-2',
+        unlockedPhaseIds: ['1-1', '1-2'],
+        clearedPhaseIds: ['1-1'],
+        highestTierReached: 1,
+        seasonCompleted: false,
+      },
+    });
+    const next = baseState({
+      stage: 2,
+      campaignProgress: {
+        selectedPhaseId: '1-3',
+        unlockedPhaseIds: ['1-1', '1-2', '1-3'],
+        clearedPhaseIds: ['1-1', '1-2'],
+        highestTierReached: 2,
+        seasonCompleted: false,
+      },
+    });
+
+    const moments = detector.detect(previous, next);
+    expect(moments.some((moment) => moment.kind === 'phase_cleared')).toBe(true);
+    expect(moments.some((moment) => moment.kind === 'milestone_boss_defeated')).toBe(false);
+  });
+
+  it('celebra lendário nomeado ao entrar no inventário', () => {
+    const previous = baseState({ inventory: [] });
+    const next = baseState({
+      inventory: [
+        {
+          id: 'gear-ignus',
+          name: 'Ignus Ix',
+          templateId: 'ignus_ix',
+          slot: 'accessory',
+          rarity: 'legendary',
+          attackBonus: 0,
+          defenseBonus: 0,
+          healthBonus: 0,
+          attackSpeedBonus: 0,
+          castSpeedBonus: 0,
+          critChanceBonus: 0,
+          critDamageBonus: 0,
+          fireResistBonus: 0,
+          coldResistBonus: 0,
+          lightningResistBonus: 0,
+          chaosResistBonus: 0,
+          allElementalResistBonus: 0,
+          fireDamageBonus: 30,
+          fireResistPenetrationBonus: 30,
+          coldDamageBonus: 0,
+          lightningDamageBonus: 0,
+          chaosDamageBonus: 0,
+          allElementalDamageBonus: 0,
+          fireDamageFlat: 0,
+          coldDamageFlat: 0,
+          lightningDamageFlat: 0,
+          chaosDamageFlat: 0,
+          fireResistFlat: 0,
+          coldResistFlat: 0,
+          lightningResistFlat: 0,
+          chaosResistFlat: 0,
+          attackPercentBonus: 0,
+          defensePercentBonus: 0,
+          healthPercentBonus: 0,
+          physicalDamagePercentBonus: 0,
+          cooldownReductionBonus: 0,
+          dodgeChanceBonus: 0,
+          blockChanceBonus: 0,
+          damageReductionBonus: 0,
+          requirements: { minLevel: 30, int: 28 },
+          isNamedLegendary: true,
+        },
+      ],
+    });
+
+    const moments = detector.detect(previous, next);
+    expect(moments.some((moment) => moment.kind === 'named_legendary_received')).toBe(true);
+    expect(moments.find((moment) => moment.kind === 'named_legendary_received')?.gear?.name).toBe(
+      'Ignus Ix',
+    );
+  });
+
   it('só celebra loot raro ou melhor', () => {
     expect(
       detector.buildLootMoment({

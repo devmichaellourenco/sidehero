@@ -3,7 +3,7 @@ import { mapDefinitionByIndex } from './CampaignMaps';
 export type CampaignId = 'apprentice';
 export type MapId =
   | 'stendra'
-  | 'gondonor'
+  | 'gruftall'
   | 'valdris'
   | 'morthaven'
   | 'broken_sky'

@@ -4,11 +4,11 @@ const NON_CELEBRATION_KINDS = new Set<RewardMoment['kind']>([
   'chest_available',
   'phase_cleared',
   'shop_purchase',
+  'tier_up',
 ]);
 
 const MESO_CELEBRATION_KINDS = new Set<RewardMoment['kind']>([
   'level_up',
-  'tier_up',
   'feature_unlock',
   'upgrade_purchased',
   'forge_created',

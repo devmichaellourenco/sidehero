@@ -7,6 +7,9 @@ const GENERIC_ICONS = new Set(['attack', 'magic', 'weapon']);
 describe('SkillIconResolver', () => {
   it('mapeia skills elementais para ícones temáticos', () => {
     expect(resolveSkillIconKey('fireball')).toBe('fireball');
+    expect(resolveSkillIconKey('frost_shard')).toBe('frost_shard');
+    expect(resolveSkillIconKey('blizzard')).toBe('blizzard');
+    expect(resolveSkillIconKey('smite')).toBe('smite');
     expect(resolveSkillIconKey('inn_fei_flame')).toBe('fireball');
     expect(resolveSkillIconKey('arc_mag_bolt')).toBe('arcane_bolt');
     expect(resolveSkillIconKey('minor_heal')).toBe('heal');

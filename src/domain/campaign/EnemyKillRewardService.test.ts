@@ -88,4 +88,30 @@ describe('EnemyKillRewardService', () => {
     expect(result.state.activeHeroes()[0].experience.current).toBe(expectedXp);
     vi.restoreAllMocks();
   });
+
+  it('concede Ignus Ix ao matar Saci na 1-50 sem role de boss (save migrado)', () => {
+    const phaseId = buildPhaseId(1, 50);
+    const state = GameState.initial().withCampaignProgress(
+      GameState.initial().campaignProgress.withSelectedPhase(phaseId),
+    );
+    const combat = combatWithEnemies(state, phaseId, 3);
+    const boss = combat.enemies.find((enemy) => enemy.enemyType === 'saci');
+    expect(boss).toBeDefined();
+
+    const defeated = combat.enemies.map((entry) =>
+      entry.id === boss!.id
+        ? Enemy.restore({
+            ...entry.toProps(),
+            role: 'trash',
+            stats: Stats.create({ ...entry.stats.toProps(), currentHealth: 0 }),
+          })
+        : entry,
+    );
+
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
+
+    expect(result.state.inventory.some((gear) => gear.templateId === 'ignus_ix')).toBe(true);
+    vi.restoreAllMocks();
+  });
 });

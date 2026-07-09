@@ -49,14 +49,28 @@ describe('HeroClassAscensionPresentation', () => {
     expect(html).not.toContain('ascension-moment__lead');
   });
 
-  it('renderiza card temático com requisitos em pills e CTA', () => {
+  it('renderiza card compacto com detalhes no tooltip e seleção por clique', () => {
     const html = renderAscensionPathCard(minimalHero(), ascensionOption({ canAscend: true }), false);
 
     expect(html).toContain('ascension-path-card--sacred');
     expect(html).toContain('ascension-path-card--ready');
-    expect(html).toContain('ascension-path-card__showcase');
+    expect(html).toContain('ascension-path-card--selectable');
+    expect(html).toContain('data-ascension-path-tooltip');
+    expect(html).toContain('ascension-path-tooltip-content');
     expect(html).toContain('ascension-req--unmet');
     expect(html).toContain('Seguir este caminho');
-    expect(html).not.toContain('ascension-card');
+    expect(html).toContain('data-ascension-select="priest_sacred_cleriga"');
+    expect(html).not.toContain('ascension-path-card__footer');
+    expect(html).not.toContain('ascension-path-card__cta');
+    expect(html).not.toContain('ascension-path-card__status');
+    expect(html).not.toContain('ascension-path-card__reqs');
+  });
+
+  it('mantém requisitos bloqueados apenas no tooltip', () => {
+    const html = renderAscensionPathCard(minimalHero(), ascensionOption(), false);
+
+    expect(html).toContain('Complete os requisitos para desbloquear');
+    expect(html).not.toContain('data-ascension-select=');
+    expect(html).not.toContain('ascension-path-card--selectable');
   });
 });

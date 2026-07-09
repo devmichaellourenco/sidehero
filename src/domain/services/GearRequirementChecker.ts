@@ -76,10 +76,13 @@ export class GearRequirementChecker {
     rarity: Gear['rarity'],
   ): GearRequirements {
     const template = getGearTemplate(templateId);
-    const reqs = GearRequirementChecker.inferRequirements(stage, slot, rarity);
+    let result = GearRequirementChecker.inferRequirements(stage, slot, rarity);
     if (template?.exclusiveHeroId) {
-      return { ...reqs, heroId: template.exclusiveHeroId };
+      result = { ...result, heroId: template.exclusiveHeroId };
     }
-    return reqs;
+    if (template?.fixedRequirements) {
+      result = { ...result, ...template.fixedRequirements };
+    }
+    return result;
   }
 }

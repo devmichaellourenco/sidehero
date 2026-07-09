@@ -42,6 +42,7 @@ Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara 
 
 Adicionar critérios `[ ]` aqui antes de codar:
 
+- Efeitos únicos → [`unique-effects.spec.md`](unique-effects.spec.md) (entregue)
 - Busca textual no grid de inventário
 - Favoritar itens
 - Vender/descartar lixo em lote

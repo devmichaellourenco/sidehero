@@ -42,6 +42,7 @@ export interface GearProps {
   chaosResistBonus?: number;
   allElementalResistBonus?: number;
   fireDamageBonus?: number;
+  fireResistPenetrationBonus?: number;
   coldDamageBonus?: number;
   lightningDamageBonus?: number;
   chaosDamageBonus?: number;
@@ -86,6 +87,7 @@ export class Gear {
   readonly chaosResistBonus: number;
   readonly allElementalResistBonus: number;
   readonly fireDamageBonus: number;
+  readonly fireResistPenetrationBonus: number;
   readonly coldDamageBonus: number;
   readonly lightningDamageBonus: number;
   readonly chaosDamageBonus: number;
@@ -127,6 +129,7 @@ export class Gear {
     this.chaosResistBonus = props.chaosResistBonus ?? 0;
     this.allElementalResistBonus = props.allElementalResistBonus ?? 0;
     this.fireDamageBonus = props.fireDamageBonus ?? 0;
+    this.fireResistPenetrationBonus = props.fireResistPenetrationBonus ?? 0;
     this.coldDamageBonus = props.coldDamageBonus ?? 0;
     this.lightningDamageBonus = props.lightningDamageBonus ?? 0;
     this.chaosDamageBonus = props.chaosDamageBonus ?? 0;
@@ -174,6 +177,7 @@ export class Gear {
       chaosResistBonus: this.chaosResistBonus,
       allElementalResistBonus: this.allElementalResistBonus,
       fireDamageBonus: this.fireDamageBonus,
+      fireResistPenetrationBonus: this.fireResistPenetrationBonus,
       coldDamageBonus: this.coldDamageBonus,
       lightningDamageBonus: this.lightningDamageBonus,
       chaosDamageBonus: this.chaosDamageBonus,

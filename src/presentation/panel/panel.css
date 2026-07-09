@@ -284,11 +284,11 @@ h2 {
   --campaign-panel-glow: rgba(110, 207, 138, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='gondonor'] {
-  --campaign-accent: #d4a24a;
-  --campaign-accent-soft: rgba(212, 162, 74, 0.16);
-  --campaign-accent-border: rgba(212, 162, 74, 0.55);
-  --campaign-panel-glow: rgba(212, 162, 74, 0.08);
+.campaign-context-pill[data-campaign-theme='gruftall'] {
+  --campaign-accent: #a89b8c;
+  --campaign-accent-soft: rgba(168, 155, 140, 0.16);
+  --campaign-accent-border: rgba(168, 155, 140, 0.55);
+  --campaign-panel-glow: rgba(168, 155, 140, 0.08);
 }
 
 .campaign-context-pill[data-campaign-theme='valdris'] {
@@ -378,7 +378,7 @@ h2 {
 }
 
 .campaign-tooltip-portal[data-campaign-theme='stendra'] { --campaign-accent: #6ecf8a; }
-.campaign-tooltip-portal[data-campaign-theme='gondonor'] { --campaign-accent: #d4a24a; }
+.campaign-tooltip-portal[data-campaign-theme='gruftall'] { --campaign-accent: #9a8b7a; }
 .campaign-tooltip-portal[data-campaign-theme='valdris'] { --campaign-accent: #6eb8ff; }
 .campaign-tooltip-portal[data-campaign-theme='morthaven'] { --campaign-accent: #a98cff; }
 .campaign-tooltip-portal[data-campaign-theme='broken_sky'] { --campaign-accent: #58d7e8; }
@@ -445,9 +445,10 @@ h2 {
   --strip-floor-skill-inset: 4px;
   --strip-floor-skill-zone: 14px;
   --strip-actor-gap: 2px;
-  --strip-actors-bottom: calc(var(--strip-floor-height) + var(--strip-actor-gap));
-  --strip-hp-bottom: 5px;
-  --strip-card-foot: 11px;
+  --strip-actors-bottom: 14px;
+  --strip-skill-overhang: 10px;
+  --strip-hp-bottom: 2px;
+  --strip-card-foot: 8px;
   --strip-hero-slot: 46px;
   --strip-enemy-slot: 50px;
   --strip-enemy-boss-slot: 56px;
@@ -485,20 +486,146 @@ h2 {
   z-index: 6;
 }
 
+.battle-strip--milestone-victory {
+  overflow: hidden;
+  z-index: 6;
+  box-shadow: inset 0 0 36px rgba(255, 214, 96, 0.28);
+}
+
 .strip-bg {
   position: absolute;
   inset: 0;
-  background:
-    url('assets/backgrounds/battle.png') center / cover no-repeat,
-    linear-gradient(180deg, #1a3a5c 0%, var(--strip) 60%, var(--floor) 100%);
+  overflow: hidden;
+  z-index: 0;
+  background: linear-gradient(180deg, #1a3a5c 0%, var(--strip) 60%, var(--floor) 100%);
+}
+
+.strip-bg__sky,
+.strip-bg__center,
+.strip-bg__left,
+.strip-bg__right {
+  position: absolute;
+  pointer-events: none;
+}
+
+.strip-bg__sky {
+  inset: 0;
+  background: linear-gradient(180deg, #1a3a5c 0%, var(--strip) 60%, var(--floor) 100%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center bottom;
+}
+
+.strip-bg__center {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: min(36%, 280px);
+  transform: translateX(-50%);
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  background-position: center bottom;
+  opacity: 0;
+  z-index: 1;
+}
+
+.strip-bg__center--visible {
+  opacity: 1;
+}
+
+.strip-bg__left,
+.strip-bg__right {
+  top: 0;
+  bottom: 0;
+  width: min(52%, 400px);
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  background-position: left bottom;
+  z-index: 2;
+}
+
+.strip-bg__left {
+  left: 0;
+}
+
+.strip-bg__right {
+  right: 0;
+  background-position: right bottom;
+}
+
+.strip-bg--scenic .strip-bg__sky {
+  background: linear-gradient(180deg, #8ec8e8 0%, #c8e8c0 52%, #6a9e58 100%);
+}
+
+.strip-bg--scenic[data-map-id='stendra'] .strip-bg__sky {
+  background: linear-gradient(180deg, #8ec8e8 0%, #d4f0c8 48%, #6daf62 100%);
+}
+
+.battle-strip:has(.strip-bg--scenic) .strip-floor:not(.strip-floor--tiled) {
+  opacity: 0.35;
+  background: linear-gradient(180deg, transparent, rgba(58, 41, 102, 0.55));
 }
 
 .battle-float-layer {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 5;
   pointer-events: none;
   overflow: visible;
+}
+
+.battle-skill-vfx {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  pointer-events: none;
+  transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0);
+  animation: battle-skill-vfx-travel var(--vfx-duration, 520ms) ease-out forwards;
+  filter: drop-shadow(0 0 10px rgba(255, 120, 32, 0.55));
+}
+
+.battle-skill-vfx--rtl {
+  transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scaleX(-1);
+  animation-name: battle-skill-vfx-travel-rtl;
+}
+
+.battle-skill-vfx--self {
+  animation-name: battle-skill-vfx-pulse;
+}
+
+.battle-skill-vfx__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@keyframes battle-skill-vfx-travel {
+  to {
+    transform: translate3d(var(--vfx-to-x), var(--vfx-to-y), 0);
+  }
+}
+
+@keyframes battle-skill-vfx-travel-rtl {
+  to {
+    transform: translate3d(var(--vfx-to-x), var(--vfx-to-y), 0) scaleX(-1);
+  }
+}
+
+@keyframes battle-skill-vfx-pulse {
+  0% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(0.65);
+    opacity: 0.2;
+  }
+  35% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scale(1);
+    opacity: 0;
+  }
 }
 
 .battle-victory-overlay {
@@ -562,6 +689,22 @@ h2 {
   background: rgba(120, 72, 72, 0.48);
 }
 
+.battle-victory-compact--milestone {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 214, 96, 0.55), transparent 58%),
+    rgba(168, 112, 24, 0.52);
+}
+
+.battle-victory-compact--milestone-major {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 232, 128, 0.72), transparent 62%),
+    linear-gradient(160deg, rgba(196, 128, 24, 0.62), rgba(88, 48, 8, 0.58));
+}
+
+.battle-victory-compact--celebration {
+  box-shadow: inset 0 0 48px rgba(255, 214, 96, 0.22);
+}
+
 .battle-victory-compact-main {
   flex: 1;
   display: flex;
@@ -582,6 +725,34 @@ h2 {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   line-height: 1;
   animation: battle-victory-label-in 2.2s ease-out forwards;
+}
+
+.battle-victory-compact-label--milestone {
+  letter-spacing: 0.22em;
+  text-shadow:
+    0 0 18px rgba(255, 232, 128, 0.85),
+    0 2px 10px rgba(0, 0, 0, 0.45);
+  animation: battle-victory-milestone-label-in 3.4s ease-out forwards;
+}
+
+@keyframes battle-victory-milestone-label-in {
+  0% {
+    transform: scale(0.35);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  16% {
+    transform: scale(1.18);
+    opacity: 1;
+    filter: blur(0);
+  }
+  30% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes battle-victory-label-in {
@@ -755,6 +926,7 @@ h2 {
   left: 0;
   right: 0;
   height: var(--strip-floor-height);
+  z-index: 3;
   background: repeating-linear-gradient(
     90deg,
     #3d2966 0px,
@@ -762,6 +934,15 @@ h2 {
     #4a3078 8px,
     #4a3078 16px
   );
+}
+
+.strip-floor--tiled {
+  opacity: 1;
+  background-color: #4a7a42;
+  background-image: var(--strip-floor-tile-image);
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  background-position: left bottom;
 }
 
 .heroes-row {
@@ -772,7 +953,7 @@ h2 {
   flex-direction: row-reverse;
   align-items: flex-end;
   gap: var(--strip-actor-gap);
-  z-index: 2;
+  z-index: 4;
   max-width: calc(100% - 96px);
 }
 
@@ -780,7 +961,7 @@ h2 {
   position: absolute;
   bottom: var(--strip-actors-bottom);
   right: 8px;
-  z-index: 2;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1114,7 +1295,7 @@ h2 {
 .combat-skill-floor-slot {
   position: absolute;
   top: auto;
-  bottom: calc(-1 * (var(--strip-actors-bottom) - var(--strip-floor-skill-inset)));
+  bottom: calc(-1 * var(--strip-skill-overhang));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -2186,6 +2367,14 @@ button.hero-skill-chip:hover {
 .gear-stat-line--empty {
   color: var(--muted);
   font-style: italic;
+}
+
+.gear-unique-effect {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--gold);
 }
 
 .gear-tooltip-portal {
@@ -5880,6 +6069,12 @@ body.modal-open {
   padding: 8px;
 }
 
+.skill-card--equipped-active {
+  background: rgba(34, 88, 52, 0.55);
+  border-color: rgba(110, 207, 138, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(126, 231, 135, 0.12);
+}
+
 .skill-card-compact {
   display: flex;
   align-items: flex-start;
@@ -6451,7 +6646,8 @@ body.skill-drag-active * {
   display: none;
 }
 
-.ascension-moment-tooltip-portal {
+.ascension-moment-tooltip-portal,
+.ascension-path-tooltip-portal {
   position: fixed;
   z-index: var(--z-toast);
   max-width: min(260px, calc(100vw - 24px));
@@ -6463,7 +6659,8 @@ body.skill-drag-active * {
   pointer-events: none;
 }
 
-.ascension-moment-tooltip-portal.hidden {
+.ascension-moment-tooltip-portal.hidden,
+.ascension-path-tooltip-portal.hidden {
   display: none;
 }
 
@@ -6538,6 +6735,15 @@ body.skill-drag-active * {
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
 }
 
+.ascension-path-card--selectable {
+  cursor: pointer;
+}
+
+.ascension-path-card--selectable:focus-visible .ascension-path-card__frame {
+  outline: 2px solid rgba(245, 197, 66, 0.75);
+  outline-offset: 2px;
+}
+
 .ascension-path-card__ribbon {
   position: absolute;
   top: 10px;
@@ -6593,9 +6799,9 @@ body.skill-drag-active * {
 
 .ascension-path-card__header {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
 }
 
 .ascension-path-card__title {
@@ -6607,7 +6813,7 @@ body.skill-drag-active * {
 }
 
 .ascension-path-card__points {
-  flex-shrink: 0;
+  align-self: flex-start;
   padding: 3px 7px;
   border-radius: 999px;
   font-size: 9px;
@@ -6665,6 +6871,109 @@ body.skill-drag-active * {
 .ascension-req__icon {
   font-size: 8px;
   line-height: 1;
+}
+
+.ascension-path-tooltip-title {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-heading);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ffe8a8;
+}
+
+.ascension-path-tooltip-reqs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.ascension-path-tooltip-reqs-empty {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ascension-path-tooltip-status,
+.ascension-path-tooltip-cta {
+  display: block;
+  font-size: 10px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ascension-path-tooltip-cta {
+  margin-top: 4px;
+  color: #9dffb0;
+  font-weight: 600;
+}
+
+.ascend-confirm-dialog {
+  max-width: 360px;
+}
+
+.ascend-confirm-dialog__eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.ascend-confirm-body-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ascend-confirm-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ascend-confirm-preview__sprite {
+  width: 72px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+}
+
+.ascend-confirm-preview__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ascend-confirm-preview__name {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  color: #fff4dc;
+}
+
+.ascend-confirm-preview__points {
+  font-size: 11px;
+  color: #ffe8a8;
+}
+
+.ascend-confirm-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ascend-confirm-warning,
+.ascend-confirm-action-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .ascension-path-card__footer {
@@ -6928,11 +7237,11 @@ body.skill-drag-active * {
   --campaign-panel-glow: rgba(110, 207, 138, 0.08);
 }
 
-.campaign-modal[data-campaign-theme='gondonor'] {
-  --campaign-accent: #d4a24a;
-  --campaign-accent-soft: rgba(212, 162, 74, 0.16);
-  --campaign-accent-border: rgba(212, 162, 74, 0.55);
-  --campaign-panel-glow: rgba(212, 162, 74, 0.08);
+.campaign-modal[data-campaign-theme='gruftall'] {
+  --campaign-accent: #a89b8c;
+  --campaign-accent-soft: rgba(168, 155, 140, 0.16);
+  --campaign-accent-border: rgba(168, 155, 140, 0.55);
+  --campaign-panel-glow: rgba(168, 155, 140, 0.08);
 }
 
 .campaign-modal[data-campaign-theme='valdris'] {
@@ -7868,16 +8177,16 @@ body.skill-drag-active * {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .campaign-world-node {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: min(88%, 260px);
   padding: 8px 10px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.28);
   color: inherit;
@@ -7887,6 +8196,89 @@ body.skill-drag-active * {
     transform 0.15s ease,
     border-color 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+.campaign-world-node--illustrated {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  min-height: 108px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  align-self: stretch;
+}
+
+.campaign-world-node--illustrated.campaign-world-node--left,
+.campaign-world-node--illustrated.campaign-world-node--right {
+  align-self: stretch;
+}
+
+.campaign-world-node-banner {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.campaign-world-node-banner__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.campaign-world-node-banner__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 18, 36, 0.08) 0%,
+    rgba(12, 18, 36, 0.55) 72%,
+    rgba(12, 18, 36, 0.82) 100%
+  );
+}
+
+.campaign-world-node-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.campaign-world-node--illustrated .campaign-world-node-body {
+  position: relative;
+  z-index: 1;
+  min-height: 108px;
+  padding: 12px 14px;
+}
+
+.campaign-world-node--illustrated .campaign-world-node-visual {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+}
+
+.campaign-world-node--illustrated .campaign-world-node-visual .campaign-map-tab-biome-icon {
+  inset: 8px;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+}
+
+.campaign-world-node--illustrated .campaign-world-node-boss-teaser {
+  inset: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+}
+
+.campaign-world-node--illustrated .campaign-world-node-name {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.campaign-world-node--illustrated .campaign-world-node-meta {
+  font-size: 9px;
 }
 
 .campaign-world-node--left {
@@ -8589,6 +8981,30 @@ body.wow-celebration-open {
 
 .wow-banner--loot-mythic .wow-banner-title {
   color: #ffb3c7;
+}
+
+.wow-banner--milestone-victory.wow-banner--center {
+  border: 2px solid rgba(245, 197, 66, 0.45);
+  box-shadow:
+    inset 0 0 60px rgba(245, 197, 66, 0.14),
+    0 0 40px rgba(245, 197, 66, 0.18);
+}
+
+.wow-banner--milestone-victory .wow-banner-glow {
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 232, 128, 0.42), transparent 58%),
+    radial-gradient(circle at 18% 78%, rgba(233, 69, 96, 0.16), transparent 48%);
+}
+
+.wow-banner--milestone-victory .wow-banner-title {
+  font-size: clamp(1.45rem, 5vw, 1.85rem);
+  color: #ffe88a;
+  text-shadow: 0 0 18px rgba(255, 214, 96, 0.45);
+}
+
+.wow-banner--milestone-victory .wow-banner-eyebrow {
+  color: #f5c542;
+  letter-spacing: 0.16em;
 }
 
 .wow-banner-gear-frame--epic,

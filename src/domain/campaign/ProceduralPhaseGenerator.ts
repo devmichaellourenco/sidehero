@@ -19,7 +19,7 @@ const MAP_CONFIG: Record<
   { campaignId: 'apprentice'; displayPrefix: string; maxPhases: number; mapIndex: number }
 > = {
   stendra: { campaignId: 'apprentice', displayPrefix: 'Estrenda', maxPhases: 50, mapIndex: 1 },
-  gondonor: { campaignId: 'apprentice', displayPrefix: 'Gondonor', maxPhases: 50, mapIndex: 2 },
+  gruftall: { campaignId: 'apprentice', displayPrefix: 'Gruftall', maxPhases: 50, mapIndex: 2 },
 };
 
 export class ProceduralPhaseGenerator {
@@ -48,7 +48,7 @@ export class ProceduralPhaseGenerator {
 
   generateByPhaseId(phaseId: PhaseId): PhaseDefinition | null {
     const { mapIndex, phaseNumber } = parsePhaseId(phaseId);
-    const mapId: MapId = mapIndex === 2 ? 'gondonor' : 'stendra';
+    const mapId: MapId = mapIndex === 2 ? 'gruftall' : 'stendra';
     return this.generate(mapId, phaseNumber);
   }
 

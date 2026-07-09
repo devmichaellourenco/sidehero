@@ -32,6 +32,7 @@ export function createDamageEvent(
 }
 
 export function createHealEvent(
+  target: CombatFloatTarget,
   targetId: string,
   beforeHealth: number,
   afterHealth: number,
@@ -39,7 +40,7 @@ export function createHealEvent(
   const amount = Math.max(0, afterHealth - beforeHealth);
   if (amount <= 0) return null;
 
-  return { target: 'hero', targetId, kind: 'heal', amount };
+  return { target, targetId, kind: 'heal', amount };
 }
 
 export function createStatusImpactEvent(

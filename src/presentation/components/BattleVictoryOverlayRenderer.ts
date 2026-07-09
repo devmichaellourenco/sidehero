@@ -5,12 +5,26 @@ export class BattleVictoryOverlayRenderer {
   render(container: HTMLElement, payload: BattleVictoryPayload): void {
     const isDefeat = payload.variant === 'defeat';
     const isWarning = payload.variant === 'boss-approach';
+    const isMilestone = payload.milestoneVictory?.isMilestone === true;
+    const isMajorMilestone = payload.milestoneVictory?.isMajorMilestone === true;
     const toneClass = isDefeat
       ? 'battle-victory-compact--defeat'
       : isWarning
         ? 'battle-victory-compact--warning'
-        : 'battle-victory-compact--clear';
-    const headline = isDefeat ? 'DEFEAT' : isWarning ? 'WARNING' : 'CLEAR';
+        : isMilestone
+          ? isMajorMilestone
+            ? 'battle-victory-compact--milestone-major'
+            : 'battle-victory-compact--milestone'
+          : 'battle-victory-compact--clear';
+    const headline = isDefeat
+      ? 'DEFEAT'
+      : isWarning
+        ? 'WARNING'
+        : isMilestone
+          ? isMajorMilestone
+            ? 'CONQUISTA'
+            : 'MARCO'
+          : 'CLEAR';
     const subtitle = this.buildSubtitle(payload);
     const rewardRows = this.buildRewardRows(payload);
     const levelUpRows = this.buildLevelUpRows(payload);
@@ -38,9 +52,9 @@ export class BattleVictoryOverlayRenderer {
       `;
 
     container.innerHTML = `
-      <div class="battle-victory-compact ${toneClass}">
+      <div class="battle-victory-compact ${toneClass}${isMilestone ? ' battle-victory-compact--celebration' : ''}">
         <div class="battle-victory-compact-main">
-          <span class="battle-victory-compact-label">${headline}</span>
+          <span class="battle-victory-compact-label${isMilestone ? ' battle-victory-compact-label--milestone' : ''}">${headline}</span>
           <span class="battle-victory-compact-sub">${subtitle}</span>
         </div>
         ${detailsSection}
@@ -61,8 +75,14 @@ export class BattleVictoryOverlayRenderer {
       return 'Wave concluída';
     }
 
-    if (payload.seasonCompleted) {
-      return 'Boss final';
+    if (payload.variant === 'phase-clear') {
+      if (payload.milestoneVictory?.isMilestone) {
+        return payload.milestoneVictory.chapterTitle;
+      }
+      if (payload.seasonCompleted) {
+        return 'Boss final';
+      }
+      return 'Fase concluída';
     }
 
     return 'Fase concluída';

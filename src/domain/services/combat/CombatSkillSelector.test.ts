@@ -110,7 +110,7 @@ describe('CombatSkillSelector', () => {
 
     expect(selected?.skillId).toBe('goblin_stab');
     expect(selected?.action.skillName).toBe('Facada');
-    expect(selected?.action.power).toBe(8);
+    expect(selected?.action.power).toBe(12);
     expect(selected?.action.targetHeroId).toBe('h1');
   });
 
@@ -141,7 +141,7 @@ describe('CombatSkillSelector', () => {
 
     expect(selected?.skillId).toBe('orc_smash');
     expect(selected?.action.skillName).toBe('Pancada');
-    expect(selected?.action.power).toBe(12);
+    expect(selected?.action.power).toBe(16);
   });
 
   it('wraith prioriza Drenar Vida com poder fixo', () => {
@@ -157,7 +157,7 @@ describe('CombatSkillSelector', () => {
 
     expect(selected?.skillId).toBe('wraith_drain');
     expect(selected?.action.skillName).toBe('Drenar Vida');
-    expect(selected?.action.power).toBe(12);
+    expect(selected?.action.power).toBe(13);
   });
 
   it('dragão prioriza Baforada em área quando fora de cooldown inicial', () => {
@@ -177,7 +177,7 @@ describe('CombatSkillSelector', () => {
     expect(readyPick?.skillId).toBe('dragon_breath');
     expect(readyPick?.action.skillName).toBe('Baforada');
     expect(readyPick?.action.targeting).toBe('all_allies');
-    expect(readyPick?.action.power).toBe(17);
+    expect(readyPick?.action.power).toBe(19);
 
     const chargingPick = selector.selectEnemyAction(dragon, [hero], [dragon], charging);
     expect(chargingPick?.skillId).toBe('dragon_bite');

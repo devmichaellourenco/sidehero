@@ -24,6 +24,7 @@ export function renderCombatStatusEffects(effects: CombatStatusEffectDto[]): str
           : 'combat-status-badge--debuff';
       const iconUrl = statusIconAsset(effect);
       const iconAlt = effect.polarity === 'buff' ? 'Buff' : 'Debuff';
+      const turnsLabel = effect.kind === 'heal_block' ? '∞' : String(effect.turnsRemaining);
 
       return `
         <span
@@ -34,7 +35,7 @@ export function renderCombatStatusEffects(effects: CombatStatusEffectDto[]): str
           aria-label="${escapeHtml(effect.tooltip)}"
         >
           ${imgTag(iconUrl, iconAlt, 'combat-status-badge-icon')}
-          <span class="combat-status-badge-turns" aria-hidden="true">${effect.turnsRemaining}</span>
+          <span class="combat-status-badge-turns" aria-hidden="true">${turnsLabel}</span>
         </span>
       `;
     })

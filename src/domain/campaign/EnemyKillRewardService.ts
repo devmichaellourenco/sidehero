@@ -9,6 +9,7 @@ import { resolvePhase } from './CampaignCatalog';
 import { parsePhaseId } from './CampaignIds';
 import { EncounterMeta } from './EncounterResolver';
 import { LootDropResult, rollEnemyLoot } from './EnemyLootTable';
+import { isNamedChapterBossKill, tryCreateUniqueBossGearDrop } from './UniqueGearLootService';
 import {
   grantsPhaseChests,
   isPhaseReplay,
@@ -81,7 +82,13 @@ export class EnemyKillRewardService {
     const { mapIndex } = parsePhaseId(phaseId);
     const replay = isPhaseReplay(state.campaignProgress, phaseId);
     const legacyBonuses = MetaBonusScope.get();
-    const isPhaseBoss = enemy.role === 'boss' && meta.isBossWave;
+    const isPhaseBoss = isNamedChapterBossKill({
+      phaseId,
+      mapIndex,
+      enemyType: enemy.enemyType,
+      role: enemy.role,
+      isPhaseBoss: meta.isBossWave,
+    });
     const firstClearBoss = isPhaseBoss && grantsPhaseChests(state.campaignProgress, phaseId);
 
     const gold = Math.floor(
@@ -113,7 +120,7 @@ export class EnemyKillRewardService {
       mapIndex,
       enemyType: enemy.enemyType,
       role: enemy.role,
-      isPhaseBoss,
+      isPhaseBoss: meta.isBossWave && enemy.role === 'boss',
       firstClearBoss,
       seasonFinale: phase?.seasonFinale ?? false,
     });
@@ -126,6 +133,22 @@ export class EnemyKillRewardService {
       );
       nextState = lootApplied.state;
       rewardParts.push(lootApplied.label);
+    }
+
+    const uniqueGear = tryCreateUniqueBossGearDrop(
+      nextState,
+      {
+        phaseId,
+        mapIndex,
+        enemyType: enemy.enemyType,
+        role: enemy.role,
+        isPhaseBoss,
+      },
+      this.lootService,
+    );
+    if (uniqueGear) {
+      nextState = nextState.withInventory([...nextState.inventory, uniqueGear]);
+      rewardParts.push(uniqueGear.name);
     }
 
     const replayTag = replay && rewardParts.length > 0 ? '' : '';

@@ -124,4 +124,14 @@ describe('LootService', () => {
 
     vi.restoreAllMocks();
   });
+
+  it('Ignus Ix aplica bônus fixos de fogo e penetração', () => {
+    const gear = lootService.generateGearFromTemplate('ignus_ix', 20, 'legendary', 'ignus-test');
+
+    expect(gear.name).toBe('Ignus Ix');
+    expect(gear.fireDamageBonus).toBe(30);
+    expect(gear.fireResistPenetrationBonus).toBe(30);
+    expect(gear.requirements.minLevel).toBe(30);
+    expect(gear.requirements.int).toBe(28);
+  });
 });

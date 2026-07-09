@@ -71,7 +71,8 @@ describe('renderHeroClassTab', () => {
     expect(html).toContain('ascension-moment-header--upgrade');
     expect(html).toContain('Próximo capítulo');
     expect(html).toContain('Alta Sacerdotisa');
-    expect(html).toContain('Evoluir agora');
+    expect(html).toContain('data-ascension-select=');
+    expect(html).not.toContain('Evoluir agora');
     expect(html).not.toContain('Evolução:');
     expect(html).not.toContain('hero-class-portrait');
   });

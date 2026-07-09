@@ -1,0 +1,67 @@
+# Spec — Cenários e arte de campanha
+
+## Status
+
+**Aceite:** 1/6 (17%)  
+**Testes obrigatórios:** 2/2 (Estrenda)
+
+## Objetivo
+
+Cada região da campanha tem **cenário de batalha** (painéis L/R + céu elástico) e **banner ilustrado** no modal de campanha, reforçando imersão sem bloquear leitura do combate.
+
+## Critérios de aceite
+
+- [x] `stendra`: battle strip com painéis `battle_stendra_left/right` + banner + chão `floor_stendra_tile`
+- [x] `gruftall`: banner `campaign_grutfall_banner.png` no mapa-mundo (painéis de batalha pendentes)
+- [x] `valdris`: banner `campaign_valdris_banner.png` no mapa-mundo (painéis pendentes)
+- [x] `morthaven`: banner `campaign_morthaven_banner.png` no mapa-mundo (painéis pendentes)
+- [ ] Demais mapas (`broken_sky` … `void_throne`) seguem o mesmo padrão de assets
+- [ ] Layout da strip escala de ~280px a ~900px sem cortar zona central de combate
+- [ ] Fallback: gradiente genérico quando mapa não tem cena cadastrada
+- [ ] Assets em `public/sprites/campaign/{mapId}/` copiados no build
+- [ ] Catálogo em `CampaignSceneCatalog.ts` é fonte única de paths
+
+## Convenção de arquivos
+
+| Arquivo | Uso |
+|---------|-----|
+| `battle_{mapId}_left.png` | Painel esquerdo da battle strip |
+| `battle_{mapId}_right.png` | Painel direito da battle strip |
+| `battle_{mapId}_center.png` | *(opcional)* Faixa central (horizonte entre os painéis) |
+| `battle_{mapId}_backdrop.png` | *(opcional)* Céu/horizonte em largura total (camada atrás) |
+| `campaign_{mapId}_banner.png` | Banner ilustrado no card da região no **mapa-mundo** |
+| `floor_{mapId}_tile.png` | Textura de chão com `repeat-x` na battle strip (28px de altura) |
+
+## Camadas e arquivos-chave
+
+| Camada | Paths |
+|--------|-------|
+| Assets | `public/sprites/campaign/{mapId}/` |
+| Build | `scripts/copy-assets.mjs` → `dist/panel/assets/campaign/` |
+| Presentation | `CampaignSceneCatalog.ts`, `BattleScenePresentation.ts`, `CampaignMapPresentation.ts` |
+
+## Inventário de arte
+
+| mapId | Battle L+R | Banner |
+|-------|------------|--------|
+| stendra | ✅ | ✅ |
+| gruftall | ☐ (strip) | ✅ banner |
+| valdris | ☐ | ✅ banner |
+| morthaven | ☐ | ✅ banner |
+| broken_sky | ☐ | ☐ |
+| crimson_abyss | ☐ | ☐ |
+| eternal_forge | ☐ | ☐ |
+| ancient_grove | ☐ | ☐ |
+| twilight_tower | ☐ | ☐ |
+| void_throne | ☐ | ☐ |
+
+## Testes obrigatórios
+
+- [x] `BattleScenePresentation.test.ts` — catálogo Estrenda + apply/remove scenic
+- [x] `CampaignModalRenderer.test.ts` — banner Estrenda no card do mapa-mundo
+
+## Notas
+
+- PNGs atuais de Estrenda são alta resolução (~1.5k×1k); o CSS escala para 128px de altura. Otimizar tamanho de arquivo em release futura se necessário.
+- O vão central aparece porque os painéis L/R cobrem ~52% cada; preencher com `battle_{mapId}_center.png` (~400–600×128) ou `battle_{mapId}_backdrop.png` (largura total ~900×128). Registrar paths opcionais em `CampaignSceneCatalog.ts`.
+- Personagens ancorados no chão via `--strip-actors-bottom` (14px); HP e skills agrupados acima da faixa de piso.

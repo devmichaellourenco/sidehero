@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readdir } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, stat } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,6 +9,7 @@ const heroesSpritesRoot = join(root, 'public', 'sprites', 'heroes');
 const enemiesSpritesRoot = join(root, 'public', 'sprites', 'enemies');
 const skillsSpritesRoot = join(root, 'public', 'sprites', 'skills');
 const itemsSpritesRoot = join(root, 'public', 'sprites', 'items');
+const campaignSpritesRoot = join(root, 'public', 'sprites', 'campaign');
 const publicRoot = join(root, 'public');
 const outRoot = join(root, 'dist', 'panel', 'assets');
 
@@ -51,6 +52,9 @@ const SKILL_SPRITE_MAP = [
   ['iron_skin.png', 'skills/iron_skin.png'],
   ['power_attack.png', 'skills/power_attack.png'],
   ['evasion.png', 'skills/evasion.png'],
+  ['frost_shard.png', 'skills/frost_shard.png'],
+  ['blizzard.png', 'skills/blizzard.png'],
+  ['smite.png', 'skills/smite.png'],
 ];
 
 /** Copia todos os PNGs de inimigos para characters/ (mesmo basename). */
@@ -69,6 +73,27 @@ async function copyEnemySprites() {
   return copied;
 }
 
+/** Copia SVGs animados de skills em public/sprites/skills/svg → panel/assets/skills/svg/. */
+async function copySkillSvgSprites() {
+  const svgRoot = join(skillsSpritesRoot, 'svg');
+  let copied = 0;
+
+  try {
+    const files = await readdir(svgRoot);
+    for (const file of files) {
+      if (!file.endsWith('.svg')) continue;
+      const destPath = join(outRoot, 'skills', 'svg', file);
+      await mkdir(dirname(destPath), { recursive: true });
+      await copyFile(join(svgRoot, file), destPath);
+      copied += 1;
+    }
+  } catch {
+    return 0;
+  }
+
+  return copied;
+}
+
 /** Sprites de itens customizados em public/sprites/items. */
 const ITEM_WEAPON_SPRITE_MAP = [
   ['weapons/standard_common_sword.png', 'gear/items/standard_common_sword.png'],
@@ -76,6 +101,9 @@ const ITEM_WEAPON_SPRITE_MAP = [
   ['weapons/standard_rare_sword.png', 'gear/items/standard_rare_sword.png'],
   ['weapons/standard_epic_sword.png', 'gear/items/standard_epic_sword.png'],
   ['weapons/standard_legendary_sword.png', 'gear/items/standard_legendary_sword.png'],
+  ['weapons/sword_vorpal_lupnus.png', 'gear/items/sword_vorpal_lupnus.png'],
+  ['weapons/soler_plegius.png', 'gear/items/soler_plegius.png'],
+  ['accessory/ignus_ix.png', 'gear/items/ignus_ix.png'],
 ];
 
 /** Logo e demais assets estáticos em public/. */
@@ -158,14 +186,45 @@ async function copyEquipmentIcons() {
   return copied;
 }
 
+async function copyCampaignScenes() {
+  let copied = 0;
+
+  let mapDirs;
+  try {
+    mapDirs = await readdir(campaignSpritesRoot);
+  } catch {
+    return 0;
+  }
+
+  for (const mapId of mapDirs) {
+    const sourceDir = join(campaignSpritesRoot, mapId);
+    const sourceStat = await stat(sourceDir).catch(() => null);
+    if (!sourceStat?.isDirectory()) continue;
+
+    const destDir = join(outRoot, 'campaign', mapId);
+    const files = await readdir(sourceDir);
+
+    for (const file of files) {
+      if (!file.endsWith('.png')) continue;
+      await mkdir(destDir, { recursive: true });
+      await copyFile(join(sourceDir, file), join(destDir, file));
+      copied += 1;
+    }
+  }
+
+  return copied;
+}
+
 export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
   const equipmentIconCount = await copyEquipmentIcons();
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
   const enemySpriteCount = await copyEnemySprites();
   await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
+  const skillSvgCount = await copySkillSvgSprites();
   await copyAssetBatch(itemsSpritesRoot, ITEM_WEAPON_SPRITE_MAP);
   await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
+  const campaignSceneCount = await copyCampaignScenes();
 
   const total =
     ASSET_MAP.length +
@@ -173,9 +232,13 @@ export async function copyAssets() {
     HERO_SPRITE_MAP.length +
     enemySpriteCount +
     SKILL_SPRITE_MAP.length +
+    skillSvgCount +
     ITEM_WEAPON_SPRITE_MAP.length +
-    PUBLIC_ASSET_MAP.length;
-  console.log(`Assets copiados: ${total} arquivos em dist/panel/assets/`);
+    PUBLIC_ASSET_MAP.length +
+    campaignSceneCount;
+  console.log(
+    `Assets copiados: ${total} arquivos em dist/panel/assets/ (${campaignSceneCount} cenas de campanha)`,
+  );
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

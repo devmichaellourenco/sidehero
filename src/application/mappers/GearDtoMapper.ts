@@ -1,7 +1,12 @@
 import { Gear } from '../../domain/entities/Gear';
+import { getGearTemplate } from '../../domain/gear/GearTemplateCatalog';
+import { getUniqueEffectDescription } from '../../domain/unique-effects/UniqueEffectCatalog';
 import { GearDto } from '../dto/GameStateDto';
 
 export function mapGearToDto(gear: Gear): GearDto {
+  const template = getGearTemplate(gear.templateId);
+  const uniqueEffectId = template?.uniqueEffectId;
+
   return {
     id: gear.id,
     name: gear.name,
@@ -21,6 +26,7 @@ export function mapGearToDto(gear: Gear): GearDto {
     chaosResistBonus: gear.chaosResistBonus,
     allElementalResistBonus: gear.allElementalResistBonus,
     fireDamageBonus: gear.fireDamageBonus,
+    fireResistPenetrationBonus: gear.fireResistPenetrationBonus,
     coldDamageBonus: gear.coldDamageBonus,
     lightningDamageBonus: gear.lightningDamageBonus,
     chaosDamageBonus: gear.chaosDamageBonus,
@@ -50,5 +56,8 @@ export function mapGearToDto(gear: Gear): GearDto {
           heroId: gear.requirements.heroId,
         }
       : { minLevel: 1 },
+    isUniqueLegendary: template?.unique ?? false,
+    isNamedLegendary: template?.namedLegendary ?? false,
+    uniqueEffectDescription: uniqueEffectId ? getUniqueEffectDescription(uniqueEffectId) : null,
   };
 }

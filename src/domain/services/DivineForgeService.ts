@@ -8,6 +8,10 @@ import {
   getNextGearRarity,
 } from '../gear/GearRarityProgression';
 import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
+import {
+  isSalvageBlockedGearTemplate,
+  resolveForgeNamedLegendaryTemplate,
+} from '../gear/UniqueGearCatalog';
 import { GearStorageService } from './GearStorageService';
 import { ILootService } from './ILootService';
 
@@ -25,6 +29,7 @@ export class DivineForgeService {
   constructor(
     private readonly lootService: ILootService,
     private readonly gearStorage: GearStorageService = new GearStorageService(),
+    private readonly random: () => number = Math.random,
   ) {}
 
   fuse(state: GameState, gearIds: string[]): ForgeFuseResult {
@@ -68,7 +73,18 @@ export class DivineForgeService {
     this.gearStorage.assertInventoryHasRoom(remainingInventory.length, 1);
 
     const slot = ACTIVE_GEAR_SLOTS[Math.floor(Math.random() * ACTIVE_GEAR_SLOTS.length)];
-    const created = this.lootService.generateGearForSlot(state.stage, slot, nextRarity);
+    const forgeTemplateId =
+      rarity === 'epic' && nextRarity === 'legendary'
+        ? resolveForgeNamedLegendaryTemplate(state, this.random)
+        : null;
+    const created = forgeTemplateId
+      ? this.lootService.generateGearFromTemplate(
+          forgeTemplateId,
+          state.stage,
+          'legendary',
+          `forge-unique-${forgeTemplateId}`,
+        )
+      : this.lootService.generateGearForSlot(state.stage, slot, nextRarity);
 
     const nextState = state
       .withInventory([...remainingInventory, created])
@@ -88,6 +104,10 @@ export class DivineForgeService {
     const gear = this.findGear(state, gearId);
     if (!gear) {
       throw new Error('Item não encontrado no inventário ou no baú');
+    }
+
+    if (isSalvageBlockedGearTemplate(gear.templateId)) {
+      throw new Error('Itens lendários únicos não podem ser destruídos na forja');
     }
 
     const goldGained = calculateForgeSalvageGold(gear.rarity, state.stage);

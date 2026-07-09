@@ -85,7 +85,7 @@ export function renderAscensionMomentBanner(isUpgrade: boolean, heroName: string
 
 function renderAscensionRequirements(requirements: AscensionOptionDto['requirements']): string {
   if (requirements.length === 0) {
-    return '<p class="ascension-path-card__reqs-empty">Sem requisitos adicionais</p>';
+    return '<p class="ascension-path-tooltip-reqs-empty">Sem requisitos adicionais</p>';
   }
 
   const items = requirements
@@ -101,7 +101,30 @@ function renderAscensionRequirements(requirements: AscensionOptionDto['requireme
     })
     .join('');
 
-  return `<ul class="ascension-path-card__reqs">${items}</ul>`;
+  return `<ul class="ascension-path-tooltip-reqs">${items}</ul>`;
+}
+
+function renderAscensionPathTooltipContent(
+  option: AscensionOptionDto,
+  isUpgrade: boolean,
+): string {
+  const ctaLabel = isUpgrade ? 'Evoluir agora' : 'Seguir este caminho';
+  const statusLabel = option.canAscend
+    ? 'Pronto para ascender'
+    : 'Complete os requisitos para desbloquear';
+
+  return `
+    <span class="ascension-path-tooltip-content hidden">
+      <strong class="ascension-path-tooltip-title">Requisitos</strong>
+      ${renderAscensionRequirements(option.requirements)}
+      <span class="ascension-path-tooltip-status">${escapeHtml(statusLabel)}</span>
+      ${
+        option.canAscend && !isUpgrade
+          ? `<span class="ascension-path-tooltip-cta">${escapeHtml(ctaLabel)}</span>`
+          : ''
+      }
+    </span>
+  `;
 }
 
 export function renderAscensionPathCard(
@@ -111,18 +134,22 @@ export function renderAscensionPathCard(
 ): string {
   const theme = resolveAscensionPathTheme(option.id, option.pathLabel);
   const stateClass = option.canAscend ? 'ascension-path-card--ready' : 'ascension-path-card--locked';
+  const selectableClass = option.canAscend ? ' ascension-path-card--selectable' : '';
   const pathLabel = option.pathLabel
     ? `<span class="ascension-path-card__ribbon">${escapeHtml(option.pathLabel)}</span>`
     : '';
-  const ctaLabel = isUpgrade ? 'Evoluir agora' : 'Seguir este caminho';
-  const ctaHint = option.canAscend
-    ? 'Pronto para ascender'
-    : 'Complete os requisitos para desbloquear';
+  const selectAttrs = option.canAscend
+    ? `data-ascension-select="${escapeHtml(option.id)}" role="button"`
+    : '';
 
   return `
     <article
-      class="ascension-path-card ascension-path-card--${theme} ${stateClass}"
+      class="ascension-path-card ascension-path-card--${theme} ${stateClass}${selectableClass}"
       data-ascension-theme="${theme}"
+      data-ascension-path-tooltip
+      tabindex="0"
+      ${selectAttrs}
+      aria-label="${escapeHtml(option.name)} — +${option.pointsGranted} pts"
     >
       <div class="ascension-path-card__glow" aria-hidden="true"></div>
       <div class="ascension-path-card__frame">
@@ -141,18 +168,7 @@ export function renderAscensionPathCard(
             <span class="ascension-path-card__points">+${option.pointsGranted} pts</span>
           </header>
           <p class="ascension-path-card__desc">${escapeHtml(option.description)}</p>
-          ${renderAscensionRequirements(option.requirements)}
-          <footer class="ascension-path-card__footer">
-            <span class="ascension-path-card__status">${ctaHint}</span>
-            <button
-              type="button"
-              class="ascension-path-card__cta"
-              data-ascend="${option.id}"
-              ${option.canAscend ? '' : 'disabled'}
-            >
-              ${ctaLabel}
-            </button>
-          </footer>
+          ${renderAscensionPathTooltipContent(option, isUpgrade)}
         </div>
       </div>
     </article>

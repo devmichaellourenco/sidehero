@@ -75,4 +75,33 @@ describe('MitigationPipeline', () => {
 
     expect(amount).toBe(58);
   });
+
+  it('ignora parte da resistência de fogo com penetração', () => {
+    const baseline = resolveMultiComponentDamage(
+      100,
+      [{ element: 'fire', delivery: 'projectile', weight: 1 }],
+      {
+        armor: 0,
+        stageLevel: 1,
+        resistances: { fire: 40, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+      },
+    );
+    const penetrated = resolveMultiComponentDamage(
+      100,
+      [{ element: 'fire', delivery: 'projectile', weight: 1 }],
+      {
+        armor: 0,
+        stageLevel: 1,
+        resistances: { fire: 40, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+      },
+      ZERO_ELEMENTAL_DAMAGE,
+      { fire: 0, cold: 0, lightning: 0, chaos: 0 },
+      0,
+      { fire: 30, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+    );
+
+    expect(baseline).toBe(60);
+    expect(penetrated).toBeGreaterThan(baseline);
+    expect(penetrated).toBe(72);
+  });
 });

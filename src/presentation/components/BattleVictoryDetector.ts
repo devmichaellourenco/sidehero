@@ -1,3 +1,7 @@
+import {
+  MilestoneVictoryPresentation,
+  resolveMilestoneVictoryPresentation,
+} from '../../application/mappers/MilestoneRewardPresentation';
 import { GameStateDto, CombatIntermissionDto } from '../../application/dto/GameStateDto';
 import { resolvePhase } from '../../domain/campaign/CampaignCatalog';
 
@@ -23,6 +27,7 @@ export interface BattleVictoryPayload {
   chestCount: number;
   tierReached: number | null;
   seasonCompleted: boolean;
+  milestoneVictory: MilestoneVictoryPresentation | null;
 }
 
 export function detectBattleVictory(
@@ -53,6 +58,7 @@ export function buildBattleIntermissionPayload(
     chestCount: 0,
     tierReached: null,
     seasonCompleted: state.seasonCompleted,
+    milestoneVictory: null,
   };
 }
 
@@ -161,5 +167,12 @@ function buildVictoryPayload(
     chestCount,
     tierReached,
     seasonCompleted: context.seasonCompleted,
+    milestoneVictory:
+      context.variant === 'phase-clear'
+        ? resolveMilestoneVictoryPresentation(
+            context.clearedPhaseId,
+            context.clearedPhaseName,
+          )
+        : null,
   };
 }

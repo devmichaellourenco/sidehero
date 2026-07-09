@@ -13,14 +13,14 @@ describe('MilestonePhaseBlueprints', () => {
 
   it('aplica nomes únicos nos marcos principais 50/100/250/500', () => {
     expect(resolvePhase(buildPhaseId(1, 50))?.displayName).toBe('Guardião Elemental');
-    expect(resolvePhase(buildPhaseId(2, 50))?.displayName).toBe('Capitão da Mina');
+    expect(resolvePhase(buildPhaseId(2, 50))?.displayName).toBe('Centelha de Gonodor');
     expect(resolvePhase(buildPhaseId(5, 50))?.displayName).toBe('Colosso do Céu Quebrado');
     expect(resolvePhase(buildPhaseId(10, 50))?.displayName).toBe('Soberano do Vazio');
   });
 
-  it('aplica Gonodor no marco final de Gondonor', () => {
+  it('aplica Gonodor no marco final de Gruftall', () => {
     const phase = resolvePhase(buildPhaseId(2, 50));
-    expect(phase?.displayName).toBe('Capitão da Mina');
+    expect(phase?.displayName).toBe('Centelha de Gonodor');
     const bossWave = phase?.waves.at(-1);
     expect(bossWave?.slots.some((slot) => slot.enemyType === 'gonodor' && slot.role === 'boss')).toBe(true);
   });

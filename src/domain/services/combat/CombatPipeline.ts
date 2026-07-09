@@ -11,6 +11,7 @@ export class CombatPipeline implements ICombatService {
       state: result.state,
       events: result.events,
       floatingEvents: result.floatingEvents,
+      skillVfxEvents: result.skillVfxEvents,
     };
   }
 }

@@ -1,4 +1,4 @@
-import { GearRarity } from '../entities/Gear';
+import { GearRarity, GearRequirements } from '../entities/Gear';
 import { ActiveGearSlot } from './GearSlotCatalog';
 import {
   GALNEON_HERO_ID,
@@ -6,6 +6,8 @@ import {
   GALNEON_STANDARD_SWORD_SPRITES,
   GALNEON_STANDARD_SWORD_TEMPLATE_ID,
 } from './GalneonGearCatalog';
+import { UniqueEffectId } from '../unique-effects/UniqueEffectCatalog';
+import { SWORD_VORPAL_LUPNUS_TEMPLATE_ID, IGNUS_IX_TEMPLATE_ID, SOLER_PLEGIUS_TEMPLATE_ID, IGNUS_IX_FIXED_REQUIREMENTS } from './UniqueGearCatalog';
 
 export type GearElementTheme = 'fire' | 'cold' | 'lightning' | 'chaos';
 
@@ -21,6 +23,19 @@ export interface GearTemplateDefinition {
   exclusiveHeroId?: string;
   /** Tema elemental — afixa dano/resistência coerente no loot. */
   elementTheme?: GearElementTheme;
+  /** Apenas uma cópia pode existir no save (inventário, baú ou equipado). */
+  unique?: boolean;
+  /** Efeito de combate exclusivo programado no domínio. */
+  uniqueEffectId?: UniqueEffectId;
+  /** Nome fixo sem sufixo de raridade (lendário nomeado, sem regra de unicidade no save). */
+  namedLegendary?: boolean;
+  /** Bônus fixos ao gerar do template (substituem rolls procedurais correspondentes). */
+  fixedBonuses?: {
+    fireDamageBonus?: number;
+    fireResistPenetrationBonus?: number;
+  };
+  /** Requisitos fixos (ex.: lendário recebido cedo mas equipável só no nível 30). */
+  fixedRequirements?: GearRequirements;
 }
 
 export const GEAR_TEMPLATES: GearTemplateDefinition[] = [
@@ -188,6 +203,34 @@ export const GEAR_TEMPLATES: GearTemplateDefinition[] = [
     spriteByRarity: GALNEON_STANDARD_SWORD_SPRITES,
     exclusiveHeroId: GALNEON_HERO_ID,
   },
+  {
+    id: SWORD_VORPAL_LUPNUS_TEMPLATE_ID,
+    baseName: 'Vorpal Lupnus',
+    slot: 'weapon',
+    sprite: 'gear/items/sword_vorpal_lupnus.png',
+    unique: true,
+    uniqueEffectId: 'vorpal_lupnus_heal_block',
+  },
+  {
+    id: IGNUS_IX_TEMPLATE_ID,
+    baseName: 'Ignus Ix',
+    slot: 'accessory',
+    sprite: 'gear/items/ignus_ix.png',
+    namedLegendary: true,
+    fixedBonuses: {
+      fireDamageBonus: 30,
+      fireResistPenetrationBonus: 30,
+    },
+    fixedRequirements: IGNUS_IX_FIXED_REQUIREMENTS,
+  },
+  {
+    id: SOLER_PLEGIUS_TEMPLATE_ID,
+    baseName: 'Soler Plégius',
+    slot: 'weapon',
+    sprite: 'gear/items/soler_plegius.png',
+    namedLegendary: true,
+    uniqueEffectId: 'soler_plegius_cleanse',
+  },
 ];
 
 const TEMPLATE_BY_ID = new Map(GEAR_TEMPLATES.map((entry) => [entry.id, entry]));
@@ -203,7 +246,13 @@ export function getGearTemplate(templateId: string): GearTemplateDefinition | un
 }
 
 export function listGearTemplatesForSlot(slot: ActiveGearSlot): GearTemplateDefinition[] {
-  return GEAR_TEMPLATES.filter((entry) => entry.slot === slot && !entry.exclusiveHeroId);
+  return GEAR_TEMPLATES.filter(
+    (entry) =>
+      entry.slot === slot &&
+      !entry.exclusiveHeroId &&
+      !entry.unique &&
+      !entry.namedLegendary,
+  );
 }
 
 export function resolveGearTemplateSprite(

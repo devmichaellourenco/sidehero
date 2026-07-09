@@ -89,6 +89,7 @@ export interface HeroDto {
       chaosResistBonus: number;
       allElementalResistBonus: number;
       fireDamageBonus: number;
+      fireResistPenetrationBonus: number;
       coldDamageBonus: number;
       lightningDamageBonus: number;
       chaosDamageBonus: number;
@@ -127,7 +128,7 @@ export interface HeroSkillCooldownDto {
 }
 
 export interface CombatStatusEffectDto {
-  kind: 'buff_attack' | 'debuff_defense' | 'dot';
+  kind: 'buff_attack' | 'debuff_defense' | 'dot' | 'heal_block';
   tooltip: string;
   turnsRemaining: number;
   polarity: 'buff' | 'debuff';
@@ -196,6 +197,7 @@ export interface GearDto {
   chaosResistBonus: number;
   allElementalResistBonus: number;
   fireDamageBonus: number;
+  fireResistPenetrationBonus: number;
   coldDamageBonus: number;
   lightningDamageBonus: number;
   chaosDamageBonus: number;
@@ -217,6 +219,9 @@ export interface GearDto {
   blockChanceBonus: number;
   damageReductionBonus: number;
   requirements: GearRequirementsDto;
+  isUniqueLegendary?: boolean;
+  isNamedLegendary?: boolean;
+  uniqueEffectDescription?: string | null;
 }
 
 export interface ChestDto {

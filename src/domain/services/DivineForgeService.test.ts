@@ -3,6 +3,7 @@ import { GameState } from '../entities/GameState';
 import { Gear, GearRarity } from '../entities/Gear';
 import { FORGE_FUSE_REQUIRED_COUNT } from '../gear/GearRarityProgression';
 import { calculateForgeSalvageGold } from '../forge/ForgeSalvageGoldCatalog';
+import { SWORD_VORPAL_LUPNUS_TEMPLATE_ID } from '../gear/UniqueGearCatalog';
 import { DivineForgeService } from './DivineForgeService';
 import { ILootService } from './ILootService';
 
@@ -143,5 +144,66 @@ describe('DivineForgeService', () => {
     expect(result.state.inventory).toHaveLength(0);
     expect(result.state.gold.amount).toBe(expectedGold);
     expect(result.state.battleLog.at(-1)?.message).toContain('destruído');
+  });
+
+  it('fuse épico pode criar Vorpal Lupnus com chance baixa se ainda não possui', () => {
+    const vorpal = Gear.create({
+      id: 'vorpal-forge',
+      name: 'Vorpal Lupnus',
+      templateId: SWORD_VORPAL_LUPNUS_TEMPLATE_ID,
+      slot: 'weapon',
+      rarity: 'legendary',
+      attackBonus: 30,
+      defenseBonus: 0,
+      healthBonus: 0,
+    });
+    const loot: ILootService = {
+      generateGear: vi.fn(),
+      generateGearForChest: vi.fn(),
+      generateDeterministicGearForSlot: vi.fn(),
+      generateGearFromTemplate: vi.fn().mockReturnValue(vorpal),
+      generateGearForSlot: vi.fn(),
+    };
+    const service = new DivineForgeService(loot, undefined, () => 0);
+    const inventory = Array.from({ length: FORGE_FUSE_REQUIRED_COUNT }, (_, i) =>
+      forgeGear(`e${i}`, 'epic'),
+    );
+    const ids = inventory.map((gear) => gear.id);
+
+    const result = service.fuse(stateWithForgeUnlocked(inventory), ids);
+
+    expect(result.created.templateId).toBe(SWORD_VORPAL_LUPNUS_TEMPLATE_ID);
+    expect(loot.generateGearFromTemplate).toHaveBeenCalled();
+  });
+
+  it('salvage bloqueia itens lendários únicos e nomeados', () => {
+    const service = createService();
+    const vorpal = Gear.create({
+      id: 'vorpal',
+      name: 'Vorpal Lupnus',
+      templateId: SWORD_VORPAL_LUPNUS_TEMPLATE_ID,
+      slot: 'weapon',
+      rarity: 'legendary',
+      attackBonus: 1,
+      defenseBonus: 0,
+      healthBonus: 0,
+    });
+    const ignus = Gear.create({
+      id: 'ignus',
+      name: 'Ignus Ix',
+      templateId: 'ignus_ix',
+      slot: 'accessory',
+      rarity: 'legendary',
+      attackBonus: 0,
+      defenseBonus: 0,
+      healthBonus: 0,
+    });
+
+    expect(() => service.salvage(stateWithForgeUnlocked([vorpal]), 'vorpal')).toThrow(
+      'lendários únicos',
+    );
+    expect(() => service.salvage(stateWithForgeUnlocked([ignus]), 'ignus')).toThrow(
+      'lendários únicos',
+    );
   });
 });

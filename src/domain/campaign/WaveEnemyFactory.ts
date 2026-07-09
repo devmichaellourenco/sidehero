@@ -1,6 +1,7 @@
 import { Enemy } from '../entities/Enemy';
 import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
 import { phaseGoldScaleForPhase } from '../balance/PhaseGoldBudget';
+import { ENEMY_ATK_BALANCE_FACTOR, ENEMY_HP_BALANCE_FACTOR, resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
 import { stageScalingFactorsForTier } from '../progression/StageScalingCatalog';
 import { Stats } from '../value-objects/Stats';
 import { PhaseId } from './CampaignIds';
@@ -55,9 +56,11 @@ function createEnemyFromSlot(
     context.statMultiplier ?? 1,
   );
   const roleScale = ROLE_SCALE[slot.role];
-  const attack = Math.floor(10 * scaling.atk * roleScale.stat);
+  const attack = Math.floor(10 * scaling.atk * roleScale.stat * ENEMY_ATK_BALANCE_FACTOR);
   const defense = Math.floor(4 * scaling.atk * roleScale.stat);
-  const maxHealth = Math.floor(60 * scaling.hp * roleScale.stat);
+  const maxHealth = resolveEnemySpawnMaxHealth(
+    Math.floor(60 * scaling.hp * roleScale.stat * ENEMY_HP_BALANCE_FACTOR),
+  );
   const phaseGoldScale =
     context.applyPhaseGoldBudget === false ? 1 : phaseGoldScaleForPhase(context.phaseId);
   const goldReward = Math.floor(

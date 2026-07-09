@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 9/9 (100%) · auditoria 2026-07-06  
-**Testes obrigatórios:** 10/10 presentes na suite
+**Aceite:** 11/11 (100%)  
+**Testes obrigatórios:** 12/12 presentes na suite
 
 ## Objetivo
 
@@ -18,8 +18,10 @@ Cada herói investe **pontos de melhoria** em árvore de skills, equipa até N s
 - [x] Combate usa `HeroCombatSkillCatalog` + `CombatSkillRegistry`
 - [x] Ao clicar `+` rank (aba Skills ou ascensão), a lista mantém a posição de scroll no drawer/modal
 - [x] Aba Skills do herói **sem** textos de instrução (equipar, drag, hover); slots e cards comunicam a ação só por highlight visual no tap-to-assign
+- [x] Cards da lista de skills **sem** badges Ativa/Inativa nem Disponível; skill equipada usa fundo verde no card; rank disponível comunicado só pelo botão `[+]`
 - [x] Aba Classe lista apenas próxima(s) ascensão(ões) e skills de evolução; classe/tier atual ficam no header do modal
 - [x] Cards de ascensão usam tema por caminho (military/martial/arcane/innate/sacred/life), showcase ampliado do sprite e CTA com estado pronto/bloqueado
+- [x] Cards de ascensão **sem** requisitos, status nem CTA no corpo visível — detalhes no tooltip ao apontar; nome e `+N pts` em linhas separadas; ascensão disponível abre modal de confirmação ao clicar no card
 
 ## Camadas e arquivos-chave
 
@@ -47,4 +49,5 @@ Cada herói investe **pontos de melhoria** em árvore de skills, equipa até N s
 - [x] `CombatSkillSelector.test.ts`, `SkillCardPresentation.test.ts`
 - [x] `HeroDetailScrollPresentation.test.ts` — captura/restaura scroll da lista de skills
 - [x] `HeroSkillsTabRenderer.test.ts` — aba Skills sem parágrafos de hint estático (equipadas/hover/equipar)
-- [x] `SkillCardPresentation.test.ts` — cards equipáveis sem hint “Toque para equipar · arraste até um slot”
+- [x] `HeroClassAscensionPresentation.test.ts` — cards com requisitos/CTA só no tooltip
+- [x] `AscendClassConfirmPresentation.test.ts` — confirmação de ascensão com preview e aviso permanente

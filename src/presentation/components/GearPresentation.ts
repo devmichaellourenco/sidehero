@@ -63,6 +63,7 @@ function formatElementalDamageBonuses(
   gear: Pick<
     GearDto,
     | 'fireDamageBonus'
+    | 'fireResistPenetrationBonus'
     | 'coldDamageBonus'
     | 'lightningDamageBonus'
     | 'chaosDamageBonus'
@@ -75,6 +76,9 @@ function formatElementalDamageBonuses(
 ): string[] {
   const parts: string[] = [];
   if (gear.fireDamageBonus !== 0) parts.push(formatSigned(gear.fireDamageBonus, '%', 'Dano Fogo'));
+  if (gear.fireResistPenetrationBonus !== 0) {
+    parts.push(formatSigned(gear.fireResistPenetrationBonus, '%', 'Ignora Res. Fogo'));
+  }
   if (gear.coldDamageBonus !== 0) parts.push(formatSigned(gear.coldDamageBonus, '%', 'Dano Gelo'));
   if (gear.lightningDamageBonus !== 0) {
     parts.push(formatSigned(gear.lightningDamageBonus, '%', 'Dano Raio'));
@@ -158,6 +162,7 @@ export function listGearBonusLines(
     lightningResistFlat: gear.lightningResistFlat ?? 0,
     chaosResistFlat: gear.chaosResistFlat ?? 0,
     fireDamageBonus: gear.fireDamageBonus ?? 0,
+    fireResistPenetrationBonus: gear.fireResistPenetrationBonus ?? 0,
     coldDamageBonus: gear.coldDamageBonus ?? 0,
     lightningDamageBonus: gear.lightningDamageBonus ?? 0,
     chaosDamageBonus: gear.chaosDamageBonus ?? 0,
@@ -203,6 +208,11 @@ export function listGearBonusLines(
   parts.push(...formatElementalDamageBonuses(stats));
 
   return parts;
+}
+
+export function renderUniqueEffectLine(gear: Pick<GearDto, 'uniqueEffectDescription'>): string {
+  if (!gear.uniqueEffectDescription) return '';
+  return `<span class="gear-unique-effect">✦ Efeito único: ${escapeHtml(gear.uniqueEffectDescription)}</span>`;
 }
 
 export function formatGearBonuses(
@@ -422,6 +432,7 @@ export function renderGearCard(
           </div>
           <span class="gear-slot-tag">${GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot}</span>
           <span>${formatGearBonuses(gear)}</span>
+          ${renderUniqueEffectLine(gear)}
           ${requirementSection}
           ${options.extraContent ?? ''}
         </div>
@@ -459,6 +470,7 @@ export function renderEquippedGearCard(
       chaosResistBonus: gear.chaosResistBonus ?? 0,
       allElementalResistBonus: gear.allElementalResistBonus ?? 0,
       fireDamageBonus: gear.fireDamageBonus ?? 0,
+      fireResistPenetrationBonus: gear.fireResistPenetrationBonus ?? 0,
       coldDamageBonus: gear.coldDamageBonus ?? 0,
       lightningDamageBonus: gear.lightningDamageBonus ?? 0,
       chaosDamageBonus: gear.chaosDamageBonus ?? 0,

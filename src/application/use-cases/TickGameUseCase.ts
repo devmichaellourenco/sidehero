@@ -8,11 +8,13 @@ import { IMetaProgressRepository } from '../../domain/repositories/IMetaProgress
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { mapMetaSummary } from '../mappers/MetaMapper';
 import { CombatFloatingEventDto } from '../dto/CombatFloatingEventDto';
+import { CombatSkillVfxDto } from '../dto/CombatSkillVfxDto';
 import { GameStateDto } from '../dto/GameStateDto';
 
 export interface TickGameResult {
   state: GameStateDto;
   combatFloats: CombatFloatingEventDto[];
+  combatSkillVfx: CombatSkillVfxDto[];
   sigilsAwarded: number;
 }
 
@@ -34,6 +36,7 @@ export class TickGameUseCase {
     let state = await this.repository.load();
     const wasSeasonCompleted = state.campaignProgress.seasonCompleted;
     const combatFloats: CombatFloatingEventDto[] = [];
+    const combatSkillVfx: CombatSkillVfxDto[] = [];
 
     if (options.restartCurrentPhase) {
       if (!state.loadoutEditOpen || !state.phaseRestartOnResume) {
@@ -61,6 +64,7 @@ export class TickGameUseCase {
           meta: mapMetaSummary(meta, this.metaService),
         },
         combatFloats: [],
+        combatSkillVfx: [],
         sigilsAwarded: 0,
       };
     }
@@ -73,6 +77,7 @@ export class TickGameUseCase {
         const result = this.combatService.executeTick(state);
         state = result.state;
         combatFloats.push(...result.floatingEvents);
+        combatSkillVfx.push(...result.skillVfxEvents);
       }
     } finally {
       MetaBonusScope.clear();
@@ -97,6 +102,7 @@ export class TickGameUseCase {
         meta: mapMetaSummary(meta, this.metaService),
       },
       combatFloats,
+      combatSkillVfx,
       sigilsAwarded,
     };
   }

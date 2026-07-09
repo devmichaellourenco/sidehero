@@ -25,6 +25,28 @@ describe('WowCelebrationPolicy', () => {
         tone: 'idle',
       }),
     ).toBe(true);
+
+    expect(
+      isCelebrationMoment({
+        id: 'milestone-1',
+        kind: 'milestone_boss_defeated',
+        tier: 'macro',
+        priority: 99,
+        title: 'Capítulo conquistado!',
+        tone: 'victory',
+      }),
+    ).toBe(true);
+
+    expect(
+      isCelebrationMoment({
+        id: 'named-1',
+        kind: 'named_legendary_received',
+        tier: 'macro',
+        priority: 96,
+        title: 'Ignus Ix',
+        tone: 'loot',
+      }),
+    ).toBe(true);
   });
 
   it('ignora eventos rotineiros', () => {
@@ -47,6 +69,17 @@ describe('WowCelebrationPolicy', () => {
         priority: 30,
         title: 'Baú',
         tone: 'chest',
+      }),
+    ).toBe(false);
+
+    expect(
+      isCelebrationMoment({
+        id: 'tier-1',
+        kind: 'tier_up',
+        tier: 'meso',
+        priority: 70,
+        title: 'Tier 12',
+        tone: 'victory',
       }),
     ).toBe(false);
   });
@@ -73,5 +106,37 @@ describe('WowStripPresentation', () => {
     expect(mapped?.gear?.rarity).toBe('epic');
     expect(mapped?.eyebrow).toBe('Novo Item');
     expect(mapped?.cta).toEqual({ label: 'Entendi', action: 'dismiss' });
+  });
+
+  it('mapeia marco de campanha e lendário nomeado para celebração central', () => {
+    const milestone = mapRewardMomentToWowBanner({
+      id: 'milestone-1',
+      kind: 'milestone_boss_defeated',
+      tier: 'macro',
+      priority: 99,
+      title: 'Capítulo conquistado!',
+      subtitle: 'Guardião Elemental',
+      tone: 'victory',
+    });
+
+    const named = mapRewardMomentToWowBanner({
+      id: 'named-1',
+      kind: 'named_legendary_received',
+      tier: 'macro',
+      priority: 96,
+      title: 'Ignus Ix',
+      tone: 'loot',
+      gear: {
+        id: 'g2',
+        name: 'Ignus Ix',
+        rarity: 'legendary',
+        slot: 'accessory',
+      } as NonNullable<ReturnType<typeof mapRewardMomentToWowBanner>>['gear'],
+    });
+
+    expect(milestone?.kind).toBe('milestone-victory');
+    expect(milestone?.eyebrow).toBe('Marco da Campanha');
+    expect(named?.kind).toBe('loot-received');
+    expect(named?.gear?.rarity).toBe('legendary');
   });
 });

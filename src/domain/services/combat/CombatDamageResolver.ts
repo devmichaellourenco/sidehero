@@ -5,6 +5,7 @@ import {
   MitigationTarget,
   resolveMultiComponentDamage,
 } from '../../combat/MitigationPipeline';
+import { ElementalPenetrationProfile, ZERO_ELEMENTAL_PENETRATION } from '../../combat/ElementalPenetrationProfile';
 import { ElementalDamageProfile, ZERO_ELEMENTAL_DAMAGE } from '../../combat/ElementalDamageProfile';
 import {
   ElementalDamageFlatProfile,
@@ -26,6 +27,7 @@ export interface DamageRollOptions {
   attackerElementalBonus?: ElementalDamageProfile;
   attackerElementalFlat?: ElementalDamageFlatProfile;
   attackerPhysicalDamagePercent?: number;
+  attackerElementalPenetration?: ElementalPenetrationProfile;
 }
 
 export function mitigatePhysicalDamage(
@@ -94,6 +96,7 @@ export function resolveOutgoingDamage(
     options.attackerElementalBonus ?? ZERO_ELEMENTAL_DAMAGE,
     options.attackerElementalFlat ?? ZERO_ELEMENTAL_DAMAGE_FLAT,
     options.attackerPhysicalDamagePercent ?? 0,
+    options.attackerElementalPenetration ?? ZERO_ELEMENTAL_PENETRATION,
   );
   const defensive = applyDefensiveLayers(
     componentDamage,

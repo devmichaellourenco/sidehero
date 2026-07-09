@@ -6,6 +6,7 @@ import {
   renderCampaignPath,
   renderCampaignViewToggle,
   renderCampaignWorldMap,
+  renderCampaignWorldNodeBanner,
   renderMapProgressBar,
   renderMapRegionTooltipContent,
   renderPhasePreviewFooter,
@@ -69,20 +70,25 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
     const html = renderCampaignWorldMap(
       overview([
         map('stendra', 'Estrenda', true, [phase('1-1', { unlocked: true, playable: true })]),
-        map('gondonor', 'Gondonor', false, [phase('2-1')]),
+        map('gruftall', 'Gruftall', false, [phase('2-1')]),
       ]),
       'stendra',
     );
 
     expect(html).toContain('campaign-world-map');
-    expect(html).toContain('data-campaign-world-map="gondonor"');
+    expect(html).toContain('data-campaign-world-map="gruftall"');
     expect(html).toContain('campaign-world-node--locked');
     expect(html).toContain('aria-disabled="true"');
     expect(html).toContain('data-campaign-tooltip');
+    expect(html).toContain('campaign-world-node--illustrated');
+    expect(html).toContain('campaign_stendra_banner.png');
+    expect(html).toContain('campaign_grutfall_banner.png');
+    expect(html).toContain('campaign-world-node-banner__img');
+    expect(renderCampaignWorldNodeBanner('gruftall')).toContain('campaign_grutfall_banner.png');
   });
 
   it('renderMapRegionTooltipContent orienta desbloqueio para regiões bloqueadas', () => {
-    const lockedMap = map('gondonor', 'Gondonor', false, [phase('2-1')]);
+    const lockedMap = map('gruftall', 'Gruftall', false, [phase('2-1')]);
     const html = renderMapRegionTooltipContent(lockedMap, 2);
     expect(html).toContain('Derrote');
     expect(html).toContain('desbloquear');

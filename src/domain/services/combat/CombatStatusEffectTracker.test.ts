@@ -41,4 +41,36 @@ describe('CombatStatusEffectTracker', () => {
       expect.objectContaining({ magnitude: 5, remainingTurns: 3 }),
     ]);
   });
+
+  it('remove debuffs e dots preservando buffs', () => {
+    let tracker = CombatStatusEffectTracker.fromMap({
+      'hero:h1': [
+        {
+          skillId: 'blessing',
+          kind: 'buff_attack',
+          magnitude: 4,
+          remainingTurns: 2,
+        },
+        {
+          skillId: 'dot',
+          kind: 'dot',
+          magnitude: 3,
+          remainingTurns: 2,
+          dotElement: 'fire',
+        },
+        {
+          skillId: 'debuff',
+          kind: 'debuff_defense',
+          magnitude: 5,
+          remainingTurns: 2,
+        },
+      ],
+    });
+
+    tracker = tracker.clearNegativeEffects('hero:h1');
+
+    expect(tracker.listFor('hero:h1')).toEqual([
+      expect.objectContaining({ kind: 'buff_attack', magnitude: 4 }),
+    ]);
+  });
 });

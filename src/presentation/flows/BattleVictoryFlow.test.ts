@@ -16,6 +16,7 @@ function basePayload(): BattleVictoryPayload {
     chestCount: 0,
     seasonCompleted: false,
     heroRewards: [],
+    milestoneVictory: null,
   };
 }
 

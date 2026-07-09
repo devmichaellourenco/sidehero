@@ -47,6 +47,10 @@ function mapKind(kind: RewardMoment['kind']): WowBanner['kind'] {
       return 'upgrade-purchased';
     case 'loot_received':
       return 'loot-received';
+    case 'named_legendary_received':
+      return 'loot-received';
+    case 'milestone_boss_defeated':
+      return 'milestone-victory';
     case 'shop_purchase':
       return 'shop-purchase';
     case 'forge_created':
@@ -70,8 +74,11 @@ function eyebrowFor(kind: RewardMoment['kind']): string {
     case 'upgrade_purchased':
       return 'Desbloqueado';
     case 'loot_received':
+    case 'named_legendary_received':
     case 'shop_purchase':
       return 'Novo Item';
+    case 'milestone_boss_defeated':
+      return 'Marco da Campanha';
     case 'forge_created':
       return 'Forja Divina';
     case 'idle_report':

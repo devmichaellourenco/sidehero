@@ -1,5 +1,6 @@
 import { CampaignOverviewDto } from '../dto/CampaignDto';
 import { CombatFloatingEventDto } from '../dto/CombatFloatingEventDto';
+import { CombatSkillVfxDto } from '../dto/CombatSkillVfxDto';
 import { GameStateDto, GearDto } from '../dto/GameStateDto';
 import { ShopOfferDto } from '../dto/ShopOfferDto';
 import { AscensionOptionDto } from '../dto/AscensionOptionDto';
@@ -53,6 +54,7 @@ export type GameResponse =
       ok: true;
       state: GameStateDto;
       combatFloats?: CombatFloatingEventDto[];
+      combatSkillVfx?: CombatSkillVfxDto[];
       openedGear?: GearDto;
       openedGears?: GearDto[];
       equippedCount?: number;

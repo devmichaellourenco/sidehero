@@ -1,6 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
+import { applyBattleScene } from './BattleScenePresentation';
 import { patchBattleStripInPlace, syncBattleStripCrowdedLayout } from './BattleStripPatcher';
 import {
   battleStripDomMatchesStructure,
@@ -13,14 +14,22 @@ import { bindHeroTooltips } from './HeroTooltipBinder';
 
 export class BattleStripRenderer {
   private structureKey: string | null = null;
+  private sceneMapId: string | null = null;
 
   constructor(
     private readonly heroesContainer: HTMLElement,
     private readonly enemyContainer: HTMLElement,
     private readonly battleStrip: HTMLElement,
+    private readonly stripBg: HTMLElement,
+    private readonly stripFloor: HTMLElement,
   ) {}
 
   render(state: GameStateDto): void {
+    if (state.mapId !== this.sceneMapId) {
+      applyBattleScene(this.stripBg, state.mapId, this.stripFloor);
+      this.sceneMapId = state.mapId;
+    }
+
     syncBattleStripCrowdedLayout(
       this.battleStrip,
       state.activeParty.length,

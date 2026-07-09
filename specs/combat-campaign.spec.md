@@ -40,6 +40,12 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - Sprites novos de inimigos (arte incremental)
 - PvP ou combate manual por turno do jogador
 
+## Lore — regiões (mapa 2)
+
+**Gruftall** (`gruftall`, T51–100): terra desolada sob o domínio destrutivo de Gonodor. Cinzas espessas, ruínas e crateras; ar sufocante que aterroriza os fracos. Quase nada vive além de monstros errantes e o próprio Gonodor.
+
+**Fase 2-50:** os heróis enfrentam **Gonodor** — na verdade apenas uma **centelha** de seu poder, enquanto o verdadeiro Gonodor está a quilômetros (fora do alcance do nível atual dos heróis). Título da fase: **Centelha de Gonodor**. Background narrativo; não precisa ser exposto na UI além do nome da fase.
+
 ## Testes obrigatórios
 
 - [x] `PhaseCombatHandlers.test.ts`, `EnemyKillRewardService.test.ts`, `EnemyLootTable.test.ts`

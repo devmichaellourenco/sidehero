@@ -5,6 +5,7 @@ import {
   TOTAL_CAMPAIGN_PHASES,
 } from '../../domain/campaign/CampaignMaps';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, imgTag } from '../assets/AssetCatalog';
+import { getCampaignScene, hasCampaignBanner } from '../assets/CampaignSceneCatalog';
 import { CampaignViewMode } from '../campaign/CampaignViewStorage';
 
 export type CampaignMapThemeId = (typeof CAMPAIGN_MAPS)[number]['id'];
@@ -37,12 +38,13 @@ const MAP_THEMES: Record<CampaignMapThemeId, CampaignMapTheme> = {
     biomeKind: 'forest',
     flavorText: 'Campos outrora pacíficos agora fervilham de goblins e bandoleiros.',
   },
-  gondonor: {
-    id: 'gondonor',
-    biomeLabel: 'Minas profundas',
-    biomeIcon: ASSETS.ui.chest,
-    biomeKind: 'mine',
-    flavorText: 'Túneis antigos escondem riquezas — e o eco de passos famintos.',
+  gruftall: {
+    id: 'gruftall',
+    biomeLabel: 'Terra das cinzas',
+    biomeIcon: ASSETS.ui.defense,
+    biomeKind: 'ruins',
+    flavorText:
+      'Terra desolada sob o domínio de Gonodor — cinzas espessas, ruínas e um ar sufocante que paralisa os fracos.',
   },
   valdris: {
     id: 'valdris',
@@ -109,7 +111,7 @@ const MILESTONE_BOSS_BY_MAP_INDEX: Record<
   { enemyType: string; displayName: string; bossLabel: string }
 > = {
   1: { enemyType: 'saci', displayName: 'Saci', bossLabel: 'Guardião Elemental' },
-  2: { enemyType: 'gonodor', displayName: 'Gonodor', bossLabel: 'Capitão da Mina' },
+  2: { enemyType: 'gonodor', displayName: 'Gonodor', bossLabel: 'Centelha de Gonodor' },
   3: { enemyType: 'bloody_orc_chief', displayName: 'Chefe Orc', bossLabel: 'Espectro de Valdris' },
   4: { enemyType: 'mountain_troll', displayName: 'Troll', bossLabel: 'Duque de Morthaven' },
   5: { enemyType: 'three_head_hydra', displayName: 'Hidra', bossLabel: 'Colosso do Céu Quebrado' },
@@ -609,6 +611,7 @@ function renderWorldMapNode(
   const locked = !map.unlocked;
   const active = map.id === activeMapId;
   const side = nodeIndex % 2 === 0 ? 'left' : 'right';
+  const illustrated = hasCampaignBanner(map.id);
   const boss = locked ? getMilestoneBossForMapIndex(mapIndex - 1) : getMilestoneBossForMapIndex(mapIndex);
   const bossTeaser =
     locked && boss
@@ -624,20 +627,23 @@ function renderWorldMapNode(
   return `
     <button
       type="button"
-      class="campaign-world-node campaign-world-node--${side}${active ? ' campaign-world-node--active' : ''}${locked ? ' campaign-world-node--locked' : ''}"
+      class="campaign-world-node campaign-world-node--${side}${active ? ' campaign-world-node--active' : ''}${locked ? ' campaign-world-node--locked' : ''}${illustrated ? ' campaign-world-node--illustrated' : ''}"
       data-campaign-world-map="${escapeHtml(map.id)}"
       data-campaign-theme="${escapeHtml(map.id)}"
       data-campaign-tooltip
       ${disabled}
     >
-      <span class="campaign-world-node-visual">
-        ${locked ? '' : renderMapTabRing(progress.cleared, progress.total)}
-        ${bossTeaser}
-        ${locked ? '<span class="campaign-map-tab-fog" aria-hidden="true"></span>' : ''}
-      </span>
-      <span class="campaign-world-node-copy">
-        <span class="campaign-world-node-name">${escapeHtml(map.name)}</span>
-        <span class="campaign-world-node-meta">${escapeHtml(theme.biomeLabel)} · ${progress.cleared}/${progress.total}</span>
+      ${illustrated ? renderCampaignWorldNodeBanner(map.id) : ''}
+      <span class="campaign-world-node-body">
+        <span class="campaign-world-node-visual">
+          ${locked ? '' : renderMapTabRing(progress.cleared, progress.total)}
+          ${bossTeaser}
+          ${locked ? '<span class="campaign-map-tab-fog" aria-hidden="true"></span>' : ''}
+        </span>
+        <span class="campaign-world-node-copy">
+          <span class="campaign-world-node-name">${escapeHtml(map.name)}</span>
+          <span class="campaign-world-node-meta">${escapeHtml(theme.biomeLabel)} · ${progress.cleared}/${progress.total}</span>
+        </span>
       </span>
       <span class="campaign-tooltip-content hidden">${regionTooltip}</span>
     </button>
@@ -666,6 +672,18 @@ export function renderMapUnlockBanner(map: CampaignMapDto): string {
         <p class="campaign-unlock-banner-eyebrow">Nova região · ${escapeHtml(map.name)}</p>
       </div>
     </div>
+  `;
+}
+
+export function renderCampaignWorldNodeBanner(mapId: string): string {
+  const scene = getCampaignScene(mapId);
+  if (!scene?.banner) return '';
+
+  return `
+    <span class="campaign-world-node-banner" aria-hidden="true">
+      ${imgTag(getAssetUrl(scene.banner), '', 'campaign-world-node-banner__img')}
+      <span class="campaign-world-node-banner__shade"></span>
+    </span>
   `;
 }
 

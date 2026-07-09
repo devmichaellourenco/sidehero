@@ -1,6 +1,6 @@
 import { DamageElement, DAMAGE_ELEMENT_LABELS } from '../../combat/DamageElement';
 
-export type CombatStatusEffectKind = 'buff_attack' | 'debuff_defense' | 'dot';
+export type CombatStatusEffectKind = 'buff_attack' | 'debuff_defense' | 'dot' | 'heal_block';
 
 export interface CombatStatusEffect {
   skillId: string;
@@ -29,6 +29,9 @@ export function statusEffectLabel(effect: CombatStatusEffect): string {
   if (effect.kind === 'debuff_defense') {
     return `DEF-${formatStatusMagnitude(effect.magnitude)}`;
   }
+  if (effect.kind === 'heal_block') {
+    return 'Cura bloqueada';
+  }
 
   const element = effect.dotElement ? DAMAGE_ELEMENT_LABELS[effect.dotElement] : 'DOT';
   return `${element} ${formatStatusMagnitude(effect.magnitude)}/t`;
@@ -36,6 +39,9 @@ export function statusEffectLabel(effect: CombatStatusEffect): string {
 
 export function statusEffectTooltip(effect: CombatStatusEffect): string {
   const statLabel = statusEffectLabel(effect);
+  if (effect.kind === 'heal_block') {
+    return `${statLabel} · dura até o fim da batalha`;
+  }
   const turns =
     effect.remainingTurns === 1
       ? '1 turno restante'

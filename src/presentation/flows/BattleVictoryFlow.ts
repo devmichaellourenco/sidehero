@@ -4,6 +4,9 @@ import { BattleVictoryPayload } from '../components/BattleVictoryDetector';
 /** Duração da animação do rótulo CLEAR/WARNING/DEFEAT. */
 export const OVERLAY_ANIMATION_MS = 2200;
 
+/** Marcos X-50 — animação mais longa para reforçar conquista. */
+export const MILESTONE_OVERLAY_ANIMATION_MS = 3400;
+
 /** Overlay de resultado — bloqueia ticks até a animação terminar. */
 export class BattleVictoryFlow {
   private overlayVisible = false;
@@ -34,9 +37,11 @@ export class BattleVictoryFlow {
     this.overlayVisible = true;
     this.renderer.render(this.overlayEl, payload);
     this.overlayEl.classList.remove('hidden');
-    this.battleStripEl.classList.add('battle-strip--victory');
+    this.battleStripEl.classList.add(
+      payload.milestoneVictory?.isMilestone ? 'battle-strip--milestone-victory' : 'battle-strip--victory',
+    );
     this.bindActions();
-    this.scheduleDismissAfterAnimation();
+    this.scheduleDismissAfterAnimation(payload);
   }
 
   dismiss(): void {
@@ -65,7 +70,9 @@ export class BattleVictoryFlow {
     });
   }
 
-  private scheduleDismissAfterAnimation(): void {
+  private scheduleDismissAfterAnimation(payload: BattleVictoryPayload): void {
+    const isMilestone = payload.milestoneVictory?.isMilestone === true;
+    const animationMs = isMilestone ? MILESTONE_OVERLAY_ANIMATION_MS : OVERLAY_ANIMATION_MS;
     const label = this.overlayEl.querySelector('.battle-victory-compact-label');
     if (label) {
       label.addEventListener('animationend', () => this.dismiss(), { once: true });
@@ -73,14 +80,14 @@ export class BattleVictoryFlow {
 
     this.autoDismissTimer = globalThis.setTimeout(
       () => this.dismiss(),
-      OVERLAY_ANIMATION_MS + 300,
+      animationMs + 300,
     );
   }
 
   private hideOverlay(): void {
     this.overlayEl.classList.add('hidden');
     this.overlayEl.innerHTML = '';
-    this.battleStripEl.classList.remove('battle-strip--victory');
+    this.battleStripEl.classList.remove('battle-strip--victory', 'battle-strip--milestone-victory');
   }
 
   private clearTimers(): void {

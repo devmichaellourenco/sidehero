@@ -94,13 +94,19 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         ok: true,
         state: result.state,
         combatFloats: result.combatFloats,
+        combatSkillVfx: result.combatSkillVfx,
         sigilsAwarded: result.sigilsAwarded,
       };
     }
     case 'RESUME_COMBAT_INTERMISSION': {
       const result = await app.resumeCombatIntermission.execute();
       await syncBackgroundTickAlarm(result.state.upgradeLevels);
-      return { ok: true, state: result.state, combatFloats: result.combatFloats };
+      return {
+        ok: true,
+        state: result.state,
+        combatFloats: result.combatFloats,
+        combatSkillVfx: result.combatSkillVfx,
+      };
     }
     case 'OPEN_CHEST': {
       const result = await app.openChest.execute(message.chestId);

@@ -3,7 +3,7 @@
 ## Status
 
 **Aceite:** 10/10 (100%)  
-**Testes obrigatórios:** 11/11 presentes na suite
+**Testes obrigatórios:** 12/12 presentes na suite
 
 ## Objetivo
 
@@ -19,7 +19,7 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] Aba Inventário do herói **sem** hint estático de equipamento; slots clicáveis e picker inline comunicam a ação
 - [x] Aba Inventário: **sem** abas texto Todos/Armas/Armaduras/Acessórios; categoria só via ícones do loadout; grid único com ordenação compartilhada; slot ativo filtra o mesmo grid in-place
 - [x] Header do modal exibe `Lv.{n} {Classe} - {Evolução}` (ex.: `Lv.2 Priest - Aprendiz`); aba Classe **sem** retrato/classe atual — só próxima(s) ascensão(ões) e skills de evolução
-- [x] Aba Classe apresenta título compacto **Escolha seu destino** + cards temáticos; detalhes do momento de ascensão ficam no tooltip do título
+- [x] Aba Classe apresenta título compacto **Escolha seu destino** + cards temáticos; detalhes do momento de ascensão ficam no tooltip do título; requisitos e CTA dos cards ficam no tooltip do card
 
 ## Camadas e arquivos-chave
 
@@ -49,4 +49,5 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] `HeroDetailHeaderRenderer.test.ts` — linha `Lv.{n} {Classe} - {Evolução}` no topo
 - [x] `HeroClassTabRenderer.test.ts` — aba Classe sem retrato/classe atual; só ascensões disponíveis
 - [x] `HeroClassLinePresentation.test.ts` — formatação da linha classe/evolução
-- [x] `HeroClassAscensionPresentation.test.ts` — banner, tema visual e cards de ascensão
+- [x] `HeroClassAscensionPresentation.test.ts` — cards com requisitos/CTA só no tooltip; seleção por clique quando disponível
+- [x] `AscendClassConfirmPresentation.test.ts` — modal de confirmação com preview e aviso permanente

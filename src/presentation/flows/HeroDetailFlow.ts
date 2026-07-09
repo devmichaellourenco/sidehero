@@ -1,10 +1,11 @@
 import { AscensionOptionDto } from '../../application/dto/AscensionOptionDto';
-import { GameStateDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { HeroDetailModalRenderer, HeroDetailTab } from '../components/HeroDetailModalRenderer';
 import { ToastController } from '../components/ToastController';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
+import { AscendClassConfirmDialog } from '../components/AscendClassConfirmDialog';
 
 export class HeroDetailFlow {
   skillNodes: SkillNodeDto[] = [];
@@ -17,6 +18,7 @@ export class HeroDetailFlow {
     private readonly heroDetailModal: HeroDetailModalRenderer,
     private readonly toasts: ToastController,
     private readonly rewards: RewardCelebrationPort,
+    private readonly ascendClassConfirmDialog: AscendClassConfirmDialog,
     private readonly onStateUpdated: (state: GameStateDto) => void,
     private readonly refreshModal: () => void,
   ) {}
@@ -100,7 +102,10 @@ export class HeroDetailFlow {
         void this.equipSkillFirstAvailable(id, skillId);
       },
       onAscendClass: (id, ascensionId) => {
-        void this.ascendClass(id, ascensionId);
+        const heroEntry = state.heroes.find((entry) => entry.id === id);
+        if (heroEntry) {
+          void this.confirmAndAscend(id, ascensionId, heroEntry);
+        }
       },
       onAllocateAscensionSkill: (id, skillId) => {
         void this.allocateAscensionSkill(id, skillId);
@@ -182,6 +187,20 @@ export class HeroDetailFlow {
     }
     await Promise.all([this.loadSkillTree(heroId), this.loadAscensionTree(heroId)]);
     this.afterMutation(response.state);
+  }
+
+  async confirmAndAscend(heroId: string, ascensionId: string, hero: HeroDto): Promise<void> {
+    const option = this.ascensionOptions.find((entry) => entry.id === ascensionId);
+    if (!option?.canAscend) return;
+
+    const confirmed = await this.ascendClassConfirmDialog.open({
+      hero,
+      option,
+      isUpgrade: Boolean(hero.ascensionId),
+    });
+    if (!confirmed) return;
+
+    await this.ascendClass(heroId, ascensionId);
   }
 
   private async ascendClass(heroId: string, ascensionId: string): Promise<void> {

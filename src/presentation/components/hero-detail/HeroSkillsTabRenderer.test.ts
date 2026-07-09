@@ -49,5 +49,8 @@ describe('renderHeroSkillsTab', () => {
     expect(html).not.toContain('arraste até um slot');
     expect(html).not.toContain('Toque para equipar');
     expect(html).not.toContain('skill-card-equip-hint');
+    expect(html).not.toContain('>Ativa<');
+    expect(html).not.toContain('>Inativa<');
+    expect(html).not.toContain('>Disponível<');
   });
 });

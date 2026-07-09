@@ -7,6 +7,7 @@ import {
   GearElementTheme,
   listGearTemplatesForSlot,
 } from '../gear/GearTemplateCatalog';
+import { formatUniqueGearName } from '../gear/UniqueGearCatalog';
 import { GearRequirementChecker } from './GearRequirementChecker';
 import { ILootService } from './ILootService';
 
@@ -122,18 +123,28 @@ export class LootService implements ILootService {
     }
 
     const multiplier = RARITY_MULTIPLIER[rarity];
-    return this.createGear(
+    const gear = this.createGear(
       stage,
       template.slot,
       rarity,
       multiplier,
-      `${template.baseName} (${rarity})`,
+      formatUniqueGearName(template.id, rarity),
       template.id,
       id,
       statBump,
       'monster',
       templateId,
     );
+
+    if (!template.fixedBonuses) {
+      return gear;
+    }
+
+    return Gear.create({
+      ...gear.toProps(),
+      ...template.fixedBonuses,
+      name: formatUniqueGearName(template.id, rarity),
+    });
   }
 
   private createGear(

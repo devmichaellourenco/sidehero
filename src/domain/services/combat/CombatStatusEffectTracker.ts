@@ -38,9 +38,12 @@ export class CombatStatusEffectTracker {
     const next = structuredClone(this.effects);
     next[params.combatantKey] ??= [];
 
-    const withoutSkill = next[params.combatantKey].filter(
-      (effect) => effect.skillId !== params.skillId,
-    );
+    const withoutSkill = next[params.combatantKey].filter((effect) => {
+      if (params.kind === 'heal_block' && effect.kind === 'heal_block') {
+        return false;
+      }
+      return effect.skillId !== params.skillId;
+    });
 
     withoutSkill.push({
       skillId: params.skillId,
@@ -62,7 +65,7 @@ export class CombatStatusEffectTracker {
     next[combatantKey] = current
       .map((effect) => ({
         ...effect,
-        remainingTurns: effect.remainingTurns - 1,
+        remainingTurns: effect.kind === 'heal_block' ? effect.remainingTurns : effect.remainingTurns - 1,
       }))
       .filter((effect) => effect.remainingTurns > 0);
 
@@ -95,6 +98,28 @@ export class CombatStatusEffectTracker {
 
   getDefensePenalty(combatantKey: string): number {
     return this.sumMagnitude(combatantKey, 'debuff_defense');
+  }
+
+  isHealBlocked(combatantKey: string): boolean {
+    return (this.effects[combatantKey] ?? []).some((effect) => effect.kind === 'heal_block');
+  }
+
+  clearNegativeEffects(combatantKey: string): CombatStatusEffectTracker {
+    const current = this.effects[combatantKey];
+    if (!current || current.length === 0) {
+      return this;
+    }
+
+    const next = structuredClone(this.effects);
+    const remaining = current.filter((effect) => effect.kind === 'buff_attack');
+
+    if (remaining.length === 0) {
+      delete next[combatantKey];
+    } else {
+      next[combatantKey] = remaining;
+    }
+
+    return new CombatStatusEffectTracker(next);
   }
 
   private sumMagnitude(

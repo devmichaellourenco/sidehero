@@ -1,4 +1,5 @@
 import { EnemyRole } from '../campaign/WaveDefinition';
+import { ENEMY_HP_BALANCE_FACTOR, resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
 import { Stats } from '../value-objects/Stats';
 import { EnemyType, enemyNameForStage, enemyTypeForStage } from './EnemyType';
 
@@ -49,7 +50,7 @@ export class Enemy {
       stats: Stats.fromBase(
         Math.floor(10 * scale),
         Math.floor(4 * scale),
-        Math.floor(60 * scale),
+        resolveEnemySpawnMaxHealth(Math.floor(60 * scale * ENEMY_HP_BALANCE_FACTOR)),
       ),
       goldReward: Math.floor(8 * scale),
       xpReward: Math.floor(2 * scale),

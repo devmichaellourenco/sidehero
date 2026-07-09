@@ -16,6 +16,8 @@ export type RewardMomentKind =
   | 'chest_available'
   | 'level_up'
   | 'phase_cleared'
+  | 'milestone_boss_defeated'
+  | 'named_legendary_received'
   | 'tier_up'
   | 'season_complete'
   | 'feature_unlock'

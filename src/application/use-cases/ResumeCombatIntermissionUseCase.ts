@@ -2,11 +2,13 @@ import { PhaseCombatHandlers } from '../../domain/campaign/PhaseCombatHandlers';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { CombatFloatingEventDto } from '../dto/CombatFloatingEventDto';
+import { CombatSkillVfxDto } from '../dto/CombatSkillVfxDto';
 import { GameStateDto } from '../dto/GameStateDto';
 
 export interface ResumeCombatIntermissionResult {
   state: GameStateDto;
   combatFloats: CombatFloatingEventDto[];
+  combatSkillVfx: CombatSkillVfxDto[];
 }
 
 export class ResumeCombatIntermissionUseCase {
@@ -24,6 +26,7 @@ export class ResumeCombatIntermissionUseCase {
       return {
         state: this.presenter.present(state),
         combatFloats: [],
+        combatSkillVfx: [],
       };
     }
 
@@ -33,6 +36,7 @@ export class ResumeCombatIntermissionUseCase {
     return {
       state: this.presenter.present(resumed.state),
       combatFloats: [],
+      combatSkillVfx: [],
     };
   }
 }

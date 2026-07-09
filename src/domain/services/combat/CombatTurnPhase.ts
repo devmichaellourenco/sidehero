@@ -9,6 +9,7 @@ import { EnemyKillRewardService } from '../../campaign/EnemyKillRewardService';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
 import { elementalDamageProfileFromHeroEquipment } from '../../combat/ElementalDamageProfileAggregator';
 import { elementalDamageFlatFromHeroEquipment } from '../../combat/ElementalDamageFlatProfileAggregator';
+import { elementalPenetrationFromHeroEquipment } from '../../combat/ElementalPenetrationProfileAggregator';
 import { physicalDamagePercentFromHeroEquipment } from '../../combat/GearStatAggregator';
 import {
   COMBAT_DELTA_SECONDS,
@@ -20,9 +21,11 @@ import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill
 import { ActionTimerService } from './ActionTimerService';
 import { CombatActionExecutor } from './CombatActionExecutor';
 import { CombatFloatingEvent, createDamageEvent } from './CombatFloatingEvent';
+import { CombatSkillVfxEvent, createSkillVfxEvent } from './CombatSkillVfxEvent';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
+import { trySolerPlegiusCleanse } from '../../unique-effects/UniqueBattleEffectResolver';
 import {
   applyMitigatedDotTicks,
   buildDotMitigationTargetForEnemy,
@@ -34,6 +37,7 @@ export interface CombatTurnPhaseResult {
   state: GameState;
   events: string[];
   floatingEvents: CombatFloatingEvent[];
+  skillVfxEvents: CombatSkillVfxEvent[];
 }
 
 export class CombatTurnPhase {
@@ -50,11 +54,11 @@ export class CombatTurnPhase {
     let workingState = state;
 
     if (workingState.loadoutEditOpen && workingState.phaseRestartOnResume) {
-      return { state: workingState.touchTick(), events: [], floatingEvents: [] };
+      return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
     }
 
     if (workingState.combatIntermission) {
-      return { state: workingState.touchTick(), events: [], floatingEvents: [] };
+      return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
     }
 
     if (!workingState.phaseRun) {
@@ -69,7 +73,7 @@ export class CombatTurnPhase {
     let combat = workingState.combat;
     if (!combat || combat.livingEnemies().length === 0) {
       if (!workingState.phaseRun) {
-        return { state: workingState.touchTick(), events: [], floatingEvents: [] };
+        return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
       }
       const started = this.phaseHandlers.startPhaseRun(workingState, workingState.phaseRun);
       return this.finish(started.state, started.events, []);
@@ -77,6 +81,7 @@ export class CombatTurnPhase {
 
     const events: string[] = [];
     const floatingEvents: CombatFloatingEvent[] = [];
+    const skillVfxEvents: CombatSkillVfxEvent[] = [];
 
     let cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
     cooldowns = cooldowns.advanceTime(COMBAT_DELTA_SECONDS);
@@ -125,6 +130,7 @@ export class CombatTurnPhase {
       combat = strike.combat;
       events.push(...strike.events);
       floatingEvents.push(...strike.floatingEvents);
+      skillVfxEvents.push(...strike.skillVfxEvents);
 
       if (strike.usedSkillId === null) {
         break;
@@ -143,6 +149,7 @@ export class CombatTurnPhase {
       (logMessage ? workingState.addLog(logMessage) : workingState).withCombat(combat).touchTick(),
       events,
       floatingEvents,
+      skillVfxEvents,
     );
   }
 
@@ -150,8 +157,9 @@ export class CombatTurnPhase {
     state: GameState,
     events: string[],
     floatingEvents: CombatFloatingEvent[],
+    skillVfxEvents: CombatSkillVfxEvent[] = [],
   ): CombatTurnPhaseResult {
-    return { state, events, floatingEvents };
+    return { state, events, floatingEvents, skillVfxEvents };
   }
 
   private tryResolveCombatOutcome(
@@ -202,6 +210,7 @@ export class CombatTurnPhase {
     combat: CombatState;
     events: string[];
     floatingEvents: CombatFloatingEvent[];
+    skillVfxEvents: CombatSkillVfxEvent[];
     usedSkillId: string | null;
   } {
     const enemiesBeforeStrike = combat.enemies;
@@ -209,6 +218,7 @@ export class CombatTurnPhase {
     let enemies = combat.enemies;
     const events: string[] = [];
     const floatingEvents: CombatFloatingEvent[] = [];
+    const skillVfxEvents: CombatSkillVfxEvent[] = [];
     let cooldowns = SkillCooldownTracker.fromMap(combat.skillCooldowns);
     let statusEffects = CombatStatusEffectTracker.fromMap(combat.statusEffects);
     const actorKey = combatantKey(actor.side, actor.id);
@@ -221,7 +231,7 @@ export class CombatTurnPhase {
     if (actor.side === 'hero') {
       const hero = heroes.find((entry) => entry.id === actor.id);
       if (!hero?.isAlive()) {
-        return { state, combat, events, floatingEvents, usedSkillId: null };
+        return { state, combat, events, floatingEvents, skillVfxEvents, usedSkillId: null };
       }
 
       attackerProfile = this.profiles.forHero(hero);
@@ -239,6 +249,8 @@ export class CombatTurnPhase {
       }
 
       usedSkillId = selected.skillId;
+      const heroVfx = createSkillVfxEvent(usedSkillId, 'hero', actor.id, selected.action);
+      if (heroVfx) skillVfxEvents.push(heroVfx);
       const result = this.actionExecutor.execute(
         selected.action,
         hero.name,
@@ -251,6 +263,8 @@ export class CombatTurnPhase {
           attackerElementalBonus: elementalDamageProfileFromHeroEquipment(hero.toProps().equipment),
           attackerElementalFlat: elementalDamageFlatFromHeroEquipment(hero.toProps().equipment),
           attackerPhysicalDamagePercent: physicalDamagePercentFromHeroEquipment(hero.toProps().equipment),
+          attackerElementalPenetration: elementalPenetrationFromHeroEquipment(hero.toProps().equipment),
+          attackerEquipment: hero.toProps().equipment,
         },
       );
       heroes = result.heroes;
@@ -261,7 +275,7 @@ export class CombatTurnPhase {
     } else {
       const enemy = enemies.find((entry) => entry.id === actor.id);
       if (!enemy?.isAlive()) {
-        return { state, combat, events, floatingEvents, usedSkillId: null };
+        return { state, combat, events, floatingEvents, skillVfxEvents, usedSkillId: null };
       }
 
       attackerProfile = this.profiles.forEnemy(enemy, combat.encounterMeta?.isBossWave);
@@ -273,6 +287,8 @@ export class CombatTurnPhase {
       }
 
       usedSkillId = selected.skillId;
+      const enemyVfx = createSkillVfxEvent(usedSkillId, 'enemy', actor.id, selected.action);
+      if (enemyVfx) skillVfxEvents.push(enemyVfx);
       const result = this.actionExecutor.execute(
         selected.action,
         enemy.name,
@@ -288,7 +304,16 @@ export class CombatTurnPhase {
       floatingEvents.push(...result.floatingEvents);
     }
 
+    let workingCombat = combat;
     for (const application of statusApplications) {
+      const cleanse = trySolerPlegiusCleanse(application, heroes, workingCombat, statusEffects);
+      if (cleanse.intercepted) {
+        statusEffects = cleanse.tracker;
+        workingCombat = cleanse.combat;
+        if (cleanse.event) events.push(cleanse.event);
+        continue;
+      }
+
       statusEffects = statusEffects.apply({
         combatantKey: application.combatantKey,
         skillId: application.skillId,
@@ -298,6 +323,7 @@ export class CombatTurnPhase {
         dotElement: application.dotElement,
       });
     }
+    combat = workingCombat;
 
     const dotEntries = statusEffects.listDotTicks(actorKey);
     if (dotEntries.length > 0) {
@@ -419,6 +445,7 @@ export class CombatTurnPhase {
       combat: nextCombat,
       events,
       floatingEvents,
+      skillVfxEvents,
       usedSkillId,
     };
   }
@@ -433,6 +460,7 @@ export class CombatTurnPhase {
     combat: CombatState;
     events: string[];
     floatingEvents: CombatFloatingEvent[];
+    skillVfxEvents: CombatSkillVfxEvent[];
     usedSkillId: string | null;
   } {
     const updatedTimers = this.actionTimers.scheduleAfterAction(
@@ -448,6 +476,7 @@ export class CombatTurnPhase {
       combat: combat.withActionTimers(updatedTimers),
       events: [],
       floatingEvents: [],
+      skillVfxEvents: [],
       usedSkillId: null,
     };
   }

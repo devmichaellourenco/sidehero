@@ -3,6 +3,7 @@ import { DamageElement } from '../../combat/DamageElement';
 import { SkillId } from '../SkillId';
 import { SkillCombatKind } from './SkillCombatKind';
 import { SkillTargeting } from './SkillTargeting';
+import { UniqueEffectId } from '../../unique-effects/UniqueEffectCatalog';
 
 export type SkillTargetScope = 'single' | 'all';
 export type SkillTargetPool = 'heroes' | 'enemies';
@@ -54,6 +55,8 @@ export interface CombatSkillDefinition {
   effectDurationTurns?: number;
   /** Aplica DOT ao acertar dano (veneno, ignite, etc.). */
   onHitDot?: OnHitDotEffect;
+  /** Reservado — efeito único programado (ver unique-effects.spec.md). */
+  uniqueEffectId?: UniqueEffectId;
 }
 
 export function toSkillTargeting(definition: CombatSkillDefinition): SkillTargeting {

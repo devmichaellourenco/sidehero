@@ -1,4 +1,9 @@
 import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
+import {
+  isCelebrationNamedGear,
+  isChapterMilestonePhaseId,
+  resolveMilestoneVictoryPresentation,
+} from '../../application/mappers/MilestoneRewardPresentation';
 import { getUpgradeById } from '../../domain/upgrades/UpgradeCatalog';
 import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
 import { PanelSnapshot } from '../components/PanelStateSnapshot';
@@ -105,14 +110,24 @@ export class RewardMomentDetector {
       );
     } else if (!skipVictoryRewards && clearedNow.length > 0) {
       const phase = clearedNow[clearedNow.length - 1];
-      moments.push(
-        buildMoment('phase_cleared', {
-          title: `Fase ${phase} limpa!`,
-          subtitle: 'Campanha avançando',
-          tone: 'victory',
-          iconUrl: getAssetUrl(ASSETS.ui.campaign),
-        }),
-      );
+      if (isChapterMilestonePhaseId(phase)) {
+        moments.push(this.buildMilestoneBossMoment(phase));
+      } else {
+        moments.push(
+          buildMoment('phase_cleared', {
+            title: `Fase ${phase} limpa!`,
+            subtitle: 'Campanha avançando',
+            tone: 'victory',
+            iconUrl: getAssetUrl(ASSETS.ui.campaign),
+          }),
+        );
+      }
+    }
+
+    if (!skipVictoryRewards) {
+      for (const gear of this.detectNewNamedLegendaryGear(previous, next)) {
+        moments.push(this.buildNamedLegendaryMoment(gear));
+      }
     }
 
     if (!skipVictoryRewards) {
@@ -182,6 +197,10 @@ export class RewardMomentDetector {
   }
 
   buildLootMoment(gear: GearDto): RewardMoment | null {
+    if (isCelebrationNamedGear(gear)) {
+      return this.buildNamedLegendaryMoment(gear);
+    }
+
     if (!LOOT_CELEBRATION_RARITIES.has(gear.rarity)) return null;
 
     const rarityBoost = LOOT_RARITY_PRIORITY_BOOST[gear.rarity] ?? 0;
@@ -238,6 +257,50 @@ export class RewardMomentDetector {
       detailLines: gears.slice(0, 5).map((gear) => gear.name),
       autoDismissMs: 3800,
     });
+  }
+
+  buildNamedLegendaryMoment(gear: GearDto): RewardMoment {
+    const detailLines = [
+      'Lendário nomeado — conquista rara da campanha',
+      gear.uniqueEffectDescription ? `✦ ${gear.uniqueEffectDescription}` : null,
+    ].filter((line): line is string => Boolean(line));
+
+    return buildMoment('named_legendary_received', {
+      title: gear.name,
+      subtitle: 'Um troféu lendário entrou no seu inventário',
+      tone: 'loot',
+      gear,
+      detailLines,
+      priority: REWARD_KIND_PRIORITY.named_legendary_received,
+      autoDismissMs: REWARD_AUTO_DISMISS_MS.named_legendary_received,
+    });
+  }
+
+  buildMilestoneBossMoment(phaseId: string): RewardMoment {
+    const presentation = resolveMilestoneVictoryPresentation(phaseId, `Fase ${phaseId}`);
+    const title = presentation.isMajorMilestone
+      ? 'Capítulo conquistado!'
+      : 'Chefe do marco derrotado!';
+
+    return buildMoment('milestone_boss_defeated', {
+      title,
+      subtitle: presentation.chapterTitle,
+      tone: 'victory',
+      iconUrl: getAssetUrl(ASSETS.ui.victoryFrame),
+      detailLines: [
+        presentation.bossSubtitle,
+        `Fase ${phaseId} — um marco exigente da campanha`,
+      ],
+      priority: REWARD_KIND_PRIORITY.milestone_boss_defeated,
+      autoDismissMs: REWARD_AUTO_DISMISS_MS.milestone_boss_defeated,
+    });
+  }
+
+  private detectNewNamedLegendaryGear(previous: GameStateDto, next: GameStateDto): GearDto[] {
+    const previousIds = new Set(previous.inventory.map((gear) => gear.id));
+    return next.inventory.filter(
+      (gear) => !previousIds.has(gear.id) && isCelebrationNamedGear(gear),
+    );
   }
 
   buildUpgradePurchasedMoment(upgradeId: string): RewardMoment | null {

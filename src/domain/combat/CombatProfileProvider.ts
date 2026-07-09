@@ -1,6 +1,8 @@
 import { Enemy } from '../entities/Enemy';
 import { Gear } from '../entities/Gear';
 import { Hero } from '../entities/Hero';
+import { resolveHeroAttributeAttackSpeed } from './CombatSpeedScaling';
+import { resolveEnemyAttackSpeed } from './EnemyCombatBalance';
 import { getClassCombatBaseline } from './ClassCombatBaselines';
 import { CombatProfile, createCombatProfile } from './CombatProfile';
 import { getEnemyCombatBaseline } from './EnemyCombatBaselines';
@@ -28,13 +30,13 @@ export class CombatProfileProvider {
   forHero(hero: Hero): CombatProfile {
     const baseline = getClassCombatBaseline(hero.heroClass);
     const equipment = hero.toProps().equipment;
-    const dexBonus = hero.totalAttributes.dex * 0.002;
+    const attributeAspd = resolveHeroAttributeAttackSpeed(baseline.attackSpeed, hero);
     const attackSpeedBonus = sumGearBonus(equipment, (g) => g.attackSpeedBonus);
     const castSpeedBonus = sumGearBonus(equipment, (g) => g.castSpeedBonus);
     const cooldownReduction = sumGearBonus(equipment, (g) => g.cooldownReductionBonus);
 
     return createCombatProfile({
-      attackSpeed: resolveAttackSpeed(baseline.attackSpeed + dexBonus, attackSpeedBonus),
+      attackSpeed: resolveAttackSpeed(attributeAspd, attackSpeedBonus),
       castSpeed: resolveCastSpeed(baseline.castSpeed + castSpeedBonus, cooldownReduction),
       critChance: Math.min(0.75, baseline.critChance + sumGearBonus(equipment, (g) => g.critChanceBonus)),
       critDamage: baseline.critDamage + sumGearBonus(equipment, (g) => g.critDamageBonus),
@@ -43,10 +45,10 @@ export class CombatProfileProvider {
 
   forEnemy(enemy: Enemy, isBoss = false): CombatProfile {
     const baseline = getEnemyCombatBaseline(enemy.enemyType, isBoss);
-    const stageAspdBonus = Math.min(0.15, enemy.stage * 0.001);
+    const attributeAspd = resolveEnemyAttackSpeed(baseline.attackSpeed, enemy.stage);
 
     return createCombatProfile({
-      attackSpeed: baseline.attackSpeed + stageAspdBonus,
+      attackSpeed: attributeAspd,
       castSpeed: baseline.castSpeed,
       critChance: baseline.critChance,
       critDamage: baseline.critDamage,

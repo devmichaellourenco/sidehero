@@ -3,7 +3,9 @@ import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
 import { Hero } from '../entities/Hero';
+import { LootService } from '../services/LootService';
 import { ActionTimerService } from '../services/combat/ActionTimerService';
+import { tryGrantMilestoneUniqueGearOnPhaseClear } from './UniqueGearLootService';
 import { EncounterMeta, EncounterResolver } from './EncounterResolver';
 import { PhaseRun } from './PhaseRun';
 import { resolvePhase } from './CampaignCatalog';
@@ -18,6 +20,7 @@ export class PhaseCombatHandlers {
   constructor(
     private readonly encounterResolver = new EncounterResolver(),
     private readonly actionTimers = new ActionTimerService(),
+    private readonly lootService = new LootService(),
   ) {}
 
   startPhaseRun(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {
@@ -125,6 +128,15 @@ export class PhaseCombatHandlers {
         }),
       )
       .incrementBattlesWon();
+
+    const milestoneGear = tryGrantMilestoneUniqueGearOnPhaseClear(
+      nextState,
+      meta.phaseId,
+      this.lootService,
+    );
+    if (milestoneGear) {
+      nextState = nextState.withInventory([...nextState.inventory, milestoneGear]);
+    }
 
     if (phase.seasonFinale) {
       nextState = nextState.addLog(
