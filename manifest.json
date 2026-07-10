@@ -4,7 +4,7 @@
   "version": "0.8.4",
   "description": "Heróis batalham no painel lateral do Chrome enquanto você navega normalmente.",
   "minimum_chrome_version": "116",
-  "permissions": ["storage", "alarms", "tabs", "sidePanel"],
+  "permissions": ["storage", "unlimitedStorage", "alarms", "tabs", "sidePanel"],
   "action": {
     "default_icon": {
       "16": "icons/icon-16.png",

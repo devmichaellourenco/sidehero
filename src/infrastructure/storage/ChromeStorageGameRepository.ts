@@ -9,6 +9,11 @@ import {
 import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import {
+  chromeStorageGet,
+  chromeStorageRemove,
+  chromeStorageSet,
+} from './ChromeStorageLocal';
+import {
   migrateChest,
   migrateCombat,
   migrateEnemy,
@@ -49,7 +54,7 @@ function serializeHero(hero: Hero): Record<string, unknown> {
 
 export class ChromeStorageGameRepository implements IGameStateRepository {
   async load(): Promise<GameState> {
-    const result = await chrome.storage.local.get([STORAGE_KEY, LEGACY_STORAGE_KEY]);
+    const result = await chromeStorageGet([STORAGE_KEY, LEGACY_STORAGE_KEY]);
     const raw = result[STORAGE_KEY] ?? result[LEGACY_STORAGE_KEY];
 
     if (!raw || typeof raw !== 'object') {
@@ -62,7 +67,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       const state = this.deserialize(raw);
       if (!result[STORAGE_KEY] && result[LEGACY_STORAGE_KEY]) {
         await this.save(state);
-        await chrome.storage.local.remove(LEGACY_STORAGE_KEY);
+        await chromeStorageRemove(LEGACY_STORAGE_KEY);
       }
       return state;
     } catch {
@@ -73,7 +78,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
   }
 
   async save(state: GameState): Promise<void> {
-    await chrome.storage.local.set({ [STORAGE_KEY]: this.serialize(state) });
+    await chromeStorageSet({ [STORAGE_KEY]: this.serialize(state) });
   }
 
   private serialize(state: GameState): Record<string, unknown> {
@@ -82,7 +87,6 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
     const serializedHeroes = roster.map((hero) => serializeHero(hero));
 
     return {
-      heroes: serializedHeroes,
       roster: serializedHeroes,
       activePartyIds: [...props.activePartyIds ?? []],
       combat: props.combat?.toProps() ?? null,

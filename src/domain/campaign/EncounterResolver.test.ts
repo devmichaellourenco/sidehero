@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { resolvePhaseEnemyStatMultiplier } from '../balance/PhaseEnemyEase';
 import { buildPhaseId } from './CampaignIds';
 import { EncounterResolver } from './EncounterResolver';
+import { spawnEnemiesForWave } from './WaveEnemyFactory';
 
 describe('EncounterResolver', () => {
   const resolver = new EncounterResolver();
@@ -30,5 +32,22 @@ describe('EncounterResolver', () => {
     expect(finale?.meta.isBossWave).toBe(true);
     expect(finale?.enemies[0]?.name).toBe('Saci');
     expect(finale?.enemies[0]?.enemyType).toBe('saci');
+  });
+
+  it('reduz vida e dano em 30% nas fases 1-47 a 1-50', () => {
+    const eased = resolver.resolve(buildPhaseId(1, 47), 0);
+    const phase = eased!.phase;
+    const wave = phase.waves[0];
+    const [baseline] = spawnEnemiesForWave(wave, {
+      phaseId: buildPhaseId(1, 47),
+      waveIndex: 0,
+      difficultyTier: phase.difficultyTier,
+      isBossWave: false,
+      statMultiplier: phase.statMultiplier ?? 1,
+    });
+
+    expect(eased?.enemies[0]?.stats.attack).toBe(Math.floor(baseline.stats.attack * 0.7));
+    expect(eased?.enemies[0]?.stats.maxHealth).toBe(Math.floor(baseline.stats.maxHealth * 0.7));
+    expect(resolvePhaseEnemyStatMultiplier(buildPhaseId(1, 50), 1.5)).toBeCloseTo(1.05);
   });
 });

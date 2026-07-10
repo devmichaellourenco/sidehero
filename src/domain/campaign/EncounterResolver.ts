@@ -1,5 +1,6 @@
 import { Enemy } from '../entities/Enemy';
 import { milestoneGoldScaleForPhase } from '../balance/MilestoneGoldCap';
+import { resolvePhaseEnemyStatMultiplier } from '../balance/PhaseEnemyEase';
 import { resolvePhase } from './CampaignCatalog';
 import { PhaseId } from './CampaignIds';
 import { PhaseDefinition } from './PhaseDefinition';
@@ -33,7 +34,7 @@ export class EncounterResolver {
       waveIndex,
       difficultyTier: phase.difficultyTier,
       isBossWave,
-      statMultiplier: phase.statMultiplier ?? 1,
+      statMultiplier: resolvePhaseEnemyStatMultiplier(phaseId, phase.statMultiplier ?? 1),
       milestoneGoldScale,
     });
 

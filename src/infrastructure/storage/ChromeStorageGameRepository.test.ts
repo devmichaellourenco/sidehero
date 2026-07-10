@@ -42,9 +42,11 @@ describe('ChromeStorageGameRepository', () => {
 
     await repository.save(paused);
     expect(storage[STORAGE_KEY]).toMatchObject({
+      roster: expect.any(Array),
       loadoutEditOpen: true,
       phaseRestartOnResume: true,
     });
+    expect(storage[STORAGE_KEY]).not.toHaveProperty('heroes');
 
     const loaded = await repository.load();
     expect(loaded.loadoutEditOpen).toBe(true);
@@ -64,5 +66,22 @@ describe('ChromeStorageGameRepository', () => {
     expect(loaded.phaseRun?.phaseId).toBe('2-3');
     expect(storage[STORAGE_KEY]).toBeDefined();
     expect(storage[LEGACY_STORAGE_KEY]).toBeUndefined();
+  });
+
+  it('carrega saves antigos que só tinham heroes', async () => {
+    const repository = new ChromeStorageGameRepository();
+    const paused = GameState.initial().withPhaseRun(PhaseRun.start('3-4'));
+
+    await repository.save(paused);
+    const saved = storage[STORAGE_KEY] as Record<string, unknown>;
+    storage[STORAGE_KEY] = {
+      ...saved,
+      heroes: saved.roster,
+      roster: undefined,
+    };
+
+    const loaded = await repository.load();
+    expect(loaded.phaseRun?.phaseId).toBe('3-4');
+    expect(loaded.roster.length).toBeGreaterThan(0);
   });
 });
