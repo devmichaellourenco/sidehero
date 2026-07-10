@@ -59,8 +59,8 @@ const SKILL_VFX_BY_ID: Record<string, SkillVfxDefinition> = {
     svgFile: 'basic_attack.svg',
     placement: 'target',
     durationMs: 380,
-    width: 176,
-    height: 99,
+    width: 53,
+    height: 30,
     glow: 'slash',
   },
   fireball: {
