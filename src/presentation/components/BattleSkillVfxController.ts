@@ -39,7 +39,8 @@ export class BattleSkillVfxController {
       return;
     }
 
-    const needsAttacker = definition.motion === 'projectile';
+    const needsAttacker =
+      definition.motion === 'projectile' || definition.placement === 'caster';
     const attackerAnchor = needsAttacker
       ? this.findAnchor(event.attackerSide, event.attackerId)
       : null;
@@ -165,6 +166,8 @@ export class BattleSkillVfxController {
     host.className = 'battle-skill-vfx battle-skill-vfx--melee';
     if (definition.glow === 'slash') {
       host.classList.add('battle-skill-vfx--slash');
+    } else if (definition.glow === 'holy') {
+      host.classList.add('battle-skill-vfx--holy');
     }
     if (event.attackerSide === 'enemy') {
       host.classList.add('battle-skill-vfx--melee-rtl');
@@ -229,7 +232,9 @@ export class BattleSkillVfxController {
     host.className =
       definition.glow === 'heal'
         ? 'battle-skill-vfx battle-skill-vfx--heal'
-        : 'battle-skill-vfx battle-skill-vfx--self';
+        : definition.glow === 'holy'
+          ? 'battle-skill-vfx battle-skill-vfx--holy'
+          : 'battle-skill-vfx battle-skill-vfx--self';
     host.setAttribute('aria-hidden', 'true');
     host.style.width = `${definition.width}px`;
     host.style.height = `${definition.height}px`;

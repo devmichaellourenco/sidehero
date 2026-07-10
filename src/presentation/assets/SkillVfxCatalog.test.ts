@@ -61,7 +61,27 @@ describe('SkillVfxCatalog', () => {
     expect(getSkillVfxSvgPath('blizzard', definition?.svgFile)).toBe('skills/svg/blizzard.svg');
   });
 
+  it('registra skills da party padrão (Galneon, Nix, Elara)', () => {
+    const partySkills = [
+      'power_attack',
+      'thrust',
+      'frost_shard',
+      'blessing',
+      'smite',
+    ] as const;
+
+    for (const skillId of partySkills) {
+      expect(getSkillVfxDefinition(skillId)).not.toBeNull();
+    }
+
+    expect(getSkillVfxDefinition('frost_shard')?.motion).toBe('projectile');
+    expect(getSkillVfxDefinition('power_attack')?.motion).toBe('melee');
+    expect(getSkillVfxDefinition('thrust')?.svgFile).toBe('thrust.svg');
+    expect(getSkillVfxDefinition('blessing')?.placement).toBe('caster');
+    expect(getSkillVfxDefinition('smite')?.glow).toBe('holy');
+  });
+
   it('retorna null para skills sem VFX', () => {
-    expect(getSkillVfxDefinition('frost_shard')).toBeNull();
+    expect(getSkillVfxDefinition('mana_shield')).toBeNull();
   });
 });

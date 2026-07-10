@@ -627,6 +627,10 @@ h2 {
   filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.85));
 }
 
+.battle-skill-vfx--holy {
+  filter: drop-shadow(0 0 14px rgba(255, 220, 120, 0.85));
+}
+
 .battle-skill-vfx--rtl {
   transform: translate3d(var(--vfx-from-x), var(--vfx-from-y), 0) scaleX(-1);
   animation-name: battle-skill-vfx-travel-rtl;

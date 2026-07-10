@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Side Hero — Idle RPG",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Heróis batalham no painel lateral do Chrome enquanto você navega normalmente.",
   "minimum_chrome_version": "116",
   "permissions": ["storage", "alarms", "tabs", "sidePanel"],

@@ -20,7 +20,7 @@ export interface SkillVfxDefinition {
   svgFile?: string;
   /** Rotação do SVG (ex.: raio vertical → projétil horizontal). */
   rotationDeg?: number;
-  glow?: 'fire' | 'lightning' | 'heal' | 'slash' | 'cold';
+  glow?: 'fire' | 'lightning' | 'heal' | 'slash' | 'cold' | 'holy';
   /** Onde ancorar efeitos; `target_column` = coluna do topo da strip até o chão no alvo. */
   placement?: 'caster' | 'target' | 'target_column';
   /** Proporção largura/altura da coluna quando `placement: 'target_column'`. */
@@ -74,6 +74,55 @@ const SKILL_VFX_BY_ID: Record<string, SkillVfxDefinition> = {
     width: 64,
     height: 136,
     glow: 'lightning',
+  },
+  frost_shard: {
+    skillId: 'frost_shard',
+    motion: 'projectile',
+    svgFile: 'frost_shard.svg',
+    durationMs: 420,
+    width: 72,
+    height: 96,
+    glow: 'cold',
+  },
+  power_attack: {
+    skillId: 'power_attack',
+    motion: 'melee',
+    svgFile: 'power_attack.svg',
+    placement: 'target',
+    durationMs: 420,
+    width: 190,
+    height: 108,
+    glow: 'slash',
+  },
+  thrust: {
+    skillId: 'thrust',
+    motion: 'melee',
+    svgFile: 'thrust.svg',
+    placement: 'target',
+    durationMs: 340,
+    width: 200,
+    height: 80,
+    glow: 'slash',
+  },
+  blessing: {
+    skillId: 'blessing',
+    motion: 'self',
+    svgFile: 'blessing.svg',
+    placement: 'caster',
+    durationMs: 880,
+    width: 120,
+    height: 140,
+    glow: 'holy',
+  },
+  smite: {
+    skillId: 'smite',
+    motion: 'melee',
+    svgFile: 'smite.svg',
+    placement: 'target',
+    durationMs: 400,
+    width: 160,
+    height: 120,
+    glow: 'holy',
   },
   minor_heal: HEAL_VFX,
   blizzard: {

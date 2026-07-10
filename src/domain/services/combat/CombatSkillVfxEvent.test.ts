@@ -65,4 +65,24 @@ describe('createSkillVfxEvent', () => {
       targetId: 'e1',
     });
   });
+
+  it('cria aura no caster para blessing', () => {
+    const action: CombatAction = {
+      skillId: 'blessing',
+      skillName: 'Bênção',
+      kind: 'buff_attack',
+      targeting: 'all_allies',
+      power: 4,
+      targetHeroIds: ['h1', 'h2'],
+    };
+
+    expect(createSkillVfxEvent('blessing', 'hero', 'p1', action)).toEqual({
+      skillId: 'blessing',
+      vfxKind: 'aoe',
+      attackerSide: 'hero',
+      attackerId: 'p1',
+      targetSide: 'hero',
+      targetId: 'h1',
+    });
+  });
 });
