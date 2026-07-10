@@ -109,9 +109,7 @@ export class BattleSkillVfxController {
 
     const host = document.createElement('div');
     host.className = 'battle-skill-vfx battle-skill-vfx--column';
-    if (definition.glow === 'cold') {
-      host.classList.add('battle-skill-vfx--cold');
-    }
+    this.applyGlowClass(host, definition.glow);
     host.setAttribute('aria-hidden', 'true');
     host.style.width = `${width}px`;
     host.style.height = `${height}px`;
@@ -138,9 +136,7 @@ export class BattleSkillVfxController {
 
     const host = document.createElement('div');
     host.className = 'battle-skill-vfx battle-skill-vfx--aoe';
-    if (definition.glow === 'cold') {
-      host.classList.add('battle-skill-vfx--cold');
-    }
+    this.applyGlowClass(host, definition.glow);
     host.setAttribute('aria-hidden', 'true');
     host.style.width = `${definition.width}px`;
     host.style.height = `${definition.height}px`;
@@ -164,11 +160,7 @@ export class BattleSkillVfxController {
 
     const host = document.createElement('div');
     host.className = 'battle-skill-vfx battle-skill-vfx--melee';
-    if (definition.glow === 'slash') {
-      host.classList.add('battle-skill-vfx--slash');
-    } else if (definition.glow === 'holy') {
-      host.classList.add('battle-skill-vfx--holy');
-    }
+    this.applyGlowClass(host, definition.glow);
     if (event.attackerSide === 'enemy') {
       host.classList.add('battle-skill-vfx--melee-rtl');
     }
@@ -194,11 +186,7 @@ export class BattleSkillVfxController {
 
     const host = document.createElement('div');
     host.className = 'battle-skill-vfx battle-skill-vfx--projectile';
-    if (definition.glow === 'lightning') {
-      host.classList.add('battle-skill-vfx--lightning');
-    } else if (definition.glow === 'fire') {
-      host.classList.add('battle-skill-vfx--fire');
-    }
+    this.applyGlowClass(host, definition.glow);
     host.setAttribute('aria-hidden', 'true');
     host.style.width = `${definition.width}px`;
     host.style.height = `${definition.height}px`;
@@ -229,12 +217,12 @@ export class BattleSkillVfxController {
     if (!svgUrl) return;
 
     const host = document.createElement('div');
-    host.className =
-      definition.glow === 'heal'
-        ? 'battle-skill-vfx battle-skill-vfx--heal'
-        : definition.glow === 'holy'
-          ? 'battle-skill-vfx battle-skill-vfx--holy'
-          : 'battle-skill-vfx battle-skill-vfx--self';
+    host.className = 'battle-skill-vfx battle-skill-vfx--self';
+    if (definition.glow === 'heal') {
+      host.classList.add('battle-skill-vfx--heal');
+    } else {
+      this.applyGlowClass(host, definition.glow);
+    }
     host.setAttribute('aria-hidden', 'true');
     host.style.width = `${definition.width}px`;
     host.style.height = `${definition.height}px`;
@@ -279,6 +267,11 @@ export class BattleSkillVfxController {
     this.layer.appendChild(host);
 
     window.setTimeout(() => host.remove(), impact.durationMs + 80);
+  }
+
+  private applyGlowClass(host: HTMLElement, glow?: SkillVfxDefinition['glow']): void {
+    if (!glow) return;
+    host.classList.add(`battle-skill-vfx--${glow}`);
   }
 
   private createSvgFrame(svgUrl: string, rotationDeg?: number): HTMLElement {

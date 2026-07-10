@@ -81,6 +81,61 @@ describe('SkillVfxCatalog', () => {
     expect(getSkillVfxDefinition('smite')?.glow).toBe('holy');
   });
 
+  it('registra ascensão tier 1 e skills comuns de inimigos', () => {
+    const nextBatch = [
+      'mil_guer_cleave',
+      'arc_mag_bolt',
+      'arc_arq_nova',
+      'sag_clr_light',
+      'pyro_inferno',
+      'pyro_ember',
+      'goblin_stab',
+      'orc_smash',
+      'poison_spit',
+      'ground_slam',
+      'dragon_breath',
+      'wraith_drain',
+      'frost_breath',
+    ] as const;
+
+    for (const skillId of nextBatch) {
+      expect(getSkillVfxDefinition(skillId)).not.toBeNull();
+    }
+
+    expect(getSkillVfxDefinition('arc_mag_bolt')?.svgFile).toBe('thunder_bolt.svg');
+    expect(getSkillVfxDefinition('goblin_stab')?.svgFile).toBe('thrust.svg');
+    expect(getSkillVfxDefinition('reaver_cleave')?.svgFile).toBe('cleave.svg');
+    expect(getSkillVfxDefinition('frost_breath')?.svgFile).toBe('blizzard.svg');
+    expect(getSkillVfxDefinition('saci_fire')?.svgFile).toBe('pyro_ember.svg');
+  });
+
+  it('registra ascensões, curas avançadas e debuffs', () => {
+    const batch = [
+      'wraith_curse',
+      'arc_arq_rift',
+      'inn_sob_comet',
+      'oracle_sanctuary',
+      'vid_gua_aegis',
+      'mil_gen_decree',
+      'mar_gla_bleed',
+      'sag_san_grace',
+      'inn_fil_storm',
+      'mar_mes_flow',
+      'arc_mag_weave',
+      'vid_clr_bloom',
+      'mar_cam_crown',
+    ] as const;
+
+    for (const skillId of batch) {
+      expect(getSkillVfxDefinition(skillId)).not.toBeNull();
+    }
+
+    expect(getSkillVfxDefinition('arc_arq_bind')?.svgFile).toBe('curse.svg');
+    expect(getSkillVfxDefinition('inn_fil_ether')?.svgFile).toBe('arc_rift.svg');
+    expect(getSkillVfxDefinition('vid_gua_pulse')?.svgFile).toBe('radiance.svg');
+    expect(getSkillVfxDefinition('mil_guer_hold')?.glow).toBe('shield');
+  });
+
   it('retorna null para skills sem VFX', () => {
     expect(getSkillVfxDefinition('mana_shield')).toBeNull();
   });
