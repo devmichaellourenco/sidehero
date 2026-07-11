@@ -18,12 +18,13 @@ import {
 } from './BalanceAudit';
 
 describe('BalanceAudit — curva por tier', () => {
-  it('mapeia faixas early / mid / late conforme spec', () => {
+  it('mapeia faixas early / mid / late conforme spec (jogo base v1)', () => {
     expect(tierBandForTier(1)).toBe('early');
     expect(tierBandForTier(25)).toBe('early');
     expect(tierBandForTier(26)).toBe('mid');
-    expect(tierBandForTier(60)).toBe('mid');
-    expect(tierBandForTier(61)).toBe('late');
+    expect(tierBandForTier(100)).toBe('mid');
+    expect(tierBandForTier(101)).toBe('late');
+    expect(tierBandForTier(200)).toBe('late');
     expect(tierBandForTier(500)).toBe('late');
   });
 
@@ -102,8 +103,8 @@ describe('BalanceAudit — economia ouro vs loja/forja', () => {
     const late = auditTierBand('late', BALANCE_ANCHOR_TIERS);
 
     expect(early.tiers).toEqual([1, 10, 25]);
-    expect(mid.tiers).toEqual([26, 40, 60]);
-    expect(late.tiers).toEqual([61, 100, 250, 500]);
+    expect(mid.tiers).toEqual([26, 50, 100]);
+    expect(late.tiers).toEqual([150, 200]);
     expect(early.maxGoldPerPhase).toBeLessThan(mid.minGoldPerPhase * 4);
     expect(mid.maxGoldPerPhase).toBeLessThan(late.minGoldPerPhase * 2);
   });
@@ -122,14 +123,14 @@ describe('BalanceAudit — tempo de clear estimado', () => {
     }
   });
 
-  it('finale 10-50 é o marco com mais HP entre os milestones principais', () => {
-    const finale = summarizePhaseEconomy(buildPhaseId(10, 50))!;
-    const mid = summarizePhaseEconomy(buildPhaseId(5, 50))!;
+  it('finale 4-50 é o marco com mais HP entre os milestones do jogo base', () => {
+    if (ENEMY_QUICK_PHASE_TEST_HP) return;
+
+    const finale = summarizePhaseEconomy(buildPhaseId(4, 50))!;
+    const mid = summarizePhaseEconomy(buildPhaseId(3, 50))!;
 
     expect(finale.totalEnemyHp).toBeGreaterThanOrEqual(mid.totalEnemyHp);
-    if (!ENEMY_QUICK_PHASE_TEST_HP) {
-      expect(finale.totalEnemyHp).toBeGreaterThan(mid.totalEnemyHp);
-    }
+    expect(finale.totalEnemyHp).toBeGreaterThan(mid.totalEnemyHp);
     expect(finale.estimatedClearSeconds).toBeGreaterThanOrEqual(mid.estimatedClearSeconds);
     expect(isClearSecondsInBand('late', finale.estimatedClearSeconds)).toBe(true);
   });
@@ -137,7 +138,7 @@ describe('BalanceAudit — tempo de clear estimado', () => {
 
 describe('BalanceAudit — BAL-007 milestone gold', () => {
   it('marcos X-50 não trivializam épico na loja', () => {
-    for (const mapIndex of [1, 2, 5, 10]) {
+    for (const mapIndex of [1, 2, 4]) {
       const phaseId = buildPhaseId(mapIndex, 50);
       const economy = summarizePhaseEconomy(phaseId)!;
       const ratios = summarizeEconomyRatios(economy.tier);

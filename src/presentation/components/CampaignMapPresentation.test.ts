@@ -37,14 +37,32 @@ function phase(
     selected: options.selected ?? false,
     playable: options.playable ?? false,
     milestoneBoss: options.milestoneBoss ?? id.endsWith('-50'),
-    seasonFinale: options.seasonFinale ?? id === '10-50',
+    seasonFinale: options.seasonFinale ?? id === '4-50',
     actNumber: Math.min(5, Math.max(1, Math.ceil(phaseNumber / 10))),
     featuredEnemyTypes: ['goblin_raider'],
   };
 }
 
 function map(id: string, name: string, unlocked: boolean, phases: ReturnType<typeof phase>[]): CampaignMapDto {
-  return { id, name, unlocked, phases };
+  return {
+    id,
+    name,
+    unlocked,
+    phases,
+    actScenes: phases
+      .filter((entry, index, list) => list.findIndex((p) => p.actNumber === entry.actNumber) === index)
+      .map((entry) => ({
+        id: `${id}-act-${entry.actNumber}`,
+        mapId: id,
+        actNumber: entry.actNumber,
+        title: `Cena ${entry.actNumber}`,
+        recap: 'Recap',
+        preview: 'Preview',
+        imageAssetPath: null,
+        unlocked,
+        viewed: false,
+      })),
+  };
 }
 
 function overview(maps: CampaignMapDto[]): CampaignOverviewDto {
@@ -144,7 +162,7 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
     const html = renderCampaignOverviewTooltipContent(campaign);
     expect(html).toContain('role="progressbar"');
     expect(html).toContain('aria-valuenow="1"');
-    expect(html).toContain('aria-valuemax="500"');
+    expect(html).toContain('aria-valuemax="200"');
   });
 });
 

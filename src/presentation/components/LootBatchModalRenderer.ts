@@ -57,7 +57,7 @@ export class LootBatchModalRenderer {
       </div>
       ${
         optimizeAction ||
-        '<p class="loot-batch-locked">Otimizar loot em lote: desbloqueie em Melhorias.</p><div class="loot-reveal-actions"><button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button></div>'
+        '<p class="loot-batch-locked">Otimizar loot em lote: desbloqueie em Runas.</p><div class="loot-reveal-actions"><button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button></div>'
       }
     `;
 

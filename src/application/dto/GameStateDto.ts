@@ -243,6 +243,7 @@ export interface CampaignProgressDto {
   clearedPhaseIds: string[];
   highestTierReached: number;
   seasonCompleted: boolean;
+  viewedActSceneIds: string[];
 }
 
 export interface CombatIntermissionDto {

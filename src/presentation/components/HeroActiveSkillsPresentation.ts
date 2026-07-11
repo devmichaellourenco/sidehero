@@ -93,8 +93,8 @@ function renderEmptyAssignableSlot(slotIndex: number, heroId: string): string {
 
 function renderLockedSkillSlot(slotNumber: number): string {
   const frameUrl = getGearFrameSprite('common');
-  const upgradeName = LOCKED_SLOT_UPGRADE_NAMES[slotNumber] ?? 'Melhorias';
-  const title = `Slot bloqueado — desbloqueie em Melhorias (${upgradeName})`;
+  const upgradeName = LOCKED_SLOT_UPGRADE_NAMES[slotNumber] ?? 'Runas';
+  const title = `Slot bloqueado — desbloqueie em Runas (${upgradeName})`;
 
   return `
     <button

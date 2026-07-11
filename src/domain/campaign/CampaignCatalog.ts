@@ -1,5 +1,6 @@
 import { MapId, PhaseId } from './CampaignIds';
 import { CAMPAIGN_MAPS } from './CampaignMaps';
+import { releasedCampaignMaps, seasonFinalePhaseId } from './CampaignReleaseScope';
 import { HANDCRAFTED_PHASES } from './HandcraftedPhaseCatalog';
 import { PhaseDefinition } from './PhaseDefinition';
 
@@ -18,7 +19,7 @@ export interface CampaignInfo {
 const CAMPAIGN: CampaignInfo = {
   id: 'apprentice',
   name: 'Ascensão de Nix',
-  maps: CAMPAIGN_MAPS.map((map) => ({
+  maps: releasedCampaignMaps().map((map) => ({
     id: map.id,
     name: map.name,
     phaseCount: map.phaseCount,
@@ -50,5 +51,5 @@ export function listPhasesForMap(mapId: MapId): PhaseDefinition[] {
 }
 
 export function getSeasonFinalePhase(): PhaseDefinition | null {
-  return handcraftedMap.get('10-50') ?? null;
+  return handcraftedMap.get(seasonFinalePhaseId()) ?? null;
 }

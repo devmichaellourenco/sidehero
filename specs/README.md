@@ -6,7 +6,7 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 
 | Feature | Aceite | Testes spec | Pendências |
 |---------|--------|-------------|------------|
-| [combat-campaign](combat-campaign.spec.md) | 8/8 | 6/6 | — |
+| [combat-campaign](combat-campaign.spec.md) | 15/15 | 9/9 | — |
 | [heroes-party](heroes-party.spec.md) | 9/9 | 10/10 | — |
 | [skills-progression](skills-progression.spec.md) | 9/9 | 10/10 | — |
 | [gear-loot](gear-loot.spec.md) | 6/6 | 6/6 | — |
@@ -14,19 +14,24 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [stash-forge](stash-forge.spec.md) | 8/8 | 7/7 | — |
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
 | [upgrade-tree](upgrade-tree.spec.md) | 8/8 | 7/7 | — |
-| [meta-legacy](meta-legacy.spec.md) | 5/5 | 1/1 | — |
+| [meta-legacy](meta-legacy.spec.md) | 6/6 | 1/1 | — |
 | [battle-ui](battle-ui.spec.md) | 9/9 | 8/8 | — |
-| [art-scenes](art-scenes.spec.md) | 1/6 | 2/2 | demais regiões sem arte |
+| [art-scenes](art-scenes.spec.md) | 4/9 | 2/2 | strip das 4 regiões base |
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
 | [game-balance](game-balance.spec.md) | 9/9 | 11/11 | — |
+| [story-scenes](story-scenes.spec.md) | 9/10 | 5/5 | copy DLC placeholder |
 
-**Total aceite (features):** 72/72 (100%)  
+**Total aceite (features):** 85/93 (91%)  
 **Balanceamento transversal:** 9/9  
-**Total testes listados nas specs:** 69/69 (100%)
+**Total testes listados nas specs:** 77/77 (100%)
+
+## Escopo do jogo (v1)
+
+Campanha jogável até **Morthaven** (`4-50`, tier 200). Regiões 5–10 (DLC) permanecem no código mas ocultas — ver [`combat-campaign.spec.md`](combat-campaign.spec.md) (seção Escopo do jogo base).
 
 ## Próxima feature sugerida
 
-Backlog inventário Fase 2: [`gear-loot.spec.md`](gear-loot.spec.md).
+Polish e balanceamento do jogo base (tiers 1–200); arte de battle strip das 4 regiões — [`art-scenes.spec.md`](art-scenes.spec.md).
 
 ## Regras de workflow do agente
 
@@ -60,6 +65,7 @@ Backlog inventário Fase 2: [`gear-loot.spec.md`](gear-loot.spec.md).
 | [art-scenes](art-scenes.spec.md) | Cenários de batalha e banners por região | — | `.cursor/skills/battle-ui/` |
 | [chrome-infra](chrome-infra.spec.md) | Extension, storage, SW, panel | `.cursor/agents/chrome-infra.md` | `.cursor/skills/chrome-infra/` |
 | [game-balance](game-balance.spec.md) | Curva, fórmulas, auditoria transversal | `.cursor/agents/game-balance.md` | `.cursor/skills/game-balance/` |
+| [story-scenes](story-scenes.spec.md) | Cenas narrativas por ato, overlay com pausa | `.cursor/agents/story-scenes.md` | `.cursor/skills/story-scenes/` |
 
 ## Arquitetura global
 

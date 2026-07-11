@@ -19,10 +19,6 @@ export class PauseForLoadoutUseCase {
       throw new Error('Não há missão ativa para voltar ao acampamento');
     }
 
-    if (state.campaignProgress.seasonCompleted) {
-      throw new Error('Temporada concluída — inicie um novo jogo');
-    }
-
     const nextState = state
       .withCombat(null)
       .withLoadoutEditOpen(true)

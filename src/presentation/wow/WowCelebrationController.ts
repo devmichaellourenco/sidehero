@@ -73,6 +73,10 @@ export class WowCelebrationController {
     this.pumpCelebrationQueue();
   }
 
+  isBlockingAdvance(): boolean {
+    return this.activeCelebration !== null;
+  }
+
   destroy(): void {
     this.stopCelebrationTimer();
   }

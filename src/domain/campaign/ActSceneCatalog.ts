@@ -1,0 +1,243 @@
+import { MapId } from './CampaignIds';
+import { releasedCampaignMaps } from './CampaignReleaseScope';
+
+export interface ActSceneDefinition {
+  id: string;
+  mapId: MapId;
+  actNumber: number;
+  title: string;
+  /** O que já aconteceu até este ponto. */
+  recap: string;
+  /** O que o grupo enfrentará neste ato. */
+  preview: string;
+}
+
+export function buildActSceneId(mapId: MapId, actNumber: number): string {
+  return `${mapId}-act-${actNumber}`;
+}
+
+type ActCopy = Pick<ActSceneDefinition, 'title' | 'recap' | 'preview'>;
+
+const SCENES_BY_MAP: Record<
+  MapId,
+  { acts: [ActCopy, ActCopy, ActCopy, ActCopy, ActCopy] }
+> = {
+  stendra: {
+    acts: [
+      {
+        title: 'Ecos nas Planícies',
+        recap:
+          'Galneon, Nix e Elara deixam o acampamento inicial rumo a Estrenda, onde relatos de saques se multiplicam.',
+        preview:
+          'Goblins e bandoleiros testam a formação nas primeiras encostas verdes. A party aprende o ritmo da batalha.',
+      },
+      {
+        title: 'Trilha dos Salteadores',
+        recap:
+          'Os heróis dispersaram bandos menores, mas as caravanas ainda desaparecem nas encruzilhadas.',
+        preview:
+          'Emboscadas coordenadas e líderes mais audazes bloqueiam a estrada principal. O perigo deixa de ser acidental.',
+      },
+      {
+        title: 'Ruínas da Vigília',
+        recap:
+          'A estrada ficou mais segura, porém torres antigas voltaram a acender luzes na noite.',
+        preview:
+          'Patrulhas misturam mortos-vivos e arqueiros em ruínas estreitas. Cada sala esconde um emboscador.',
+      },
+      {
+        title: 'Sopro do Guardião',
+        recap:
+          'Os heróis mapearam os esconderijos locais; um poder elemental pulsa sob o forte quebrado.',
+        preview:
+          'Elementais e capitães corrompidos guardam o caminho para o coração de Estrenda. A pressão aumenta.',
+      },
+      {
+        title: 'Julgamento de Estrenda',
+        recap:
+          'Resta apenas o núcleo do conflito — o Guardião Elemental desperta para expulsar intrusos.',
+        preview:
+          'O boss do capítulo decide se a party merece avançar além das planícies. Vitória abre o caminho para Gruftall.',
+      },
+    ],
+  },
+  gruftall: {
+    acts: [
+      {
+        title: 'Fronteira de Cinzas',
+        recap:
+          'Após Estrenda, o ar quente e seco anuncia Gruftall, terra sob a sombra de Gonodor.',
+        preview:
+          'Monstros errantes e scavengers vagam entre crateras. A party precisa se adaptar ao terreno hostil.',
+      },
+      {
+        title: 'Cinzas Profundas',
+        recap:
+          'A travessia inicial provou que Gruftall não perdoa hesitação; cinzas grossas encobrem armadilhas.',
+        preview:
+          'Patrulhas maiores e conjuradores goblins testam resistências. O calor drena forças lentamente.',
+      },
+      {
+        title: 'Ruína Fumegante',
+        recap:
+          'Os heróis encontraram acampamentos abandonados — sinais de que algo maior varreu a região.',
+        preview:
+          'Elites e aberrações de cinza bloqueiam passagens estreitas entre torres desmoronadas.',
+      },
+      {
+        title: 'Voz de Gonodor',
+        recap:
+          'Ecos de risada distante percorrem as ruínas; o nome Gonodor volta em canções de medo.',
+        preview:
+          'A party sente a influência destrutiva do deus afro antes de vê-lo. Waves mais brutais e sincronizadas.',
+      },
+      {
+        title: 'Centelha de Gonodor',
+        recap:
+          'O epicentro do poder destrutivo finalmente responde — apenas uma centelha, dizem, mas suficiente para incendiar um exército.',
+        preview:
+          'O confronto com a Centelha de Gonodor marca o fim de Gruftall e abre Valdris àqueles que sobreviverem.',
+      },
+    ],
+  },
+  valdris: {
+    acts: [
+      {
+        title: 'Névoa Espectral',
+        recap:
+          'Valdris surge como um vale de colunas quebradas, onde a luz do dia não dissipa o frio.',
+        preview:
+          'Mortos-vivos e predadores das ruínas caçam em silêncio. A party avança entre ecos e sombras.',
+      },
+      {
+        title: 'Tumbas Abertas',
+        recap:
+          'Os primeiros salões foram limpos, mas novas portas se abriram sozinhas nas profundezas.',
+        preview:
+          'Necromantes menores e enxames de esqueletos testam a cura e o controle de área do grupo.',
+      },
+      {
+        title: 'Sussurros do Vale',
+        recap:
+          'Inscrições antigas contam um espectro que vigia Valdris desde a queda da cidade.',
+        preview:
+          'Elites espectrais e elementalistas corrompidos atacam em pares. Coordenação é essencial.',
+      },
+      {
+        title: 'Corte Quebrada',
+        recap:
+          'O espectro de Valdris manipula os vivos restantes; a party interrompe rituais em câmaras ocultas.',
+        preview:
+          'Capitães orcs e invocações mistas guardam o penúltimo anel do vale.',
+      },
+      {
+        title: 'Espectro de Valdris',
+        recap:
+          'O vale inteiro treme quando o guardião espectral se manifesta para julgar os intrusos.',
+        preview:
+          'Derrotar o espectro abre o caminho para Morthaven — castelo decadente e último bastião do jogo base.',
+      },
+    ],
+  },
+  morthaven: {
+    acts: [
+      {
+        title: 'Muralhas de Morthaven',
+        recap:
+          'O castelo sombrio de Morthaven domina o horizonte; seus lordes preferem a escuridão à paz.',
+        preview:
+          'Orcs, trolls menores e cultistas patrulham os primeiros pátios. A party entra pela brecha leste.',
+      },
+      {
+        title: 'Salões Opressores',
+        recap:
+          'Os pátios externos caíram, mas corredores internos ainda fervilham de servos armados.',
+        preview:
+          'Necromantes renegados e bestas de cerco estreitam o campo de batalha em salões baixos.',
+      },
+      {
+        title: 'Criptas do Duque',
+        recap:
+          'Rumores apontam o Duque de Morthaven como mente por trás dos ataques coordenados.',
+        preview:
+          'Elites vampíricas e constructos de carne bloqueiam as criptas. Cada vitória revela mais do complô.',
+      },
+      {
+        title: 'Ascensão ao Trono Menor',
+        recap:
+          'O Duque recuou para a torre central; só restam os mais leais — e os mais monstruosos.',
+        preview:
+          'Trolls das montanhas e magos de sangue defendem a escadaria final do castelo.',
+      },
+      {
+        title: 'Duque de Morthaven',
+        recap:
+          'No ápice do castelo, o Duque concentra o que resta de seu domínio para esmagar os heróis.',
+        preview:
+          'Este é o **finale do jogo base**. Vencer encerra a temporada e consolida tudo o que a party conquistou até aqui.',
+      },
+    ],
+  },
+  broken_sky: { acts: placeholderActs('Céu Quebrado') },
+  crimson_abyss: { acts: placeholderActs('Abismo Carmesim') },
+  eternal_forge: { acts: placeholderActs('Forja Eterna') },
+  ancient_grove: { acts: placeholderActs('Bosque Antigo') },
+  twilight_tower: { acts: placeholderActs('Torre do Crepúsculo') },
+  void_throne: { acts: placeholderActs('Trono do Vazio') },
+};
+
+function placeholderActs(regionName: string): [ActCopy, ActCopy, ActCopy, ActCopy, ActCopy] {
+  return [1, 2, 3, 4, 5].map((actNumber) => ({
+    title: `${regionName} — Ato ${actNumber}`,
+    recap: 'Narrativa reservada para DLC futura.',
+    preview: 'Conteúdo será liberado em expansão.',
+  })) as [ActCopy, ActCopy, ActCopy, ActCopy, ActCopy];
+}
+
+function buildCatalog(): ActSceneDefinition[] {
+  const scenes: ActSceneDefinition[] = [];
+
+  for (const map of releasedCampaignMaps()) {
+    const copy = SCENES_BY_MAP[map.id];
+    if (!copy) continue;
+
+    copy.acts.forEach((act, index) => {
+      const actNumber = index + 1;
+      scenes.push({
+        id: buildActSceneId(map.id, actNumber),
+        mapId: map.id,
+        actNumber,
+        ...act,
+      });
+    });
+  }
+
+  return scenes;
+}
+
+export const ACT_SCENE_CATALOG: ActSceneDefinition[] = buildCatalog();
+
+const sceneById = new Map(ACT_SCENE_CATALOG.map((scene) => [scene.id, scene]));
+
+export function resolveActScene(mapId: MapId, actNumber: number): ActSceneDefinition | null {
+  return sceneById.get(buildActSceneId(mapId, actNumber)) ?? null;
+}
+
+export function resolveActSceneById(sceneId: string): ActSceneDefinition | null {
+  return sceneById.get(sceneId) ?? null;
+}
+
+export function listActScenesForMap(mapId: MapId): ActSceneDefinition[] {
+  return ACT_SCENE_CATALOG.filter((scene) => scene.mapId === mapId);
+}
+
+/** Caminho relativo de asset para banner da região (v1). */
+export function actSceneImageAssetPath(mapId: MapId): string | null {
+  const paths: Partial<Record<MapId, string>> = {
+    stendra: 'campaign/stendra/campaign_stendra_banner.png',
+    gruftall: 'campaign/grutfall/campaign_grutfall_banner.png',
+    valdris: 'campaign/valdris/campaign_valdris_banner.png',
+    morthaven: 'campaign/morthaven/campaign_morthaven_banner.png',
+  };
+  return paths[mapId] ?? null;
+}

@@ -57,7 +57,7 @@ export class GearEquipFlow {
   ): Promise<void> {
     const state = this.getState();
     if (!getFeatureFlags(state).optimizeLoadout) {
-      this.toasts.show('Desbloqueie Otimizar equipe em Melhorias', 'info');
+      this.toasts.show('Desbloqueie Otimizar equipe em Runas', 'info');
       return;
     }
 

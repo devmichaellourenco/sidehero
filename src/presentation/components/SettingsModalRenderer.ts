@@ -18,7 +18,7 @@ export class SettingsModalRenderer {
     handlers: SettingsModalHandlers,
   ): void {
     container.innerHTML = `
-      <p class="settings-intro">Auto-batalha já vem ativa. Outras automações exigem Melhorias.</p>
+      <p class="settings-intro">Auto-batalha já vem ativa. Outras automações exigem Runas.</p>
       <div class="settings-list">
         ${this.renderToggle({
           key: 'autoBattle',
@@ -104,7 +104,7 @@ export class SettingsModalRenderer {
         <div class="settings-item settings-item-locked">
           <span class="settings-item-text">
             <strong>${options.title}</strong>
-            <small>Desbloqueie em <button type="button" class="settings-link-btn" data-open-upgrades>Melhorias</button></small>
+            <small>Desbloqueie em <button type="button" class="settings-link-btn" data-open-upgrades>Runas</button></small>
           </span>
         </div>
       `;

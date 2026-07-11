@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 1/6 (17%)  
+**Aceite:** 4/9 (44%) · v1 foca nas 4 regiões base  
 **Testes obrigatórios:** 2/2 (Estrenda)
 
 ## Objetivo
@@ -15,11 +15,15 @@ Cada região da campanha tem **cenário de batalha** (painéis L/R + céu elást
 - [x] `gruftall`: banner `campaign_grutfall_banner.png` no mapa-mundo (painéis de batalha pendentes)
 - [x] `valdris`: banner `campaign_valdris_banner.png` no mapa-mundo (painéis pendentes)
 - [x] `morthaven`: banner `campaign_morthaven_banner.png` no mapa-mundo (painéis pendentes)
-- [ ] Demais mapas (`broken_sky` … `void_throne`) seguem o mesmo padrão de assets
+- [ ] Battle strip completa (L/R + chão) para as quatro regiões base
 - [ ] Layout da strip escala de ~280px a ~900px sem cortar zona central de combate
 - [ ] Fallback: gradiente genérico quando mapa não tem cena cadastrada
 - [ ] Assets em `public/sprites/campaign/{mapId}/` copiados no build
 - [ ] Catálogo em `CampaignSceneCatalog.ts` é fonte única de paths
+
+### Backlog DLC (fora do escopo v1)
+
+Mapas `broken_sky` … `void_throne` seguem o mesmo padrão de assets quando cada DLC for liberado.
 
 ## Convenção de arquivos
 

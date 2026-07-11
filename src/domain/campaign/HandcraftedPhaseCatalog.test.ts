@@ -18,12 +18,18 @@ describe('HandcraftedPhaseCatalog', () => {
     }
   });
 
-  it('define finale da temporada em 10-50 sem desbloqueios', () => {
+  it('define finale da temporada em 4-50 sem desbloqueios no perfil base', () => {
     const finale = getSeasonFinalePhase();
-    expect(finale?.id).toBe('10-50');
+    expect(finale?.id).toBe('4-50');
     expect(finale?.seasonFinale).toBe(true);
     expect(finale?.unlocks).toEqual([]);
-    expect(finale?.difficultyTier).toBe(500);
+    expect(finale?.difficultyTier).toBe(200);
+  });
+
+  it('não desbloqueia mapa DLC ao concluir Morthaven', () => {
+    const morthavenFinale = resolvePhase('4-50');
+    expect(morthavenFinale?.unlocks).toEqual([]);
+    expect(resolvePhase('5-1')).not.toBeNull();
   });
 
   it('não usa gerador procedural no catálogo', () => {

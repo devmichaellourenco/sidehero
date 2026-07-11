@@ -16,4 +16,17 @@ describe('CampaignProgress', () => {
     expect(progress.isUnlocked(buildPhaseId(1, 2))).toBe(true);
     expect(progress.highestTierReached).toBe(1);
   });
+
+  it('bloqueia fases DLC mesmo se desbloqueadas no save', () => {
+    const progress = CampaignProgress.restore({
+      unlockedPhaseIds: [buildPhaseId(1, 1), buildPhaseId(5, 1)],
+      clearedPhaseIds: [],
+      selectedPhaseId: buildPhaseId(1, 1),
+      highestTierReached: 1,
+      seasonCompleted: false,
+    });
+
+    expect(progress.isUnlocked(buildPhaseId(5, 1))).toBe(true);
+    expect(progress.canPlayPhase(buildPhaseId(5, 1))).toBe(false);
+  });
 });

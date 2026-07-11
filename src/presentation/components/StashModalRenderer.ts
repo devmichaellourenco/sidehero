@@ -25,7 +25,7 @@ export class StashModalRenderer {
       container.innerHTML = `
         <div class="inventory-panel stash-panel">
           <p class="empty-state modal-empty">
-            Baú de itens bloqueado. Desbloqueie <strong>Baú de itens I</strong> em Melhorias.
+            Baú de itens bloqueado. Desbloqueie <strong>Baú de itens I</strong> em Runas.
           </p>
         </div>
       `;

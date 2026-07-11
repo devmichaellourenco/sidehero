@@ -16,6 +16,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Todo card Wow exibe botão de rodapé (padrão **Entendi** para dispensar); o [×] só aparece em CTAs de ação no modo center
 - [x] Baú flutuante na batalha quando pendente
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
+- [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer em ícones com badges (baús, pendências)
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)
 - [x] Barras de vida verdes; HP na strip

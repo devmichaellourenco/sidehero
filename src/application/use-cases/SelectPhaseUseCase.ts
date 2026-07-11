@@ -1,4 +1,5 @@
 import { resolvePhase } from '../../domain/campaign/CampaignCatalog';
+import { isPhaseReleased } from '../../domain/campaign/CampaignReleaseScope';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
@@ -15,6 +16,10 @@ export class SelectPhaseUseCase {
 
     if (!phase) {
       throw new Error('Fase não encontrada');
+    }
+
+    if (!isPhaseReleased(phaseId)) {
+      throw new Error('Fase indisponível nesta versão do jogo');
     }
 
     if (!state.campaignProgress.canPlayPhase(phaseId)) {

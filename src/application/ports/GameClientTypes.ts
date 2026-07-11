@@ -13,7 +13,8 @@ export type SpendTargetMessage =
   | { type: 'skill'; skillId: string };
 
 export type GameMessage =
-  | { type: 'GET_STATE' }
+  | { type: 'SET_PARTY_SLOT'; slotIndex: number; heroId: string }
+  | { type: 'MARK_ACT_SCENE_VIEWED'; sceneId: string };
   | { type: 'GET_CAMPAIGN_OVERVIEW' }
   | { type: 'SELECT_PHASE'; phaseId: string }
   | { type: 'NEW_GAME' }

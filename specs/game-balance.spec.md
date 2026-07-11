@@ -50,7 +50,7 @@ Poder × crítico → split damageComponents[]
 - [x] Matriz de coordenação com specs de feature documentada
 - [x] DOT (`CombatTurnPhase`) mitigado por elemento + defesas como hit instantâneo
 - [x] Ciclo elemental completo: skills `frost_shard`, `blizzard` e `frost_breath` (gelo)
-- [x] Auditoria documentada de curva tier 1–25 (early), 26–60 (mid), 61+ (late)
+- [x] Auditoria documentada de curva tier 1–25 (early), 26–100 (mid), 101–200 (late) no jogo base v1
 - [x] Loja, loot e baús validados contra renda de ouro por fase (sem trivializar nem starvation)
 - [x] Ouro de combate em fases normais limitado à renda de referência do tier (`PhaseGoldBudget`)
 - [x] Waves/boss: tempo médio para clear dentro de faixa alvo por tier (ver skill)
@@ -77,6 +77,18 @@ Poder × crítico → split damageComponents[]
 - `allElemental` soma a **todos** os elementos (não a físico)
 - Scaling de inimigo usa `difficultyTier` global da fase, não stage local arbitrário
 - Determinismo: IDs de oferta/seed não podem mudar item ao recomprar no mesmo tier+seed
+
+## Escopo v1 (jogo base até Morthaven)
+
+Auditoria de balanceamento do release inicial cobre **tier 1–200** (fases `1-1` … `4-50`). Tiers 201–500 (DLC) permanecem no catálogo numérico mas ficam fora do escopo de aceite até liberação de DLC.
+
+| Faixa | Tiers (v1) | Notas |
+|-------|------------|-------|
+| Early | 1–25 | Estrenda |
+| Mid | 26–100 | Gruftall + início Valdris |
+| Late | 101–200 | Valdris + Morthaven |
+
+Âncoras de auditoria v1: `1, 10, 25, 26, 50, 100, 150, 200`. Tiers `250` e `500` reservados para perfil `full` / DLC.
 
 ## Fora de escopo
 

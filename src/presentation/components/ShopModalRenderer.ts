@@ -106,7 +106,7 @@ export class ShopModalRenderer {
         </button>
       `
       : `
-        <p class="shop-refresh-locked">Renovar estoque: desbloqueie em <strong>Melhorias</strong></p>
+        <p class="shop-refresh-locked">Renovar estoque: desbloqueie em <strong>Runas</strong></p>
       `;
 
     container.innerHTML = `

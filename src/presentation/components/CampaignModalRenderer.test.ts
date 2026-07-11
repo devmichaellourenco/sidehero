@@ -27,7 +27,7 @@ function phase(
     selected: options.selected ?? false,
     playable: options.playable ?? false,
     milestoneBoss: id.endsWith('-50'),
-    seasonFinale: id === '10-50',
+    seasonFinale: id === '4-50',
     actNumber: Math.min(5, Math.max(1, Math.ceil(phaseNumber / 10))),
     featuredEnemyTypes: ['goblin_raider'],
   };
@@ -51,12 +51,14 @@ function buildOverview(): CampaignOverviewDto {
             selected: true,
           }),
         ],
+        actScenes: [],
       },
       {
         id: 'gruftall',
         name: 'Gruftall',
         unlocked: false,
         phases: [phase('2-1')],
+        actScenes: [],
       },
     ],
   };

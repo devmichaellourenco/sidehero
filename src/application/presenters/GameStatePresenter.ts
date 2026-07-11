@@ -118,6 +118,7 @@ export class GameStatePresenter {
         clearedPhaseIds: [...state.campaignProgress.clearedPhaseIds],
         highestTierReached: state.campaignProgress.highestTierReached,
         seasonCompleted: state.campaignProgress.seasonCompleted,
+        viewedActSceneIds: [...state.campaignProgress.viewedActSceneIds],
       },
       seasonCompleted: state.campaignProgress.seasonCompleted,
       stage: state.stage,

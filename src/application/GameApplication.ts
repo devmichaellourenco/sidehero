@@ -35,7 +35,7 @@ import { SalvageGearInForgeUseCase } from './use-cases/SalvageGearInForgeUseCase
 import { GameApplicationDependencies } from './GameApplicationDependencies';
 import { GetMetaTreeUseCase } from './use-cases/GetMetaTreeUseCase';
 import { PurchaseMetaUpgradeUseCase } from './use-cases/PurchaseMetaUpgradeUseCase';
-import { MetaService } from '../domain/meta/MetaService';
+import { MarkActSceneViewedUseCase } from './use-cases/MarkActSceneViewedUseCase';
 import { IMetaProgressRepository } from '../domain/repositories/IMetaProgressRepository';
 
 export class GameApplication {
@@ -74,6 +74,7 @@ export class GameApplication {
   readonly salvageGearInForge: SalvageGearInForgeUseCase;
   readonly getMetaTree: GetMetaTreeUseCase;
   readonly purchaseMetaUpgrade: PurchaseMetaUpgradeUseCase;
+  readonly markActSceneViewed: MarkActSceneViewedUseCase;
 
   constructor(
     repository: IGameStateRepository,
@@ -158,5 +159,6 @@ export class GameApplication {
       metaService,
       presenter,
     );
+    this.markActSceneViewed = new MarkActSceneViewedUseCase(repository, presenter);
   }
 }

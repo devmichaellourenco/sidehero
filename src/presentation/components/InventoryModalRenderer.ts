@@ -140,7 +140,7 @@ export class InventoryModalRenderer {
 
     const optimizeButton =
       options.showOptimize === false
-        ? '<p class="inventory-optimize-locked">Otimizar equipe: desbloqueie em Melhorias.</p>'
+        ? '<p class="inventory-optimize-locked">Otimizar equipe: desbloqueie em Runas.</p>'
         : `
       <button
         type="button"

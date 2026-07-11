@@ -18,12 +18,15 @@ import {
   type UpgradeTreeViewportState,
 } from './UpgradeTreeViewportBinder';
 
+import {
+  bindUpgradeNodeTooltip,
+  hideUpgradeNodeTooltip,
+} from './UpgradeNodeTooltipBinder';
+
 export type UpgradeTreeHandlers = {
   onPurchase: (upgradeId: string) => void;
 };
 
-const TOOLTIP_PORTAL_ID = 'upgrade-node-tooltip-portal';
-let tooltipHideTimer: number | null = null;
 let unbindViewport: (() => void) | null = null;
 
 export class UpgradeTreeModalRenderer {
@@ -31,7 +34,7 @@ export class UpgradeTreeModalRenderer {
   private preservedViewport: UpgradeTreeViewportState | null = null;
   private autoFocusPending = true;
 
-  /** Chamar ao abrir o modal de melhorias (nova sessão). */
+  /** Chamar ao abrir o modal de runas (nova sessão). */
   beginSession(): void {
     this.preservedViewport = null;
     this.autoFocusPending = true;
@@ -184,20 +187,12 @@ export class UpgradeTreeModalRenderer {
       const node = this.nodeById.get(nodeId);
       if (!node) return;
 
-      const show = () => {
-        cancelUpgradeTooltipHide();
-        showUpgradeNodeTooltip(
-          element as HTMLElement,
-          node,
-          this.renderTooltipContent(node),
-          (upgradeId) => handlers.onPurchase(upgradeId),
-        );
-      };
-
-      element.addEventListener('mouseenter', show);
-      element.addEventListener('mouseleave', scheduleUpgradeTooltipHide);
-      element.addEventListener('focus', show);
-      element.addEventListener('blur', scheduleUpgradeTooltipHide);
+      bindUpgradeNodeTooltip(
+        element as HTMLElement,
+        node,
+        (entry) => this.renderTooltipContent(entry),
+        (upgradeId) => handlers.onPurchase(upgradeId),
+      );
     });
   }
 
@@ -245,84 +240,4 @@ export class UpgradeTreeModalRenderer {
   }
 }
 
-function ensureTooltipPortal(): HTMLElement {
-  let portal = document.getElementById(TOOLTIP_PORTAL_ID);
-  if (portal) return portal;
-
-  portal = document.createElement('div');
-  portal.id = TOOLTIP_PORTAL_ID;
-  portal.className = 'upgrade-node-tooltip-portal hidden';
-  portal.setAttribute('role', 'tooltip');
-  document.body.appendChild(portal);
-  return portal;
-}
-
-function scheduleUpgradeTooltipHide(): void {
-  cancelUpgradeTooltipHide();
-  tooltipHideTimer = window.setTimeout(() => {
-    hideUpgradeNodeTooltip();
-    tooltipHideTimer = null;
-  }, 140);
-}
-
-function cancelUpgradeTooltipHide(): void {
-  if (tooltipHideTimer === null) return;
-  window.clearTimeout(tooltipHideTimer);
-  tooltipHideTimer = null;
-}
-
-function showUpgradeNodeTooltip(
-  anchor: HTMLElement,
-  node: UpgradeNodeDto,
-  html: string,
-  onPurchase: (upgradeId: string) => void,
-): void {
-  const portal = ensureTooltipPortal();
-  portal.className = `upgrade-node-tooltip-portal upgrade-node-tooltip-portal--${node.status}`;
-  portal.innerHTML = html;
-
-  portal.onmouseenter = cancelUpgradeTooltipHide;
-  portal.onmouseleave = scheduleUpgradeTooltipHide;
-
-  const buyButton = portal.querySelector('[data-upgrade-buy]') as HTMLButtonElement | null;
-  if (buyButton) {
-    buyButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const upgradeId = buyButton.getAttribute('data-upgrade-buy');
-      if (!upgradeId || buyButton.disabled) return;
-      hideUpgradeNodeTooltip();
-      onPurchase(upgradeId);
-    });
-  }
-
-  const margin = 10;
-  portal.style.visibility = 'hidden';
-  portal.classList.remove('hidden');
-
-  const anchorRect = anchor.getBoundingClientRect();
-  const portalRect = portal.getBoundingClientRect();
-  let top = anchorRect.bottom + margin;
-  let left = anchorRect.left + anchorRect.width / 2 - portalRect.width / 2;
-
-  const maxLeft = window.innerWidth - portalRect.width - margin;
-  left = Math.max(margin, Math.min(left, maxLeft));
-
-  if (top + portalRect.height > window.innerHeight - margin) {
-    top = anchorRect.top - portalRect.height - margin;
-  }
-
-  portal.style.top = `${top}px`;
-  portal.style.left = `${left}px`;
-  portal.style.visibility = 'visible';
-}
-
-export function hideUpgradeNodeTooltip(): void {
-  cancelUpgradeTooltipHide();
-  const portal = document.getElementById(TOOLTIP_PORTAL_ID);
-  if (!portal) return;
-  portal.classList.add('hidden');
-  portal.style.visibility = '';
-  portal.innerHTML = '';
-  portal.onmouseenter = null;
-  portal.onmouseleave = null;
-}
+export { hideUpgradeNodeTooltip } from './UpgradeNodeTooltipBinder';

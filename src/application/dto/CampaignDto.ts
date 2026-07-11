@@ -1,3 +1,15 @@
+export interface ActSceneDto {
+  id: string;
+  mapId: string;
+  actNumber: number;
+  title: string;
+  recap: string;
+  preview: string;
+  imageAssetPath: string | null;
+  unlocked: boolean;
+  viewed: boolean;
+}
+
 export interface CampaignPhaseDto {
   id: string;
   displayName: string;
@@ -18,6 +30,7 @@ export interface CampaignMapDto {
   name: string;
   unlocked: boolean;
   phases: CampaignPhaseDto[];
+  actScenes: ActSceneDto[];
 }
 
 export interface CampaignOverviewDto {

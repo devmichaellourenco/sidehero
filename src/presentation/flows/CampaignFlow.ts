@@ -1,4 +1,4 @@
-import { CampaignOverviewDto } from '../../application/dto/CampaignDto';
+import { CampaignOverviewDto, ActSceneDto } from '../../application/dto/CampaignDto';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { IGameClient } from '../../application/ports/IGameClient';
 import {
@@ -22,12 +22,17 @@ export class CampaignFlow {
   private activeMapId = 'stendra';
   private pendingPhaseId: string | null = null;
   private viewMode: CampaignViewMode = 'region';
+  private actSceneReader: ((scene: ActSceneDto) => void) | null = null;
 
   constructor(
     private readonly client: IGameClient,
     private readonly modal: ModalController,
     private readonly renderer = new CampaignModalRenderer(),
   ) {}
+
+  setActSceneReader(handler: (scene: ActSceneDto) => void): void {
+    this.actSceneReader = handler;
+  }
 
   async open(
     onState: (state: GameStateDto) => void,
@@ -92,6 +97,22 @@ export class CampaignFlow {
     this.bindMapTabs(modalBody, onState);
     this.bindPhaseButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
+    this.bindActSceneButtons(modalBody);
+  }
+
+  private bindActSceneButtons(modalBody: HTMLElement): void {
+    modalBody.querySelectorAll<HTMLButtonElement>('[data-act-scene-read]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const sceneId = button.dataset.actSceneRead;
+        if (!sceneId || !this.campaign) return;
+
+        const map = this.campaign.maps.find((entry) => entry.id === this.activeMapId);
+        const scene = map?.actScenes.find((entry) => entry.id === sceneId);
+        if (!scene || !scene.unlocked) return;
+
+        this.actSceneReader?.(scene);
+      });
+    });
   }
 
   private bindViewToggle(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {

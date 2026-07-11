@@ -32,8 +32,8 @@ export function buildPendingActions(state: GameStateDto): PendingActionItem[] {
       kind: 'upgrade-tree',
       label:
         state.purchasableUpgradeCount === 1
-          ? '1 melhoria disponível'
-          : `${state.purchasableUpgradeCount} melhorias disponíveis`,
+          ? '1 runa disponível'
+          : `${state.purchasableUpgradeCount} runas disponíveis`,
     });
   }
 

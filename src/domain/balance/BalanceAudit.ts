@@ -43,8 +43,11 @@ export interface TierBandAudit {
   maxEpicPhasesToAfford: number;
 }
 
-/** Tiers âncora usados na auditoria (spec game-balance). */
-export const BALANCE_ANCHOR_TIERS = [1, 10, 25, 26, 40, 60, 61, 100, 250, 500] as const;
+/** Tiers âncora usados na auditoria do jogo base v1 (spec game-balance). */
+export const BALANCE_ANCHOR_TIERS = [1, 10, 25, 26, 50, 100, 150, 200] as const;
+
+/** Tiers âncora do catálogo completo (DLC / perfil full). */
+export const FULL_CAMPAIGN_ANCHOR_TIERS = [250, 500] as const;
 
 const resolver = new EncounterResolver();
 
@@ -86,7 +89,7 @@ function sumPhaseCombat(phaseId: PhaseId): PhaseCombatTotals | null {
 
 export function tierBandForTier(tier: number): BalanceTierBand {
   if (tier <= 25) return 'early';
-  if (tier <= 60) return 'mid';
+  if (tier <= 100) return 'mid';
   return 'late';
 }
 

@@ -4,8 +4,8 @@ import {
   buildPhaseId,
   difficultyTierForPhase,
   isMilestonePhase,
-  isSeasonFinalePhase,
 } from './CampaignIds';
+import { isMapReleased, isSeasonFinalePhase } from './CampaignReleaseScope';
 import {
   pickCommonForGlobalTier,
   pickLevelBossForGlobalTier,
@@ -36,8 +36,9 @@ function buildUnlocks(mapIndex: number, phaseNumber: number): string[] {
     return [buildPhaseId(mapIndex, phaseNumber + 1)];
   }
 
-  if (mapIndex < CAMPAIGN_MAPS.length) {
-    return [buildPhaseId(mapIndex + 1, 1)];
+  const nextMapIndex = mapIndex + 1;
+  if (nextMapIndex <= CAMPAIGN_MAPS.length && isMapReleased(nextMapIndex)) {
+    return [buildPhaseId(nextMapIndex, 1)];
   }
 
   return [];

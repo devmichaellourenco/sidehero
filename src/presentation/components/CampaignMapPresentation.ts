@@ -1,9 +1,10 @@
 import { CampaignMapDto, CampaignOverviewDto, CampaignPhaseDto } from '../../application/dto/CampaignDto';
+import { renderActSceneCard } from './ActScenePresentation';
 import {
   CAMPAIGN_MAPS,
   mapDefinitionById,
-  TOTAL_CAMPAIGN_PHASES,
 } from '../../domain/campaign/CampaignMaps';
+import { releasedCampaignPhaseCount } from '../../domain/campaign/CampaignReleaseScope';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, imgTag } from '../assets/AssetCatalog';
 import { getCampaignScene, hasCampaignBanner } from '../assets/CampaignSceneCatalog';
 import { CampaignViewMode } from '../campaign/CampaignViewStorage';
@@ -172,7 +173,7 @@ export function campaignGlobalProgress(campaign: CampaignOverviewDto): {
     (sum, map) => sum + map.phases.filter((phase) => phase.cleared).length,
     0,
   );
-  return { cleared, total: TOTAL_CAMPAIGN_PHASES };
+  return { cleared, total: releasedCampaignPhaseCount() };
 }
 
 export function parseMapIndex(map: CampaignMapDto): number {
@@ -318,6 +319,8 @@ export function renderCampaignPath(
 
     const actStart = (actNumber - 1) * 10 + 1;
     const actEnd = actNumber * 10;
+    const actScene = map.actScenes?.find((scene) => scene.actNumber === actNumber);
+    const sceneCard = actScene ? renderActSceneCard(actScene) : '';
     const nodes = actPhases
       .map((phase, nodeIndex) => {
         const phaseNumber = resolvePhaseNumber(phase.id);
@@ -334,6 +337,7 @@ export function renderCampaignPath(
           <span class="campaign-path-act-title">Ato ${ACT_ROMAN[index] ?? actNumber}</span>
           <span class="campaign-path-act-range">Fases ${actStart}–${actEnd}</span>
         </header>
+        ${sceneCard}
         <div class="campaign-path-act-track">${nodes}</div>
       </section>
     `;

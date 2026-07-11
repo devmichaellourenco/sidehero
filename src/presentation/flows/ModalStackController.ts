@@ -91,7 +91,7 @@ export class ModalStackController {
       case 'shop':
         return 'Loja';
       case 'upgrades':
-        return 'Melhorias';
+        return 'Runas';
       case 'meta-legacy':
         return 'Legado';
       case 'divine-forge':

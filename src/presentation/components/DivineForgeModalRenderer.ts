@@ -46,7 +46,7 @@ export class DivineForgeModalRenderer {
       container.innerHTML = `
         <div class="forge-panel">
           <p class="empty-state modal-empty">
-            Forja Divina bloqueada. Desbloqueie <strong>Forja Divina</strong> em Melhorias.
+            Forja Divina bloqueada. Desbloqueie <strong>Forja Divina</strong> em Runas.
           </p>
         </div>
       `;

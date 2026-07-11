@@ -63,7 +63,7 @@ function mapPendingAction(
   const ctaMap: Record<typeof kind, WowBannerCta> = {
     chest: { label: 'Abrir baú', action: 'chest' },
     'inventory-upgrade': { label: 'Ver inventário', action: 'inventory-upgrade' },
-    'upgrade-tree': { label: 'Ver melhorias', action: 'upgrade-tree' },
+    'upgrade-tree': { label: 'Ver runas', action: 'upgrade-tree' },
     'hero-points': { label: 'Usar Aprimoramento', action: 'hero-points' },
   };
 

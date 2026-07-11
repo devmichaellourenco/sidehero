@@ -1,7 +1,9 @@
 import { getCampaignInfo, listPhasesForMap, resolvePhase } from '../../domain/campaign/CampaignCatalog';
+import { MapId } from '../../domain/campaign/CampaignIds';
 import { PhaseDefinition } from '../../domain/campaign/PhaseDefinition';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { CampaignOverviewDto } from '../dto/CampaignDto';
+import { mapActScenesForMap } from '../mappers/ActSceneDtoMapper';
 import { mapCampaignOverview } from '../mappers/CampaignDtoMapper';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
@@ -74,6 +76,7 @@ export class GetCampaignOverviewUseCase {
         name: map.name,
         unlocked,
         phases,
+        actScenes: mapActScenesForMap(state.campaignProgress, map.id as MapId),
       };
     });
 

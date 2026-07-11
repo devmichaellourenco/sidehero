@@ -129,9 +129,9 @@
             <img class="btn-icon" src="assets/ui/attack.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
             <span class="action-icon-label">Otimizar</span>
           </button>
-          <button id="open-upgrades-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--upgrades" type="button" title="Melhorias do acampamento" aria-label="Melhorias do acampamento">
+          <button id="open-upgrades-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--upgrades" type="button" title="Runas do acampamento" aria-label="Runas do acampamento">
             <img class="btn-icon" src="assets/ui/stage.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
-            <span class="action-icon-label">Melhorias</span>
+            <span class="action-icon-label">Runas</span>
           </button>
           <button id="open-chest-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--chest" type="button" disabled title="Abrir baú" aria-label="Abrir baú">
             <img class="btn-icon" src="assets/ui/chest.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
@@ -158,6 +158,18 @@
         aria-modal="true"
         aria-live="assertive"
         aria-label="Celebração"
+      ></div>
+    </div>
+
+    <div id="act-scene-root" class="act-scene-root hidden" aria-hidden="true">
+      <div id="act-scene-backdrop" class="act-scene-backdrop" data-act-scene-dismiss></div>
+      <div
+        id="act-scene-stage"
+        class="act-scene-stage"
+        role="dialog"
+        aria-modal="true"
+        aria-live="polite"
+        aria-label="Cena da campanha"
       ></div>
     </div>
 

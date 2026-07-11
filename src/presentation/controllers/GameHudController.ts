@@ -276,7 +276,7 @@ export class GameHudController {
       !flags.openAllChests || state.pendingChestCount < 2,
     );
 
-    this.openUpgradesBtn.title = 'Melhorias do acampamento';
+    this.openUpgradesBtn.title = 'Runas do acampamento';
     updateBadge(this.upgradesBadgeEl, state.purchasableUpgradeCount);
 
     const hasChests = state.pendingChestCount > 0;
@@ -295,7 +295,6 @@ export class GameHudController {
 
     const canPause =
       Boolean(state.phaseRun) &&
-      !state.seasonCompleted &&
       !options.loadoutPauseActive;
     this.pauseLoadoutBtn.disabled = !canPause;
     this.pauseLoadoutBtn.classList.toggle('hidden', options.loadoutPauseActive);

@@ -40,9 +40,9 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
     anchorSelector: '#open-heroes-btn',
   },
   'first-upgrade': {
-    title: 'Melhorias do acampamento',
+    title: 'Runas do acampamento',
     message:
-      'Há uma melhoria disponível com o ouro acumulado. Toque na estrela ★ para abrir a árvore.',
+      'Há uma runa disponível com o ouro acumulado. Toque na estrela ★ para abrir a árvore.',
     anchorSelector: '#open-upgrades-btn',
   },
 };

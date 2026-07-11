@@ -77,6 +77,10 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.selectPhase.execute(message.phaseId);
       return { ok: true, state };
     }
+    case 'MARK_ACT_SCENE_VIEWED': {
+      const state = await app.markActSceneViewed.execute(message.sceneId);
+      return { ok: true, state };
+    }
     case 'NEW_GAME': {
       const state = await app.newGame.execute();
       return { ok: true, state };

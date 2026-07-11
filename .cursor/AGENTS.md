@@ -43,6 +43,7 @@ Regra crítica: `presentation/` **não** importa `domain/` diretamente.
 | [battle-ui](agents/battle-ui.md) | strip, modais, wow, UX | `specs/battle-ui.spec.md` | `presentation/panel`, controllers |
 | [chrome-infra](agents/chrome-infra.md) | extension, build, storage | `specs/chrome-infra.spec.md` | `infrastructure`, `manifest.json` |
 | [game-balance](agents/game-balance.md) | curva, fórmulas, auditoria | `specs/game-balance.spec.md` | `domain/combat`, scaling, catálogos numéricos |
+| [story-scenes](agents/story-scenes.md) | cenas por ato, overlay, pausa | `specs/story-scenes.spec.md` | `ActSceneCatalog`, `ActSceneFlow`, campanha |
 
 ## Comandos (desenvolvedor — agente não executa test/release automaticamente)
 

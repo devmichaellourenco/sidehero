@@ -11,6 +11,7 @@ import { GamePreferencesController } from '../controllers/GamePreferencesControl
 import { LootFlowController } from '../controllers/LootFlowController';
 import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
+import { ActSceneFlow } from '../flows/ActSceneFlow';
 import { ChestLootFlow } from '../flows/ChestLootFlow';
 import { GearEquipFlow } from '../flows/GearEquipFlow';
 import { GearStorageFlow, bindGearStorageActions } from '../flows/GearStorageFlow';
@@ -70,6 +71,8 @@ import { bindGearDragDrop } from '../gear/GearDragDropBinder';
 import { OnboardingController } from '../onboarding/OnboardingController';
 import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
 import { bindBattleChromeLayout } from '../layout/BattleChromeLayout';
+import { detectPendingActSceneDto } from '../../application/mappers/ActScenePresentationMapper';
+import { ActSceneDto } from '../../application/dto/CampaignDto';
 
 export class GameViewController {
   private state: GameStateDto | null = null;
@@ -154,6 +157,7 @@ export class GameViewController {
   private readonly divineForgeFlow: DivineForgeFlow;
   private readonly chestLootFlow: ChestLootFlow;
   private readonly campaignFlow: CampaignFlow;
+  private readonly actSceneFlow: ActSceneFlow;
   private readonly partyFlow: PartyFlow;
   private readonly modalStackController: ModalStackController;
   private readonly inlineEquip = new InlineEquipController();
@@ -252,6 +256,11 @@ export class GameViewController {
       this.wowInboxRoot,
       this.wowInboxPanel,
       this.openWowInboxBtn,
+    );
+    this.actSceneFlow = new ActSceneFlow(
+      root.querySelector('#act-scene-root') as HTMLElement,
+      root.querySelector('#act-scene-stage') as HTMLElement,
+      root.querySelector('#act-scene-backdrop') as HTMLElement,
     );
     this.rewards = new RewardPresentationController(this.wowCelebration);
     this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
@@ -368,6 +377,10 @@ export class GameViewController {
     );
 
     this.campaignFlow = new CampaignFlow(this.client, this.modal);
+    this.campaignFlow.setActSceneReader((scene) => {
+      this.stopAutoBattle();
+      this.actSceneFlow.show(scene, { markViewedOnDismiss: false });
+    });
     this.partyFlow = new PartyFlow(this.client);
 
     this.chestLootFlow = new ChestLootFlow(
@@ -576,7 +589,7 @@ export class GameViewController {
   ): void {
     const result = this.prefsController.update(key, value, this.state);
     if (!result.applied) {
-      this.toasts.show('Desbloqueie esta automação em Melhorias', 'info');
+      this.toasts.show('Desbloqueie esta automação em Runas', 'info');
       if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'settings') {
         this.renderModalTop();
       }
@@ -611,6 +624,8 @@ export class GameViewController {
   private isAdvanceBlocked(state: GameStateDto | null = this.state): boolean {
     if (this.onboarding.isActive()) return true;
     if (this.victoryFlow.isBlockingAdvance()) return true;
+    if (this.wowCelebration.isBlockingAdvance()) return true;
+    if (this.actSceneFlow.isBlocking()) return true;
     if (this.pausingLoadout) return true;
     return this.isManualLoadoutPause(state);
   }
@@ -1501,7 +1516,7 @@ export class GameViewController {
   private openStashModal(): void {
     if (this.contextInvalidated) return;
     if (!this.state?.storageCapacity.stashUnlocked) {
-      this.toasts.show('Desbloqueie Baú de itens em Melhorias', 'info');
+      this.toasts.show('Desbloqueie Baú de itens em Runas', 'info');
       return;
     }
     this.closeHeroDrawer();
@@ -1516,7 +1531,7 @@ export class GameViewController {
   private openForgeModal(): void {
     if (this.contextInvalidated) return;
     if (!this.state?.featureFlags.divineForge) {
-      this.toasts.show('Desbloqueie Forja Divina em Melhorias', 'info');
+      this.toasts.show('Desbloqueie Forja Divina em Runas', 'info');
       return;
     }
     this.closeHeroDrawer();
@@ -1733,6 +1748,44 @@ export class GameViewController {
       this.renderModalTop();
     }
     this.syncOnboarding(mergedState);
+    this.tryShowAutoActScene(previous, mergedState);
+  }
+
+  private tryShowAutoActScene(
+    previous: GameStateDto | null | undefined,
+    state: GameStateDto,
+  ): void {
+    if (
+      this.onboarding.isActive() ||
+      this.actSceneFlow.isBlocking() ||
+      state.combatIntermission ||
+      this.victoryFlow.isBlockingAdvance()
+    ) {
+      return;
+    }
+
+    const scene = detectPendingActSceneDto(previous?.campaignProgress, state.campaignProgress);
+    if (!scene) return;
+
+    this.stopAutoBattle();
+    this.actSceneFlow.show(scene, {
+      markViewedOnDismiss: true,
+      onDismiss: () => {
+        void this.markActSceneViewed(scene.id);
+      },
+    });
+  }
+
+  private async markActSceneViewed(sceneId: string): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    const response = await this.client.send({ type: 'MARK_ACT_SCENE_VIEWED', sceneId });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    this.render(response.state, { previousState: this.state });
   }
 
   private dismissOnboardingStep(stepId: OnboardingStepId): void {
@@ -1752,12 +1805,16 @@ export class GameViewController {
         this.dismissOnboardingStep(stepId);
         if (this.state) {
           this.syncOnboarding(this.state);
+          this.tryShowAutoActScene(null, this.state);
         }
         this.syncAutoBattleTimer();
       },
       onSkipAll: () => {
         this.onboarding.skipAll();
         this.onboarding.hide();
+        if (this.state) {
+          this.tryShowAutoActScene(null, this.state);
+        }
         this.syncAutoBattleTimer();
       },
     });

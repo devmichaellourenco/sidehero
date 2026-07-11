@@ -1,6 +1,7 @@
 import { Gold } from '../value-objects/Gold';
 import { UpgradeLevels } from '../upgrades/FeatureKey';
 import { CampaignProgress, CampaignProgressProps } from '../campaign/CampaignProgress';
+import { isPhaseReleased, maxReleasedTier } from '../campaign/CampaignReleaseScope';
 import { CombatIntermission, CombatIntermissionProps } from '../campaign/CombatIntermission';
 import { PhaseRun, PhaseRunProps } from '../campaign/PhaseRun';
 import { resolvePhase } from '../campaign/CampaignCatalog';
@@ -126,10 +127,24 @@ export class GameState {
   }
 
   static restore(props: GameStateProps): GameState {
+    const campaignProgress =
+      props.campaignProgress ?? CampaignProgress.initial().toProps();
+
+    let phaseRun = props.phaseRun ?? null;
+    if (phaseRun && !isPhaseReleased(phaseRun.phaseId)) {
+      phaseRun = null;
+    }
+
+    const stage =
+      typeof props.stage === 'number'
+        ? Math.min(props.stage, maxReleasedTier())
+        : campaignProgress.highestTierReached;
+
     return new GameState({
       ...props,
-      campaignProgress: props.campaignProgress ?? CampaignProgress.initial().toProps(),
-      phaseRun: props.phaseRun ?? null,
+      campaignProgress,
+      phaseRun,
+      stage,
     });
   }
 

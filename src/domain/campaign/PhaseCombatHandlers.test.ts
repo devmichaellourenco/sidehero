@@ -120,8 +120,8 @@ describe('PhaseCombatHandlers', () => {
     expect(victory.state.loadoutEditOpen).toBe(false);
   });
 
-  it('marca temporada concluída ao derrotar boss final', () => {
-    const phaseId = '10-50';
+  it('marca temporada concluída ao derrotar boss final do jogo base', () => {
+    const phaseId = '4-50';
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial().withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;

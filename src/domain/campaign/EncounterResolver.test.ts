@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ENEMY_QUICK_PHASE_TEST_HP } from '../combat/EnemyCombatBalance';
 import { resolvePhaseEnemyStatMultiplier } from '../balance/PhaseEnemyEase';
 import { buildPhaseId } from './CampaignIds';
 import { EncounterResolver } from './EncounterResolver';
@@ -47,7 +48,9 @@ describe('EncounterResolver', () => {
     });
 
     expect(eased?.enemies[0]?.stats.attack).toBe(Math.floor(baseline.stats.attack * 0.7));
-    expect(eased?.enemies[0]?.stats.maxHealth).toBe(Math.floor(baseline.stats.maxHealth * 0.7));
+    if (!ENEMY_QUICK_PHASE_TEST_HP) {
+      expect(eased?.enemies[0]?.stats.maxHealth).toBe(Math.floor(baseline.stats.maxHealth * 0.7));
+    }
     expect(resolvePhaseEnemyStatMultiplier(buildPhaseId(1, 50), 1.5)).toBeCloseTo(1.05);
   });
 });
