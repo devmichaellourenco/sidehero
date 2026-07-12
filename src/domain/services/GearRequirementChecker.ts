@@ -1,6 +1,8 @@
 import { Hero } from '../entities/Hero';
 import { Gear, GearRequirements } from '../entities/Gear';
-import { getGearTemplate } from '../gear/GearTemplateCatalog';
+import { isGalneonCatalogItem } from '../gear/GearItemDefinition';
+import { findCatalogItemBySpriteId } from '../gear/GearItemCatalog';
+import { GALNEON_HERO_ID, GALNEON_STANDARD_SWORD_TEMPLATE_ID } from '../gear/GalneonGearCatalog';
 
 export interface RequirementCheckResult {
   met: boolean;
@@ -84,14 +86,15 @@ export class GearRequirementChecker {
     slot: Gear['slot'],
     rarity: Gear['rarity'],
   ): GearRequirements {
-    const template = getGearTemplate(templateId);
-    let result = GearRequirementChecker.inferRequirementsForItemLevel(itemLevel, slot, rarity);
-    if (template?.exclusiveHeroId) {
-      result = { ...result, heroId: template.exclusiveHeroId };
+    const catalogItem = findCatalogItemBySpriteId(templateId, rarity, itemLevel, slot);
+    if (catalogItem?.requirements) {
+      const result = { ...catalogItem.requirements };
+      if (isGalneonCatalogItem(catalogItem)) {
+        result.heroId = GALNEON_HERO_ID;
+      }
+      return result;
     }
-    if (template?.fixedRequirements) {
-      result = { ...result, ...template.fixedRequirements };
-    }
-    return result;
+
+    return GearRequirementChecker.inferRequirementsForItemLevel(itemLevel, slot, rarity);
   }
 }

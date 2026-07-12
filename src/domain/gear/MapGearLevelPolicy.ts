@@ -1,4 +1,4 @@
-import { getGearTemplate } from './GearTemplateCatalog';
+import { getGearCatalogItem } from './GearItemCatalog';
 
 export interface MapGearLevelRange {
   readonly min: number;
@@ -23,15 +23,17 @@ export function gearLevelRangeForTier(difficultyTier: number): MapGearLevelRange
 }
 
 /** Itens únicos de chefes finais ignoram a faixa por mapa. */
-export function isExemptFromMapGearLevelPolicy(templateId?: string): boolean {
-  if (!templateId) {
+export function isExemptFromMapGearLevelPolicy(catalogOrTemplateId?: string): boolean {
+  if (!catalogOrTemplateId) {
     return false;
   }
 
-  const template = getGearTemplate(templateId);
-  return Boolean(
-    template?.namedLegendary || template?.unique || template?.fixedRequirements,
-  );
+  const catalogItem = getGearCatalogItem(catalogOrTemplateId);
+  if (catalogItem) {
+    return Boolean(catalogItem.unique || catalogItem.namedLegendary);
+  }
+
+  return false;
 }
 
 function progressWithinMap(difficultyTier: number): number {

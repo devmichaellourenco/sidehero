@@ -8,7 +8,8 @@ import { Stats } from '../../domain/value-objects/Stats';
 import { Gear } from '../../domain/entities/Gear';
 import { GearProps } from '../../domain/entities/Gear';
 import { ActiveGearSlot } from '../../domain/gear/GearSlotCatalog';
-import { resolveGearTemplateId } from '../../domain/gear/GearTemplateCatalog';
+import { DEFAULT_GEAR_TEMPLATE_BY_SLOT } from '../../domain/gear/GearTemplateCatalog';
+import { getGearCatalogItem, resolveCatalogItemId } from '../../domain/gear/GearItemCatalog';
 import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
 import { EnemyRole } from '../../domain/campaign/WaveDefinition';
@@ -312,8 +313,41 @@ export function migrateChest(raw: unknown): Chest {
 
 export function migrateGear(raw: unknown): Gear {
   const props = { ...(raw as GearProps) };
-  if (!props.templateId && typeof props.name === 'string' && props.slot) {
-    props.templateId = resolveGearTemplateId(props.name, props.slot as ActiveGearSlot);
+
+  if (!props.templateId && props.catalogItemId) {
+    props.templateId = getGearCatalogItem(props.catalogItemId)?.spriteId ?? props.catalogItemId;
   }
+
+  if (!props.catalogItemId && typeof props.name === 'string' && props.slot) {
+    const catalogId = resolveCatalogItemId(
+      props.name,
+      props.slot as ActiveGearSlot,
+      props.templateId,
+      props.rarity,
+    );
+    if (catalogId) {
+      props.catalogItemId = catalogId;
+    }
+  }
+
+  if (!props.templateId && typeof props.name === 'string' && props.slot) {
+    if (props.catalogItemId) {
+      props.templateId =
+        getGearCatalogItem(props.catalogItemId)?.spriteId ??
+        props.catalogItemId ??
+        DEFAULT_GEAR_TEMPLATE_BY_SLOT[props.slot as ActiveGearSlot];
+    } else {
+      const catalogId = resolveCatalogItemId(
+        props.name,
+        props.slot as ActiveGearSlot,
+        undefined,
+        props.rarity,
+      );
+      props.templateId = catalogId
+        ? getGearCatalogItem(catalogId)!.spriteId
+        : DEFAULT_GEAR_TEMPLATE_BY_SLOT[props.slot as ActiveGearSlot];
+    }
+  }
+
   return Gear.create(props);
 }

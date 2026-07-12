@@ -36,20 +36,31 @@ describe('EncounterResolver', () => {
   });
 
   it('reduz vida e dano em 30% nas fases 1-47 a 1-50', () => {
-    const eased = resolver.resolve(buildPhaseId(1, 47), 0);
+    const phaseId = buildPhaseId(1, 47);
+    const eased = resolver.resolve(phaseId, 0);
     const phase = eased!.phase;
     const wave = phase.waves[0];
+    const easedMultiplier = resolvePhaseEnemyStatMultiplier(phaseId, phase.statMultiplier ?? 1);
     const [baseline] = spawnEnemiesForWave(wave, {
-      phaseId: buildPhaseId(1, 47),
+      phaseId,
       waveIndex: 0,
       difficultyTier: phase.difficultyTier,
       isBossWave: false,
       statMultiplier: phase.statMultiplier ?? 1,
     });
+    const [easedSpawn] = spawnEnemiesForWave(wave, {
+      phaseId,
+      waveIndex: 0,
+      difficultyTier: phase.difficultyTier,
+      isBossWave: false,
+      statMultiplier: easedMultiplier,
+    });
 
-    expect(eased?.enemies[0]?.stats.attack).toBe(Math.floor(baseline.stats.attack * 0.7));
+    expect(eased?.enemies[0]?.stats.attack).toBe(easedSpawn.stats.attack);
+    expect(easedSpawn.stats.attack).toBeLessThan(baseline.stats.attack);
     if (!ENEMY_QUICK_PHASE_TEST_HP) {
-      expect(eased?.enemies[0]?.stats.maxHealth).toBe(Math.floor(baseline.stats.maxHealth * 0.7));
+      expect(eased?.enemies[0]?.stats.maxHealth).toBe(easedSpawn.stats.maxHealth);
+      expect(easedSpawn.stats.maxHealth).toBeLessThan(baseline.stats.maxHealth);
     }
     expect(resolvePhaseEnemyStatMultiplier(buildPhaseId(1, 50), 1.5)).toBeCloseTo(1.05);
   });

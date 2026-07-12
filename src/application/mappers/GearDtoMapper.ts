@@ -1,10 +1,14 @@
 import { Gear } from '../../domain/entities/Gear';
+import { getGearCatalogItem } from '../../domain/gear/GearItemCatalog';
 import { getGearTemplate } from '../../domain/gear/GearTemplateCatalog';
 import { getUniqueEffectDescription } from '../../domain/unique-effects/UniqueEffectCatalog';
 import { GearDto } from '../dto/GameStateDto';
 
 export function mapGearToDto(gear: Gear): GearDto {
   const template = getGearTemplate(gear.templateId);
+  const catalogItem = gear.catalogItemId
+    ? getGearCatalogItem(gear.catalogItemId)
+    : getGearCatalogItem(gear.templateId);
   const uniqueEffectId = template?.uniqueEffectId;
 
   return {
@@ -56,8 +60,8 @@ export function mapGearToDto(gear: Gear): GearDto {
           heroId: gear.requirements.heroId,
         }
       : { minLevel: 1 },
-    isUniqueLegendary: template?.unique ?? false,
-    isNamedLegendary: template?.namedLegendary ?? false,
+    isUniqueLegendary: catalogItem?.unique ?? false,
+    isNamedLegendary: catalogItem?.namedLegendary ?? false,
     uniqueEffectDescription: uniqueEffectId ? getUniqueEffectDescription(uniqueEffectId) : null,
   };
 }

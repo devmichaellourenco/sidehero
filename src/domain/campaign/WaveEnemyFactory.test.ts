@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ENEMY_HP_BALANCE_FACTOR, resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
+import { ENEMY_CAMPAIGN_STAT_SCALE } from '../balance/ProgressionPowerScale';
 import { stageScalingFactorsForTier } from '../progression/StageScalingCatalog';
 import { spawnEnemiesForWave } from './WaveEnemyFactory';
 
@@ -28,8 +29,12 @@ describe('spawnEnemiesForWave', () => {
       },
     );
 
+    const scaling = stageScalingFactorsForTier(1, 1);
+
     expect(enemy.stats.maxHealth).toBe(
-      resolveEnemySpawnMaxHealth(Math.floor(60 * ENEMY_HP_BALANCE_FACTOR)),
+      resolveEnemySpawnMaxHealth(
+        Math.floor(72 * scaling.hp * ENEMY_HP_BALANCE_FACTOR * ENEMY_CAMPAIGN_STAT_SCALE),
+      ),
     );
   });
 });

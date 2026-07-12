@@ -27,6 +27,8 @@ export interface GearProps {
   id: string;
   name: string;
   templateId: string;
+  /** ID estável no catálogo (`gear-items.catalog.json`). */
+  catalogItemId?: string;
   slot: GearSlot;
   rarity: GearRarity;
   attackBonus: number;
@@ -72,6 +74,7 @@ export class Gear {
   readonly id: string;
   readonly name: string;
   readonly templateId: string;
+  readonly catalogItemId: string | undefined;
   readonly slot: GearSlot;
   readonly rarity: GearRarity;
   readonly attackBonus: number;
@@ -114,6 +117,7 @@ export class Gear {
     this.id = props.id;
     this.name = props.name;
     this.templateId = props.templateId;
+    this.catalogItemId = props.catalogItemId;
     this.slot = props.slot;
     this.rarity = props.rarity;
     this.attackBonus = props.attackBonus;
@@ -162,6 +166,7 @@ export class Gear {
       id: this.id,
       name: this.name,
       templateId: this.templateId,
+      catalogItemId: this.catalogItemId,
       slot: this.slot,
       rarity: this.rarity,
       attackBonus: this.attackBonus,

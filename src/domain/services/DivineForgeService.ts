@@ -106,7 +106,7 @@ export class DivineForgeService {
       throw new Error('Item não encontrado no inventário ou no baú');
     }
 
-    if (isSalvageBlockedGearTemplate(gear.templateId)) {
+    if (isSalvageBlockedGearTemplate(gear.templateId, gear.catalogItemId)) {
       throw new Error('Itens lendários únicos não podem ser destruídos na forja');
     }
 

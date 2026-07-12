@@ -1,6 +1,6 @@
 import { GEAR_RARITIES, GearRarity, GearSlot } from '../entities/Gear';
-import { GALNEON_STANDARD_SWORD_TEMPLATE_ID } from '../gear/GalneonGearCatalog';
-import { listGearTemplatesForSlot } from '../gear/GearTemplateCatalog';
+import { isGalneonCatalogItem } from '../gear/GearItemDefinition';
+import { listLootCatalogItems } from '../gear/GearItemCatalog';
 import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
 
 export const SHOP_OFFER_COUNT = 8;
@@ -71,37 +71,40 @@ export function parseShopOfferIndex(offerId: string): number | null {
   return Number(match[1]);
 }
 
-/** Garante que nenhum par slot+template se repita no mesmo estoque. */
-export function pickUniqueShopTemplateId(
+/** Garante que nenhum par slot+catalogItemId se repita no mesmo estoque. */
+export function pickUniqueShopCatalogItemId(
   slot: GearSlot,
   tier: number,
   refreshSeed: number,
   offerIndex: number,
-  usedTemplateKeys: Set<string>,
+  rarity: GearRarity,
+  usedCatalogKeys: Set<string>,
 ): string {
-  const templates = listGearTemplatesForSlot(slot);
-  const galneonKey = `${slot}:${GALNEON_STANDARD_SWORD_TEMPLATE_ID}`;
+  const candidates = listLootCatalogItems(slot, rarity, tier);
+  const galneonCandidates = candidates.filter((entry) => isGalneonCatalogItem(entry));
+  const galneonKey = galneonCandidates[0] ? `${slot}:${galneonCandidates[0].id}` : null;
 
   if (
     slot === 'weapon' &&
     tier >= 3 &&
     offerIndex % 4 === 0 &&
-    !usedTemplateKeys.has(galneonKey)
+    galneonKey &&
+    !usedCatalogKeys.has(galneonKey)
   ) {
-    return GALNEON_STANDARD_SWORD_TEMPLATE_ID;
+    return galneonCandidates[0].id;
   }
 
-  const start = shopDeterministicRoll(tier, refreshSeed, offerIndex) % Math.max(1, templates.length);
+  const start = shopDeterministicRoll(tier, refreshSeed, offerIndex) % Math.max(1, candidates.length);
 
-  for (let offset = 0; offset < templates.length; offset += 1) {
-    const template = templates[(start + offset) % templates.length];
-    const key = `${slot}:${template.id}`;
-    if (!usedTemplateKeys.has(key)) {
-      return template.id;
+  for (let offset = 0; offset < candidates.length; offset += 1) {
+    const item = candidates[(start + offset) % candidates.length];
+    const key = `${slot}:${item.id}`;
+    if (!usedCatalogKeys.has(key)) {
+      return item.id;
     }
   }
 
-  return templates[start % templates.length].id;
+  return candidates[start % candidates.length].id;
 }
 
 export function listShopSlots(): GearSlot[] {

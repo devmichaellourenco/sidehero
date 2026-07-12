@@ -167,6 +167,27 @@ async function copyAssetBatch(sourceRoot, entries) {
   }
 }
 
+/** Copia sprites únicos de gear (um PNG por item do catálogo). */
+async function copyGearItemSprites() {
+  const sourceDir = join(itemsSpritesRoot, 'gear');
+  const destDir = join(outRoot, 'gear/items');
+  await mkdir(destDir, { recursive: true });
+  let copied = 0;
+
+  try {
+    const files = await readdir(sourceDir);
+    for (const file of files) {
+      if (!file.endsWith('.png')) continue;
+      await copyFile(join(sourceDir, file), join(destDir, file));
+      copied += 1;
+    }
+  } catch {
+    return 0;
+  }
+
+  return copied;
+}
+
 async function copyEquipmentIcons() {
   const sourceDir = join(
     resourcesRoot,
@@ -218,6 +239,7 @@ async function copyCampaignScenes() {
 export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
   const equipmentIconCount = await copyEquipmentIcons();
+  const gearItemSpriteCount = await copyGearItemSprites();
   await copyAssetBatch(heroesSpritesRoot, HERO_SPRITE_MAP);
   const enemySpriteCount = await copyEnemySprites();
   await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
@@ -229,6 +251,7 @@ export async function copyAssets() {
   const total =
     ASSET_MAP.length +
     equipmentIconCount +
+    gearItemSpriteCount +
     HERO_SPRITE_MAP.length +
     enemySpriteCount +
     SKILL_SPRITE_MAP.length +

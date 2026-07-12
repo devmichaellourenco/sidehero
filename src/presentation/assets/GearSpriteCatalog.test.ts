@@ -2,26 +2,27 @@ import { describe, expect, it } from 'vitest';
 import { resolveGearSpritePath } from './GearSpriteCatalog';
 
 describe('GearSpriteCatalog', () => {
-  it('resolve sprite por templateId', () => {
+  it('resolve sprite por catalogItemId / templateId único', () => {
     expect(
       resolveGearSpritePath({
-        templateId: 'pixel_axe',
+        templateId: 'field_axe',
         slot: 'weapon',
       }),
-    ).toBe('gear/items/equip_axe_2.png');
+    ).toBe('gear/items/field_axe.png');
   });
 
-  it('resolve sprite da espada padrão por raridade', () => {
+  it('resolve sprite do item Galneon pelo id único', () => {
     expect(
       resolveGearSpritePath({
-        templateId: 'galneon_standard_sword',
+        templateId: 'galneon_commander_blade',
+        catalogItemId: 'galneon_commander_blade',
         slot: 'weapon',
         rarity: 'epic',
       }),
-    ).toBe('gear/items/standard_epic_sword.png');
+    ).toBe('gear/items/galneon_commander_blade.png');
   });
 
   it('usa fallback de slot quando templateId ausente', () => {
-    expect(resolveGearSpritePath({ slot: 'armor' })).toBe('gear/items/equip_shield_wood.png');
+    expect(resolveGearSpritePath({ slot: 'armor' })).toBe('gear/items/wooden_shield.png');
   });
 });

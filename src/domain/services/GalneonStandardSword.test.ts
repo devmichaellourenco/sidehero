@@ -12,9 +12,7 @@ describe('Galneon — Espada Padrão', () => {
 
   it('espada padrão pode aparecer como oferta única na loja em tier adequado', () => {
     const offers = shopService.generateOffers(10, 0);
-    const swords = offers.filter(
-      (offer) => offer.gear.templateId === GALNEON_STANDARD_SWORD_TEMPLATE_ID,
-    );
+    const swords = offers.filter((offer) => offer.gear.templateId.startsWith('galneon_'));
 
     expect(swords.length).toBeLessThanOrEqual(1);
     if (swords.length > 0) {

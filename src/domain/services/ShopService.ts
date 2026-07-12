@@ -1,7 +1,7 @@
 import { Gear, GearRarity } from '../entities/Gear';
 import {
   buildShopOfferId,
-  pickUniqueShopTemplateId,
+  pickUniqueShopCatalogItemId,
   rollShopRarity,
   SHOP_OFFER_COUNT,
   SHOP_SLOT_BY_INDEX,
@@ -33,29 +33,24 @@ export class ShopService {
   constructor(private readonly lootService: LootService) {}
 
   generateOffers(tier: number, refreshSeed = 0): ShopOffer[] {
-    const usedTemplateKeys = new Set<string>();
+    const usedCatalogKeys = new Set<string>();
     const offers: ShopOffer[] = [];
 
     for (let offerIndex = 0; offerIndex < SHOP_OFFER_COUNT; offerIndex += 1) {
       const slot = SHOP_SLOT_BY_INDEX[offerIndex];
       const rarity = rollShopRarity(tier, refreshSeed, offerIndex);
-      const templateId = pickUniqueShopTemplateId(
+      const catalogItemId = pickUniqueShopCatalogItemId(
         slot,
         tier,
         refreshSeed,
         offerIndex,
-        usedTemplateKeys,
+        rarity,
+        usedCatalogKeys,
       );
-      usedTemplateKeys.add(`${slot}:${templateId}`);
+      usedCatalogKeys.add(`${slot}:${catalogItemId}`);
 
       const gearId = `shop-gear-${tier}-${refreshSeed}-${offerIndex}`;
-      const gear = this.lootService.generateGearFromTemplate(
-        templateId,
-        tier,
-        rarity,
-        gearId,
-        offerIndex % 3,
-      );
+      const gear = this.lootService.generateGearFromCatalogItem(catalogItemId, gearId);
 
       offers.push({
         id: buildShopOfferId(tier, refreshSeed, offerIndex),

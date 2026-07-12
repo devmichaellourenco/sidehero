@@ -1,6 +1,9 @@
 import { GameState } from '../entities/GameState';
-import { Gear, GearRequirements } from '../entities/Gear';
-import { getGearTemplate } from '../gear/GearTemplateCatalog';
+import { Gear } from '../entities/Gear';
+import {
+  getGearCatalogItem,
+  isSalvageBlockedCatalogItem,
+} from './GearItemCatalog';
 
 export const SWORD_VORPAL_LUPNUS_TEMPLATE_ID = 'sword_vorpal_lupnus';
 export const IGNUS_IX_TEMPLATE_ID = 'ignus_ix';
@@ -21,9 +24,13 @@ export function isUniqueGearTemplate(templateId: string): boolean {
   return UNIQUE_GEAR_TEMPLATE_IDS.includes(templateId as UniqueGearTemplateId);
 }
 
-export function isSalvageBlockedGearTemplate(templateId: string): boolean {
-  const template = getGearTemplate(templateId);
-  return template?.unique === true || template?.namedLegendary === true;
+export function isSalvageBlockedGearTemplate(templateId: string, catalogItemId?: string): boolean {
+  if (catalogItemId && isSalvageBlockedCatalogItem(catalogItemId)) {
+    return true;
+  }
+
+  const catalogItem = getGearCatalogItem(templateId);
+  return catalogItem?.salvageBlocked === true;
 }
 
 export function listUniqueGearTemplateIds(): readonly string[] {
@@ -31,7 +38,12 @@ export function listUniqueGearTemplateIds(): readonly string[] {
 }
 
 function gearMatchesTemplate(gear: Gear, templateId: string): boolean {
-  return gear.templateId === templateId;
+  if (gear.catalogItemId === templateId || gear.templateId === templateId) {
+    return true;
+  }
+
+  const catalogItem = gear.catalogItemId ? getGearCatalogItem(gear.catalogItemId) : undefined;
+  return catalogItem?.spriteId === templateId;
 }
 
 export function playerOwnsGearTemplate(state: GameState, templateId: string): boolean {
@@ -88,18 +100,12 @@ export function resolveForgeNamedLegendaryTemplate(
   return null;
 }
 
-export function formatUniqueGearName(templateId: string, rarity: Gear['rarity']): string {
-  const template = getGearTemplate(templateId);
-  if (!template) {
-    return templateId;
-  }
-  if (template.unique || template.namedLegendary) {
-    return template.baseName;
-  }
-  return `${template.baseName} (${rarity})`;
+export function formatUniqueGearName(templateId: string, _rarity: Gear['rarity']): string {
+  const catalogItem = getGearCatalogItem(templateId);
+  return catalogItem?.name ?? templateId;
 }
 
-export const IGNUS_IX_FIXED_REQUIREMENTS: GearRequirements = {
+export const IGNUS_IX_FIXED_REQUIREMENTS = {
   minLevel: 30,
   int: 28,
-};
+} as const;

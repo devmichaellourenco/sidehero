@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GearSlot } from '../entities/Gear';
 import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
+import { getGearCatalogItem, listLootCatalogItems } from '../gear/GearItemCatalog';
 import { GALNEON_STANDARD_SWORD_TEMPLATE_ID } from '../gear/GalneonGearCatalog';
 import { LootService } from './LootService';
 
@@ -12,7 +13,7 @@ describe('LootService', () => {
     const second = lootService.generateDeterministicGearForSlot(5, 'weapon', 'rare', 2);
 
     expect(second.id).toBe(first.id);
-    expect(second.templateId).toBe(first.templateId);
+    expect(second.catalogItemId).toBe(first.catalogItemId);
     expect(second.rarity).toBe('rare');
     expect(second.slot).toBe('weapon');
   });
@@ -23,10 +24,10 @@ describe('LootService', () => {
 
     expect(weapon.slot).toBe('weapon');
     expect(armor.slot).toBe('armor');
-    expect(weapon.templateId).not.toBe(armor.templateId);
+    expect(weapon.catalogItemId).not.toBe(armor.catalogItemId);
   });
 
-  it('generateGearFromTemplate aplica slot e raridade do template', () => {
+  it('generateGearFromTemplate resolve item do catálogo por templateId e raridade', () => {
     const gear = lootService.generateGearFromTemplate(
       GALNEON_STANDARD_SWORD_TEMPLATE_ID,
       8,
@@ -37,8 +38,20 @@ describe('LootService', () => {
     expect(gear.id).toBe('loot-test-sword');
     expect(gear.slot).toBe('weapon');
     expect(gear.rarity).toBe('epic');
-    expect(gear.templateId).toBe(GALNEON_STANDARD_SWORD_TEMPLATE_ID);
+    expect(gear.templateId).toBe(gear.catalogItemId);
+    expect(gear.catalogItemId).toBeDefined();
     expect(gear.attackBonus).toBeGreaterThan(0);
+  });
+
+  it('generateGearFromTemplate aceita catalogItemId direto', () => {
+    const gear = lootService.generateGearFromTemplate('ignus_ix', 20, 'legendary', 'ignus-test');
+
+    expect(gear.catalogItemId).toBe('ignus_ix');
+    expect(gear.name).toBe('Ignus Ix');
+    expect(gear.fireDamageBonus).toBe(30);
+    expect(gear.fireResistPenetrationBonus).toBe(30);
+    expect(gear.requirements.minLevel).toBe(30);
+    expect(gear.requirements.int).toBe(28);
   });
 
   it('generateGearFromTemplate lança para template inválido', () => {
@@ -47,13 +60,13 @@ describe('LootService', () => {
     );
   });
 
-  it('generateGearForSlot usa slot solicitado e escala stats por raridade', () => {
-    const common = lootService.generateGearForSlot(10, 'armor', 'common');
-    const epic = lootService.generateGearForSlot(10, 'armor', 'epic');
+  it('generateGearForSlot usa stats fixos do catálogo', () => {
+    const gear = lootService.generateGearForSlot(10, 'armor', 'epic');
 
-    expect(common.slot).toBe('armor');
-    expect(epic.slot).toBe('armor');
-    expect(epic.defenseBonus).toBeGreaterThan(common.defenseBonus);
+    expect(gear.slot).toBe('armor');
+    expect(gear.rarity).toBe('epic');
+    expect(gear.catalogItemId).toBeDefined();
+    expect(getGearCatalogItem(gear.catalogItemId!)?.defenseBonus).toBe(gear.defenseBonus);
   });
 
   it('generateGearForChest retorna item de slot ativo válido', () => {
@@ -63,89 +76,29 @@ describe('LootService', () => {
 
     expect(ACTIVE_GEAR_SLOTS).toContain(gear.slot);
     expect(gear.rarity).toBeDefined();
+    expect(gear.catalogItemId).toBeDefined();
 
     vi.restoreAllMocks();
   });
 
-  it('raridades mais altas produzem bônus primários maiores no mesmo slot', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+  it('raridades mais altas têm stats maiores no mesmo template visual', () => {
+    const rare = lootService.generateGearFromCatalogItem('scout_axe');
+    const epic = lootService.generateGearFromCatalogItem('headsman_axe');
 
-    const slots: GearSlot[] = ['weapon', 'armor', 'accessory'];
-    for (const slot of slots) {
-      const rare = lootService.generateGearForSlot(6, slot, 'rare');
-      const legendary = lootService.generateGearForSlot(6, slot, 'legendary');
-      const rarePrimary =
-        slot === 'weapon'
-          ? rare.attackBonus
-          : slot === 'armor'
-            ? rare.defenseBonus
-            : rare.healthBonus;
-      const legendaryPrimary =
-        slot === 'weapon'
-          ? legendary.attackBonus
-          : slot === 'armor'
-            ? legendary.defenseBonus
-            : legendary.healthBonus;
-
-      expect(legendaryPrimary).toBeGreaterThan(rarePrimary);
-    }
-
-    vi.restoreAllMocks();
+    expect(epic.attackBonus).toBeGreaterThan(rare.attackBonus);
   });
 
-  it('generateGearFromTemplate com tema elemental aplica bônus temático', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+  it('item temático tem bônus elemental fixo no catálogo', () => {
+    const gear = lootService.generateGearFromCatalogItem('igneous_sword');
 
-    const gear = lootService.generateGearFromTemplate('flame_brand', 10, 'rare', 'themed-fire');
-
-    expect(gear.templateId).toBe('flame_brand');
-    expect(gear.fireDamageBonus).toBeGreaterThan(0);
-
-    vi.restoreAllMocks();
+    expect(gear.templateId).toBe('igneous_sword');
+    expect(gear.fireDamageBonus).toBe(6);
   });
 
-  it('template de armadura temática aplica resistência', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+  it('loot normal respeita faixa de nível do mapa em Estrenda', () => {
+    const estrendaPool = listLootCatalogItems('weapon', 'common', 8);
 
-    const gear = lootService.generateGearFromTemplate('glacial_mail', 10, 'epic', 'themed-cold');
-
-    expect(gear.coldResistBonus).toBeGreaterThan(0);
-
-    vi.restoreAllMocks();
-  });
-
-  it('template de acessório temático aplica dano e resistência', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.99);
-
-    const gear = lootService.generateGearFromTemplate('ruby_signet', 12, 'legendary', 'themed-ring');
-
-    expect(gear.fireDamageBonus).toBeGreaterThan(0);
-    expect(gear.fireResistBonus).toBeGreaterThan(0);
-
-    vi.restoreAllMocks();
-  });
-
-  it('Ignus Ix aplica bônus fixos de fogo e penetração', () => {
-    const gear = lootService.generateGearFromTemplate('ignus_ix', 20, 'legendary', 'ignus-test');
-
-    expect(gear.name).toBe('Ignus Ix');
-    expect(gear.fireDamageBonus).toBe(30);
-    expect(gear.fireResistPenetrationBonus).toBe(30);
-    expect(gear.requirements.minLevel).toBe(30);
-    expect(gear.requirements.int).toBe(28);
-  });
-
-  it('loot normal respeita faixa de nível do mapa', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.25);
-
-    const estrenda = lootService.generateGearForSlot(8, 'weapon', 'common');
-    const morthaven = lootService.generateGearForSlot(180, 'weapon', 'common');
-
-    expect(estrenda.requirements.minLevel).toBeGreaterThanOrEqual(1);
-    expect(estrenda.requirements.minLevel).toBeLessThanOrEqual(12);
-    expect(morthaven.requirements.minLevel).toBeGreaterThanOrEqual(30);
-    expect(morthaven.requirements.minLevel).toBeLessThanOrEqual(42);
-
-    vi.restoreAllMocks();
+    expect(estrendaPool.length).toBeGreaterThan(0);
+    expect(estrendaPool.every((item) => (item.requirements?.minLevel ?? 1) <= 12)).toBe(true);
   });
 });

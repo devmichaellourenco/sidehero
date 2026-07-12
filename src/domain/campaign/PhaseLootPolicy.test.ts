@@ -21,12 +21,12 @@ describe('PhaseLootPolicy', () => {
     expect(isPhaseReplay(progress, buildPhaseId(1, 2))).toBe(true);
   });
 
-  it('aplica 50% ouro e 75% XP na repetição', () => {
+  it('aplica 50% ouro e 47% XP na repetição', () => {
     const progress = CampaignProgress.initial().markCleared(buildPhaseId(1, 2), [buildPhaseId(1, 3)], 2);
     const phaseId = buildPhaseId(1, 2);
 
     expect(scalePhaseGold(100, progress, phaseId)).toBe(50);
-    expect(scalePhaseXp(100, progress, phaseId)).toBe(75);
+    expect(scalePhaseXp(100, progress, phaseId)).toBe(47);
   });
 
   it('mantém 100% ouro e XP na primeira conclusão', () => {

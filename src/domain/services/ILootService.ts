@@ -11,6 +11,7 @@ export interface ILootService {
     rarity: GearRarity,
     refreshSeed?: number,
   ): Gear;
+  generateGearFromCatalogItem(catalogItemId: string, instanceId?: string): Gear;
   generateGearFromTemplate(
     templateId: string,
     stage: number,

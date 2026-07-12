@@ -1,36 +1,35 @@
 import { describe, expect, it } from 'vitest';
 import {
-  listGearTemplatesForSlot,
-  resolveGearTemplateId,
-  stripGearRaritySuffix,
+  getGearTemplate,
+  GEAR_TEMPLATES,
+  resolveGearTemplateSprite,
 } from './GearTemplateCatalog';
 
 describe('GearTemplateCatalog', () => {
-  it('remove sufixo de raridade do nome', () => {
-    expect(stripGearRaritySuffix('Espada Enferrujada (rare)')).toBe('Espada Enferrujada');
+  it('define um sprite único por item do catálogo', () => {
+    const worn = getGearTemplate('worn_sword')!;
+    const recruit = getGearTemplate('recruit_blade')!;
+
+    expect(worn.id).toBe('worn_sword');
+    expect(recruit.id).toBe('recruit_blade');
+    expect(worn.sprite).toBe('gear/items/worn_sword.png');
+    expect(recruit.sprite).toBe('gear/items/recruit_blade.png');
   });
 
-  it('resolve template por nome e slot', () => {
-    expect(resolveGearTemplateId('Machado Pixel (epic)', 'weapon')).toBe('pixel_axe');
-    expect(resolveGearTemplateId('Anel de Cobre (common)', 'accessory')).toBe('copper_ring');
+  it('cada entrada tem spriteId e caminho de sprite distintos', () => {
+    const ids = new Set(GEAR_TEMPLATES.map((entry) => entry.id));
+    const sprites = new Set(GEAR_TEMPLATES.map((entry) => entry.sprite));
+    expect(ids.size).toBe(GEAR_TEMPLATES.length);
+    expect(sprites.size).toBe(GEAR_TEMPLATES.length);
   });
 
-  it('lista oito templates por slot ativo (genéricos + elementais)', () => {
-    expect(listGearTemplatesForSlot('weapon')).toHaveLength(8);
-    expect(listGearTemplatesForSlot('armor')).toHaveLength(8);
-    expect(listGearTemplatesForSlot('accessory')).toHaveLength(8);
+  it('resolve sprite do item Galneon pelo id', () => {
+    const template = getGearTemplate('galneon_knight_sword')!;
+    expect(resolveGearTemplateSprite(template)).toBe('gear/items/galneon_knight_sword.png');
   });
 
-  it('inclui templates temáticos elementais em cada slot', () => {
-    expect(listGearTemplatesForSlot('weapon').some((entry) => entry.elementTheme === 'fire')).toBe(true);
-    expect(listGearTemplatesForSlot('armor').some((entry) => entry.elementTheme === 'cold')).toBe(true);
-    expect(listGearTemplatesForSlot('accessory').some((entry) => entry.elementTheme === 'lightning')).toBe(
-      true,
-    );
-  });
-
-  it('não inclui itens exclusivos de herói no loot aleatório', () => {
-    const weaponTemplates = listGearTemplatesForSlot('weapon');
-    expect(weaponTemplates.some((entry) => entry.id === 'galneon_standard_sword')).toBe(false);
+  it('mantém efeitos únicos nos sprites nomeados', () => {
+    expect(getGearTemplate('sword_vorpal_lupnus')?.uniqueEffectId).toBe('vorpal_lupnus_heal_block');
+    expect(getGearTemplate('soler_plegius')?.uniqueEffectId).toBe('soler_plegius_cleanse');
   });
 });
