@@ -1,7 +1,8 @@
 import { ChestType } from '../combat/ChestType';
-import { lootPrimaryStatScale } from '../combat/DifficultyCombatScaling';
+import { rolledGearPrimaryStat } from '../combat/DifficultyCombatScaling';
 import { Gear, GearRarity, GearSlot } from '../entities/Gear';
 import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
+import { resolveGearItemLevel } from '../gear/MapGearLevelPolicy';
 import {
   getGearTemplate,
   GearElementTheme,
@@ -107,6 +108,8 @@ export class LootService implements ILootService {
       `shop-gear-${stage}-${refreshSeed}-${slot}`,
       statBump,
       'monster',
+      undefined,
+      refreshSeed,
     );
   }
 
@@ -158,8 +161,10 @@ export class LootService implements ILootService {
     statBump = 0,
     chestType: ChestType = 'monster',
     requirementTemplateId?: string,
+    deterministicSeed?: number,
   ): Gear {
-    const base = Math.floor((2 + Math.floor(stage / 2) + statBump) * lootPrimaryStatScale(stage));
+    const itemLevel = resolveGearItemLevel(stage, requirementTemplateId ?? templateId, deterministicSeed);
+    const base = rolledGearPrimaryStat(itemLevel, statBump);
     const template = getGearTemplate(templateId);
     const secondary = this.rollSecondaryStats(slot, rarity, chestType);
     const elemental = template?.elementTheme
@@ -187,11 +192,11 @@ export class LootService implements ILootService {
       requirements: requirementTemplateId
         ? GearRequirementChecker.inferRequirementsForTemplate(
             requirementTemplateId,
-            stage,
+            itemLevel,
             slot,
             rarity,
           )
-        : GearRequirementChecker.inferRequirements(stage, slot, rarity),
+        : GearRequirementChecker.inferRequirementsForItemLevel(itemLevel, slot, rarity),
     });
   }
 

@@ -1,3 +1,8 @@
+import {
+  CAMPAIGN_HERO_LEVEL_SOFT_CAP,
+  campaignHeroXpRequired,
+} from '../balance/CampaignXpScaling';
+
 /**
  * XP necessária para avançar do nível N para N+1 (níveis 1–100).
  */
@@ -118,6 +123,11 @@ export function expRequiredToAdvanceFromLevel(level: number): number {
   }
 
   const safeLevel = Math.max(1, Math.floor(level));
+
+  if (safeLevel <= CAMPAIGN_HERO_LEVEL_SOFT_CAP) {
+    return campaignHeroXpRequired(safeLevel);
+  }
+
   const entry = HERO_LEVEL_XP_TABLE.find((row) => row.level === safeLevel);
   return entry?.expForLevelUp ?? HERO_LEVEL_XP_TABLE[0].expForLevelUp;
 }

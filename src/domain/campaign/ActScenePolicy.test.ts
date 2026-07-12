@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildActSceneId } from './ActSceneCatalog';
+import { buildActSceneId, SEASON_FINALE_EPILOGUE_ID } from './ActSceneCatalog';
 import { CampaignProgress } from './CampaignProgress';
 import {
   detectNewlyUnlockedActScene,
+  detectSeasonFinaleEpilogue,
   firstPhaseIdForAct,
   isActUnlocked,
 } from './ActScenePolicy';
@@ -42,6 +43,22 @@ describe('ActScenePolicy', () => {
     const scene = detectNewlyUnlockedActScene(null, progress);
 
     expect(scene).toBeNull();
+  });
+
+  it('detecta epílogo na primeira conclusão da temporada', () => {
+    const before = CampaignProgress.initial();
+    const after = before.markSeasonCompleted();
+
+    expect(detectSeasonFinaleEpilogue(before, after)?.id).toBe(SEASON_FINALE_EPILOGUE_ID);
+  });
+
+  it('não repete epílogo de temporada já visto', () => {
+    const before = CampaignProgress.initial();
+    const after = before
+      .markSeasonCompleted()
+      .markActSceneViewed(SEASON_FINALE_EPILOGUE_ID);
+
+    expect(detectSeasonFinaleEpilogue(before, after)).toBeNull();
   });
 
   it('mapeia primeira fase de cada ato', () => {

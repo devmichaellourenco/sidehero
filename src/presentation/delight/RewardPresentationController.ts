@@ -5,9 +5,10 @@ import { RewardMomentKind } from '../delight/types/RewardMoment';
 import { RewardMomentDetector, StateChangeDetectOptions, StateChangeHandlers } from '../delight/RewardMomentDetector';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
 
-const PHASE_MILESTONE_CELEBRATION_KINDS = new Set<RewardMomentKind>([
+const PHASE_CLEAR_CELEBRATION_KINDS = new Set<RewardMomentKind>([
   'milestone_boss_defeated',
   'named_legendary_received',
+  'season_complete',
 ]);
 
 export class RewardPresentationController implements RewardCelebrationPort {
@@ -31,7 +32,7 @@ export class RewardPresentationController implements RewardCelebrationPort {
   celebratePhaseMilestoneRewards(previous: GameStateDto, next: GameStateDto): void {
     const moments = this.detector.detect(previous, next);
     for (const moment of moments) {
-      if (PHASE_MILESTONE_CELEBRATION_KINDS.has(moment.kind)) {
+      if (PHASE_CLEAR_CELEBRATION_KINDS.has(moment.kind)) {
         this.wowCelebration.enqueueMoment(moment);
       }
     }

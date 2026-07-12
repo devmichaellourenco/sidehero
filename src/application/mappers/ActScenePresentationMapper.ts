@@ -1,5 +1,5 @@
 import { resolveActSceneById } from '../../domain/campaign/ActSceneCatalog';
-import { detectNewlyUnlockedActScene } from '../../domain/campaign/ActScenePolicy';
+import { detectNewlyUnlockedActScene, detectSeasonFinaleEpilogue } from '../../domain/campaign/ActScenePolicy';
 import { CampaignProgress } from '../../domain/campaign/CampaignProgress';
 import { ActSceneDto } from '../dto/CampaignDto';
 import { CampaignProgressDto } from '../dto/GameStateDto';
@@ -21,6 +21,19 @@ export function detectPendingActSceneDto(
   next: CampaignProgressDto,
 ): ActSceneDto | null {
   const scene = detectNewlyUnlockedActScene(
+    previous ? toProgress(previous) : null,
+    toProgress(next),
+  );
+  if (!scene) return null;
+
+  return mapActSceneToDto(scene, { unlocked: true, viewed: false });
+}
+
+export function detectSeasonFinaleEpilogueDto(
+  previous: CampaignProgressDto | null | undefined,
+  next: CampaignProgressDto,
+): ActSceneDto | null {
+  const scene = detectSeasonFinaleEpilogue(
     previous ? toProgress(previous) : null,
     toProgress(next),
   );

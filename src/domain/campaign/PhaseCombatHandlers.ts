@@ -9,7 +9,7 @@ import { tryGrantMilestoneUniqueGearOnPhaseClear } from './UniqueGearLootService
 import { EncounterMeta, EncounterResolver } from './EncounterResolver';
 import { PhaseRun } from './PhaseRun';
 import { resolvePhase } from './CampaignCatalog';
-import { previousPhaseId } from './CampaignIds';
+import { isMilestonePhase, parsePhaseId, previousPhaseId, PhaseId } from './CampaignIds';
 
 export interface PhaseCombatResult {
   state: GameState;
@@ -98,7 +98,7 @@ export class PhaseCombatHandlers {
     );
 
     if (phase.seasonFinale) {
-      progress = progress.markSeasonCompleted();
+      progress = progress.markSeasonCompleted().withSelectedPhase(meta.phaseId);
     } else if (phase.unlocks.length > 0) {
       progress = progress.withSelectedPhase(phase.unlocks[0]);
     }
@@ -227,7 +227,12 @@ export class PhaseCombatHandlers {
       return { state, events: [] };
     }
 
+    const intermission = state.combatIntermission;
     const cleared = state.withCombatIntermission(null);
+
+    if (this.shouldEnterCampAfterPhaseClear(intermission)) {
+      return this.enterCampForNextPhase(cleared, intermission);
+    }
 
     if (cleared.phaseRun) {
       return this.startCombatForPhaseRun(cleared, cleared.phaseRun);
@@ -239,6 +244,39 @@ export class PhaseCombatHandlers {
     }
 
     return this.startPhaseRun(cleared, PhaseRun.start(phaseId));
+  }
+
+  private shouldEnterCampAfterPhaseClear(intermission: CombatIntermission): boolean {
+    if (intermission.variant !== 'phase-clear') return false;
+
+    const phase = resolvePhase(intermission.clearedPhaseId);
+    if (!phase) return false;
+
+    const { phaseNumber } = parsePhaseId(intermission.clearedPhaseId);
+    return phase.seasonFinale === true || isMilestonePhase(phaseNumber);
+  }
+
+  private enterCampForNextPhase(
+    state: GameState,
+    intermission: CombatIntermission,
+  ): PhaseCombatResult {
+    const targetPhaseId =
+      (intermission.nextPhaseId as PhaseId | null) ?? state.campaignProgress.selectedPhaseId;
+    const phaseRun = PhaseRun.start(targetPhaseId);
+    const nextPhase = resolvePhase(targetPhaseId);
+
+    return {
+      state: state
+        .withCampaignProgress(state.campaignProgress.withSelectedPhase(targetPhaseId))
+        .withPhaseRun(phaseRun)
+        .withCombat(null)
+        .withLoadoutEditOpen(true)
+        .withPhaseRestartOnResume(true)
+        .addLog(
+          `🏕 Acampamento — ${nextPhase?.displayName ?? targetPhaseId}. Toque em Partir para continuar`,
+        ),
+      events: ['Acampamento'],
+    };
   }
 
   private startCombatForPhaseRun(state: GameState, phaseRun: PhaseRun): PhaseCombatResult {

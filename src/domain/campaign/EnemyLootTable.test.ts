@@ -80,11 +80,11 @@ describe('WaveEnemyFactory XP', () => {
     const trash = resolver.resolve(buildPhaseId(1, 2), 0);
     const boss = resolver.resolve(buildPhaseId(1, 2), 1);
 
-    expect(trash?.enemies.every((enemy) => enemy.xpReward > 0 && enemy.xpReward <= 10)).toBe(true);
+    expect(trash?.enemies.every((enemy) => enemy.xpReward > 0 && enemy.xpReward <= 12)).toBe(true);
     expect(boss?.enemies.some((enemy) => enemy.xpReward > 0)).toBe(true);
     const bossXp = boss!.enemies.find((enemy) => enemy.role === 'boss')!.xpReward;
     const trashXp = trash!.enemies[0].xpReward;
     expect(bossXp).toBeGreaterThan(trashXp);
-    expect(bossXp).toBeLessThan(40);
+    expect(bossXp).toBeLessThan(50);
   });
 });

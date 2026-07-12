@@ -1,6 +1,8 @@
 import { Enemy } from '../entities/Enemy';
 import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
 import { phaseGoldScaleForPhase } from '../balance/PhaseGoldBudget';
+import { resolveCampaignKillXp } from '../balance/CampaignXpScaling';
+import { ENEMY_CAMPAIGN_STAT_SCALE } from '../balance/ProgressionPowerScale';
 import { ENEMY_ATK_BALANCE_FACTOR, ENEMY_HP_BALANCE_FACTOR, resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
 import { stageScalingFactorsForTier } from '../progression/StageScalingCatalog';
 import { Stats } from '../value-objects/Stats';
@@ -56,10 +58,13 @@ function createEnemyFromSlot(
     context.statMultiplier ?? 1,
   );
   const roleScale = ROLE_SCALE[slot.role];
-  const attack = Math.floor(10 * scaling.atk * roleScale.stat * ENEMY_ATK_BALANCE_FACTOR);
-  const defense = Math.floor(4 * scaling.atk * roleScale.stat);
+  const campaignScale = ENEMY_CAMPAIGN_STAT_SCALE;
+  const attack = Math.floor(
+    12 * scaling.atk * roleScale.stat * ENEMY_ATK_BALANCE_FACTOR * campaignScale,
+  );
+  const defense = Math.floor(4 * scaling.atk * roleScale.stat * campaignScale);
   const maxHealth = resolveEnemySpawnMaxHealth(
-    Math.floor(60 * scaling.hp * roleScale.stat * ENEMY_HP_BALANCE_FACTOR),
+    Math.floor(72 * scaling.hp * roleScale.stat * ENEMY_HP_BALANCE_FACTOR * campaignScale),
   );
   const phaseGoldScale =
     context.applyPhaseGoldBudget === false ? 1 : phaseGoldScaleForPhase(context.phaseId);
@@ -72,7 +77,7 @@ function createEnemyFromSlot(
       phaseGoldScale,
   );
   const xpBase = slot.role === 'boss' ? 8 : slot.role === 'elite' ? 5 : 2;
-  const xpReward = Math.floor(xpBase * scaling.exp * roleScale.reward);
+  const xpReward = resolveCampaignKillXp(xpBase, context.difficultyTier, roleScale.reward);
 
   const rosterEntry = getEnemyRosterEntry(slot.enemyType);
   const baseName = rosterEntry?.name ?? slot.enemyType;

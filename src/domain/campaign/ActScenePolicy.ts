@@ -1,7 +1,7 @@
 import { buildPhaseId, mapIdFromIndex, parsePhaseId, PhaseId } from './CampaignIds';
 import { mapDefinitionById } from './CampaignMaps';
 import { CampaignProgress } from './CampaignProgress';
-import { ActSceneDefinition, listActScenesForMap, resolveActScene } from './ActSceneCatalog';
+import { ActSceneDefinition, listActScenesForMap, resolveActScene, SEASON_FINALE_EPILOGUE } from './ActSceneCatalog';
 import { MapId } from './CampaignIds';
 
 export function firstPhaseIdForAct(mapIndex: number, actNumber: number): PhaseId {
@@ -56,6 +56,24 @@ export function detectNewlyUnlockedActScene(
   }
 
   return null;
+}
+
+/**
+ * Epílogo de fim de temporada — só na primeira conclusão do jogo base.
+ */
+export function detectSeasonFinaleEpilogue(
+  previous: CampaignProgress | null,
+  next: CampaignProgress,
+): ActSceneDefinition | null {
+  if ((previous?.seasonCompleted ?? false) || !next.seasonCompleted) {
+    return null;
+  }
+
+  if (isActSceneViewed(next, SEASON_FINALE_EPILOGUE.id)) {
+    return null;
+  }
+
+  return SEASON_FINALE_EPILOGUE;
 }
 
 export function listVisibleActScenes(

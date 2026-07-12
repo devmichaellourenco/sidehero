@@ -71,7 +71,7 @@ import { bindGearDragDrop } from '../gear/GearDragDropBinder';
 import { OnboardingController } from '../onboarding/OnboardingController';
 import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
 import { bindBattleChromeLayout } from '../layout/BattleChromeLayout';
-import { detectPendingActSceneDto } from '../../application/mappers/ActScenePresentationMapper';
+import { detectPendingActSceneDto, detectSeasonFinaleEpilogueDto } from '../../application/mappers/ActScenePresentationMapper';
 import { ActSceneDto } from '../../application/dto/CampaignDto';
 
 export class GameViewController {
@@ -166,6 +166,7 @@ export class GameViewController {
   private shownIntermissionKey: string | null = null;
   private intermissionResuming = false;
   private deferredRewardBaseline: GameStateDto | null = null;
+  private deferredSeasonFinaleEpilogueBaseline: GameStateDto | null = null;
 
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
     this.client = client;
@@ -263,6 +264,9 @@ export class GameViewController {
       root.querySelector('#act-scene-backdrop') as HTMLElement,
     );
     this.rewards = new RewardPresentationController(this.wowCelebration);
+    this.wowCelebration.onIdle(() => {
+      this.tryShowSeasonFinaleEpilogue();
+    });
     this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
       root.querySelector('#destroy-gear-confirm-root')!,
       root.querySelector('#destroy-confirm-body')!,
@@ -857,6 +861,7 @@ export class GameViewController {
       this.render(response.state);
       this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
       this.flushDeferredVictoryRewards();
+      this.tryShowSeasonFinaleEpilogueAfterCelebration();
       this.syncAutoBattleTimer();
     } finally {
       this.intermissionResuming = false;
@@ -869,6 +874,43 @@ export class GameViewController {
     if (!baseline || !this.state) return;
 
     this.rewards.celebratePhaseMilestoneRewards(baseline, this.state);
+  }
+
+  private tryShowSeasonFinaleEpilogueAfterCelebration(): void {
+    if (this.wowCelebration.isBlockingAdvance()) return;
+    this.tryShowSeasonFinaleEpilogue();
+  }
+
+  private tryShowSeasonFinaleEpilogue(): void {
+    const previous = this.deferredSeasonFinaleEpilogueBaseline;
+    if (!previous || !this.state) return;
+
+    if (
+      this.onboarding.isActive() ||
+      this.actSceneFlow.isBlocking() ||
+      this.victoryFlow.isBlockingAdvance() ||
+      this.wowCelebration.isBlockingAdvance()
+    ) {
+      return;
+    }
+
+    const scene = detectSeasonFinaleEpilogueDto(
+      previous.campaignProgress,
+      this.state.campaignProgress,
+    );
+    if (!scene) {
+      this.deferredSeasonFinaleEpilogueBaseline = null;
+      return;
+    }
+
+    this.deferredSeasonFinaleEpilogueBaseline = null;
+    this.stopAutoBattle();
+    this.actSceneFlow.show(scene, {
+      markViewedOnDismiss: true,
+      onDismiss: () => {
+        void this.markActSceneViewed(scene.id);
+      },
+    });
   }
 
   private buildIntermissionKey(state: GameStateDto): string | null {
@@ -895,9 +937,12 @@ export class GameViewController {
     if (
       payload.variant === 'phase-clear' &&
       previous &&
-      payload.milestoneVictory?.isMilestone
+      (payload.milestoneVictory?.isMilestone || payload.seasonCompleted)
     ) {
       this.deferredRewardBaseline = previous;
+    }
+    if (payload.seasonCompleted && previous) {
+      this.deferredSeasonFinaleEpilogueBaseline = previous;
     }
     this.stopAutoBattle();
     this.victoryFlow.show(payload, () => {
@@ -1759,7 +1804,8 @@ export class GameViewController {
       this.onboarding.isActive() ||
       this.actSceneFlow.isBlocking() ||
       state.combatIntermission ||
-      this.victoryFlow.isBlockingAdvance()
+      this.victoryFlow.isBlockingAdvance() ||
+      this.wowCelebration.isBlockingAdvance()
     ) {
       return;
     }

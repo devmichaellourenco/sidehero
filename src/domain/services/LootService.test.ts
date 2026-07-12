@@ -134,4 +134,18 @@ describe('LootService', () => {
     expect(gear.requirements.minLevel).toBe(30);
     expect(gear.requirements.int).toBe(28);
   });
+
+  it('loot normal respeita faixa de nível do mapa', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.25);
+
+    const estrenda = lootService.generateGearForSlot(8, 'weapon', 'common');
+    const morthaven = lootService.generateGearForSlot(180, 'weapon', 'common');
+
+    expect(estrenda.requirements.minLevel).toBeGreaterThanOrEqual(1);
+    expect(estrenda.requirements.minLevel).toBeLessThanOrEqual(12);
+    expect(morthaven.requirements.minLevel).toBeGreaterThanOrEqual(30);
+    expect(morthaven.requirements.minLevel).toBeLessThanOrEqual(42);
+
+    vi.restoreAllMocks();
+  });
 });

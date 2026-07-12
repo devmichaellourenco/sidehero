@@ -111,6 +111,9 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `BalanceAudit.test.ts` — curva por tier, economia loja/forja, tempo de clear
 - [x] `PhaseGoldBudget.test.ts` — teto de ouro por fase normal alinhado à referência
 - [x] `MilestoneGoldCap.test.ts` — teto de ouro em milestones (BAL-007)
+- [x] `MapGearLevelPolicy.test.ts` — faixa de nível de item por mapa
+- [x] `ProgressionPowerScale.test.ts` — curva de XP e stats de gear por nível
+- [x] `CampaignXpScaling.test.ts` — XP por mapa, early boost e metas de progressão
 
 ## Backlog conhecido (auditoria 2026-07-03)
 
@@ -124,3 +127,4 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-006 | Média | Gear sem flat/%, velocidade negativa e redução de CD | Gear/Loot | ✅ Resolvido |
 | BAL-007 | Média | Milestones (ex. 2-50) pagam ouro muito acima da renda de referência — épico na loja fica trivial nessas fases | Economia | ✅ Resolvido (`MilestoneGoldCap`) |
 | BAL-008 | Média | Ouro por fase normal escalava acima da renda de referência em fases multi-inimigo (épico trivial cedo) | Economia | ✅ Resolvido (`PhaseGoldBudget`) |
+| BAL-009 | Alta | Progressão de nível lenta no v1; loot fora da faixa do mapa; dano não escalava até ~20k DPS | Progressão/Loot | ✅ Resolvido (`ProgressionPowerScale`, `MapGearLevelPolicy`) |

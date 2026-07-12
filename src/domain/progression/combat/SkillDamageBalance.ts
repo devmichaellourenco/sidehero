@@ -2,10 +2,10 @@ import { CombatSkillDefinition } from './CombatSkillDefinition';
 import { isDamageCombatKind } from './SkillCombatKind';
 
 /** Multiplicador global de dano em skills ofensivas do herói (não afeta auto-ataque nem inimigos). */
-export const HERO_DAMAGE_SKILL_MULTIPLIER = 1.35;
+export const HERO_DAMAGE_SKILL_MULTIPLIER = 1.9;
 
 /** Skills físicas não ficam abaixo desta fração do ATK efetivo do herói. */
-export const PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO = 1.2;
+export const PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO = 1.35;
 
 export function isPhysicalDamageSkill(skill: CombatSkillDefinition): boolean {
   return (

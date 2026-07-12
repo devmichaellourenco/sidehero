@@ -123,7 +123,11 @@ describe('PhaseCombatHandlers', () => {
   it('marca temporada concluída ao derrotar boss final do jogo base', () => {
     const phaseId = '4-50';
     const phaseRun = PhaseRun.start(phaseId);
-    let state = GameState.initial().withPhaseRun(phaseRun);
+    let state = GameState.initial()
+      .withCampaignProgress(
+        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
+      )
+      .withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
 
     const finale = resolvePhase(phaseId)!;
@@ -139,6 +143,47 @@ describe('PhaseCombatHandlers', () => {
 
     expect(victory.state.campaignProgress.seasonCompleted).toBe(true);
     expect(victory.events.some((event) => event.includes('Temporada concluída'))).toBe(true);
+
+    const camp = handlers.resumeIntermission(victory.state);
+
+    expect(camp.state.loadoutEditOpen).toBe(true);
+    expect(camp.state.phaseRestartOnResume).toBe(true);
+    expect(camp.state.combat).toBeNull();
+    expect(camp.state.phaseRun?.phaseId).toBe('4-50');
+    expect(camp.state.phaseRun?.waveIndex).toBe(0);
+  });
+
+  it('envia para acampamento na próxima fase após marco X-50', () => {
+    const phaseId = buildPhaseId(1, 50);
+    const phaseRun = PhaseRun.start(phaseId);
+    let state = GameState.initial()
+      .withCampaignProgress(
+        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
+      )
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+
+    const finale = resolvePhase(phaseId)!;
+    const resolved = resolver.resolve(phaseId, finale.waves.length - 1);
+    expect(resolved).not.toBeNull();
+
+    const victory = handlers.onBossDefeated(
+      state,
+      resolved!.enemies,
+      state.heroes,
+      resolved!.meta,
+    );
+
+    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(2, 1));
+    expect(victory.state.combatIntermission?.nextPhaseId).toBe(buildPhaseId(2, 1));
+
+    const camp = handlers.resumeIntermission(victory.state);
+
+    expect(camp.state.loadoutEditOpen).toBe(true);
+    expect(camp.state.phaseRestartOnResume).toBe(true);
+    expect(camp.state.combat).toBeNull();
+    expect(camp.state.phaseRun?.phaseId).toBe(buildPhaseId(2, 1));
+    expect(camp.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(2, 1));
   });
 
   it('reinicia na fase anterior com cura completa no wipe', () => {

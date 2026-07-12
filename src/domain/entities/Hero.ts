@@ -1,6 +1,14 @@
 import { Experience } from '../value-objects/Experience';
 import { Attributes, AttributeKey } from '../progression/Attributes';
 import { getBaseAttributes } from '../progression/BaseAttributes';
+import {
+  HERO_ATTACK_PER_LEVEL,
+  HERO_DEFENSE_PER_LEVEL,
+  HERO_HEALTH_PER_LEVEL,
+  HERO_LEVEL_UP_ATTACK_GAIN,
+  HERO_LEVEL_UP_DEFENSE_GAIN,
+  HERO_LEVEL_UP_HEALTH_GAIN,
+} from '../balance/ProgressionPowerScale';
 import { AscensionId, SkillId } from '../progression/SkillId';
 import { canHeroEquip } from '../services/GearEquipService';
 import { Gear, GearSlot } from './Gear';
@@ -28,11 +36,11 @@ export interface HeroProps {
 }
 
 const BASE_STATS: Record<HeroClass, { attack: number; defense: number; health: number }> = {
-  knight: { attack: 12, defense: 8, health: 120 },
-  sorcerer: { attack: 18, defense: 3, health: 80 },
-  priest: { attack: 8, defense: 5, health: 100 },
-  berserker: { attack: 16, defense: 4, health: 110 },
-  paladin: { attack: 11, defense: 10, health: 115 },
+  knight: { attack: 26, defense: 8, health: 120 },
+  sorcerer: { attack: 22, defense: 3, health: 80 },
+  priest: { attack: 14, defense: 5, health: 100 },
+  berserker: { attack: 24, defense: 4, health: 110 },
+  paladin: { attack: 22, defense: 10, health: 115 },
 };
 
 const HERO_EMOJI: Record<HeroClass, string> = {
@@ -125,7 +133,7 @@ export class Hero {
 
   get attack(): number {
     const gearBonus = this.sumGear((g) => g.attackBonus);
-    const levelBonus = (this.level - 1) * 2;
+    const levelBonus = (this.level - 1) * HERO_ATTACK_PER_LEVEL;
     const attrBonus = Math.floor(this.totalAttributes.str * 0.5 + this.totalAttributes.dex * 0.3);
     const raw = this.baseAttack + gearBonus + levelBonus + attrBonus;
     const percent = this.sumGear((g) => g.attackPercentBonus);
@@ -134,7 +142,7 @@ export class Hero {
 
   get defense(): number {
     const gearBonus = this.sumGear((g) => g.defenseBonus);
-    const levelBonus = (this.level - 1) * 2;
+    const levelBonus = (this.level - 1) * HERO_DEFENSE_PER_LEVEL;
     const attrBonus = Math.floor(this.totalAttributes.dex * 0.5 + this.totalAttributes.str * 0.2);
     const raw = this.baseDefense + gearBonus + levelBonus + attrBonus;
     const percent = this.sumGear((g) => g.defensePercentBonus);
@@ -143,7 +151,7 @@ export class Hero {
 
   get maxHealth(): number {
     const gearBonus = this.sumGear((g) => g.healthBonus);
-    const levelBonus = (this.level - 1) * 10;
+    const levelBonus = (this.level - 1) * HERO_HEALTH_PER_LEVEL;
     const attrBonus = this.totalAttributes.str * 2;
     const raw = this.baseMaxHealth + gearBonus + levelBonus + attrBonus;
     const percent = this.sumGear((g) => g.healthPercentBonus);
@@ -161,9 +169,9 @@ export class Hero {
     if (leveledUp) {
       hero = new Hero({
         ...hero.toProps(),
-        baseAttack: hero.baseAttack + 2,
-        baseDefense: hero.baseDefense + 2,
-        baseMaxHealth: hero.baseMaxHealth + 10,
+        baseAttack: hero.baseAttack + HERO_LEVEL_UP_ATTACK_GAIN,
+        baseDefense: hero.baseDefense + HERO_LEVEL_UP_DEFENSE_GAIN,
+        baseMaxHealth: hero.baseMaxHealth + HERO_LEVEL_UP_HEALTH_GAIN,
         currentHealth: hero.maxHealth,
         ...hero.progression.withImprovementPointGranted().toProps(),
       });

@@ -36,7 +36,8 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | Esquiva/block/DR | gear + passivas | Após soma de componentes | `DefensiveMitigation.ts` |
 | DOT tick | `onHitDot` | **Deve** usar pipeline (backlog BAL-001) | `CombatTurnPhase.ts` |
 | Inimigo stats | tier, role | `StageScalingCatalog` | `WaveEnemyFactory.ts` |
-| Loot primário | tier, raridade | `lootPrimaryStatScale` | `DifficultyCombatScaling.ts` |
+| XP por kill | mapa, tier, replay | `CampaignXpScaling` | `WaveEnemyFactory.ts`, `PhaseLootPolicy.ts` |
+| Loot primário | itemLevel, raridade | `rolledGearPrimaryStat` | `DifficultyCombatScaling.ts`, `MapGearLevelPolicy.ts` |
 | Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → referência | `PhaseGoldBudget.ts`, `EconomyReference.ts` |
 | Loja | tier, seed | cap raridade + pesos | `ShopCatalog.ts` |
 

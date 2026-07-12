@@ -20,6 +20,7 @@ export class WowCelebrationController {
   private celebrationSnapshot: string | null = null;
   private inboxSnapshot: string | null = null;
   private lastCelebrationBannerId: string | null = null;
+  private idleListeners: Array<() => void> = [];
 
   constructor(
     private readonly celebrationRoot: HTMLElement,
@@ -75,6 +76,10 @@ export class WowCelebrationController {
 
   isBlockingAdvance(): boolean {
     return this.activeCelebration !== null;
+  }
+
+  onIdle(listener: () => void): void {
+    this.idleListeners.push(listener);
   }
 
   destroy(): void {
@@ -134,6 +139,15 @@ export class WowCelebrationController {
     this.celebrationStage.innerHTML = '';
     this.celebrationSnapshot = null;
     this.pumpCelebrationQueue();
+    this.notifyIdleIfReady();
+  }
+
+  private notifyIdleIfReady(): void {
+    if (this.activeCelebration || this.displayQueue.length > 0) return;
+
+    for (const listener of this.idleListeners) {
+      listener();
+    }
   }
 
   private handleCelebrationClick(event: Event): void {

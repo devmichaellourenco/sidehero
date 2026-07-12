@@ -13,7 +13,20 @@ export function scaledDotDamage(baseDamage: number, difficultyTier: number): num
   return Math.max(1, Math.floor(baseDamage * scale));
 }
 
-/** Escala stats primários de loot gerado para tiers mais altos. */
+import {
+  gearPrimaryStatBase,
+  lootPrimaryStatScaleForItemLevel,
+} from '../balance/ProgressionPowerScale';
+
+/** Escala stats primários de loot gerado para tiers mais altos (legado — preferir itemLevel). */
 export function lootPrimaryStatScale(difficultyTier: number): number {
   return 1 + Math.min(0.35, Math.max(0, difficultyTier - 1) * 0.003);
+}
+
+/** Stat primário rolado para um item com nível explícito. */
+export function rolledGearPrimaryStat(itemLevel: number, statBump = 0): number {
+  const bumpScale = 1 + statBump * 0.08;
+  return Math.floor(
+    gearPrimaryStatBase(itemLevel) * lootPrimaryStatScaleForItemLevel(itemLevel) * bumpScale,
+  );
 }

@@ -101,11 +101,14 @@ export class RewardMomentDetector {
     if (!skipVictoryRewards && !previous.seasonCompleted && next.seasonCompleted) {
       moments.push(
         buildMoment('season_complete', {
-          title: 'Temporada Concluída!',
-          subtitle: 'Você venceu a campanha desta run',
+          title: 'Jornada concluída!',
+          subtitle: 'Você venceu Morthaven — fim do jogo base por enquanto',
           tone: 'victory',
           iconUrl: getAssetUrl(ASSETS.ui.victoryFrame),
-          detailLines: ['Inicie um novo jogo quando quiser continuar'],
+          detailLines: [
+            'Novas regiões virão em atualizações futuras.',
+            'Repita fases liberadas quando quiser — toque em Partir no acampamento.',
+          ],
         }),
       );
     } else if (!skipVictoryRewards && clearedNow.length > 0) {

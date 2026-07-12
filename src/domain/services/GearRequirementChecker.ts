@@ -42,28 +42,37 @@ export class GearRequirementChecker {
     rarity: Gear['rarity'],
   ): GearRequirements {
     const baseLevel = Math.max(1, Math.floor(stage / 3));
-    const rarityBump =
-      rarity === 'mythic'
-        ? 8
-        : rarity === 'legendary'
-          ? 5
-          : rarity === 'epic'
-            ? 3
-            : rarity === 'rare'
-              ? 1
-              : 0;
+    return GearRequirementChecker.inferRequirementsForItemLevel(baseLevel, slot, rarity);
+  }
 
-    const reqs: GearRequirements = { minLevel: baseLevel + rarityBump };
+  static inferRequirementsForItemLevel(
+    itemLevel: number,
+    slot: Gear['slot'],
+    rarity: Gear['rarity'],
+  ): GearRequirements {
+    const safeLevel = Math.max(1, Math.floor(itemLevel));
+    const rarityRelax =
+      rarity === 'mythic' || rarity === 'legendary'
+        ? 0
+        : rarity === 'epic'
+          ? 1
+          : rarity === 'rare'
+            ? 2
+            : 3;
+    const minLevel = Math.max(1, safeLevel - rarityRelax);
+    const attributeGate = Math.max(0, Math.floor(safeLevel * 0.55));
+
+    const reqs: GearRequirements = { minLevel };
 
     if (slot === 'weapon') {
-      reqs.str = Math.max(0, baseLevel - 1);
-      if (rarity !== 'common') reqs.str = (reqs.str ?? 0) + rarityBump;
+      reqs.str = Math.max(0, attributeGate - 1);
+      if (rarity !== 'common') reqs.str = (reqs.str ?? 0) + Math.max(0, rarityRelax - 1);
     } else if (slot === 'armor') {
-      reqs.dex = Math.max(0, baseLevel - 1);
-      if (rarity !== 'common') reqs.dex = (reqs.dex ?? 0) + rarityBump;
+      reqs.dex = Math.max(0, attributeGate - 1);
+      if (rarity !== 'common') reqs.dex = (reqs.dex ?? 0) + Math.max(0, rarityRelax - 1);
     } else {
-      reqs.int = Math.max(0, baseLevel - 1);
-      if (rarity !== 'common') reqs.int = (reqs.int ?? 0) + rarityBump;
+      reqs.int = Math.max(0, attributeGate - 1);
+      if (rarity !== 'common') reqs.int = (reqs.int ?? 0) + Math.max(0, rarityRelax - 1);
     }
 
     return reqs;
@@ -71,12 +80,12 @@ export class GearRequirementChecker {
 
   static inferRequirementsForTemplate(
     templateId: string,
-    stage: number,
+    itemLevel: number,
     slot: Gear['slot'],
     rarity: Gear['rarity'],
   ): GearRequirements {
     const template = getGearTemplate(templateId);
-    let result = GearRequirementChecker.inferRequirements(stage, slot, rarity);
+    let result = GearRequirementChecker.inferRequirementsForItemLevel(itemLevel, slot, rarity);
     if (template?.exclusiveHeroId) {
       result = { ...result, heroId: template.exclusiveHeroId };
     }

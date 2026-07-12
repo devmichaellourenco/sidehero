@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { buildPhaseId } from './CampaignIds';
 import { EncounterResolver } from './EncounterResolver';
+import { CAMPAIGN_REPLAY_XP_MULTIPLIER } from '../balance/CampaignXpScaling';
 import { EnemyKillRewardService } from './EnemyKillRewardService';
 import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
@@ -83,7 +84,7 @@ describe('EnemyKillRewardService', () => {
     const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
 
     const expectedGold = Math.floor(enemy.goldReward * 0.5);
-    const expectedXp = Math.floor(enemy.xpReward * 0.75);
+    const expectedXp = Math.floor(enemy.xpReward * CAMPAIGN_REPLAY_XP_MULTIPLIER);
     expect(result.state.gold.amount).toBe(expectedGold);
     expect(result.state.activeHeroes()[0].experience.current).toBe(expectedXp);
     vi.restoreAllMocks();
