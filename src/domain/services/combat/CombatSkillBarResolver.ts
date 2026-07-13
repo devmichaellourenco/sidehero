@@ -10,6 +10,9 @@ import { CombatSkillSelector } from './CombatSkillSelector';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 
+/** Oculto na strip de batalha; o carregamento do ataque usa a barra de time action. */
+const STRIP_HIDDEN_SKILL_IDS = new Set(['basic_attack']);
+
 export class CombatSkillBarResolver {
   constructor(private readonly selector = new CombatSkillSelector()) {}
 
@@ -24,7 +27,7 @@ export class CombatSkillBarResolver {
     if (!hero.isAlive()) return [];
 
     const key = combatantKey('hero', hero.id);
-    const skills = listHeroCombatSkills(hero);
+    const skills = this.filterSkillsForStrip(listHeroCombatSkills(hero));
     const highlights = this.resolveHighlights(
       hero,
       null,
@@ -48,7 +51,7 @@ export class CombatSkillBarResolver {
     if (!enemy.isAlive()) return [];
 
     const key = combatantKey('enemy', enemy.id);
-    const skills = listEnemyCombatSkills(enemy);
+    const skills = this.filterSkillsForStrip(listEnemyCombatSkills(enemy));
     const highlights = this.resolveHighlights(
       null,
       enemy,
@@ -88,6 +91,12 @@ export class CombatSkillBarResolver {
     }
 
     return highlights;
+  }
+
+  private filterSkillsForStrip(skills: CombatSkillDefinition[]): CombatSkillDefinition[] {
+    return skills.filter((skill) => !STRIP_HIDDEN_SKILL_IDS.has(skill.skillId));
+    // Para exibir o ataque básico de novo na strip:
+    // return skills;
   }
 
   private mapSkills(

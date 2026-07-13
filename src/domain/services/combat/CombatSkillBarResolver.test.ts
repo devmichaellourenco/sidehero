@@ -23,13 +23,30 @@ describe('CombatSkillBarResolver', () => {
       isActiveTurn: false,
     });
 
-    expect(bar.length).toBeGreaterThan(1);
-    expect(bar.some((entry) => entry.skillId === 'basic_attack')).toBe(true);
+    expect(bar.length).toBeGreaterThan(0);
+    expect(bar.some((entry) => entry.skillId === 'basic_attack')).toBe(false);
     expect(bar.find((entry) => entry.skillId === 'goblin_stab')?.secondsRemaining).toBe(2);
   });
 
-  it('destaca próxima e fila quando duas skills prontas no turno ativo', () => {
+  it('oculta ataque básico na strip do herói', () => {
     const sorcerer = Hero.createStarter('s1', 'sorcerer', 'Nix');
+    const enemy = Enemy.forStage(2);
+    const cooldowns = SkillCooldownTracker.fromMap({});
+
+    const bar = resolver.resolveForHero(sorcerer, [sorcerer], [enemy], cooldowns, {
+      isActiveTurn: false,
+    });
+
+    expect(bar.some((entry) => entry.skillId === 'basic_attack')).toBe(false);
+  });
+
+  it('destaca próxima skill visível no turno ativo', () => {
+    let sorcerer = Hero.createStarter('s1', 'sorcerer', 'Nix');
+    sorcerer = Hero.restore({
+      ...sorcerer.toProps(),
+      equippedSkillIds: ['basic_attack', 'fireball'],
+      skillRanks: { ...sorcerer.toProps().skillRanks, fireball: 1 },
+    });
     const hero = Hero.createStarter('h1', 'knight', 'Galneon');
     const enemy = Enemy.forStage(2);
     const cooldowns = SkillCooldownTracker.fromMap({});
@@ -39,6 +56,7 @@ describe('CombatSkillBarResolver', () => {
     });
 
     const highlighted = bar.filter((entry) => entry.highlight !== 'none');
+    expect(bar.some((entry) => entry.skillId === 'fireball')).toBe(true);
     expect(highlighted.length).toBeGreaterThanOrEqual(1);
     expect(highlighted[0].highlight).toBe('next');
   });
