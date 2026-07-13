@@ -36,6 +36,7 @@
   --toast-loot-bg: linear-gradient(135deg, #6a1b9a 0%, #ab47bc 100%);
   --toast-idle-bg: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
   --panel-sheet-top: 42%;
+  --battle-stage-width: 333px;
 }
 
 * {
@@ -63,8 +64,21 @@ body {
   gap: 12px;
   padding: 12px;
   height: 100%;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   background: linear-gradient(180deg, rgba(15, 20, 40, 0.72), rgba(26, 26, 46, 0.92));
+}
+
+.battle-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: var(--battle-stage-width);
+  min-width: var(--battle-stage-width);
+  max-width: var(--battle-stage-width);
+  margin-inline: auto;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .header {
@@ -461,7 +475,9 @@ h2 {
   --strip-action-bottom: calc(var(--strip-skill-outer) + var(--strip-stack-gap));
   --strip-actors-bottom: calc(var(--strip-floor-height) + var(--strip-sprite-lift));
   position: relative;
+  width: 100%;
   height: 133px;
+  flex-shrink: 0;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.08);
@@ -566,6 +582,23 @@ h2 {
 
 .strip-bg--scenic[data-map-id='stendra'] .strip-bg__sky {
   background: linear-gradient(180deg, #8ec8e8 0%, #d4f0c8 48%, #6daf62 100%);
+}
+
+.strip-bg--unified .strip-bg__left,
+.strip-bg--unified .strip-bg__right,
+.strip-bg--unified .strip-bg__center {
+  display: none;
+}
+
+.strip-bg--unified .strip-bg__sky {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center bottom;
+}
+
+.battle-strip:has(.strip-bg--unified) .strip-floor {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .battle-strip:has(.strip-bg--scenic) .strip-floor:not(.strip-floor--tiled) {
@@ -9062,6 +9095,7 @@ body.act-scene-open {
 .battle-combat-bar {
   display: flex;
   flex-shrink: 0;
+  width: 100%;
   margin-top: -4px;
 }
 

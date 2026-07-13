@@ -26,7 +26,7 @@ export const ENEMY_MAX_STAGE_ATTACK_SPEED_BONUS = 0.18;
  * Playtest: inimigos nascem com HP fixo para avançar fases rápido.
  * Desligar (`false`) antes de release ou balanceamento sério.
  */
-export const ENEMY_QUICK_PHASE_TEST_HP = false;
+export const ENEMY_QUICK_PHASE_TEST_HP = true;
 
 export const ENEMY_QUICK_PHASE_TEST_MAX_HEALTH = 1;
 

@@ -11,10 +11,10 @@ Cada região da campanha tem **cenário de batalha** (painéis L/R + céu elást
 
 ## Critérios de aceite
 
-- [x] `stendra`: battle strip com painéis `battle_stendra_left/right` + banner + chão `floor_stendra_tile`
-- [x] `gruftall`: banner `campaign_grutfall_banner.png` no mapa-mundo (painéis de batalha pendentes)
+- [x] `stendra`: battle strip com fundo único `cenario_stendra.jpeg` (333×133) + banner
+- [x] `gruftall`: battle strip com fundo único `cenario_grutfall.png` + banner
 - [x] `valdris`: banner `campaign_valdris_banner.png` no mapa-mundo (painéis pendentes)
-- [x] `morthaven`: banner `campaign_morthaven_banner.png` no mapa-mundo (painéis pendentes)
+- [x] `morthaven`: battle strip com fundo único `cenario_morthaven.png` + banner
 - [ ] Battle strip completa (L/R + chão) para as quatro regiões base
 - [ ] Layout da strip escala de ~280px a ~900px sem cortar zona central de combate
 - [ ] Fallback: gradiente genérico quando mapa não tem cena cadastrada
@@ -29,7 +29,8 @@ Mapas `broken_sky` … `void_throne` seguem o mesmo padrão de assets quando cad
 
 | Arquivo | Uso |
 |---------|-----|
-| `battle_{mapId}_left.png` | Painel esquerdo da battle strip |
+| `cenario_{mapId}.png` / `.jpeg` | *(preferencial)* Fundo único da battle strip (333×133) |
+| `battle_{mapId}_left.png` | Painel esquerdo da battle strip (legado / mapas sem fundo único) |
 | `battle_{mapId}_right.png` | Painel direito da battle strip |
 | `battle_{mapId}_center.png` | *(opcional)* Faixa central (horizonte entre os painéis) |
 | `battle_{mapId}_backdrop.png` | *(opcional)* Céu/horizonte em largura total (camada atrás) |
@@ -48,10 +49,10 @@ Mapas `broken_sky` … `void_throne` seguem o mesmo padrão de assets quando cad
 
 | mapId | Battle L+R | Banner |
 |-------|------------|--------|
-| stendra | ✅ | ✅ |
-| gruftall | ☐ (strip) | ✅ banner |
+| stendra | ✅ fundo único | ✅ |
+| gruftall | ✅ fundo único | ✅ banner |
 | valdris | ☐ | ✅ banner |
-| morthaven | ☐ | ✅ banner |
+| morthaven | ✅ fundo único | ✅ banner |
 | broken_sky | ☐ | ☐ |
 | crimson_abyss | ☐ | ☐ |
 | eternal_forge | ☐ | ☐ |

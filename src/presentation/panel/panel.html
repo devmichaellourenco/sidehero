@@ -51,44 +51,46 @@
         ></span>
       </section>
 
-      <section class="battle-strip" aria-label="Campo de batalha">
-        <div class="strip-bg" data-strip-bg>
-          <div class="strip-bg__sky" aria-hidden="true"></div>
-          <div class="strip-bg__center" aria-hidden="true"></div>
-          <div class="strip-bg__left" aria-hidden="true"></div>
-          <div class="strip-bg__right" aria-hidden="true"></div>
-        </div>
-        <div id="heroes-container" class="heroes-row"></div>
-        <div id="enemy-container" class="enemy-slot"></div>
-        <div id="battle-float-layer" class="battle-float-layer" aria-hidden="true"></div>
-        <div id="battle-victory-overlay" class="battle-victory-overlay hidden" aria-live="polite"></div>
-        <div id="battle-pause-overlay" class="battle-pause-overlay hidden" aria-live="polite">
-          <span class="battle-pause-label">Acampamento</span>
-        </div>
-        <div class="strip-floor"></div>
-      </section>
+      <div class="battle-stage">
+        <section class="battle-strip" aria-label="Campo de batalha">
+          <div class="strip-bg" data-strip-bg>
+            <div class="strip-bg__sky" aria-hidden="true"></div>
+            <div class="strip-bg__center" aria-hidden="true"></div>
+            <div class="strip-bg__left" aria-hidden="true"></div>
+            <div class="strip-bg__right" aria-hidden="true"></div>
+          </div>
+          <div id="heroes-container" class="heroes-row"></div>
+          <div id="enemy-container" class="enemy-slot"></div>
+          <div id="battle-float-layer" class="battle-float-layer" aria-hidden="true"></div>
+          <div id="battle-victory-overlay" class="battle-victory-overlay hidden" aria-live="polite"></div>
+          <div id="battle-pause-overlay" class="battle-pause-overlay hidden" aria-live="polite">
+            <span class="battle-pause-label">Acampamento</span>
+          </div>
+          <div class="strip-floor"></div>
+        </section>
 
-      <div class="battle-combat-bar">
-        <button
-          id="pause-loadout-btn"
-          class="combat-bar-btn"
-          type="button"
-          aria-label="Voltar ao acampamento"
-          title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao partir."
-        >
-          <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
-          <span class="combat-bar-btn-label">Acampamento</span>
-        </button>
-        <button
-          id="continue-loadout-btn"
-          class="combat-bar-btn combat-bar-btn--continue hidden"
-          type="button"
-          aria-label="Partir do acampamento"
-          title="Sair do acampamento e reiniciar a fase do início"
-        >
-          <span class="combat-bar-btn-icon" aria-hidden="true">▶</span>
-          <span class="combat-bar-btn-label">Partir</span>
-        </button>
+        <div class="battle-combat-bar">
+          <button
+            id="pause-loadout-btn"
+            class="combat-bar-btn"
+            type="button"
+            aria-label="Voltar ao acampamento"
+            title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao partir."
+          >
+            <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
+            <span class="combat-bar-btn-label">Acampamento</span>
+          </button>
+          <button
+            id="continue-loadout-btn"
+            class="combat-bar-btn combat-bar-btn--continue hidden"
+            type="button"
+            aria-label="Partir do acampamento"
+            title="Sair do acampamento e reiniciar a fase do início"
+          >
+            <span class="combat-bar-btn-icon" aria-hidden="true">▶</span>
+            <span class="combat-bar-btn-label">Partir</span>
+          </button>
+        </div>
       </div>
 
       <footer class="actions">

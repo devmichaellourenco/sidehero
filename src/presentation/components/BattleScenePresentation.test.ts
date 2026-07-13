@@ -5,13 +5,11 @@ import { getCampaignScene, hasCampaignBanner, hasCampaignScene } from '../assets
 import { applyBattleScene } from './BattleScenePresentation';
 
 describe('CampaignSceneCatalog', () => {
-  it('expõe cena de Estrenda', () => {
+  it('expõe cena de Estrenda com fundo único', () => {
     expect(hasCampaignScene('stendra')).toBe(true);
     expect(getCampaignScene('stendra')).toEqual({
-      battleLeft: 'campaign/stendra/battle_stendra_left.png',
-      battleRight: 'campaign/stendra/battle_stendra_right.png',
+      battleBackground: 'campaign/stendra/cenario_stendra.jpeg',
       banner: 'campaign/stendra/campaign_stendra_banner.png',
-      floorTile: 'campaign/stendra/floor_stendra_tile.png',
     });
   });
 
@@ -21,21 +19,30 @@ describe('CampaignSceneCatalog', () => {
     expect(getCampaignScene('broken_sky')).toBeNull();
   });
 
-  it('expõe banner de Gruftall sem painéis de batalha', () => {
-    expect(hasCampaignScene('gruftall')).toBe(false);
+  it('expõe cena de Gruftall com fundo único e banner', () => {
+    expect(hasCampaignScene('gruftall')).toBe(true);
     expect(hasCampaignBanner('gruftall')).toBe(true);
     expect(getCampaignScene('gruftall')).toEqual({
+      battleBackground: 'campaign/grutfall/cenario_grutfall.png',
       banner: 'campaign/grutfall/campaign_grutfall_banner.png',
     });
   });
 
-  it.each([
-    ['valdris', 'campaign/valdris/campaign_valdris_banner.png'],
-    ['morthaven', 'campaign/morthaven/campaign_morthaven_banner.png'],
-  ] as const)('expõe banner de %s sem painéis de batalha', (mapId, bannerPath) => {
-    expect(hasCampaignScene(mapId)).toBe(false);
-    expect(hasCampaignBanner(mapId)).toBe(true);
-    expect(getCampaignScene(mapId)).toEqual({ banner: bannerPath });
+  it('expõe cena de Morthaven com fundo único e banner', () => {
+    expect(hasCampaignScene('morthaven')).toBe(true);
+    expect(hasCampaignBanner('morthaven')).toBe(true);
+    expect(getCampaignScene('morthaven')).toEqual({
+      battleBackground: 'campaign/morthaven/cenario_morthaven.png',
+      banner: 'campaign/morthaven/campaign_morthaven_banner.png',
+    });
+  });
+
+  it('expõe banner de valdris sem painéis de batalha', () => {
+    expect(hasCampaignScene('valdris')).toBe(false);
+    expect(hasCampaignBanner('valdris')).toBe(true);
+    expect(getCampaignScene('valdris')).toEqual({
+      banner: 'campaign/valdris/campaign_valdris_banner.png',
+    });
   });
 });
 
@@ -52,7 +59,7 @@ function buildStripBg(): HTMLElement {
 }
 
 describe('applyBattleScene', () => {
-  it('aplica painéis laterais e chão tiled quando há cena para o mapa', () => {
+  it('aplica imagem única de fundo para Estrenda', () => {
     const stripBg = buildStripBg();
     const stripFloor = document.createElement('div');
     stripFloor.className = 'strip-floor';
@@ -60,33 +67,60 @@ describe('applyBattleScene', () => {
     applyBattleScene(stripBg, 'stendra', stripFloor);
 
     expect(stripBg.classList.contains('strip-bg--scenic')).toBe(true);
+    expect(stripBg.classList.contains('strip-bg--unified')).toBe(true);
     expect(stripBg.dataset.mapId).toBe('stendra');
-    const left = stripBg.querySelector('.strip-bg__left') as HTMLElement;
-    expect(left.style.backgroundImage).toContain('battle_stendra_left.png');
-    expect(
-      stripBg.querySelector('.strip-bg__center')?.classList.contains('strip-bg__center--visible'),
-    ).toBe(false);
-    expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(true);
-    expect(stripFloor.style.getPropertyValue('--strip-floor-tile-image')).toContain(
-      'floor_stendra_tile.png',
-    );
+    const sky = stripBg.querySelector('.strip-bg__sky') as HTMLElement;
+    expect(sky.style.backgroundImage).toContain('cenario_stendra.jpeg');
+    expect((stripBg.querySelector('.strip-bg__left') as HTMLElement).style.backgroundImage).toBe('');
+    expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(false);
+  });
+
+  it('aplica imagem única de fundo para Gruftall', () => {
+    const stripBg = buildStripBg();
+    const stripFloor = document.createElement('div');
+    stripFloor.className = 'strip-floor';
+
+    applyBattleScene(stripBg, 'gruftall', stripFloor);
+
+    expect(stripBg.classList.contains('strip-bg--scenic')).toBe(true);
+    expect(stripBg.classList.contains('strip-bg--unified')).toBe(true);
+    expect(stripBg.dataset.mapId).toBe('gruftall');
+    const sky = stripBg.querySelector('.strip-bg__sky') as HTMLElement;
+    expect(sky.style.backgroundImage).toContain('cenario_grutfall.png');
+    expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(false);
+  });
+
+  it('aplica imagem única de fundo para Morthaven', () => {
+    const stripBg = buildStripBg();
+    const stripFloor = document.createElement('div');
+    stripFloor.className = 'strip-floor';
+
+    applyBattleScene(stripBg, 'morthaven', stripFloor);
+
+    expect(stripBg.classList.contains('strip-bg--scenic')).toBe(true);
+    expect(stripBg.classList.contains('strip-bg--unified')).toBe(true);
+    expect(stripBg.dataset.mapId).toBe('morthaven');
+    const sky = stripBg.querySelector('.strip-bg__sky') as HTMLElement;
+    expect(sky.style.backgroundImage).toContain('cenario_morthaven.png');
+    expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(false);
   });
 
   it('remove modo cênico e chão tiled para mapas sem arte', () => {
     const stripBg = buildStripBg();
-    stripBg.classList.add('strip-bg--scenic');
+    stripBg.classList.add('strip-bg--scenic', 'strip-bg--unified');
     stripBg.dataset.mapId = 'stendra';
-    const left = stripBg.querySelector('.strip-bg__left') as HTMLElement;
-    left.style.backgroundImage = 'url(test.png)';
+    const sky = stripBg.querySelector('.strip-bg__sky') as HTMLElement;
+    sky.style.backgroundImage = 'url(test.png)';
     const stripFloor = document.createElement('div');
     stripFloor.className = 'strip-floor strip-floor--tiled';
     stripFloor.style.setProperty('--strip-floor-tile-image', "url('floor.png')");
 
-    applyBattleScene(stripBg, 'gruftall', stripFloor);
+    applyBattleScene(stripBg, 'valdris', stripFloor);
 
     expect(stripBg.classList.contains('strip-bg--scenic')).toBe(false);
+    expect(stripBg.classList.contains('strip-bg--unified')).toBe(false);
     expect(stripBg.dataset.mapId).toBeUndefined();
-    expect(left.style.backgroundImage).toBe('');
+    expect(sky.style.backgroundImage).toBe('');
     expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(false);
     expect(stripFloor.style.getPropertyValue('--strip-floor-tile-image')).toBe('');
   });

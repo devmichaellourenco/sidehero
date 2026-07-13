@@ -226,7 +226,7 @@ async function copyCampaignScenes() {
     const files = await readdir(sourceDir);
 
     for (const file of files) {
-      if (!file.endsWith('.png')) continue;
+      if (!/\.(png|jpe?g)$/i.test(file)) continue;
       await mkdir(destDir, { recursive: true });
       await copyFile(join(sourceDir, file), join(destDir, file));
       copied += 1;

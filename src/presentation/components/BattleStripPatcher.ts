@@ -112,8 +112,11 @@ export function patchBattleStripInPlace(
   }
 }
 
-export function shouldUseCrowdedBattleStrip(heroCount: number, enemyCount: number): boolean {
-  return heroCount + enemyCount >= 5 || (heroCount >= 3 && enemyCount >= 2);
+export function shouldUseCrowdedBattleStrip(_heroCount: number, _enemyCount: number): boolean {
+  // Layout compacto desativado: strip mantém tamanho grande com qualquer quantidade de combatentes.
+  // Para reativar:
+  // return heroCount + enemyCount >= 5 || (heroCount >= 3 && enemyCount >= 2);
+  return false;
 }
 
 export function syncBattleStripCrowdedLayout(
