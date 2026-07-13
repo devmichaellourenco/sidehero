@@ -1,7 +1,14 @@
 import { DamageElement } from '../../combat/DamageElement';
 
 export type CombatFloatTarget = 'hero' | 'enemy';
-export type CombatFloatKind = 'damage' | 'heal' | 'crit' | 'buff' | 'debuff';
+export type CombatFloatKind =
+  | 'damage'
+  | 'heal'
+  | 'crit'
+  | 'crit-heal'
+  | 'crit-buff'
+  | 'buff'
+  | 'debuff';
 
 export interface CombatFloatingEvent {
   target: CombatFloatTarget;
@@ -36,11 +43,12 @@ export function createHealEvent(
   targetId: string,
   beforeHealth: number,
   afterHealth: number,
+  isCrit = false,
 ): CombatFloatingEvent | null {
   const amount = Math.max(0, afterHealth - beforeHealth);
   if (amount <= 0) return null;
 
-  return { target, targetId, kind: 'heal', amount };
+  return { target, targetId, kind: isCrit ? 'crit-heal' : 'heal', amount };
 }
 
 export function createStatusImpactEvent(
@@ -48,6 +56,10 @@ export function createStatusImpactEvent(
   targetId: string,
   kind: 'buff' | 'debuff',
   amount = 0,
+  isCrit = false,
 ): CombatFloatingEvent {
-  return { target, targetId, kind, amount };
+  const resolvedKind =
+    kind === 'buff' && isCrit ? 'crit-buff' : kind;
+
+  return { target, targetId, kind: resolvedKind, amount };
 }

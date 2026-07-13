@@ -3,21 +3,63 @@ export function clampHealthPercent(value: number, total: number): number {
   return Math.max(0, Math.min(100, (value / total) * 100));
 }
 
+export function renderStripActorBars(options: {
+  side: 'hero' | 'enemy';
+  healthLabel: string;
+  healthPercent: number;
+  actionTimeRatio: number;
+}): string {
+  const fillWidth = Math.max(0, Math.min(100, options.actionTimeRatio * 100));
+
+  return `
+    <div class="strip-actor-bars">
+      <div
+        class="stat-bar health-bar ${options.side} strip-bar"
+        data-bar-label="${options.healthLabel}"
+        tabindex="0"
+        aria-label="Vida ${options.healthLabel}"
+      >
+        <div class="stat-bar-track">
+          <div class="health-fill ${options.side}" style="width: ${options.healthPercent}%"></div>
+        </div>
+      </div>
+      <div class="action-time-bar strip-bar" data-action-time-bar aria-hidden="true">
+        <div class="action-time-fill" style="width: ${fillWidth}%"></div>
+      </div>
+    </div>
+  `;
+}
+
+/** @deprecated Use renderStripActorBars */
 export function renderStripHealthBar(options: {
   side: 'hero' | 'enemy';
   healthLabel: string;
   healthPercent: number;
 }): string {
-  return `
-    <div
-      class="stat-bar health-bar ${options.side} strip-bar"
-      data-bar-label="${options.healthLabel}"
-      tabindex="0"
-      aria-label="Vida ${options.healthLabel}"
-    >
-      <div class="stat-bar-track">
-        <div class="health-fill ${options.side}" style="width: ${options.healthPercent}%"></div>
-      </div>
-    </div>
-  `;
+  return renderStripActorBars({ ...options, actionTimeRatio: 1 });
+}
+
+export function stampActionTimeBar(
+  bar: HTMLElement,
+  remaining: number,
+  total: number,
+): void {
+  bar.dataset.atRemaining = String(Math.max(0, remaining));
+  bar.dataset.atTotal = String(Math.max(0, total));
+  bar.dataset.atCapturedAt = String(performance.now());
+}
+
+export function patchActionTimeBar(
+  card: HTMLElement,
+  actionTimeRatio: number,
+  actionTimeRemaining: number,
+  actionTimeTotal: number,
+): void {
+  const fill = card.querySelector<HTMLElement>('.action-time-fill');
+  const bar = card.querySelector<HTMLElement>('[data-action-time-bar]');
+  if (!fill || !bar) return;
+
+  const width = Math.max(0, Math.min(100, actionTimeRatio * 100));
+  fill.style.width = `${width}%`;
+  stampActionTimeBar(bar, actionTimeRemaining, actionTimeTotal);
 }

@@ -30,7 +30,7 @@ describe('CombatSkillIntentPresentation', () => {
     expect(html).toContain('data-skill-id="fireball"');
     expect(html).toContain('data-skill-id="arcane_bolt"');
     expect(html).toContain('combat-skill-slot--next');
-    expect(html).toContain('combat-skill-cooldown-shade');
-    expect(html).toContain('>2<');
+    expect(html).toContain('data-action-time-bar');
+    expect(html).not.toContain('combat-skill-cooldown-label');
   });
 });

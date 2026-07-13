@@ -19,10 +19,16 @@ describe('CombatDamageResolver', () => {
     expect(mitigated).toBeLessThan(5);
   });
 
-  it('aplica crítico quando rng está abaixo da chance', () => {
-    const result = rollCriticalMultiplier(0.5, 1.8, { rng: () => 0.1 });
+  it('aplica crítico quando rng está abaixo da chance (escala 0–100)', () => {
+    const result = rollCriticalMultiplier(0.5, 1.8, { rng: () => 0.49 });
     expect(result.isCrit).toBe(true);
     expect(result.multiplier).toBe(1.8);
+  });
+
+  it('não aplica crítico quando rng está na ou acima da chance', () => {
+    const result = rollCriticalMultiplier(0.5, 1.8, { rng: () => 0.5 });
+    expect(result.isCrit).toBe(false);
+    expect(result.multiplier).toBe(1);
   });
 
   it('resolve dano final com perfil de atacante', () => {

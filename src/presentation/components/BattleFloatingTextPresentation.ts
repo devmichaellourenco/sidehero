@@ -3,8 +3,8 @@ import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEven
 export function resolveBattleFloatClass(
   event: Pick<CombatFloatingEventDto, 'kind' | 'damageElement'>,
 ): string {
-  if (event.kind === 'crit') {
-    return 'crit';
+  if (event.kind === 'crit' || event.kind === 'crit-heal' || event.kind === 'crit-buff') {
+    return event.kind === 'crit' ? 'crit' : event.kind;
   }
 
   if (event.kind === 'heal') {

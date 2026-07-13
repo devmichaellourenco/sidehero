@@ -33,6 +33,8 @@ export class BattleImpactFeedbackController {
 
   private resolveVisualKind(kind: CombatFloatKind): keyof typeof IMPACT_ICON | null {
     if (kind === 'crit') return 'damage';
+    if (kind === 'crit-heal') return 'heal';
+    if (kind === 'crit-buff') return 'buff';
     if (kind in IMPACT_ICON) return kind as keyof typeof IMPACT_ICON;
     return null;
   }

@@ -113,6 +113,9 @@ export interface HeroDto {
   combatIntent: CombatSkillIntentDto | null;
   combatSkills: CombatBattleSkillDto[];
   combatSkillCooldowns: HeroSkillCooldownDto[];
+  actionTimeRatio: number;
+  actionTimeRemaining: number;
+  actionTimeTotal: number;
   statusEffects: CombatStatusEffectDto[];
   combatResists: CombatResistSummaryDto;
   combatStatSheet: HeroCombatStatSectionDto[];
@@ -174,6 +177,9 @@ export interface EnemyDto {
   signatureSkills: EnemySignatureSkillDto[];
   combatIntent: CombatSkillIntentDto | null;
   combatSkills: CombatBattleSkillDto[];
+  actionTimeRatio: number;
+  actionTimeRemaining: number;
+  actionTimeTotal: number;
   statusEffects: CombatStatusEffectDto[];
   combatResists: CombatResistSummaryDto;
 }

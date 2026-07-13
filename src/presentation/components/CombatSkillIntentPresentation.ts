@@ -22,10 +22,9 @@ function renderSkillCooldownOverlay(skill: CombatBattleSkillDto): string {
   }
 
   return `
-    <span class="combat-skill-cooldown" aria-hidden="true" data-remaining-label="${escapeHtml(skill.cooldownLabel)}">
+    <span class="combat-skill-cooldown" aria-hidden="true">
       <span class="combat-skill-cooldown-shade" style="--cooldown-ratio: ${skill.cooldownRatio}"></span>
       <span class="combat-skill-cooldown-fill"></span>
-      <span class="combat-skill-cooldown-label">${escapeHtml(skill.cooldownLabel)}</span>
     </span>
   `;
 }
@@ -167,13 +166,11 @@ export function patchCombatSkillCooldowns(
 
     const overlay = slot.querySelector<HTMLElement>('.combat-skill-cooldown');
     const shade = slot.querySelector<HTMLElement>('.combat-skill-cooldown-shade');
-    const label = slot.querySelector<HTMLElement>('.combat-skill-cooldown-label');
-    if (!overlay || !shade || !label) continue;
+    if (!overlay || !shade) continue;
 
     if (skill.ready) {
       overlay.classList.add('combat-skill-cooldown--ready');
       shade.style.setProperty('--cooldown-ratio', '0');
-      label.textContent = '';
       overlay.removeAttribute('data-remaining-label');
       delete overlay.dataset.cdRemaining;
       delete overlay.dataset.cdTotal;
@@ -183,8 +180,6 @@ export function patchCombatSkillCooldowns(
 
     overlay.classList.remove('combat-skill-cooldown--ready');
     shade.style.setProperty('--cooldown-ratio', String(skill.cooldownRatio));
-    label.textContent = skill.cooldownLabel;
-    overlay.setAttribute('data-remaining-label', skill.cooldownLabel);
     stampSkillCooldownOverlay(overlay, skill.secondsRemaining, skill.cooldownTotal);
   }
 }

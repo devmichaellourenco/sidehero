@@ -12,13 +12,15 @@ describe('renderBattleActorCard', () => {
       tooltipHtml: '<span>tooltip</span>',
       healthLabel: '80/100',
       healthPercent: 80,
+      actionTimeRatio: 1,
       statusEffects: [],
       combatSkills: [],
     });
 
     expect(html).toContain('hero-battle-card--active-turn');
     expect(html).toContain('data-hero-battle-open="h1"');
-    expect(html).toContain('health-bar hero strip-bar');
+    expect(html).toContain('data-action-time-bar');
+    expect(html).toContain('strip-actor-bars');
   });
 
   it('renderiza card de inimigo com classe de boss quando indicado', () => {
@@ -32,6 +34,7 @@ describe('renderBattleActorCard', () => {
       tooltipHtml: '<span>tooltip</span>',
       healthLabel: '50/50',
       healthPercent: 100,
+      actionTimeRatio: 1,
       statusEffects: [],
       combatSkills: [],
     });

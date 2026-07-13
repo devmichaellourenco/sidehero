@@ -1,4 +1,5 @@
 import { dominantDamageElement, normalizeDamageComponents } from '../../combat/DamageComponent';
+import { rollCriticalHit } from '../../combat/CriticalHitRoll';
 import { DAMAGE_ELEMENT_LABELS } from '../../combat/DamageElement';
 import { DefensiveMitigation, ZERO_DEFENSIVE } from '../../combat/DefensiveMitigation';
 import { defensiveMitigationForEnemy, defensiveMitigationForHero } from '../../combat/HeroDefensiveStatsProvider';
@@ -50,14 +51,14 @@ export class CombatActionExecutor {
     }
 
     if (isStatusCombatKind(action.kind)) {
-      return this.applyStatusEffect(action, actorName, heroes, enemies);
+      return this.applyStatusEffect(action, actorName, heroes, enemies, context);
     }
 
     if (action.kind === 'heal_ally') {
       if (action.targetEnemyId || (action.targetEnemyIds?.length ?? 0) > 0) {
-        return this.applyEnemyHeal(action, actorName, heroes, enemies, statusEffects);
+        return this.applyEnemyHeal(action, actorName, heroes, enemies, statusEffects, context);
       }
-      return this.applyHeal(action, actorName, heroes, enemies);
+      return this.applyHeal(action, actorName, heroes, enemies, context);
     }
 
     if (action.targeting === 'single_ally' || action.targeting === 'all_allies') {
@@ -72,6 +73,7 @@ export class CombatActionExecutor {
     actorName: string,
     heroes: Hero[],
     enemies: Enemy[],
+    context?: CombatActionContext,
   ): CombatExecutionResult {
     const targetKeys: Array<{ key: string; label: string }> = [];
 
@@ -110,33 +112,41 @@ export class CombatActionExecutor {
     const duration = action.effectDurationTurns ?? 1;
     const impactKind = action.kind === 'buff_attack' ? 'buff' : 'debuff';
     const floatingEvents: CombatFloatingEvent[] = [];
+    const canCrit = action.kind === 'buff_attack';
 
     const statusApplications: StatusApplication[] = targetKeys.map((target) => {
       const [, combatantId] = target.key.split(':');
       const side = target.key.startsWith('hero:') ? 'hero' : 'enemy';
+      const { isCrit, multiplier } = canCrit
+        ? this.rollAttackerCritical(context)
+        : { isCrit: false, multiplier: 1 };
+      const magnitude = Math.floor(action.power * multiplier);
+
       floatingEvents.push(
-        createStatusImpactEvent(side, combatantId, impactKind, action.power),
+        createStatusImpactEvent(side, combatantId, impactKind, magnitude, isCrit),
       );
 
       return {
         combatantKey: target.key,
         skillId: action.skillId,
         kind: action.kind as StatusApplication['kind'],
-        magnitude: action.power,
+        magnitude,
         durationTurns: duration,
         skillName: action.skillName,
       };
     });
 
+    const sampleMagnitude = statusApplications[0]?.magnitude ?? action.power;
+    const critTag = floatingEvents.some((entry) => entry.kind === 'crit-buff') ? ' CRÍTICO!' : '';
     const statLabel =
       action.kind === 'buff_attack'
-        ? `+${action.power} ATK`
-        : `-${action.power} DEF`;
+        ? `+${sampleMagnitude} ATK`
+        : `-${sampleMagnitude} DEF`;
     const scope =
       targetKeys.length > 1
         ? `${targetKeys.length} alvos (${statLabel}, ${duration}t)`
         : `${statLabel}, ${duration}t`;
-    const event = `${actorName} usou ${action.skillName} (${scope})`;
+    const event = `${actorName} usou ${action.skillName} (${scope})${critTag}`;
 
     return { heroes, enemies, event, floatingEvents, statusApplications };
   }
@@ -146,6 +156,7 @@ export class CombatActionExecutor {
     actorName: string,
     heroes: Hero[],
     enemies: Enemy[],
+    context?: CombatActionContext,
   ): CombatExecutionResult {
     const targetIds =
       action.targeting === 'all_allies'
@@ -160,26 +171,32 @@ export class CombatActionExecutor {
 
     const floatingEvents: CombatFloatingEvent[] = [];
     let updatedHeroes = heroes;
+    let critAny = false;
 
     for (const heroId of targetIds) {
       const target = updatedHeroes.find((hero) => hero.id === heroId);
       if (!target || !target.isAlive()) continue;
 
+      const { isCrit, multiplier } = this.rollAttackerCritical(context);
+      const healPower = Math.floor(action.power * multiplier);
+      if (isCrit) critAny = true;
+
       const beforeHealth = target.currentHealth;
       updatedHeroes = updatedHeroes.map((hero) =>
-        hero.id === heroId ? hero.heal(action.power) : hero,
+        hero.id === heroId ? hero.heal(healPower) : hero,
       );
       const healed = updatedHeroes.find((hero) => hero.id === heroId)!;
-      const healEvent = createHealEvent('hero', heroId, beforeHealth, healed.currentHealth);
+      const healEvent = createHealEvent('hero', heroId, beforeHealth, healed.currentHealth, isCrit);
       if (healEvent) floatingEvents.push(healEvent);
     }
 
     const healedAmount = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
+    const critTag = critAny ? ' CRÍTICO!' : '';
     const scope =
       action.targeting === 'all_allies'
         ? `curou todos os aliados (+${healedAmount} HP total)`
         : `(+${healedAmount} HP)`;
-    const event = `${actorName} usou ${action.skillName} ${scope}`;
+    const event = `${actorName} usou ${action.skillName} ${scope}${critTag}`;
 
     return {
       heroes: updatedHeroes,
@@ -196,6 +213,7 @@ export class CombatActionExecutor {
     heroes: Hero[],
     enemies: Enemy[],
     statusEffects: CombatStatusEffectTracker,
+    context?: CombatActionContext,
   ): CombatExecutionResult {
     const targetIds =
       action.targeting === 'all_enemies'
@@ -211,6 +229,7 @@ export class CombatActionExecutor {
     const floatingEvents: CombatFloatingEvent[] = [];
     let updatedEnemies = enemies;
     let blockedAny = false;
+    let critAny = false;
 
     for (const enemyId of targetIds) {
       const target = updatedEnemies.find((enemy) => enemy.id === enemyId);
@@ -222,22 +241,27 @@ export class CombatActionExecutor {
         continue;
       }
 
+      const { isCrit, multiplier } = this.rollAttackerCritical(context);
+      const healPower = Math.floor(action.power * multiplier);
+      if (isCrit) critAny = true;
+
       const beforeHealth = target.stats.currentHealth;
       const healed = Enemy.restore({
         ...target.toProps(),
         stats: Stats.create({
           ...target.stats.toProps(),
-          currentHealth: Math.min(target.stats.maxHealth, target.stats.currentHealth + action.power),
+          currentHealth: Math.min(target.stats.maxHealth, target.stats.currentHealth + healPower),
         }),
       });
       updatedEnemies = updatedEnemies.map((enemy) => (enemy.id === enemyId ? healed : enemy));
-      const healEvent = createHealEvent('enemy', enemyId, beforeHealth, healed.stats.currentHealth);
+      const healEvent = createHealEvent('enemy', enemyId, beforeHealth, healed.stats.currentHealth, isCrit);
       if (healEvent) {
         floatingEvents.push(healEvent);
       }
     }
 
     const healedAmount = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
+    const critTag = critAny ? ' CRÍTICO!' : '';
     const scope =
       action.targeting === 'all_enemies'
         ? `curou todos os inimigos (+${healedAmount} HP total)`
@@ -246,7 +270,7 @@ export class CombatActionExecutor {
           : blockedAny
             ? '(cura bloqueada)'
             : '';
-    const event = `${actorName} usou ${action.skillName} ${scope}`.trim();
+    const event = `${actorName} usou ${action.skillName} ${scope}${critTag}`.trim();
 
     return {
       heroes,
@@ -478,6 +502,15 @@ export class CombatActionExecutor {
         attackerElementalPenetration: context?.attackerElementalPenetration,
       },
     );
+  }
+
+  private rollAttackerCritical(context?: CombatActionContext): { isCrit: boolean; multiplier: number } {
+    const profile = context?.attackerProfile;
+    if (!profile || profile.critChance <= 0) {
+      return { isCrit: false, multiplier: 1 };
+    }
+
+    return rollCriticalHit(profile.critChance, profile.critDamage, context?.rng);
   }
 
   private collectOnHitDot(

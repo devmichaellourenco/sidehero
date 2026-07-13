@@ -4,7 +4,7 @@ import {
 } from '../../application/dto/GameStateDto';
 import { renderCombatSkillBar } from './CombatSkillIntentPresentation';
 import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
-import { renderStripHealthBar } from './BattleActorHealthPresentation';
+import { renderStripActorBars } from './BattleActorHealthPresentation';
 
 export type BattleActorSide = 'hero' | 'enemy';
 
@@ -18,6 +18,7 @@ export interface BattleActorCardViewModel {
   tooltipHtml: string;
   healthLabel: string;
   healthPercent: number;
+  actionTimeRatio: number;
   statusEffects: CombatStatusEffectDto[];
   combatSkills: CombatBattleSkillDto[] | null | undefined;
 }
@@ -81,10 +82,11 @@ export function renderBattleActorCard(vm: BattleActorCardViewModel): string {
   return `
     <div class="battle-actor-card ${sideClass}${activeClass}${bossClass}" ${idAttr}="${escapeHtml(vm.id)}">
       ${renderHitbox(vm)}
-      ${renderStripHealthBar({
+      ${renderStripActorBars({
         side: vm.side,
         healthLabel: vm.healthLabel,
         healthPercent: vm.healthPercent,
+        actionTimeRatio: vm.actionTimeRatio,
       })}
       ${renderCombatSkillBar(vm.combatSkills)}
     </div>

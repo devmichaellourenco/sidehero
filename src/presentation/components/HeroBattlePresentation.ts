@@ -68,6 +68,7 @@ export function renderHeroBattleSprite(
     tooltipHtml: renderHeroTooltipContent(hero),
     healthLabel: formatHealthLabel(hero),
     healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
+    actionTimeRatio: hero.actionTimeRatio,
     statusEffects: hero.statusEffects,
     combatSkills: hero.combatSkills,
   });

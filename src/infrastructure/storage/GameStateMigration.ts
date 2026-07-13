@@ -17,6 +17,7 @@ import { inferEnemyType, migrateLegacyEnemyType } from '../../domain/entities/En
 import { Chest, ChestProps } from '../../domain/entities/Chest';
 import { CombatState } from '../../domain/entities/CombatState';
 import { ActionTimerService } from '../../domain/services/combat/ActionTimerService';
+import { normalizeActionTimerMap } from '../../domain/services/combat/ActionTimerTypes';
 import { ChestType } from '../../domain/combat/ChestType';
 
 type RawRecord = Record<string, unknown>;
@@ -272,7 +273,7 @@ export function migrateCombat(
       return CombatState.restore({
         enemies: enemies.map((enemy) => enemy.toProps()),
         actionTimers: hasActionTimers
-          ? (combat.actionTimers as CombatState['actionTimers'])
+          ? normalizeActionTimerMap(combat.actionTimers)
           : actionTimerService.createInitial(heroes, enemies),
         combatTime: typeof combat.combatTime === 'number' ? combat.combatTime : 0,
         skillCooldowns:

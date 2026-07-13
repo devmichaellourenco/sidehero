@@ -19,11 +19,25 @@ export class BattleSkillVfxController {
     if (!events.length) return;
 
     for (const event of events) {
+      this.flashSkillSlot(event);
       const definition = getSkillVfxDefinition(event.skillId);
       if (!definition) continue;
 
       void this.spawn(event, definition);
     }
+  }
+
+  private flashSkillSlot(event: CombatSkillVfxDto): void {
+    const cardSelector =
+      event.attackerSide === 'hero'
+        ? `[data-hero-id="${event.attackerId}"]`
+        : `[data-enemy-id="${event.attackerId}"]`;
+    const card = this.battleStrip.querySelector<HTMLElement>(cardSelector);
+    const slot = card?.querySelector<HTMLElement>(`[data-skill-id="${event.skillId}"]`);
+    if (!slot) return;
+
+    slot.classList.add('combat-skill-slot--fired');
+    window.setTimeout(() => slot.classList.remove('combat-skill-slot--fired'), 650);
   }
 
   private async spawn(event: CombatSkillVfxDto, definition: SkillVfxDefinition): Promise<void> {

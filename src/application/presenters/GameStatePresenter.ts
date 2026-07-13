@@ -24,6 +24,7 @@ import {
   mapHeroCombatIntent,
 } from '../mappers/CombatSkillIntentMapper';
 import { mapEnemyCombatSkills, mapHeroCombatSkills } from '../mappers/CombatSkillBarMapper';
+import { mapCombatantActionTime } from '../mappers/ActionTimePresentationMapper';
 import { mapHeroSkillCooldowns } from '../mappers/HeroSkillCooldownMapper';
 import { mapCombatantStatusEffects } from '../mappers/CombatStatusEffectMapper';
 import { mapCombatResistSummary } from '../mappers/CombatResistMapper';
@@ -43,13 +44,14 @@ export class GameStatePresenter {
     const combatEnemies = combat?.enemies ?? [];
     const skillCooldowns = combat?.skillCooldowns;
     const statusEffects = combat?.statusEffects;
+    const actionTimers = combat?.actionTimers;
     const activeParty = state.activeHeroes();
     const activeActor = combat?.peekNextActor(state.activeHeroes(), combat.enemies) ?? null;
     const combatBarContext = {
       activeTurn: activeActor,
     };
     const enemies = combatEnemies.map((enemy) =>
-      mapEnemyToDto(enemy, activeParty, combatEnemies, skillCooldowns, statusEffects, combatBarContext),
+      mapEnemyToDto(enemy, activeParty, combatEnemies, skillCooldowns, statusEffects, combatBarContext, actionTimers),
     );
     const campaignLabels = mapCampaignLabels(state);
     const phaseRun = mapPhaseRunDto(state);
@@ -63,6 +65,7 @@ export class GameStatePresenter {
         statusEffects,
         state.upgradeLevels,
         combatBarContext,
+        actionTimers,
       ),
     );
 
@@ -77,6 +80,7 @@ export class GameStatePresenter {
           statusEffects,
           state.upgradeLevels,
           combatBarContext,
+          actionTimers,
         ),
       ),
       benchHeroes: state.benchHeroes().map((hero) =>
@@ -88,6 +92,7 @@ export class GameStatePresenter {
           statusEffects,
           state.upgradeLevels,
           combatBarContext,
+          actionTimers,
         ),
       ),
       activePartyIds: [...state.activePartyIds],
@@ -159,10 +164,12 @@ function mapHeroToDtoWithCombatIntent(
   combatBarContext: {
     activeTurn: { side: 'hero' | 'enemy'; id: string } | null;
   },
+  actionTimers: Parameters<typeof mapCombatantActionTime>[2],
 ) {
   const isActiveTurn =
     combatBarContext.activeTurn?.side === 'hero' &&
     combatBarContext.activeTurn.id === hero.id;
+  const actionTime = mapCombatantActionTime('hero', hero.id, actionTimers);
 
   return {
     ...mapHeroBaseToDto(hero, upgradeLevels),
@@ -171,6 +178,7 @@ function mapHeroToDtoWithCombatIntent(
       isActiveTurn,
     }),
     combatSkillCooldowns: mapHeroSkillCooldowns(hero, skillCooldowns),
+    ...actionTime,
     statusEffects: mapCombatantStatusEffects('hero', hero.id, combatStatusEffects),
     combatResists: mapCombatResistSummary(
       resistanceProfileFromHeroEquipment(hero.toProps().equipment),
@@ -187,10 +195,12 @@ function mapEnemyToDto(
   combatBarContext: {
     activeTurn: { side: 'hero' | 'enemy'; id: string } | null;
   },
+  actionTimers: Parameters<typeof mapCombatantActionTime>[2],
 ): EnemyDto {
   const isActiveTurn =
     combatBarContext.activeTurn?.side === 'enemy' &&
     combatBarContext.activeTurn.id === enemy.id;
+  const actionTime = mapCombatantActionTime('enemy', enemy.id, actionTimers);
 
   return {
     id: enemy.id,
@@ -211,6 +221,7 @@ function mapEnemyToDto(
     combatSkills: mapEnemyCombatSkills(enemy, party, enemies, skillCooldowns, {
       isActiveTurn,
     }),
+    ...actionTime,
     statusEffects: mapCombatantStatusEffects('enemy', enemy.id, combatStatusEffects),
     combatResists: mapCombatResistSummary(
       resolveEnemyInnateResists(enemy.enemyType, enemy.stage),

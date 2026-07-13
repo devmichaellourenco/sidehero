@@ -58,6 +58,7 @@ export function renderEnemyBattleCard(
     tooltipHtml: renderEnemyTooltipContent(enemy, stage),
     healthLabel: formatEnemyHealthLabel(enemy),
     healthPercent: clampHealthPercent(enemy.health, enemy.maxHealth),
+    actionTimeRatio: enemy.actionTimeRatio,
     statusEffects: enemy.statusEffects,
     combatSkills: enemy.combatSkills,
   });

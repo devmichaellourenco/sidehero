@@ -44,7 +44,7 @@ export class BattleFloatingTextController {
     const anchorRect = anchor.getBoundingClientRect();
     const stripRect = this.battleStrip.getBoundingClientRect();
     const label =
-      event.kind === 'heal'
+      event.kind === 'heal' || event.kind === 'crit-heal' || event.kind === 'crit-buff'
         ? `+${event.amount}`
         : event.kind === 'crit' || event.kind === 'damage'
           ? `-${event.amount}`

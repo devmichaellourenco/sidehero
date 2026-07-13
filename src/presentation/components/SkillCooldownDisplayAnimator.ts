@@ -5,7 +5,7 @@ const UPDATE_INTERVAL_MS = 100;
 function updateOverlayElement(overlay: HTMLElement, remaining: number, total: number): void {
   const shade = overlay.querySelector<HTMLElement>('.hero-skill-cooldown-shade, .combat-skill-cooldown-shade');
   const label = overlay.querySelector<HTMLElement>('.hero-skill-cooldown-label, .combat-skill-cooldown-label');
-  if (!shade || !label) return;
+  if (!shade) return;
 
   const ready = remaining <= 0 || total <= 0;
   const ratio = ready ? 0 : Math.min(1, remaining / total);
@@ -13,16 +13,27 @@ function updateOverlayElement(overlay: HTMLElement, remaining: number, total: nu
   if (ready) {
     overlay.classList.add('hero-skill-cooldown--ready', 'combat-skill-cooldown--ready');
     shade.style.setProperty('--cooldown-ratio', '0');
-    label.textContent = '';
+    if (label) label.textContent = '';
     overlay.removeAttribute('data-remaining-label');
     return;
   }
 
   overlay.classList.remove('hero-skill-cooldown--ready', 'combat-skill-cooldown--ready');
   shade.style.setProperty('--cooldown-ratio', String(ratio));
-  const countdown = formatSkillCooldownCountdown(remaining);
-  label.textContent = countdown;
-  overlay.setAttribute('data-remaining-label', countdown);
+  if (label) {
+    const countdown = formatSkillCooldownCountdown(remaining);
+    label.textContent = countdown;
+    overlay.setAttribute('data-remaining-label', countdown);
+  }
+}
+
+function updateActionTimeBar(bar: HTMLElement, remaining: number, total: number): void {
+  const fill = bar.querySelector<HTMLElement>('.action-time-fill');
+  if (!fill) return;
+
+  const ready = remaining <= 0 || total <= 0;
+  const ratio = ready ? 1 : Math.max(0, Math.min(1, 1 - remaining / total));
+  fill.style.width = `${ratio * 100}%`;
 }
 
 /** Interpola cooldowns de skills entre ticks de simulação. */
@@ -68,6 +79,15 @@ export class SkillCooldownDisplayAnimator {
       const elapsed = (now - capturedAt) / 1000;
       const remaining = Math.max(0, baseRemaining - elapsed);
       updateOverlayElement(overlay, remaining, total);
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-at-remaining]').forEach((bar) => {
+      const baseRemaining = Number.parseFloat(bar.dataset.atRemaining ?? '0');
+      const total = Number.parseFloat(bar.dataset.atTotal ?? '0');
+      const capturedAt = Number.parseFloat(bar.dataset.atCapturedAt ?? String(now));
+      const elapsed = (now - capturedAt) / 1000;
+      const remaining = Math.max(0, baseRemaining - elapsed);
+      updateActionTimeBar(bar, remaining, total);
     });
   }
 }

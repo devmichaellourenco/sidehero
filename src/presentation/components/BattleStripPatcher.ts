@@ -3,7 +3,7 @@ import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
 import { patchCombatSkillBar } from './CombatSkillIntentPresentation';
 import { formatEnemyHealthLabel } from './EnemyBattlePresentation';
 import { formatHealthLabel } from './HeroBarsPresentation';
-import { clampHealthPercent } from './BattleActorHealthPresentation';
+import { clampHealthPercent, patchActionTimeBar } from './BattleActorHealthPresentation';
 
 function updateHealthBar(
   card: HTMLElement,
@@ -48,6 +48,9 @@ function patchActorCard(
     activeTurnClass: string;
     healthLabel: string;
     healthPercent: number;
+    actionTimeRatio: number;
+    actionTimeRemaining: number;
+    actionTimeTotal: number;
     statusEffectsHtml: string;
     combatSkills: HeroDto['combatSkills'] | EnemyDto['combatSkills'];
   },
@@ -55,6 +58,12 @@ function patchActorCard(
   card.classList.toggle(options.activeTurnClass, options.isActiveTurn);
 
   updateHealthBar(card, '.health-bar', options.healthLabel, options.healthPercent);
+  patchActionTimeBar(
+    card,
+    options.actionTimeRatio,
+    options.actionTimeRemaining,
+    options.actionTimeTotal,
+  );
   replaceOrRemoveStatusBadges(card, options.statusEffectsHtml);
   patchCombatSkillBar(card, options.combatSkills);
 }
@@ -75,6 +84,9 @@ export function patchBattleStripInPlace(
       activeTurnClass: 'hero-battle-card--active-turn',
       healthLabel: formatHealthLabel(hero),
       healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
+      actionTimeRatio: hero.actionTimeRatio,
+      actionTimeRemaining: hero.actionTimeRemaining,
+      actionTimeTotal: hero.actionTimeTotal,
       statusEffectsHtml: renderCombatStatusEffects(hero.statusEffects),
       combatSkills: hero.combatSkills,
     });
@@ -91,6 +103,9 @@ export function patchBattleStripInPlace(
       activeTurnClass: 'enemy-battle-card--active-turn',
       healthLabel: formatEnemyHealthLabel(enemy),
       healthPercent: clampHealthPercent(enemy.health, enemy.maxHealth),
+      actionTimeRatio: enemy.actionTimeRatio,
+      actionTimeRemaining: enemy.actionTimeRemaining,
+      actionTimeTotal: enemy.actionTimeTotal,
       statusEffectsHtml: renderCombatStatusEffects(enemy.statusEffects),
       combatSkills: enemy.combatSkills,
     });

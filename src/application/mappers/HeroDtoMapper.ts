@@ -63,6 +63,9 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     combatIntent: null,
     combatSkills: [],
     combatSkillCooldowns: [],
+    actionTimeRatio: 1,
+    actionTimeRemaining: 0,
+    actionTimeTotal: 0,
     statusEffects: [],
     combatResists: mapCombatResistSummary(
       resistanceProfileFromHeroEquipment(props.equipment),

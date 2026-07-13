@@ -1,3 +1,4 @@
+import { rollCriticalHit } from '../../combat/CriticalHitRoll';
 import { CombatProfile } from '../../combat/CombatProfile';
 import { applyDefensiveLayers, DefensiveMitigation, ZERO_DEFENSIVE } from '../../combat/DefensiveMitigation';
 import { DamageComponent, normalizeDamageComponents } from '../../combat/DamageComponent';
@@ -51,13 +52,7 @@ export function rollCriticalMultiplier(
   options: DamageRollOptions = {},
 ): { multiplier: number; isCrit: boolean } {
   const rng = options.rng ?? Math.random;
-  const roll = rng();
-
-  if (roll < critChance) {
-    return { multiplier: critDamage, isCrit: true };
-  }
-
-  return { multiplier: 1, isCrit: false };
+  return rollCriticalHit(critChance, critDamage, rng);
 }
 
 export function buildMitigationTarget(

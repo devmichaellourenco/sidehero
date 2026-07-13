@@ -441,22 +441,27 @@ h2 {
 }
 
 .battle-strip {
-  --strip-floor-height: 28px;
+  --strip-stack-gap: 1px;
+  --strip-sprite-lift: 2px;
+  --strip-health-outer: 9px;
+  --strip-action-outer: 4px;
   --strip-floor-skill-inset: 4px;
-  --strip-floor-skill-zone: 14px;
   --strip-actor-gap: 2px;
-  --strip-actors-bottom: 14px;
-  --strip-skill-overhang: 10px;
-  --strip-hp-bottom: 2px;
-  --strip-card-foot: 8px;
   --strip-hero-slot: 46px;
   --strip-enemy-slot: 50px;
   --strip-enemy-boss-slot: 56px;
   --strip-sprite-zoom: 1.22;
-  --strip-skill-size: 9px;
-  --strip-skill-wrap: 11px;
+  --strip-skill-size: 16px;
+  --strip-skill-wrap: 18px;
+  --strip-skill-outer: var(--strip-skill-wrap);
+  --strip-floor-height: calc(
+    var(--strip-stack-gap) + var(--strip-health-outer) + var(--strip-stack-gap) +
+      var(--strip-action-outer) + var(--strip-stack-gap) + var(--strip-skill-outer)
+  );
+  --strip-action-bottom: calc(var(--strip-skill-outer) + var(--strip-stack-gap));
+  --strip-actors-bottom: calc(var(--strip-floor-height) + var(--strip-sprite-lift));
   position: relative;
-  height: 128px;
+  height: 133px;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.08);
@@ -471,6 +476,8 @@ h2 {
   --strip-enemy-boss-slot: 50px;
   --strip-sprite-zoom: 1.12;
   --strip-actor-gap: 2px;
+  --strip-skill-size: 14px;
+  --strip-skill-wrap: 16px;
 }
 
 .battle-strip--crowded .combat-skill-bar[data-skill-count='4'] .combat-skill-slot {
@@ -1118,6 +1125,30 @@ h2 {
     0 0 1px rgba(0, 0, 0, 1);
 }
 
+.battle-float--crit-heal {
+  color: #fff44d;
+  font-size: 26px;
+  letter-spacing: 0.03em;
+  -webkit-text-stroke: 0.6px rgba(0, 60, 40, 0.85);
+  text-shadow:
+    0 0 18px rgba(45, 255, 176, 0.95),
+    0 0 10px rgba(255, 244, 77, 0.85),
+    0 3px 6px rgba(0, 0, 0, 0.95),
+    0 0 1px rgba(0, 0, 0, 1);
+}
+
+.battle-float--crit-buff {
+  color: #ffcc00;
+  font-size: 24px;
+  letter-spacing: 0.03em;
+  -webkit-text-stroke: 0.6px rgba(20, 40, 90, 0.9);
+  text-shadow:
+    0 0 16px rgba(120, 180, 255, 0.9),
+    0 0 10px rgba(255, 204, 0, 0.85),
+    0 3px 6px rgba(0, 0, 0, 0.95),
+    0 0 1px rgba(0, 0, 0, 1);
+}
+
 @keyframes battle-float-rise {
   0% {
     opacity: 0;
@@ -1205,7 +1236,7 @@ h2 {
   cursor: default;
   overflow: visible;
   flex-shrink: 0;
-  padding-bottom: var(--strip-card-foot);
+  padding-bottom: 0;
 }
 
 .hero-battle-card {
@@ -1243,23 +1274,56 @@ h2 {
   animation-delay: 0.6s;
 }
 
-.hero-battle-card .health-bar.strip-bar,
-.enemy-battle-card .health-bar.strip-bar {
+.hero-battle-card .strip-actor-bars,
+.enemy-battle-card .strip-actor-bars {
   position: absolute;
-  bottom: var(--strip-hp-bottom);
+  bottom: calc(var(--strip-action-bottom) - var(--strip-actors-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: calc(var(--strip-hero-slot) - 6px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--strip-stack-gap);
+}
+
+.enemy-battle-card .strip-actor-bars {
+  width: calc(var(--strip-enemy-slot) - 6px);
+}
+
+.hero-battle-card .health-bar.strip-bar,
+.enemy-battle-card .health-bar.strip-bar {
+  position: relative;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  width: 100%;
   height: 7px;
   margin-top: 0;
   padding: 1px;
   border-radius: 3px;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 2;
 }
 
-.enemy-battle-card .health-bar.strip-bar {
-  width: calc(var(--strip-enemy-slot) - 6px);
+.action-time-bar.strip-bar {
+  position: relative;
+  width: 100%;
+  height: auto;
+  padding: 1px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(22, 32, 56, 0.98), rgba(12, 18, 34, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.action-time-fill {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #9aa8bc 0%, #d8e0ec 55%, #f4f7fb 100%);
+  box-shadow: 0 0 6px rgba(220, 230, 245, 0.55);
+  transition: width 0.2s linear;
 }
 
 .hero-battle-card .health-bar.strip-bar .stat-bar-track {
@@ -1516,7 +1580,7 @@ h2 {
 .combat-skill-floor-slot {
   position: absolute;
   top: auto;
-  bottom: calc(-1 * var(--strip-skill-overhang));
+  bottom: calc(0px - var(--strip-actors-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1527,9 +1591,10 @@ h2 {
   gap: 1px;
   width: max-content;
   max-width: var(--strip-hero-slot);
-  min-height: var(--strip-floor-skill-zone);
+  min-height: var(--strip-skill-outer);
+  height: var(--strip-skill-outer);
   margin-top: 0;
-  z-index: 3;
+  z-index: 5;
   pointer-events: none;
 }
 
@@ -1563,20 +1628,42 @@ h2 {
   align-items: center;
   justify-content: center;
   padding: 0;
-  border-radius: 3px;
+  border-radius: 4px;
   line-height: 0;
   flex-shrink: 0;
-  background: rgba(12, 18, 32, 0.55);
-  border: 1px solid rgba(80, 96, 128, 0.45);
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  background: rgba(18, 26, 42, 0.72);
+  border: 1px solid rgba(110, 130, 168, 0.55);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .combat-skill-slot--ready {
   opacity: 1;
+  filter: brightness(1.05);
 }
 
 .combat-skill-slot--cooldown {
-  opacity: 0.88;
+  opacity: 0.96;
+  filter: brightness(0.92);
+}
+
+.combat-skill-slot--fired {
+  animation: combat-skill-fired 0.65s ease-out;
+  z-index: 4;
+}
+
+@keyframes combat-skill-fired {
+  0% {
+    filter: brightness(1.35) saturate(1.2);
+    box-shadow: 0 0 0 rgba(255, 230, 140, 0);
+  }
+  35% {
+    filter: brightness(1.85) saturate(1.35);
+    box-shadow: 0 0 14px rgba(255, 220, 120, 0.95), 0 0 4px rgba(255, 255, 255, 0.8);
+  }
+  100% {
+    filter: brightness(1);
+    box-shadow: none;
+  }
 }
 
 .combat-skill-slot--next {
@@ -1611,7 +1698,7 @@ h2 {
   width: var(--strip-skill-wrap);
   height: var(--strip-skill-wrap);
   overflow: hidden;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 .combat-skill-icon-wrap .element-pip--skill {
@@ -1707,7 +1794,7 @@ h2 {
   width: var(--strip-skill-size);
   height: var(--strip-skill-size);
   object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
 }
 
 .combat-skill-cooldown {
@@ -1731,9 +1818,9 @@ h2 {
   height: calc(var(--cooldown-ratio, 0) * 100%);
   background: linear-gradient(
     to top,
-    rgba(6, 10, 22, 0.94) 0%,
-    rgba(18, 28, 52, 0.82) 70%,
-    rgba(40, 58, 96, 0.45) 100%
+    rgba(8, 12, 24, 0.72) 0%,
+    rgba(24, 36, 58, 0.58) 70%,
+    rgba(48, 64, 96, 0.28) 100%
   );
   transition: height 0.35s linear;
   z-index: 2;
@@ -1755,17 +1842,7 @@ h2 {
 }
 
 .combat-skill-cooldown-label {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-size: 7px;
-  font-weight: 700;
-  color: #e8edf8;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-  z-index: 3;
+  display: none;
 }
 
 .combat-skill-floor-slot .combat-skill-icon-wrap {

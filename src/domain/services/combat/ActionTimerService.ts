@@ -7,8 +7,16 @@ import {
 } from '../../combat/CombatTimingConstants';
 import { combatantKey } from './SkillCooldownTracker';
 import { CombatantRef } from './TurnOrderService';
+import {
+  ActionTimerEntry,
+  ActionTimerMap,
+  normalizeActionTimerEntry,
+  normalizeActionTimerMap,
+  resolveActionTimeRatio,
+} from './ActionTimerTypes';
 
-export type ActionTimerMap = Record<string, number>;
+export type { ActionTimerEntry, ActionTimerMap } from './ActionTimerTypes';
+export { normalizeActionTimerMap, resolveActionTimeRatio } from './ActionTimerTypes';
 
 interface LivingCombatant {
   key: string;
@@ -26,13 +34,13 @@ export class ActionTimerService {
 
     for (const hero of heroes.filter((entry) => entry.isAlive())) {
       const key = combatantKey('hero', hero.id);
-      timers[key] = stagger;
+      timers[key] = { remaining: stagger, total: Math.max(stagger, MIN_ACTION_INTERVAL_SECONDS) };
       stagger += 0.12 / this.profiles.forHero(hero).attackSpeed;
     }
 
     for (const enemy of enemies.filter((entry) => entry.isAlive())) {
       const key = combatantKey('enemy', enemy.id);
-      timers[key] = stagger;
+      timers[key] = { remaining: stagger, total: Math.max(stagger, MIN_ACTION_INTERVAL_SECONDS) };
       stagger += 0.12 / this.profiles.forEnemy(enemy).attackSpeed;
     }
 
@@ -40,9 +48,12 @@ export class ActionTimerService {
   }
 
   advanceAll(timers: ActionTimerMap, elapsedSeconds: number): ActionTimerMap {
-    const next = structuredClone(timers);
+    const next = normalizeActionTimerMap(timers);
     for (const key of Object.keys(next)) {
-      next[key] -= elapsedSeconds;
+      next[key] = {
+        ...next[key],
+        remaining: next[key].remaining - elapsedSeconds,
+      };
     }
     return next;
   }
@@ -50,7 +61,7 @@ export class ActionTimerService {
   /** Combatentes prontos para agir (timer ≤ 0), ordenados por prioridade de fila. */
   listReadyActors(timers: ActionTimerMap, heroes: Hero[], enemies: Enemy[]): CombatantRef[] {
     return this.listLivingCombatants(heroes, enemies)
-      .filter((entry) => (timers[entry.key] ?? 0) <= 0)
+      .filter((entry) => normalizeActionTimerEntry(timers[entry.key]).remaining <= 0)
       .sort((left, right) => this.compareQueueOrder(timers, left, right))
       .map((entry) => ({ side: entry.side, id: entry.id }));
   }
@@ -71,10 +82,12 @@ export class ActionTimerService {
     const interval = usedSkill
       ? Math.max(MIN_ACTION_INTERVAL_SECONDS, SKILL_ACTION_RECOVERY_SECONDS / castSpeed)
       : Math.max(MIN_ACTION_INTERVAL_SECONDS, 1 / attackSpeed);
+    const current = normalizeActionTimerEntry(timers[key]);
+    const debt = Math.min(current.remaining, 0);
 
     return {
-      ...timers,
-      [key]: (timers[key] ?? 0) + interval,
+      ...normalizeActionTimerMap(timers),
+      [key]: { remaining: debt + interval, total: interval },
     };
   }
 
@@ -82,7 +95,7 @@ export class ActionTimerService {
     const livingKeys = new Set(
       this.listLivingCombatants(heroes, enemies).map((entry) => entry.key),
     );
-    const next = structuredClone(timers);
+    const next = normalizeActionTimerMap(timers);
 
     for (const key of Object.keys(next)) {
       if (!livingKeys.has(key)) {
@@ -98,8 +111,8 @@ export class ActionTimerService {
     left: LivingCombatant,
     right: LivingCombatant,
   ): number {
-    const leftTimer = timers[left.key] ?? 0;
-    const rightTimer = timers[right.key] ?? 0;
+    const leftTimer = normalizeActionTimerEntry(timers[left.key]).remaining;
+    const rightTimer = normalizeActionTimerEntry(timers[right.key]).remaining;
     if (leftTimer !== rightTimer) return leftTimer - rightTimer;
     return left.tieBreaker - right.tieBreaker;
   }

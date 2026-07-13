@@ -362,6 +362,121 @@ describe('CombatActionExecutor', () => {
     expect(result.statusApplications.some((entry) => entry.kind === 'heal_block')).toBe(true);
   });
 
+  it('aplica crítico probabilístico em cura quando roll está dentro da chance', () => {
+    const priest = Hero.createStarter('p1', 'priest', 'Elara');
+    const damagedKnight = Hero.createStarter('k1', 'knight', 'Galneon').takeDamage(50);
+    const enemy = Enemy.forStage(1);
+    const context = {
+      attackerProfile: {
+        attackSpeed: 1,
+        castSpeed: 1,
+        cooldownReduction: 0,
+        critChance: 0.25,
+        critDamage: 2,
+      },
+      stageLevel: 1,
+      rng: () => 0.1,
+    };
+
+    const result = executor.execute(
+      {
+        skillId: 'minor_heal',
+        skillName: 'Cura Menor',
+        kind: 'heal_ally',
+        targeting: 'single_ally',
+        power: 20,
+        targetHeroId: 'k1',
+      },
+      'Elara',
+      [priest, damagedKnight],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      context,
+    );
+
+    expect(result.floatingEvents[0]).toMatchObject({
+      kind: 'crit-heal',
+      amount: 40,
+    });
+    expect(result.event).toContain('CRÍTICO');
+  });
+
+  it('não aplica multiplicador de crítico em cura quando roll falha', () => {
+    const priest = Hero.createStarter('p1', 'priest', 'Elara');
+    const damagedKnight = Hero.createStarter('k1', 'knight', 'Galneon').takeDamage(50);
+    const enemy = Enemy.forStage(1);
+    const context = {
+      attackerProfile: {
+        attackSpeed: 1,
+        castSpeed: 1,
+        cooldownReduction: 0,
+        critChance: 0.25,
+        critDamage: 2,
+      },
+      stageLevel: 1,
+      rng: () => 0.9,
+    };
+
+    const result = executor.execute(
+      {
+        skillId: 'minor_heal',
+        skillName: 'Cura Menor',
+        kind: 'heal_ally',
+        targeting: 'single_ally',
+        power: 20,
+        targetHeroId: 'k1',
+      },
+      'Elara',
+      [priest, damagedKnight],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      context,
+    );
+
+    expect(result.floatingEvents[0]).toMatchObject({
+      kind: 'heal',
+      amount: 20,
+    });
+  });
+
+  it('aplica crítico probabilístico em buff de ataque', () => {
+    const priest = Hero.createStarter('p1', 'priest', 'Elara');
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
+    const enemy = Enemy.forStage(1);
+    const context = {
+      attackerProfile: {
+        attackSpeed: 1,
+        castSpeed: 1,
+        cooldownReduction: 0,
+        critChance: 0.5,
+        critDamage: 1.5,
+      },
+      stageLevel: 1,
+      rng: () => 0.2,
+    };
+
+    const result = executor.execute(
+      {
+        skillId: 'blessing',
+        skillName: 'Bênção',
+        kind: 'buff_attack',
+        targeting: 'single_ally',
+        power: 10,
+        effectDurationTurns: 3,
+        targetHeroId: 'k1',
+      },
+      'Elara',
+      [priest, knight],
+      [enemy],
+      CombatStatusEffectTracker.fromMap({}),
+      context,
+    );
+
+    expect(result.statusApplications[0]).toMatchObject({ magnitude: 15 });
+    expect(result.floatingEvents[0]).toMatchObject({ kind: 'crit-buff', amount: 15 });
+    expect(result.event).toContain('CRÍTICO');
+  });
+
   it('bloqueia cura em inimigo com heal_block', () => {
     const enemy = Enemy.forStage(1).takeDamage(20);
     const hpBefore = enemy.stats.currentHealth;

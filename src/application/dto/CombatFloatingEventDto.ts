@@ -1,6 +1,13 @@
 import { DamageElement } from '../../domain/combat/DamageElement';
 
-export type CombatFloatKind = 'damage' | 'heal' | 'crit' | 'buff' | 'debuff';
+export type CombatFloatKind =
+  | 'damage'
+  | 'heal'
+  | 'crit'
+  | 'crit-heal'
+  | 'crit-buff'
+  | 'buff'
+  | 'debuff';
 
 export interface CombatFloatingEventDto {
   target: 'hero' | 'enemy';
