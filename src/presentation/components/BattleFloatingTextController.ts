@@ -1,7 +1,7 @@
 import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEventDto';
 import { resolveBattleFloatClass } from './BattleFloatingTextPresentation';
 
-const FLOAT_DURATION_MS = 900;
+const FLOAT_DURATION_MS = 1750;
 
 export class BattleFloatingTextController {
   constructor(
@@ -58,9 +58,9 @@ export class BattleFloatingTextController {
     float.setAttribute('aria-hidden', 'true');
     float.style.left = `${anchorRect.left - stripRect.left + anchorRect.width / 2 + offsetIndex * 8}px`;
     float.style.top = `${anchorRect.top - stripRect.top}px`;
-    float.style.animationDelay = `${offsetIndex * 0.06}s`;
+    float.style.animationDelay = `${offsetIndex * 0.08}s`;
 
     this.layer.appendChild(float);
-    window.setTimeout(() => float.remove(), FLOAT_DURATION_MS + offsetIndex * 60);
+    window.setTimeout(() => float.remove(), FLOAT_DURATION_MS + offsetIndex * 80);
   }
 }

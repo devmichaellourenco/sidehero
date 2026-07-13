@@ -213,9 +213,29 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       value: fmtSpeed(profile.castSpeed),
       tooltipLines: [
         `Classe (${hero.heroClass}): ${fmtSpeed(baseline.castSpeed)}`,
-        ...(gearCast > 0 ? [`Equipamento (vel.): +${gearCast.toFixed(2)}/s`] : []),
-        ...(gearCdr !== 0 ? [`Redução de recarga do equipamento: ${gearCdr >= 0 ? '+' : ''}${Math.round(gearCdr)}%`] : []),
+        ...(gearCast > 0 ? [`Equipamento: +${gearCast.toFixed(2)}×`] : []),
+        `Acelera a recuperação após conjurar uma skill.`,
         `Total: ${fmtSpeed(profile.castSpeed)}`,
+      ],
+    },
+    {
+      id: 'cooldown-reduction',
+      label: 'Redução de recarga',
+      value: fmtPct(profile.cooldownReduction, 0),
+      tooltipLines: [
+        'Reduz o tempo de recarga das skills em percentual direto.',
+        'Ex.: 30% em uma skill de 10s → 7s de recarga.',
+        ...(gearCdr !== 0
+          ? [
+              `Equipamento: ${gearCdr >= 0 ? '+' : ''}${Math.round(gearCdr)}%`,
+              ...gearContributionLines(
+                equipment,
+                (g) => g.cooldownReductionBonus,
+                (v) => `${v >= 0 ? '+' : ''}${Math.round(v)}%`,
+              ),
+            ]
+          : ['Sem bônus de equipamento.']),
+        `Total (máx. 45%): ${fmtPct(profile.cooldownReduction, 0)}`,
       ],
     },
     {

@@ -228,7 +228,7 @@ describe('CombatActionExecutor', () => {
       [sorcerer],
       [enemy],
       CombatStatusEffectTracker.fromMap({}),
-      { attackerProfile: { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 }, stageLevel: 1 },
+      { attackerProfile: { attackSpeed: 1, castSpeed: 1, cooldownReduction: 0, critChance: 0, critDamage: 1.4 }, stageLevel: 1 },
     );
 
     const boosted = executor.execute(
@@ -246,7 +246,7 @@ describe('CombatActionExecutor', () => {
       [enemy],
       CombatStatusEffectTracker.fromMap({}),
       {
-        attackerProfile: { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 },
+        attackerProfile: { attackSpeed: 1, castSpeed: 1, cooldownReduction: 0, critChance: 0, critDamage: 1.4 },
         stageLevel: 1,
         attackerElementalBonus: { fire: 25, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
       },
@@ -352,7 +352,7 @@ describe('CombatActionExecutor', () => {
       [enemy],
       CombatStatusEffectTracker.fromMap({}),
       {
-        attackerProfile: { attackSpeed: 1, castSpeed: 1, critChance: 0, critDamage: 1.4 },
+        attackerProfile: { attackSpeed: 1, castSpeed: 1, cooldownReduction: 0, critChance: 0, critDamage: 1.4 },
         stageLevel: 1,
         attackerEquipment: knight.toProps().equipment,
         rng: () => 0,

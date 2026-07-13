@@ -20,6 +20,7 @@ import { CombatProfile } from '../../combat/CombatProfile';
 const DOT_ATTACKER_PROFILE: CombatProfile = {
   attackSpeed: 1,
   castSpeed: 1,
+  cooldownReduction: 0,
   critChance: 0,
   critDamage: 1,
 };

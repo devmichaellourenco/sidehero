@@ -457,6 +457,7 @@ export class CombatActionExecutor {
     const profile = context?.attackerProfile ?? {
       attackSpeed: 1,
       castSpeed: 1,
+      cooldownReduction: 0,
       critChance: 0,
       critDamage: 1.4,
     };

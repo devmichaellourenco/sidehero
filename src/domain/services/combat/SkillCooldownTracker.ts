@@ -81,7 +81,7 @@ export class SkillCooldownTracker {
     key: string,
     usedSkillId: string | null,
     skills: CombatSkillDefinition[],
-    castSpeed = 1,
+    cooldownReduction = 0,
   ): SkillCooldownTracker {
     const next = structuredClone(this.cooldowns);
     next[key] ??= {};
@@ -97,7 +97,7 @@ export class SkillCooldownTracker {
 
     const cooldownSeconds = getCooldownSeconds(usedSkill);
     if (cooldownSeconds > 0) {
-      next[key][usedSkillId] = cooldownSeconds / castSpeed;
+      next[key][usedSkillId] = Math.max(0, cooldownSeconds * (1 - cooldownReduction));
     }
 
     return new SkillCooldownTracker(next);
@@ -109,7 +109,7 @@ export class SkillCooldownTracker {
     usedSkillId: string | null,
     skills: CombatSkillDefinition[],
   ): SkillCooldownTracker {
-    return this.onSkillUsed(key, usedSkillId, skills, 1);
+    return this.onSkillUsed(key, usedSkillId, skills, 0);
   }
 }
 

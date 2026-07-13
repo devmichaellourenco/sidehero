@@ -410,8 +410,9 @@ export class CombatTurnPhase {
     statusEffects = statusEffects.tickOnTurnEnd(actorKey);
 
     const castSpeed = attackerProfile.castSpeed;
+    const cooldownReduction = attackerProfile.cooldownReduction;
     const updatedCooldowns = cooldowns
-      .onSkillUsed(actorKey, usedSkillId, skillList, castSpeed)
+      .onSkillUsed(actorKey, usedSkillId, skillList, cooldownReduction)
       .toMap();
 
     const usedSkill = usedSkillId !== null && usedSkillId !== BASIC_ATTACK_SKILL_ID;

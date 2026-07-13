@@ -43,7 +43,7 @@ const SCENES_BY_MAP: Record<
         recap:
           'Galneon, Nix e Elara deixam o acampamento inicial rumo a Estrenda, onde relatos de saques se multiplicam.',
         preview:
-          'Goblins e bandoleiros testam a formação nas primeiras encostas verdes. A party aprende o ritmo da batalha.',
+          'Goblins e bandoleiros emboscam os aventureiros nas encostas verdes.',
       },
       {
         title: 'Trilha dos Salteadores',
@@ -57,7 +57,7 @@ const SCENES_BY_MAP: Record<
         recap:
           'A estrada ficou mais segura, porém torres antigas voltaram a acender luzes na noite.',
         preview:
-          'Patrulhas misturam mortos-vivos e arqueiros em ruínas estreitas. Cada sala esconde um emboscador.',
+          'Patrulhas misturam mortos-vivos e arqueiros em ruínas estreitas. Cada canto esconde um emboscador.',
       },
       {
         title: 'Sopro do Guardião',
@@ -69,9 +69,9 @@ const SCENES_BY_MAP: Record<
       {
         title: 'Julgamento de Estrenda',
         recap:
-          'Resta apenas o núcleo do conflito — o Guardião Elemental desperta para expulsar intrusos.',
+          'Resta apenas o núcleo do conflito. O Saci, um dos Guardiões Elementais da Floresta de Estrenda, desperta para testar os aventureiros.',
         preview:
-          'O boss do capítulo decide se a party merece avançar além das planícies. Vitória abre o caminho para Gruftall.',
+          'O Saci decidirá se os aventureiros merecem avançar além das planícies.',
       },
     ],
   },

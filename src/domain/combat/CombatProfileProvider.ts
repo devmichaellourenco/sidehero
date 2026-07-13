@@ -8,7 +8,8 @@ import { CombatProfile, createCombatProfile } from './CombatProfile';
 import { getEnemyCombatBaseline } from './EnemyCombatBaselines';
 
 const MIN_COMBAT_SPEED = 0.35;
-const MAX_COOLDOWN_REDUCTION = 0.45;
+export const MAX_COOLDOWN_REDUCTION = 0.45;
+export const MIN_COOLDOWN_REDUCTION = -0.25;
 
 function sumGearBonus(gear: Partial<Record<string, Gear | null>>, selector: (g: Gear) => number): number {
   return Object.values(gear ?? {}).reduce((sum, item) => {
@@ -17,9 +18,23 @@ function sumGearBonus(gear: Partial<Record<string, Gear | null>>, selector: (g: 
   }, 0);
 }
 
-function resolveCastSpeed(baseCastSpeed: number, cooldownReductionPercent: number): number {
-  const cdr = Math.min(MAX_COOLDOWN_REDUCTION, Math.max(-0.25, cooldownReductionPercent / 100));
-  return Math.max(MIN_COMBAT_SPEED, baseCastSpeed * (1 + cdr));
+export function resolveCastSpeed(baseCastSpeed: number, castSpeedBonus: number): number {
+  return Math.max(MIN_COMBAT_SPEED, baseCastSpeed + castSpeedBonus);
+}
+
+export function resolveCooldownReduction(cooldownReductionPercent: number): number {
+  return Math.min(
+    MAX_COOLDOWN_REDUCTION,
+    Math.max(MIN_COOLDOWN_REDUCTION, cooldownReductionPercent / 100),
+  );
+}
+
+export function applyCooldownReduction(baseCooldownSeconds: number, cooldownReduction: number): number {
+  if (baseCooldownSeconds <= 0) {
+    return 0;
+  }
+
+  return Math.max(0, baseCooldownSeconds * (1 - cooldownReduction));
 }
 
 function resolveAttackSpeed(baseAttackSpeed: number, attackSpeedBonus: number): number {
@@ -37,7 +52,8 @@ export class CombatProfileProvider {
 
     return createCombatProfile({
       attackSpeed: resolveAttackSpeed(attributeAspd, attackSpeedBonus),
-      castSpeed: resolveCastSpeed(baseline.castSpeed + castSpeedBonus, cooldownReduction),
+      castSpeed: resolveCastSpeed(baseline.castSpeed, castSpeedBonus),
+      cooldownReduction: resolveCooldownReduction(cooldownReduction),
       critChance: Math.min(0.75, baseline.critChance + sumGearBonus(equipment, (g) => g.critChanceBonus)),
       critDamage: baseline.critDamage + sumGearBonus(equipment, (g) => g.critDamageBonus),
     });
@@ -50,6 +66,7 @@ export class CombatProfileProvider {
     return createCombatProfile({
       attackSpeed: attributeAspd,
       castSpeed: baseline.castSpeed,
+      cooldownReduction: 0,
       critChance: baseline.critChance,
       critDamage: baseline.critDamage,
     });

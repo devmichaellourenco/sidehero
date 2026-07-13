@@ -4,12 +4,17 @@ import { Hero } from '../entities/Hero';
 import { Gear } from '../entities/Gear';
 import { getEnemyCombatBaseline } from './EnemyCombatBaselines';
 import { resolveEnemyAttackSpeed } from './EnemyCombatBalance';
-import { CombatProfileProvider } from './CombatProfileProvider';
+import {
+  applyCooldownReduction,
+  CombatProfileProvider,
+  resolveCastSpeed,
+  resolveCooldownReduction,
+} from './CombatProfileProvider';
 
 describe('CombatProfileProvider', () => {
   const profiles = new CombatProfileProvider();
 
-  it('aplica redução de cooldown positiva no cast speed efetivo', () => {
+  it('separa redução de recarga da velocidade de conjuração', () => {
     const hero = Hero.createStarter('h1', 'sorcerer', 'Mira').equip(
       Gear.create({
         id: 'ring-cdr',
@@ -25,7 +30,33 @@ describe('CombatProfileProvider', () => {
     );
 
     const profile = profiles.forHero(hero);
-    expect(profile.castSpeed).toBeGreaterThan(1);
+    expect(profile.castSpeed).toBe(1);
+    expect(profile.cooldownReduction).toBeCloseTo(0.2);
+  });
+
+  it('cast speed acelera recovery sem alterar redução de recarga', () => {
+    const hero = Hero.createStarter('h1', 'sorcerer', 'Mira').equip(
+      Gear.create({
+        id: 'cast-ring',
+        name: 'Anel Ágil',
+        templateId: 'copper_ring',
+        slot: 'accessory',
+        rarity: 'rare',
+        attackBonus: 0,
+        defenseBonus: 0,
+        healthBonus: 0,
+        castSpeedBonus: 0.12,
+      }),
+    );
+
+    const profile = profiles.forHero(hero);
+    expect(profile.castSpeed).toBeCloseTo(1.12);
+    expect(profile.cooldownReduction).toBe(0);
+  });
+
+  it('aplica redução de recarga como percentual do tempo base', () => {
+    expect(applyCooldownReduction(10, resolveCooldownReduction(30))).toBe(7);
+    expect(applyCooldownReduction(10, resolveCooldownReduction(0))).toBe(10);
   });
 
   it('limita penalidade de velocidade de ataque negativa', () => {
@@ -82,5 +113,9 @@ describe('CombatProfileProvider', () => {
     const late = profiles.forEnemy(Enemy.forStage(40));
 
     expect(late.attackSpeed).toBeGreaterThan(early.attackSpeed);
+  });
+
+  it('resolveCastSpeed respeita piso mínimo', () => {
+    expect(resolveCastSpeed(1, -2)).toBe(0.35);
   });
 });
