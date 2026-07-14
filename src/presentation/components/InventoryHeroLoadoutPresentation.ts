@@ -96,8 +96,9 @@ function renderInventoryLoadoutSlot(
     : `${label}: vazio`;
 
   return `
-    <button
-      type="button"
+    <div
+      role="button"
+      tabindex="0"
       class="equipment-slot equipment-slot--icon-only inventory-loadout-slot${gear ? ' inventory-loadout-slot--filled' : ' inventory-loadout-slot--empty'}${highlightClass}${activeClass}${extraClasses}${dropClass} ${gearRaritySurfaceClass(gear?.rarity)}"
       ${slotAttrs}
       ${dropAttrs}
@@ -110,7 +111,7 @@ function renderInventoryLoadoutSlot(
         ${rarityIcon}
       </span>
       ${renderEquipmentSlotTooltip(slot, gear)}
-    </button>
+    </div>
   `;
 }
 

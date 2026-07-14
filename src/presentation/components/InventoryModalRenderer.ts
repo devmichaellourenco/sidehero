@@ -20,6 +20,8 @@ import {
   resolveDefaultInventoryHeroId,
 } from './InventoryGridPresentation';
 import { renderInventoryHeroLoadout } from './InventoryHeroLoadoutPresentation';
+import { renderInventoryDestroySlot } from './InventoryDestroySlotPresentation';
+import { renderInventoryStashSlot } from './InventoryStashSlotPresentation';
 
 export type InventorySortMode = 'gain' | 'name' | 'rarity';
 
@@ -139,19 +141,39 @@ export class InventoryModalRenderer {
       ? ''
       : '<div class="inline-equip-host hidden" data-inline-equip-host aria-live="polite"></div>';
 
+    const optimizeLabel =
+      upgradeCount > 0 ? `Otimizar equipe (↑${upgradeCount})` : 'Otimizar equipe';
+    const optimizeIcon = imgTag(getAssetUrl(ASSETS.ui.attack), 'Otimizar', 'inventory-optimize-icon');
     const optimizeButton =
       options.showOptimize === false
-        ? '<p class="inventory-optimize-locked">Otimizar equipe: desbloqueie em Runas.</p>'
+        ? `<span class="inventory-optimize-locked" title="Otimizar equipe: desbloqueie em Runas" aria-label="Otimizar equipe: desbloqueie em Runas">${optimizeIcon}</span>`
         : `
       <button
         type="button"
-        class="gear-equip-btn inventory-optimize-btn"
+        class="inventory-optimize-btn"
         data-optimize-loadout
+        title="${optimizeLabel}"
+        aria-label="${optimizeLabel}"
         ${upgradeCount === 0 ? 'disabled' : ''}
       >
-        Otimizar equipe${upgradeCount > 0 ? ` (↑${upgradeCount})` : ''}
+        ${optimizeIcon}
+        ${upgradeCount > 0 ? `<span class="inventory-optimize-badge">${upgradeCount}</span>` : ''}
       </button>
     `;
+    const dockSlots = slotPicking
+      ? ''
+      : `
+          ${renderInventoryStashSlot({
+            unlocked: state.storageCapacity.stashUnlocked,
+            canStash:
+              state.storageCapacity.stashUnlocked &&
+              state.storageCapacity.stashUsed < state.storageCapacity.stashLimit,
+            used: state.storageCapacity.stashUsed,
+            limit: state.storageCapacity.stashLimit,
+          })}
+          <div class="inventory-footer-center">${optimizeButton}</div>
+          ${renderInventoryDestroySlot()}
+        `;
 
     const sortButtons = `
       <div class="inventory-toolbar-row">
@@ -185,9 +207,6 @@ export class InventoryModalRenderer {
     const slotContextHeader = activeSlot
       ? `<p class="inventory-slot-context">Escolha ${slotLabel!.toLowerCase()}</p>`
       : '';
-    const canStash =
-      state.storageCapacity.stashUnlocked &&
-      state.storageCapacity.stashUsed < state.storageCapacity.stashLimit;
     const panelClass = [
       'inventory-panel',
       embedded ? 'inventory-panel--embedded' : '',
@@ -207,7 +226,7 @@ export class InventoryModalRenderer {
             ${imgTag(inventoryIcon, 'Inventário', 'stat-icon')}
             Nenhum item ainda. Derrote inimigos e abra baús!
           </p>
-          <footer class="inventory-footer">${optimizeButton}</footer>
+          <footer class="inventory-footer">${dockSlots || `<div class="inventory-footer-center">${optimizeButton}</div>`}</footer>
         </div>
       `;
       this.previousRenderState = state;
@@ -223,7 +242,6 @@ export class InventoryModalRenderer {
             returnedGearIds: equipFeedback?.returnedGearIds,
             equipMode: slotPicking ? 'pick' : 'inventory',
             upgradeForHeroId: slotPicking ? selectedHeroId : undefined,
-            canStash: slotPicking ? undefined : canStash,
           })
         : activeSlot
           ? `<p class="empty-state modal-empty">Nenhum ${slotLabel!.toLowerCase()} disponível no inventário.</p>`
@@ -238,7 +256,7 @@ export class InventoryModalRenderer {
         ${sortButtons}
         ${countLabel}
         ${mainGridSection}
-        <footer class="inventory-footer">${optimizeButton}</footer>
+        <footer class="inventory-footer">${dockSlots || `<div class="inventory-footer-center">${optimizeButton}</div>`}</footer>
       </div>
     `;
 

@@ -25,9 +25,7 @@ import {
   canHeroEquipGear,
   renderGearRequirementLines,
 } from './GearRequirementPresentation';
-import { renderInventoryStorageActions } from './StorageGridPresentation';
 import { gearDragAttr } from '../gear/GearDragDropBinder';
-import { renderInventoryGearAction } from './InventoryGearActionPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -100,7 +98,6 @@ export function renderInventoryGridSlot(
     upgradeStatus: GearUpgradeStatus;
     returnedToInventory?: boolean;
     equipMode?: InventoryGridEquipMode;
-    canStash?: boolean;
   },
 ): string {
   const frameUrl = getGearFrameSprite(gear.rarity);
@@ -122,41 +119,22 @@ export function renderInventoryGridSlot(
       : equipMode === 'pick' && canEquip
         ? `data-can-equip="true"`
         : `data-can-equip="false"`;
-  const equipAction = canEquip
-    ? equipMode === 'pick'
-      ? renderInventoryGearAction(
-          'equip',
-          'Equipar',
-          `data-pick-gear="${escapeHtml(gear.id)}" data-pick-hero="${escapeHtml(options.hero.id)}"`,
-        )
-      : renderInventoryGearAction(
-          'equip',
-          'Equipar',
-          `data-inventory-equip="${escapeHtml(gear.id)}" data-inventory-equip-hero="${escapeHtml(options.hero.id)}"`,
-        )
-    : '';
   const returnedClass = options.returnedToInventory ? ' inventory-grid-slot--returned' : '';
   const returnedBadge = options.returnedToInventory
     ? '<span class="inventory-grid-returned-badge" aria-hidden="true">↩</span>'
     : '';
-  const storageActions =
-    options.canStash !== undefined
-      ? renderInventoryStorageActions(gear, { canStash: options.canStash })
-      : '';
-  const tooltipActions =
-    equipAction || storageActions
-      ? `<span class="inventory-gear-action-row">${equipAction}${storageActions}</span>`
-      : '';
+  // Drag em qualquer item do inventário (equipar/baú/destruir via drop); no picker só se equipável.
   const dragAttrs =
-    equipMode === 'inventory' && canEquip
+    equipMode === 'inventory'
       ? gearDragAttr({ kind: 'inventory', gearId: gear.id, slot: gear.slot as GearSlotKey })
       : equipMode === 'pick' && canEquip
         ? gearDragAttr({ kind: 'inventory', gearId: gear.id, slot: gear.slot as GearSlotKey })
         : '';
 
   return `
-    <button
-      type="button"
+    <div
+      role="button"
+      tabindex="0"
       class="inventory-grid-slot inventory-grid-slot--${options.upgradeStatus}${canEquip ? '' : ' inventory-grid-slot--locked'}${returnedClass} ${gearRaritySurfaceClass(gear.rarity)}"
       ${inventoryAttrs}
       ${pickAttrs}
@@ -182,9 +160,8 @@ export function renderInventoryGridSlot(
           <span>${comparison.defense}</span>
           <span>${comparison.health}</span>
         </span>
-        ${tooltipActions}
       </span>
-    </button>
+    </div>
   `;
 }
 
@@ -196,7 +173,6 @@ export function renderInventoryGrid(
     returnedGearIds?: string[];
     equipMode?: InventoryGridEquipMode;
     upgradeForHeroId?: string;
-    canStash?: boolean;
   } = {},
 ): string {
   const hero = state.heroes.find((entry) => entry.id === selectedHeroId);
@@ -223,7 +199,6 @@ export function renderInventoryGrid(
               : getGearUpgradeInfoForActiveParty(state, gear).status,
             returnedToInventory: returnedSet.has(gear.id),
             equipMode,
-            canStash: options.canStash,
           }),
         )
         .join('')}

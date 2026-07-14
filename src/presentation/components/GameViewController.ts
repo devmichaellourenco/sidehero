@@ -479,6 +479,15 @@ export class GameViewController {
           await this.gearEquipFlow.equip(target.heroId, source.gearId, { fromInventory: true });
         })();
       },
+      onDestroyGear: (source) => {
+        if (source.kind !== 'inventory' && source.kind !== 'stash') return;
+        if (!this.state) return;
+        const gear =
+          source.kind === 'stash'
+            ? this.state.stash.find((entry) => entry.id === source.gearId)
+            : this.state.inventory.find((entry) => entry.id === source.gearId);
+        void this.gearStorageFlow.destroy(source.gearId, source.kind, gear);
+      },
       onPartySlotDrop: (heroId, targetIndex) => {
         void this.handlePartySlotDrop(heroId, targetIndex);
       },

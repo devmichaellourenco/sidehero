@@ -1,4 +1,5 @@
 import { GearSlotKey } from '../components/GearPresentation';
+import { hideInventoryGearTooltip } from '../components/InventoryGearTooltipBinder';
 import {
   canDropGearOnSlot,
   GearDragSource,
@@ -21,6 +22,7 @@ export type GearDragDropHandlers = {
     source: { heroId: string; slot: GearSlotKey; gearId: string },
     target: { heroId: string; slot: GearSlotKey },
   ) => void;
+  onDestroyGear: (source: GearDragSource) => void;
   onPartySlotDrop: (heroId: string, targetIndex: number) => void;
   onPartyActiveToBench: (heroId: string) => void;
   onPartyReorder: (fromIndex: number, toIndex: number) => void;
@@ -57,6 +59,13 @@ function resolveGearDropTarget(element: HTMLElement): { heroId: string; slot: Ge
 function handleGearDrop(source: GearDragSource, target: HTMLElement, handlers: GearDragDropHandlers): void {
   const zone = target.closest('[data-drop-zone]')?.getAttribute('data-drop-zone');
   const slotTarget = resolveGearDropTarget(target);
+
+  if (zone === 'destroy') {
+    if (source.kind === 'inventory' || source.kind === 'stash') {
+      handlers.onDestroyGear(source);
+    }
+    return;
+  }
 
   if (zone === 'inventory') {
     if (source.kind === 'equipped') {
@@ -104,6 +113,9 @@ function handleGearDrop(source: GearDragSource, target: HTMLElement, handlers: G
 
 function previewGearDrop(source: GearDragSource, target: HTMLElement): 'valid' | 'invalid' | null {
   const zone = target.closest('[data-drop-zone]')?.getAttribute('data-drop-zone');
+  if (zone === 'destroy') {
+    return source.kind === 'inventory' || source.kind === 'stash' ? 'valid' : null;
+  }
   if (zone === 'inventory') {
     return source.kind === 'equipped' ? 'valid' : null;
   }
@@ -119,6 +131,11 @@ function previewGearDrop(source: GearDragSource, target: HTMLElement): 'valid' |
   return canDropGearOnSlot(source.slot, slotTarget.slot) ? 'valid' : 'invalid';
 }
 
+function markDropTarget(element: HTMLElement, preview: 'valid' | 'invalid'): void {
+  element.classList.add('gear-drop-target--active');
+  element.classList.add(preview === 'valid' ? 'gear-drop-target--valid' : 'gear-drop-target--invalid');
+}
+
 function highlightGearTarget(target: HTMLElement, source: GearDragSource): void {
   const preview = previewGearDrop(source, target);
   if (!preview) return;
@@ -126,8 +143,42 @@ function highlightGearTarget(target: HTMLElement, source: GearDragSource): void 
   const slotEl = target.closest('[data-drop-gear-hero], [data-drop-zone]') as HTMLElement | null;
   if (!slotEl) return;
 
-  slotEl.classList.add('gear-drop-target--active');
-  slotEl.classList.add(preview === 'valid' ? 'gear-drop-target--valid' : 'gear-drop-target--invalid');
+  markDropTarget(slotEl, preview);
+}
+
+/** Destinos válidos já destacados no início do drag (sem precisar passar o mouse). */
+function highlightCompatibleGearTargets(root: HTMLElement, source: GearDragSource): void {
+  root.querySelectorAll('[data-drop-gear-hero][data-drop-gear-slot]').forEach((element) => {
+    const slotEl = element as HTMLElement;
+    const heroId = slotEl.getAttribute('data-drop-gear-hero');
+    const slot = slotEl.getAttribute('data-drop-gear-slot') as GearSlotKey | null;
+    if (!heroId || !slot) return;
+
+    if (source.kind === 'equipped' && source.heroId === heroId && source.slot === slot) {
+      return;
+    }
+    if (!canDropGearOnSlot(source.slot, slot)) return;
+
+    markDropTarget(slotEl, 'valid');
+  });
+
+  if (source.kind === 'equipped') {
+    root.querySelectorAll('[data-drop-zone="inventory"]').forEach((element) => {
+      markDropTarget(element as HTMLElement, 'valid');
+    });
+  }
+
+  if (source.kind === 'inventory' || source.kind === 'equipped') {
+    root.querySelectorAll('[data-drop-zone="stash"]').forEach((element) => {
+      markDropTarget(element as HTMLElement, 'valid');
+    });
+  }
+
+  if (source.kind === 'inventory' || source.kind === 'stash') {
+    root.querySelectorAll('[data-drop-zone="destroy"]').forEach((element) => {
+      markDropTarget(element as HTMLElement, 'valid');
+    });
+  }
 }
 
 export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandlers): () => void {
@@ -153,7 +204,7 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
       const fromIndexRaw = partyEl.getAttribute('data-party-from-index');
       activePartyFromIndex = fromIndexRaw !== null ? Number(fromIndexRaw) : -1;
       event.dataTransfer?.setData(PARTY_MIME, heroId);
-      event.dataTransfer!.effectAllowed = 'move';
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
       partyEl.classList.add('party-dragging');
       return;
     }
@@ -170,9 +221,14 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
     if (!source) return;
 
     activeGearSource = source;
-    event.dataTransfer?.setData(GEAR_MIME, serializeGearDragSource(source));
-    event.dataTransfer!.effectAllowed = 'move';
+    if (event.dataTransfer) {
+      event.dataTransfer.setData(GEAR_MIME, serializeGearDragSource(source));
+      event.dataTransfer.effectAllowed = 'move';
+    }
     gearEl.classList.add('gear-dragging');
+    hideInventoryGearTooltip(true);
+    clearDropHighlights(root);
+    highlightCompatibleGearTargets(root, source);
   };
 
   const onDragOver = (event: DragEvent) => {
@@ -183,7 +239,7 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
       ) as HTMLElement | null;
       if (!dropEl) return;
       event.preventDefault();
-      event.dataTransfer!.dropEffect = 'move';
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
       clearDropHighlights(root);
       dropEl.classList.add('party-drop-target--active');
       return;
@@ -194,14 +250,21 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
     const dropEl = (event.target as HTMLElement).closest(
       '[data-drop-gear-hero], [data-drop-zone]',
     ) as HTMLElement | null;
-    if (!dropEl) return;
+    if (!dropEl) {
+      clearDropHighlights(root);
+      highlightCompatibleGearTargets(root, activeGearSource);
+      return;
+    }
 
-    const preview = previewGearDrop(dropEl, activeGearSource);
+    const preview = previewGearDrop(activeGearSource, dropEl);
+    clearDropHighlights(root);
+    highlightCompatibleGearTargets(root, activeGearSource);
     if (!preview) return;
 
     event.preventDefault();
-    event.dataTransfer!.dropEffect = preview === 'valid' ? 'move' : 'none';
-    clearDropHighlights(root);
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = preview === 'valid' ? 'move' : 'none';
+    }
     highlightGearTarget(dropEl, activeGearSource);
   };
 

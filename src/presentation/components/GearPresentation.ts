@@ -328,8 +328,9 @@ export function renderEquipmentSlot(
 
   if (variant === 'loadout') {
     return `
-      <button
-        type="button"
+      <div
+        role="button"
+        tabindex="0"
         class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass}${activeClass}${dropClass} ${gearRaritySurfaceClass(gear?.rarity)}"
         ${slotAttrs}
         ${dropAttrs}
@@ -342,13 +343,14 @@ export function renderEquipmentSlot(
           ${rarityIcon}
         </span>
         ${renderEquipmentSlotTooltip(slot, gear)}
-      </button>
+      </div>
     `;
   }
 
   return `
-    <button
-      type="button"
+    <div
+      role="button"
+      tabindex="0"
       class="equipment-slot equipment-slot--icon-only${clickableClass}${dropClass} ${gearRaritySurfaceClass(gear?.rarity)}"
       ${slotAttrs}
       ${dropAttrs}
@@ -361,7 +363,7 @@ export function renderEquipmentSlot(
         ${rarityIcon}
       </span>
       ${renderEquipmentSlotTooltip(slot, gear)}
-    </button>
+    </div>
   `;
 }
 

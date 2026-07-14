@@ -3430,6 +3430,9 @@ button.hero-skill-chip:hover {
   background-clip: padding-box;
   cursor: pointer;
   overflow: visible;
+  box-sizing: border-box;
+  color: inherit;
+  font: inherit;
 }
 
 .inventory-grid-slot:focus-visible {
@@ -3540,14 +3543,148 @@ button.hero-skill-chip:hover {
 
 .inventory-footer {
   display: flex;
-  justify-content: stretch;
-  padding-top: 4px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
 
-.inventory-footer .inventory-optimize-btn {
-  width: 100%;
+.inventory-footer-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.inventory-dock-slot {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  cursor: default;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.inventory-dock-slot-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  object-fit: contain;
+}
+
+.inventory-dock-slot-label {
+  font-family: var(--font-heading);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.inventory-dock-slot--disabled {
+  opacity: 0.45;
+}
+
+.inventory-stash-slot {
+  border-color: rgba(66, 165, 245, 0.5);
+  background: rgba(66, 165, 245, 0.12);
+  color: #bbdefb;
+}
+
+.inventory-stash-slot.gear-drop-target--valid,
+.inventory-stash-slot.gear-drop-target--active {
+  outline: none;
+  border-style: solid;
+  border-color: rgba(129, 198, 255, 0.9);
+  background: rgba(66, 165, 245, 0.32);
+  box-shadow: 0 0 0 2px rgba(66, 165, 245, 0.28);
+  color: #fff;
+}
+
+.inventory-destroy-slot {
+  border-color: rgba(229, 115, 115, 0.55);
+  background: rgba(183, 28, 28, 0.16);
+  color: #ffcdd2;
+}
+
+.inventory-destroy-slot.gear-drop-target--valid,
+.inventory-destroy-slot.gear-drop-target--active {
+  outline: none;
+  border-style: solid;
+  border-color: rgba(255, 138, 128, 0.85);
+  background: rgba(211, 47, 47, 0.35);
+  box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.28);
+  color: #fff;
+}
+
+.inventory-optimize-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(245, 197, 66, 0.45);
+  border-radius: 10px;
+  background: rgba(245, 197, 66, 0.14);
+  color: var(--gold);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.inventory-optimize-btn:hover:not(:disabled) {
+  background: rgba(245, 197, 66, 0.28);
+  border-color: rgba(245, 197, 66, 0.7);
+  transform: translateY(-1px);
+}
+
+.inventory-optimize-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.inventory-optimize-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+.inventory-optimize-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #e53935;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.inventory-optimize-locked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  opacity: 0.4;
 }
 
 @media (max-width: 340px) {
@@ -3896,11 +4033,11 @@ button.hero-skill-chip:hover {
   margin-bottom: 10px;
 }
 
-.inventory-optimize-btn {
+.inventory-optimize-row .inventory-optimize-btn {
   width: 100%;
 }
 
-.inventory-optimize-locked {
+.inventory-optimize-row .inventory-optimize-locked {
   margin: 0 0 10px;
   font-size: 11px;
   color: var(--muted);

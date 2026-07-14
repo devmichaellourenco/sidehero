@@ -232,5 +232,5 @@ export function getGearFrameSprite(rarity: string): string {
 
 export function imgTag(src: string, alt: string, className?: string): string {
   const classAttr = className ? ` class="${className}"` : '';
-  return `<img src="${src}" alt="${alt}"${classAttr} loading="lazy" />`;
+  return `<img src="${src}" alt="${alt}"${classAttr} loading="lazy" draggable="false" />`;
 }

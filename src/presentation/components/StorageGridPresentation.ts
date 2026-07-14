@@ -28,23 +28,17 @@ function renderStorageTooltipActions(
   gear: GearDto,
   options: {
     location: 'inventory' | 'stash';
-    canStash?: boolean;
     canWithdraw?: boolean;
   },
 ): string {
   const actions: string[] = [];
 
-  if (options.location === 'inventory' && options.canStash) {
-    actions.push(
-      renderInventoryGearAction(
-        'stash',
-        'Guardar no baú',
-        `data-move-to-stash="${escapeHtml(gear.id)}"`,
-      ),
-    );
+  // Inventário: guardar/destruir são slots de drop no footer (não no tooltip).
+  if (options.location !== 'stash') {
+    return '';
   }
 
-  if (options.location === 'stash' && options.canWithdraw) {
+  if (options.canWithdraw) {
     actions.push(
       renderInventoryGearAction(
         'withdraw',
@@ -80,8 +74,9 @@ export function renderStashGridSlot(
       : '';
 
   return `
-    <button
-      type="button"
+    <div
+      role="button"
+      tabindex="0"
       class="inventory-grid-slot inventory-grid-slot--stash ${gearRaritySurfaceClass(gear.rarity)}${options.canWithdraw ? '' : ' inventory-grid-slot--locked'}"
       data-stash-gear-id="${escapeHtml(gear.id)}"
       data-can-withdraw="${options.canWithdraw ? 'true' : 'false'}"
@@ -102,7 +97,7 @@ export function renderStashGridSlot(
           canWithdraw: options.canWithdraw,
         })}</span>
       </span>
-    </button>
+    </div>
   `;
 }
 
@@ -121,12 +116,3 @@ export function renderStashGrid(
   `;
 }
 
-export function renderInventoryStorageActions(
-  gear: GearDto,
-  options: { canStash: boolean },
-): string {
-  return renderStorageTooltipActions(gear, {
-    location: 'inventory',
-    canStash: options.canStash,
-  });
-}
