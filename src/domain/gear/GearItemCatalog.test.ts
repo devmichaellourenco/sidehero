@@ -37,10 +37,10 @@ describe('GearItemCatalog', () => {
   });
 
   it('lista loot por slot, raridade e faixa de nível do mapa', () => {
-    const estrenda = listLootCatalogItems('weapon', 'common', 8);
+    const stendra = listLootCatalogItems('weapon', 'common', 8);
 
-    expect(estrenda.length).toBeGreaterThan(0);
-    expect(estrenda.every((item) => (item.requirements?.minLevel ?? 1) <= 12)).toBe(true);
+    expect(stendra.length).toBeGreaterThan(0);
+    expect(stendra.every((item) => (item.requirements?.minLevel ?? 1) <= 12)).toBe(true);
   });
 
   it('remove sufixo de raridade do nome', () => {

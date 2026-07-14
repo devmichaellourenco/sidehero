@@ -50,7 +50,7 @@ describe('UpgradeTreeModalRenderer', () => {
     expect(container.innerHTML).not.toContain('upgrade-branch-tab');
   });
 
-  it('dispara onPurchase ao clicar em comprar no tooltip', () => {
+  it('dispara onPurchase ao clicar no nodo disponível', () => {
     const container = document.createElement('div');
     const onPurchase = vi.fn();
     const nodes = [
@@ -66,14 +66,39 @@ describe('UpgradeTreeModalRenderer', () => {
 
     renderer.render(container, minimalState(200), nodes, { onPurchase });
 
-    const upgradeNode = container.querySelector('[data-upgrade-node="auto_open_chests_1"]') as HTMLElement;
-    upgradeNode.dispatchEvent(new Event('mouseenter'));
-
-    const buyButton = document.querySelector('[data-upgrade-buy="auto_open_chests_1"]') as HTMLButtonElement;
-    expect(buyButton).not.toBeNull();
-    buyButton.click();
+    const upgradeNode = container.querySelector(
+      '[data-upgrade-node="auto_open_chests_1"]',
+    ) as HTMLElement;
+    upgradeNode.click();
 
     expect(onPurchase).toHaveBeenCalledWith('auto_open_chests_1');
+    expect(document.querySelector('[data-upgrade-buy]')).toBeNull();
+  });
+
+  it('exibe preço no tooltip sem botão comprar', () => {
+    const container = document.createElement('div');
+    const nodes = [
+      node({
+        id: 'auto_open_chests_1',
+        branch: 'chests',
+        status: 'ready',
+        canAfford: false,
+        cost: 60,
+        name: 'Auto-abrir baús I',
+      }),
+    ];
+
+    renderer.render(container, minimalState(10), nodes, { onPurchase: vi.fn() });
+
+    const upgradeNode = container.querySelector(
+      '[data-upgrade-node="auto_open_chests_1"]',
+    ) as HTMLElement;
+    upgradeNode.dispatchEvent(new Event('mouseenter'));
+
+    const portal = document.getElementById('upgrade-node-tooltip-portal');
+    expect(portal?.querySelector('.upgrade-tooltip-price')?.textContent).toContain('60');
+    expect(portal?.querySelector('[data-upgrade-buy]')).toBeNull();
+    expect(portal?.textContent).toContain('Ouro insuficiente');
   });
 
   it('preserva viewport no segundo render após compra simulada', () => {

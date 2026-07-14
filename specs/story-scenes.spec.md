@@ -34,7 +34,7 @@ Cada **ato** de cada **região** (mapa) da campanha exibe uma **cena narrativa**
 | Evento | Comportamento |
 |--------|----------------|
 | Primeira fase do ato desbloqueada | Overlay automático + pausa |
-| Primeira sessão com `1-1` desbloqueada e cena do Ato I não vista | Overlay do Ato I de Estrenda |
+| Primeira sessão com `1-1` desbloqueada e cena do Ato I não vista | Overlay do Ato I de Stendra |
 | Boss X-50 / finale | Overlay de vitória existente + Wow de marco (já pausam com esta feature) |
 | Card "Ver cena" no mapa | Overlay somente leitura; não re-marca se já vista |
 

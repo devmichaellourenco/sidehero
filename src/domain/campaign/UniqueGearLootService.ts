@@ -64,7 +64,7 @@ export function tryCreateGonodorVorpalDrop(
   return createNamedLegendaryDrop(state, SWORD_VORPAL_LUPNUS_TEMPLATE_ID, lootService);
 }
 
-/** Drop garantido do Saci (boss final 1-50 / Estrenda) se o jogador ainda não possui. */
+/** Drop garantido do Saci (boss final 1-50 / Stendra) se o jogador ainda não possui. */
 export function tryCreateSaciIgnusDrop(
   state: GameState,
   params: UniqueBossDropParams,

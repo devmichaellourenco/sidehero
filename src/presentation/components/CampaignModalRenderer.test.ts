@@ -40,7 +40,7 @@ function buildOverview(): CampaignOverviewDto {
     maps: [
       {
         id: 'stendra',
-        name: 'Estrenda',
+        name: 'Stendra',
         unlocked: true,
         phases: [
           phase('1-1', { unlocked: true, playable: true, cleared: true }),

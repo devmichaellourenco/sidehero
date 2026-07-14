@@ -9,7 +9,7 @@ export const CAMPAIGN_REPLAY_XP_MULTIPLIER = 0.47;
 /** Níveis 1–50 usam curva de campanha; acima disso mantém tabela legada. */
 export const CAMPAIGN_HERO_LEVEL_SOFT_CAP = 50;
 
-/** Escala base de XP por kill conforme o mapa (Estrenda → Morthaven). */
+/** Escala base de XP por kill conforme o mapa (Stendra → Morthaven). */
 const MAP_KILL_XP_BASE_BY_INDEX = [0.2, 2.2, 16, 95] as const;
 
 /** Crescimento de XP do início ao fim de cada mapa. */
@@ -25,7 +25,7 @@ const LATE_LEVEL_XP_BASE = 115;
 const LATE_LEVEL_XP_GROWTH = 1.27;
 
 /**
- * Boost nas primeiras fases de Estrenda para não estagnar no nível 1–2,
+ * Boost nas primeiras fases de Stendra para não estagnar no nível 1–2,
  * sem inflar o ganho nas fases 17–50 na primeira run.
  */
 export function earlyMapKillXpBoost(tier: number): number {
@@ -65,7 +65,7 @@ export function resolveCampaignKillXp(
 
 /**
  * XP para avançar do nível N para N+1 na curva v1.
- * Early suave (nível ~8 na 1ª clear de Estrenda); late íngreme (nível ~40 no finale).
+ * Early suave (nível ~8 na 1ª clear de Stendra); late íngreme (nível ~40 no finale).
  */
 export function campaignHeroXpRequired(level: number): number {
   const safeLevel = Math.max(1, Math.floor(level));

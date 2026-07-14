@@ -39,8 +39,14 @@ describe('UpgradeNodeTooltipBinder', () => {
   });
 
   it('exibe tooltip no hover e esconde ao sair do nodo sem clique', () => {
+    const onPurchase = vi.fn();
     const anchor = mountAnchor();
-    bindUpgradeNodeTooltip(anchor, node({ id: 'auto_battle_2' }), () => '<p>Detalhe</p>', vi.fn());
+    bindUpgradeNodeTooltip(
+      anchor,
+      node({ id: 'auto_battle_2', status: 'ready', canAfford: false }),
+      () => '<p>Detalhe</p>',
+      onPurchase,
+    );
 
     anchor.dispatchEvent(new Event('mouseenter'));
     expect(document.getElementById('upgrade-node-tooltip-portal')?.classList.contains('hidden')).toBe(false);
@@ -48,16 +54,37 @@ describe('UpgradeNodeTooltipBinder', () => {
     anchor.dispatchEvent(new Event('mouseleave'));
     expect(document.getElementById('upgrade-node-tooltip-portal')?.classList.contains('hidden')).toBe(true);
     expect(isUpgradeNodeTooltipPinned()).toBe(false);
+    expect(onPurchase).not.toHaveBeenCalled();
   });
 
-  it('mantém tooltip fixo após clique enquanto o ponteiro está no nodo ou no tooltip', () => {
-    vi.useFakeTimers();
+  it('compra direto ao clicar em nodo disponível', () => {
+    const onPurchase = vi.fn();
     const anchor = mountAnchor();
-    bindUpgradeNodeTooltip(anchor, node({ id: 'auto_battle_2' }), () => '<p>Detalhe fixo</p>', vi.fn());
+    bindUpgradeNodeTooltip(anchor, node({ id: 'auto_battle_2' }), () => '<p>Detalhe</p>', onPurchase);
+
+    anchor.dispatchEvent(new Event('mouseenter'));
+    anchor.click();
+
+    expect(onPurchase).toHaveBeenCalledWith('auto_battle_2');
+    expect(isUpgradeNodeTooltipPinned()).toBe(false);
+    expect(document.getElementById('upgrade-node-tooltip-portal')?.classList.contains('hidden')).toBe(true);
+  });
+
+  it('mantém tooltip fixo após clique em nodo sem compra enquanto o ponteiro está no nodo ou no tooltip', () => {
+    vi.useFakeTimers();
+    const onPurchase = vi.fn();
+    const anchor = mountAnchor();
+    bindUpgradeNodeTooltip(
+      anchor,
+      node({ id: 'auto_battle_2', status: 'ready', canAfford: false }),
+      () => '<p>Detalhe fixo</p>',
+      onPurchase,
+    );
 
     anchor.dispatchEvent(new Event('mouseenter'));
     anchor.click();
     expect(isUpgradeNodeTooltipPinned()).toBe(true);
+    expect(onPurchase).not.toHaveBeenCalled();
     expect(anchor.classList.contains('upgrade-node--selected')).toBe(true);
     expect(anchor.getAttribute('aria-pressed')).toBe('true');
 
@@ -80,7 +107,12 @@ describe('UpgradeNodeTooltipBinder', () => {
 
   it('não mantém tooltip aberto ao passar o mouse no tooltip sem clicar no nodo', () => {
     const anchor = mountAnchor();
-    bindUpgradeNodeTooltip(anchor, node({ id: 'auto_battle_2' }), () => '<p>Detalhe</p>', vi.fn());
+    bindUpgradeNodeTooltip(
+      anchor,
+      node({ id: 'auto_battle_2', status: 'locked', canAfford: false }),
+      () => '<p>Detalhe</p>',
+      vi.fn(),
+    );
 
     anchor.dispatchEvent(new Event('mouseenter'));
     const portal = document.getElementById('upgrade-node-tooltip-portal') as HTMLElement;

@@ -35,7 +35,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 
 | mapId | Nome | Tiers |
 |-------|------|-------|
-| `stendra` | Estrenda | 1–50 |
+| `stendra` | Stendra | 1–50 |
 | `gruftall` | Gruftall | 51–100 |
 | `valdris` | Valdris | 101–150 |
 | `morthaven` | Morthaven | 151–200 |

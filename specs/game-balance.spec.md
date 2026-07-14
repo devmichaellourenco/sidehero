@@ -84,7 +84,7 @@ Auditoria de balanceamento do release inicial cobre **tier 1–200** (fases `1-1
 
 | Faixa | Tiers (v1) | Notas |
 |-------|------------|-------|
-| Early | 1–25 | Estrenda |
+| Early | 1–25 | Stendra |
 | Mid | 26–100 | Gruftall + início Valdris |
 | Late | 101–200 | Valdris + Morthaven |
 

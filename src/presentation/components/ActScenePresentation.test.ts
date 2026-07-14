@@ -6,7 +6,7 @@ const scene = {
   mapId: 'stendra',
   actNumber: 1,
   title: 'Ecos nas Planícies',
-  recap: 'A party chega a Estrenda.',
+  recap: 'A party chega a Stendra.',
   preview: 'Goblins atacam nas encostas.',
   imageAssetPath: 'campaign/stendra/campaign_stendra_banner.png',
   unlocked: true,
@@ -28,7 +28,7 @@ describe('ActScenePresentation', () => {
 
     expect(html).toContain('O que passou');
     expect(html).toContain('Pela frente');
-    expect(html).toContain('A party chega a Estrenda.');
+    expect(html).toContain('A party chega a Stendra.');
     expect(html).toContain('data-act-scene-dismiss');
   });
 

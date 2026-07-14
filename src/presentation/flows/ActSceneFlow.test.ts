@@ -7,7 +7,7 @@ const scene: ActSceneDto = {
   id: 'stendra-act-1',
   mapId: 'stendra',
   actNumber: 1,
-  title: 'Portões de Estrenda',
+  title: 'Portões de Stendra',
   recap: 'Recap',
   preview: 'Preview',
   imageUrl: null,
@@ -47,7 +47,7 @@ describe('ActSceneFlow', () => {
 
     expect(flow.isBlocking()).toBe(true);
     expect(root.classList.contains('hidden')).toBe(false);
-    expect(stage.innerHTML).toContain('Portões de Estrenda');
+    expect(stage.innerHTML).toContain('Portões de Stendra');
     expect(document.body.classList.contains('act-scene-open')).toBe(true);
   });
 

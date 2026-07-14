@@ -7,7 +7,7 @@ import {
 } from './PhaseEnemyEase';
 
 describe('PhaseEnemyEase', () => {
-  it('aplica facilidade nas fases 1-47 a 1-50 de Estrenda', () => {
+  it('aplica facilidade nas fases 1-47 a 1-50 de Stendra', () => {
     expect(enemyStatEaseForPhase(buildPhaseId(1, 46))).toBe(1);
     expect(enemyStatEaseForPhase(buildPhaseId(1, 47))).toBe(PHASE_ENEMY_EASE_MULTIPLIER);
     expect(enemyStatEaseForPhase(buildPhaseId(1, 48))).toBe(PHASE_ENEMY_EASE_MULTIPLIER);

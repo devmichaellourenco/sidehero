@@ -159,6 +159,10 @@ export class UpgradeTreeModalRenderer {
     const { node, x, y } = entry;
     const label = upgradeNodeShortLabel(node);
     const statusClass = `upgrade-node--${node.status}`;
+    const ariaLabel =
+      node.status === 'available'
+        ? `${node.name}. Clique para comprar por ${node.cost} de ouro`
+        : node.name;
 
     return `
       <button
@@ -167,7 +171,7 @@ export class UpgradeTreeModalRenderer {
         data-upgrade-node="${node.id}"
         data-upgrade-status="${node.status}"
         style="left: ${(x / viewBox.width) * 100}%; top: ${(y / viewBox.height) * 100}%;"
-        aria-label="${node.name}"
+        aria-label="${ariaLabel}"
       >
         <span class="upgrade-node-ring" aria-hidden="true"></span>
         <span class="upgrade-node-core">${label}</span>
@@ -207,33 +211,35 @@ export class UpgradeTreeModalRenderer {
         ? `<ul class="upgrade-tooltip-reqs">${requirements}</ul>`
         : '';
 
-    const action = this.renderTooltipAction(node, goldIcon);
+    const status = this.renderTooltipStatus(node);
+    const price =
+      node.status !== 'owned'
+        ? `<span class="upgrade-tooltip-price">${goldIcon} <strong>${node.cost}</strong></span>`
+        : '';
 
     return `
-      <p class="upgrade-tooltip-eyebrow">${UPGRADE_BRANCH_LABELS[node.branch]}</p>
-      <h4 class="upgrade-tooltip-title">${node.name}</h4>
-      <p class="upgrade-tooltip-desc">${node.description}</p>
-      <p class="upgrade-tooltip-cost">Custo: ${goldIcon} <strong>${node.cost}</strong></p>
-      ${requirementsBlock}
-      ${action}
+      <div class="upgrade-tooltip-body">
+        <p class="upgrade-tooltip-eyebrow">${UPGRADE_BRANCH_LABELS[node.branch]}</p>
+        <h4 class="upgrade-tooltip-title">${node.name}</h4>
+        <p class="upgrade-tooltip-desc">${node.description}</p>
+        ${requirementsBlock}
+        ${status}
+      </div>
+      ${price}
     `;
   }
 
-  private renderTooltipAction(node: UpgradeNodeDto, goldIcon: string): string {
+  private renderTooltipStatus(node: UpgradeNodeDto): string {
     if (node.status === 'owned') {
       return '<p class="upgrade-tooltip-status upgrade-tooltip-status--owned">✓ Desbloqueado</p>';
     }
 
     if (node.status === 'available') {
-      return `
-        <button type="button" class="gear-equip-btn upgrade-buy-btn" data-upgrade-buy="${node.id}">
-          Comprar ${goldIcon} ${node.cost}
-        </button>
-      `;
+      return '<p class="upgrade-tooltip-status upgrade-tooltip-status--available">Clique para comprar</p>';
     }
 
     if (node.status === 'ready') {
-      return `<p class="upgrade-tooltip-status upgrade-tooltip-status--ready">Falta ouro (${goldIcon} ${node.cost})</p>`;
+      return '<p class="upgrade-tooltip-status upgrade-tooltip-status--ready">Ouro insuficiente</p>';
     }
 
     return '<p class="upgrade-tooltip-status upgrade-tooltip-status--locked">Complete os requisitos para desbloquear</p>';

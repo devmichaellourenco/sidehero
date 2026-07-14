@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 8/8 (100%) · auditoria 2026-07-06  
-**Testes obrigatórios:** 7/7 presentes na suite
+**Aceite:** 9/9 (100%) · auditoria 2026-07-14  
+**Testes obrigatórios:** 8/8 presentes na suite
 
 ## Objetivo
 
@@ -16,8 +16,9 @@ Desbloquear automações e QoL comprando nós na **árvore única** com ouro, de
 - [x] Layout colinear (H/V/45°) em `UpgradeTreeLayout.ts`
 - [x] Ramos integrados à raiz `optimize_loadout_1`: combate, baús, slots, loja, heróis; log via `auto_battle_3`
 - [x] Compra aplica `feature` level + `unlockHeroClass` quando aplicável
-- [x] Tooltip com requisitos e botão comprar
-- [x] **Viewport estável após compra:** ao habilitar uma melhoria (botão Comprar no tooltip), o canvas **mantém** pan e zoom atuais — a visão não volta ao início nem recentraliza sozinha
+- [x] Tooltip com requisitos; runas **não compradas** mostram o custo no canto inferior direito (sem botão Comprar)
+- [x] Clique no nó **disponível** (ouro suficiente) compra direto; hover continua só informativo
+- [x] **Viewport estável após compra:** ao habilitar uma melhoria (clique no nó disponível), o canvas **mantém** pan e zoom atuais — a visão não volta ao início nem recentraliza sozinha
 - [x] Modal **sem** hint estático de pan/zoom/hover; legenda, nodos com tooltip e botão **Ir para disponível** comunicam a interação
 
 ## Comportamento esperado do viewport
@@ -29,7 +30,7 @@ Desbloquear automações e QoL comprando nós na **árvore única** com ouro, de
 | **Botão "Ir para disponível"** | Centraliza manualmente no próximo nó — comportamento atual, inalterado |
 | **Scroll / arrastar** entre compras | Continua funcionando; estado persiste até o usuário mover ou usar o botão de foco |
 
-O tooltip/card de compra deve continuar aparecendo e fechando normalmente; apenas o **reset involuntário** do canvas é proibido.
+O tooltip continua informativo no hover; a compra ocorre pelo **clique no nó** quando há ouro. O **reset involuntário** do canvas após a compra permanece proibido.
 
 ## Camadas e arquivos-chave
 
@@ -57,7 +58,8 @@ O tooltip/card de compra deve continuar aparecendo e fechando normalmente; apena
 - [x] `UpgradeTreeGraphPresentation.test.ts`
 - [x] `UpgradeTreeModalRenderer.test.ts`, `UpgradeTreeViewportBinder.test.ts`
 - [x] `UpgradeTreeViewportBinder.test.ts` — restaurar `UpgradeTreeViewportState` (`scale`, `panX`, `panY`) após re-bind
-- [x] `UpgradeTreeModalRenderer.test.ts` — segundo `render()` após compra simulada **não** chama foco automático nem reseta transform do stage; **sem** parágrafo `upgrade-intro`
+- [x] `UpgradeTreeModalRenderer.test.ts` — clique no nó disponível dispara compra; tooltip sem `data-upgrade-buy` e com preço; segundo `render()` após compra **não** chama foco automático nem reseta transform; **sem** parágrafo `upgrade-intro`
+- [x] `UpgradeNodeTooltipBinder.test.ts` — hover informativo; clique compra se `available`; pin só fora de compra
 
 ## Notas de implementação (orientação)
 

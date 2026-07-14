@@ -18,7 +18,7 @@ describe('CampaignXpScaling', () => {
     expect(resolveCampaignKillXp(2, 200, 1)).toBeGreaterThan(resolveCampaignKillXp(2, 16, 1));
   });
 
-  it('aplica boost tutorial só nas primeiras fases de Estrenda', () => {
+  it('aplica boost tutorial só nas primeiras fases de Stendra', () => {
     expect(earlyMapKillXpBoost(1)).toBeGreaterThan(earlyMapKillXpBoost(12));
     expect(earlyMapKillXpBoost(16)).toBe(1);
     expect(earlyMapKillXpBoost(50)).toBe(1);
@@ -51,7 +51,7 @@ describe('CampaignXpScaling', () => {
     expect(level).toBeLessThanOrEqual(6);
   });
 
-  it('primeira clear de Estrenda e replays levam ao nível 10–12', () => {
+  it('primeira clear de Stendra e replays levam ao nível 10–12', () => {
     const resolver = new EncounterResolver();
     const sumMap = (replay = false) => {
       let xp = 0;

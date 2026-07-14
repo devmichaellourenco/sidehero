@@ -18,7 +18,7 @@ const MAP_CONFIG: Record<
   MapId,
   { campaignId: 'apprentice'; displayPrefix: string; maxPhases: number; mapIndex: number }
 > = {
-  stendra: { campaignId: 'apprentice', displayPrefix: 'Estrenda', maxPhases: 50, mapIndex: 1 },
+  stendra: { campaignId: 'apprentice', displayPrefix: 'Stendra', maxPhases: 50, mapIndex: 1 },
   gruftall: { campaignId: 'apprentice', displayPrefix: 'Gruftall', maxPhases: 50, mapIndex: 2 },
 };
 

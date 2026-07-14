@@ -3,7 +3,7 @@
 ## Status
 
 **Aceite:** 4/9 (44%) · v1 foca nas 4 regiões base  
-**Testes obrigatórios:** 2/2 (Estrenda)
+**Testes obrigatórios:** 2/2 (Stendra)
 
 ## Objetivo
 
@@ -62,11 +62,11 @@ Mapas `broken_sky` … `void_throne` seguem o mesmo padrão de assets quando cad
 
 ## Testes obrigatórios
 
-- [x] `BattleScenePresentation.test.ts` — catálogo Estrenda + apply/remove scenic
-- [x] `CampaignModalRenderer.test.ts` — banner Estrenda no card do mapa-mundo
+- [x] `BattleScenePresentation.test.ts` — catálogo Stendra + apply/remove scenic
+- [x] `CampaignModalRenderer.test.ts` — banner Stendra no card do mapa-mundo
 
 ## Notas
 
-- PNGs atuais de Estrenda são alta resolução (~1.5k×1k); o CSS escala para 128px de altura. Otimizar tamanho de arquivo em release futura se necessário.
+- PNGs atuais de Stendra são alta resolução (~1.5k×1k); o CSS escala para 128px de altura. Otimizar tamanho de arquivo em release futura se necessário.
 - O vão central aparece porque os painéis L/R cobrem ~52% cada; preencher com `battle_{mapId}_center.png` (~400–600×128) ou `battle_{mapId}_backdrop.png` (largura total ~900×128). Registrar paths opcionais em `CampaignSceneCatalog.ts`.
 - Personagens ancorados no chão via `--strip-actors-bottom` (14px); HP e skills agrupados acima da faixa de piso.

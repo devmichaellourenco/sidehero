@@ -7,7 +7,7 @@ export interface MapGearLevelRange {
 
 /** Faixas de nível de item por mapa (v1 até Morthaven). Não se aplica a únicos de boss. */
 export const MAP_GEAR_LEVEL_RANGES: Readonly<Record<number, MapGearLevelRange>> = {
-  1: { min: 1, max: 12 }, // Estrenda
+  1: { min: 1, max: 12 }, // Stendra
   2: { min: 10, max: 22 }, // Gruftall
   3: { min: 20, max: 32 }, // Valdris
   4: { min: 30, max: 42 }, // Morthaven

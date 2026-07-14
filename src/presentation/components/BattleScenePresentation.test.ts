@@ -5,7 +5,7 @@ import { getCampaignScene, hasCampaignBanner, hasCampaignScene } from '../assets
 import { applyBattleScene } from './BattleScenePresentation';
 
 describe('CampaignSceneCatalog', () => {
-  it('expõe cena de Estrenda com fundo único', () => {
+  it('expõe cena de Stendra com fundo único', () => {
     expect(hasCampaignScene('stendra')).toBe(true);
     expect(getCampaignScene('stendra')).toEqual({
       battleBackground: 'campaign/stendra/cenario_stendra.jpeg',
@@ -60,7 +60,7 @@ function buildStripBg(): HTMLElement {
 }
 
 describe('applyBattleScene', () => {
-  it('aplica imagem única de fundo para Estrenda', () => {
+  it('aplica imagem única de fundo para Stendra', () => {
     const stripBg = buildStripBg();
     const stripFloor = document.createElement('div');
     stripFloor.className = 'strip-floor';

@@ -95,10 +95,10 @@ describe('LootService', () => {
     expect(gear.fireDamageBonus).toBe(6);
   });
 
-  it('loot normal respeita faixa de nível do mapa em Estrenda', () => {
-    const estrendaPool = listLootCatalogItems('weapon', 'common', 8);
+  it('loot normal respeita faixa de nível do mapa em Stendra', () => {
+    const stendraPool = listLootCatalogItems('weapon', 'common', 8);
 
-    expect(estrendaPool.length).toBeGreaterThan(0);
-    expect(estrendaPool.every((item) => (item.requirements?.minLevel ?? 1) <= 12)).toBe(true);
+    expect(stendraPool.length).toBeGreaterThan(0);
+    expect(stendraPool.every((item) => (item.requirements?.minLevel ?? 1) <= 12)).toBe(true);
   });
 });

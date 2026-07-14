@@ -72,7 +72,7 @@ function createHud(): {
 function mockState(overrides: Partial<GameStateDto> = {}): GameStateDto {
   return {
     mapId: 'stendra',
-    mapName: 'Estrenda',
+    mapName: 'Stendra',
     campaignName: 'Campanha',
     phaseLabel: '1-1',
     stage: 1,

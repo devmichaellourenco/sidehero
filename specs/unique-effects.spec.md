@@ -108,7 +108,7 @@ Itens e skills podem ter **um efeito único** com comportamento de combate **rea
 - [x] Template `ignus_ix` + sprite `gear/items/ignus_ix.png`
 - [x] +30% dano de fogo (`fireDamageBonus`)
 - [x] Ignora 30% da resistência de fogo do alvo (`fireResistPenetrationBonus` no pipeline de mitigação)
-- [x] **Aquisição principal:** espólio do **Saci** (boss fase **1-50**, mapa Estrenda) — garantido se ainda não possui
+- [x] **Aquisição principal:** espólio do **Saci** (boss fase **1-50**, mapa Stendra) — garantido se ainda não possui
 - [x] **Aquisição secundária:** Forja Divina (9× épico → lendário) — chance `FORGE_IGNUS_IX_CHANCE` = **0,005** (0,5%)
 - [x] **Requisitos:** nível **30** + **INT 28** (recebido cedo, equipável só depois)
 

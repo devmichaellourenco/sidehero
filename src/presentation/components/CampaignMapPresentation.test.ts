@@ -87,7 +87,7 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
   it('renderCampaignWorldMap marca regiões bloqueadas com aria-disabled (mantém hover/tooltip)', () => {
     const html = renderCampaignWorldMap(
       overview([
-        map('stendra', 'Estrenda', true, [phase('1-1', { unlocked: true, playable: true })]),
+        map('stendra', 'Stendra', true, [phase('1-1', { unlocked: true, playable: true })]),
         map('gruftall', 'Gruftall', false, [phase('2-1')]),
       ]),
       'stendra',
@@ -113,7 +113,7 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
   });
 
   it('renderCampaignPath aplica classes de status e mantém title informativo', () => {
-    const campaignMap = map('stendra', 'Estrenda', true, [
+    const campaignMap = map('stendra', 'Stendra', true, [
       phase('1-1', { unlocked: true, cleared: true, playable: true }),
       phase('1-2', { unlocked: true, playable: true, selected: true }),
       phase('1-3', { unlocked: false, playable: false }),
@@ -130,7 +130,7 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
   });
 
   it('renderMapProgressBar mantém tooltip do bloco e meta compacta', () => {
-    const campaignMap = map('stendra', 'Estrenda', true, [
+    const campaignMap = map('stendra', 'Stendra', true, [
       phase('1-1', { unlocked: true, cleared: true }),
       phase('1-2', { unlocked: true, selected: true }),
     ]);
@@ -143,7 +143,7 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
   });
 
   it('renderPhasePreviewFooter mostra estado vazio e desabilita iniciar se não jogável', () => {
-    const campaignMap = map('stendra', 'Estrenda', true, [
+    const campaignMap = map('stendra', 'Stendra', true, [
       phase('1-1', { unlocked: true, playable: false, displayName: 'Bloqueada' }),
     ]);
 
@@ -157,7 +157,7 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
 
   it('renderCampaignOverviewTooltipContent renderiza progressbar acessível', () => {
     const campaign = overview([
-      map('stendra', 'Estrenda', true, [phase('1-1', { cleared: true, unlocked: true })]),
+      map('stendra', 'Stendra', true, [phase('1-1', { cleared: true, unlocked: true })]),
     ]);
     const html = renderCampaignOverviewTooltipContent(campaign);
     expect(html).toContain('role="progressbar"');

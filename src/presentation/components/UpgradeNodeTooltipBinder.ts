@@ -58,7 +58,7 @@ export function bindUpgradeNodeTooltip(
   const show = () => {
     tooltipInteraction.nodeHovered = true;
     cancelUpgradeTooltipHide();
-    showUpgradeNodeTooltip(anchor, node, renderContent(node), onPurchase);
+    showUpgradeNodeTooltip(anchor, node, renderContent(node));
   };
 
   const onNodeMouseLeave = () => {
@@ -83,7 +83,15 @@ export function bindUpgradeNodeTooltip(
   anchor.addEventListener('mouseleave', onNodeMouseLeave);
   anchor.addEventListener('focus', show);
   anchor.addEventListener('blur', onNodeBlur);
-  anchor.addEventListener('click', () => {
+  anchor.addEventListener('click', (event) => {
+    if (node.status === 'available') {
+      event.preventDefault();
+      event.stopPropagation();
+      hideUpgradeNodeTooltip();
+      onPurchase(node.id);
+      return;
+    }
+
     tooltipInteraction.pinnedNodeId = node.id;
     tooltipInteraction.nodeHovered = true;
     setUpgradeNodeSelected(anchor);
@@ -134,7 +142,6 @@ function showUpgradeNodeTooltip(
   anchor: HTMLElement,
   node: UpgradeNodeDto,
   html: string,
-  onPurchase: (upgradeId: string) => void,
 ): void {
   const portal = ensureTooltipPortal();
   portal.className = `upgrade-node-tooltip-portal upgrade-node-tooltip-portal--${node.status}`;
@@ -154,17 +161,6 @@ function showUpgradeNodeTooltip(
     }
     scheduleTooltipVisibilityCheck();
   };
-
-  const buyButton = portal.querySelector('[data-upgrade-buy]') as HTMLButtonElement | null;
-  if (buyButton) {
-    buyButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const upgradeId = buyButton.getAttribute('data-upgrade-buy');
-      if (!upgradeId || buyButton.disabled) return;
-      hideUpgradeNodeTooltip();
-      onPurchase(upgradeId);
-    });
-  }
 
   const margin = 10;
   portal.style.visibility = 'hidden';

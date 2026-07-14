@@ -13,7 +13,7 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [unique-effects](unique-effects.spec.md) | 8/8 | 5/5 | — |
 | [stash-forge](stash-forge.spec.md) | 8/8 | 7/7 | — |
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
-| [upgrade-tree](upgrade-tree.spec.md) | 8/8 | 7/7 | — |
+| [upgrade-tree](upgrade-tree.spec.md) | 9/9 | 8/8 | — |
 | [meta-legacy](meta-legacy.spec.md) | 6/6 | 1/1 | — |
 | [battle-ui](battle-ui.spec.md) | 10/10 | 9/9 | — |
 | [art-scenes](art-scenes.spec.md) | 4/9 | 2/2 | strip das 4 regiões base |

@@ -8,7 +8,7 @@ export interface CampaignMapDefinition {
 }
 
 export const CAMPAIGN_MAPS: CampaignMapDefinition[] = [
-  { id: 'stendra', mapIndex: 1, name: 'Estrenda', phaseCount: 50 },
+  { id: 'stendra', mapIndex: 1, name: 'Stendra', phaseCount: 50 },
   { id: 'gruftall', mapIndex: 2, name: 'Gruftall', phaseCount: 50 },
   { id: 'valdris', mapIndex: 3, name: 'Valdris', phaseCount: 50 },
   { id: 'morthaven', mapIndex: 4, name: 'Morthaven', phaseCount: 50 },

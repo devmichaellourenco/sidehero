@@ -41,7 +41,7 @@ const SCENES_BY_MAP: Record<
       {
         title: 'Ecos nas Planícies',
         recap:
-          'Galneon, Nix e Elara deixam o acampamento inicial rumo a Estrenda, onde relatos de saques se multiplicam.',
+          'Galneon, Nix e Elara deixam o acampamento inicial rumo a Stendra, onde relatos de saques se multiplicam.',
         preview:
           'Goblins e bandoleiros emboscam os aventureiros nas encostas verdes.',
       },
@@ -64,12 +64,12 @@ const SCENES_BY_MAP: Record<
         recap:
           'Os heróis mapearam os esconderijos locais; um poder elemental pulsa sob o forte quebrado.',
         preview:
-          'Elementais e capitães corrompidos guardam o caminho para o coração de Estrenda. A pressão aumenta.',
+          'Elementais e capitães corrompidos guardam o caminho para o coração de Stendra. A pressão aumenta.',
       },
       {
-        title: 'Julgamento de Estrenda',
+        title: 'Julgamento de Stendra',
         recap:
-          'Resta apenas o núcleo do conflito. O Saci, um dos Guardiões Elementais da Floresta de Estrenda, desperta para testar os aventureiros.',
+          'Resta apenas o núcleo do conflito. O Saci, um dos Guardiões Elementais da Floresta de Stendra, desperta para testar os aventureiros.',
         preview:
           'O Saci decidirá se os aventureiros merecem avançar além das planícies.',
       },
@@ -80,7 +80,7 @@ const SCENES_BY_MAP: Record<
       {
         title: 'Fronteira de Cinzas',
         recap:
-          'Após Estrenda, o ar quente e seco anuncia Gruftall, terra sob a sombra de Gonodor.',
+          'Após Stendra, o ar quente e seco anuncia Gruftall, terra sob a sombra de Gonodor.',
         preview:
           'Monstros errantes e scavengers vagam entre crateras. A party precisa se adaptar ao terreno hostil.',
       },

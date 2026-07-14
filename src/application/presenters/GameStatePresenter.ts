@@ -247,7 +247,7 @@ function mapCampaignLabels(state: GameState): {
   return {
     campaignName: campaign.name,
     mapId: map?.id ?? 'stendra',
-    mapName: map?.name ?? 'Estrenda',
+    mapName: map?.name ?? 'Stendra',
     phaseLabel: phase?.displayName ?? phaseId,
   };
 }
