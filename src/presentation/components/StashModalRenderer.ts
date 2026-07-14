@@ -4,6 +4,7 @@ import {
   hideInventoryGearTooltip,
 } from './InventoryGearTooltipBinder';
 import { GEAR_SLOTS, GEAR_SLOT_LABELS, GearSlotKey } from './GearPresentation';
+import { compareGearRarityRank } from './GearRarityPresentation';
 import { renderStashGrid } from './StorageGridPresentation';
 import { InventorySortMode } from './InventoryModalRenderer';
 
@@ -84,11 +85,9 @@ export class StashModalRenderer {
 
   private sortGear(gears: GameStateDto['stash']): GameStateDto['stash'] {
     if (this.sortMode === 'rarity') {
-      const rarityRank: Record<string, number> = { epic: 3, rare: 2, common: 1 };
       return [...gears].sort((left, right) => {
-        const leftRank = rarityRank[left.rarity] ?? 0;
-        const rightRank = rarityRank[right.rarity] ?? 0;
-        if (rightRank !== leftRank) return rightRank - leftRank;
+        const byRarity = compareGearRarityRank(left.rarity, right.rarity);
+        if (byRarity !== 0) return byRarity;
         return left.name.localeCompare(right.name, 'pt-BR');
       });
     }

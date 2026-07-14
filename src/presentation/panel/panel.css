@@ -23,9 +23,16 @@
   --muted: #8d99ae;
   --strip: #0f3460;
   --floor: #533483;
-  --common: #9e9e9e;
-  --rare: #42a5f5;
-  --epic: #ab47bc;
+  --rarity-common: #9e9e9e;
+  --rarity-uncommon: #4caf50;
+  --rarity-rare: #42a5f5;
+  --rarity-epic: #c9a0dc;
+  --rarity-legendary: #f5c542;
+  --rarity-mythic: #f5c542;
+  --rarity-mythic-glow: rgba(245, 197, 66, 0.55);
+  --common: var(--rarity-common);
+  --rare: var(--rarity-rare);
+  --epic: var(--rarity-epic);
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
@@ -2055,13 +2062,21 @@ h2 {
 
 .loadout-slot--gear,
 .loadout-slot--skill {
-  --slot-frame-size: 4px;
+  --slot-frame-size: 2px;
   padding: 1px;
-  border: var(--slot-frame-size) solid transparent;
-  border-image: var(--slot-frame) 20 / var(--slot-frame-size) / 0 stretch;
+  border: var(--slot-frame-size) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
+  border-image: none;
   background-color: rgba(18, 28, 48, 0.92);
   background-clip: padding-box;
   border-radius: 0;
+}
+
+.loadout-slot--gear.empty {
+  --gear-rarity-color: rgba(255, 255, 255, 0.14);
+}
+
+.loadout-slot--skill {
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .loadout-slot--gear.empty .loadout-slot-icon,
@@ -2588,7 +2603,7 @@ button.hero-skill-chip:hover {
 }
 
 .equipment-slot {
-  --slot-frame-size: 8px;
+  --slot-frame-size: 2px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -2596,8 +2611,7 @@ button.hero-skill-chip:hover {
   justify-content: center;
   gap: 0;
   padding: 6px 4px;
-  border: var(--slot-frame-size) solid transparent;
-  border-image: var(--slot-frame) 20 / var(--slot-frame-size) / 0 stretch;
+  border: var(--slot-frame-size) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
   background-color: rgba(18, 28, 48, 0.92);
   background-clip: padding-box;
   color: var(--text);
@@ -2605,6 +2619,10 @@ button.hero-skill-chip:hover {
   font-size: 9px;
   cursor: default;
   overflow: visible;
+}
+
+.equipment-slot.empty {
+  --gear-rarity-color: rgba(255, 255, 255, 0.14);
 }
 
 .equipment-slot--icon-only {
@@ -2733,16 +2751,31 @@ button.hero-skill-chip:hover {
   display: none !important;
 }
 
-.gear-tooltip-portal.epic {
-  border-color: rgba(171, 71, 188, 0.55);
+.gear-tooltip-portal.common {
+  border-color: color-mix(in srgb, var(--rarity-common) 55%, transparent);
+}
+
+.gear-tooltip-portal.uncommon {
+  border-color: color-mix(in srgb, var(--rarity-uncommon) 55%, transparent);
 }
 
 .gear-tooltip-portal.rare {
-  border-color: rgba(66, 165, 245, 0.55);
+  border-color: color-mix(in srgb, var(--rarity-rare) 55%, transparent);
 }
 
-.gear-tooltip-portal.common {
-  border-color: rgba(158, 158, 158, 0.45);
+.gear-tooltip-portal.epic {
+  border-color: color-mix(in srgb, var(--rarity-epic) 55%, transparent);
+}
+
+.gear-tooltip-portal.legendary {
+  border-color: color-mix(in srgb, var(--rarity-legendary) 55%, transparent);
+}
+
+.gear-tooltip-portal.mythic {
+  border-color: color-mix(in srgb, var(--rarity-mythic) 70%, transparent);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 18px var(--rarity-mythic-glow);
 }
 
 #inventory-gear-tooltip-portal {
@@ -3188,17 +3221,169 @@ button.hero-skill-chip:hover {
   gap: 6px;
 }
 
+/* --- Bordas de raridade (consistentes em inventário, loadout, loja, forja, loot) --- */
+.inventory-grid-slot.common,
+.equipment-slot.common,
+.loadout-slot.common,
+.shop-offer-tile.common,
+.gear-item.common,
+.destroy-confirm-gear.common,
+.forge-confirm-gear.common,
+.wow-banner-gear-frame--common {
+  --gear-rarity-color: var(--rarity-common);
+}
+
+.inventory-grid-slot.uncommon,
+.equipment-slot.uncommon,
+.loadout-slot.uncommon,
+.shop-offer-tile.uncommon,
+.gear-item.uncommon,
+.destroy-confirm-gear.uncommon,
+.forge-confirm-gear.uncommon,
+.wow-banner-gear-frame--uncommon {
+  --gear-rarity-color: var(--rarity-uncommon);
+}
+
+.inventory-grid-slot.rare,
+.equipment-slot.rare,
+.loadout-slot.rare,
+.shop-offer-tile.rare,
+.gear-item.rare,
+.destroy-confirm-gear.rare,
+.forge-confirm-gear.rare,
+.wow-banner-gear-frame--rare {
+  --gear-rarity-color: var(--rarity-rare);
+}
+
+.inventory-grid-slot.epic,
+.equipment-slot.epic,
+.loadout-slot.epic,
+.shop-offer-tile.epic,
+.gear-item.epic,
+.destroy-confirm-gear.epic,
+.forge-confirm-gear.epic,
+.wow-banner-gear-frame--epic {
+  --gear-rarity-color: var(--rarity-epic);
+}
+
+.inventory-grid-slot.legendary,
+.equipment-slot.legendary,
+.loadout-slot.legendary,
+.shop-offer-tile.legendary,
+.gear-item.legendary,
+.destroy-confirm-gear.legendary,
+.forge-confirm-gear.legendary,
+.wow-banner-gear-frame--legendary {
+  --gear-rarity-color: var(--rarity-legendary);
+}
+
+.inventory-grid-slot.mythic,
+.equipment-slot.mythic,
+.loadout-slot.mythic,
+.shop-offer-tile.mythic,
+.gear-item.mythic,
+.destroy-confirm-gear.mythic,
+.forge-confirm-gear.mythic,
+.wow-banner-gear-frame--mythic {
+  --gear-rarity-color: var(--rarity-mythic);
+}
+
+.inventory-grid-slot:not(.empty),
+.equipment-slot:not(.empty),
+.loadout-slot--gear:not(.empty),
+.gear-item {
+  border-style: solid;
+  border-color: var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
+  border-image: none;
+}
+
+.inventory-grid-slot.mythic,
+.equipment-slot.mythic,
+.loadout-slot.mythic,
+.gear-item.mythic {
+  background-image: radial-gradient(
+    circle at 50% 35%,
+    var(--rarity-mythic-glow),
+    transparent 68%
+  );
+  background-color: rgba(22, 32, 54, 0.94);
+  background-clip: padding-box;
+  box-shadow:
+    0 0 14px color-mix(in srgb, var(--rarity-mythic-glow) 80%, transparent),
+    inset 0 0 12px rgba(245, 197, 66, 0.22);
+}
+
+.shop-offer-tile .shop-offer-icon-wrap,
+.destroy-confirm-gear-icon-wrap,
+.forge-confirm-gear-icon-wrap {
+  background-image: none;
+  border: 2px solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
+  border-radius: 8px;
+  background-color: rgba(12, 20, 38, 0.92);
+  box-sizing: border-box;
+}
+
+.shop-offer-tile.mythic .shop-offer-icon-wrap,
+.destroy-confirm-gear.mythic .destroy-confirm-gear-icon-wrap,
+.forge-confirm-gear.mythic .forge-confirm-gear-icon-wrap {
+  background-image: radial-gradient(
+    circle at 50% 40%,
+    var(--rarity-mythic-glow),
+    transparent 70%
+  );
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--rarity-mythic-glow) 75%, transparent),
+    inset 0 0 10px rgba(245, 197, 66, 0.25);
+}
+
+.shop-offer-tile {
+  border-color: color-mix(in srgb, var(--gear-rarity-color, rgba(255, 255, 255, 0.14)) 45%, transparent);
+}
+
+.shop-offer-tile.mythic,
+.destroy-confirm-gear.mythic,
+.forge-confirm-gear.mythic {
+  background-image: radial-gradient(
+    circle at 12% 20%,
+    color-mix(in srgb, var(--rarity-mythic-glow) 35%, transparent),
+    transparent 55%
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rarity-mythic) 40%, transparent);
+}
+
+.wow-banner-gear-frame--common,
+.wow-banner-gear-frame--uncommon,
+.wow-banner-gear-frame--rare,
+.wow-banner-gear-frame--epic,
+.wow-banner-gear-frame--legendary,
+.wow-banner-gear-frame--mythic {
+  border: 2px solid var(--gear-rarity-color, rgba(255, 255, 255, 0.2));
+}
+
+.wow-banner-gear-frame--mythic {
+  background:
+    radial-gradient(circle at 50% 40%, var(--rarity-mythic-glow), transparent 68%),
+    rgba(0, 0, 0, 0.28);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--rarity-mythic-glow) 85%, transparent);
+}
+
+.inventory-grid-slot-rarity,
+.equipment-slot-rarity,
+.loadout-slot-rarity,
+.shop-offer-rarity,
+.gear-rarity-icon,
+.destroy-confirm-gear-rarity,
+.forge-confirm-gear-rarity {
+  display: none;
+}
+
 .inventory-grid-slot {
-  --grid-frame: 8px;
+  --grid-frame: 2px;
   position: relative;
   width: 100%;
   aspect-ratio: 1;
   padding: 0;
-  border: var(--grid-frame) solid transparent;
-  border-image-source: var(--gear-frame);
-  border-image-slice: 20;
-  border-image-width: var(--grid-frame);
-  border-image-repeat: stretch;
+  border: var(--grid-frame) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
   background: rgba(22, 32, 54, 0.92);
   background-clip: padding-box;
   cursor: pointer;
@@ -3331,18 +3516,14 @@ button.hero-skill-chip:hover {
 }
 
 .gear-item {
-  --item-frame: 10px;
+  --item-frame: 2px;
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 8px 8px 8px 10px;
   font-size: 10px;
-  border: var(--item-frame) solid transparent;
-  border-image-source: var(--gear-frame);
-  border-image-slice: 20;
-  border-image-width: var(--item-frame);
-  border-image-repeat: stretch;
+  border: var(--item-frame) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
   background-color: rgba(22, 32, 54, 0.9);
   background-clip: padding-box;
 }
@@ -3437,31 +3618,6 @@ button.hero-skill-chip:hover {
   display: flex;
   flex-direction: column;
   gap: 2px;
-}
-
-.gear-item.common::before,
-.gear-item.rare::before,
-.gear-item.epic::before {
-  content: '';
-  position: absolute;
-  left: 12px;
-  top: 10px;
-  bottom: 10px;
-  width: 3px;
-  border-radius: 2px;
-  pointer-events: none;
-}
-
-.gear-item.common::before {
-  background: var(--common);
-}
-
-.gear-item.rare::before {
-  background: var(--rare);
-}
-
-.gear-item.epic::before {
-  background: var(--epic);
 }
 
 .gear-slot-tag {
@@ -5037,7 +5193,7 @@ body.modal-open {
   padding: 10px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--gear-rarity-color, rgba(255, 255, 255, 0.14)) 50%, transparent);
 }
 
 .destroy-confirm-gear-icon-wrap {
@@ -5201,7 +5357,7 @@ body.modal-open {
   padding: 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid color-mix(in srgb, var(--gear-rarity-color, rgba(255, 255, 255, 0.14)) 50%, transparent);
 }
 
 .forge-confirm-gear-icon-wrap {
@@ -9528,7 +9684,7 @@ body.wow-celebration-open {
 }
 
 .wow-banner--loot-mythic .wow-banner-glow {
-  background: radial-gradient(circle at 20% 30%, rgba(255, 92, 122, 0.32), transparent 62%);
+  background: radial-gradient(circle at 20% 30%, rgba(245, 197, 66, 0.42), transparent 62%);
 }
 
 .wow-banner--loot-epic .wow-banner-title {
@@ -9540,7 +9696,8 @@ body.wow-celebration-open {
 }
 
 .wow-banner--loot-mythic .wow-banner-title {
-  color: #ffb3c7;
+  color: #ffe08a;
+  text-shadow: 0 0 14px rgba(245, 197, 66, 0.55);
 }
 
 .wow-banner--milestone-victory.wow-banner--center {
@@ -9565,12 +9722,6 @@ body.wow-celebration-open {
 .wow-banner--milestone-victory .wow-banner-eyebrow {
   color: #f5c542;
   letter-spacing: 0.16em;
-}
-
-.wow-banner-gear-frame--epic,
-.wow-banner-gear-frame--legendary,
-.wow-banner-gear-frame--mythic {
-  box-shadow: 0 0 18px rgba(255, 255, 255, 0.12);
 }
 
 .wow-banner--unlock .wow-banner-cta,

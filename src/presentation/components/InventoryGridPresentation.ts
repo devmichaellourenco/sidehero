@@ -20,6 +20,7 @@ import {
   GearSlotKey,
   getHeroEquipment,
 } from './GearPresentation';
+import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import {
   canHeroEquipGear,
   renderGearRequirementLines,
@@ -143,7 +144,7 @@ export function renderInventoryGridSlot(
   return `
     <button
       type="button"
-      class="inventory-grid-slot inventory-grid-slot--${options.upgradeStatus}${canEquip ? '' : ' inventory-grid-slot--locked'}${returnedClass} ${gear.rarity}"
+      class="inventory-grid-slot inventory-grid-slot--${options.upgradeStatus}${canEquip ? '' : ' inventory-grid-slot--locked'}${returnedClass} ${gearRaritySurfaceClass(gear.rarity)}"
       ${inventoryAttrs}
       ${pickAttrs}
       ${dragAttrs}

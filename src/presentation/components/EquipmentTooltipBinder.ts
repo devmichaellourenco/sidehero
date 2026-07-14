@@ -1,9 +1,12 @@
+import { GEAR_RARITY_ORDER } from './GearRarityPresentation';
+
 const PORTAL_ID = 'gear-tooltip-portal';
 
 function getRarityClass(element: Element): string {
-  if (element.classList.contains('epic')) return 'epic';
-  if (element.classList.contains('rare')) return 'rare';
-  if (element.classList.contains('common')) return 'common';
+  for (let i = GEAR_RARITY_ORDER.length - 1; i >= 0; i -= 1) {
+    const rarity = GEAR_RARITY_ORDER[i];
+    if (element.classList.contains(rarity)) return rarity;
+  }
   return '';
 }
 

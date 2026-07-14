@@ -12,6 +12,7 @@ import {
   GEAR_SLOT_LABELS,
   GearSlotKey,
 } from './GearPresentation';
+import { gearRaritySurfaceClass } from './GearRarityPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -27,7 +28,7 @@ export function renderDestroyGearConfirmContent(gear: GearDto): string {
   const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
 
   return `
-    <div class="destroy-confirm-gear ${gear.rarity}" style="--gear-frame: url('${frameUrl}')">
+    <div class="destroy-confirm-gear ${gearRaritySurfaceClass(gear.rarity)}" style="--gear-frame: url('${frameUrl}')">
       <span class="destroy-confirm-gear-icon-wrap">
         ${imgTag(getGearSprite(gear), slotLabel, 'destroy-confirm-gear-icon')}
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'destroy-confirm-gear-rarity')}

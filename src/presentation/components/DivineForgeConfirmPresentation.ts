@@ -12,6 +12,7 @@ import {
   GEAR_SLOT_LABELS,
   GearSlotKey,
 } from './GearPresentation';
+import { gearRaritySurfaceClass } from './GearRarityPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -28,7 +29,7 @@ function renderGearConfirmCard(gear: GearDto, compact = false): string {
   const cardClass = compact ? 'forge-confirm-gear forge-confirm-gear--compact' : 'forge-confirm-gear';
 
   return `
-    <div class="${cardClass} ${gear.rarity}" style="--gear-frame: url('${frameUrl}')">
+    <div class="${cardClass} ${gearRaritySurfaceClass(gear.rarity)}" style="--gear-frame: url('${frameUrl}')">
       <span class="forge-confirm-gear-icon-wrap">
         ${imgTag(getGearSprite(gear), slotLabel, 'forge-confirm-gear-icon')}
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'forge-confirm-gear-rarity')}

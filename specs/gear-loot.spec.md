@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 7/7 (100%)  
-**Testes obrigatórios:** 7/7
+**Aceite:** 8/8 (100%)  
+**Testes obrigatórios:** 8/8
 
 ## Objetivo
 
@@ -18,6 +18,7 @@ Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara 
 - [x] Otimizar equipe sugere upgrades por herói (`LoadoutOptimizer`)
 - [x] Comparação visual no picker/modal (setas ▲)
 - [x] Inventário (global e embedded): filtro por categoria exclusivamente pelos ícones do loadout; toolbar de ordenação única; sem painel inline duplicado para escolha por slot
+- [x] Bordas de raridade consistentes em inventário, loadout, loja, forja, loot e tooltips: common cinza, uncommon verde, rare azul, epic lilás, legendary dourado, mythic dourado com brilho
 
 ## Camadas e arquivos-chave
 
@@ -56,3 +57,4 @@ Adicionar critérios `[ ]` aqui antes de codar:
 - [x] `GearDragDropPolicy.test.ts`, `InventoryGridPresentation.test.ts`
 - [x] `EquipGearRace.test.ts`
 - [x] `ChestService.test.ts` — abrir todos parcial (inventário + baú de itens)
+- [x] `GearRarityPresentation.test.ts` — normalização e ordenação das 6 raridades

@@ -8,6 +8,7 @@ import {
   GEAR_SLOT_LABELS,
   GearSlotKey,
 } from './GearPresentation';
+import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { getShopMaxRarityForTier, SHOP_OFFER_COUNT } from '../../domain/shop/ShopCatalog';
 
 export type ShopModalHandlers = {
@@ -53,7 +54,7 @@ function renderShopOfferTile(offer: ShopOfferDto): string {
   const fullStats = renderGearBonusLines(gear);
 
   return `
-    <article class="shop-offer-tile ${gear.rarity}${affordClass}" data-shop-offer="${offer.id}">
+    <article class="shop-offer-tile ${gearRaritySurfaceClass(gear.rarity)}${affordClass}" data-shop-offer="${offer.id}">
       <div class="shop-offer-icon-wrap" style="--gear-frame: url('${frameUrl}')">
         ${imgTag(getGearSprite(gear), gear.name, 'shop-offer-icon')}
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'shop-offer-rarity')}

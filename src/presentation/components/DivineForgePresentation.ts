@@ -1,6 +1,6 @@
 import { FORGE_FUSE_REQUIRED_COUNT } from '../../domain/gear/GearRarityProgression';
 import { calculateForgeSalvageGold } from '../../domain/forge/ForgeSalvageGoldCatalog';
-import { GearDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import {
   getGearFrameSprite,
   getGearRaritySprite,
@@ -14,10 +14,13 @@ import {
   GEAR_SLOT_LABELS,
   GearSlotKey,
 } from './GearPresentation';
+import {
+  GEAR_RARITY_ORDER,
+  gearRaritySurfaceClass,
+  normalizeGearRarity,
+} from './GearRarityPresentation';
 
 export const DIVINE_FORGE_FUSE_COUNT = FORGE_FUSE_REQUIRED_COUNT;
-
-const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'] as const;
 
 export type DivineForgeTab = 'create' | 'salvage';
 
@@ -30,11 +33,11 @@ function escapeHtml(text: string): string {
 }
 
 export function getNextRarityLabel(rarity: string): string | null {
-  const index = RARITY_ORDER.indexOf(rarity as (typeof RARITY_ORDER)[number]);
-  if (index < 0 || index >= RARITY_ORDER.length - 1) {
+  const index = GEAR_RARITY_ORDER.indexOf(normalizeGearRarity(rarity));
+  if (index < 0 || index >= GEAR_RARITY_ORDER.length - 1) {
     return null;
   }
-  const next = RARITY_ORDER[index + 1];
+  const next = GEAR_RARITY_ORDER[index + 1];
   return GEAR_RARITY_LABELS[next] ?? next;
 }
 
@@ -85,7 +88,7 @@ function renderForgeSlot(
   return `
     <button
       type="button"
-      class="inventory-grid-slot forge-grid-slot ${gear.rarity}${options.selected ? ' forge-grid-slot--selected' : ''}${options.inStash ? ' forge-grid-slot--stash' : ''}"
+      class="inventory-grid-slot forge-grid-slot ${gearRaritySurfaceClass(gear.rarity)}${options.selected ? ' forge-grid-slot--selected' : ''}${options.inStash ? ' forge-grid-slot--stash' : ''}"
       data-forge-gear-id="${escapeHtml(gear.id)}"
       aria-pressed="${options.selected ? 'true' : 'false'}"
       aria-label="${escapeHtml(gear.name)} · ${slotLabel} · ${rarityLabel}"
@@ -124,8 +127,8 @@ export function renderForgeGrid(
 
   const stashGearIds = options.stashGearIds ?? new Set<string>();
   const sorted = [...gears].sort((left, right) => {
-    const leftRank = RARITY_ORDER.indexOf(left.rarity as (typeof RARITY_ORDER)[number]);
-    const rightRank = RARITY_ORDER.indexOf(right.rarity as (typeof RARITY_ORDER)[number]);
+    const leftRank = GEAR_RARITY_ORDER.indexOf(normalizeGearRarity(left.rarity));
+    const rightRank = GEAR_RARITY_ORDER.indexOf(normalizeGearRarity(right.rarity));
     if (rightRank !== leftRank) return rightRank - leftRank;
     return left.name.localeCompare(right.name, 'pt-BR');
   });

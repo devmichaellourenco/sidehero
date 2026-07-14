@@ -15,6 +15,7 @@ import {
   getHeroEquipment,
   renderEquipmentSlotTooltip,
 } from './GearPresentation';
+import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { InventoryEquipFeedback } from './InventoryEquipFeedback';
 import { gearDragAttr, gearDropTargetAttr } from '../gear/GearDragDropBinder';
 
@@ -97,7 +98,7 @@ function renderInventoryLoadoutSlot(
   return `
     <button
       type="button"
-      class="equipment-slot equipment-slot--icon-only inventory-loadout-slot${gear ? ' inventory-loadout-slot--filled' : ' inventory-loadout-slot--empty'}${highlightClass}${activeClass}${extraClasses}${dropClass} ${gear?.rarity ?? 'empty'}"
+      class="equipment-slot equipment-slot--icon-only inventory-loadout-slot${gear ? ' inventory-loadout-slot--filled' : ' inventory-loadout-slot--empty'}${highlightClass}${activeClass}${extraClasses}${dropClass} ${gearRaritySurfaceClass(gear?.rarity)}"
       ${slotAttrs}
       ${dropAttrs}
       ${dragAttrs}

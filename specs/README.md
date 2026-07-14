@@ -9,7 +9,7 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [combat-campaign](combat-campaign.spec.md) | 15/15 | 9/9 | — |
 | [heroes-party](heroes-party.spec.md) | 9/9 | 10/10 | — |
 | [skills-progression](skills-progression.spec.md) | 9/9 | 10/10 | — |
-| [gear-loot](gear-loot.spec.md) | 6/6 | 6/6 | — |
+| [gear-loot](gear-loot.spec.md) | 8/8 | 8/8 | — |
 | [unique-effects](unique-effects.spec.md) | 8/8 | 5/5 | — |
 | [stash-forge](stash-forge.spec.md) | 8/8 | 7/7 | — |
 | [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |

@@ -9,6 +9,7 @@ import {
 import { canHeroEquipGear } from '../../application/mappers/GearRequirementPresentationMapper';
 import { renderGearRequirementLines } from './GearRequirementPresentation';
 import { gearDragAttr, gearDropTargetAttr } from '../gear/GearDragDropBinder';
+import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { GearDragSource } from '../gear/GearDragDropPolicy';
 
 export const GEAR_SLOTS = ['weapon', 'armor', 'accessory'] as const;
@@ -329,7 +330,7 @@ export function renderEquipmentSlot(
     return `
       <button
         type="button"
-        class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass}${activeClass}${dropClass} ${gear?.rarity ?? 'empty'}"
+        class="loadout-slot loadout-slot--gear equipment-slot equipment-slot--icon-only${clickableClass}${activeClass}${dropClass} ${gearRaritySurfaceClass(gear?.rarity)}"
         ${slotAttrs}
         ${dropAttrs}
         ${dragAttrs}
@@ -348,7 +349,7 @@ export function renderEquipmentSlot(
   return `
     <button
       type="button"
-      class="equipment-slot equipment-slot--icon-only${clickableClass}${dropClass} ${gear?.rarity ?? 'empty'}"
+      class="equipment-slot equipment-slot--icon-only${clickableClass}${dropClass} ${gearRaritySurfaceClass(gear?.rarity)}"
       ${slotAttrs}
       ${dropAttrs}
       ${dragAttrs}
@@ -419,7 +420,7 @@ export function renderGearCard(
     .join(' ');
 
   return `
-    <div class="gear-item ${gear.rarity}" style="--gear-frame: url('${frameUrl}')">
+    <div class="gear-item ${gearRaritySurfaceClass(gear.rarity)}" style="--gear-frame: url('${frameUrl}')">
       <div class="gear-item-main">
         <div class="gear-icon-wrap">
           ${imgTag(getGearSprite(gear), gear.slot, 'gear-slot-icon')}

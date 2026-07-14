@@ -12,6 +12,7 @@ import {
   GEAR_SLOT_LABELS,
   GearSlotKey,
 } from './GearPresentation';
+import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { gearDragAttr } from '../gear/GearDragDropBinder';
 
 function escapeHtml(text: string): string {
@@ -68,7 +69,7 @@ export function renderStashGridSlot(
   return `
     <button
       type="button"
-      class="inventory-grid-slot inventory-grid-slot--stash ${gear.rarity}${options.canWithdraw ? '' : ' inventory-grid-slot--locked'}"
+      class="inventory-grid-slot inventory-grid-slot--stash ${gearRaritySurfaceClass(gear.rarity)}${options.canWithdraw ? '' : ' inventory-grid-slot--locked'}"
       data-stash-gear-id="${escapeHtml(gear.id)}"
       data-can-withdraw="${options.canWithdraw ? 'true' : 'false'}"
       ${dragAttrs}
