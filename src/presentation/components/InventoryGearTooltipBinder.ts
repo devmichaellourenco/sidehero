@@ -2,7 +2,22 @@ import { GEAR_RARITY_ORDER } from './GearRarityPresentation';
 
 const PORTAL_ID = 'inventory-gear-tooltip-portal';
 const PORTAL_Z_INDEX = 1600;
-const HIDE_DELAY_MS = 260;
+const PINNED_BRIDGE_MS = 80;
+const SLOT_PINNED_CLASS = 'inventory-grid-slot--tooltip-pinned';
+
+type TooltipInteractionState = {
+  pinned: boolean;
+  pinnedSlot: HTMLElement | null;
+  slotHovered: boolean;
+  portalHovered: boolean;
+};
+
+const interaction: TooltipInteractionState = {
+  pinned: false,
+  pinnedSlot: null,
+  slotHovered: false,
+  portalHovered: false,
+};
 
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
 let activeSlot: HTMLElement | null = null;
@@ -23,20 +38,34 @@ function cancelScheduledHide(): void {
   }
 }
 
-function isPointerOverTooltipArea(): boolean {
-  const portal = document.getElementById(PORTAL_ID);
-  if (portal?.matches(':hover')) return true;
-  if (activeSlot?.matches(':hover')) return true;
-  return false;
+function clearSlotPinVisual(): void {
+  document.querySelectorAll(`.${SLOT_PINNED_CLASS}`).forEach((element) => {
+    element.classList.remove(SLOT_PINNED_CLASS);
+  });
 }
 
-function scheduleHide(): void {
+function setSlotPinned(slot: HTMLElement): void {
+  clearSlotPinVisual();
+  slot.classList.add(SLOT_PINNED_CLASS);
+  interaction.pinnedSlot = slot;
+  interaction.pinned = true;
+}
+
+function resetInteraction(): void {
+  interaction.pinned = false;
+  interaction.pinnedSlot = null;
+  interaction.slotHovered = false;
+  interaction.portalHovered = false;
+  clearSlotPinVisual();
   cancelScheduledHide();
-  hideTimer = window.setTimeout(() => {
-    hideTimer = null;
-    if (isPointerOverTooltipArea()) return;
-    hideInventoryGearTooltip(true);
-  }, HIDE_DELAY_MS);
+}
+
+function applyPortalPointerMode(portal: HTMLElement): void {
+  if (interaction.pinned) {
+    portal.dataset.pinned = 'true';
+  } else {
+    delete portal.dataset.pinned;
+  }
 }
 
 function ensurePortal(): HTMLElement {
@@ -50,12 +79,17 @@ function ensurePortal(): HTMLElement {
   portal.setAttribute('role', 'tooltip');
 
   portal.addEventListener('mouseenter', () => {
+    if (!interaction.pinned) return;
+    interaction.portalHovered = true;
     cancelScheduledHide();
-    portal!.dataset.pinned = 'true';
   });
   portal.addEventListener('mouseleave', () => {
-    delete portal!.dataset.pinned;
-    scheduleHide();
+    interaction.portalHovered = false;
+    if (!interaction.pinned) {
+      hideInventoryGearTooltip();
+      return;
+    }
+    scheduleVisibilityCheck();
   });
 
   document.body.appendChild(portal);
@@ -109,8 +143,30 @@ function attachScrollListener(slot: HTMLElement): void {
   scrollContainer?.addEventListener('scroll', repositionActiveTooltip, { passive: true });
 }
 
+function updateVisibility(): void {
+  if (interaction.pinned) {
+    if (interaction.slotHovered || interaction.portalHovered) return;
+    hideInventoryGearTooltip();
+    return;
+  }
+
+  if (!interaction.slotHovered) {
+    hideInventoryGearTooltip();
+  }
+}
+
+function scheduleVisibilityCheck(): void {
+  cancelScheduledHide();
+  const delay = interaction.pinned ? PINNED_BRIDGE_MS : 0;
+  hideTimer = window.setTimeout(() => {
+    hideTimer = null;
+    updateVisibility();
+  }, delay);
+}
+
 function showPortal(slot: HTMLElement, tooltip: HTMLElement): void {
   cancelScheduledHide();
+  interaction.slotHovered = true;
 
   const portal = ensurePortal();
   const rarity = getRarityClass(slot);
@@ -119,6 +175,7 @@ function showPortal(slot: HTMLElement, tooltip: HTMLElement): void {
   portal.className = 'gear-tooltip-portal gear-tooltip-portal--interactive';
   if (rarity) portal.classList.add(rarity);
   portal.style.zIndex = String(PORTAL_Z_INDEX);
+  applyPortalPointerMode(portal);
 
   if (slotChanged) {
     portal.innerHTML = tooltip.innerHTML;
@@ -129,15 +186,22 @@ function showPortal(slot: HTMLElement, tooltip: HTMLElement): void {
   attachScrollListener(slot);
 }
 
-export function hideInventoryGearTooltip(force = false): void {
-  if (!force) {
-    scheduleHide();
-    return;
-  }
+function pinAndShow(slot: HTMLElement): void {
+  const tooltip = slot.querySelector('.inventory-gear-tooltip-content');
+  if (!tooltip) return;
 
+  setSlotPinned(slot);
+  interaction.slotHovered = true;
+  interaction.portalHovered = false;
+  showPortal(slot, tooltip as HTMLElement);
+  applyPortalPointerMode(ensurePortal());
+}
+
+export function hideInventoryGearTooltip(_force = false): void {
   cancelScheduledHide();
   activeSlot = null;
   detachScrollListener();
+  resetInteraction();
 
   const portal = document.getElementById(PORTAL_ID);
   if (!portal) return;
@@ -155,7 +219,10 @@ function handlePointerOver(event: Event): void {
 
   const portal = document.getElementById(PORTAL_ID);
   if (portal && portal.contains(target)) {
-    cancelScheduledHide();
+    if (interaction.pinned) {
+      cancelScheduledHide();
+      interaction.portalHovered = true;
+    }
     return;
   }
 
@@ -165,24 +232,67 @@ function handlePointerOver(event: Event): void {
   const tooltip = slot.querySelector('.inventory-gear-tooltip-content');
   if (!tooltip) return;
 
+  if (interaction.pinned && interaction.pinnedSlot && interaction.pinnedSlot !== slot) {
+    hideInventoryGearTooltip();
+  }
+
   showPortal(slot, tooltip as HTMLElement);
 }
 
 function handlePointerOut(event: Event): void {
   const mouseEvent = event as MouseEvent;
   const related = mouseEvent.relatedTarget as Node | null;
-  const portal = document.getElementById(PORTAL_ID);
-
-  if (portal && related && portal.contains(related)) {
-    cancelScheduledHide();
-    return;
-  }
 
   if (activeSlot && related && activeSlot.contains(related)) {
     return;
   }
 
-  scheduleHide();
+  interaction.slotHovered = false;
+
+  if (!interaction.pinned) {
+    hideInventoryGearTooltip();
+    return;
+  }
+
+  const portal = document.getElementById(PORTAL_ID);
+  if (portal && related && portal.contains(related)) {
+    interaction.portalHovered = true;
+    cancelScheduledHide();
+    return;
+  }
+
+  scheduleVisibilityCheck();
+}
+
+function handleSlotClick(event: Event): void {
+  const target = event.target as HTMLElement | null;
+  if (!target) return;
+
+  if (
+    target.closest(
+      '.inventory-gear-tooltip-action, .gear-destroy-btn, [data-inventory-equip], [data-pick-gear], [data-move-to-stash], [data-move-from-stash], [data-destroy-gear]',
+    )
+  ) {
+    return;
+  }
+
+  const slot = target.closest('.inventory-grid-slot') as HTMLElement | null;
+  if (!slot?.querySelector('.inventory-gear-tooltip-content')) return;
+
+  pinAndShow(slot);
+
+  // Forja / picker: deixa o clique prosseguir (seleção ou equipar).
+  if (slot.hasAttribute('data-forge-gear-id') || slot.hasAttribute('data-pick-gear')) {
+    return;
+  }
+
+  // Inventário / baú: clique só seleciona (pin); ações ficam no tooltip.
+  event.stopPropagation();
+  event.preventDefault();
+}
+
+export function isInventoryGearTooltipPinned(): boolean {
+  return interaction.pinned;
 }
 
 export function bindInventoryGearTooltips(container: HTMLElement): void {
@@ -191,6 +301,7 @@ export function bindInventoryGearTooltips(container: HTMLElement): void {
 
   container.addEventListener('mouseover', handlePointerOver);
   container.addEventListener('mouseout', handlePointerOut);
+  container.addEventListener('click', handleSlotClick, true);
 
   container.addEventListener('focusin', (event) => {
     const slot = (event.target as HTMLElement).closest('.inventory-grid-slot') as HTMLElement | null;
@@ -201,6 +312,11 @@ export function bindInventoryGearTooltips(container: HTMLElement): void {
   });
 
   container.addEventListener('focusout', () => {
-    scheduleHide();
+    interaction.slotHovered = false;
+    if (!interaction.pinned) {
+      hideInventoryGearTooltip();
+      return;
+    }
+    scheduleVisibilityCheck();
   });
 }

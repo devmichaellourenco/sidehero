@@ -53,7 +53,7 @@ describe('InventoryGridPresentation', () => {
     expect(html).toContain('inventory-grid-badge');
   });
 
-  it('inclui tooltip com delta e ação equipar', () => {
+  it('inclui tooltip com delta e ação equipar em ícone', () => {
     const state = minimalState();
     const hero = state.heroes[0];
     const html = renderInventoryGridSlot(gear('g1'), {
@@ -63,6 +63,8 @@ describe('InventoryGridPresentation', () => {
 
     expect(html).toContain('inventory-gear-tooltip-stats');
     expect(html).toContain('data-inventory-equip="g1"');
+    expect(html).toContain('inventory-gear-action--equip');
+    expect(html).toContain('title="Equipar"');
     expect(html).toContain('inventory-grid-badge--upgrade');
   });
 

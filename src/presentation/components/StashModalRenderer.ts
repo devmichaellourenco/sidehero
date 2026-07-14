@@ -11,7 +11,6 @@ import { InventorySortMode } from './InventoryModalRenderer';
 export type StashModalHandlers = {
   onFilterChange: (slot: GearSlotKey | 'all') => void;
   onSortChange: (mode: InventorySortMode) => void;
-  onWithdrawGear: (gearId: string) => void;
   onOpenInventory: () => void;
 };
 
@@ -115,25 +114,6 @@ export class StashModalRenderer {
 
     container.querySelector('[data-open-inventory]')?.addEventListener('click', () => {
       handlers.onOpenInventory();
-    });
-
-    container.querySelectorAll('[data-stash-gear-id]').forEach((slot) => {
-      slot.addEventListener('click', (event) => {
-        const target = event.target as HTMLElement;
-        if (
-          target.closest('[data-move-from-stash]') ||
-          target.closest('[data-destroy-gear]')
-        ) {
-          return;
-        }
-
-        if (slot.getAttribute('data-can-withdraw') !== 'true') return;
-
-        const gearId = slot.getAttribute('data-stash-gear-id');
-        if (!gearId) return;
-
-        handlers.onWithdrawGear(gearId);
-      });
     });
   }
 

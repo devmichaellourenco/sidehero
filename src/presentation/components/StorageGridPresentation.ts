@@ -14,6 +14,7 @@ import {
 } from './GearPresentation';
 import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { gearDragAttr } from '../gear/GearDragDropBinder';
+import { renderInventoryGearAction } from './InventoryGearActionPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -35,18 +36,30 @@ function renderStorageTooltipActions(
 
   if (options.location === 'inventory' && options.canStash) {
     actions.push(
-      `<span class="inventory-gear-tooltip-action gear-equip-btn" data-move-to-stash="${escapeHtml(gear.id)}">Guardar no baú</span>`,
+      renderInventoryGearAction(
+        'stash',
+        'Guardar no baú',
+        `data-move-to-stash="${escapeHtml(gear.id)}"`,
+      ),
     );
   }
 
   if (options.location === 'stash' && options.canWithdraw) {
     actions.push(
-      `<span class="inventory-gear-tooltip-action gear-equip-btn" data-move-from-stash="${escapeHtml(gear.id)}">Retirar</span>`,
+      renderInventoryGearAction(
+        'withdraw',
+        'Retirar',
+        `data-move-from-stash="${escapeHtml(gear.id)}"`,
+      ),
     );
   }
 
   actions.push(
-    `<span class="inventory-gear-tooltip-action gear-destroy-btn" data-destroy-gear="${escapeHtml(gear.id)}" data-gear-location="${options.location}">Destruir</span>`,
+    renderInventoryGearAction(
+      'destroy',
+      'Destruir',
+      `data-destroy-gear="${escapeHtml(gear.id)}" data-gear-location="${options.location}"`,
+    ),
   );
 
   return actions.join('');
@@ -84,10 +97,10 @@ export function renderStashGridSlot(
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}</span>
         <span class="inventory-gear-tooltip-stats">${renderGearBonusLines(gear)}</span>
-        ${renderStorageTooltipActions(gear, {
+        <span class="inventory-gear-action-row">${renderStorageTooltipActions(gear, {
           location: 'stash',
           canWithdraw: options.canWithdraw,
-        })}
+        })}</span>
       </span>
     </button>
   `;

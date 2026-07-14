@@ -184,9 +184,6 @@ export class ModalStackController {
         this.stashModal.render(container, state, {
           onFilterChange: () => this.renderTop(stack, state, options),
           onSortChange: () => this.renderTop(stack, state, options),
-          onWithdrawGear: (gearId) => {
-            void this.gearStorageFlow.moveFromStash(gearId);
-          },
           onOpenInventory: () => this.onOpenInventory(),
         });
         break;

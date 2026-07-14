@@ -27,6 +27,7 @@ import {
 } from './GearRequirementPresentation';
 import { renderInventoryStorageActions } from './StorageGridPresentation';
 import { gearDragAttr } from '../gear/GearDragDropBinder';
+import { renderInventoryGearAction } from './InventoryGearActionPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -123,8 +124,16 @@ export function renderInventoryGridSlot(
         : `data-can-equip="false"`;
   const equipAction = canEquip
     ? equipMode === 'pick'
-      ? `<span class="inventory-gear-tooltip-action gear-equip-btn" data-pick-gear="${escapeHtml(gear.id)}" data-pick-hero="${escapeHtml(options.hero.id)}">Equipar</span>`
-      : `<span class="inventory-gear-tooltip-action gear-equip-btn" data-inventory-equip="${escapeHtml(gear.id)}" data-inventory-equip-hero="${escapeHtml(options.hero.id)}">Equipar</span>`
+      ? renderInventoryGearAction(
+          'equip',
+          'Equipar',
+          `data-pick-gear="${escapeHtml(gear.id)}" data-pick-hero="${escapeHtml(options.hero.id)}"`,
+        )
+      : renderInventoryGearAction(
+          'equip',
+          'Equipar',
+          `data-inventory-equip="${escapeHtml(gear.id)}" data-inventory-equip-hero="${escapeHtml(options.hero.id)}"`,
+        )
     : '';
   const returnedClass = options.returnedToInventory ? ' inventory-grid-slot--returned' : '';
   const returnedBadge = options.returnedToInventory
@@ -133,6 +142,10 @@ export function renderInventoryGridSlot(
   const storageActions =
     options.canStash !== undefined
       ? renderInventoryStorageActions(gear, { canStash: options.canStash })
+      : '';
+  const tooltipActions =
+    equipAction || storageActions
+      ? `<span class="inventory-gear-action-row">${equipAction}${storageActions}</span>`
       : '';
   const dragAttrs =
     equipMode === 'inventory' && canEquip
@@ -169,8 +182,7 @@ export function renderInventoryGridSlot(
           <span>${comparison.defense}</span>
           <span>${comparison.health}</span>
         </span>
-        ${equipAction}
-        ${storageActions}
+        ${tooltipActions}
       </span>
     </button>
   `;

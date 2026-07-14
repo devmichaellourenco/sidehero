@@ -320,21 +320,6 @@ export class InventoryModalRenderer {
         handlers.onSlotClick(heroId, slot);
       });
     });
-
-    container.querySelectorAll('[data-inventory-gear-id]').forEach((slot) => {
-      slot.addEventListener('click', (event) => {
-        const target = event.target as HTMLElement;
-        if (target.closest('[data-inventory-equip]')) return;
-
-        if (slot.getAttribute('data-can-equip') !== 'true') return;
-
-        const gearId = slot.getAttribute('data-inventory-gear-id');
-        const heroId = slot.getAttribute('data-inventory-equip-hero');
-        if (!gearId || !heroId) return;
-
-        handlers.onEquipGear(gearId, heroId);
-      });
-    });
   }
 
   resetFilter(): void {

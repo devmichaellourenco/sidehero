@@ -2303,6 +2303,10 @@ button.hero-skill-chip:hover {
   pointer-events: none;
 }
 
+.skill-chip-tooltip-portal[data-pinned='true'] {
+  pointer-events: auto;
+}
+
 .skill-chip-tooltip-portal.hidden {
   display: none !important;
 }
@@ -2781,11 +2785,15 @@ button.hero-skill-chip:hover {
 #inventory-gear-tooltip-portal {
   z-index: 1600;
   max-width: 240px;
+  pointer-events: none;
+}
+
+#inventory-gear-tooltip-portal[data-pinned='true'] {
   pointer-events: auto;
 }
 
-#inventory-gear-tooltip-portal[data-placement='above']::after,
-#inventory-gear-tooltip-portal[data-placement='below']::before {
+#inventory-gear-tooltip-portal[data-pinned='true'][data-placement='above']::after,
+#inventory-gear-tooltip-portal[data-pinned='true'][data-placement='below']::before {
   content: '';
   position: absolute;
   left: 0;
@@ -2794,11 +2802,11 @@ button.hero-skill-chip:hover {
   pointer-events: auto;
 }
 
-#inventory-gear-tooltip-portal[data-placement='above']::after {
+#inventory-gear-tooltip-portal[data-pinned='true'][data-placement='above']::after {
   bottom: -12px;
 }
 
-#inventory-gear-tooltip-portal[data-placement='below']::before {
+#inventory-gear-tooltip-portal[data-pinned='true'][data-placement='below']::before {
   top: -12px;
 }
 
@@ -2854,31 +2862,65 @@ button.hero-skill-chip:hover {
   z-index: 1;
 }
 
-.gear-tooltip-portal--interactive .inventory-gear-tooltip-action {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(66, 165, 245, 0.25);
-  border: 1px solid rgba(66, 165, 245, 0.45);
-  color: var(--text);
-  font-family: var(--font-heading);
-  font-size: 10px;
-  cursor: pointer;
+#inventory-gear-tooltip-portal .inventory-gear-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.gear-tooltip-portal--interactive .gear-destroy-btn {
-  display: inline-block;
-  margin-top: 6px;
-  margin-left: 4px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(183, 28, 28, 0.25);
-  border: 1px solid rgba(229, 115, 115, 0.45);
-  color: #ffcdd2;
-  font-family: var(--font-heading);
-  font-size: 10px;
+#inventory-gear-tooltip-portal .inventory-gear-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid transparent;
   cursor: pointer;
+  color: #e8f0ff;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease, color 0.15s ease;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-action-icon {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-action--equip,
+#inventory-gear-tooltip-portal .inventory-gear-action--stash,
+#inventory-gear-tooltip-portal .inventory-gear-action--withdraw {
+  background: rgba(66, 165, 245, 0.22);
+  border-color: rgba(66, 165, 245, 0.45);
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-action--destroy {
+  background: rgba(183, 28, 28, 0.28);
+  border-color: rgba(229, 115, 115, 0.5);
+  color: #ffcdd2;
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-action:hover {
+  transform: translateY(-1px);
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-action--equip:hover,
+#inventory-gear-tooltip-portal .inventory-gear-action--stash:hover,
+#inventory-gear-tooltip-portal .inventory-gear-action--withdraw:hover {
+  background: rgba(66, 165, 245, 0.38);
+  border-color: rgba(129, 198, 255, 0.7);
+}
+
+#inventory-gear-tooltip-portal .inventory-gear-action--destroy:hover {
+  background: rgba(211, 47, 47, 0.45);
+  border-color: rgba(239, 154, 154, 0.75);
+  color: #fff;
 }
 
 .stash-panel-intro,
@@ -3392,6 +3434,11 @@ button.hero-skill-chip:hover {
 
 .inventory-grid-slot:focus-visible {
   outline: 2px solid rgba(245, 197, 66, 0.65);
+  outline-offset: 1px;
+}
+
+.inventory-grid-slot--tooltip-pinned:not(.forge-grid-slot--selected) {
+  outline: 2px solid rgba(245, 197, 66, 0.45);
   outline-offset: 1px;
 }
 
@@ -5464,8 +5511,35 @@ body.modal-open {
   min-width: 0;
 }
 
-.destroy-gear-confirm-dialog .gear-destroy-btn {
-  min-width: 88px;
+.destroy-gear-confirm-dialog .gear-destroy-btn,
+.destroy-gear-confirm-dialog .confirm-dialog-btn--danger {
+  min-width: 108px;
+  min-height: 34px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 138, 128, 0.55);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #d32f2f 0%, #b71c1c 100%);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(183, 28, 28, 0.35);
+  transition: filter 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.destroy-gear-confirm-dialog .gear-destroy-btn:hover,
+.destroy-gear-confirm-dialog .confirm-dialog-btn--danger:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(183, 28, 28, 0.45);
+}
+
+.destroy-gear-confirm-dialog .gear-destroy-btn:focus-visible,
+.destroy-gear-confirm-dialog .confirm-dialog-btn--danger:focus-visible {
+  outline: 2px solid rgba(255, 205, 210, 0.9);
+  outline-offset: 2px;
 }
 
 .modal-backdrop {
