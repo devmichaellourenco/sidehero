@@ -27,6 +27,7 @@ const CAMPAIGN_SCENES: Record<string, CampaignSceneAssets> = {
     banner: 'campaign/grutfall/campaign_grutfall_banner.png',
   },
   valdris: {
+    battleBackground: 'campaign/valdris/cenario_valdris.png',
     banner: 'campaign/valdris/campaign_valdris_banner.png',
   },
   morthaven: {

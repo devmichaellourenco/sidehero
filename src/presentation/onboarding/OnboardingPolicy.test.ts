@@ -30,15 +30,29 @@ describe('OnboardingPolicy', () => {
     expect(step?.id).toBe('pause-loadout');
   });
 
-  it('detecta Aprimoramento pendente', () => {
+  it('detecta Aprimoramento pendente no acampamento', () => {
     const dismissed = new Set(['first-chest', 'pause-loadout'] as const);
     const step = resolveOnboardingStep(
       mockState({
+        canEditParty: true,
+        phaseRun: null,
         heroes: [{ id: 'h1', hasUnspentPoints: true } as GameStateDto['heroes'][number]],
       }),
       dismissed,
     );
     expect(step?.id).toBe('hero-points');
+  });
+
+  it('não aponta Heróis fora do acampamento', () => {
+    const dismissed = new Set(['first-chest', 'pause-loadout'] as const);
+    const step = resolveOnboardingStep(
+      mockState({
+        canEditParty: false,
+        heroes: [{ id: 'h1', hasUnspentPoints: true } as GameStateDto['heroes'][number]],
+      }),
+      dismissed,
+    );
+    expect(step?.id).not.toBe('hero-points');
   });
 
   it('detecta melhoria disponível', () => {
@@ -54,7 +68,12 @@ describe('OnboardingPolicy', () => {
   it('aciona gatilhos individuais', () => {
     expect(isOnboardingStepTriggered('first-chest', mockState({ pendingChestCount: 2 }))).toBe(true);
     expect(isOnboardingStepTriggered('hero-points', mockState({
+      canEditParty: true,
       heroes: [{ hasUnspentPoints: true } as GameStateDto['heroes'][number]],
     }))).toBe(true);
+    expect(isOnboardingStepTriggered('hero-points', mockState({
+      canEditParty: false,
+      heroes: [{ hasUnspentPoints: true } as GameStateDto['heroes'][number]],
+    }))).toBe(false);
   });
 });

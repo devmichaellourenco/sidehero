@@ -139,6 +139,7 @@ export class GameHudController {
     private readonly chestProgressLabel: HTMLElement,
     private readonly openHeroesBtn: HTMLButtonElement,
     private readonly openFormationBtn: HTMLButtonElement,
+    private readonly openShopBtn: HTMLButtonElement,
     private readonly openInventoryBtn: HTMLButtonElement,
     private readonly openStashBtn: HTMLButtonElement,
     private readonly openForgeBtn: HTMLButtonElement,
@@ -170,6 +171,8 @@ export class GameHudController {
     this.heroesBadgeEl = ensureBadge(this.openHeroesBtn);
 
     ensureButtonIcon(this.openFormationBtn, ASSETS.ui.defense);
+
+    ensureButtonIcon(this.openShopBtn, ASSETS.ui.shop);
 
     ensureButtonIcon(this.openInventoryBtn, ASSETS.ui.inventory);
     this.inventoryBadgeEl = ensureBadge(this.openInventoryBtn);
@@ -229,27 +232,36 @@ export class GameHudController {
 
     const upgradeCount = countUpgradeItems(state);
     const flags = state.featureFlags;
+    const atCamp = state.canEditParty;
     const heroPointsCount = state.heroes.filter((hero) => hero.hasUnspentPoints).length;
 
+    this.openHeroesBtn.classList.toggle('hidden', !atCamp);
     this.openHeroesBtn.title =
       heroPointsCount > 0
         ? `Heróis (${heroPointsCount} com Aprimoramento)`
         : 'Heróis';
-    updateBadge(this.heroesBadgeEl, heroPointsCount);
+    updateBadge(this.heroesBadgeEl, atCamp ? heroPointsCount : 0);
 
+    this.openFormationBtn.classList.toggle('hidden', !atCamp);
     this.openFormationBtn.title = `Formação (${state.activeParty.length}/3)`;
 
+    this.openShopBtn.classList.toggle('hidden', !atCamp);
+    this.openShopBtn.title = 'Loja';
+
+    this.openInventoryBtn.classList.toggle('hidden', !atCamp);
     this.openInventoryBtn.title = `Inventário (${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit})`;
     updateBadge(
       this.inventoryBadgeEl,
-      upgradeCount > 0
-        ? upgradeCount
-        : state.storageCapacity.inventoryUsed >= state.storageCapacity.inventoryLimit
-          ? 1
-          : 0,
+      atCamp
+        ? upgradeCount > 0
+          ? upgradeCount
+          : state.storageCapacity.inventoryUsed >= state.storageCapacity.inventoryLimit
+            ? 1
+            : 0
+        : 0,
     );
 
-    if (state.storageCapacity.stashUnlocked) {
+    if (atCamp && state.storageCapacity.stashUnlocked) {
       this.openStashBtn.classList.remove('hidden');
       this.openStashBtn.title = `Cofre (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
       updateBadge(this.stashBadgeEl, state.storageCapacity.stashUsed);
@@ -265,11 +277,12 @@ export class GameHudController {
       this.openForgeBtn.classList.add('hidden');
     }
 
-    this.optimizeLoadoutBtn.classList.toggle('hidden', !flags.optimizeLoadout);
-    this.optimizeLoadoutBtn.disabled = !flags.optimizeLoadout || upgradeCount === 0;
+    const canOptimize = atCamp && flags.optimizeLoadout;
+    this.optimizeLoadoutBtn.classList.toggle('hidden', !canOptimize);
+    this.optimizeLoadoutBtn.disabled = !canOptimize || upgradeCount === 0;
     this.optimizeLoadoutBtn.title =
       upgradeCount > 0 ? `Otimizar equipe (↑${upgradeCount})` : 'Otimizar equipe';
-    updateBadge(this.optimizeBadgeEl, upgradeCount);
+    updateBadge(this.optimizeBadgeEl, canOptimize ? upgradeCount : 0);
 
     this.openAllChestsBtn.classList.toggle(
       'hidden',

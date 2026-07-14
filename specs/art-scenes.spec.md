@@ -13,9 +13,9 @@ Cada região da campanha tem **cenário de batalha** (painéis L/R + céu elást
 
 - [x] `stendra`: battle strip com fundo único `cenario_stendra.jpeg` (333×133) + banner
 - [x] `gruftall`: battle strip com fundo único `cenario_grutfall.png` + banner
-- [x] `valdris`: banner `campaign_valdris_banner.png` no mapa-mundo (painéis pendentes)
+- [x] `valdris`: battle strip com fundo único `cenario_valdris.png` + banner
 - [x] `morthaven`: battle strip com fundo único `cenario_morthaven.png` + banner
-- [ ] Battle strip completa (L/R + chão) para as quatro regiões base
+- [x] Battle strip com fundo único nas quatro regiões base
 - [ ] Layout da strip escala de ~280px a ~900px sem cortar zona central de combate
 - [ ] Fallback: gradiente genérico quando mapa não tem cena cadastrada
 - [ ] Assets em `public/sprites/campaign/{mapId}/` copiados no build
@@ -51,7 +51,7 @@ Mapas `broken_sky` … `void_throne` seguem o mesmo padrão de assets quando cad
 |-------|------------|--------|
 | stendra | ✅ fundo único | ✅ |
 | gruftall | ✅ fundo único | ✅ banner |
-| valdris | ☐ | ✅ banner |
+| valdris | ✅ fundo único | ✅ banner |
 | morthaven | ✅ fundo único | ✅ banner |
 | broken_sky | ☐ | ☐ |
 | crimson_abyss | ☐ | ☐ |

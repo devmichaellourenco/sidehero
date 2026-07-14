@@ -11,7 +11,8 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 
 ## Critérios de aceite
 
-- [x] Party editável só quando `canEditParty` (pausa loadout)
+- [x] Party editável só quando `canEditParty` (pausa loadout / acampamento)
+- [x] Botões Heróis e Formação do footer só visíveis no acampamento (`canEditParty`)
 - [x] Drag-and-drop: reserva ↔ equipe, reordenar slots
 - [x] Unlock de herói via melhoria (`hero_unlock_*`) adiciona à reserva
 - [x] XP de batalha para party ativa; bench segue `BenchXpPolicy`

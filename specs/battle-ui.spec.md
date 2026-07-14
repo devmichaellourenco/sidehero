@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 9/9 (100%) · auditoria 2026-07-07  
-**Testes obrigatórios:** 8/8 presentes na suite
+**Aceite:** 10/10 (100%) · auditoria 2026-07-14  
+**Testes obrigatórios:** 9/9 presentes na suite
 
 ## Objetivo
 
@@ -21,6 +21,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)
 - [x] Barras de vida verdes; HP na strip
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
+- [x] Heróis / Formação / Loja / Inventário / Cofre / Otimizar só aparecem no **acampamento** (`canEditParty`)
 
 ## Camadas e arquivos-chave
 
@@ -47,3 +48,4 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `BattleLogRenderer.test.ts` — log incremental no painel
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts` (campanha — ver também `combat-campaign.spec.md`)
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
+- [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`

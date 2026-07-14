@@ -37,10 +37,11 @@ describe('CampaignSceneCatalog', () => {
     });
   });
 
-  it('expõe banner de valdris sem painéis de batalha', () => {
-    expect(hasCampaignScene('valdris')).toBe(false);
+  it('expõe cena de Valdris com fundo único e banner', () => {
+    expect(hasCampaignScene('valdris')).toBe(true);
     expect(hasCampaignBanner('valdris')).toBe(true);
     expect(getCampaignScene('valdris')).toEqual({
+      battleBackground: 'campaign/valdris/cenario_valdris.png',
       banner: 'campaign/valdris/campaign_valdris_banner.png',
     });
   });
@@ -105,6 +106,21 @@ describe('applyBattleScene', () => {
     expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(false);
   });
 
+  it('aplica imagem única de fundo para Valdris', () => {
+    const stripBg = buildStripBg();
+    const stripFloor = document.createElement('div');
+    stripFloor.className = 'strip-floor';
+
+    applyBattleScene(stripBg, 'valdris', stripFloor);
+
+    expect(stripBg.classList.contains('strip-bg--scenic')).toBe(true);
+    expect(stripBg.classList.contains('strip-bg--unified')).toBe(true);
+    expect(stripBg.dataset.mapId).toBe('valdris');
+    const sky = stripBg.querySelector('.strip-bg__sky') as HTMLElement;
+    expect(sky.style.backgroundImage).toContain('cenario_valdris.png');
+    expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(false);
+  });
+
   it('remove modo cênico e chão tiled para mapas sem arte', () => {
     const stripBg = buildStripBg();
     stripBg.classList.add('strip-bg--scenic', 'strip-bg--unified');
@@ -115,7 +131,7 @@ describe('applyBattleScene', () => {
     stripFloor.className = 'strip-floor strip-floor--tiled';
     stripFloor.style.setProperty('--strip-floor-tile-image', "url('floor.png')");
 
-    applyBattleScene(stripBg, 'valdris', stripFloor);
+    applyBattleScene(stripBg, 'broken_sky', stripFloor);
 
     expect(stripBg.classList.contains('strip-bg--scenic')).toBe(false);
     expect(stripBg.classList.contains('strip-bg--unified')).toBe(false);

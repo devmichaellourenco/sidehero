@@ -54,7 +54,9 @@ export function isOnboardingStepTriggered(stepId: OnboardingStepId, state: GameS
     case 'pause-loadout':
       return Boolean(state.phaseRun) || !state.canEditParty;
     case 'hero-points':
-      return state.heroes.some((hero) => hero.hasUnspentPoints);
+      return (
+        state.canEditParty && state.heroes.some((hero) => hero.hasUnspentPoints)
+      );
     case 'first-upgrade':
       return state.purchasableUpgradeCount > 0;
     default:

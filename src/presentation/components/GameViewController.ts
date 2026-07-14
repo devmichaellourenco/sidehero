@@ -304,6 +304,7 @@ export class GameViewController {
       this.chestProgressLabel,
       this.openHeroesBtn,
       this.openFormationBtn,
+      this.openShopBtn,
       this.openInventoryBtn,
       this.openStashBtn,
       this.openForgeBtn,
@@ -524,6 +525,10 @@ export class GameViewController {
     this.openStashBtn.addEventListener('click', () => this.openStashModal());
     this.openForgeBtn.addEventListener('click', () => this.openForgeModal());
     this.optimizeLoadoutBtn.addEventListener('click', () => {
+      if (!this.canEditParty()) {
+        this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
+        return;
+      }
       void this.gearEquipFlow.optimizeLoadout();
     });
     this.openSettingsBtn.addEventListener('click', () => this.openSettingsModal());
@@ -669,6 +674,10 @@ export class GameViewController {
 
   private async openShopModal(): Promise<void> {
     if (this.contextInvalidated) return;
+    if (!this.canEditParty()) {
+      this.toasts.show('Volte ao acampamento para usar a loja', 'info');
+      return;
+    }
 
     this.closeHeroDrawer();
     const response = await this.client.send({ type: 'GET_SHOP_OFFERS' });
@@ -1258,6 +1267,28 @@ export class GameViewController {
     this.heroDrawer.close('action');
   }
 
+  private isCampOnlyModal(type: ModalView['type']): boolean {
+    return (
+      type === 'shop' ||
+      type === 'inventory' ||
+      type === 'stash' ||
+      type === 'formation' ||
+      type === 'heroes' ||
+      type === 'hero-detail' ||
+      type === 'equip-picker'
+    );
+  }
+
+  private closeCampOnlyUi(): void {
+    this.closeHeroDrawer();
+    if (!this.modal.isOpen() || this.modalStack.length === 0) return;
+
+    if (this.modalStack.some((view) => this.isCampOnlyModal(view.type))) {
+      this.modalStack.length = 0;
+      this.modal.close('action');
+    }
+  }
+
   private refreshHeroDrawerIfOpen(): void {
     if (!this.heroDrawer.isOpen() || !this.heroDrawerHeroId || !this.state) return;
 
@@ -1381,6 +1412,10 @@ export class GameViewController {
 
   private openHeroesModal(): void {
     if (!this.state) return;
+    if (!this.canEditParty()) {
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
+      return;
+    }
 
     const heroIds = listNavigableHeroIds(this.state);
     const firstId = heroIds[0] ?? this.state.heroes[0]?.id;
@@ -1393,6 +1428,11 @@ export class GameViewController {
   }
 
   private openFormationModal(): void {
+    if (!this.canEditParty()) {
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
+      return;
+    }
+
     if (
       this.modal.isOpen() &&
       this.modalStack[this.modalStack.length - 1]?.type === 'formation'
@@ -1554,12 +1594,20 @@ export class GameViewController {
 
   private openInventoryModal(): void {
     if (this.contextInvalidated || !this.state) return;
+    if (!this.canEditParty()) {
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
+      return;
+    }
     const heroId = resolveDefaultInventoryHeroId(this.state);
     this.openHeroDrawer(heroId, 'sheet');
   }
 
   private openStashModal(): void {
     if (this.contextInvalidated) return;
+    if (!this.canEditParty()) {
+      this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
+      return;
+    }
     if (!this.state?.storageCapacity.stashUnlocked) {
       this.toasts.show('Desbloqueie Baú de itens em Runas', 'info');
       return;
@@ -1742,6 +1790,10 @@ export class GameViewController {
     }
 
     this.state = mergedState;
+
+    if (previous?.canEditParty && !mergedState.canEditParty) {
+      this.closeCampOnlyUi();
+    }
 
     this.syncLoadoutPauseBanner(mergedState);
 
