@@ -12,6 +12,7 @@ export type ModalView =
   | { type: 'shop' }
   | { type: 'upgrades' }
   | { type: 'meta-legacy' }
+  | { type: 'achievements' }
   | { type: 'divine-forge' }
   | { type: 'formation' }
   | { type: 'heroes' };

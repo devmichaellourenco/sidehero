@@ -14,7 +14,7 @@ function renderImprovementTooltipContent(): string {
     <strong class="hero-improvement-tooltip-title">Aprimoramento</strong>
     <span class="hero-improvement-tooltip-line">Você ganha <strong>1 Aprimoramento</strong> a cada nível.</span>
     <span class="hero-improvement-tooltip-line hero-improvement-tooltip-section">Como usar</span>
-    <span class="hero-improvement-tooltip-line">· <strong>Progressão</strong> — toque em <strong>+</strong> em STR, DEX ou INT.</span>
+    <span class="hero-improvement-tooltip-line">· <strong>Status</strong> — toque em <strong>+</strong> em STR, DEX ou INT.</span>
     <span class="hero-improvement-tooltip-line">· <strong>Skills</strong> — suba o rank de skills desbloqueadas.</span>
     <span class="hero-improvement-tooltip-line hero-improvement-tooltip-note">O mesmo saldo vale para atributos e skills.</span>
   `;

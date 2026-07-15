@@ -20,11 +20,11 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
 | [game-balance](game-balance.spec.md) | 9/9 | 11/11 | — |
 | [story-scenes](story-scenes.spec.md) | 9/10 | 5/5 | copy DLC placeholder |
-| [achievements](achievements.spec.md) | 5/5 | 3/3 | — |
+| [achievements](achievements.spec.md) | 7/7 | 4/4 | — |
 
-**Total aceite (features):** 90/98 (92%)  
+**Total aceite (features):** 92/100 (92%)  
 **Balanceamento transversal:** 9/9  
-**Total testes listados nas specs:** 80/80 (100%)
+**Total testes listados nas specs:** 81/81 (100%)
 
 ## Escopo do jogo (v1)
 

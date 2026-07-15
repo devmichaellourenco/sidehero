@@ -21,6 +21,7 @@ import { ModalStackController } from '../flows/ModalStackController';
 import { ModalView } from '../flows/ModalTypes';
 import { ShopFlow } from '../flows/ShopFlow';
 import { MetaLegacyFlow } from '../flows/MetaLegacyFlow';
+import { AchievementsFlow } from '../flows/AchievementsFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation, listNavigableHeroIds } from '../helpers/HeroNavigationHelper';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
@@ -58,6 +59,7 @@ import { SettingsModalRenderer } from './SettingsModalRenderer';
 import { ShopModalRenderer } from './ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
 import { MetaLegacyModalRenderer } from './MetaLegacyModalRenderer';
+import { AchievementsModalRenderer } from './AchievementsModalRenderer';
 import { ToastController } from './ToastController';
 import { RewardPresentationController } from '../delight/RewardPresentationController';
 import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
@@ -106,6 +108,7 @@ export class GameViewController {
   private readonly openCampaignBtn: HTMLButtonElement;
   private readonly openShopBtn: HTMLButtonElement;
   private readonly openUpgradesBtn: HTMLButtonElement;
+  private readonly openAchievementsBtn: HTMLButtonElement;
   private readonly battlePauseOverlay: HTMLElement;
   private readonly wowCelebrationRoot: HTMLElement;
   private readonly wowCelebrationStage: HTMLElement;
@@ -136,6 +139,7 @@ export class GameViewController {
   private readonly shopModal: ShopModalRenderer;
   private readonly upgradeTreeModal: UpgradeTreeModalRenderer;
   private readonly metaLegacyModal: MetaLegacyModalRenderer;
+  private readonly achievementsModal: AchievementsModalRenderer;
   private readonly divineForgeModal: DivineForgeModalRenderer;
   private readonly toasts: ToastController;
   private readonly rewards: RewardPresentationController;
@@ -152,6 +156,7 @@ export class GameViewController {
   private readonly heroDetailFlow: HeroDetailFlow;
   private readonly shopFlow: ShopFlow;
   private readonly metaLegacyFlow: MetaLegacyFlow;
+  private readonly achievementsFlow: AchievementsFlow;
   private readonly gearEquipFlow: GearEquipFlow;
   private readonly gearStorageFlow: GearStorageFlow;
   private readonly divineForgeFlow: DivineForgeFlow;
@@ -191,6 +196,7 @@ export class GameViewController {
     this.openCampaignBtn = root.querySelector('#open-campaign-btn') as HTMLButtonElement;
     this.openShopBtn = root.querySelector('#open-shop-btn') as HTMLButtonElement;
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
+    this.openAchievementsBtn = root.querySelector('#open-achievements-btn') as HTMLButtonElement;
     this.battlePauseOverlay = root.querySelector('#battle-pause-overlay') as HTMLElement;
     this.wowCelebrationRoot = root.querySelector('#wow-celebration-root') as HTMLElement;
     this.wowCelebrationStage = root.querySelector('#wow-celebration-stage') as HTMLElement;
@@ -249,6 +255,7 @@ export class GameViewController {
     this.shopModal = new ShopModalRenderer();
     this.upgradeTreeModal = new UpgradeTreeModalRenderer();
     this.metaLegacyModal = new MetaLegacyModalRenderer();
+    this.achievementsModal = new AchievementsModalRenderer();
     this.divineForgeModal = new DivineForgeModalRenderer();
     this.toasts = new ToastController(root.querySelector('#toast-root')!);
     this.wowCelebration = new WowCelebrationController(
@@ -353,6 +360,12 @@ export class GameViewController {
       () => this.refreshModalIfOpen(),
     );
 
+    this.achievementsFlow = new AchievementsFlow(
+      this.client,
+      this.toasts,
+      (state) => this.render(state),
+    );
+
     this.gearEquipFlow = new GearEquipFlow(
       this.client,
       this.gearMutations,
@@ -416,9 +429,11 @@ export class GameViewController {
       this.shopModal,
       this.upgradeTreeModal,
       this.metaLegacyModal,
+      this.achievementsModal,
       this.divineForgeModal,
       this.shopFlow,
       this.metaLegacyFlow,
+      this.achievementsFlow,
       this.divineForgeFlow,
       this.gearEquipFlow,
       this.gearStorageFlow,
@@ -557,6 +572,9 @@ export class GameViewController {
     this.openUpgradesBtn.addEventListener('click', () => {
       this.dismissOnboardingStep('first-upgrade');
       void this.openUpgradesModal();
+    });
+    this.openAchievementsBtn.addEventListener('click', () => {
+      void this.openAchievementsModal();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -743,6 +761,18 @@ export class GameViewController {
     this.state = state;
     this.modalStack.length = 0;
     this.pushModal({ type: 'meta-legacy' });
+  }
+
+  private async openAchievementsModal(): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    this.closeHeroDrawer();
+    const state = await this.achievementsFlow.loadList();
+    if (!state) return;
+
+    this.state = state;
+    this.modalStack.length = 0;
+    this.pushModal({ type: 'achievements' });
   }
 
   private syncAutoBattleTimer(): void {

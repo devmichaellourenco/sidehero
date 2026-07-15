@@ -10,6 +10,7 @@ const PANEL_ICON_TARGETS: Array<{ selector: string; assetPath: string }> = [
   { selector: '#open-forge-btn .btn-icon', assetPath: ASSETS.ui.forge },
   { selector: '#optimize-loadout-btn .btn-icon', assetPath: ASSETS.ui.attack },
   { selector: '#open-upgrades-btn .btn-icon', assetPath: ASSETS.ui.rune },
+  { selector: '#open-achievements-btn .btn-icon', assetPath: ASSETS.ui.bookOpen },
   { selector: '#open-chest-btn .btn-icon', assetPath: ASSETS.ui.chest },
   { selector: '#open-all-chests-btn .btn-icon', assetPath: ASSETS.ui.chestOpen },
 ];

@@ -2,12 +2,12 @@
 
 ## Status
 
-**Aceite:** 5/5 (100%)  
-**Testes obrigatórios:** 3/3
+**Aceite:** 7/7 (100%)  
+**Testes obrigatórios:** 4/4
 
 ## Objetivo
 
-Registrar progresso em conquistas persistentes (estilo TaskBar Hero / Steam). Eventos do jogo avançam missões; ao atingir 100% a conquista é desbloqueada. Progresso e unlock disparam celebração Wow.
+Registrar progresso em conquistas persistentes (estilo TaskBar Hero / Steam). Eventos do jogo avançam missões; ao atingir 100% a conquista é desbloqueada. Progresso e unlock disparam celebração Wow. Painel exibe lista consultável.
 
 ## Critérios de aceite
 
@@ -16,10 +16,12 @@ Registrar progresso em conquistas persistentes (estilo TaskBar Hero / Steam). Ev
 - [x] Eventos de jogo avançam progresso (`AchievementService`)
 - [x] Primeiro achievement: **Hero - Out of the Side** — Clear stage 1-1 for the first time
 - [x] Wow ao progredir e ao completar achievement
+- [x] Botão no menu do painel (ícone book open) abre a tela de achievements
+- [x] Tela/modal lista conquistas com progresso e estado desbloqueado
 
 ## Escopo v1
 
-Um único achievement binary (0→1). Sem UI de lista ainda — só tracking + Wow.
+Um único achievement binary (0→1). UI de lista somente-leitura (sem recompensas materiais).
 
 Referência conceitual: [TaskBar Hero Achievements](https://taskbarhero.wiki/achievements) (`Hero Out of the Taskbar` → adaptação Side Hero).
 
@@ -28,9 +30,9 @@ Referência conceitual: [TaskBar Hero Achievements](https://taskbarhero.wiki/ach
 | Camada | Paths |
 |--------|-------|
 | Domain | `src/domain/achievements/*` |
-| Application | `TickGameUseCase` (hook de fase limpa), DTOs de update |
-| Infrastructure | `ChromeStorageAchievementRepository`, DI |
-| Presentation | Wow via `RewardPresentationController` / `RewardMomentDetector` |
+| Application | `TickGameUseCase`, `GetAchievementsUseCase`, DTOs |
+| Infrastructure | `ChromeStorageAchievementRepository`, DI, SW `GET_ACHIEVEMENTS` |
+| Presentation | Botão HUD, `AchievementsModalRenderer`, Wow |
 
 ## Invariantes
 
@@ -40,7 +42,6 @@ Referência conceitual: [TaskBar Hero Achievements](https://taskbarhero.wiki/ach
 
 ## Fora de escopo
 
-- Modal/lista de achievements no painel
 - Remates Steam/cloud
 - Recompensas materiais por unlock
 
@@ -49,3 +50,4 @@ Referência conceitual: [TaskBar Hero Achievements](https://taskbarhero.wiki/ach
 - [x] `AchievementService.test.ts`
 - [x] `AchievementCatalog.test.ts`
 - [x] `RewardMomentDetector.test.ts` (momentos de achievement)
+- [x] `AchievementsModalRenderer.test.ts`

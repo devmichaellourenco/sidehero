@@ -36,6 +36,7 @@ import { GameApplicationDependencies } from './GameApplicationDependencies';
 import { GetMetaTreeUseCase } from './use-cases/GetMetaTreeUseCase';
 import { PurchaseMetaUpgradeUseCase } from './use-cases/PurchaseMetaUpgradeUseCase';
 import { MarkActSceneViewedUseCase } from './use-cases/MarkActSceneViewedUseCase';
+import { GetAchievementsUseCase } from './use-cases/GetAchievementsUseCase';
 import { IMetaProgressRepository } from '../domain/repositories/IMetaProgressRepository';
 import { IAchievementProgressRepository } from '../domain/repositories/IAchievementProgressRepository';
 
@@ -76,6 +77,7 @@ export class GameApplication {
   readonly getMetaTree: GetMetaTreeUseCase;
   readonly purchaseMetaUpgrade: PurchaseMetaUpgradeUseCase;
   readonly markActSceneViewed: MarkActSceneViewedUseCase;
+  readonly getAchievements: GetAchievementsUseCase;
 
   constructor(
     repository: IGameStateRepository,
@@ -165,5 +167,11 @@ export class GameApplication {
       presenter,
     );
     this.markActSceneViewed = new MarkActSceneViewedUseCase(repository, presenter);
+    this.getAchievements = new GetAchievementsUseCase(
+      repository,
+      achievementRepository,
+      achievementService,
+      presenter,
+    );
   }
 }

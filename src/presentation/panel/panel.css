@@ -5999,17 +5999,16 @@ body.modal-open {
 
 .toast-root {
   position: fixed;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+  inset: 0;
   z-index: var(--z-toast);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   pointer-events: none;
 }
 
 .game-toast {
+  position: absolute;
+  left: 50%;
+  width: min(calc(100% - 24px), 360px);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -6026,7 +6025,7 @@ body.modal-open {
     0 0 0 1px rgba(255, 255, 255, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translate(-50%, -8px);
   transition: opacity 0.25s ease, transform 0.25s ease;
   pointer-events: auto;
 }
@@ -6046,7 +6045,7 @@ body.modal-open {
 
 .game-toast.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(-50%, 0);
 }
 
 .game-toast-info {
@@ -6385,6 +6384,134 @@ body.modal-open {
   font-weight: 700;
 }
 
+.achievements-intro {
+  margin: 0 0 12px;
+  color: #d8e4ff;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.achievements-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 160, 255, 0.28);
+  background: rgba(40, 36, 72, 0.55);
+}
+
+.achievements-summary-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.achievements-summary-count {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e8e0ff;
+}
+
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.achievement-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(20, 28, 48, 0.72);
+}
+
+.achievement-card--unlocked {
+  border-color: rgba(120, 220, 140, 0.35);
+  background: rgba(28, 48, 40, 0.55);
+}
+
+.achievement-card--locked {
+  opacity: 0.88;
+}
+
+.achievement-card-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.achievement-card--locked .achievement-card-icon {
+  filter: grayscale(0.85) brightness(0.75);
+}
+
+.achievement-card-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.achievement-card-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #f2f6ff;
+}
+
+.achievement-card-desc,
+.achievement-card-status {
+  margin: 0;
+  color: #b8c8e8;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.achievement-card-progress {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 6px;
+}
+
+.achievement-card-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.achievement-card-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7aa2ff, #b08cff);
+}
+
+.achievement-card--unlocked .achievement-card-progress-fill {
+  background: linear-gradient(90deg, #6edf8f, #b6ff9a);
+}
+
+.achievement-card-progress-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d8e4ff;
+}
+
+.achievement-card-status {
+  color: #9eb0d4;
+}
+
+.achievement-card--unlocked .achievement-card-status {
+  color: #9dffb0;
+}
+
 .hero-detail-header {
   flex-shrink: 0;
   padding: 12px 12px 10px;
@@ -6669,35 +6796,66 @@ body.modal-open {
 .hero-attr-chip {
   flex: 1;
   min-width: 0;
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  column-gap: 4px;
+  min-height: 28px;
   padding: 5px 6px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(12, 18, 36, 0.55);
 }
 
+.hero-attr-chip .hero-attr-label,
+.hero-attr-chip .hero-attr-value,
+.hero-attr-chip .hero-attr-add {
+  box-sizing: border-box;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  font-family: var(--font-body);
+}
+
+.hero-attr-chip .hero-attr-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #b8c8e8;
+}
+
+.hero-attr-chip .hero-attr-value {
+  justify-content: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .hero-attr-allocated {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
   font-size: 9px;
+  line-height: 1;
   color: var(--gold);
   margin-left: 1px;
 }
 
 .hero-attr-add {
-  flex: 0 0 auto;
   width: 18px;
-  height: 18px;
-  padding: 0;
-  margin: 0;
   border-radius: 4px;
   border: 1px solid rgba(255, 200, 87, 0.45);
   background: rgba(255, 200, 87, 0.12);
   color: #fff8e7;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  line-height: 1;
   cursor: pointer;
 }
 
@@ -6710,6 +6868,107 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.hero-status-section {
+  margin-top: 14px;
+}
+
+.hero-status-section-intro,
+.hero-status-empty {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: #b8c8e8;
+  line-height: 1.4;
+}
+
+.hero-status-skill-list,
+.hero-status-gear-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-status-skill-card,
+.hero-status-gear-card {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 18, 36, 0.55);
+}
+
+.hero-status-skill-header,
+.hero-status-gear-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.hero-status-skill-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.hero-status-skill-name,
+.hero-status-gear-name {
+  margin: 0;
+  font-size: 12px;
+  color: #f2f6ff;
+}
+
+.hero-status-skill-meta,
+.hero-status-gear-slot {
+  margin: 2px 0 0;
+  font-size: 10px;
+  color: #9eb0d4;
+}
+
+.hero-status-skill-hint {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: #8fa0c4;
+  line-height: 1.35;
+}
+
+.hero-status-skill-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-status-skill-stat {
+  font-size: 10px;
+}
+
+.hero-status-skill-stat-label {
+  color: #9eb0d4;
+}
+
+.hero-status-skill-stat-value {
+  color: #fff8e7;
+  font-weight: 600;
+  text-align: right;
+}
+
+.hero-status-skill-stat--emphasize .hero-status-skill-stat-label,
+.hero-status-skill-stat--emphasize .hero-status-skill-stat-value {
+  color: var(--gold);
+}
+
+.hero-status-gear-bonuses {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 10px;
+  color: #d8e4ff;
+  line-height: 1.45;
+}
+
+.hero-status-gear-unique {
+  margin-top: 6px;
+  font-size: 10px;
 }
 
 .hero-stat-section-title {
@@ -6770,8 +7029,8 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-width: 180px;
-  max-width: 260px;
+  min-width: 200px;
+  max-width: 340px;
   padding: 8px 10px;
   border-radius: 8px;
   background: rgba(12, 18, 36, 0.96);
@@ -6792,10 +7051,25 @@ body.modal-open {
 }
 
 .hero-stat-tooltip-line {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   font-size: 10px;
   color: #fff8e7;
   line-height: 1.35;
+}
+
+.hero-stat-tooltip-icon {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  object-fit: contain;
+}
+
+.hero-stat-tooltip-line-text {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .hero-attr-card {
@@ -10133,6 +10407,10 @@ body.wow-celebration-open {
 
 .action-icon-btn--upgrades {
   border-color: rgba(245, 197, 66, 0.42);
+}
+
+.action-icon-btn--achievements {
+  border-color: rgba(180, 160, 255, 0.4);
 }
 
 .action-icon-btn--log {

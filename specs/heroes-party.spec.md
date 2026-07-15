@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 10/10 (100%)  
-**Testes obrigatórios:** 12/12 presentes na suite
+**Aceite:** 11/11 (100%)  
+**Testes obrigatórios:** 14/14 presentes na suite
 
 ## Objetivo
 
@@ -16,7 +16,8 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] Drag-and-drop: reserva ↔ equipe, reordenar slots
 - [x] Unlock de herói via melhoria (`hero_unlock_*`) adiciona à reserva
 - [x] XP de batalha para party ativa; bench segue `BenchXpPolicy`
-- [x] Detalhe do herói: modal com abas Loadout / Progressão / Skills / Classe
+- [x] Detalhe do herói: modal com abas Loadout / Status / Skills / Classe
+- [x] Aba Status lista skills de batalha equipadas (efeitos + DPS estimado) e bônus/únicos do equipamento
 - [x] Aba Inventário do herói **sem** hint estático de equipamento; slots clicáveis e picker inline comunicam a ação
 - [x] Aba Inventário: **sem** abas texto Todos/Armas/Armaduras/Acessórios; categoria só via ícones do loadout; grid único com ordenação compartilhada; slot ativo filtra o mesmo grid in-place
 - [x] Header do modal exibe `Lv.{n} {Classe} - {Evolução}` (ex.: `Lv.2 Priest - Aprendiz`); aba Classe **sem** retrato/classe atual — só próxima(s) ascensão(ões) e skills de evolução
@@ -52,3 +53,5 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] `HeroClassLinePresentation.test.ts` — formatação da linha classe/evolução
 - [x] `HeroClassAscensionPresentation.test.ts` — cards com requisitos/CTA só no tooltip; seleção por clique quando disponível
 - [x] `AscendClassConfirmPresentation.test.ts` — modal de confirmação com preview e aviso permanente
+- [x] `HeroAttributesTabRenderer.test.ts` / `HeroStatusSkillsPresentation.test.ts` — Status com skills + equipamento
+- [x] `SkillBattleStatsMapper.test.ts` — DPS estimado por skill

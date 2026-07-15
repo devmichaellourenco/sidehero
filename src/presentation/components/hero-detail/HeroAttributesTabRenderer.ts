@@ -1,5 +1,6 @@
 import { HeroDto } from '../../../application/dto/GameStateDto';
 import { improvementSpendLabel } from './HeroImprovementPointsPresentation';
+import { renderHeroStatusExtras } from './HeroStatusSkillsPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -78,6 +79,7 @@ export function renderHeroAttributesTab(hero: HeroDto): string {
       <div class="hero-combat-stat-sheet">
         ${hero.combatStatSheet.map(renderStatSection).join('')}
       </div>
+      ${renderHeroStatusExtras(hero)}
     </section>
   `;
 }

@@ -1,12 +1,27 @@
-import { formatCooldownLabel, getCooldownSeconds, getInitialCooldownSeconds } from '../../domain/combat/SkillCooldownTiming';
+import {
+  applyCooldownReduction,
+  CombatProfileProvider,
+} from '../../domain/combat/CombatProfileProvider';
+import {
+  estimateHeroSkillThroughput,
+  ThroughputBreakdownLine,
+} from '../../domain/combat/DamageThroughputEstimate';
 import { DAMAGE_ELEMENT_LABELS } from '../../domain/combat/DamageElement';
+import {
+  formatCooldownLabel,
+  getCooldownSeconds,
+  getInitialCooldownSeconds,
+} from '../../domain/combat/SkillCooldownTiming';
 import { Hero } from '../../domain/entities/Hero';
 import { getTargetPriorityPercent } from '../../domain/progression/combat/CombatSkillTargeting';
 import { CombatSkillDefinition } from '../../domain/progression/combat/CombatSkillDefinition';
 import { getHeroCombatSkill } from '../../domain/progression/combat/HeroCombatSkillCatalog';
 import { SkillCombatKind } from '../../domain/progression/combat/SkillCombatKind';
 import { SkillPowerCalculator } from '../../domain/progression/combat/SkillPowerCalculator';
-import { HeroActiveSkillStatDto } from '../dto/GameStateDto';
+import {
+  HeroActiveSkillStatDto,
+  HeroActiveSkillStatTooltipLineDto,
+} from '../dto/GameStateDto';
 import { SKILL_BRANCH_LABELS, SkillBranchDto, SkillScopeDto } from '../dto/SkillNodeDto';
 
 const SCALING_LABELS: Record<string, string> = {
@@ -26,6 +41,16 @@ const KIND_LABELS: Record<SkillCombatKind, string> = {
   buff_attack: 'Buff ATK',
   debuff_defense: 'Debuff DEF',
 };
+
+const combatProfiles = new CombatProfileProvider();
+
+function toTooltipLines(lines: ThroughputBreakdownLine[]): HeroActiveSkillStatTooltipLineDto[] {
+  return lines.map((line) => ({ text: line.text, icon: line.icon }));
+}
+
+function tip(...lines: HeroActiveSkillStatTooltipLineDto[]): HeroActiveSkillStatTooltipLineDto[] {
+  return lines;
+}
 
 function formatDamageType(combat: CombatSkillDefinition): string {
   if (!combat.damageComponents?.length) {
@@ -63,10 +88,134 @@ function formatTarget(combat: CombatSkillDefinition): string {
   return pool;
 }
 
-function formatCooldown(combat: CombatSkillDefinition): string {
-  const seconds = getCooldownSeconds(combat);
-  if (seconds <= 0) return 'Sem recarga';
-  return formatCooldownLabel(seconds);
+function formatEffectiveCooldown(combat: CombatSkillDefinition, hero: Hero): string {
+  const baseSeconds = getCooldownSeconds(combat);
+  if (baseSeconds <= 0) return 'Sem recarga';
+
+  const profile = combatProfiles.forHero(hero);
+  const effective = applyCooldownReduction(baseSeconds, profile.cooldownReduction);
+  if (Math.abs(effective - baseSeconds) < 0.05) {
+    return formatCooldownLabel(effective);
+  }
+
+  return `${formatCooldownLabel(effective)} (base ${formatCooldownLabel(baseSeconds)}, CDR ${(profile.cooldownReduction * 100).toFixed(0)}%)`;
+}
+
+function buildTypeTooltip(combat: CombatSkillDefinition): HeroActiveSkillStatTooltipLineDto[] {
+  if (combat.kind !== 'damage' || !combat.damageComponents?.length) {
+    return tip(
+      { text: `Categoria de combate: ${KIND_LABELS[combat.kind]}.` },
+      { text: 'Define o papel da skill no motor de combate (dano, cura, buff ou debuff).' },
+    );
+  }
+
+  return tip(
+    { icon: 'rune', text: 'Elementos e entrega deste golpe:' },
+    ...combat.damageComponents.map((component) => ({
+      icon: 'attack' as const,
+      text: `${DAMAGE_ELEMENT_LABELS[component.element]} · ${component.delivery} · peso ${(component.weight * 100).toFixed(0)}%`,
+    })),
+    {
+      text: 'O peso divide o poder entre elementos antes dos bônus de gear.',
+    },
+  );
+}
+
+function buildTargetTooltip(combat: CombatSkillDefinition): HeroActiveSkillStatTooltipLineDto[] {
+  const lines = tip(
+    {
+      icon: 'defense',
+      text: `Pool: ${combat.targetPool === 'enemies' ? 'inimigos' : 'aliados'}`,
+    },
+    {
+      text: `Alcance: ${combat.targetScope === 'all' ? 'todos no pool' : 'um único alvo'}`,
+    },
+  );
+
+  if (combat.targetScope === 'single') {
+    const percent = getTargetPriorityPercent(combat);
+    lines.push({
+      text: `Prioridade ${combat.targetPriority}: ${percent}% de chance de mirar o alvo preferido; senão outro aleatório do pool.`,
+    });
+  }
+
+  return lines;
+}
+
+function buildCooldownTooltip(combat: CombatSkillDefinition, hero: Hero): HeroActiveSkillStatTooltipLineDto[] {
+  const baseSeconds = getCooldownSeconds(combat);
+  if (baseSeconds <= 0) {
+    return tip(
+      { text: 'Esta ação não entra em recarga (ataque contínuo ou skill sem CD).' },
+      { icon: 'attack', text: 'A taxa vem da velocidade de ataque do herói.' },
+    );
+  }
+
+  const profile = combatProfiles.forHero(hero);
+  const effective = applyCooldownReduction(baseSeconds, profile.cooldownReduction);
+
+  return tip(
+    { icon: 'rune', text: `Recarga base do catálogo = ${baseSeconds.toFixed(2)}s` },
+    {
+      icon: 'improvement',
+      text: `CDR do equipamento = ${(profile.cooldownReduction * 100).toFixed(1)}%`,
+    },
+    {
+      text: `Recarga efetiva = base × (1 − CDR) = ${effective.toFixed(2)}s`,
+    },
+    {
+      icon: 'power_attack',
+      text: `Cast speed ${profile.castSpeed.toFixed(2)} também afeta o recovery após o cast (ver DPS).`,
+    },
+  );
+}
+
+/** DPS alinhado ao combate: poder + bônus de gear + crit esperado + taxa (ASPD ou CD/CDR + recovery). */
+function appendDamageThroughputStats(
+  stats: HeroActiveSkillStatDto[],
+  combat: CombatSkillDefinition,
+  hero: Hero,
+  powerCalculator: SkillPowerCalculator,
+): void {
+  const estimate = estimateHeroSkillThroughput(hero, combat, powerCalculator, combatProfiles);
+  if (!estimate) return;
+
+  if (estimate.effectiveCooldownSeconds === null) {
+    stats.push({
+      label: 'Dano/hit esperado',
+      value: `~${estimate.expectedDamagePerHit.toFixed(1)} (poder × gear × crit)`,
+      tooltipLines: toTooltipLines(estimate.hitBreakdown),
+    });
+    stats.push({
+      label: 'APS efetiva',
+      value: `${estimate.ratePerSecond.toFixed(2)}/s (vel. ${estimate.attackSpeed.toFixed(2)})`,
+      tooltipLines: toTooltipLines(estimate.rateBreakdown),
+    });
+    stats.push({
+      label: 'DPS estimado',
+      value: `~${estimate.dps.toFixed(1)} (ataque contínuo)`,
+      emphasize: true,
+      tooltipLines: toTooltipLines(estimate.dpsBreakdown),
+    });
+    return;
+  }
+
+  stats.push({
+    label: 'Dano/cast esperado',
+    value: `~${estimate.expectedDamagePerHit.toFixed(1)} (poder × gear × crit)`,
+    tooltipLines: toTooltipLines(estimate.hitBreakdown),
+  });
+  stats.push({
+    label: 'Casts/s',
+    value: `${estimate.ratePerSecond.toFixed(2)}/s`,
+    tooltipLines: toTooltipLines(estimate.rateBreakdown),
+  });
+  stats.push({
+    label: 'DPS estimado',
+    value: `~${estimate.dps.toFixed(1)} (cast contínuo da skill)`,
+    emphasize: true,
+    tooltipLines: toTooltipLines(estimate.dpsBreakdown),
+  });
 }
 
 export function formatScalingLabel(scalingKey: string): string {
@@ -90,38 +239,135 @@ export function buildSkillBattleStats(
   const combat = getHeroCombatSkill(skillId);
   if (!combat) return [];
 
+  const estimate =
+    combat.kind === 'damage'
+      ? estimateHeroSkillThroughput(hero, combat, powerCalculator, combatProfiles)
+      : null;
+
   const stats: HeroActiveSkillStatDto[] = [
     {
       label: 'Tipo',
       value: combat.kind === 'damage' ? formatDamageType(combat) : KIND_LABELS[combat.kind],
+      tooltipLines: buildTypeTooltip(combat),
     },
-    { label: 'Alvo', value: formatTarget(combat) },
+    {
+      label: 'Alvo',
+      value: formatTarget(combat),
+      tooltipLines: buildTargetTooltip(combat),
+    },
   ];
 
   if (combat.usesAttackStat) {
-    stats.push({ label: 'Poder', value: `ATK do herói (${hero.attack})` });
+    stats.push({
+      label: 'Poder',
+      value: `ATK do herói (${hero.attack})`,
+      tooltipLines: estimate
+        ? toTooltipLines(estimate.powerBreakdown)
+        : tip(
+            { icon: 'attack', text: `ATK total do herói = ${hero.attack}` },
+            { text: 'Inclui nível, atributos e bônus flat/% do equipamento.' },
+          ),
+    });
   } else {
     const estimatedPower = powerCalculator.calculateForHero(combat, hero);
     const scaling = formatScalingLabel(scalingKey);
-    stats.push({ label: 'Poder', value: `~${estimatedPower} (escala ${scaling})` });
+    const powerTooltips = estimate
+      ? toTooltipLines(estimate.powerBreakdown)
+      : tip(
+          { icon: 'power_attack', text: `Poder estimado ≈ ${estimatedPower}` },
+          { text: `Escala com ${scaling}.` },
+        );
+    stats.push({
+      label: 'Poder',
+      value: `~${estimatedPower} (escala ${scaling})`,
+      tooltipLines: powerTooltips,
+    });
   }
 
-  stats.push({ label: 'Recarga', value: formatCooldown(combat) });
+  if (estimate && combat.kind === 'damage') {
+    const gearSummary =
+      estimate.physicalDamagePercent !== 0
+        ? `físico +${estimate.physicalDamagePercent}%`
+        : `${estimate.gearBreakdown.length} componente(s)`;
+    stats.push({
+      label: 'Bônus de gear no dano',
+      value: gearSummary,
+      tooltipLines: toTooltipLines(estimate.gearBreakdown),
+    });
+    stats.push({
+      label: 'Fator de crit',
+      value: `${estimate.critFactor.toFixed(3)}× (${(estimate.critChance * 100).toFixed(1)}% · ${estimate.critDamage.toFixed(2)}×)`,
+      tooltipLines: tip(
+        {
+          icon: 'power_attack',
+          text: `Chance de crítico = ${(estimate.critChance * 100).toFixed(1)}%`,
+        },
+        {
+          icon: 'attack',
+          text: `Multiplicador de crítico = ${estimate.critDamage.toFixed(2)}×`,
+        },
+        {
+          text: `Fator esperado = 1 + chance × (multiplicador − 1) = ${estimate.critFactor.toFixed(3)}`,
+        },
+        {
+          text: 'O fator multiplica o dano médio por acerto (não o pico do crítico puro).',
+        },
+      ),
+    });
+  }
+
+  appendDamageThroughputStats(stats, combat, hero, powerCalculator);
+
+  stats.push({
+    label: 'Recarga',
+    value: formatEffectiveCooldown(combat, hero),
+    tooltipLines: buildCooldownTooltip(combat, hero),
+  });
 
   const initialSeconds = getInitialCooldownSeconds(combat);
   if (initialSeconds > 0) {
-    stats.push({ label: 'Início', value: `Aguarda ${formatCooldownLabel(initialSeconds)}` });
+    stats.push({
+      label: 'Início',
+      value: `Aguarda ${formatCooldownLabel(initialSeconds)}`,
+      tooltipLines: tip(
+        {
+          icon: 'rune',
+          text: `Ao entrar em combate, a skill começa com ${initialSeconds.toFixed(2)}s de espera.`,
+        },
+        { text: 'Depois do primeiro cast, vale a recarga normal (com CDR).' },
+      ),
+    });
   }
 
   if (combat.healConditionThreshold !== undefined) {
     const threshold = Math.round(combat.healConditionThreshold * 100);
-    stats.push({ label: 'Condição', value: `Só se aliado abaixo de ${threshold}% HP` });
+    stats.push({
+      label: 'Condição',
+      value: `Só se aliado abaixo de ${threshold}% HP`,
+      tooltipLines: tip(
+        {
+          icon: 'health',
+          text: `Só dispara se o alvo escolhido estiver com HP% < ${threshold}%.`,
+        },
+        { text: 'Evita gastar o cast de cura em aliados ainda saudáveis.' },
+      ),
+    });
   }
 
   if (combat.effectDurationTurns !== undefined && combat.effectDurationTurns > 0) {
     const turns =
       combat.effectDurationTurns === 1 ? '1 turno' : `${combat.effectDurationTurns} turnos`;
-    stats.push({ label: 'Duração', value: turns });
+    stats.push({
+      label: 'Duração',
+      value: turns,
+      tooltipLines: tip(
+        {
+          icon: 'improvement',
+          text: `O efeito permanece por ${combat.effectDurationTurns} turno(s) de combate.`,
+        },
+        { text: 'Turnos seguem o ritmo do tick de batalha, não o relógio de parede.' },
+      ),
+    });
   }
 
   return stats;

@@ -1,4 +1,5 @@
 import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
+import { estimateHeroSkillThroughput } from '../../domain/combat/DamageThroughputEstimate';
 import { getClassCombatBaseline } from '../../domain/combat/ClassCombatBaselines';
 import { DAMAGE_ELEMENT_LABELS, DamageElement } from '../../domain/combat/DamageElement';
 import { defensiveMitigationForHero } from '../../domain/combat/HeroDefensiveStatsProvider';
@@ -9,6 +10,7 @@ import {
 import { resistanceProfileFromHeroEquipment } from '../../domain/combat/ResistanceProfileAggregator';
 import { Gear } from '../../domain/entities/Gear';
 import { Hero } from '../../domain/entities/Hero';
+import { BASIC_ATTACK_SKILL } from '../../domain/progression/combat/BasicAttackSkill';
 import {
   HeroCombatStatLineDto,
   HeroCombatStatSectionDto,
@@ -158,7 +160,8 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const healthLevelBonus = (level - 1) * 10;
 
   const critMultiplier = 1 + profile.critChance * (profile.critDamage - 1);
-  const estimatedDps = hero.attack * profile.attackSpeed * critMultiplier;
+  const basicThroughput = estimateHeroSkillThroughput(hero, BASIC_ATTACK_SKILL);
+  const estimatedDps = basicThroughput?.dps ?? hero.attack * profile.attackSpeed * critMultiplier;
 
   const dexAspdBonus = hero.totalAttributes.dex * 0.002;
   const gearAspd = sumGear(equipment, (g) => g.attackSpeedBonus);
@@ -187,11 +190,14 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       label: 'DPS estimado',
       value: estimatedDps.toFixed(1),
       tooltipLines: [
-        'Estimativa com ataque básico contínuo.',
+        'Estimativa com ataque básico contínuo (mesma fórmula da aba Status).',
         `Ataque: ${fmtInt(hero.attack)}`,
         `Vel. de ataque: ${fmtSpeed(profile.attackSpeed)}`,
+        `APS efetiva: ${basicThroughput ? basicThroughput.ratePerSecond.toFixed(2) : profile.attackSpeed.toFixed(2)}/s`,
+        `Dano/hit esperado: ${basicThroughput ? basicThroughput.expectedDamagePerHit.toFixed(1) : '—'}`,
         `Crítico esperado: ${fmtMultiplier(critMultiplier)} (1 + ${fmtPct(profile.critChance, 1)} × (${fmtMultiplier(profile.critDamage)} − 1))`,
-        `DPS = ${fmtInt(hero.attack)} × ${profile.attackSpeed.toFixed(2)} × ${critMultiplier.toFixed(3)} ≈ ${estimatedDps.toFixed(1)}`,
+        'Inclui bônus %/flat de dano do equipamento; exclui armadura, resist e esquiva do alvo.',
+        `DPS ≈ ${estimatedDps.toFixed(1)}`,
       ],
     },
     {

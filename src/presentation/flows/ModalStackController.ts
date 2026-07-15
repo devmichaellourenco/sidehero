@@ -10,6 +10,7 @@ import { SettingsModalRenderer } from '../components/SettingsModalRenderer';
 import { ShopModalRenderer } from '../components/ShopModalRenderer';
 import { UpgradeTreeModalRenderer } from '../components/UpgradeTreeModalRenderer';
 import { MetaLegacyModalRenderer } from '../components/MetaLegacyModalRenderer';
+import { AchievementsModalRenderer } from '../components/AchievementsModalRenderer';
 import { DivineForgeModalRenderer } from '../components/DivineForgeModalRenderer';
 import {
   bindFormationPanelInteractions,
@@ -30,6 +31,7 @@ import { HeroDetailFlow } from './HeroDetailFlow';
 import { ModalView } from './ModalTypes';
 import { ShopFlow } from './ShopFlow';
 import { MetaLegacyFlow } from './MetaLegacyFlow';
+import { AchievementsFlow } from './AchievementsFlow';
 import { DivineForgeFlow } from './DivineForgeFlow';
 import { GearSlotKey } from '../components/GearPresentation';
 
@@ -51,9 +53,11 @@ export class ModalStackController {
     private readonly shopModal: ShopModalRenderer,
     private readonly upgradeTreeModal: UpgradeTreeModalRenderer,
     private readonly metaLegacyModal: MetaLegacyModalRenderer,
+    private readonly achievementsModal: AchievementsModalRenderer,
     private readonly divineForgeModal: DivineForgeModalRenderer,
     private readonly shopFlow: ShopFlow,
     private readonly metaLegacyFlow: MetaLegacyFlow,
+    private readonly achievementsFlow: AchievementsFlow,
     private readonly divineForgeFlow: DivineForgeFlow,
     private readonly gearEquipFlow: GearEquipFlow,
     private readonly gearStorageFlow: GearStorageFlow,
@@ -94,6 +98,8 @@ export class ModalStackController {
         return 'Runas';
       case 'meta-legacy':
         return 'Legado';
+      case 'achievements':
+        return 'Achievements';
       case 'divine-forge':
         return 'Forja Divina';
       case 'formation':
@@ -246,6 +252,12 @@ export class ModalStackController {
           onPurchase: (upgradeId) => {
             void this.metaLegacyFlow.purchaseUpgrade(upgradeId);
           },
+        });
+        break;
+      case 'achievements':
+        this.achievementsModal.render(container, this.achievementsFlow.entries, {
+          completedCount: this.achievementsFlow.completedCount,
+          totalCount: this.achievementsFlow.totalCount,
         });
         break;
       case 'shop':

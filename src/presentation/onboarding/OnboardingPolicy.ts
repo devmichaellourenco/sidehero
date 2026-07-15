@@ -41,7 +41,7 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
   'hero-points': {
     title: 'Aprimoramento',
     message:
-      'Você ganhou Aprimoramento ao subir de nível. Abra Heróis e gaste em Progressão (atributos) ou Skills (rank).',
+      'Você ganhou Aprimoramento ao subir de nível. Abra Heróis e gaste em Status (atributos) ou Skills (rank).',
     anchorSelector: '#open-heroes-btn',
   },
   'first-upgrade': {

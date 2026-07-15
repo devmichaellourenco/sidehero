@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HeroDto } from '../../application/dto/GameStateDto';
+import { HeroDto } from '../../../application/dto/GameStateDto';
 import { renderHeroAttributesTab } from './HeroAttributesTabRenderer';
 
 function minimalHero(overrides: Partial<HeroDto> = {}): HeroDto {
@@ -60,6 +60,8 @@ describe('renderHeroAttributesTab', () => {
     const html = renderHeroAttributesTab(minimalHero());
 
     expect(html).toContain('hero-attr-row');
+    expect(html).toContain('hero-attr-label');
+    expect(html).toContain('hero-attr-value');
     expect(html).toContain('data-attr-spend="str"');
     expect(html).toContain('hero-attr-add');
     expect(html).not.toContain('+1 STR');
@@ -67,5 +69,77 @@ describe('renderHeroAttributesTab', () => {
     expect(html).toContain('data-hero-stat-tooltip');
     expect(html).toContain('DPS estimado');
     expect(html).toContain('hero-stat-tooltip-content');
+  });
+
+  it('inclui skills de batalha e equipamento na aba Status', () => {
+    const html = renderHeroAttributesTab(
+      minimalHero({
+        activeSkills: [
+          {
+            id: 'basic_attack',
+            name: 'Ataque Básico',
+            branch: 'offense',
+            branchLabel: 'Ofensiva',
+            description: 'Golpe básico.',
+            currentRank: 1,
+            maxRank: 1,
+            scope: 'universal',
+            scopeLabel: 'Universal',
+            scalingLabel: 'STR',
+            battleStats: [{ label: 'DPS estimado', value: '~10 (ataque contínuo)' }],
+          },
+          null,
+          null,
+        ],
+        equipment: {
+          weapon: {
+            id: 'w1',
+            name: 'Espada',
+            templateId: 'sword',
+            slot: 'weapon',
+            rarity: 'common',
+            attackBonus: 4,
+            defenseBonus: 0,
+            healthBonus: 0,
+            attackSpeedBonus: 0,
+            castSpeedBonus: 0,
+            critChanceBonus: 0,
+            critDamageBonus: 0,
+            fireResistBonus: 0,
+            coldResistBonus: 0,
+            lightningResistBonus: 0,
+            chaosResistBonus: 0,
+            allElementalResistBonus: 0,
+            fireDamageBonus: 0,
+            fireResistPenetrationBonus: 0,
+            coldDamageBonus: 0,
+            lightningDamageBonus: 0,
+            chaosDamageBonus: 0,
+            allElementalDamageBonus: 0,
+            fireDamageFlat: 0,
+            coldDamageFlat: 0,
+            lightningDamageFlat: 0,
+            chaosDamageFlat: 0,
+            fireResistFlat: 0,
+            coldResistFlat: 0,
+            lightningResistFlat: 0,
+            chaosResistFlat: 0,
+            attackPercentBonus: 0,
+            defensePercentBonus: 0,
+            healthPercentBonus: 0,
+            physicalDamagePercentBonus: 0,
+            cooldownReductionBonus: 0,
+            requirements: { minLevel: 1 },
+          } as NonNullable<HeroDto['equipment']['weapon']>,
+          armor: null,
+          accessory: null,
+        },
+      }),
+    );
+
+    expect(html).toContain('Skills de batalha');
+    expect(html).toContain('Equipamento e passivas');
+    expect(html).toContain('Ataque Básico');
+    expect(html).toContain('Espada');
   });
 });

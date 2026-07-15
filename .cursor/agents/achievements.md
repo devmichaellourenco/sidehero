@@ -19,6 +19,7 @@ Conquistas persistentes: catálogo, progresso por eventos, Wow de avanço/unlock
 - `src/domain/achievements/**`
 - `IAchievementProgressRepository` / storage `side_hero_achievements`
 - Hook em `TickGameUseCase` (fases limpas) e Wow de achievement
+- UI: botão + `GET_ACHIEVEMENTS` + `AchievementsModalRenderer`
 
 ## Checklist
 
@@ -26,3 +27,4 @@ Conquistas persistentes: catálogo, progresso por eventos, Wow de avanço/unlock
 - [x] Persistência fora do game state
 - [x] `AchievementService.test.ts` / catalog / Wow
 - [x] Sem re-unlock de achievement completo
+- [x] Botão + modal de lista

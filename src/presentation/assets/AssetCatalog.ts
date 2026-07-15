@@ -89,6 +89,7 @@ export const ASSETS = {
     stage: 'ui/stage.png',
     rune: 'ui/rune.png',
     achievement: 'ui/achievement.png',
+    bookOpen: 'ui/book-open.png',
     arrowPrev: 'ui/arrow-prev.png',
     arrowNext: 'ui/arrow-next.png',
   },

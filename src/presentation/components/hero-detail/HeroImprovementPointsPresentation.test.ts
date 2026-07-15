@@ -55,7 +55,7 @@ describe('renderHeroImprovementPoints', () => {
     expect(html).toContain('>2<');
     expect(html).toContain('data-hero-improvement-tooltip');
     expect(html).toContain('hero-improvement-tooltip-content');
-    expect(html).toContain('Progressão');
+    expect(html).toContain('Status');
     expect(html).toContain('Skills');
     expect(html).toContain('O mesmo saldo vale para atributos e skills');
   });

@@ -213,6 +213,16 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         purchasableMetaCount: result.purchasableMetaCount,
       };
     }
+    case 'GET_ACHIEVEMENTS': {
+      const result = await app.getAchievements.execute();
+      return {
+        ok: true,
+        state: result.state,
+        achievements: result.achievements,
+        completedAchievementCount: result.completedCount,
+        totalAchievementCount: result.totalCount,
+      };
+    }
     case 'PURCHASE_META_UPGRADE': {
       const result = await app.purchaseMetaUpgrade.execute(message.upgradeId);
       return {

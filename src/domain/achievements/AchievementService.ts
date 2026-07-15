@@ -1,4 +1,4 @@
-import { listAchievementsForPhaseCleared } from './AchievementCatalog';
+import { listAchievements, listAchievementsForPhaseCleared } from './AchievementCatalog';
 import { AchievementDefinition } from './AchievementDefinition';
 import { AchievementEntry, AchievementProgress } from './AchievementProgress';
 
@@ -14,7 +14,26 @@ export interface AchievementRecordResult {
   updates: AchievementUpdate[];
 }
 
+export interface AchievementListEntry {
+  definition: AchievementDefinition;
+  currentProgress: number;
+  completed: boolean;
+  completedAt: number | null;
+}
+
 export class AchievementService {
+  listEntries(progress: AchievementProgress): AchievementListEntry[] {
+    return listAchievements().map((definition) => {
+      const entry = progress.getEntry(definition.id);
+      return {
+        definition,
+        currentProgress: Math.min(definition.target, entry.current),
+        completed: entry.completed || entry.current >= definition.target,
+        completedAt: entry.completedAt,
+      };
+    });
+  }
+
   recordPhaseCleared(
     progress: AchievementProgress,
     phaseId: string,

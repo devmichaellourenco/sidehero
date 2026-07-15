@@ -15,13 +15,15 @@ description: Achievements persistentes do Side Hero — catálogo, progresso por
 2. Evento de jogo → `AchievementService.record…`
 3. Persistência → `IAchievementProgressRepository` (`side_hero_achievements`)
 4. Updates → Tick result → Wow (`achievement_progress` / `achievement_unlocked`)
+5. Lista → `GET_ACHIEVEMENTS` → modal `AchievementsModalRenderer`
 
 ## Padrões
 
 - Progresso **não** vive no `GameState` (sobrevive Novo Jogo)
 - Catálogo declarativo; service só avança entradas elegíveis ao evento
 - Completos não re-incrementam nem re-disparram Wow
-- Presentation só vê `AchievementUpdateDto`
+- Presentation só vê DTOs (`AchievementUpdateDto` / `AchievementListEntryDto`)
+- Botão do menu: ícone `ui/book-open.png` (`icon_itemicon_book_open`)
 
 ## Achievement v1
 
@@ -31,7 +33,7 @@ description: Achievements persistentes do Side Hero — catálogo, progresso por
 
 ## Testes
 
-`AchievementService.test.ts`, `AchievementCatalog.test.ts`, momentos em `RewardMomentDetector.test.ts` — criar/atualizar; **não** executar automaticamente.
+`AchievementService.test.ts`, `AchievementCatalog.test.ts`, momentos em `RewardMomentDetector.test.ts`, `AchievementsModalRenderer.test.ts` — criar/atualizar; **não** executar automaticamente.
 
 ## Workflow do agente
 

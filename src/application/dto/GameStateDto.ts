@@ -14,9 +14,19 @@ export interface GearRequirementsDto {
   heroId?: string;
 }
 
+export interface HeroActiveSkillStatTooltipLineDto {
+  text: string;
+  /** Chave de ícone UI (`attack`, `rune`, `improvement`, …). */
+  icon?: string;
+}
+
 export interface HeroActiveSkillStatDto {
   label: string;
   value: string;
+  /** Passo a passo do cálculo; hover na Status mostra a fórmula. */
+  tooltipLines?: HeroActiveSkillStatTooltipLineDto[];
+  /** Destaque visual (ex.: DPS estimado). */
+  emphasize?: boolean;
 }
 
 export interface HeroActiveSkillDto {
@@ -107,6 +117,10 @@ export interface HeroDto {
       healthPercentBonus: number;
       physicalDamagePercentBonus: number;
       cooldownReductionBonus: number;
+      dodgeChanceBonus?: number;
+      blockChanceBonus?: number;
+      damageReductionBonus?: number;
+      uniqueEffectDescription?: string | null;
       requirements: GearRequirementsDto;
     } | null
   >;
