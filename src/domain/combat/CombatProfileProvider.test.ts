@@ -54,6 +54,22 @@ describe('CombatProfileProvider', () => {
     expect(profile.cooldownReduction).toBe(0);
   });
 
+  it('cajado do catálogo contribui cast speed no perfil de combate', async () => {
+    const { createGearFromCatalogItem } = await import('../gear/GearItemCatalog');
+    const { Experience } = await import('../value-objects/Experience');
+    const staff = createGearFromCatalogItem('arcanist_staff', 'staff-test');
+    const base = Hero.createStarter('h1', 'sorcerer', 'Mira');
+    const hero = Hero.restore({
+      ...base.toProps(),
+      experience: Experience.restore(0, 100, 8),
+      equipment: { weapon: staff },
+    });
+    const profile = profiles.forHero(hero);
+
+    expect(staff.castSpeedBonus).toBe(0.09);
+    expect(profile.castSpeed).toBeCloseTo(1.09);
+  });
+
   it('aplica redução de recarga como percentual do tempo base', () => {
     expect(applyCooldownReduction(10, resolveCooldownReduction(30))).toBe(7);
     expect(applyCooldownReduction(10, resolveCooldownReduction(0))).toBe(10);

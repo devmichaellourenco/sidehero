@@ -2,7 +2,7 @@ import { Hero } from '../entities/Hero';
 import { Gear, GearRequirements } from '../entities/Gear';
 import { isGalneonCatalogItem } from '../gear/GearItemDefinition';
 import { findCatalogItemBySpriteId } from '../gear/GearItemCatalog';
-import { GALNEON_HERO_ID, GALNEON_STANDARD_SWORD_TEMPLATE_ID } from '../gear/GalneonGearCatalog';
+import { GALNEON_HERO_ID } from '../gear/GalneonGearCatalog';
 
 export interface RequirementCheckResult {
   met: boolean;

@@ -1,7 +1,60 @@
 import { describe, expect, it } from 'vitest';
 import { buildPhaseId } from '../../domain/campaign/CampaignIds';
-import { migrateEnemy } from './GameStateMigration';
+import { migrateEnemy, migrateGear, migrateHero } from './GameStateMigration';
 import { IGNUS_IX_TEMPLATE_ID } from '../../domain/gear/UniqueGearCatalog';
+import { getGearCatalogItem } from '../../domain/gear/GearItemCatalog';
+
+describe('migrateGear', () => {
+  it('reespelha stats atuais do catálogo preservando o id da instância', () => {
+    const catalog = getGearCatalogItem('arcanist_staff')!;
+    const migrated = migrateGear({
+      id: 'inst-arcanist',
+      catalogItemId: 'arcanist_staff',
+      name: 'Cajado antigo',
+      templateId: 'arcanist_staff',
+      slot: 'weapon',
+      rarity: 'rare',
+      attackBonus: 999,
+      defenseBonus: 0,
+      healthBonus: 0,
+      castSpeedBonus: 0,
+      requirements: { minLevel: 1, str: 99 },
+    });
+
+    expect(migrated.id).toBe('inst-arcanist');
+    expect(migrated.attackBonus).toBe(catalog.attackBonus);
+    expect(migrated.castSpeedBonus).toBe(catalog.castSpeedBonus);
+    expect(migrated.allElementalDamageBonus).toBe(catalog.allElementalDamageBonus);
+    expect(migrated.requirements).toEqual(catalog.requirements);
+  });
+
+  it('migra equipamento equipado no herói com stats do catálogo', () => {
+    const catalog = getGearCatalogItem('oracle_staff')!;
+    const hero = migrateHero({
+      id: 'h1',
+      name: 'Ora',
+      heroClass: 'priest',
+      equipment: {
+        weapon: {
+          id: 'eq-oracle',
+          catalogItemId: 'oracle_staff',
+          name: 'Oráculo velho',
+          templateId: 'oracle_staff',
+          slot: 'weapon',
+          rarity: 'legendary',
+          attackBonus: 1,
+          defenseBonus: 0,
+          healthBonus: 0,
+        },
+      },
+    });
+
+    const weapon = hero.toProps().equipment?.weapon;
+    expect(weapon?.id).toBe('eq-oracle');
+    expect(weapon?.cooldownReductionBonus).toBe(catalog.cooldownReductionBonus);
+    expect(weapon?.castSpeedBonus).toBe(catalog.castSpeedBonus);
+  });
+});
 
 describe('migrateEnemy', () => {
   it('preserva role de boss ao recarregar combate do storage', () => {

@@ -39,4 +39,15 @@ describe('GearRequirementChecker', () => {
 
     expect(checker.meets(hero, gear)).toBe(false);
   });
+
+  it('usa requisitos declarados no catálogo (cajado com INT)', () => {
+    const reqs = GearRequirementChecker.inferRequirementsForTemplate(
+      'arcanist_staff',
+      6,
+      'weapon',
+      'rare',
+    );
+
+    expect(reqs).toEqual({ minLevel: 6, int: 3 });
+  });
 });

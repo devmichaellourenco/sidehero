@@ -200,12 +200,14 @@
     "name": "Cajado de Bétula (common)",
     "slot": "weapon",
     "rarity": "common",
-    "attackBonus": 9,
+    "attackBonus": 5,
     "defenseBonus": 0,
     "healthBonus": 0,
+    "castSpeedBonus": 0.03,
+    "coldDamageFlat": 1,
+    "allElementalDamageBonus": 2,
     "requirements": {
-      "minLevel": 1,
-      "str": 0
+      "minLevel": 1
     },
     "spriteId": "birch_staff",
     "sprite": "gear/items/birch_staff.png"
@@ -215,12 +217,15 @@
     "name": "Cajado do Aprendiz (uncommon)",
     "slot": "weapon",
     "rarity": "uncommon",
-    "attackBonus": 14,
-    "defenseBonus": 1,
+    "attackBonus": 10,
+    "defenseBonus": 0,
     "healthBonus": 0,
+    "castSpeedBonus": 0.05,
+    "fireDamageBonus": 4,
+    "fireDamageFlat": 1,
     "requirements": {
       "minLevel": 3,
-      "str": 0
+      "int": 1
     },
     "spriteId": "apprentice_staff",
     "sprite": "gear/items/apprentice_staff.png"
@@ -230,12 +235,14 @@
     "name": "Cajado do Arcanista (rare)",
     "slot": "weapon",
     "rarity": "rare",
-    "attackBonus": 24,
+    "attackBonus": 15,
     "defenseBonus": 1,
     "healthBonus": 0,
+    "castSpeedBonus": 0.09,
+    "allElementalDamageBonus": 10,
     "requirements": {
       "minLevel": 6,
-      "str": 3
+      "int": 3
     },
     "spriteId": "arcanist_staff",
     "sprite": "gear/items/arcanist_staff.png"
@@ -245,14 +252,16 @@
     "name": "Cajado da Torre Vigilante (epic)",
     "slot": "weapon",
     "rarity": "epic",
-    "attackBonus": 42,
-    "defenseBonus": 3,
-    "healthBonus": 0,
-    "attackPercentBonus": 8,
-    "physicalDamagePercentBonus": 4,
+    "attackBonus": 24,
+    "defenseBonus": 5,
+    "healthBonus": 20,
+    "castSpeedBonus": 0.06,
+    "allElementalDamageBonus": 8,
+    "allElementalResistBonus": 4,
+    "cooldownReductionBonus": 3,
     "requirements": {
       "minLevel": 10,
-      "str": 6
+      "int": 5
     },
     "spriteId": "watchtower_staff",
     "sprite": "gear/items/watchtower_staff.png"
@@ -262,15 +271,16 @@
     "name": "Cajado do Oráculo (legendary)",
     "slot": "weapon",
     "rarity": "legendary",
-    "attackBonus": 72,
-    "defenseBonus": 5,
-    "healthBonus": 0,
-    "attackPercentBonus": 10,
-    "physicalDamagePercentBonus": 5,
-    "critChanceBonus": 0.026000000000000002,
+    "attackBonus": 38,
+    "defenseBonus": 4,
+    "healthBonus": 40,
+    "castSpeedBonus": 0.08,
+    "allElementalDamageBonus": 10,
+    "cooldownReductionBonus": 8,
+    "healthPercentBonus": 6,
     "requirements": {
       "minLevel": 15,
-      "str": 10
+      "int": 8
     },
     "spriteId": "oracle_staff",
     "sprite": "gear/items/oracle_staff.png"
@@ -280,15 +290,16 @@
     "name": "Archicajado dos Astros (mythic)",
     "slot": "weapon",
     "rarity": "mythic",
-    "attackBonus": 125,
-    "defenseBonus": 10,
+    "attackBonus": 90,
+    "defenseBonus": 2,
     "healthBonus": 0,
-    "attackPercentBonus": 12,
-    "physicalDamagePercentBonus": 6,
-    "critChanceBonus": 0.03,
+    "castSpeedBonus": 0.18,
+    "allElementalDamageBonus": 24,
+    "critChanceBonus": 0.04,
+    "fireResistPenetrationBonus": 6,
     "requirements": {
       "minLevel": 22,
-      "str": 15
+      "int": 16
     },
     "spriteId": "archmage_staff",
     "sprite": "gear/items/archmage_staff.png"
@@ -608,12 +619,14 @@
     "name": "Cajado da Chuva (common)",
     "slot": "weapon",
     "rarity": "common",
-    "attackBonus": 9,
+    "attackBonus": 7,
     "defenseBonus": 0,
     "healthBonus": 0,
+    "castSpeedBonus": 0.02,
+    "lightningDamageBonus": 2,
+    "coldDamageFlat": 1,
     "requirements": {
-      "minLevel": 1,
-      "str": 0
+      "minLevel": 1
     },
     "spriteId": "rain_rod",
     "sprite": "gear/items/rain_rod.png"
@@ -623,12 +636,14 @@
     "name": "Vara do Vento (uncommon)",
     "slot": "weapon",
     "rarity": "uncommon",
-    "attackBonus": 14,
-    "defenseBonus": 1,
+    "attackBonus": 8,
+    "defenseBonus": 0,
     "healthBonus": 0,
+    "castSpeedBonus": 0.11,
+    "lightningDamageBonus": 3,
     "requirements": {
       "minLevel": 3,
-      "str": 0
+      "int": 1
     },
     "spriteId": "wind_rod",
     "sprite": "gear/items/wind_rod.png"
@@ -638,14 +653,15 @@
     "name": "Vara do Trovão (rare)",
     "slot": "weapon",
     "rarity": "rare",
-    "attackBonus": 24,
-    "defenseBonus": 1,
+    "attackBonus": 18,
+    "defenseBonus": 0,
     "healthBonus": 0,
-    "lightningDamageBonus": 6,
-    "lightningDamageFlat": 2,
+    "castSpeedBonus": 0.05,
+    "lightningDamageBonus": 11,
+    "lightningDamageFlat": 3,
     "requirements": {
       "minLevel": 6,
-      "str": 3
+      "int": 4
     },
     "spriteId": "thunder_rod",
     "sprite": "gear/items/thunder_rod.png"
@@ -655,16 +671,16 @@
     "name": "Bastão da Tempestade (epic)",
     "slot": "weapon",
     "rarity": "epic",
-    "attackBonus": 42,
-    "defenseBonus": 3,
+    "attackBonus": 30,
+    "defenseBonus": 2,
     "healthBonus": 0,
-    "attackPercentBonus": 8,
-    "physicalDamagePercentBonus": 4,
-    "lightningDamageBonus": 10,
-    "lightningDamageFlat": 4,
+    "attackPercentBonus": 5,
+    "castSpeedBonus": 0.08,
+    "lightningDamageBonus": 14,
+    "lightningDamageFlat": 5,
     "requirements": {
       "minLevel": 10,
-      "str": 6
+      "int": 7
     },
     "spriteId": "tempest_staff",
     "sprite": "gear/items/tempest_staff.png"
@@ -674,17 +690,17 @@
     "name": "Orbe do Trovão Errante (legendary)",
     "slot": "weapon",
     "rarity": "legendary",
-    "attackBonus": 72,
-    "defenseBonus": 5,
+    "attackBonus": 42,
+    "defenseBonus": 1,
     "healthBonus": 0,
-    "attackPercentBonus": 10,
-    "physicalDamagePercentBonus": 5,
-    "critChanceBonus": 0.026000000000000002,
+    "castSpeedBonus": 0.14,
+    "critChanceBonus": 0.045,
+    "critDamageBonus": 0.12,
     "lightningDamageBonus": 14,
-    "lightningDamageFlat": 6,
+    "lightningDamageFlat": 4,
     "requirements": {
       "minLevel": 15,
-      "str": 10
+      "int": 12
     },
     "spriteId": "wandering_orb",
     "sprite": "gear/items/wandering_orb.png"
@@ -694,17 +710,17 @@
     "name": "Cajado do Rei do Céu (mythic)",
     "slot": "weapon",
     "rarity": "mythic",
-    "attackBonus": 125,
-    "defenseBonus": 10,
+    "attackBonus": 95,
+    "defenseBonus": 4,
     "healthBonus": 0,
-    "attackPercentBonus": 12,
-    "physicalDamagePercentBonus": 6,
-    "critChanceBonus": 0.03,
-    "lightningDamageBonus": 18,
-    "lightningDamageFlat": 8,
+    "attackPercentBonus": 8,
+    "castSpeedBonus": 0.12,
+    "lightningDamageBonus": 22,
+    "lightningDamageFlat": 10,
+    "critChanceBonus": 0.028,
     "requirements": {
       "minLevel": 22,
-      "str": 15
+      "int": 14
     },
     "spriteId": "sky_king_staff",
     "sprite": "gear/items/sky_king_staff.png"

@@ -234,6 +234,14 @@ export function createGearFromCatalogItem(catalogItemId: string, instanceId?: st
   });
 }
 
+/** Reaplica stats/requisitos atuais do catálogo, preservando o id da instância. */
+export function resyncGearFromCatalog(gear: Gear): Gear {
+  if (!gear.catalogItemId || !getGearCatalogItem(gear.catalogItemId)) {
+    return gear;
+  }
+  return createGearFromCatalogItem(gear.catalogItemId, gear.id);
+}
+
 export function isSalvageBlockedCatalogItem(catalogItemId: string): boolean {
   return getGearCatalogItem(catalogItemId)?.salvageBlocked === true;
 }

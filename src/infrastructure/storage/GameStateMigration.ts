@@ -5,11 +5,14 @@ import { AscensionId, SkillId } from '../../domain/progression/SkillId';
 import { normalizeAscensionId } from '../../domain/progression/normalizeAscensionId';
 import { Experience } from '../../domain/value-objects/Experience';
 import { Stats } from '../../domain/value-objects/Stats';
-import { Gear } from '../../domain/entities/Gear';
-import { GearProps } from '../../domain/entities/Gear';
+import { Gear, GearProps, GearSlot } from '../../domain/entities/Gear';
 import { ActiveGearSlot } from '../../domain/gear/GearSlotCatalog';
 import { DEFAULT_GEAR_TEMPLATE_BY_SLOT } from '../../domain/gear/GearTemplateCatalog';
-import { getGearCatalogItem, resolveCatalogItemId } from '../../domain/gear/GearItemCatalog';
+import {
+  createGearFromCatalogItem,
+  getGearCatalogItem,
+  resolveCatalogItemId,
+} from '../../domain/gear/GearItemCatalog';
 import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
 import { EnemyRole } from '../../domain/campaign/WaveDefinition';
@@ -40,7 +43,7 @@ function migrateEquipment(raw: unknown): HeroProps['equipment'] {
   return Object.fromEntries(
     entries.map(([slot, gear]) => [
       slot as GearSlot,
-      gear && typeof gear === 'object' ? Gear.create(gear as Parameters<typeof Gear.create>[0]) : null,
+      gear && typeof gear === 'object' ? migrateGear(gear) : null,
     ]),
   );
 }
@@ -308,7 +311,7 @@ export function migrateChest(raw: unknown): Chest {
     stageEarned: typeof c.stageEarned === 'number' ? c.stageEarned : 1,
     chestType,
     opened: Boolean(c.opened),
-    loot: c.loot && typeof c.loot === 'object' ? Gear.create(c.loot as Parameters<typeof Gear.create>[0]) : null,
+    loot: c.loot && typeof c.loot === 'object' ? migrateGear(c.loot) : null,
   });
 }
 
@@ -348,6 +351,11 @@ export function migrateGear(raw: unknown): Gear {
         ? getGearCatalogItem(catalogId)!.spriteId
         : DEFAULT_GEAR_TEMPLATE_BY_SLOT[props.slot as ActiveGearSlot];
     }
+  }
+
+  if (props.catalogItemId && getGearCatalogItem(props.catalogItemId)) {
+    const instanceId = typeof props.id === 'string' ? props.id : undefined;
+    return createGearFromCatalogItem(props.catalogItemId, instanceId);
   }
 
   return Gear.create(props);

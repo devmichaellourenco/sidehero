@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { Gear } from '../entities/Gear';
 import {
   createGearFromCatalogItem,
   getGearCatalogItem,
   listLootCatalogItems,
   resolveCatalogItemId,
+  resyncGearFromCatalog,
   stripGearRaritySuffix,
 } from './GearItemCatalog';
 
@@ -45,5 +47,43 @@ describe('GearItemCatalog', () => {
 
   it('remove sufixo de raridade do nome', () => {
     expect(stripGearRaritySuffix('Espada do Patrulheiro (rare)')).toBe('Espada do Patrulheiro');
+  });
+
+  it('resyncGearFromCatalog reaplica stats preservando id', () => {
+    const stale = createGearFromCatalogItem('arcanist_staff', 'keep-me');
+    const mutated = Gear.create({
+      ...stale.toProps(),
+      attackBonus: 1,
+      castSpeedBonus: 0,
+    });
+
+    const synced = resyncGearFromCatalog(mutated);
+    expect(synced.id).toBe('keep-me');
+    expect(synced.attackBonus).toBe(getGearCatalogItem('arcanist_staff')!.attackBonus);
+    expect(synced.castSpeedBonus).toBe(0.09);
+  });
+
+  it('cada cajado declara identidade própria no catálogo', () => {
+    const arcanist = getGearCatalogItem('arcanist_staff')!;
+    const oracle = getGearCatalogItem('oracle_staff')!;
+    const watchtower = getGearCatalogItem('watchtower_staff')!;
+    const wind = getGearCatalogItem('wind_rod')!;
+    const thunder = getGearCatalogItem('thunder_rod')!;
+    const patrol = getGearCatalogItem('patrol_sword')!;
+
+    expect(arcanist.attackBonus).toBeLessThan(patrol.attackBonus!);
+    expect(arcanist.castSpeedBonus).toBe(0.09);
+    expect(arcanist.allElementalDamageBonus).toBe(10);
+    expect(arcanist.requirements).toEqual({ minLevel: 6, int: 3 });
+
+    expect(oracle.cooldownReductionBonus).toBe(8);
+    expect(oracle.healthPercentBonus).toBe(6);
+    expect(oracle.requirements?.int).toBe(8);
+
+    expect(watchtower.defenseBonus).toBe(5);
+    expect(watchtower.allElementalResistBonus).toBe(4);
+
+    expect(wind.castSpeedBonus).toBeGreaterThan(thunder.castSpeedBonus!);
+    expect(thunder.lightningDamageBonus).toBeGreaterThan(wind.lightningDamageBonus!);
   });
 });

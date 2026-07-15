@@ -1,6 +1,7 @@
 import { GameState } from '../entities/GameState';
 import { Gear, GearSlot } from '../entities/Gear';
 import { Hero } from '../entities/Hero';
+import { HeroClass } from '../entities/HeroClass';
 import { addReplacedGearToInventory, equipHeroWithGear } from './GearEquipService';
 import { GearRequirementChecker } from './GearRequirementChecker';
 
@@ -23,13 +24,58 @@ export interface GearUpgradePreview {
   equipped: Gear | null;
 }
 
-function gearPower(gear: Pick<Gear, 'attackBonus' | 'defenseBonus' | 'healthBonus'>): number {
-  return gear.attackBonus + gear.defenseBonus + gear.healthBonus;
+function isCasterHeroClass(heroClass: HeroClass): boolean {
+  return heroClass === 'sorcerer' || heroClass === 'priest';
+}
+
+/** Score relativo para comparar upgrades — casters valorizam cast/elemental/CDR. */
+export function scoreGearForHero(gear: Gear, hero: Hero): number {
+  const flat = gear.attackBonus + gear.defenseBonus + gear.healthBonus;
+  const shared =
+    gear.attackPercentBonus +
+    gear.defensePercentBonus +
+    gear.healthPercentBonus +
+    gear.critChanceBonus * 100 +
+    gear.critDamageBonus * 50 +
+    gear.dodgeChanceBonus * 80 +
+    gear.blockChanceBonus * 80 +
+    gear.damageReductionBonus * 80 +
+    gear.allElementalResistBonus +
+    gear.fireResistBonus +
+    gear.coldResistBonus +
+    gear.lightningResistBonus +
+    gear.chaosResistBonus;
+
+  if (isCasterHeroClass(hero.heroClass)) {
+    return (
+      flat +
+      shared +
+      gear.castSpeedBonus * 100 +
+      gear.cooldownReductionBonus * 2.5 +
+      gear.allElementalDamageBonus +
+      gear.fireDamageBonus +
+      gear.coldDamageBonus +
+      gear.lightningDamageBonus +
+      gear.chaosDamageBonus +
+      gear.fireDamageFlat +
+      gear.coldDamageFlat +
+      gear.lightningDamageFlat +
+      gear.chaosDamageFlat +
+      gear.fireResistPenetrationBonus
+    );
+  }
+
+  return (
+    flat +
+    shared +
+    gear.physicalDamagePercentBonus +
+    gear.attackSpeedBonus * 80
+  );
 }
 
 function equippedPower(hero: Hero, slot: GearSlot): number {
   const gear = hero.toProps().equipment?.[slot];
-  return gear ? gearPower(gear) : 0;
+  return gear ? scoreGearForHero(gear, hero) : 0;
 }
 
 export class LoadoutOptimizer {
@@ -68,8 +114,8 @@ export class LoadoutOptimizer {
       if (!this.requirementChecker.meets(hero, gear)) continue;
 
       const equipped = hero.toProps().equipment?.[gear.slot] ?? null;
-      const currentPower = equipped ? gearPower(equipped) : 0;
-      const gain = gearPower(gear) - currentPower;
+      const currentPower = equipped ? scoreGearForHero(equipped, hero) : 0;
+      const gain = scoreGearForHero(gear, hero) - currentPower;
 
       if (!best || gain > best.gain) {
         best = { hero, gain, equipped };
@@ -116,7 +162,7 @@ export class LoadoutOptimizer {
         for (const gear of inventory.filter((entry) => entry.slot === slot)) {
           if (!this.requirementChecker.meets(hero, gear)) continue;
 
-          const gain = gearPower(gear) - currentPower;
+          const gain = scoreGearForHero(gear, hero) - currentPower;
           if (gain > 0) {
             actions.push({ heroId: hero.id, gearId: gear.id, slot, gain });
           }

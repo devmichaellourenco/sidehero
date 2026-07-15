@@ -6,6 +6,14 @@ import {
 } from './ElementalDamageProfileAggregator';
 
 describe('ElementalDamageProfileAggregator', () => {
+  it('cajado do catálogo entra no perfil elemental do herói', async () => {
+    const { createGearFromCatalogItem } = await import('../gear/GearItemCatalog');
+    const staff = createGearFromCatalogItem('arcanist_staff', 'el-staff');
+    const profile = elementalDamageProfileFromHeroEquipment({ weapon: staff });
+
+    expect(profile.allElemental).toBe(10);
+  });
+
   it('soma bônus de dano elemental do equipamento', () => {
     const weapon = Gear.create({
       id: 'w1',

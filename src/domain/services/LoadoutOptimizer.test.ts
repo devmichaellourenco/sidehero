@@ -96,4 +96,43 @@ describe('LoadoutOptimizer.optimizeLoadout', () => {
     expect(result.equippedCount).toBeGreaterThanOrEqual(2);
     expect(result.state.inventory).toHaveLength(0);
   });
+
+  it('para mago preferência cajado com cast/elemental a espada de ATK maior', () => {
+    const mage = heroAtLevel('mage-1', 'sorcerer', 'Mira', 8);
+    const sword = Gear.create({
+      id: 'sword-atk',
+      name: 'Espada',
+      templateId: 'patrol_sword',
+      slot: 'weapon',
+      rarity: 'rare',
+      attackBonus: 24,
+      defenseBonus: 0,
+      healthBonus: 0,
+      requirements: { minLevel: 1 },
+    });
+    const staff = Gear.create({
+      id: 'staff-cast',
+      name: 'Cajado',
+      templateId: 'arcanist_staff',
+      slot: 'weapon',
+      rarity: 'rare',
+      attackBonus: 15,
+      defenseBonus: 1,
+      healthBonus: 0,
+      castSpeedBonus: 0.09,
+      allElementalDamageBonus: 10,
+      requirements: { minLevel: 1, int: 0 },
+    });
+    const mageWithSword = mage.equip(sword);
+    const state = GameState.restore({
+      ...GameState.initial().toProps(),
+      heroes: [mageWithSword],
+      activePartyIds: [mageWithSword.id],
+      inventory: [staff],
+    });
+
+    const preview = new LoadoutOptimizer().previewUpgradeForGear(state, staff);
+    expect(preview?.status).toBe('upgrade');
+    expect(preview?.heroId).toBe(mageWithSword.id);
+  });
 });
