@@ -9,7 +9,7 @@ const PANEL_ICON_TARGETS: Array<{ selector: string; assetPath: string }> = [
   { selector: '#open-stash-btn .btn-icon', assetPath: ASSETS.ui.chestOpen },
   { selector: '#open-forge-btn .btn-icon', assetPath: ASSETS.ui.forge },
   { selector: '#optimize-loadout-btn .btn-icon', assetPath: ASSETS.ui.attack },
-  { selector: '#open-upgrades-btn .btn-icon', assetPath: ASSETS.ui.stage },
+  { selector: '#open-upgrades-btn .btn-icon', assetPath: ASSETS.ui.rune },
   { selector: '#open-chest-btn .btn-icon', assetPath: ASSETS.ui.chest },
   { selector: '#open-all-chests-btn .btn-icon', assetPath: ASSETS.ui.chestOpen },
 ];

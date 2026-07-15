@@ -1,4 +1,5 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
+import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
 
 export type OnboardingStepId =
   | 'first-chest'
@@ -19,6 +20,10 @@ export const ONBOARDING_STEP_ORDER: OnboardingStepId[] = [
   'hero-points',
   'first-upgrade',
 ];
+
+function runeInlineIcon(): string {
+  return `<img class="onboarding-inline-icon" src="${getAssetUrl(ASSETS.ui.rune)}" alt="" aria-hidden="true" />`;
+}
 
 const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
   'first-chest': {
@@ -41,8 +46,7 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
   },
   'first-upgrade': {
     title: 'Runas do acampamento',
-    message:
-      'Há uma runa disponível com o ouro acumulado. Toque na estrela ★ para abrir a árvore.',
+    message: `Há uma runa disponível com o ouro acumulado. Toque em ${runeInlineIcon()} Runas para abrir a árvore.`,
     anchorSelector: '#open-upgrades-btn',
   },
 };

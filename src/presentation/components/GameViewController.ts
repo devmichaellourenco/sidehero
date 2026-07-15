@@ -999,6 +999,10 @@ export class GameViewController {
     this.render(response.state, { previousState: this.state });
     this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
 
+    if (response.achievementUpdates?.length) {
+      this.rewards.celebrateAchievementUpdates(response.achievementUpdates);
+    }
+
     if (response.sigilsAwarded && response.sigilsAwarded > 0) {
       this.toasts.show(`+${response.sigilsAwarded} selos de legado!`, 'victory');
     }

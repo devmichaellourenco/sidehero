@@ -59,6 +59,9 @@ describe('OnboardingPolicy', () => {
     const dismissed = new Set(['first-chest', 'pause-loadout', 'hero-points'] as const);
     const step = resolveOnboardingStep(mockState({ purchasableUpgradeCount: 1 }), dismissed);
     expect(step?.id).toBe('first-upgrade');
+    expect(step?.message).toContain('ui/rune.png');
+    expect(step?.message).not.toContain('★');
+    expect(step?.message).not.toContain('estrela');
   });
 
   it('marca onboarding completo quando todos os passos foram dispensados', () => {

@@ -37,6 +37,7 @@ import { GetMetaTreeUseCase } from './use-cases/GetMetaTreeUseCase';
 import { PurchaseMetaUpgradeUseCase } from './use-cases/PurchaseMetaUpgradeUseCase';
 import { MarkActSceneViewedUseCase } from './use-cases/MarkActSceneViewedUseCase';
 import { IMetaProgressRepository } from '../domain/repositories/IMetaProgressRepository';
+import { IAchievementProgressRepository } from '../domain/repositories/IAchievementProgressRepository';
 
 export class GameApplication {
   readonly getState: GetGameStateUseCase;
@@ -79,6 +80,7 @@ export class GameApplication {
   constructor(
     repository: IGameStateRepository,
     metaRepository: IMetaProgressRepository,
+    achievementRepository: IAchievementProgressRepository,
     deps: GameApplicationDependencies,
   ) {
     const {
@@ -93,6 +95,7 @@ export class GameApplication {
       divineForgeService,
       presenter,
       metaService,
+      achievementService,
     } = deps;
 
     this.getState = new GetGameStateUseCase(repository, metaRepository, metaService, presenter);
@@ -105,6 +108,8 @@ export class GameApplication {
       metaService,
       combatService,
       presenter,
+      achievementRepository,
+      achievementService,
     );
     this.resumeCombatIntermission = new ResumeCombatIntermissionUseCase(repository, presenter);
     this.pauseForLoadout = new PauseForLoadoutUseCase(repository, presenter);

@@ -1,4 +1,5 @@
-import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto, HeroDto } from '../../application/dto/GameStateDto';
+import { AchievementUpdateDto } from '../../application/dto/AchievementDto';
 import { PanelSnapshot } from '../components/PanelStateSnapshot';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 import { RewardMomentKind } from '../delight/types/RewardMoment';
@@ -51,8 +52,15 @@ export class RewardPresentationController implements RewardCelebrationPort {
     this.wowCelebration.enqueueMoment(this.detector.buildForgeCreatedMoment(gear));
   }
 
-  celebrateAscension(heroName: string, heroEmoji: string): void {
-    this.wowCelebration.enqueueMoment(this.detector.buildAscensionMoment(heroName, heroEmoji));
+  celebrateAscension(hero: Pick<HeroDto, 'id' | 'name' | 'heroClass' | 'ascensionId'>): void {
+    this.wowCelebration.enqueueMoment(this.detector.buildAscensionMoment(hero));
+  }
+
+  celebrateAchievementUpdates(updates: readonly AchievementUpdateDto[]): void {
+    if (updates.length === 0) return;
+    for (const moment of this.detector.buildAchievementMoments(updates)) {
+      this.wowCelebration.enqueueMoment(moment);
+    }
   }
 
   celebrateBatchLoot(gears: GearDto[]): void {

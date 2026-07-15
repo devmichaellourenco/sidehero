@@ -44,6 +44,7 @@ Regra crítica: `presentation/` **não** importa `domain/` diretamente.
 | [chrome-infra](agents/chrome-infra.md) | extension, build, storage | `specs/chrome-infra.spec.md` | `infrastructure`, `manifest.json` |
 | [game-balance](agents/game-balance.md) | curva, fórmulas, auditoria | `specs/game-balance.spec.md` | `domain/combat`, scaling, catálogos numéricos |
 | [story-scenes](agents/story-scenes.md) | cenas por ato, overlay, pausa | `specs/story-scenes.spec.md` | `ActSceneCatalog`, `ActSceneFlow`, campanha |
+| [achievements](agents/achievements.md) | conquistas, progresso, Wow | `specs/achievements.spec.md` | `domain/achievements`, storage achievements |
 
 ## Comandos (desenvolvedor — agente não executa test/release automaticamente)
 

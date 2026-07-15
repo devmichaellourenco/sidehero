@@ -20,10 +20,11 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
 | [game-balance](game-balance.spec.md) | 9/9 | 11/11 | — |
 | [story-scenes](story-scenes.spec.md) | 9/10 | 5/5 | copy DLC placeholder |
+| [achievements](achievements.spec.md) | 5/5 | 3/3 | — |
 
-**Total aceite (features):** 85/93 (91%)  
+**Total aceite (features):** 90/98 (92%)  
 **Balanceamento transversal:** 9/9  
-**Total testes listados nas specs:** 77/77 (100%)
+**Total testes listados nas specs:** 80/80 (100%)
 
 ## Escopo do jogo (v1)
 
@@ -66,6 +67,7 @@ Polish e balanceamento do jogo base (tiers 1–200); arte de battle strip das 4 
 | [chrome-infra](chrome-infra.spec.md) | Extension, storage, SW, panel | `.cursor/agents/chrome-infra.md` | `.cursor/skills/chrome-infra/` |
 | [game-balance](game-balance.spec.md) | Curva, fórmulas, auditoria transversal | `.cursor/agents/game-balance.md` | `.cursor/skills/game-balance/` |
 | [story-scenes](story-scenes.spec.md) | Cenas narrativas por ato, overlay com pausa | `.cursor/agents/story-scenes.md` | `.cursor/skills/story-scenes/` |
+| [achievements](achievements.spec.md) | Conquistas persistentes, progresso por evento, Wow | `.cursor/agents/achievements.md` | `.cursor/skills/achievements/` |
 
 ## Arquitetura global
 

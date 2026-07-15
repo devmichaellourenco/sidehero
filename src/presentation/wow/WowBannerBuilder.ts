@@ -77,7 +77,7 @@ function mapPendingAction(
   const iconMap: Record<typeof kind, string> = {
     chest: getAssetUrl(ASSETS.ui.chest),
     'inventory-upgrade': getAssetUrl(ASSETS.ui.inventory),
-    'upgrade-tree': getAssetUrl(ASSETS.ui.stage),
+    'upgrade-tree': getAssetUrl(ASSETS.ui.rune),
     'hero-points': getAssetUrl(ASSETS.ui.improvement),
   };
 

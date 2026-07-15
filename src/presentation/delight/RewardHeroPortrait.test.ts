@@ -7,10 +7,26 @@ describe('RewardHeroPortrait', () => {
       id: 'hero-berserker',
       heroClass: 'berserker',
       name: 'Ragnar',
+      ascensionId: null,
     })).toEqual({
       id: 'hero-berserker',
       heroClass: 'berserker',
       name: 'Ragnar',
+      ascensionId: null,
+    });
+  });
+
+  it('preserva ascensionId para sprite de evolução', () => {
+    expect(rewardHeroPortraitFromDto({
+      id: 'hero-1',
+      heroClass: 'knight',
+      name: 'Galneon',
+      ascensionId: 'knight_military_guerreiro',
+    })).toEqual({
+      id: 'hero-1',
+      heroClass: 'knight',
+      name: 'Galneon',
+      ascensionId: 'knight_military_guerreiro',
     });
   });
 

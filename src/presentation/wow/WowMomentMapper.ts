@@ -55,6 +55,10 @@ function mapKind(kind: RewardMoment['kind']): WowBanner['kind'] {
       return 'shop-purchase';
     case 'forge_created':
       return 'forge-created';
+    case 'achievement_progress':
+      return 'achievement-progress';
+    case 'achievement_unlocked':
+      return 'achievement-unlocked';
     case 'idle_report':
       return 'idle-report';
     default:
@@ -70,6 +74,10 @@ function eyebrowFor(kind: RewardMoment['kind']): string {
       return 'Progressão';
     case 'season_complete':
       return 'Conquista';
+    case 'achievement_unlocked':
+      return 'Achievement';
+    case 'achievement_progress':
+      return 'Progresso';
     case 'feature_unlock':
     case 'upgrade_purchased':
       return 'Desbloqueado';

@@ -18,6 +18,8 @@ export type WowBannerKind =
   | 'shop-purchase'
   | 'forge-created'
   | 'hero-unlock'
+  | 'achievement-progress'
+  | 'achievement-unlocked'
   | 'fallback';
 
 export type WowBannerPersistence = 'persistent' | 'ephemeral';

@@ -100,6 +100,7 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         combatFloats: result.combatFloats,
         combatSkillVfx: result.combatSkillVfx,
         sigilsAwarded: result.sigilsAwarded,
+        achievementUpdates: result.achievementUpdates,
       };
     }
     case 'RESUME_COMBAT_INTERMISSION': {

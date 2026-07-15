@@ -4303,16 +4303,6 @@ button.hero-skill-chip:hover {
   opacity: 0.85;
 }
 
-.upgrade-balance {
-  margin: 0 0 10px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.upgrade-balance strong {
-  color: var(--gold);
-}
-
 .upgrade-tree-shell {
   display: flex;
   flex-direction: column;
@@ -10732,6 +10722,15 @@ body.wow-celebration-open {
   font-size: 12px;
   line-height: 1.5;
   color: #3d3428;
+}
+
+.onboarding-inline-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  object-fit: contain;
+  margin: 0 0.15em;
 }
 
 .onboarding-actions {

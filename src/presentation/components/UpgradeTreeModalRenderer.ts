@@ -1,4 +1,3 @@
-import { GameStateDto } from '../../application/dto/GameStateDto';
 import { UPGRADE_BRANCH_LABELS } from '../../application/dto/UpgradeBranchDto';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
@@ -42,7 +41,6 @@ export class UpgradeTreeModalRenderer {
 
   render(
     container: HTMLElement,
-    state: GameStateDto,
     nodes: UpgradeNodeDto[],
     handlers: UpgradeTreeHandlers,
   ): void {
@@ -56,7 +54,6 @@ export class UpgradeTreeModalRenderer {
 
     this.nodeById = new Map(nodes.map((node) => [node.id, node]));
 
-    const goldIcon = imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'shop-gold-icon');
     const positioned = buildPositionedNodes(nodes);
     const viewBox = getUnifiedViewBox();
     const edges = buildUpgradeTreeEdges(nodes);
@@ -78,7 +75,6 @@ export class UpgradeTreeModalRenderer {
     const nodeMarkup = positioned.map((entry) => this.renderNode(entry, viewBox)).join('');
 
     container.innerHTML = `
-      <p class="upgrade-balance">Seu ouro: ${goldIcon} <strong>${state.gold}</strong></p>
       <div class="upgrade-tree-shell">
         <div class="upgrade-tree-toolbar">
           <button type="button" class="upgrade-tree-focus-btn" data-upgrade-focus-available>

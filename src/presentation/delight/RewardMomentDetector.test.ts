@@ -332,4 +332,56 @@ describe('RewardMomentDetector', () => {
       })?.kind,
     ).toBe('loot_received');
   });
+
+  it('celebra ascensão com portrait do sprite de evolução', () => {
+    const moment = detector.buildAscensionMoment({
+      id: 'hero-1',
+      name: 'Galneon',
+      heroClass: 'knight',
+      ascensionId: 'knight_military_guerreiro',
+    });
+
+    expect(moment.title).toBe('Ascensão!');
+    expect(moment.heroEmoji).toBeUndefined();
+    expect(moment.heroPortrait).toEqual({
+      id: 'hero-1',
+      heroClass: 'knight',
+      name: 'Galneon',
+      ascensionId: 'knight_military_guerreiro',
+    });
+  });
+
+  it('celebra unlock de achievement Hero - Out of the Side', () => {
+    const moment = detector.buildAchievementMoment({
+      id: 'hero_out_of_the_side',
+      title: 'Hero - Out of the Side',
+      description: 'Clear stage 1-1 for the first time.',
+      previousProgress: 0,
+      currentProgress: 1,
+      target: 1,
+      completed: true,
+      justCompleted: true,
+    });
+
+    expect(moment.kind).toBe('achievement_unlocked');
+    expect(moment.title).toBe('Hero - Out of the Side');
+    expect(moment.subtitle).toBe('Achievement desbloqueado!');
+    expect(moment.detailLines?.[0]).toBe('Clear stage 1-1 for the first time.');
+  });
+
+  it('celebra progresso parcial de achievement', () => {
+    const moment = detector.buildAchievementMoment({
+      id: 'future_multi_step',
+      title: 'Stub Multi',
+      description: 'Defeat 3 bosses.',
+      previousProgress: 1,
+      currentProgress: 2,
+      target: 3,
+      completed: false,
+      justCompleted: false,
+    });
+
+    expect(moment.kind).toBe('achievement_progress');
+    expect(moment.subtitle).toBe('Progresso: 2/3');
+  });
 });

@@ -185,7 +185,7 @@ export class GameHudController {
     ensureButtonIcon(this.optimizeLoadoutBtn, ASSETS.ui.attack);
     this.optimizeBadgeEl = ensureBadge(this.optimizeLoadoutBtn);
 
-    ensureButtonIcon(this.openUpgradesBtn, ASSETS.ui.stage);
+    ensureButtonIcon(this.openUpgradesBtn, ASSETS.ui.rune);
     this.upgradesBadgeEl = ensureBadge(this.openUpgradesBtn);
 
     ensureButtonIcon(this.openChestBtn, ASSETS.ui.chest);

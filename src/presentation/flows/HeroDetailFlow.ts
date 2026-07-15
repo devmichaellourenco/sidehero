@@ -219,7 +219,7 @@ export class HeroDetailFlow {
     this.afterMutation(response.state);
     const hero = response.state.heroes.find((entry) => entry.id === heroId);
     if (hero) {
-      this.rewards.celebrateAscension(hero.name, hero.emoji);
+      this.rewards.celebrateAscension(hero);
     }
   }
 

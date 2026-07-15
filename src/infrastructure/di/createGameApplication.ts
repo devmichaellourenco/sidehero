@@ -13,7 +13,9 @@ import { PartyService } from '../../domain/party/PartyService';
 import { GameStatePresenter } from '../../application/presenters/GameStatePresenter';
 import { ChromeStorageGameRepository } from '../storage/ChromeStorageGameRepository';
 import { ChromeStorageMetaRepository } from '../storage/ChromeStorageMetaRepository';
+import { ChromeStorageAchievementRepository } from '../storage/ChromeStorageAchievementRepository';
 import { MetaService } from '../../domain/meta/MetaService';
+import { AchievementService } from '../../domain/achievements/AchievementService';
 
 let appInstance: GameApplication | null = null;
 
@@ -22,6 +24,7 @@ function createDependencies(): GameApplicationDependencies {
   const upgradeService = new UpgradeService();
 
   const metaService = new MetaService();
+  const achievementService = new AchievementService();
 
   return {
     combatService: new CombatService(),
@@ -36,6 +39,7 @@ function createDependencies(): GameApplicationDependencies {
     divineForgeService: new DivineForgeService(lootService),
     presenter: new GameStatePresenter(upgradeService),
     metaService,
+    achievementService,
   };
 }
 
@@ -43,7 +47,13 @@ export function createGameApplication(): GameApplication {
   if (!appInstance) {
     const repository = new ChromeStorageGameRepository();
     const metaRepository = new ChromeStorageMetaRepository();
-    appInstance = new GameApplication(repository, metaRepository, createDependencies());
+    const achievementRepository = new ChromeStorageAchievementRepository();
+    appInstance = new GameApplication(
+      repository,
+      metaRepository,
+      achievementRepository,
+      createDependencies(),
+    );
   }
   return appInstance;
 }

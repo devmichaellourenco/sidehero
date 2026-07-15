@@ -7,7 +7,9 @@ import { SerialTaskRunner } from '../../infrastructure/background/SerialTaskRunn
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { MetaService } from '../../domain/meta/MetaService';
+import { AchievementService } from '../../domain/achievements/AchievementService';
 import { MemoryMetaRepository } from '../testing/MemoryMetaRepository';
+import { MemoryAchievementRepository } from '../testing/MemoryAchievementRepository';
 import { EquipGearUseCase } from './EquipGearUseCase';
 import { TickGameUseCase } from './TickGameUseCase';
 
@@ -64,6 +66,8 @@ describe('EquipGearUseCase com fila serial', () => {
       new MetaService(),
       new CombatPipeline(),
       presenter,
+      new MemoryAchievementRepository(),
+      new AchievementService(),
     );
     const runner = new SerialTaskRunner();
 

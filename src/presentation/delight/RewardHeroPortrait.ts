@@ -6,6 +6,7 @@ export interface RewardHeroPortrait {
   id: string;
   heroClass: string;
   name: string;
+  ascensionId?: string | null;
 }
 
 const UNLOCKABLE_CLASS_SET = new Set<string>(UNLOCKABLE_HERO_CLASSES);
@@ -15,11 +16,14 @@ const UNLOCK_HERO_IDS: Record<(typeof UNLOCKABLE_HERO_CLASSES)[number], string> 
   paladin: 'hero-paladin',
 };
 
-export function rewardHeroPortraitFromDto(hero: Pick<HeroDto, 'id' | 'heroClass' | 'name'>): RewardHeroPortrait {
+export function rewardHeroPortraitFromDto(
+  hero: Pick<HeroDto, 'id' | 'heroClass' | 'name' | 'ascensionId'>,
+): RewardHeroPortrait {
   return {
     id: hero.id,
     heroClass: hero.heroClass,
     name: hero.name,
+    ascensionId: hero.ascensionId ?? null,
   };
 }
 

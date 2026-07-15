@@ -87,6 +87,8 @@ export const ASSETS = {
     forge: 'ui/forge.png',
     improvement: 'ui/improvement.png',
     stage: 'ui/stage.png',
+    rune: 'ui/rune.png',
+    achievement: 'ui/achievement.png',
     arrowPrev: 'ui/arrow-prev.png',
     arrowNext: 'ui/arrow-next.png',
   },

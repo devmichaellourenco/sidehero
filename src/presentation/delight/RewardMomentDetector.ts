@@ -1,4 +1,5 @@
-import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto, HeroDto } from '../../application/dto/GameStateDto';
+import { AchievementUpdateDto } from '../../application/dto/AchievementDto';
 import {
   isCelebrationNamedGear,
   isChapterMilestonePhaseId,
@@ -22,6 +23,7 @@ import {
   REWARD_KIND_TIER,
 } from './RewardMomentCatalog';
 import { rewardHeroPortraitFromClass, rewardHeroPortraitFromDto } from './RewardHeroPortrait';
+import { RewardMoment } from './types/RewardMoment';
 
 let momentCounter = 0;
 
@@ -237,13 +239,40 @@ export class RewardMomentDetector {
     });
   }
 
-  buildAscensionMoment(heroName: string, heroEmoji: string): RewardMoment {
+  buildAscensionMoment(
+    hero: Pick<HeroDto, 'id' | 'name' | 'heroClass' | 'ascensionId'>,
+  ): RewardMoment {
     return buildMoment('upgrade_purchased', {
       title: 'Ascensão!',
-      subtitle: `${heroName} alcançou uma nova classe`,
+      subtitle: `${hero.name} alcançou uma nova classe`,
       tone: 'unlock',
-      heroEmoji,
+      heroPortrait: rewardHeroPortraitFromDto(hero),
       priority: REWARD_KIND_PRIORITY.feature_unlock,
+    });
+  }
+
+  buildAchievementMoments(updates: readonly AchievementUpdateDto[]): RewardMoment[] {
+    return updates.map((update) => this.buildAchievementMoment(update));
+  }
+
+  buildAchievementMoment(update: AchievementUpdateDto): RewardMoment {
+    const progressLabel = `${update.currentProgress}/${update.target}`;
+    if (update.justCompleted) {
+      return buildMoment('achievement_unlocked', {
+        title: update.title,
+        subtitle: 'Achievement desbloqueado!',
+        detailLines: [update.description, progressLabel],
+        tone: 'unlock',
+        iconUrl: getAssetUrl(ASSETS.ui.achievement),
+      });
+    }
+
+    return buildMoment('achievement_progress', {
+      title: update.title,
+      subtitle: `Progresso: ${progressLabel}`,
+      detailLines: [update.description],
+      tone: 'unlock',
+      iconUrl: getAssetUrl(ASSETS.ui.achievement),
     });
   }
 
@@ -345,6 +374,6 @@ export class RewardMomentDetector {
     if (feature === 'auto_battle') return getAssetUrl(ASSETS.ui.attack);
     if (feature === 'background_tick') return getAssetUrl(ASSETS.ui.energy);
     if (feature.includes('chest')) return getAssetUrl(ASSETS.ui.chest);
-    return getAssetUrl(ASSETS.ui.stage);
+    return getAssetUrl(ASSETS.ui.rune);
   }
 }

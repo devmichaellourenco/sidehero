@@ -13,6 +13,7 @@ const MESO_CELEBRATION_KINDS = new Set<RewardMoment['kind']>([
   'upgrade_purchased',
   'forge_created',
   'loot_received',
+  'achievement_progress',
 ]);
 
 export function isCelebrationMoment(moment: RewardMoment): boolean {

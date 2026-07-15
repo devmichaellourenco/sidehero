@@ -7,14 +7,15 @@ import { AscensionOptionDto } from '../dto/AscensionOptionDto';
 import { SkillNodeDto } from '../dto/SkillNodeDto';
 import { UpgradeNodeDto } from '../dto/UpgradeNodeDto';
 import { MetaNodeDto } from '../dto/MetaDto';
+import { AchievementUpdateDto } from '../dto/AchievementDto';
 
 export type SpendTargetMessage =
   | { type: 'attribute'; key: 'str' | 'dex' | 'int' }
   | { type: 'skill'; skillId: string };
 
 export type GameMessage =
-  | { type: 'SET_PARTY_SLOT'; slotIndex: number; heroId: string }
-  | { type: 'MARK_ACT_SCENE_VIEWED'; sceneId: string };
+  | { type: 'GET_STATE' }
+  | { type: 'MARK_ACT_SCENE_VIEWED'; sceneId: string }
   | { type: 'GET_CAMPAIGN_OVERVIEW' }
   | { type: 'SELECT_PHASE'; phaseId: string }
   | { type: 'NEW_GAME' }
@@ -76,6 +77,7 @@ export type GameResponse =
       purchasableMetaCount?: number;
       purchasedMetaUpgradeId?: string;
       sigilsAwarded?: number;
+      achievementUpdates?: AchievementUpdateDto[];
       forgedGear?: GearDto;
       salvageGold?: number;
       campaign?: CampaignOverviewDto;

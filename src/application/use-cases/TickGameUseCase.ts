@@ -1,12 +1,15 @@
 import { PhaseCombatHandlers } from '../../domain/campaign/PhaseCombatHandlers';
-import { PhaseRun } from '../../domain/campaign/PhaseRun';
 import { MetaBonusScope } from '../../domain/meta/MetaBonusScope';
 import { MetaService } from '../../domain/meta/MetaService';
+import { AchievementService } from '../../domain/achievements/AchievementService';
 import { ICombatService } from '../../domain/services/ICombatService';
+import { IAchievementProgressRepository } from '../../domain/repositories/IAchievementProgressRepository';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { IMetaProgressRepository } from '../../domain/repositories/IMetaProgressRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
+import { mapAchievementUpdates } from '../mappers/AchievementMapper';
 import { mapMetaSummary } from '../mappers/MetaMapper';
+import { AchievementUpdateDto } from '../dto/AchievementDto';
 import { CombatFloatingEventDto } from '../dto/CombatFloatingEventDto';
 import { CombatSkillVfxDto } from '../dto/CombatSkillVfxDto';
 import { GameStateDto } from '../dto/GameStateDto';
@@ -16,6 +19,7 @@ export interface TickGameResult {
   combatFloats: CombatFloatingEventDto[];
   combatSkillVfx: CombatSkillVfxDto[];
   sigilsAwarded: number;
+  achievementUpdates: AchievementUpdateDto[];
 }
 
 export class TickGameUseCase {
@@ -27,6 +31,8 @@ export class TickGameUseCase {
     private readonly metaService: MetaService,
     private readonly combatService: ICombatService,
     private readonly presenter: GameStatePresenter,
+    private readonly achievementRepository: IAchievementProgressRepository,
+    private readonly achievementService: AchievementService,
   ) {}
 
   async execute(
@@ -35,6 +41,7 @@ export class TickGameUseCase {
   ): Promise<TickGameResult> {
     let state = await this.repository.load();
     const wasSeasonCompleted = state.campaignProgress.seasonCompleted;
+    const clearedBefore = new Set(state.campaignProgress.clearedPhaseIds);
     const combatFloats: CombatFloatingEventDto[] = [];
     const combatSkillVfx: CombatSkillVfxDto[] = [];
 
@@ -66,6 +73,7 @@ export class TickGameUseCase {
         combatFloats: [],
         combatSkillVfx: [],
         sigilsAwarded: 0,
+        achievementUpdates: [],
       };
     }
 
@@ -93,6 +101,19 @@ export class TickGameUseCase {
       sigilsAwarded = awarded.sigilsAwarded;
     }
 
+    const newlyCleared = state.campaignProgress.clearedPhaseIds.filter(
+      (phaseId) => !clearedBefore.has(phaseId),
+    );
+    let achievementUpdates: AchievementUpdateDto[] = [];
+    if (newlyCleared.length > 0) {
+      const progress = await this.achievementRepository.load();
+      const recorded = this.achievementService.recordPhaseClears(progress, newlyCleared);
+      if (recorded.updates.length > 0) {
+        await this.achievementRepository.save(recorded.progress);
+        achievementUpdates = mapAchievementUpdates(recorded.updates);
+      }
+    }
+
     await this.repository.save(state);
     const meta = await this.metaRepository.load();
 
@@ -104,6 +125,7 @@ export class TickGameUseCase {
       combatFloats,
       combatSkillVfx,
       sigilsAwarded,
+      achievementUpdates,
     };
   }
 }

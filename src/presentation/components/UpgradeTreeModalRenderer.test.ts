@@ -1,7 +1,6 @@
 // @vitest-environment happy-dom
 
 import { describe, expect, it, vi } from 'vitest';
-import { GameStateDto } from '../../application/dto/GameStateDto';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { UpgradeTreeModalRenderer } from './UpgradeTreeModalRenderer';
 import * as UpgradeTreeViewportBinder from './UpgradeTreeViewportBinder';
@@ -20,12 +19,6 @@ function node(partial: Partial<UpgradeNodeDto> & Pick<UpgradeNodeDto, 'id' | 'br
   };
 }
 
-function minimalState(gold = 500): GameStateDto {
-  return {
-    gold,
-  } as GameStateDto;
-}
-
 describe('UpgradeTreeModalRenderer', () => {
   const renderer = new UpgradeTreeModalRenderer();
 
@@ -37,7 +30,7 @@ describe('UpgradeTreeModalRenderer', () => {
       node({ id: 'log_filter_1', branch: 'qol', status: 'locked', name: 'Log resumido I' }),
     ];
 
-    renderer.render(container, minimalState(), nodes, { onPurchase: vi.fn() });
+    renderer.render(container, nodes, { onPurchase: vi.fn() });
 
     expect(container.querySelector('[data-upgrade-tree-viewport]')).not.toBeNull();
     expect(container.querySelector('.upgrade-tree-stage')).not.toBeNull();
@@ -48,6 +41,8 @@ describe('UpgradeTreeModalRenderer', () => {
     expect(container.innerHTML).not.toContain('upgrade-intro');
     expect(container.innerHTML).not.toContain('Arraste para mover');
     expect(container.innerHTML).not.toContain('upgrade-branch-tab');
+    expect(container.innerHTML).not.toContain('upgrade-balance');
+    expect(container.innerHTML).not.toContain('Seu ouro');
   });
 
   it('dispara onPurchase ao clicar no nodo disponível', () => {
@@ -64,7 +59,7 @@ describe('UpgradeTreeModalRenderer', () => {
       }),
     ];
 
-    renderer.render(container, minimalState(200), nodes, { onPurchase });
+    renderer.render(container, nodes, { onPurchase });
 
     const upgradeNode = container.querySelector(
       '[data-upgrade-node="auto_open_chests_1"]',
@@ -88,7 +83,7 @@ describe('UpgradeTreeModalRenderer', () => {
       }),
     ];
 
-    renderer.render(container, minimalState(10), nodes, { onPurchase: vi.fn() });
+    renderer.render(container, nodes, { onPurchase: vi.fn() });
 
     const upgradeNode = container.querySelector(
       '[data-upgrade-node="auto_open_chests_1"]',
@@ -110,7 +105,7 @@ describe('UpgradeTreeModalRenderer', () => {
     const focusSpy = vi.spyOn(UpgradeTreeViewportBinder, 'focusUpgradeTreeNode');
 
     renderer.beginSession();
-    renderer.render(container, minimalState(), nodes, { onPurchase: vi.fn() });
+    renderer.render(container, nodes, { onPurchase: vi.fn() });
 
     const stage = container.querySelector('.upgrade-tree-stage') as HTMLElement;
     stage.style.transform = 'translate(120px, 80px) scale(1.2)';
@@ -120,7 +115,7 @@ describe('UpgradeTreeModalRenderer', () => {
       node({ id: 'auto_battle_3', branch: 'combat', status: 'owned', name: 'Auto-batalha III' }),
     ];
     focusSpy.mockClear();
-    renderer.render(container, minimalState(400), ownedNodes, { onPurchase: vi.fn() });
+    renderer.render(container, ownedNodes, { onPurchase: vi.fn() });
 
     const nextStage = container.querySelector('.upgrade-tree-stage') as HTMLElement;
     expect(nextStage.style.transform).toBe('translate(120px, 80px) scale(1.2)');

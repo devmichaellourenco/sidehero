@@ -25,6 +25,8 @@ export type RewardMomentKind =
   | 'loot_received'
   | 'shop_purchase'
   | 'forge_created'
+  | 'achievement_progress'
+  | 'achievement_unlocked'
   | 'idle_report';
 
 export interface RewardMomentCta {

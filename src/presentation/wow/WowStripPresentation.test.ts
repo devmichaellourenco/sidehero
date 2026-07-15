@@ -47,6 +47,28 @@ describe('WowCelebrationPolicy', () => {
         tone: 'loot',
       }),
     ).toBe(true);
+
+    expect(
+      isCelebrationMoment({
+        id: 'ach-1',
+        kind: 'achievement_unlocked',
+        tier: 'macro',
+        priority: 90,
+        title: 'Hero - Out of the Side',
+        tone: 'unlock',
+      }),
+    ).toBe(true);
+
+    expect(
+      isCelebrationMoment({
+        id: 'ach-prog-1',
+        kind: 'achievement_progress',
+        tier: 'meso',
+        priority: 72,
+        title: 'Stub',
+        tone: 'unlock',
+      }),
+    ).toBe(true);
   });
 
   it('ignora eventos rotineiros', () => {
@@ -138,5 +160,20 @@ describe('WowStripPresentation', () => {
     expect(milestone?.eyebrow).toBe('Marco da Campanha');
     expect(named?.kind).toBe('loot-received');
     expect(named?.gear?.rarity).toBe('legendary');
+  });
+
+  it('mapeia achievement unlocked com eyebrow correto', () => {
+    const mapped = mapRewardMomentToWowBanner({
+      id: 'ach-1',
+      kind: 'achievement_unlocked',
+      tier: 'macro',
+      priority: 90,
+      title: 'Hero - Out of the Side',
+      subtitle: 'Achievement desbloqueado!',
+      tone: 'unlock',
+    });
+
+    expect(mapped?.kind).toBe('achievement-unlocked');
+    expect(mapped?.eyebrow).toBe('Achievement');
   });
 });

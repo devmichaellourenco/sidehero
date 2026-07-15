@@ -6,7 +6,9 @@ import { IGameStateRepository } from '../../domain/repositories/IGameStateReposi
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { MetaService } from '../../domain/meta/MetaService';
+import { AchievementService } from '../../domain/achievements/AchievementService';
 import { MemoryMetaRepository } from '../testing/MemoryMetaRepository';
+import { MemoryAchievementRepository } from '../testing/MemoryAchievementRepository';
 import { TickGameUseCase } from './TickGameUseCase';
 
 class MemoryRepository implements IGameStateRepository {
@@ -41,6 +43,8 @@ describe('TickGameUseCase — retomada de pausa', () => {
       metaService,
       new CombatPipeline(),
       presenter,
+      new MemoryAchievementRepository(),
+      new AchievementService(),
     );
     const result = await tick.execute(1, { restartCurrentPhase: true });
 
@@ -65,6 +69,8 @@ describe('TickGameUseCase — retomada de pausa', () => {
       metaService,
       new CombatPipeline(),
       presenter,
+      new MemoryAchievementRepository(),
+      new AchievementService(),
     );
     const result = await tick.execute(1, { restartCurrentPhase: true });
 

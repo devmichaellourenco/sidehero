@@ -235,7 +235,7 @@ export class ModalStackController {
         });
         break;
       case 'upgrades':
-        this.upgradeTreeModal.render(container, state, this.shopFlow.state.upgradeNodes, {
+        this.upgradeTreeModal.render(container, this.shopFlow.state.upgradeNodes, {
           onPurchase: (upgradeId) => {
             void this.shopFlow.purchaseUpgrade(upgradeId);
           },
