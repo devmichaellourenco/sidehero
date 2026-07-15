@@ -1189,6 +1189,20 @@ h2 {
     0 0 1px rgba(0, 0, 0, 1);
 }
 
+.battle-float--level-up {
+  color: #ffe566;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  -webkit-text-stroke: 0.55px rgba(40, 20, 0, 0.85);
+  text-shadow:
+    0 0 14px rgba(255, 229, 102, 0.95),
+    0 0 28px rgba(255, 200, 40, 0.85),
+    0 0 8px rgba(255, 255, 255, 0.75),
+    0 2px 5px rgba(0, 0, 0, 0.95),
+    0 0 1px rgba(0, 0, 0, 1);
+  animation: battle-float-level-up 1.85s ease-out forwards;
+}
+
 @keyframes battle-float-rise {
   0% {
     opacity: 0;
@@ -1209,6 +1223,34 @@ h2 {
   100% {
     opacity: 0;
     transform: translate(-50%, -46px) scale(1);
+  }
+}
+
+@keyframes battle-float-level-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 12px) scale(0.55);
+    filter: brightness(1.6);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-50%, -2px) scale(1.35);
+    filter: brightness(1.45);
+  }
+  28% {
+    opacity: 1;
+    transform: translate(-50%, -10px) scale(1.12);
+    filter: brightness(1.2);
+  }
+  62% {
+    opacity: 1;
+    transform: translate(-50%, -30px) scale(1.08);
+    filter: brightness(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -54px) scale(1);
+    filter: brightness(1);
   }
 }
 
@@ -6586,6 +6628,16 @@ body.modal-open {
   min-height: 0;
   overflow-y: auto;
   padding: 10px 12px 16px;
+}
+
+.hero-skills-subtitle {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  color: #d8e4ff;
+}
+
+.hero-skills-subtitle--evolution {
+  margin-top: 16px;
 }
 
 .hero-skills-tab-scroll .skill-list {

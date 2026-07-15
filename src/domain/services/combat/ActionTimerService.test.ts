@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { resolveActionTimeRatio } from './ActionTimerTypes';
 import { ActionTimerService } from './ActionTimerService';
 import { Hero } from '../../entities/Hero';
-import { Enemy } from '../../entities/Enemy';
 
 describe('ActionTimerTypes', () => {
   it('retorna barra cheia quando o timer está pronto', () => {
@@ -38,11 +37,12 @@ describe('ActionTimerService', () => {
 
   it('migra timers legados numéricos via normalize no advance', () => {
     const hero = Hero.createStarter('h1', 'knight', 'Gal');
-    const enemy = Enemy.forStage(1);
     const legacy = { 'hero:h1': 0.4 } as unknown as ReturnType<ActionTimerService['createInitial']>;
 
     const advanced = service.advanceAll(legacy, 0.1);
-    expect(advanced['hero:h1']).toMatchObject({ remaining: 0.3, total: 0.4 });
-    expect(service.listReadyActors(advanced, [hero], [enemy])).toHaveLength(0);
+    expect(advanced['hero:h1']?.total).toBe(0.4);
+    expect(advanced['hero:h1']?.remaining).toBeCloseTo(0.3);
+    // Sem entrada de timer, inimigo aparece "pronto" (remaining 0) — escopo só do herói migrado.
+    expect(service.listReadyActors(advanced, [hero], [])).toHaveLength(0);
   });
 });

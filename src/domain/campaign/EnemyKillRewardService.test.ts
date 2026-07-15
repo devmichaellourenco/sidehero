@@ -6,8 +6,11 @@ import { EnemyKillRewardService } from './EnemyKillRewardService';
 import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
+import { Hero } from '../entities/Hero';
+import { Experience } from '../value-objects/Experience';
 import { Stats } from '../value-objects/Stats';
 import { ActionTimerService } from '../services/combat/ActionTimerService';
+import { expRequiredToAdvanceFromLevel } from '../progression/HeroLevelXpCatalog';
 
 describe('EnemyKillRewardService', () => {
   const service = new EnemyKillRewardService();
@@ -50,6 +53,7 @@ describe('EnemyKillRewardService', () => {
     expect(result.state.gold.amount).toBeGreaterThan(0);
     expect(result.state.activeHeroes()[0].experience.current).toBeGreaterThan(0);
     expect(result.combat.hasRewardedEnemy(enemy.id)).toBe(true);
+    expect(result.levelUpHeroIds).toEqual([]);
     vi.restoreAllMocks();
   });
 
@@ -87,6 +91,33 @@ describe('EnemyKillRewardService', () => {
     const expectedXp = Math.floor(enemy.xpReward * CAMPAIGN_REPLAY_XP_MULTIPLIER);
     expect(result.state.gold.amount).toBe(expectedGold);
     expect(result.state.activeHeroes()[0].experience.current).toBe(expectedXp);
+    vi.restoreAllMocks();
+  });
+
+  it('lista heróis ativos que sobem de nível no kill', () => {
+    const phaseId = buildPhaseId(1, 2);
+    let state = GameState.initial().withCampaignProgress(
+      GameState.initial().campaignProgress.withSelectedPhase(phaseId),
+    );
+    const need = expRequiredToAdvanceFromLevel(1);
+    const leveledRoster = state.activeHeroes().map((hero) =>
+      Hero.restore({
+        ...hero.toProps(),
+        experience: Experience.restore(need - 1, need, 1),
+      }),
+    );
+    state = state.withRosterHeroes([...leveledRoster, ...state.benchHeroes()]);
+
+    const combat = combatWithEnemies(state, phaseId, 0);
+    const enemy = combat.enemies[0];
+    const defeated = defeatEnemy(combat.enemies, enemy.id);
+
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
+
+    expect(result.levelUpHeroIds.length).toBeGreaterThan(0);
+    expect(result.levelUpHeroIds).toEqual(leveledRoster.map((hero) => hero.id));
+    expect(result.state.activeHeroes()[0].level).toBeGreaterThan(1);
     vi.restoreAllMocks();
   });
 

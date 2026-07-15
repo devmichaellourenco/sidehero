@@ -35,7 +35,7 @@ export class HeroDetailFlow {
     if (tab === 'skills' || tab === 'sheet') {
       await this.loadSkillTree(heroId);
     }
-    if (tab === 'class') {
+    if (tab === 'skills' || tab === 'class') {
       await this.loadAscensionTree(heroId);
     }
   }
@@ -49,7 +49,12 @@ export class HeroDetailFlow {
 
   async loadAscensionTree(heroId: string): Promise<void> {
     const response = await this.client.send({ type: 'GET_HERO_ASCENSION_TREE', heroId });
-    if (!response.ok) return;
+    if (!response.ok) {
+      this.ascensionOptions = [];
+      this.ascensionName = null;
+      this.ascensionSkillNodes = [];
+      return;
+    }
 
     this.ascensionOptions = response.ascensionOptions ?? [];
     this.ascensionName = response.ascensionName ?? null;
@@ -60,7 +65,7 @@ export class HeroDetailFlow {
     this.onTabWillChange?.(tab);
     this.heroDetailModal.setActiveTab(tab);
     if (tab === 'skills') {
-      await this.loadSkillTree(heroId);
+      await Promise.all([this.loadSkillTree(heroId), this.loadAscensionTree(heroId)]);
     }
     if (tab === 'class') {
       await this.loadAscensionTree(heroId);

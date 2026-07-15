@@ -8,7 +8,8 @@ export type CombatFloatKind =
   | 'crit-heal'
   | 'crit-buff'
   | 'buff'
-  | 'debuff';
+  | 'debuff'
+  | 'level-up';
 
 export interface CombatFloatingEvent {
   target: CombatFloatTarget;
@@ -62,4 +63,13 @@ export function createStatusImpactEvent(
     kind === 'buff' && isCrit ? 'crit-buff' : kind;
 
   return { target, targetId, kind: resolvedKind, amount };
+}
+
+export function createLevelUpEvent(heroId: string, newLevel: number): CombatFloatingEvent {
+  return {
+    target: 'hero',
+    targetId: heroId,
+    kind: 'level-up',
+    amount: newLevel,
+  };
 }

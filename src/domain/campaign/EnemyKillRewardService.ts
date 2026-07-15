@@ -21,6 +21,8 @@ export interface KillRewardBatchResult {
   state: GameState;
   combat: CombatState;
   events: string[];
+  /** Heróis da party ativa que subiram de nível neste lote (para float na strip). */
+  levelUpHeroIds: string[];
 }
 
 export class EnemyKillRewardService {
@@ -34,22 +36,28 @@ export class EnemyKillRewardService {
   ): KillRewardBatchResult {
     const meta = combat.encounterMeta;
     if (!meta) {
-      return { state, combat, events: [] };
+      return { state, combat, events: [], levelUpHeroIds: [] };
     }
 
     const newlyDefeated = this.findNewlyDefeated(beforeEnemies, afterEnemies, combat);
     let nextState = state;
     let nextCombat = combat;
     const events: string[] = [];
+    const levelUpHeroIds: string[] = [];
 
     for (const enemy of newlyDefeated) {
       const result = this.applySingleKill(nextState, nextCombat, enemy, meta);
       nextState = result.state;
       nextCombat = result.combat;
       events.push(...result.events);
+      for (const heroId of result.levelUpHeroIds) {
+        if (!levelUpHeroIds.includes(heroId)) {
+          levelUpHeroIds.push(heroId);
+        }
+      }
     }
 
-    return { state: nextState, combat: nextCombat, events };
+    return { state: nextState, combat: nextCombat, events, levelUpHeroIds };
   }
 
   private findNewlyDefeated(
@@ -101,6 +109,7 @@ export class EnemyKillRewardService {
 
     let nextState = state;
     const rewardParts: string[] = [];
+    const levelUpHeroIds: string[] = [];
 
     if (gold > 0) {
       nextState = nextState.withGold(nextState.gold.add(gold));
@@ -108,7 +117,13 @@ export class EnemyKillRewardService {
     }
 
     if (xp > 0) {
-      const activeUpdates = nextState.activeHeroes().map((hero) => hero.gainExperience(xp));
+      const activeBefore = nextState.activeHeroes();
+      const activeUpdates = activeBefore.map((hero) => hero.gainExperience(xp));
+      for (let i = 0; i < activeBefore.length; i += 1) {
+        if (activeUpdates[i]!.level > activeBefore[i]!.level) {
+          levelUpHeroIds.push(activeUpdates[i]!.id);
+        }
+      }
       const benchXp = BenchXpPolicy.benchExperience(xp);
       const benchUpdates =
         benchXp > 0 ? nextState.benchHeroes().map((hero) => hero.gainExperience(benchXp)) : [];
@@ -163,6 +178,7 @@ export class EnemyKillRewardService {
       state: nextState,
       combat: combat.withRewardedEnemy(enemy.id),
       events: rewardParts,
+      levelUpHeroIds,
     };
   }
 

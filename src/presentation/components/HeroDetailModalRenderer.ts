@@ -192,13 +192,12 @@ export class HeroDetailModalRenderer {
       case 'attributes':
         return renderHeroAttributesTab(hero);
       case 'skills':
-        return renderHeroSkillsTab(hero, this.skillNodes);
+        return renderHeroSkillsTab(hero, this.skillNodes, this.ascensionSkillNodes);
       case 'class':
         return renderHeroClassTab({
           hero,
           options: this.ascensionOptions,
           ascensionName: this.ascensionName,
-          ascensionSkillNodes: this.ascensionSkillNodes,
         });
       default:
         return renderHeroSheetTab();
@@ -237,7 +236,7 @@ export class HeroDetailModalRenderer {
       });
     });
 
-    if (this.activeTab === 'skills' || (this.activeTab === 'class' && this.ascensionSkillNodes.length > 0)) {
+    if (this.activeTab === 'skills') {
       bindSkillSlotAssignment(container, {
         onAssign: (skillId, slotIndex) => {
           handlers.onAssignSkillSlot(hero.id, skillId, slotIndex);

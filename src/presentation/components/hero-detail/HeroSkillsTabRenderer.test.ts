@@ -53,4 +53,24 @@ describe('renderHeroSkillsTab', () => {
     expect(html).not.toContain('>Inativa<');
     expect(html).not.toContain('>Disponível<');
   });
+
+  it('mostra skills de evolução na aba Skills (não na Classe)', () => {
+    const hero = {
+      ...minimalHero(),
+      ascensionId: 'knight_warden',
+    } as HeroDto;
+    const evolution = skillNode({
+      id: 'mil_gen_decree',
+      name: 'Decreto do General',
+      scope: 'ascension',
+      scopeLabel: 'Ascensão',
+    });
+
+    const html = renderHeroSkillsTab(hero, [skillNode()], [evolution]);
+
+    expect(html).toContain('Skills de evolução');
+    expect(html).toContain('Decreto do General');
+    expect(html).toContain('data-ascension-allocate="mil_gen_decree"');
+    expect(html).toContain('data-skill-allocate="thrust"');
+  });
 });

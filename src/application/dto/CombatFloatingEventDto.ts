@@ -7,7 +7,8 @@ export type CombatFloatKind =
   | 'crit-heal'
   | 'crit-buff'
   | 'buff'
-  | 'debuff';
+  | 'debuff'
+  | 'level-up';
 
 export interface CombatFloatingEventDto {
   target: 'hero' | 'enemy';

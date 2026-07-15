@@ -20,7 +20,7 @@ import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCa
 import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill';
 import { ActionTimerService } from './ActionTimerService';
 import { CombatActionExecutor } from './CombatActionExecutor';
-import { CombatFloatingEvent, createDamageEvent } from './CombatFloatingEvent';
+import { CombatFloatingEvent, createDamageEvent, createLevelUpEvent } from './CombatFloatingEvent';
 import { CombatSkillVfxEvent, createSkillVfxEvent } from './CombatSkillVfxEvent';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
@@ -440,6 +440,13 @@ export class CombatTurnPhase {
     nextState = killBatch.state;
     nextCombat = killBatch.combat;
     events.push(...killBatch.events);
+
+    for (const heroId of killBatch.levelUpHeroIds) {
+      const leveled = nextState.activeHeroes().find((hero) => hero.id === heroId);
+      if (leveled) {
+        floatingEvents.push(createLevelUpEvent(heroId, leveled.level));
+      }
+    }
 
     return {
       state: nextState,

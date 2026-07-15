@@ -36,7 +36,6 @@ describe('renderHeroClassTab', () => {
       hero: minimalHero(),
       options: [ascensionOption()],
       ascensionName: null,
-      ascensionSkillNodes: [],
     });
 
     expect(html).toContain('ascension-moment-header');
@@ -65,7 +64,6 @@ describe('renderHeroClassTab', () => {
         }),
       ],
       ascensionName: 'Clériga Sagrada',
-      ascensionSkillNodes: [],
     });
 
     expect(html).toContain('ascension-moment-header--upgrade');
@@ -75,5 +73,7 @@ describe('renderHeroClassTab', () => {
     expect(html).not.toContain('Evoluir agora');
     expect(html).not.toContain('Evolução:');
     expect(html).not.toContain('hero-class-portrait');
+    expect(html).not.toContain('Skills de evolução');
+    expect(html).not.toContain('data-ascension-allocate');
   });
 });

@@ -1,5 +1,8 @@
 import { CombatFloatingEventDto } from '../../application/dto/CombatFloatingEventDto';
-import { resolveBattleFloatClass } from './BattleFloatingTextPresentation';
+import {
+  resolveBattleFloatClass,
+  resolveBattleFloatLabel,
+} from './BattleFloatingTextPresentation';
 
 const FLOAT_DURATION_MS = 1750;
 
@@ -41,15 +44,11 @@ export class BattleFloatingTextController {
   }
 
   private spawn(event: CombatFloatingEventDto, anchor: HTMLElement, offsetIndex: number): void {
+    const label = resolveBattleFloatLabel(event);
+    if (!label) return;
+
     const anchorRect = anchor.getBoundingClientRect();
     const stripRect = this.battleStrip.getBoundingClientRect();
-    const label =
-      event.kind === 'heal' || event.kind === 'crit-heal' || event.kind === 'crit-buff'
-        ? `+${event.amount}`
-        : event.kind === 'crit' || event.kind === 'damage'
-          ? `-${event.amount}`
-          : '';
-    if (!label) return;
 
     const float = document.createElement('span');
     float.className = `battle-float battle-float--${resolveBattleFloatClass(event)}`;
