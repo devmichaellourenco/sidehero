@@ -15,6 +15,7 @@ import {
 import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { gearDragAttr } from '../gear/GearDragDropBinder';
 import { renderInventoryGearAction } from './InventoryGearActionPresentation';
+import { renderTooltipPreviewImage } from './TooltipPreviewPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -89,6 +90,7 @@ export function renderStashGridSlot(
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'inventory-grid-slot-rarity')}
       </span>
       <span class="inventory-gear-tooltip-content hidden">
+        ${renderTooltipPreviewImage(getGearSprite(gear), gear.name)}
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}</span>
         <span class="inventory-gear-tooltip-stats">${renderGearBonusLines(gear)}</span>

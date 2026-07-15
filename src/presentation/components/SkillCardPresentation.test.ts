@@ -75,6 +75,7 @@ describe('SkillCardPresentation', () => {
     const html = renderSkillCard(skillNode(), cardOptions);
 
     expect(html).toContain('hero-skill-chip-tooltip');
+    expect(html).toContain('tooltip-preview-image');
     expect(html).toContain('Lança uma esfera flamejante');
     expect(html).toContain('hero-skill-chip-tooltip-stat-label');
     expect(html).toContain('hero-skill-chip-tooltip-reqs');

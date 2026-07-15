@@ -2185,6 +2185,22 @@ button.hero-skill-chip:hover {
   text-underline-offset: 3px;
 }
 
+.tooltip-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 6px;
+}
+
+.tooltip-preview-image {
+  height: 82px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
 .hero-skill-chip-tooltip-name {
   font-family: var(--font-heading);
   font-size: 12px;

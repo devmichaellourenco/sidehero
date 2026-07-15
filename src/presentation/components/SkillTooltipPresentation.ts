@@ -1,7 +1,9 @@
 import { HeroActiveSkillStatDto } from '../../application/dto/GameStateDto';
 import { SkillBranchDto, SkillNodeStatusDto, SkillRequirementDto } from '../../application/dto/SkillNodeDto';
 import { getSkillElementLabel, getSkillPrimaryElement } from '../../domain/progression/combat/SkillElementResolver';
+import { getSkillIconUrl } from '../assets/SkillIconCatalog';
 import { renderElementPip } from './ElementPipPresentation';
+import { renderTooltipPreviewImage } from './TooltipPreviewPresentation';
 
 export interface SkillTooltipData {
   id: string;
@@ -124,6 +126,7 @@ export function renderSkillTooltipContent(skill: SkillTooltipData): string {
 
   return `
     <span class="hero-skill-chip-tooltip" role="tooltip">
+      ${renderTooltipPreviewImage(getSkillIconUrl(skill.id), skill.name)}
       <strong class="hero-skill-chip-tooltip-name">${escapeHtml(skill.name)}</strong>
       <span class="hero-skill-chip-tooltip-meta">
         ${escapeHtml(skill.branchLabel)} · ${escapeHtml(skill.scopeLabel)} · ${escapeHtml(skill.scalingLabel)}${renderSkillElementMeta(skill)}

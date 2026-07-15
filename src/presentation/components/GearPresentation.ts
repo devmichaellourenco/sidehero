@@ -11,6 +11,7 @@ import { renderGearRequirementLines } from './GearRequirementPresentation';
 import { gearDragAttr, gearDropTargetAttr } from '../gear/GearDragDropBinder';
 import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { GearDragSource } from '../gear/GearDragDropPolicy';
+import { renderTooltipPreviewImage } from './TooltipPreviewPresentation';
 
 export const GEAR_SLOTS = ['weapon', 'armor', 'accessory'] as const;
 export type GearSlotKey = (typeof GEAR_SLOTS)[number];
@@ -248,6 +249,7 @@ export function renderEquipmentSlotTooltip(
 
     return `
       <span class="equipment-slot-tooltip" role="tooltip">
+        ${renderTooltipPreviewImage(getGearSprite(gear), gear.name)}
         <strong class="equipment-slot-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="equipment-slot-tooltip-meta">${slotLabel} · ${rarityLabel}</span>
         <span class="equipment-slot-tooltip-stats">${renderGearBonusLines(gear)}</span>

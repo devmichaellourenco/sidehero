@@ -63,6 +63,7 @@ describe('InventoryGridPresentation', () => {
     });
 
     expect(html).toContain('inventory-gear-tooltip-stats');
+    expect(html).toContain('tooltip-preview-image');
     expect(html).not.toContain('data-inventory-equip=');
     expect(html).not.toContain('inventory-gear-action--equip');
     expect(html).not.toContain('data-move-to-stash=');

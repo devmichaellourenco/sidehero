@@ -19,6 +19,7 @@ import {
   gearRaritySurfaceClass,
   normalizeGearRarity,
 } from './GearRarityPresentation';
+import { renderTooltipPreviewImage } from './TooltipPreviewPresentation';
 
 export const DIVINE_FORGE_FUSE_COUNT = FORGE_FUSE_REQUIRED_COUNT;
 
@@ -99,6 +100,7 @@ function renderForgeSlot(
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'inventory-grid-slot-rarity')}
       </span>
       <span class="inventory-gear-tooltip-content hidden">
+        ${renderTooltipPreviewImage(getGearSprite(gear), gear.name)}
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}${options.inStash ? ' · Baú' : ''}</span>
         <span class="inventory-gear-tooltip-stats">${renderGearBonusLines(gear)}</span>

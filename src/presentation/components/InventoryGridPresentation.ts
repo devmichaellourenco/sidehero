@@ -26,6 +26,7 @@ import {
   renderGearRequirementLines,
 } from './GearRequirementPresentation';
 import { gearDragAttr } from '../gear/GearDragDropBinder';
+import { renderTooltipPreviewImage } from './TooltipPreviewPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -149,6 +150,7 @@ export function renderInventoryGridSlot(
       <span class="inventory-grid-badge inventory-grid-badge--${options.upgradeStatus}" aria-hidden="true">${badge}</span>
       ${returnedBadge}
       <span class="inventory-gear-tooltip-content hidden">
+        ${renderTooltipPreviewImage(getGearSprite(gear), gear.name)}
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}</span>
         <span class="inventory-gear-tooltip-equipped">Equipado: ${equipped ? escapeHtml(equipped.name) : '—'}</span>
