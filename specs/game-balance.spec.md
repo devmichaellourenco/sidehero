@@ -27,7 +27,7 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Elementos** | Cada elemento usa mitigação do tipo; multi-componente; DOT | `combat-campaign`, `skills-progression` | `DamageElement`, `ResistanceProfile`, `HeroCombatSkillCatalog`, `EnemyMonsterCombatSkillCatalog` |
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
 | **Waves e fases** | HP/ATK/DEF inimigos por tier; boss vs trash; handcrafted | `combat-campaign` | `StageScalingCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
-| **Skills e progressão** | `basePower`, cooldowns, ranks, ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `HeroLevelXpCatalog` |
+| **Skills e progressão** | `Base × (powerPerRank × nível) × (attr × fator)`; cooldowns; ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `SkillDamageBalance`, `HeroLevelXpCatalog` |
 | **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
 | **Integração** | Mudança num domínio não quebra curva global | todas | esta spec + checklist abaixo |

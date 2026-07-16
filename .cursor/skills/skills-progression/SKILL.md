@@ -18,6 +18,7 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 
 ## Padrões
 
+- Poder de combate (herói): `Base × (powerPerRank × nível) × (atributo × fator)` — sem multiplicador global; níveis começam com `powerPerRank` no rank 1
 - Slot 0 = Ataque Básico (fixo)
 - Slots extras = `getUnlockedBattleSkillSlotCount(upgradeLevels)`
 - Scroll ao `+1 rank`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`

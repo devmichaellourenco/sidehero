@@ -9531,12 +9531,17 @@ body.act-scene-open {
 }
 
 .campaign-world-node--illustrated .campaign-world-node-name {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 .campaign-world-node--illustrated .campaign-world-node-meta {
-  font-size: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
 
 .campaign-world-node--left {
@@ -9603,7 +9608,7 @@ body.act-scene-open {
 }
 
 .campaign-world-node-name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -9611,8 +9616,9 @@ body.act-scene-open {
 }
 
 .campaign-world-node-meta {
-  font-size: 9px;
-  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -10724,6 +10730,12 @@ body.wow-celebration-open {
 .forge-dock-line--highlight {
   color: var(--gold);
   font-family: var(--font-heading);
+}
+
+.forge-dock-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .forge-game-btn {

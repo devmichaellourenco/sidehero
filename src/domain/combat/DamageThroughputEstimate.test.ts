@@ -33,6 +33,7 @@ describe('DamageThroughputEstimate', () => {
     expect(estimate!.effectiveCooldownSeconds).toBeNull();
     expect(estimate!.dpsBreakdown.length).toBeGreaterThan(3);
     expect(estimate!.powerBreakdown.some((line) => line.text.includes('ATK'))).toBe(true);
+    expect(estimate!.powerBreakdown.some((line) => line.text.includes('Poder final'))).toBe(true);
   });
 
   it('aumenta DPS de skill com CDR de gear', () => {

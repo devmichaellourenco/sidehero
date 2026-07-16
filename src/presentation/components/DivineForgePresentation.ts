@@ -183,6 +183,19 @@ export function renderCreateTabPanel(
         ? 'Combinação inválida para fusão.'
         : '';
 
+  const clearSelectionBtn =
+    status.count > 0
+      ? `
+      <button
+        type="button"
+        class="forge-game-btn forge-game-btn--ghost"
+        data-forge-clear-selection
+        aria-label="Limpar seleção de todos os itens"
+      >
+        Limpar seleção
+      </button>`
+      : '';
+
   return `
     <div class="forge-dock">
       <div class="forge-dock-status${status.mixedRarity || (status.count === status.requiredCount && !status.canFuse) ? ' forge-dock-status--warn' : ''}">
@@ -192,14 +205,17 @@ export function renderCreateTabPanel(
           ${resultCopy ? `<p class="forge-dock-line forge-dock-line--highlight">${resultCopy}</p>` : ''}
         </div>
       </div>
-      <button
-        type="button"
-        class="forge-game-btn forge-game-btn--fuse"
-        data-forge-fuse
-        ${status.canFuse ? '' : 'disabled'}
-      >
-        Fundir itens
-      </button>
+      <div class="forge-dock-actions">
+        <button
+          type="button"
+          class="forge-game-btn forge-game-btn--fuse"
+          data-forge-fuse
+          ${status.canFuse ? '' : 'disabled'}
+        >
+          Fundir itens
+        </button>
+        ${clearSelectionBtn}
+      </div>
     </div>
   `;
 }
@@ -211,6 +227,18 @@ export function renderSalvageTabPanel(
   const goldPreview = selectedGear
     ? calculateForgeSalvageGold(selectedGear.rarity as GearDto['rarity'], stage)
     : 0;
+
+  const clearSelectionBtn = selectedGear
+    ? `
+      <button
+        type="button"
+        class="forge-game-btn forge-game-btn--ghost"
+        data-forge-clear-selection
+        aria-label="Limpar seleção do item"
+      >
+        Limpar seleção
+      </button>`
+    : '';
 
   return `
     <div class="forge-dock">
@@ -225,14 +253,17 @@ export function renderSalvageTabPanel(
           }
         </div>
       </div>
-      <button
-        type="button"
-        class="forge-game-btn forge-game-btn--salvage"
-        data-forge-salvage
-        ${selectedGear ? '' : 'disabled'}
-      >
-        Destruir por ouro${selectedGear ? ` (+${goldPreview})` : ''}
-      </button>
+      <div class="forge-dock-actions">
+        <button
+          type="button"
+          class="forge-game-btn forge-game-btn--salvage"
+          data-forge-salvage
+          ${selectedGear ? '' : 'disabled'}
+        >
+          Destruir por ouro${selectedGear ? ` (+${goldPreview})` : ''}
+        </button>
+        ${clearSelectionBtn}
+      </div>
     </div>
   `;
 }

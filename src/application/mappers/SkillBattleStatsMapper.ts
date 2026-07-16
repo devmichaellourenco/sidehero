@@ -3,6 +3,7 @@ import {
   CombatProfileProvider,
 } from '../../domain/combat/CombatProfileProvider';
 import {
+  buildHeroSkillPowerBreakdown,
   estimateHeroSkillThroughput,
   ThroughputBreakdownLine,
 } from '../../domain/combat/DamageThroughputEstimate';
@@ -258,29 +259,19 @@ export function buildSkillBattleStats(
   ];
 
   if (combat.usesAttackStat) {
+    const estimatedPower = powerCalculator.calculateForHero(combat, hero);
     stats.push({
       label: 'Poder',
       value: `ATK do herói (${hero.attack})`,
-      tooltipLines: estimate
-        ? toTooltipLines(estimate.powerBreakdown)
-        : tip(
-            { icon: 'attack', text: `ATK total do herói = ${hero.attack}` },
-            { text: 'Inclui nível, atributos e bônus flat/% do equipamento.' },
-          ),
+      tooltipLines: toTooltipLines(buildHeroSkillPowerBreakdown(combat, hero, estimatedPower)),
     });
   } else {
     const estimatedPower = powerCalculator.calculateForHero(combat, hero);
     const scaling = formatScalingLabel(scalingKey);
-    const powerTooltips = estimate
-      ? toTooltipLines(estimate.powerBreakdown)
-      : tip(
-          { icon: 'power_attack', text: `Poder estimado ≈ ${estimatedPower}` },
-          { text: `Escala com ${scaling}.` },
-        );
     stats.push({
       label: 'Poder',
       value: `~${estimatedPower} (escala ${scaling})`,
-      tooltipLines: powerTooltips,
+      tooltipLines: toTooltipLines(buildHeroSkillPowerBreakdown(combat, hero, estimatedPower)),
     });
   }
 

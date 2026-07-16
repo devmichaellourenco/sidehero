@@ -660,8 +660,7 @@ export function renderCampaignWorldMap(campaign: CampaignOverviewDto, activeMapI
     .join('');
 
   return `
-    <div class="campaign-world-map">
-      <p class="campaign-world-map-intro">Escolha uma região desbloqueada para ver a trilha de fases.</p>
+    <div class="campaign-world-map">      
       <div class="campaign-world-map-spine" aria-hidden="true"></div>
       <div class="campaign-world-map-nodes">${nodes}</div>
     </div>

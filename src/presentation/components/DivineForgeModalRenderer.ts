@@ -138,6 +138,12 @@ export class DivineForgeModalRenderer {
       if (!this.salvageGearId) return;
       handlers.onSalvage(this.salvageGearId);
     });
+
+    const clearBtn = container.querySelector('[data-forge-clear-selection]');
+    clearBtn?.addEventListener('click', () => {
+      this.resetSelection();
+      handlers.onSelectionChange();
+    });
   }
 
   clearAfterFuse(): void {

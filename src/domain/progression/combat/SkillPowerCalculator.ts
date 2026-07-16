@@ -3,7 +3,10 @@ import { Enemy } from '../../entities/Enemy';
 import { applyEnemyDamageSkillPower } from '../../combat/EnemyCombatBalance';
 import { getSkillById } from '../SkillCatalog';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
-import { applyHeroDamageSkillPower } from './SkillDamageBalance';
+import {
+  applyHeroDamageSkillPower,
+  calculateHeroSkillRawPower,
+} from './SkillDamageBalance';
 import { resolveEffectiveAttack } from '../../services/combat/CombatStatResolver';
 import { CombatStatusEffectTracker } from '../../services/combat/CombatStatusEffectTracker';
 
@@ -26,11 +29,7 @@ export class SkillPowerCalculator {
     const scalingKey = definition?.scaling ?? 'int';
     const attributeValue = hero.totalAttributes[scalingKey];
 
-    const raw =
-      skill.basePower +
-      skill.powerPerRank * Math.max(0, rank - 1) +
-      attributeValue * skill.attributeFactor;
-
+    const raw = calculateHeroSkillRawPower(skill, rank, attributeValue);
     return applyHeroDamageSkillPower(skill, raw, effectiveAttack);
   }
 

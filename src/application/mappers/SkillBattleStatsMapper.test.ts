@@ -44,8 +44,34 @@ describe('buildSkillBattleStats — throughput alinhado ao combate', () => {
 
     expect(dps?.value).toMatch(/^~\d+(\.\d+)? \(cast contínuo da skill\)$/);
     expect(reload?.value).toMatch(/CDR/);
-    expect(poder?.tooltipLines?.some((line) => line.text.includes('multiplicador'))).toBe(true);
+    expect(poder?.tooltipLines?.some((line) => line.text.includes('Fórmula:'))).toBe(true);
+    expect(poder?.tooltipLines?.some((line) => line.text.includes('Produto ='))).toBe(true);
+    expect(poder?.tooltipLines?.some((line) => line.text.includes('powerPerRank'))).toBe(true);
+    expect(poder?.tooltipLines?.some((line) => line.text.includes('Poder final'))).toBe(true);
+    expect(poder?.tooltipLines?.some((line) => line.text.includes('1.9'))).toBe(false);
     expect(stats.some((entry) => entry.label === 'Casts/s')).toBe(true);
     expect(stats.some((entry) => entry.label === 'Fator de crit')).toBe(true);
+  });
+
+  it('tooltip de Poder em frost_shard mostra fórmula multiplicativa', () => {
+    const base = Hero.createStarter('h3', 'sorcerer', 'Nix');
+    const hero = Hero.restore({
+      ...base.toProps(),
+      skillRanks: { ...base.toProps().skillRanks, frost_shard: 2 },
+      equippedSkillIds: ['basic_attack', 'frost_shard'],
+    });
+
+    const poder = buildSkillBattleStats(hero, 'frost_shard', 'int').find(
+      (entry) => entry.label === 'Poder',
+    );
+    const lines = poder?.tooltipLines?.map((line) => line.text).join('\n') ?? '';
+
+    expect(poder?.value).toMatch(/^~\d+ \(escala INT\)$/);
+    expect(lines).toContain('Fórmula: Base × (powerPerRank × nível)');
+    expect(lines).toContain('Base = 1');
+    expect(lines).toContain('Rank: 5 × nível 2 = 10');
+    expect(lines).toContain('Produto =');
+    expect(lines).toContain('Poder final ≈');
+    expect(lines).not.toContain('1.9');
   });
 });

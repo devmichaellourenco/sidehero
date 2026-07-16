@@ -77,8 +77,24 @@ describe('renderCreateTabPanel', () => {
     expect(pendingHtml).toContain('forge-dock-badge');
     expect(pendingHtml).toContain('forge-game-btn--fuse');
     expect(pendingHtml).toContain('disabled');
+    expect(pendingHtml).not.toContain('data-forge-clear-selection');
     expect(readyHtml).not.toContain('disabled');
     expect(readyHtml).toContain('forge-dock-line--highlight');
+    expect(readyHtml).toContain('data-forge-clear-selection');
+    expect(readyHtml).toContain('Limpar seleção');
+  });
+
+  it('mostra Limpar seleção quando há itens parcialmente selecionados', () => {
+    const partial = evaluateForgeSelection(
+      new Set(['g-0', 'g-1', 'g-2']),
+      [gear('g-0'), gear('g-1'), gear('g-2')],
+    );
+
+    const html = renderCreateTabPanel(partial);
+
+    expect(html).toContain('data-forge-clear-selection');
+    expect(html).toContain('Limpar seleção');
+    expect(html).toContain('3/9');
   });
 });
 
@@ -89,8 +105,11 @@ describe('renderSalvageTabPanel', () => {
 
     expect(emptyHtml).toContain('forge-game-btn--salvage');
     expect(emptyHtml).toContain('disabled');
+    expect(emptyHtml).not.toContain('data-forge-clear-selection');
     expect(selectedHtml).toContain('forge-dock-status--ready');
     expect(selectedHtml).not.toContain('disabled');
     expect(selectedHtml).toContain('forge-dock-line--highlight');
+    expect(selectedHtml).toContain('data-forge-clear-selection');
+    expect(selectedHtml).toContain('Limpar seleção');
   });
 });

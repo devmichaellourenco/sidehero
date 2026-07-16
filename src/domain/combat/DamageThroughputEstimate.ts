@@ -26,9 +26,11 @@ import { Hero } from '../entities/Hero';
 import { getSkillById } from '../progression/SkillCatalog';
 import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefinition';
 import {
-  HERO_DAMAGE_SKILL_MULTIPLIER,
+  calculateHeroSkillRawPower,
   isPhysicalDamageSkill,
   PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
+  skillAttributeMultiplier,
+  skillRankMultiplier,
 } from '../progression/combat/SkillDamageBalance';
 import { SkillPowerCalculator } from '../progression/combat/SkillPowerCalculator';
 
@@ -119,7 +121,8 @@ export function skillCastsPerSecond(
   };
 }
 
-function buildPowerBreakdown(
+/** Passo a passo do poder exibido em Status (tooltip da linha Poder). */
+export function buildHeroSkillPowerBreakdown(
   combat: CombatSkillDefinition,
   hero: Hero,
   rawPower: number,
@@ -128,6 +131,7 @@ function buildPowerBreakdown(
     return [
       { icon: 'attack', text: `ATK do herói = ${rawPower}` },
       { text: 'Ataque básico usa o ATK total (nível, atributos e equipamento).' },
+      { icon: 'attack', text: `Poder final = ${rawPower}` },
     ];
   }
 
@@ -136,24 +140,28 @@ function buildPowerBreakdown(
   const scalingKey = (definition?.scaling ?? 'int') as 'str' | 'dex' | 'int';
   const attributeValue = hero.totalAttributes[scalingKey];
   const base = combat.basePower;
-  const perRank = combat.powerPerRank * Math.max(0, rank - 1);
-  const fromAttr = attributeValue * combat.attributeFactor;
-  const preMult = base + perRank + fromAttr;
-  const afterMult = Math.max(1, Math.floor(preMult * HERO_DAMAGE_SKILL_MULTIPLIER));
+  const rankTerm = skillRankMultiplier(combat.powerPerRank, rank);
+  const attrTerm = skillAttributeMultiplier(attributeValue, combat.attributeFactor);
+  const product = calculateHeroSkillRawPower(combat, rank, attributeValue);
+  const afterFloor = Math.max(1, Math.floor(product));
+
   const lines: ThroughputBreakdownLine[] = [
-    { icon: 'rune', text: `Base da skill = ${base}` },
+    {
+      text: `Fórmula: Base × (powerPerRank × nível) × (${scalingKey.toUpperCase()} × fator)`,
+    },
+    { icon: 'rune', text: `Base = ${base}` },
     {
       icon: 'improvement',
-      text: `Rank ${rank}: +${perRank.toFixed(1)} (${combat.powerPerRank}/rank após o 1º)`,
+      text: `Rank: ${combat.powerPerRank} × nível ${rank} = ${rankTerm}`,
     },
     {
       icon: 'power_attack',
-      text: `${scalingKey.toUpperCase()} ${attributeValue} × ${combat.attributeFactor} = ${fromAttr.toFixed(1)}`,
+      text: `${scalingKey.toUpperCase()} ${attributeValue} × ${combat.attributeFactor} = ${attrTerm.toFixed(2)}`,
     },
-    { text: `Soma bruta = ${preMult.toFixed(1)}` },
     {
-      text: `× multiplicador de skill ${HERO_DAMAGE_SKILL_MULTIPLIER} → ${afterMult}`,
+      text: `Produto = ${base} × ${rankTerm} × ${attrTerm.toFixed(2)} = ${product.toFixed(2)}`,
     },
+    { text: `floor(${product.toFixed(2)}) = ${afterFloor}` },
   ];
 
   if (isPhysicalDamageSkill(combat)) {
@@ -162,12 +170,12 @@ function buildPowerBreakdown(
       icon: 'attack',
       text: `Piso físico: ATK ${hero.attack} × ${PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO} = ${floor}`,
     });
-    if (rawPower === floor && floor > afterMult) {
-      lines.push({ text: `Piso físico venceu o multiplicador (${afterMult} → ${rawPower}).` });
+    if (rawPower === floor && floor > afterFloor) {
+      lines.push({ text: `Piso físico venceu o produto (${afterFloor} → ${rawPower}).` });
     }
   }
 
-  lines.push({ icon: 'attack', text: `Poder final = ${rawPower}` });
+  lines.push({ icon: 'attack', text: `Poder final ≈ ${rawPower}` });
   return lines;
 }
 
@@ -240,7 +248,7 @@ export function estimateHeroSkillThroughput(
 
   const critFactor = expectedCritFactor(profile.critChance, profile.critDamage);
   const expectedDamagePerHit = outgoing * critFactor;
-  const powerBreakdown = buildPowerBreakdown(combat, hero, rawPower);
+  const powerBreakdown = buildHeroSkillPowerBreakdown(combat, hero, rawPower);
   const gearBreakdown = buildGearBreakdown(
     components,
     elementalBonus,

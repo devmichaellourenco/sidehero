@@ -21,6 +21,7 @@ description: Baú de itens e Forja Divina no Side Hero. Use para stash, baú de 
 - 9 itens mesma raridade → 1 superior (`GearRarityProgression`)
 - Forja: grid com inventário + baú (`listForgeEligibleGear`)
 - UI Forja: classes `forge-panel--game`, `forge-tab`, `forge-dock`, `forge-game-btn`; confirm com `forge-confirm-dialog`
+- Limpar seleção: `data-forge-clear-selection` no dock quando há seleção; `DivineForgeModalRenderer.resetSelection()`
 - Scroll do grid: `ForgeGridScrollPresentation` captura/restaura `scrollTop` no re-render
 - Confirm destroy fora da modal stack principal
 
