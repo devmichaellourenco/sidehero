@@ -201,6 +201,36 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     ],
   },
   {
+    id: 'improvement_reset_1',
+    feature: 'improvement_reset',
+    level: 1,
+    branch: 'equipment',
+    name: 'Reset de pontos',
+    description:
+      'Permite devolver pontos de aprimoramento de atributos e skills, um a um, para o saldo do herói.',
+    cost: 5000,
+    parents: ['divine_forge_1'],
+    requirements: [
+      { type: 'upgrade_level', feature: 'divine_forge', minLevel: 1 },
+      { type: 'min_hero_level', value: 12 },
+    ],
+  },
+  {
+    id: 'improvement_reset_2',
+    feature: 'improvement_reset',
+    level: 2,
+    branch: 'equipment',
+    name: 'Reset de pontos em massa',
+    description:
+      'Permite zerar skills de aprimoramento e devolver o máximo possível de atributos do herói de uma vez.',
+    cost: 10000,
+    parents: ['improvement_reset_1'],
+    requirements: [
+      { type: 'upgrade_level', feature: 'improvement_reset', minLevel: 1 },
+      { type: 'min_hero_level', value: 22 },
+    ],
+  },
+  {
     id: 'log_filter_1',
     feature: 'log_filter',
     level: 1,

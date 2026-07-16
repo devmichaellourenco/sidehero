@@ -65,6 +65,7 @@ export class UpgradeRequirementEvaluator {
       hero_unlock_paladin: 'Paladino',
       item_stash: 'Baú de itens',
       divine_forge: 'Forja Divina',
+      improvement_reset: 'Reset de pontos',
     };
     return labels[feature];
   }

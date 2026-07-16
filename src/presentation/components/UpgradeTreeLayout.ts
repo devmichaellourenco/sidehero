@@ -34,6 +34,8 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   item_stash_3: { x: 860, y: 280 },
 
   divine_forge_1: { x: 500, y: 280 },
+  improvement_reset_1: { x: 500, y: 160 },
+  improvement_reset_2: { x: 500, y: 40 },
 
   optimize_loadout_2: { x: 380, y: 520 },
   auto_equip_loot_1: { x: 620, y: 520 },

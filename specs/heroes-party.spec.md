@@ -41,6 +41,11 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 
 - Sinergia automática de composição
 - Substituto automático ao cair em combate
+- Reset de atributos alocados (ver [`improvement-reset.spec.md`](improvement-reset.spec.md))
+
+## Relacionado
+
+- [`improvement-reset.spec.md`](improvement-reset.spec.md) — (−) de atributo (level ≥1) e reset em massa (level ≥2) no detalhe do herói
 
 ## Testes obrigatórios
 

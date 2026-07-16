@@ -44,7 +44,7 @@ describe('HeroClassAscensionPresentation', () => {
     expect(html).toContain('data-ascension-moment-tooltip');
     expect(html).toContain('ascension-moment-tooltip-content');
     expect(html).toContain('Momento decisivo');
-    expect(html).toContain('Novo visual');
+    expect(html).toContain('Pontos de aprimoramento');
     expect(html).not.toContain('ascension-moment__highlights');
     expect(html).not.toContain('ascension-moment__lead');
   });
@@ -59,6 +59,7 @@ describe('HeroClassAscensionPresentation', () => {
     expect(html).toContain('ascension-path-tooltip-content');
     expect(html).toContain('ascension-req--unmet');
     expect(html).toContain('Seguir este caminho');
+    expect(html).toContain('+2 Aprim.');
     expect(html).toContain('data-ascension-select="priest_sacred_cleriga"');
     expect(html).not.toContain('ascension-path-card__footer');
     expect(html).not.toContain('ascension-path-card__cta');

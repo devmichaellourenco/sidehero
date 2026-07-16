@@ -98,9 +98,8 @@ export class SkillService implements ISkillService {
     const currentRank = props.skillRanks[skillId] ?? 0;
     if (currentRank >= definition.maxRank) return false;
 
-    const availablePoints =
-      pointType === 'improvement' ? props.unspentImprovementPoints : props.unspentAscensionPoints;
-    if (availablePoints < 1) return false;
+    // Skills de evolução (pointType ascension) usam o mesmo pool de Aprimoramento.
+    if (props.unspentImprovementPoints < 1) return false;
 
     return this.evaluator.allMet(hero, definition.requirements);
   }
@@ -116,7 +115,7 @@ export class SkillService implements ISkillService {
     if (!this.canAllocateAscension(hero, skillId)) {
       throw new Error('Não é possível investir nesta skill de ascensão');
     }
-    return hero.spendAscensionPointOnSkill(skillId);
+    return hero.spendImprovementPointOnSkill(skillId);
   }
 
   canAssignSkillToSlot(

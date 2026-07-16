@@ -6,6 +6,8 @@ import { HeroDetailModalRenderer, HeroDetailTab } from '../components/HeroDetail
 import { ToastController } from '../components/ToastController';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 import { AscendClassConfirmDialog } from '../components/AscendClassConfirmDialog';
+import { ImprovementResetConfirmDialog } from '../components/ImprovementResetConfirmDialog';
+import { ImprovementResetUiCopy } from '../components/ImprovementResetUiCopy';
 
 export class HeroDetailFlow {
   skillNodes: SkillNodeDto[] = [];
@@ -19,6 +21,7 @@ export class HeroDetailFlow {
     private readonly toasts: ToastController,
     private readonly rewards: RewardCelebrationPort,
     private readonly ascendClassConfirmDialog: AscendClassConfirmDialog,
+    private readonly improvementResetConfirmDialog: ImprovementResetConfirmDialog,
     private readonly onStateUpdated: (state: GameStateDto) => void,
     private readonly refreshModal: () => void,
   ) {}
@@ -94,8 +97,20 @@ export class HeroDetailFlow {
       onSpendAttribute: (id, attr) => {
         void this.spendAttributePoint(id, attr);
       },
+      onRefundAttribute: (id, attr) => {
+        void this.refundAttributePoint(id, attr);
+      },
       onAllocateSkill: (id, skillId) => {
         void this.allocateSkillPoint(id, skillId);
+      },
+      onRefundSkill: (id, skillId) => {
+        void this.refundSkillPoint(id, skillId);
+      },
+      onMassRefund: (id) => {
+        const heroEntry = state.heroes.find((entry) => entry.id === id);
+        if (heroEntry) {
+          void this.confirmAndMassRefund(id, heroEntry.name);
+        }
       },
       onAssignSkillSlot: (id, skillId, slotIndex) => {
         void this.assignSkillSlot(id, skillId, slotIndex);
@@ -140,6 +155,20 @@ export class HeroDetailFlow {
     this.toasts.show(`+1 ${attr.toUpperCase()}`, 'info');
   }
 
+  private async refundAttributePoint(heroId: string, attr: 'str' | 'dex' | 'int'): Promise<void> {
+    const response = await this.client.send({
+      type: 'REFUND_IMPROVEMENT_POINT',
+      heroId,
+      target: { type: 'attribute', key: attr },
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? ImprovementResetUiCopy.refundAttributeFailed, 'info');
+      return;
+    }
+    this.afterMutation(response.state);
+    this.toasts.show(ImprovementResetUiCopy.unitaryAttributeSuccess(attr), 'info');
+  }
+
   private async allocateSkillPoint(heroId: string, skillId: string): Promise<void> {
     const response = await this.client.send({
       type: 'SPEND_IMPROVEMENT_POINT',
@@ -152,6 +181,65 @@ export class HeroDetailFlow {
     }
     await this.loadSkillTree(heroId);
     this.afterMutation(response.state);
+  }
+
+  private async refundSkillPoint(heroId: string, skillId: string): Promise<void> {
+    const response = await this.client.send({
+      type: 'REFUND_IMPROVEMENT_POINT',
+      heroId,
+      target: { type: 'skill', skillId },
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? ImprovementResetUiCopy.refundSkillFailed, 'info');
+      return;
+    }
+    await this.loadSkillTree(heroId);
+    this.afterMutation(response.state);
+  }
+
+  async confirmAndMassRefund(heroId: string, heroName: string): Promise<void> {
+    const previewResponse = await this.client.send({
+      type: 'PREVIEW_MASS_REFUND_IMPROVEMENT_POINTS',
+      heroId,
+    });
+    if (!previewResponse.ok || !previewResponse.massRefundPreview) {
+      this.toasts.show(
+        !previewResponse.ok
+          ? (previewResponse.error ?? ImprovementResetUiCopy.massPreviewFailed)
+          : ImprovementResetUiCopy.massPreviewFailed,
+        'info',
+      );
+      return;
+    }
+
+    const confirmed = await this.improvementResetConfirmDialog.open(
+      heroName,
+      previewResponse.massRefundPreview,
+    );
+    if (!confirmed) return;
+    await this.massRefund(heroId);
+  }
+
+  private async massRefund(heroId: string): Promise<void> {
+    const response = await this.client.send({
+      type: 'MASS_REFUND_IMPROVEMENT_POINTS',
+      heroId,
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? ImprovementResetUiCopy.massFailed, 'info');
+      return;
+    }
+    await Promise.all([this.loadSkillTree(heroId), this.loadAscensionTree(heroId)]);
+    this.afterMutation(response.state);
+    const refunded = response.pointsRefunded ?? 0;
+    if (refunded > 0) {
+      this.toasts.show(ImprovementResetUiCopy.massSuccess(refunded), 'info');
+    } else {
+      this.toasts.show(ImprovementResetUiCopy.massEmpty, 'info');
+    }
+    for (const warning of response.refundWarnings ?? []) {
+      this.toasts.show(warning, 'info');
+    }
   }
 
   private async assignSkillSlot(heroId: string, skillId: string, slotIndex: number): Promise<void> {

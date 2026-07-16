@@ -31,7 +31,8 @@ describe('ClassAscensionService', () => {
 
     const ascended = service.ascend(knight, 'knight_military_guerreiro');
     expect(ascended.toProps().ascensionId).toBe('knight_military_guerreiro');
-    expect(ascended.toProps().unspentAscensionPoints).toBe(2);
+    expect(ascended.toProps().unspentImprovementPoints).toBe(2);
+    expect(ascended.toProps().unspentAscensionPoints).toBe(0);
   });
 
   it('lista apenas a próxima evolução do caminho escolhido', () => {

@@ -16,9 +16,9 @@ describe('FeatureAccessPolicy', () => {
     expect(flags.autoBattleMaxSpeed).toBe(3);
   });
 
-  it('resolve abrir todos automático no nível 2', () => {
-    const flags = FeatureAccessPolicy.resolve({ open_all_chests: 2 });
-    expect(flags.openAllChests).toBe(true);
-    expect(flags.autoOpenAllChests).toBe(true);
+  it('resolve improvement_reset por nível', () => {
+    expect(FeatureAccessPolicy.resolve({}).improvementReset).toBe(0);
+    expect(FeatureAccessPolicy.resolve({ improvement_reset: 1 }).improvementReset).toBe(1);
+    expect(FeatureAccessPolicy.resolve({ improvement_reset: 2 }).improvementReset).toBe(2);
   });
 });

@@ -5,6 +5,7 @@ import type { HeroDetailModalRenderer } from '../components/HeroDetailModalRende
 import type { ToastController } from '../components/ToastController';
 import type { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 import type { AscendClassConfirmDialog } from '../components/AscendClassConfirmDialog';
+import type { ImprovementResetConfirmDialog } from '../components/ImprovementResetConfirmDialog';
 
 describe('HeroDetailFlow', () => {
   const send = vi.fn();
@@ -26,6 +27,7 @@ describe('HeroDetailFlow', () => {
       {} as ToastController,
       {} as RewardCelebrationPort,
       {} as AscendClassConfirmDialog,
+      {} as ImprovementResetConfirmDialog,
       () => undefined,
       () => undefined,
     );

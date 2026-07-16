@@ -52,6 +52,10 @@ O tooltip continua informativo no hover; a compra ocorre pelo **clique no nó** 
 - Árvore de meta legado (spec separada)
 - Mini-map ou botões extras de zoom (+/−) — pan/zoom atuais permanecem
 
+## Relacionado
+
+- Reset de pontos de aprimoramento (novo nó Runas): [`improvement-reset.spec.md`](improvement-reset.spec.md)
+
 ## Testes obrigatórios
 
 - [x] `UpgradeCatalog.test.ts`, `UpgradeTreeLayout.test.ts`, `UpgradeService.test.ts`

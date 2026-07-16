@@ -21,6 +21,7 @@ description: Árvore de melhorias com grafo, layout e UI no Side Hero. Use para 
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
 - **Não** gerar release até o usuário solicitar
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes
 
 ## UI
 
@@ -37,3 +38,7 @@ Padrão: `beginSession()` na abertura → capturar estado antes do re-render →
 ## Núcleo
 
 Ramo principal parte de `optimize_loadout_1`; integrar novos ramos com `parents` explícitos.
+
+## Relacionado
+
+- Novo nó `improvement_reset_1` / `_2` (Forja + herói 12+ / após I + herói 22+): ver `specs/improvement-reset.spec.md` e skill `improvement-reset`

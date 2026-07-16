@@ -64,11 +64,23 @@ describe('renderHeroAttributesTab', () => {
     expect(html).toContain('hero-attr-value');
     expect(html).toContain('data-attr-spend="str"');
     expect(html).toContain('hero-attr-add');
+    expect(html).not.toContain('data-attr-refund');
     expect(html).not.toContain('+1 STR');
     expect(html).toContain('hero-stat-row');
     expect(html).toContain('data-hero-stat-tooltip');
     expect(html).toContain('DPS estimado');
     expect(html).toContain('hero-stat-tooltip-content');
+  });
+
+  it('exibe (−) e reset em massa conforme nível da feature', () => {
+    const withoutMass = renderHeroAttributesTab(minimalHero(), { improvementReset: 1 });
+    expect(withoutMass).toContain('data-attr-refund="str"');
+    expect(withoutMass).toContain('data-attr-refund="int"');
+    expect(withoutMass).not.toContain('data-mass-refund');
+
+    const withMass = renderHeroAttributesTab(minimalHero(), { improvementReset: 2 });
+    expect(withMass).toContain('data-mass-refund');
+    expect(withMass).toContain('Reset em massa');
   });
 
   it('inclui skills de batalha e equipamento na aba Status', () => {

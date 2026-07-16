@@ -27,7 +27,7 @@ export function renderAscendClassConfirmContent(
         )}
         <div class="ascend-confirm-preview__meta">
           <strong class="ascend-confirm-preview__name">${escapeHtml(option.name)}</strong>
-          <span class="ascend-confirm-preview__points">+${option.pointsGranted} pts de ascensão</span>
+          <span class="ascend-confirm-preview__points">+${option.pointsGranted} pts de aprimoramento</span>
         </div>
       </div>
       <p class="ascend-confirm-desc">${escapeHtml(option.description)}</p>

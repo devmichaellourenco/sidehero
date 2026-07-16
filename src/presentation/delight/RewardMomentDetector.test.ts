@@ -80,6 +80,7 @@ function baseState(overrides: Partial<GameStateDto> = {}): GameStateDto {
       stashCapacity: 0,
       inventoryCapacity: 30,
       divineForge: false,
+      improvementReset: 0,
     },
     chestProgress: { current: 0, target: 5, ratio: 0 },
     gearUpgradeHints: [],

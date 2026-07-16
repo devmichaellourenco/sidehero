@@ -237,6 +237,27 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.spendImprovementPoint.execute(message.heroId, message.target);
       return { ok: true, state };
     }
+    case 'REFUND_IMPROVEMENT_POINT': {
+      const state = await app.refundImprovementPoint.execute(message.heroId, message.target);
+      return { ok: true, state };
+    }
+    case 'MASS_REFUND_IMPROVEMENT_POINTS': {
+      const result = await app.massRefundImprovementPoints.execute(message.heroId);
+      return {
+        ok: true,
+        state: result.state,
+        pointsRefunded: result.pointsRefunded,
+        ascensionPointsRefunded: result.ascensionPointsRefunded,
+        refundWarnings: result.warnings,
+      };
+    }
+    case 'PREVIEW_MASS_REFUND_IMPROVEMENT_POINTS': {
+      const state = await app.getState.execute();
+      const massRefundPreview = await app.previewMassRefundImprovementPoints.execute(
+        message.heroId,
+      );
+      return { ok: true, state, massRefundPreview };
+    }
     case 'GET_HERO_SKILL_TREE': {
       const result = await app.getHeroSkillTree.execute(message.heroId);
       return { ok: true, state: result.state, skillNodes: result.nodes };

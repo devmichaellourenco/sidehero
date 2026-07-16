@@ -12,6 +12,7 @@ Especialista em loop de combate, campanha por fases/waves, scaling e intermissõ
 ## Workflow do agente
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes
 - **Não** gerar release até o usuário solicitar
 
 ## Escopo

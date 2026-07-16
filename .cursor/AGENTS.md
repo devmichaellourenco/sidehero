@@ -4,8 +4,9 @@ Guia para agentes Cursor trabalhando neste repositório. **Spec-driven:** sempre
 
 ## Regras de workflow do agente
 
-1. **Não rodar testes automaticamente** — crie ou atualize arquivos de teste; `npm test` só quando o usuário pedir explicitamente.
-2. **Release só sob pedido** — não execute `npm run release`, não gere zip nem bump de versão até o usuário solicitar.
+1. **Fonte de verdade** — `specs/`, `.cursor/agents/`, `.cursor/skills/`, `.cursor/rules/` e testes. **Não** criar pasta nem arquivos `step-by-step/`.
+2. **Não rodar testes automaticamente** — crie ou atualize arquivos de teste; `npm test` só quando o usuário pedir explicitamente.
+3. **Release só sob pedido** — não execute `npm run release`, não gere zip nem bump de versão até o usuário solicitar.
 
 Detalhes: `specs/README.md` · regra Cursor: `.cursor/rules/workflow.mdc`
 
@@ -45,6 +46,7 @@ Regra crítica: `presentation/` **não** importa `domain/` diretamente.
 | [game-balance](agents/game-balance.md) | curva, fórmulas, auditoria | `specs/game-balance.spec.md` | `domain/combat`, scaling, catálogos numéricos |
 | [story-scenes](agents/story-scenes.md) | cenas por ato, overlay, pausa | `specs/story-scenes.spec.md` | `ActSceneCatalog`, `ActSceneFlow`, campanha |
 | [achievements](agents/achievements.md) | conquistas, progresso, Wow | `specs/achievements.spec.md` | `domain/achievements`, storage achievements |
+| [improvement-reset](agents/improvement-reset.md) | respec unitário + massa | `specs/improvement-reset.spec.md` | `FeatureKey` L1/L2, refund use cases, (−) + massa |
 
 ## Comandos (desenvolvedor — agente não executa test/release automaticamente)
 

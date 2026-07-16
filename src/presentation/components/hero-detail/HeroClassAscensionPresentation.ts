@@ -51,7 +51,7 @@ export function renderAscensionMomentBanner(isUpgrade: boolean, heroName: string
         <span class="ascension-moment-tooltip-content hidden">
           <strong class="ascension-moment-tooltip-title">Evolução iminente</strong>
           <span class="ascension-moment-tooltip-line">
-            ${escapeHtml(heroName)} está pronto para avançar — nova forma, novas skills e mais poder de ascensão.
+            ${escapeHtml(heroName)} está pronto para avançar — nova forma, skills exclusivas e mais Aprimoramento.
           </span>
         </span>
       </div>
@@ -77,7 +77,7 @@ export function renderAscensionMomentBanner(isUpgrade: boolean, heroName: string
         <span class="ascension-moment-tooltip-line ascension-moment-tooltip-section">Benefícios</span>
         <span class="ascension-moment-tooltip-line">· Novo visual</span>
         <span class="ascension-moment-tooltip-line">· Skills de caminho</span>
-        <span class="ascension-moment-tooltip-line">· Pontos de ascensão</span>
+        <span class="ascension-moment-tooltip-line">· Pontos de aprimoramento</span>
       </span>
     </div>
   `;
@@ -149,7 +149,7 @@ export function renderAscensionPathCard(
       data-ascension-path-tooltip
       tabindex="0"
       ${selectAttrs}
-      aria-label="${escapeHtml(option.name)} — +${option.pointsGranted} pts"
+      aria-label="${escapeHtml(option.name)} — +${option.pointsGranted} pts de aprimoramento"
     >
       <div class="ascension-path-card__glow" aria-hidden="true"></div>
       <div class="ascension-path-card__frame">
@@ -165,7 +165,7 @@ export function renderAscensionPathCard(
         <div class="ascension-path-card__body">
           <header class="ascension-path-card__header">
             <h4 class="ascension-path-card__title">${escapeHtml(option.name)}</h4>
-            <span class="ascension-path-card__points">+${option.pointsGranted} pts</span>
+            <span class="ascension-path-card__points">+${option.pointsGranted} Aprim.</span>
           </header>
           <p class="ascension-path-card__desc">${escapeHtml(option.description)}</p>
           ${renderAscensionPathTooltipContent(option, isUpgrade)}

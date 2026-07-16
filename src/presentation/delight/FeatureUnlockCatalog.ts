@@ -15,6 +15,11 @@ const FEATURE_UNLOCK_META: Partial<Record<FeatureFlagKey, FeatureUnlockMeta>> = 
     subtitle: 'Combine itens e eleve a raridade',
     iconUrl: getAssetUrl(ASSETS.ui.forge),
   },
+  improvementReset: {
+    title: 'Reset de Pontos',
+    subtitle: 'Devolva pontos de aprimoramento',
+    iconUrl: getAssetUrl(ASSETS.ui.improvement),
+  },
   itemStash: {
     title: 'Baú de Itens',
     subtitle: 'Armazene equipamentos extras',

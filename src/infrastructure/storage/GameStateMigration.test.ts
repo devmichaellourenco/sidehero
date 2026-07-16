@@ -79,6 +79,23 @@ describe('migrateEnemy', () => {
   });
 });
 
+describe('migrateHero — progressão', () => {
+  it('funde unspentAscensionPoints antigos em unspentImprovementPoints', () => {
+    const hero = migrateHero({
+      id: 'h1',
+      name: 'Galneon',
+      heroClass: 'knight',
+      unspentImprovementPoints: 3,
+      unspentAscensionPoints: 2,
+      ascensionId: 'knight_military_guerreiro',
+    });
+
+    expect(hero.toProps().unspentImprovementPoints).toBe(5);
+    expect(hero.toProps().unspentAscensionPoints).toBe(0);
+    expect(hero.toProps().ascensionId).toBe('knight_military_guerreiro');
+  });
+});
+
 describe('PhaseCombatHandlers — lendários de marco', () => {
   it('concede Ignus Ix ao concluir fase 1-50', async () => {
     const { PhaseCombatHandlers } = await import('../../domain/campaign/PhaseCombatHandlers');

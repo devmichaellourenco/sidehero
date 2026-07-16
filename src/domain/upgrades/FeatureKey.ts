@@ -12,6 +12,7 @@ export const FEATURE_KEYS = [
   'hero_unlock_paladin',
   'item_stash',
   'divine_forge',
+  'improvement_reset',
 ] as const;
 
 export type FeatureKey = (typeof FEATURE_KEYS)[number];

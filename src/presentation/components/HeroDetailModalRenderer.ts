@@ -31,7 +31,10 @@ export type HeroDetailTab = 'sheet' | 'attributes' | 'skills' | 'class';
 export type HeroDetailModalHandlers = {
   onSlotClick: (heroId: string, slot: string) => void;
   onSpendAttribute: (heroId: string, attr: 'str' | 'dex' | 'int') => void;
+  onRefundAttribute: (heroId: string, attr: 'str' | 'dex' | 'int') => void;
   onAllocateSkill: (heroId: string, skillId: string) => void;
+  onRefundSkill: (heroId: string, skillId: string) => void;
+  onMassRefund: (heroId: string) => void;
   onAssignSkillSlot: (heroId: string, skillId: string, slotIndex: number) => void;
   onClearSkillSlot: (heroId: string, skillId: string) => void;
   onEquipSkillFirstAvailable: (heroId: string, skillId: string) => void;
@@ -146,7 +149,7 @@ export class HeroDetailModalRenderer {
           ${renderHeroImprovementPoints(hero)}
         </div>
         ${loadoutSection}
-        <div class="hero-detail-panel game-scroll">${this.renderTabContent(hero)}</div>
+        <div class="hero-detail-panel game-scroll">${this.renderTabContent(hero, state)}</div>
       </div>
     `;
 
@@ -187,12 +190,17 @@ export class HeroDetailModalRenderer {
     this.preservedScrollState = captureHeroDetailScroll(container);
   }
 
-  private renderTabContent(hero: HeroDto): string {
+  private renderTabContent(hero: HeroDto, state: GameStateDto): string {
     switch (this.activeTab) {
       case 'attributes':
-        return renderHeroAttributesTab(hero);
+        return renderHeroAttributesTab(hero, state.featureFlags);
       case 'skills':
-        return renderHeroSkillsTab(hero, this.skillNodes, this.ascensionSkillNodes);
+        return renderHeroSkillsTab(
+          hero,
+          this.skillNodes,
+          this.ascensionSkillNodes,
+          state.featureFlags,
+        );
       case 'class':
         return renderHeroClassTab({
           hero,
@@ -226,12 +234,50 @@ export class HeroDetailModalRenderer {
       });
     });
 
+    container.querySelectorAll('[data-attr-refund]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const attr = button.getAttribute('data-attr-refund') as 'str' | 'dex' | 'int';
+        if (attr && !(button as HTMLButtonElement).disabled) {
+          this.pinScrollBeforeMutation(container);
+          handlers.onRefundAttribute(hero.id, attr);
+        }
+      });
+    });
+
     container.querySelectorAll('[data-skill-allocate]').forEach((button) => {
       button.addEventListener('click', () => {
         const skillId = button.getAttribute('data-skill-allocate');
         if (skillId && !(button as HTMLButtonElement).disabled) {
           this.pinScrollBeforeMutation(container);
           handlers.onAllocateSkill(hero.id, skillId);
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-skill-refund]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const skillId = button.getAttribute('data-skill-refund');
+        if (skillId && !(button as HTMLButtonElement).disabled) {
+          this.pinScrollBeforeMutation(container);
+          handlers.onRefundSkill(hero.id, skillId);
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-ascension-refund]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const skillId = button.getAttribute('data-ascension-refund');
+        if (skillId && !(button as HTMLButtonElement).disabled) {
+          this.pinScrollBeforeMutation(container);
+          handlers.onRefundSkill(hero.id, skillId);
+        }
+      });
+    });
+
+    container.querySelectorAll('[data-mass-refund]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!(button as HTMLButtonElement).disabled) {
+          handlers.onMassRefund(hero.id);
         }
       });
     });

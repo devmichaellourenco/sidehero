@@ -57,7 +57,22 @@ describe('renderHeroImprovementPoints', () => {
     expect(html).toContain('hero-improvement-tooltip-content');
     expect(html).toContain('Status');
     expect(html).toContain('Skills');
-    expect(html).toContain('O mesmo saldo vale para atributos e skills');
+    expect(html).toContain('Um único saldo');
+    expect(html).toContain('evolução');
+  });
+
+  it('não mostra chip separado de Evolução após ascensão', () => {
+    const html = renderHeroImprovementPoints(
+      minimalHero({
+        ascensionId: 'knight_military_guerreiro',
+        unspentImprovementPoints: 4,
+        unspentAscensionPoints: 2,
+      }),
+    );
+    expect(html).not.toContain('hero-improvement-points--ascension');
+    expect(html).not.toContain('>Evolução<');
+    expect(html).toContain('Aprimoramento');
+    expect(html).toContain('>4<');
   });
 
   it('omite destaque quando não há saldo', () => {

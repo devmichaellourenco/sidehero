@@ -15,6 +15,7 @@ Especialista **transversal** em curva de dificuldade, fórmulas numéricas e coe
 ## Workflow do agente
 
 - Criar ou atualizar testes de fórmula listados na spec — **não executar** `npm test` salvo pedido explícito
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes
 - **Não** gerar release até o usuário solicitar
 - Atualizar backlog (`BAL-*`) e critérios de aceite nesta spec após cada entrega de balance
 

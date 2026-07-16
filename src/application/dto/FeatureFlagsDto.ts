@@ -16,4 +16,6 @@ export interface FeatureFlagsDto {
   stashCapacity: number;
   inventoryCapacity: number;
   divineForge: boolean;
+  /** 0 = off, 1 = unitário (−), 2 = + reset em massa. */
+  improvementReset: number;
 }

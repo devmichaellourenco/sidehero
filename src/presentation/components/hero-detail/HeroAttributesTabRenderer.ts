@@ -1,5 +1,6 @@
+import { FeatureFlagsDto } from '../../../application/dto/FeatureFlagsDto';
 import { HeroDto } from '../../../application/dto/GameStateDto';
-import { improvementSpendLabel } from './HeroImprovementPointsPresentation';
+import { improvementRefundLabel, improvementSpendLabel } from './HeroImprovementPointsPresentation';
 import { renderHeroStatusExtras } from './HeroStatusSkillsPresentation';
 
 function escapeHtml(text: string): string {
@@ -16,6 +17,7 @@ function renderAttributeChip(
   total: number,
   allocated: number,
   canSpend: boolean,
+  canRefund: boolean,
 ): string {
   const allocatedHint =
     allocated > 0 ? `<span class="hero-attr-allocated">+${allocated}</span>` : '';
@@ -24,14 +26,27 @@ function renderAttributeChip(
     <div class="hero-attr-chip">
       <span class="hero-attr-label">${label}</span>
       <span class="hero-attr-value">${total}${allocatedHint}</span>
-      <button
-        type="button"
-        class="hero-attr-add"
-        data-attr-spend="${key}"
-        title="${improvementSpendLabel(label)}"
-        aria-label="Aumentar ${label}"
-        ${canSpend ? '' : 'disabled'}
-      >+</button>
+      <div class="hero-attr-actions">
+        ${
+          canRefund
+            ? `<button
+          type="button"
+          class="hero-attr-refund"
+          data-attr-refund="${key}"
+          title="${improvementRefundLabel(label)}"
+          aria-label="Reduzir ${label}"
+        >−</button>`
+            : ''
+        }
+        <button
+          type="button"
+          class="hero-attr-add"
+          data-attr-spend="${key}"
+          title="${improvementSpendLabel(label)}"
+          aria-label="Aumentar ${label}"
+          ${canSpend ? '' : 'disabled'}
+        >+</button>
+      </div>
     </div>
   `;
 }
@@ -66,16 +81,55 @@ function renderStatSection(section: HeroDto['combatStatSheet'][number]): string 
   `;
 }
 
-export function renderHeroAttributesTab(hero: HeroDto): string {
+function renderMassResetButton(canMassReset: boolean): string {
+  if (!canMassReset) return '';
+
+  return `
+    <div class="hero-mass-reset-row">
+      <button type="button" class="hero-mass-reset-btn" data-mass-refund>
+        Reset em massa
+      </button>
+    </div>
+  `;
+}
+
+export function renderHeroAttributesTab(
+  hero: HeroDto,
+  featureFlags: Pick<FeatureFlagsDto, 'improvementReset'> = { improvementReset: 0 },
+): string {
   const canSpend = hero.unspentImprovementPoints >= 1;
+  const unitaryUnlocked = featureFlags.improvementReset >= 1;
+  const massUnlocked = featureFlags.improvementReset >= 2;
 
   return `
     <section class="hero-attributes-tab">
       <div class="hero-attr-row">
-        ${renderAttributeChip('str', 'STR', hero.totalAttributes.str, hero.allocatedAttributes.str, canSpend)}
-        ${renderAttributeChip('dex', 'DEX', hero.totalAttributes.dex, hero.allocatedAttributes.dex, canSpend)}
-        ${renderAttributeChip('int', 'INT', hero.totalAttributes.int, hero.allocatedAttributes.int, canSpend)}
+        ${renderAttributeChip(
+          'str',
+          'STR',
+          hero.totalAttributes.str,
+          hero.allocatedAttributes.str,
+          canSpend,
+          unitaryUnlocked && hero.allocatedAttributes.str > 0,
+        )}
+        ${renderAttributeChip(
+          'dex',
+          'DEX',
+          hero.totalAttributes.dex,
+          hero.allocatedAttributes.dex,
+          canSpend,
+          unitaryUnlocked && hero.allocatedAttributes.dex > 0,
+        )}
+        ${renderAttributeChip(
+          'int',
+          'INT',
+          hero.totalAttributes.int,
+          hero.allocatedAttributes.int,
+          canSpend,
+          unitaryUnlocked && hero.allocatedAttributes.int > 0,
+        )}
       </div>
+      ${renderMassResetButton(massUnlocked)}
       <div class="hero-combat-stat-sheet">
         ${hero.combatStatSheet.map(renderStatSection).join('')}
       </div>

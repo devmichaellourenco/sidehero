@@ -33,3 +33,4 @@ Listados em `specs/battle-ui.spec.md` — criar ou atualizar ao mudar markup/CSS
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
 - **Não** gerar release até o usuário solicitar
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes

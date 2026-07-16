@@ -70,10 +70,15 @@ export class HeroProgression {
     });
   }
 
+  /** @deprecated Ascensão concede Aprimoramento; preferir withImprovementPointsGranted. */
   withAscensionPointsGranted(points: number): HeroProgression {
+    return this.withImprovementPointsGranted(points);
+  }
+
+  withImprovementPointsGranted(points: number): HeroProgression {
     return new HeroProgression({
       ...this.toProps(),
-      unspentAscensionPoints: this.unspentAscensionPoints + points,
+      unspentImprovementPoints: this.unspentImprovementPoints + Math.max(0, points),
     });
   }
 
@@ -100,6 +105,76 @@ export class HeroProgression {
       ...this.toProps(),
       skillRanks: { ...this.skillRanks, [skillId]: currentRank + 1 },
       unspentImprovementPoints: this.unspentImprovementPoints - 1,
+    });
+  }
+
+  refundImprovementPointFromAttribute(key: AttributeKey): HeroProgression {
+    if (this.allocatedAttributes[key] < 1) {
+      throw new Error('Nenhum ponto alocado neste atributo');
+    }
+
+    return new HeroProgression({
+      ...this.toProps(),
+      allocatedAttributes: {
+        ...this.allocatedAttributes,
+        [key]: this.allocatedAttributes[key] - 1,
+      },
+      unspentImprovementPoints: this.unspentImprovementPoints + 1,
+    });
+  }
+
+  refundImprovementPointFromSkill(skillId: SkillId): HeroProgression {
+    const currentRank = this.skillRanks[skillId] ?? 0;
+    if (currentRank < 1) {
+      throw new Error('Skill sem rank para devolver');
+    }
+
+    const nextRanks = { ...this.skillRanks };
+    if (currentRank <= 1) {
+      delete nextRanks[skillId];
+    } else {
+      nextRanks[skillId] = currentRank - 1;
+    }
+
+    return new HeroProgression({
+      ...this.toProps(),
+      skillRanks: nextRanks,
+      unspentImprovementPoints: this.unspentImprovementPoints + 1,
+    });
+  }
+
+  /** Skills de evolução usam o mesmo pool de Aprimoramento. */
+  refundAscensionPointFromSkill(skillId: SkillId): HeroProgression {
+    return this.refundImprovementPointFromSkill(skillId);
+  }
+
+  withProgressionRefundSnapshot(props: {
+    allocatedAttributes: Attributes;
+    skillRanks: Record<SkillId, number>;
+    equippedSkillIds: (SkillId | null)[];
+    unspentImprovementPoints: number;
+    unspentAscensionPoints: number;
+  }): HeroProgression {
+    return new HeroProgression({
+      ...this.toProps(),
+      allocatedAttributes: { ...props.allocatedAttributes },
+      skillRanks: { ...props.skillRanks },
+      equippedSkillIds: [...props.equippedSkillIds],
+      unspentImprovementPoints: Math.max(0, props.unspentImprovementPoints),
+      unspentAscensionPoints: Math.max(0, props.unspentAscensionPoints),
+    });
+  }
+
+  /** @deprecated use withProgressionRefundSnapshot */
+  withImprovementRefundSnapshot(props: {
+    allocatedAttributes: Attributes;
+    skillRanks: Record<SkillId, number>;
+    equippedSkillIds: (SkillId | null)[];
+    unspentImprovementPoints: number;
+  }): HeroProgression {
+    return this.withProgressionRefundSnapshot({
+      ...props,
+      unspentAscensionPoints: this.unspentAscensionPoints,
     });
   }
 
@@ -150,22 +225,13 @@ export class HeroProgression {
     return new HeroProgression({
       ...this.toProps(),
       ascensionId,
-      unspentAscensionPoints: this.unspentAscensionPoints + pointsGranted,
+      unspentImprovementPoints: this.unspentImprovementPoints + Math.max(0, pointsGranted),
     });
   }
 
+  /** Skills de evolução gastam Aprimoramento (mesmo pool do herói). */
   spendAscensionPointOnSkill(skillId: SkillId): HeroProgression {
-    if (this.unspentAscensionPoints < 1) {
-      throw new Error('Sem pontos de ascensão disponíveis');
-    }
-
-    const currentRank = this.skillRanks[skillId] ?? 0;
-
-    return new HeroProgression({
-      ...this.toProps(),
-      skillRanks: { ...this.skillRanks, [skillId]: currentRank + 1 },
-      unspentAscensionPoints: this.unspentAscensionPoints - 1,
-    });
+    return this.spendImprovementPointOnSkill(skillId);
   }
 
   addAllocatedAttributes(baseAttributes: Attributes): Attributes {

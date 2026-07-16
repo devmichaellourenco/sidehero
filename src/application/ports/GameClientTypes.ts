@@ -8,6 +8,7 @@ import { SkillNodeDto } from '../dto/SkillNodeDto';
 import { UpgradeNodeDto } from '../dto/UpgradeNodeDto';
 import { MetaNodeDto } from '../dto/MetaDto';
 import { AchievementListEntryDto, AchievementUpdateDto } from '../dto/AchievementDto';
+import { MassRefundPreviewDto } from '../dto/MassRefundPreviewDto';
 
 export type SpendTargetMessage =
   | { type: 'attribute'; key: 'str' | 'dex' | 'int' }
@@ -41,6 +42,9 @@ export type GameMessage =
   | { type: 'PURCHASE_META_UPGRADE'; upgradeId: string }
   | { type: 'GET_ACHIEVEMENTS' }
   | { type: 'SPEND_IMPROVEMENT_POINT'; heroId: string; target: SpendTargetMessage }
+  | { type: 'REFUND_IMPROVEMENT_POINT'; heroId: string; target: SpendTargetMessage }
+  | { type: 'MASS_REFUND_IMPROVEMENT_POINTS'; heroId: string }
+  | { type: 'PREVIEW_MASS_REFUND_IMPROVEMENT_POINTS'; heroId: string }
   | { type: 'GET_HERO_SKILL_TREE'; heroId: string }
   | { type: 'ASSIGN_SKILL_SLOT'; heroId: string; skillId: string; slotIndex: number }
   | { type: 'DEACTIVATE_SKILL'; heroId: string; skillId: string }
@@ -85,5 +89,9 @@ export type GameResponse =
       forgedGear?: GearDto;
       salvageGold?: number;
       campaign?: CampaignOverviewDto;
+      refundWarnings?: string[];
+      pointsRefunded?: number;
+      ascensionPointsRefunded?: number;
+      massRefundPreview?: MassRefundPreviewDto;
     }
   | { ok: false; error: string };

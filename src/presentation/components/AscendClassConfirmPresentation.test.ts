@@ -30,7 +30,7 @@ describe('AscendClassConfirmPresentation', () => {
 
     expect(html).toContain('ascend-confirm-preview');
     expect(html).toContain('Clériga Sagrada');
-    expect(html).toContain('+2 pts de ascensão');
+    expect(html).toContain('+2 pts de aprimoramento');
     expect(html).toContain('permanente');
     expect(html).toContain('seguir este caminho');
   });

@@ -12,6 +12,7 @@ Catálogo de upgrades, grafo, layout e UI da árvore.
 ## Workflow do agente
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes
 - **Não** gerar release até o usuário solicitar
 
 ## Escopo
@@ -25,3 +26,4 @@ Catálogo de upgrades, grafo, layout e UI da árvore.
 - [ ] Arestas retas (H/V/45°)
 - [ ] `FeatureAccessPolicy` se nova `FeatureKey`
 - [ ] Compra de melhoria: viewport (pan/zoom) preservado — `beginSession()` + `captureUpgradeTreeViewport`
+- [x] Nó `improvement_reset_1` / `_2`: ver `specs/improvement-reset.spec.md`

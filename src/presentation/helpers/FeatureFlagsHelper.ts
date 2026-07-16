@@ -19,6 +19,7 @@ const DEFAULT_FLAGS: FeatureFlagsDto = {
   stashCapacity: 0,
   inventoryCapacity: 30,
   divineForge: false,
+  improvementReset: 0,
 };
 
 export function getFeatureFlags(state: GameStateDto | null): FeatureFlagsDto {

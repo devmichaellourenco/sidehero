@@ -107,6 +107,7 @@ function mockState(overrides: Partial<GameStateDto> = {}): GameStateDto {
       stashCapacity: 20,
       inventoryCapacity: 30,
       divineForge: false,
+      improvementReset: 0,
     },
     chestProgress: { current: 0, target: 5, ratio: 0 },
     purchasableUpgradeCount: 0,

@@ -12,6 +12,7 @@ Formação, reserva, unlock de classes e edição de party na pausa.
 ## Workflow do agente
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes
 - **Não** gerar release até o usuário solicitar
 
 ## Escopo

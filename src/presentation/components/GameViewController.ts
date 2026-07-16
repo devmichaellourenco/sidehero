@@ -64,6 +64,7 @@ import { ToastController } from './ToastController';
 import { RewardPresentationController } from '../delight/RewardPresentationController';
 import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
 import { AscendClassConfirmDialog } from './AscendClassConfirmDialog';
+import { ImprovementResetConfirmDialog } from './ImprovementResetConfirmDialog';
 import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
 import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
 import { SkillCooldownDisplayAnimator } from './SkillCooldownDisplayAnimator';
@@ -145,6 +146,7 @@ export class GameViewController {
   private readonly rewards: RewardPresentationController;
   private readonly destroyGearConfirmDialog: DestroyGearConfirmDialog;
   private readonly ascendClassConfirmDialog: AscendClassConfirmDialog;
+  private readonly improvementResetConfirmDialog: ImprovementResetConfirmDialog;
   private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
   private readonly donationPrompt: DonationPromptController;
   private readonly hud: GameHudController;
@@ -291,6 +293,12 @@ export class GameViewController {
       root.querySelector('#ascend-confirm-body')!,
       root.querySelector('[data-ascend-confirm-accept]') as HTMLButtonElement,
     );
+    this.improvementResetConfirmDialog = new ImprovementResetConfirmDialog(
+      root.querySelector('#improvement-reset-confirm-root')!,
+      root.querySelector('#improvement-reset-confirm-title')!,
+      root.querySelector('#improvement-reset-confirm-body')!,
+      root.querySelector('[data-improvement-reset-confirm-accept]') as HTMLButtonElement,
+    );
     this.donationPrompt = new DonationPromptController(
       root.querySelector('#donation-prompt-root')!,
       root.querySelector('#donation-card-body')!,
@@ -335,6 +343,7 @@ export class GameViewController {
       this.toasts,
       this.rewards,
       this.ascendClassConfirmDialog,
+      this.improvementResetConfirmDialog,
       (state) => this.afterHeroProgressionMutation(state),
       () => this.refreshHeroDetailViews(),
     );

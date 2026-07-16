@@ -6542,11 +6542,21 @@ body.modal-open {
   background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
 }
 
+.hero-improvement-points-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+  justify-content: center;
+}
+
 .hero-improvement-points {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
+  flex: 1 1 140px;
+  min-width: 0;
   max-width: 320px;
   padding: 8px 12px;
   border-radius: 10px;
@@ -6557,6 +6567,26 @@ body.modal-open {
     border-color 0.15s ease,
     box-shadow 0.15s ease,
     transform 0.15s ease;
+}
+
+.hero-improvement-points--ascension {
+  border-color: rgba(140, 180, 255, 0.35);
+  background: linear-gradient(160deg, rgba(120, 160, 240, 0.12), rgba(12, 18, 36, 0.72));
+}
+
+.hero-improvement-points--ascension:hover,
+.hero-improvement-points--ascension:focus-visible {
+  border-color: rgba(160, 200, 255, 0.6);
+  box-shadow: 0 0 0 1px rgba(140, 180, 255, 0.22);
+  outline: none;
+}
+
+.hero-improvement-points--ascension.hero-improvement-points--available {
+  border-color: rgba(160, 200, 255, 0.7);
+  background: linear-gradient(160deg, rgba(120, 160, 240, 0.24), rgba(16, 24, 48, 0.9));
+  box-shadow:
+    0 0 0 1px rgba(140, 180, 255, 0.28),
+    0 0 18px rgba(100, 150, 255, 0.14);
 }
 
 .hero-improvement-points:hover,
@@ -6809,7 +6839,8 @@ body.modal-open {
 
 .hero-attr-chip .hero-attr-label,
 .hero-attr-chip .hero-attr-value,
-.hero-attr-chip .hero-attr-add {
+.hero-attr-chip .hero-attr-add,
+.hero-attr-chip .hero-attr-refund {
   box-sizing: border-box;
   height: 18px;
   display: inline-flex;
@@ -6859,9 +6890,99 @@ body.modal-open {
   cursor: pointer;
 }
 
-.hero-attr-add:disabled {
+.hero-attr-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.hero-attr-refund {
+  width: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(160, 180, 220, 0.4);
+  background: rgba(80, 100, 140, 0.2);
+  color: #d8e4f8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hero-attr-add:disabled,
+.hero-attr-refund:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+.hero-mass-reset-row {
+  margin: 0 0 10px;
+}
+
+.hero-mass-reset-btn {
+  width: 100%;
+  min-height: 28px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 200, 87, 0.35);
+  background: rgba(255, 200, 87, 0.1);
+  color: #fff8e7;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hero-mass-reset-btn:hover {
+  background: rgba(255, 200, 87, 0.18);
+}
+
+.improvement-reset-confirm-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(220, 230, 250, 0.8);
+}
+
+.improvement-reset-confirm-body-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.improvement-reset-confirm-preview {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 200, 87, 0.22);
+  background: rgba(20, 28, 48, 0.65);
+}
+
+.improvement-reset-confirm-total {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #fff8e7;
+}
+
+.improvement-reset-confirm-breakdown,
+.improvement-reset-confirm-attrs,
+.improvement-reset-confirm-warnings {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(220, 230, 250, 0.9);
+}
+
+.improvement-reset-confirm-section {
+  margin: 8px 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #b8c8e8;
+}
+
+.improvement-reset-confirm-warnings {
+  margin-top: 8px;
+  color: #ffd59a;
 }
 
 .hero-combat-stat-sheet {
@@ -7165,7 +7286,15 @@ body.modal-open {
   gap: 6px;
 }
 
-.skill-card-rank-up {
+.skill-card-rank-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.skill-card-rank-up,
+.skill-card-rank-down {
   flex: 0 0 auto;
   width: 22px;
   height: 22px;
@@ -7191,13 +7320,29 @@ body.modal-open {
   box-shadow: 0 0 0 1px rgba(110, 207, 138, 0.16);
 }
 
+.skill-card-rank-down--available {
+  opacity: 1;
+  cursor: pointer;
+  border-color: rgba(160, 180, 220, 0.5);
+  background: linear-gradient(180deg, rgba(120, 140, 180, 0.28), rgba(80, 100, 140, 0.18));
+  color: #d0dcff;
+  box-shadow: 0 0 0 1px rgba(160, 180, 220, 0.14);
+}
+
 .skill-card-rank-up--available:hover:not(:disabled) {
   border-color: rgba(110, 207, 138, 0.75);
   background: linear-gradient(180deg, rgba(110, 207, 138, 0.38), rgba(70, 160, 100, 0.24));
   color: #c8ffd4;
 }
 
-.skill-card-rank-up:disabled {
+.skill-card-rank-down--available:hover:not(:disabled) {
+  border-color: rgba(180, 200, 240, 0.7);
+  background: linear-gradient(180deg, rgba(140, 160, 200, 0.36), rgba(90, 110, 150, 0.22));
+  color: #e8eeff;
+}
+
+.skill-card-rank-up:disabled,
+.skill-card-rank-down:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }

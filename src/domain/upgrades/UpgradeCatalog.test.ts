@@ -90,4 +90,31 @@ describe('UpgradeCatalog', () => {
     expect(logFilter?.branch).toBe('qol');
     expect(logFilter?.parents).toEqual(['auto_battle_3']);
   });
+
+  it('reset de pontos I e II na árvore (Forja → I → II)', () => {
+    const reset1 = UPGRADE_CATALOG.find((entry) => entry.id === 'improvement_reset_1');
+    const reset2 = UPGRADE_CATALOG.find((entry) => entry.id === 'improvement_reset_2');
+
+    expect(reset1?.feature).toBe('improvement_reset');
+    expect(reset1?.level).toBe(1);
+    expect(reset1?.cost).toBe(5000);
+    expect(reset1?.parents).toEqual(['divine_forge_1']);
+    expect(reset1?.requirements).toEqual(
+      expect.arrayContaining([
+        { type: 'upgrade_level', feature: 'divine_forge', minLevel: 1 },
+        { type: 'min_hero_level', value: 12 },
+      ]),
+    );
+
+    expect(reset2?.feature).toBe('improvement_reset');
+    expect(reset2?.level).toBe(2);
+    expect(reset2?.cost).toBe(10000);
+    expect(reset2?.parents).toEqual(['improvement_reset_1']);
+    expect(reset2?.requirements).toEqual(
+      expect.arrayContaining([
+        { type: 'upgrade_level', feature: 'improvement_reset', minLevel: 1 },
+        { type: 'min_hero_level', value: 22 },
+      ]),
+    );
+  });
 });

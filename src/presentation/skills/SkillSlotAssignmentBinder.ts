@@ -191,7 +191,7 @@ export function bindSkillSlotAssignment(
 
     element.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
-      if (target.closest('button[data-skill-allocate], button[data-ascension-allocate]')) return;
+      if (target.closest('button[data-skill-allocate], button[data-ascension-allocate], button[data-skill-refund], button[data-ascension-refund]')) return;
 
       event.stopPropagation();
 
@@ -224,7 +224,7 @@ export function bindSkillSlotAssignment(
     const target = event.target as HTMLElement;
     if (
       target.closest(
-        '[data-skill-equip], [data-skill-slot-index], [data-skill-slot-clear], [data-skill-allocate], [data-ascension-allocate]',
+        '[data-skill-equip], [data-skill-slot-index], [data-skill-slot-clear], [data-skill-allocate], [data-skill-refund], [data-ascension-allocate], [data-ascension-refund]',
       )
     ) {
       return;

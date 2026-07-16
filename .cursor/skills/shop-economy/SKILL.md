@@ -29,3 +29,4 @@ description: Loja, ofertas e economia de ouro no Side Hero. Use para shop, loja,
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
 - **Não** gerar release até o usuário solicitar
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes

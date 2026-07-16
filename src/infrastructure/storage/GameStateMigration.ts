@@ -144,12 +144,16 @@ function migrateProgression(raw: RawRecord): Pick<
     migrateEquippedSkillIds(raw.equippedSkillIds),
   );
 
+  const rawImprovement =
+    typeof raw.unspentImprovementPoints === 'number' ? raw.unspentImprovementPoints : 0;
+  const rawAscension =
+    typeof raw.unspentAscensionPoints === 'number' ? raw.unspentAscensionPoints : 0;
+
+  // Pool unificado: saldos antigos de evolução passam a Aprimoramento.
   return {
     allocatedAttributes: migrateAttributes(raw.allocatedAttributes),
-    unspentImprovementPoints:
-      typeof raw.unspentImprovementPoints === 'number' ? raw.unspentImprovementPoints : 0,
-    unspentAscensionPoints:
-      typeof raw.unspentAscensionPoints === 'number' ? raw.unspentAscensionPoints : 0,
+    unspentImprovementPoints: rawImprovement + rawAscension,
+    unspentAscensionPoints: 0,
     skillRanks: starter.skillRanks,
     equippedSkillIds: starter.equippedSkillIds,
     ascensionId: migrateAscensionId(raw.ascensionId),

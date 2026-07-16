@@ -188,6 +188,37 @@ export class Hero {
     return this.withProgression(this.progression.spendImprovementPointOnSkill(skillId));
   }
 
+  refundImprovementPointFromAttribute(key: AttributeKey): Hero {
+    return this.withProgression(this.progression.refundImprovementPointFromAttribute(key));
+  }
+
+  refundImprovementPointFromSkill(skillId: SkillId): Hero {
+    return this.withProgression(this.progression.refundImprovementPointFromSkill(skillId));
+  }
+
+  refundAscensionPointFromSkill(skillId: SkillId): Hero {
+    return this.withProgression(this.progression.refundAscensionPointFromSkill(skillId));
+  }
+
+  withProgressionRefundSnapshot(props: {
+    allocatedAttributes: Attributes;
+    skillRanks: Record<SkillId, number>;
+    equippedSkillIds: (SkillId | null)[];
+    unspentImprovementPoints: number;
+    unspentAscensionPoints: number;
+  }): Hero {
+    return this.withProgression(this.progression.withProgressionRefundSnapshot(props));
+  }
+
+  withImprovementRefundSnapshot(props: {
+    allocatedAttributes: Attributes;
+    skillRanks: Record<SkillId, number>;
+    equippedSkillIds: (SkillId | null)[];
+    unspentImprovementPoints: number;
+  }): Hero {
+    return this.withProgression(this.progression.withImprovementRefundSnapshot(props));
+  }
+
   activateSkill(skillId: SkillId, maxActiveSlots: number): Hero {
     return this.withProgression(this.progression.activateSkill(skillId, maxActiveSlots));
   }

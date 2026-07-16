@@ -19,6 +19,8 @@ export interface FeatureAccessSnapshot {
   stashCapacity: number;
   inventoryCapacity: number;
   divineForge: boolean;
+  /** Nível da feature: 0 = off, 1 = reset unitário, 2 = + massa. */
+  improvementReset: number;
 }
 
 export class FeatureAccessPolicy {
@@ -47,6 +49,7 @@ export class FeatureAccessPolicy {
       stashCapacity: StorageCapacityPolicy.stashLimit(levels),
       inventoryCapacity: StorageCapacityPolicy.inventoryLimit(),
       divineForge: getFeatureLevel(levels, 'divine_forge') >= 1,
+      improvementReset: getFeatureLevel(levels, 'improvement_reset'),
     };
   }
 

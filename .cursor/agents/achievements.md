@@ -12,6 +12,7 @@ Conquistas persistentes: catálogo, progresso por eventos, Wow de avanço/unlock
 ## Workflow do agente
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes
 - **Não** gerar release até o usuário solicitar
 
 ## Escopo

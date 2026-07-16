@@ -48,7 +48,10 @@ function noopHandlers(): HeroDetailModalHandlers {
   return {
     onSlotClick: () => undefined,
     onSpendAttribute: () => undefined,
+    onRefundAttribute: () => undefined,
     onAllocateSkill: () => undefined,
+    onRefundSkill: () => undefined,
+    onMassRefund: () => undefined,
     onAssignSkillSlot: () => undefined,
     onClearSkillSlot: () => undefined,
     onEquipSkillFirstAvailable: () => undefined,

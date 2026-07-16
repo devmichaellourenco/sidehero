@@ -24,6 +24,7 @@ description: Gerencia heróis, party ativa, reserva, unlock e formação no Side
 - Aba Inventário: sem hint de texto nos slots; equipar via clique no slot + picker inline
 - Header do modal: `Lv.{n} {Classe} - {Evolução}` via `HeroClassLinePresentation`
 - Aba Classe: título compacto + tooltip (`HeroAscensionMomentTooltipBinder`) + cards temáticos (`HeroClassAscensionPresentation`)
+- Reset de atributos (− e massa): `specs/improvement-reset.spec.md` + skill `improvement-reset`
 
 ## Testes
 
@@ -33,3 +34,4 @@ description: Gerencia heróis, party ativa, reserva, unlock e formação no Side
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
 - **Não** gerar release até o usuário solicitar
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes

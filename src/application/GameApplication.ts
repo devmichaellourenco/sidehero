@@ -20,6 +20,8 @@ import { PurchaseUpgradeUseCase } from './use-cases/PurchaseUpgradeUseCase';
 import { RefreshShopUseCase } from './use-cases/RefreshShopUseCase';
 import { SpendAscensionPointUseCase } from './use-cases/SpendAscensionPointUseCase';
 import { SpendImprovementPointUseCase } from './use-cases/SpendImprovementPointUseCase';
+import { RefundImprovementPointUseCase } from './use-cases/RefundImprovementPointUseCase';
+import { MassRefundImprovementPointsUseCase, PreviewMassRefundImprovementPointsUseCase } from './use-cases/MassRefundImprovementPointsUseCase';
 import { TickGameUseCase } from './use-cases/TickGameUseCase';
 import { ResumeCombatIntermissionUseCase } from './use-cases/ResumeCombatIntermissionUseCase';
 import { UnequipGearUseCase } from './use-cases/UnequipGearUseCase';
@@ -59,6 +61,9 @@ export class GameApplication {
   readonly getUpgradeTree: GetUpgradeTreeUseCase;
   readonly purchaseUpgrade: PurchaseUpgradeUseCase;
   readonly spendImprovementPoint: SpendImprovementPointUseCase;
+  readonly refundImprovementPoint: RefundImprovementPointUseCase;
+  readonly massRefundImprovementPoints: MassRefundImprovementPointsUseCase;
+  readonly previewMassRefundImprovementPoints: PreviewMassRefundImprovementPointsUseCase;
   readonly getHeroSkillTree: GetHeroSkillTreeUseCase;
   readonly assignSkillSlot: AssignSkillSlotUseCase;
   readonly deactivateSkill: DeactivateSkillUseCase;
@@ -129,6 +134,14 @@ export class GameApplication {
       repository,
       presenter,
       skillService,
+    );
+    this.refundImprovementPoint = new RefundImprovementPointUseCase(repository, presenter);
+    this.massRefundImprovementPoints = new MassRefundImprovementPointsUseCase(
+      repository,
+      presenter,
+    );
+    this.previewMassRefundImprovementPoints = new PreviewMassRefundImprovementPointsUseCase(
+      repository,
     );
     this.getHeroSkillTree = new GetHeroSkillTreeUseCase(repository, presenter, skillService);
     this.assignSkillSlot = new AssignSkillSlotUseCase(repository, presenter, skillService);

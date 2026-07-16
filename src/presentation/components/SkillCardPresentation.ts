@@ -14,6 +14,10 @@ function escapeHtml(text: string): string {
 export interface SkillCardOptions {
   allocateAttr: string;
   canAllocate: boolean;
+  refundAttr?: string;
+  canRefund?: boolean;
+  /** Rótulo do ponto gasto no tooltip do [+] (ex.: Aprimoramento). */
+  spendPointLabel?: string;
 }
 
 const SKILL_STATUS_LABELS: Record<SkillNodeDto['status'], string> = {
@@ -31,16 +35,33 @@ function renderEssentialBadges(node: SkillNodeDto): string {
   return renderSkillBadge(node.branchLabel, node.branch);
 }
 
+function renderSkillRankDownButton(node: SkillNodeDto, options: SkillCardOptions): string {
+  if (!options.refundAttr || !options.canRefund || node.currentRank < 1) return '';
+
+  const tooltip = `Devolver 1 rank (${node.currentRank} → ${node.currentRank - 1})`;
+
+  return `
+    <button
+      type="button"
+      class="skill-card-rank-down skill-card-rank-down--available"
+      ${options.refundAttr}="${node.id}"
+      title="${escapeHtml(tooltip)}"
+      aria-label="${escapeHtml(tooltip)}"
+    >−</button>
+  `;
+}
+
 function renderSkillRankUpButton(node: SkillNodeDto, options: SkillCardOptions): string {
   if (node.status === 'maxed' || node.currentRank >= node.maxRank) return '';
 
   const canAllocate = options.canAllocate && node.canAllocateRank;
   const nextRank = Math.min(node.currentRank + 1, node.maxRank);
+  const spendLabel = options.spendPointLabel ?? 'Aprimoramento';
   const tooltip = canAllocate
-    ? `Subir para rank ${nextRank}/${node.maxRank} · Gasta 1 Aprimoramento`
+    ? `Subir para rank ${nextRank}/${node.maxRank} · Gasta 1 ${spendLabel}`
     : node.currentRank <= 0
       ? 'Desbloqueie a skill para subir rank'
-      : 'Requisitos não atendidos ou sem Aprimoramento';
+      : `Requisitos não atendidos ou sem ${spendLabel}`;
 
   return `
     <button
@@ -86,7 +107,10 @@ export function renderSkillCard(node: SkillNodeDto, options: SkillCardOptions): 
           </header>
           <div class="skill-card-essentials-row">
             <div class="skill-card-essentials">${renderEssentialBadges(node)}</div>
-            ${renderSkillRankUpButton(node, options)}
+            <div class="skill-card-rank-actions">
+              ${renderSkillRankDownButton(node, options)}
+              ${renderSkillRankUpButton(node, options)}
+            </div>
           </div>
         </div>
       </div>

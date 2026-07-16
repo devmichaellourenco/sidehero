@@ -25,9 +25,11 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 - Aba Skills: carregar `GET_HERO_SKILL_TREE` **e** `GET_HERO_ASCENSION_TREE` (skills de evolução vivem aqui)
 - Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltips nos cards; skills de classe + skills de evolução
 - Cards da lista: estado equipado = fundo verde; sem badge Disponível (botão `[+]` basta)
-- Cards de ascensão: requisitos/CTA no tooltip; clique no card disponível abre confirmação
+- Cards de ascensão: requisitos/CTA no tooltip; clique no card disponível abre confirmação; `+N Aprim.` (não pool separado)
+- Ascensão libera skills/passivas do caminho e concede Aprimoramento (`pointsGranted`); skills `pointType: 'ascension'` gastam o mesmo saldo até rank 3
 - Aba Classe: sem retrato/classe atual (vai no header); banner + cards temáticos (`HeroClassAscensionPresentation`) — sem lista de skills
 - Testes: `HeroDetailFlow.test.ts` — aba Skills dispara load de ascensão
+- Reset de pontos (− e massa; skills improvement **e** evolução → mesmo pool): `specs/improvement-reset.spec.md` + skill `improvement-reset`
 
 ## Testes
 
@@ -37,3 +39,4 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 
 - Criar ou atualizar testes da spec — **não executar** `npm test` salvo pedido explícito
 - **Não** gerar release até o usuário solicitar
+- **Não** criar pasta nem arquivos `step-by-step/`; fonte de verdade = specs, agents, skills, rules e testes
