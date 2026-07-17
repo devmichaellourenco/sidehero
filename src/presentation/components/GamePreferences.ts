@@ -1,9 +1,13 @@
+import { parseUiThemeId, type UiThemeId } from '../theme/MedievalThemeTokens';
+import { applyUiTheme } from '../theme/applyUiTheme';
+
 export interface GamePreferences {
   autoBattle: boolean;
   autoOpenChests: boolean;
   autoEquipLoot: boolean;
   autoBattleSpeed: 1 | 2 | 3;
   logFilterImportant: boolean;
+  uiTheme: UiThemeId;
 }
 
 const STORAGE_KEYS = {
@@ -12,6 +16,7 @@ const STORAGE_KEYS = {
   autoEquipLoot: 'sidehero_auto_equip_loot',
   autoBattleSpeed: 'sidehero_auto_battle_speed',
   logFilterImportant: 'sidehero_log_filter_important',
+  uiTheme: 'sidehero_ui_theme',
 } as const;
 
 const DEFAULT_PREFERENCES: GamePreferences = {
@@ -20,6 +25,7 @@ const DEFAULT_PREFERENCES: GamePreferences = {
   autoEquipLoot: false,
   autoBattleSpeed: 1,
   logFilterImportant: false,
+  uiTheme: 'dark',
 };
 
 function readFlag(key: string, defaultValue = false): boolean {
@@ -40,6 +46,22 @@ function writeFlag(key: string, enabled: boolean): void {
   }
 }
 
+function readUiTheme(): UiThemeId {
+  try {
+    return parseUiThemeId(localStorage.getItem(STORAGE_KEYS.uiTheme));
+  } catch {
+    return DEFAULT_PREFERENCES.uiTheme;
+  }
+}
+
+function writeUiTheme(theme: UiThemeId): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.uiTheme, theme);
+  } catch {
+    // localStorage indisponível
+  }
+}
+
 export function loadGamePreferences(): GamePreferences {
   try {
     const speedRaw = sessionStorage.getItem(STORAGE_KEYS.autoBattleSpeed);
@@ -49,6 +71,7 @@ export function loadGamePreferences(): GamePreferences {
       autoEquipLoot: readFlag(STORAGE_KEYS.autoEquipLoot),
       autoBattleSpeed: speedRaw === '3' ? 3 : speedRaw === '2' ? 2 : 1,
       logFilterImportant: readFlag(STORAGE_KEYS.logFilterImportant),
+      uiTheme: readUiTheme(),
     };
   } catch {
     return { ...DEFAULT_PREFERENCES };
@@ -60,6 +83,7 @@ export function saveGamePreferences(preferences: GamePreferences): void {
   writeFlag(STORAGE_KEYS.autoOpenChests, preferences.autoOpenChests);
   writeFlag(STORAGE_KEYS.autoEquipLoot, preferences.autoEquipLoot);
   writeFlag(STORAGE_KEYS.logFilterImportant, preferences.logFilterImportant);
+  writeUiTheme(preferences.uiTheme);
 
   try {
     sessionStorage.setItem(STORAGE_KEYS.autoBattleSpeed, String(preferences.autoBattleSpeed));
@@ -74,5 +98,15 @@ export function updateGamePreference<K extends keyof GamePreferences>(
 ): GamePreferences {
   const next = { ...loadGamePreferences(), [key]: value };
   saveGamePreferences(next);
+  if (key === 'uiTheme') {
+    applyUiTheme(next.uiTheme);
+  }
   return next;
+}
+
+/** Aplica o tema salvo no DOM (bootstrap do painel). */
+export function applyStoredUiTheme(): UiThemeId {
+  const theme = loadGamePreferences().uiTheme;
+  applyUiTheme(theme);
+  return theme;
 }

@@ -1,4 +1,5 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
+import { parseUiThemeId, type UiThemeId } from '../theme/MedievalThemeTokens';
 import { GamePreferences } from './GamePreferences';
 
 export type SettingsModalHandlers = {
@@ -20,6 +21,7 @@ export class SettingsModalRenderer {
     container.innerHTML = `
       <p class="settings-intro">Auto-batalha já vem ativa. Outras automações exigem Runas.</p>
       <div class="settings-list">
+        ${this.renderThemeSelect(preferences)}
         ${this.renderToggle({
           key: 'autoBattle',
           title: 'Auto-batalha',
@@ -74,11 +76,17 @@ export class SettingsModalRenderer {
         return;
       }
 
-      if (element instanceof HTMLSelectElement && key === 'autoBattleSpeed') {
+      if (element instanceof HTMLSelectElement) {
         if (element.disabled) return;
         element.addEventListener('change', () => {
-          const speed = Number(element.value) === 3 ? 3 : Number(element.value) === 2 ? 2 : 1;
-          handlers.onPreferenceChange('autoBattleSpeed', speed as GamePreferences['autoBattleSpeed']);
+          if (key === 'autoBattleSpeed') {
+            const speed = Number(element.value) === 3 ? 3 : Number(element.value) === 2 ? 2 : 1;
+            handlers.onPreferenceChange('autoBattleSpeed', speed as GamePreferences['autoBattleSpeed']);
+            return;
+          }
+          if (key === 'uiTheme') {
+            handlers.onPreferenceChange('uiTheme', parseUiThemeId(element.value));
+          }
         });
       }
     });
@@ -117,6 +125,34 @@ export class SettingsModalRenderer {
           <strong>${options.title}</strong>
           <small>${options.hint}</small>
         </span>
+      </label>
+    `;
+  }
+
+  private renderThemeSelect(preferences: GamePreferences): string {
+    const options: { value: UiThemeId; label: string }[] = [
+      { value: 'light', label: 'Claro' },
+      { value: 'dark', label: 'Escuro' },
+    ];
+    const selected = preferences.uiTheme === 'light' ? 'light' : 'dark';
+
+    return `
+      <label class="settings-item settings-item-select">
+        <span class="settings-item-text">
+          <strong>Tema do painel</strong>
+          <small>A batalha permanece no visual atual</small>
+        </span>
+        <select data-pref="uiTheme" class="settings-speed-select" aria-label="Tema do painel">
+          ${options
+            .map(
+              (option) => `
+                <option value="${option.value}" ${selected === option.value ? 'selected' : ''}>
+                  ${option.label}
+                </option>
+              `,
+            )
+            .join('')}
+        </select>
       </label>
     `;
   }

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { MEDIEVAL_THEME, MEDIEVAL_THEME_SEMANTICS } from './MedievalThemeTokens';
+import {
+  MEDIEVAL_THEME,
+  MEDIEVAL_THEME_DARK,
+  MEDIEVAL_THEME_SEMANTICS,
+  parseUiThemeId,
+  UI_THEME_IDS,
+} from './MedievalThemeTokens';
 
 describe('MedievalThemeTokens', () => {
   it('preserva paleta canônica do tutorial (ouro, pergaminho, tinta, floresta)', () => {
@@ -52,11 +58,6 @@ describe('MedievalThemeTokens', () => {
     expect(MEDIEVAL_THEME.badgeDowngradeFill).toBe(MEDIEVAL_THEME.mapCrimsonAbyss);
     expect(MEDIEVAL_THEME.metaOwnedLabel).toBe(MEDIEVAL_THEME.rosterActiveLabel);
     expect(MEDIEVAL_THEME.toastVictoryDeep).toBe(MEDIEVAL_THEME.metaCtaDeep);
-    // chaves distintas = temas futuros podem divergir por contexto
-    expect('floatLightning' in MEDIEVAL_THEME).toBe(true);
-    expect('floatCritHeal' in MEDIEVAL_THEME).toBe(true);
-    expect('mapCrimsonAbyss' in MEDIEVAL_THEME).toBe(true);
-    expect('badgeDowngradeFill' in MEDIEVAL_THEME).toBe(true);
   });
 
   it('expõe tokens de badges, HUD e mapas para espelho em :root', () => {
@@ -65,5 +66,25 @@ describe('MedievalThemeTokens', () => {
     expect(MEDIEVAL_THEME.scrollbarThumb).toBe('#c9892f');
     expect(MEDIEVAL_THEME.mapStendra).toBe('#6ecf8a');
     expect(MEDIEVAL_THEME.floatHeal).toBe('#2dffb0');
+  });
+
+  it('tema escuro inverte fundo/texto e cobre as mesmas chaves do claro', () => {
+    expect(Object.keys(MEDIEVAL_THEME_DARK).sort()).toEqual(Object.keys(MEDIEVAL_THEME).sort());
+    expect(MEDIEVAL_THEME_DARK.bg).toBe(MEDIEVAL_THEME.ink);
+    expect(MEDIEVAL_THEME_DARK.text).toBe(MEDIEVAL_THEME.parchment0);
+    expect(MEDIEVAL_THEME_DARK.surface).toBe(MEDIEVAL_THEME.strip);
+    expect(MEDIEVAL_THEME_DARK.ink).toBe(MEDIEVAL_THEME.parchment0);
+    expect(MEDIEVAL_THEME_DARK.parchment1).toBe(MEDIEVAL_THEME.ink);
+    expect(UI_THEME_IDS).toEqual(['light', 'dark']);
+    expect(parseUiThemeId('dark')).toBe('dark');
+    expect(parseUiThemeId('nope')).toBe('dark');
+    expect(parseUiThemeId(null)).toBe('dark');
+    expect(parseUiThemeId('light')).toBe('light');
+  });
+
+  it('mantém tokens de batalha iguais entre light e dark (isolamento v1)', () => {
+    expect(MEDIEVAL_THEME_DARK.floatDamage).toBe(MEDIEVAL_THEME.floatDamage);
+    expect(MEDIEVAL_THEME_DARK.stripSkyStart).toBe(MEDIEVAL_THEME.stripSkyStart);
+    expect(MEDIEVAL_THEME_DARK.mapStendra).toBe(MEDIEVAL_THEME.mapStendra);
   });
 });

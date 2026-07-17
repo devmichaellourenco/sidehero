@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 8/8 (100%)  
+**Aceite:** 9/9 (100%)  
 **Testes obrigatórios:** 1/1 presentes na suite
 
 ## Objetivo
@@ -23,6 +23,7 @@ Referência canônica: card `.onboarding-card`.
 - [x] Temas por mapa (`data-campaign-theme`) e raridades (`--rarity-*`) preservados
 - [x] Accent selo (`#8b3a2f`) no lugar do rosa neon; sem azul cyber como default de chrome
 - [x] Contraste legível: tinta em pergaminho no chrome; legibilidade na strip de batalha intacta
+- [x] Tema escuro opcional via Config (`ui-theme.spec.md`) — chrome só; batalha isolada
 
 ## Tokens canônicos (tutorial → chrome)
 

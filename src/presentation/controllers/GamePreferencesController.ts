@@ -15,6 +15,7 @@ export class GamePreferencesController {
   autoEquipLoot = false;
   autoBattleSpeed: GamePreferences['autoBattleSpeed'] = 1;
   logFilterImportant = false;
+  uiTheme: GamePreferences['uiTheme'] = 'dark';
 
   apply(state: GameStateDto | null): { autoBattleChanged: boolean } {
     const flags = getFeatureFlags(state);
@@ -31,6 +32,7 @@ export class GamePreferencesController {
       flags.autoBattleMaxSpeed,
     ) as GamePreferences['autoBattleSpeed'];
     this.logFilterImportant = clamped.logFilterImportant && flags.logFilter;
+    this.uiTheme = clamped.uiTheme;
 
     const autoBattleChanged =
       wasAutoBattle !== this.autoBattleEnabled || wasSpeed !== this.autoBattleSpeed;
@@ -57,6 +59,8 @@ export class GamePreferencesController {
         return flags.autoEquipLoot;
       case 'logFilterImportant':
         return flags.logFilter;
+      case 'uiTheme':
+        return true;
       default:
         return true;
     }
@@ -93,6 +97,7 @@ export class GamePreferencesController {
         flags.autoBattleMaxSpeed,
       ) as GamePreferences['autoBattleSpeed'],
       logFilterImportant: flags.logFilter ? preferences.logFilterImportant : false,
+      uiTheme: preferences.uiTheme === 'light' ? 'light' : 'dark',
     };
   }
 }

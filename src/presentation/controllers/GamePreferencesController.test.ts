@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { GamePreferencesController } from './GamePreferencesController';
+import { UI_THEME_ATTR } from '../theme/applyUiTheme';
 
 const sessionStore = new Map<string, string>();
+const localStore = new Map<string, string>();
 
 vi.stubGlobal('sessionStorage', {
   getItem: (key: string) => sessionStore.get(key) ?? null,
@@ -14,6 +16,19 @@ vi.stubGlobal('sessionStorage', {
   },
   clear: () => {
     sessionStore.clear();
+  },
+});
+
+vi.stubGlobal('localStorage', {
+  getItem: (key: string) => localStore.get(key) ?? null,
+  setItem: (key: string, value: string) => {
+    localStore.set(key, value);
+  },
+  removeItem: (key: string) => {
+    localStore.delete(key);
+  },
+  clear: () => {
+    localStore.clear();
   },
 });
 
@@ -51,6 +66,8 @@ function createStateWithAutoBattle(): GameStateDto {
 describe('GamePreferencesController', () => {
   beforeEach(() => {
     sessionStore.clear();
+    localStore.clear();
+    document.documentElement.removeAttribute(UI_THEME_ATTR);
   });
 
   it('liga auto-batalha por padrão em sessão nova', () => {
@@ -72,5 +89,26 @@ describe('GamePreferencesController', () => {
     expect(result.applied).toBe(true);
     expect(controller.preferences.autoBattle).toBe(true);
     expect(controller.autoBattleEnabled).toBe(true);
+  });
+
+  it('usa tema escuro por padrão em sessão nova', () => {
+    const controller = new GamePreferencesController();
+    const state = createStateWithAutoBattle();
+
+    controller.apply(state);
+
+    expect(controller.preferences.uiTheme).toBe('dark');
+  });
+
+  it('persiste tema escuro e aplica data-ui-theme', () => {
+    const controller = new GamePreferencesController();
+    const state = createStateWithAutoBattle();
+
+    const result = controller.update('uiTheme', 'dark', state);
+
+    expect(result.applied).toBe(true);
+    expect(controller.preferences.uiTheme).toBe('dark');
+    expect(localStore.get('sidehero_ui_theme')).toBe('dark');
+    expect(document.documentElement.getAttribute(UI_THEME_ATTR)).toBe('dark');
   });
 });

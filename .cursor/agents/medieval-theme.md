@@ -2,11 +2,11 @@
 
 ## Papel
 
-Manter o chrome do painel no padrão **tutorial**: pergaminho claro + tinta escura. Isolar batalha e waves.
+Manter o chrome do painel no padrão **tutorial** (claro) e o **tema escuro** opcional (`ui-theme`). Isolar batalha e waves.
 
 ## Antes de codar
 
-1. `specs/medieval-theme.spec.md`
+1. `specs/medieval-theme.spec.md` + `specs/ui-theme.spec.md`
 2. `.cursor/skills/medieval-theme/SKILL.md`
 3. Coordenar: `battle-ui`, `stage-progress-bar`, `art-scenes`
 
@@ -18,9 +18,10 @@ Manter o chrome do painel no padrão **tutorial**: pergaminho claro + tinta escu
 
 ## Escopo
 
-- Tokens CSS + `MedievalThemeTokens.ts`
-- Chrome claro (app, header, modais, ações, campanha context)
-- **Não** recolorir `.battle-stage` / `.stage-progress-*` para pergaminho
+- Tokens CSS + `MedievalThemeTokens.ts` / `MEDIEVAL_THEME_DARK`
+- Chrome claro/escuro (app, header, modais, ações, campanha context)
+- Preferência `uiTheme` em Configurações
+- **Não** recolorir `.battle-stage` / `.stage-progress-*` com o tema escuro (v1)
 - **Não** mudar combate, loot, raridades nem arte por mapa
 
 ## Checklist
@@ -28,4 +29,5 @@ Manter o chrome do painel no padrão **tutorial**: pergaminho claro + tinta escu
 - [x] Spec critérios marcados conforme entrega
 - [x] Onboarding usa vars do tema
 - [x] Chrome claro; batalha/waves isolados
+- [x] Tema escuro + seletor em Config
 - [x] Teste de tokens atualizado

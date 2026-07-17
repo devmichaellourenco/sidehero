@@ -1,13 +1,13 @@
 ---
 name: medieval-theme
-description: Paleta medieval do painel Side Hero (pergaminho claro, tinta, ouro de selo). Use para tema, cores, :root, CSS vars, onboarding palette, chrome claro ou MedievalThemeTokens. Exceto battle-stage e stage-progress.
+description: Paleta medieval do painel Side Hero (pergaminho claro, tinta, ouro de selo) e tema escuro (data-ui-theme). Use para tema, cores, :root, CSS vars, dark mode, uiTheme, onboarding palette, chrome ou MedievalThemeTokens. Exceto battle-stage e stage-progress.
 ---
 
 # Tema medieval
 
 ## Spec
 
-`specs/medieval-theme.spec.md`
+`specs/medieval-theme.spec.md` · `specs/ui-theme.spec.md`
 
 ## Coordenação SDD
 
@@ -30,21 +30,23 @@ Card do tutorial (`.onboarding-card`): borda ouro `#c9a227`, fundo `#fff9ed → 
 
 ## Tokens
 
-`src/presentation/theme/MedievalThemeTokens.ts` → `panel.css` `:root`
+`MedievalThemeTokens.ts` → `:root` (light) + `html[data-ui-theme='dark']` (dark)  
+Preferência: `GamePreferences.uiTheme` → `applyUiTheme()` → `data-ui-theme`  
+Batalha: `html[data-ui-theme='dark'] .battle-stage` restaura tokens light.
 
-Inclui base (pergaminho/tinta/ouro/floresta), **semântica** (`danger`, `info`, `crit`, `element*`), aliases (`--log-damage`, …) e **tokens por contexto** (CTA, badges, floats, mapas, scrollbar, toast). Mesmo hex em contextos diferentes = variáveis distintas.
+Inclui base, **semântica**, **tokens por contexto** e `MEDIEVAL_THEME_DARK`.
 
 ## Fluxo ao alterar cor / tema
 
-1. Spec + `MedievalThemeTokens.ts` (e `MEDIEVAL_THEME_SEMANTICS` se o mapeamento mudar)
-2. Espelhar hex/aliases em `:root` (definição única de literais)
+1. Spec (`medieval-theme` / `ui-theme`) + `MedievalThemeTokens.ts` (+ `MEDIEVAL_THEME_DARK`)
+2. Espelhar light em `:root` e dark em `html[data-ui-theme='dark']`; manter reset de `.battle-stage`
 3. Componentes só usam `var(--*)` — sem hex solto fora de `:root`
-4. Teste de tokens (inclui separação por contexto)
+4. Teste de tokens + `applyUiTheme` / preferência
 5. Marcar aceite
 
 ## Testes
 
-`MedievalThemeTokens.test.ts` — **não** executar `npm test` automaticamente.
+`MedievalThemeTokens.test.ts`, `applyUiTheme.test.ts`, `GamePreferencesController.test.ts` — **não** executar `npm test` automaticamente.
 
 ## Workflow do agente
 

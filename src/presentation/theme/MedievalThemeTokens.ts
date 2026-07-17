@@ -1,11 +1,14 @@
 /**
  * Tokens canônicos do tema Side Hero.
- * Chrome = pergaminho claro + tinta. Battle/waves têm tokens de contexto próprios.
- * Espelhar em `panel.css` `:root`.
+ * Light = pergaminho + tinta. Dark = inversão harmônica (fundo↔texto) + acentos
+ * legíveis no escuro. Espelhar light em `:root` e dark em `html[data-ui-theme='dark']`.
  *
- * Regra: variável = contexto de uso (não só o hex). Mesma cor em contextos
- * diferentes → tokens distintos, para trocar temas sem acoplar significados.
+ * Regra: variável = contexto de uso (não só o hex).
  */
+export type UiThemeId = 'light' | 'dark';
+
+export const UI_THEME_IDS: readonly UiThemeId[] = ['light', 'dark'] as const;
+
 export const MEDIEVAL_THEME = {
   /* —— Base chrome —— */
   sealGold: '#c9a227',
@@ -112,7 +115,116 @@ export const MEDIEVAL_THEME = {
   mapVoidThrone: '#f5c542',
 } as const;
 
+/**
+ * Tema escuro: fundo ← tinta do claro; texto ← pergaminho do claro;
+ * acentos clareados/saturados para contraste no escuro.
+ * Battle tokens espelhados iguais ao light (batalha isolada no CSS).
+ */
+export const MEDIEVAL_THEME_DARK: { readonly [K in keyof typeof MEDIEVAL_THEME]: string } = {
+  /* Fundo = tinta; superfície = madeira do strip claro; texto = pergaminho */
+  sealGold: '#e0c050',
+  sealGoldDark: '#c9a227',
+  parchment0: '#2a2118',
+  parchment1: '#1f1710',
+  parchment2: '#16110c',
+  ink: '#fff9ed',
+  inkMuted: '#d4c4a0',
+  forest: '#4a9e58',
+  forestHi: '#5cb86a',
+  bg: '#1f1710',
+  surface: '#2a2118',
+  accent: '#c45a4e',
+  text: '#fff9ed',
+  muted: '#d4c4a0',
+  strip: '#0f0c0a',
+  floor: '#1a1410',
+
+  danger: '#e07070',
+  info: '#5a9fd4',
+  crit: '#e0c050',
+  elementFire: '#ff9a4a',
+  elementCold: '#5eb8ff',
+  elementLightning: '#e8d060',
+  elementChaos: '#c9a0ff',
+
+  forestCtaLabel: '#fff9ed',
+  onAccentLabel: '#ffffff',
+  onDarkGoldLabel: '#ffe6a8',
+  onDarkMutedLabel: '#b8c8e8',
+  onDarkIceLabel: '#d8e4ff',
+  onDarkWarmLabel: '#ffe08a',
+  onDarkBrightGoldLabel: '#ffe9a8',
+
+  badgeUpgradeInk: '#0f1f12',
+  badgeUpgradeFill: '#7ee787',
+  badgeDowngradeFill: '#ff8a8a',
+  destroyActionLabel: '#ffcdd2',
+  metaOwnedLabel: '#9dffb0',
+  skillChipOk: '#8fd694',
+  skillChipBad: '#e88a8a',
+  emptySlotMuted: '#9aa3b2',
+  rosterActiveLabel: '#9dffb0',
+
+  hpFillStart: '#2d7a3e',
+  hpFillMid: '#4caf6a',
+  hpFillEnd: '#8be8a8',
+  xpFillMid: '#f5d76e',
+  xpFillEnd: '#ffe9a8',
+
+  scrollbarThumb: '#d4a82a',
+  scrollbarThumbHi: '#ffe494',
+  scrollbarThumbLo: '#c9892f',
+  scrollbarThumbHoverHi: '#fff0b0',
+
+  toastOnDarkLabel: '#ffe6a8',
+  wowProgressGoldStart: '#d4a82a',
+  wowProgressGoldEnd: '#f5c542',
+  toastVictoryDeep: '#8a3028',
+  metaCtaDeep: '#8a3028',
+
+  /* Battle: iguais ao light (CSS também isola .battle-stage) */
+  stripSkyStart: MEDIEVAL_THEME.stripSkyStart,
+  floatDamage: MEDIEVAL_THEME.floatDamage,
+  floatFire: MEDIEVAL_THEME.floatFire,
+  floatCold: MEDIEVAL_THEME.floatCold,
+  floatLightning: MEDIEVAL_THEME.floatLightning,
+  floatChaos: MEDIEVAL_THEME.floatChaos,
+  floatCrit: MEDIEVAL_THEME.floatCrit,
+  floatCritBuff: MEDIEVAL_THEME.floatCritBuff,
+  floatCritHeal: MEDIEVAL_THEME.floatCritHeal,
+  floatHeal: MEDIEVAL_THEME.floatHeal,
+  floatLevelUp: MEDIEVAL_THEME.floatLevelUp,
+  waveMarkerGoldLabel: MEDIEVAL_THEME.waveMarkerGoldLabel,
+  waveMarkerEliteLabel: MEDIEVAL_THEME.waveMarkerEliteLabel,
+  waveMarkerBossLabel: MEDIEVAL_THEME.waveMarkerBossLabel,
+  enemyResistLabel: MEDIEVAL_THEME.enemyResistLabel,
+  elementPipFire: MEDIEVAL_THEME.elementPipFire,
+  elementPipCold: MEDIEVAL_THEME.elementPipCold,
+  elementPipLightning: MEDIEVAL_THEME.elementPipLightning,
+  elementPipChaos: MEDIEVAL_THEME.elementPipChaos,
+  elementPipPhysical: MEDIEVAL_THEME.elementPipPhysical,
+  resistStrongLabel: MEDIEVAL_THEME.resistStrongLabel,
+  resistWeakLabel: MEDIEVAL_THEME.resistWeakLabel,
+
+  mapStendra: MEDIEVAL_THEME.mapStendra,
+  mapGruftall: MEDIEVAL_THEME.mapGruftall,
+  mapGruftallTooltip: MEDIEVAL_THEME.mapGruftallTooltip,
+  mapValdris: MEDIEVAL_THEME.mapValdris,
+  mapMorthaven: MEDIEVAL_THEME.mapMorthaven,
+  mapBrokenSky: MEDIEVAL_THEME.mapBrokenSky,
+  mapCrimsonAbyss: MEDIEVAL_THEME.mapCrimsonAbyss,
+  mapEternalForge: MEDIEVAL_THEME.mapEternalForge,
+  mapAncientGrove: MEDIEVAL_THEME.mapAncientGrove,
+  mapTwilightTower: MEDIEVAL_THEME.mapTwilightTower,
+  mapVoidThrone: MEDIEVAL_THEME.mapVoidThrone,
+};
+
 export type MedievalThemeToken = keyof typeof MEDIEVAL_THEME;
+
+export const MEDIEVAL_THEME_BY_ID: Record<UiThemeId, typeof MEDIEVAL_THEME | typeof MEDIEVAL_THEME_DARK> = {
+  light: MEDIEVAL_THEME,
+  dark: MEDIEVAL_THEME_DARK,
+};
 
 /** Aliases semânticos → token canônico (documentação / futuros temas). */
 export const MEDIEVAL_THEME_SEMANTICS = {
@@ -127,3 +239,7 @@ export const MEDIEVAL_THEME_SEMANTICS = {
   inventoryUpgrade: 'badgeUpgradeFill',
   inventoryDowngrade: 'badgeDowngradeFill',
 } as const;
+
+export function parseUiThemeId(raw: string | null | undefined): UiThemeId {
+  return raw === 'light' ? 'light' : 'dark';
+}

@@ -650,6 +650,13 @@ export class GameViewController {
       return;
     }
 
+    if (key === 'uiTheme') {
+      if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'settings') {
+        this.renderModalTop();
+      }
+      return;
+    }
+
     if (key === 'autoOpenChests' && value === true) {
       this.chestLootFlow.scheduleAutoOpenChests();
     }
