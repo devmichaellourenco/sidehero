@@ -118,7 +118,10 @@ function updateBadge(badge: HTMLElement, value: number): void {
 }
 
 export class GameHudController {
-  private readonly campaignCompactEl: HTMLElement;
+  private readonly campaignMapEl: HTMLElement;
+  private readonly campaignPhaseEl: HTMLElement;
+  private readonly campaignWaveValueEl: HTMLElement;
+  private readonly campaignWaveBlockEl: HTMLElement;
   private readonly campaignTooltipEl: HTMLElement;
   private readonly goldValueEl: HTMLElement;
   private readonly chestValueEl: HTMLElement;
@@ -133,7 +136,7 @@ export class GameHudController {
   private lastCampaignTooltipKey = '';
 
   constructor(
-    private readonly campaignContextLabel: HTMLElement,
+    private readonly campaignContextBtn: HTMLButtonElement,
     private readonly goldLabel: HTMLElement,
     private readonly chestLabel: HTMLElement,
     private readonly chestProgressLabel: HTMLElement,
@@ -150,14 +153,35 @@ export class GameHudController {
     private readonly pauseLoadoutBtn: HTMLButtonElement,
     private readonly continueLoadoutBtn: HTMLButtonElement,
   ) {
-    this.campaignContextLabel.replaceChildren();
-    this.campaignContextLabel.append(
-      createIcon(ASSETS.ui.campaign, 'Campanha', 'stat-icon'),
-      (this.campaignCompactEl = document.createElement('span')),
-      (this.campaignTooltipEl = document.createElement('span')),
-    );
-    this.campaignCompactEl.className = 'campaign-context-compact';
+    const left = document.createElement('span');
+    left.className = 'campaign-context-btn__left';
+
+    const trail = document.createElement('span');
+    trail.className = 'campaign-context-btn__trail';
+
+    this.campaignMapEl = document.createElement('span');
+    this.campaignMapEl.className = 'campaign-context-btn__map';
+    this.campaignPhaseEl = document.createElement('span');
+    this.campaignPhaseEl.className = 'campaign-context-btn__phase';
+    trail.append(this.campaignMapEl, this.campaignPhaseEl);
+
+    const mapIcon = createIcon(ASSETS.ui.campaign, '', 'campaign-context-btn__icon');
+    mapIcon.setAttribute('aria-hidden', 'true');
+    left.append(mapIcon, trail);
+
+    this.campaignWaveBlockEl = document.createElement('span');
+    this.campaignWaveBlockEl.className = 'campaign-context-btn__right';
+    const waveLabel = document.createElement('span');
+    waveLabel.className = 'campaign-context-btn__wave-label';
+    waveLabel.textContent = 'Wave';
+    this.campaignWaveValueEl = document.createElement('span');
+    this.campaignWaveValueEl.className = 'campaign-context-btn__wave-value';
+    this.campaignWaveBlockEl.append(waveLabel, this.campaignWaveValueEl);
+
+    this.campaignTooltipEl = document.createElement('span');
     this.campaignTooltipEl.className = 'campaign-tooltip-content hidden';
+
+    this.campaignContextBtn.replaceChildren(left, this.campaignWaveBlockEl, this.campaignTooltipEl);
 
     this.goldValueEl = setupStatPill(this.goldLabel, ASSETS.ui.gold, 'Ouro');
     this.chestValueEl = setupStatPill(this.chestLabel, ASSETS.ui.chest, 'Baús');
@@ -203,18 +227,22 @@ export class GameHudController {
     },
   ): void {
     const phaseId = state.phaseRun?.phaseId ?? state.campaignProgress.selectedPhaseId;
-    const waveSuffix = state.phaseRun
-      ? ` · ${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}${state.phaseRun.isBossWave ? ' ☠' : ''}`
-      : '';
+    const hasWave = Boolean(state.phaseRun);
+    const waveText = state.phaseRun
+      ? `${state.phaseRun.waveIndex + 1}/${state.phaseRun.waveCount}`
+      : '—';
     const cleared = countClearedPhasesForMap(state.campaignProgress.clearedPhaseIds, state.mapId);
     const total = phaseCountForMap(state.mapId);
 
-    this.campaignContextLabel.setAttribute('data-campaign-theme', state.mapId);
-    this.campaignCompactEl.textContent = `${state.mapName} · ${phaseId}${waveSuffix}`;
-    this.campaignCompactEl.title = `${state.mapName} · ${cleared}/${total} concluídas`;
-    this.campaignContextLabel.setAttribute(
+    this.campaignContextBtn.setAttribute('data-campaign-theme', state.mapId);
+    this.campaignMapEl.textContent = state.mapName;
+    this.campaignPhaseEl.textContent = phaseId;
+    this.campaignWaveValueEl.textContent = waveText;
+    this.campaignWaveBlockEl.classList.toggle('campaign-context-btn__right--empty', !hasWave);
+    this.campaignContextBtn.title = `Abrir campanha · ${state.mapName} · ${cleared}/${total} concluídas`;
+    this.campaignContextBtn.setAttribute(
       'aria-label',
-      `${state.campaignName}, ${state.mapName}, ${state.phaseLabel}`,
+      `Abrir campanha: ${state.mapName} ${phaseId}${hasWave ? `, wave ${waveText}` : ''}`,
     );
 
     const tooltipKey = buildCampaignTooltipKey(state);

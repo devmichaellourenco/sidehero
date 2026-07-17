@@ -13,6 +13,7 @@ function createButton(id: string): HTMLButtonElement {
 
 function createHud(): {
   hud: GameHudController;
+  campaign: HTMLButtonElement;
   buttons: {
     heroes: HTMLButtonElement;
     formation: HTMLButtonElement;
@@ -28,7 +29,10 @@ function createHud(): {
     continue: HTMLButtonElement;
   };
 } {
-  const campaign = document.createElement('div');
+  const campaign = document.createElement('button');
+  campaign.id = 'campaign-context-btn';
+  campaign.className = 'campaign-context-btn';
+  campaign.type = 'button';
   const gold = document.createElement('div');
   const chest = document.createElement('div');
   const chestProgress = document.createElement('div');
@@ -66,7 +70,7 @@ function createHud(): {
     buttons.continue,
   );
 
-  return { hud, buttons };
+  return { hud, campaign, buttons };
 }
 
 function mockState(overrides: Partial<GameStateDto> = {}): GameStateDto {
@@ -171,5 +175,35 @@ describe('GameHudController — acesso no acampamento', () => {
 
     expect(buttons.chest.classList.contains('hidden')).toBe(false);
     expect(buttons.upgrades.classList.contains('hidden')).toBe(false);
+  });
+
+  it('monta trilha à esquerda e wave à direita', () => {
+    const { hud, campaign } = createHud();
+
+    hud.render(
+      mockState({
+        mapName: 'Stendra',
+        campaignProgress: {
+          selectedPhaseId: '1-20',
+          unlockedPhaseIds: ['1-1'],
+          clearedPhaseIds: [],
+          highestTierReached: 1,
+          seasonCompleted: false,
+        },
+        phaseRun: {
+          phaseId: '1-20',
+          waveIndex: 0,
+          waveCount: 3,
+          isBossWave: false,
+        } as GameStateDto['phaseRun'],
+      }),
+      { openingChests: false },
+    );
+
+    expect(campaign.querySelector('.campaign-context-btn__map')?.textContent).toBe('Stendra');
+    expect(campaign.querySelector('.campaign-context-btn__phase')?.textContent).toBe('1-20');
+    expect(campaign.querySelector('.campaign-context-btn__wave-label')?.textContent).toBe('Wave');
+    expect(campaign.querySelector('.campaign-context-btn__wave-value')?.textContent).toBe('1/3');
+    expect(campaign.getAttribute('data-campaign-theme')).toBe('stendra');
   });
 });

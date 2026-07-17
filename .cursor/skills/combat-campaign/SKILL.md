@@ -27,6 +27,7 @@ description: Implementa combate em tempo real, campanha por fases/waves, tick e 
 - Boss vs wave: `PhaseCombatHandlers.onBossDefeated` vs `onWaveCleared`
 - XP só em boss wave (`WaveEnemyFactory`)
 - Intermissão: setar `combatIntermission`, não avançar combate até resume
+- Timeline visual da fase: skill `stage-progress-bar` (roles trash/elite/boss → marcadores)
 
 ## Arquivos frequentes
 

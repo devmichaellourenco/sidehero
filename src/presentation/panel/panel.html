@@ -42,16 +42,24 @@
         <div id="wow-inbox-panel" class="wow-inbox-panel" aria-label="Celebrações recentes"></div>
       </div>
 
-      <section id="campaign-context-bar" class="campaign-context-bar" aria-label="Campanha">
-        <span
-          id="campaign-context-label"
-          class="stat-pill campaign-context-pill"
+      <section id="campaign-context-bar" class="campaign-context-bar" aria-label="Trilha da campanha">
+        <button
+          id="campaign-context-btn"
+          class="campaign-context-btn"
+          type="button"
           data-campaign-tooltip
           tabindex="0"
-        ></span>
+          title="Abrir campanha"
+          aria-label="Abrir campanha"
+        ></button>
       </section>
 
       <div class="battle-stage">
+        <div
+          id="stage-progress-root"
+          class="stage-progress-root hidden"
+          aria-hidden="true"
+        ></div>
         <section class="battle-strip" aria-label="Campo de batalha">
           <div class="strip-bg" data-strip-bg>
             <div class="strip-bg__sky" aria-hidden="true"></div>
@@ -75,7 +83,7 @@
             class="combat-bar-btn"
             type="button"
             aria-label="Voltar ao acampamento"
-            title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao partir."
+            title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao batalhar."
           >
             <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
             <span class="combat-bar-btn-label">Acampamento</span>
@@ -84,11 +92,18 @@
             id="continue-loadout-btn"
             class="combat-bar-btn combat-bar-btn--continue hidden"
             type="button"
-            aria-label="Partir do acampamento"
+            aria-label="Batalhar"
             title="Sair do acampamento e reiniciar a fase do início"
           >
-            <span class="combat-bar-btn-icon" aria-hidden="true">▶</span>
-            <span class="combat-bar-btn-label">Partir</span>
+            <img
+              class="combat-bar-btn-icon"
+              src="assets/ui/attack.png"
+              alt=""
+              aria-hidden="true"
+              loading="eager"
+              decoding="async"
+            />
+            <span class="combat-bar-btn-label">Batalhar</span>
           </button>
         </div>
       </div>

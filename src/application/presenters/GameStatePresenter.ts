@@ -14,6 +14,8 @@ import { getCampaignInfo, resolvePhase } from '../../domain/campaign/CampaignCat
 import { parsePhaseId } from '../../domain/campaign/CampaignIds';
 import { mapDefinitionByIndex } from '../../domain/campaign/CampaignMaps';
 import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
+import { mapStageProgress } from '../mappers/StageProgressMapper';
+import { markerTrackRatio } from '../../domain/campaign/StageProgress';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
 import { PartyEditPolicy } from '../../domain/party/PartyEditPolicy';
 import { CHEST_TYPE_LABELS } from '../../domain/combat/ChestType';
@@ -260,13 +262,36 @@ function mapPhaseRunDto(state: GameState): GameStateDto['phaseRun'] {
   const meta = state.combatIntermission ? null : state.combat?.encounterMeta;
   const waveIndex = meta?.waveIndex ?? state.phaseRun.waveIndex;
   const waveCount = meta?.waveCount ?? phase?.waves.length ?? 1;
+  const displayName = phase?.displayName ?? phaseId;
+
+  const stageProgress = phase
+    ? mapStageProgress(phase, waveIndex)
+    : {
+        phaseId,
+        displayName,
+        fillRatio: markerTrackRatio(waveIndex, waveCount),
+        markers: Array.from({ length: waveCount }, (_, index) => ({
+          id: `${phaseId}:w${index}`,
+          kind: (index === waveCount - 1 ? 'boss' : 'trash') as 'boss' | 'trash',
+          label: index === waveCount - 1 ? 'Boss' : `W${index + 1}`,
+          status:
+            index < waveIndex
+              ? ('cleared' as const)
+              : index === waveIndex
+                ? ('current' as const)
+                : ('locked' as const),
+          waveIndex: index,
+          trackRatio: markerTrackRatio(index, waveCount),
+        })),
+      };
 
   return {
     phaseId,
-    displayName: phase?.displayName ?? phaseId,
+    displayName,
     waveIndex,
     waveCount,
     isBossWave: meta?.isBossWave ?? waveIndex === waveCount - 1,
+    stageProgress,
   };
 }
 

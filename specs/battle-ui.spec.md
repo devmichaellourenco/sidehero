@@ -49,3 +49,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts` (campanha — ver também `combat-campaign.spec.md`)
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
 - [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`
+
+## Relacionado
+
+- [`stage-progress-bar.spec.md`](stage-progress-bar.spec.md) — timeline entre localização e a battle strip
+- [`combat-campaign.spec.md`](combat-campaign.spec.md) — waves / fase ativa

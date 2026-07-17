@@ -87,6 +87,10 @@ export const ASSETS = {
     forge: 'ui/forge.png',
     improvement: 'ui/improvement.png',
     stage: 'ui/stage.png',
+    /** Stage Progress — wave comum (reusa battle/swords). */
+    stageSwords: 'ui/attack.png',
+    /** Stage Progress — baú (opcional). */
+    stageChest: 'ui/chest.png',
     rune: 'ui/rune.png',
     achievement: 'ui/achievement.png',
     bookOpen: 'ui/book-open.png',

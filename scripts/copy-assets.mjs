@@ -115,7 +115,7 @@ const ASSET_MAP = [
 
   ['Sprites/Demo/Demo_Character/character_back_glow_small.png', 'characters/glow.png'],
 
-  ['Sprites/Demo/Demo_Icon_Chest/set_icon_gold_0.png', 'ui/gold.png'],
+  ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_gold.png', 'ui/gold.png'],
   ['Sprites/Demo/Demo_Icon_Chest/shop_img_chest_close_s_00.png', 'ui/chest.png'],
   ['Sprites/Demo/Demo_Icon_Chest/shop_img_chest_open01_s_00.png', 'ui/chest-open.png'],
   ['Sprites/Component/Popup/popup_01_frame.png', 'ui/victory-frame.png'],

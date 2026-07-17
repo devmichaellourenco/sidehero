@@ -109,7 +109,7 @@ export class RewardMomentDetector {
           iconUrl: getAssetUrl(ASSETS.ui.victoryFrame),
           detailLines: [
             'Novas regiões virão em atualizações futuras.',
-            'Repita fases liberadas quando quiser — toque em Partir no acampamento.',
+            'Repita fases liberadas quando quiser — toque em Batalhar no acampamento.',
           ],
         }),
       );

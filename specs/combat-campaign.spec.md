@@ -91,3 +91,8 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`
 - [x] `BattleVictoryFlow.test.ts`
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
+
+## Relacionado
+
+- [`stage-progress-bar.spec.md`](stage-progress-bar.spec.md) — timeline visual das waves da fase ativa
+- [`battle-ui.spec.md`](battle-ui.spec.md) — chrome / strip

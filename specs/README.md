@@ -22,10 +22,11 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [story-scenes](story-scenes.spec.md) | 9/10 | 5/5 | copy DLC placeholder |
 | [achievements](achievements.spec.md) | 7/7 | 4/4 | — |
 | [improvement-reset](improvement-reset.spec.md) | 16/16 | 12/12 | Unitário + massa entregues |
+| [stage-progress-bar](stage-progress-bar.spec.md) | 14/14 | 5/5 | Timeline entre localização e batalha |
 
-**Total aceite (features):** 108/116 (93%)  
+**Total aceite (features):** 122/130 (94%)  
 **Balanceamento transversal:** 9/9  
-**Total testes listados nas specs:** 93/93 (100%)
+**Total testes listados nas specs:** 98/98 (100%)
 
 ## Escopo do jogo (v1)
 
@@ -33,7 +34,7 @@ Campanha jogável até **Morthaven** (`4-50`, tier 200). Regiões 5–10 (DLC) p
 
 ## Próxima feature sugerida
 
-Reset de pontos de aprimoramento — [`improvement-reset.spec.md`](improvement-reset.spec.md). Polish e arte de battle strip das 4 regiões — [`art-scenes.spec.md`](art-scenes.spec.md).
+Polish e arte de battle strip das 4 regiões — [`art-scenes.spec.md`](art-scenes.spec.md). Ícones dedicados da Stage Progress Bar (cristal/coroa/portal).
 
 ## Regras de workflow do agente
 
@@ -71,6 +72,7 @@ Reset de pontos de aprimoramento — [`improvement-reset.spec.md`](improvement-r
 | [story-scenes](story-scenes.spec.md) | Cenas narrativas por ato, overlay com pausa | `.cursor/agents/story-scenes.md` | `.cursor/skills/story-scenes/` |
 | [achievements](achievements.spec.md) | Conquistas persistentes, progresso por evento, Wow | `.cursor/agents/achievements.md` | `.cursor/skills/achievements/` |
 | [improvement-reset](improvement-reset.spec.md) | Reset unitário + em massa (Runas; Status/Skills) | `.cursor/agents/improvement-reset.md` | `.cursor/skills/improvement-reset/` |
+| [stage-progress-bar](stage-progress-bar.spec.md) | Timeline de waves da fase (Idle RPG) | `.cursor/agents/stage-progress-bar.md` | `.cursor/skills/stage-progress-bar/` |
 
 ## Arquitetura global
 

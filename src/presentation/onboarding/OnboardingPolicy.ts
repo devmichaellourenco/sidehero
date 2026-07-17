@@ -35,7 +35,7 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
   'pause-loadout': {
     title: 'Acampamento',
     message:
-      'Use Acampamento para editar equipe, inventário e skills com calma. A fase reinicia ao partir.',
+      'Use Acampamento para editar equipe, inventário e skills com calma. A fase reinicia ao batalhar.',
     anchorSelector: '#pause-loadout-btn',
   },
   'hero-points': {

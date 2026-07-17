@@ -27,7 +27,7 @@ export const SEASON_FINALE_EPILOGUE: ActSceneDefinition = {
   recap:
     'O Duque de Morthaven caiu. A party atravessou quatro regiões, derrotou lordes e bestas, e encerrou a ameaça que pairava sobre o reino.',
   preview:
-    'Por enquanto, esta é a **última fase do jogo**. Novas regiões e capítulos virão em atualizações futuras. Você pode repetir qualquer fase liberada quando quiser — use o acampamento e toque em **Partir** para reviver a batalha.',
+    'Por enquanto, esta é a **última fase do jogo**. Novas regiões e capítulos virão em atualizações futuras. Você pode repetir qualquer fase liberada quando quiser — use o acampamento e toque em **Batalhar** para reviver a batalha.',
 };
 
 type ActCopy = Pick<ActSceneDefinition, 'title' | 'recap' | 'preview'>;

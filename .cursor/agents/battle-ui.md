@@ -20,6 +20,7 @@ Painel lateral, battle strip, modais, Wow, onboarding.
 - `src/presentation/panel/**`
 - `GameViewController`, `GameHudController`
 - Wow, onboarding, chrome layout
+- Coordenar timeline de fase com `stage-progress-bar`
 
 ## Checklist
 

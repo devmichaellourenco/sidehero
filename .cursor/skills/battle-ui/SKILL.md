@@ -20,6 +20,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Área | Arquivos |
 |------|----------|
 | Strip | `BattleStripRenderer`, `BattleActorCardPresentation`, `BattleFloatingTextController` (`Lv UP`) |
+| Stage progress | Ver skill `stage-progress-bar` — timeline entre localização e a strip |
 | Modais | `ModalStackController`, `GameViewController` |
 | Apoio | `DonationPromptController`, `DonationCardPresentation`, `DonationConfig` |
 | Wow | `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator` |

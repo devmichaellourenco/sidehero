@@ -285,96 +285,197 @@ h2 {
 .campaign-context-bar {
   display: flex;
   flex-shrink: 0;
+  width: var(--battle-stage-width);
+  min-width: var(--battle-stage-width);
+  max-width: var(--battle-stage-width);
+  margin-inline: auto;
+  align-self: center;
 }
 
-.campaign-context-pill {
-  cursor: default;
-  width: fit-content;
-  max-width: 100%;
+.campaign-context-btn {
+  display: flex;
   align-items: center;
-  border-color: var(--campaign-accent-border, rgba(255, 255, 255, 0.12));
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--campaign-accent-border, rgba(255, 255, 255, 0.14));
   background:
-    radial-gradient(circle at 0% 50%, var(--campaign-panel-glow, transparent), transparent 55%),
-    rgba(18, 28, 48, 0.92);
+    linear-gradient(
+      90deg,
+      var(--campaign-accent-soft, rgba(255, 255, 255, 0.06)) 0%,
+      rgba(18, 28, 48, 0.94) 42%,
+      rgba(18, 28, 48, 0.94) 100%
+    ),
+    radial-gradient(circle at 0% 50%, var(--campaign-panel-glow, transparent), transparent 55%);
+  color: var(--text);
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    border-color 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.campaign-context-pill[data-campaign-theme='stendra'] {
+.campaign-context-btn:hover {
+  filter: brightness(1.08);
+  border-color: var(--campaign-accent, rgba(255, 255, 255, 0.35));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px color-mix(in srgb, var(--campaign-accent, #6ecf8a) 28%, transparent);
+}
+
+.campaign-context-btn:focus-visible {
+  outline: 2px solid var(--campaign-accent, #6ecf8a);
+  outline-offset: 2px;
+}
+
+.campaign-context-btn:active {
+  filter: brightness(0.96);
+}
+
+.campaign-context-btn__left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.campaign-context-btn__icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px var(--campaign-panel-glow, transparent));
+}
+
+.campaign-context-btn__trail {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.campaign-context-btn__map {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.campaign-context-btn__phase {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--campaign-accent, var(--gold));
+  opacity: 0.95;
+}
+
+.campaign-context-btn__right {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-shrink: 0;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.campaign-context-btn__right--empty {
+  opacity: 0.55;
+}
+
+.campaign-context-btn__wave-label {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.campaign-context-btn__wave-value {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.campaign-context-btn[data-campaign-theme='stendra'] {
   --campaign-accent: #6ecf8a;
   --campaign-accent-soft: rgba(110, 207, 138, 0.16);
   --campaign-accent-border: rgba(110, 207, 138, 0.55);
   --campaign-panel-glow: rgba(110, 207, 138, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='gruftall'] {
+.campaign-context-btn[data-campaign-theme='gruftall'] {
   --campaign-accent: #a89b8c;
   --campaign-accent-soft: rgba(168, 155, 140, 0.16);
   --campaign-accent-border: rgba(168, 155, 140, 0.55);
   --campaign-panel-glow: rgba(168, 155, 140, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='valdris'] {
+.campaign-context-btn[data-campaign-theme='valdris'] {
   --campaign-accent: #6eb8ff;
   --campaign-accent-soft: rgba(110, 184, 255, 0.16);
   --campaign-accent-border: rgba(110, 184, 255, 0.55);
   --campaign-panel-glow: rgba(110, 184, 255, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='morthaven'] {
+.campaign-context-btn[data-campaign-theme='morthaven'] {
   --campaign-accent: #a98cff;
   --campaign-accent-soft: rgba(169, 140, 255, 0.16);
   --campaign-accent-border: rgba(169, 140, 255, 0.55);
   --campaign-panel-glow: rgba(169, 140, 255, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='broken_sky'] {
+.campaign-context-btn[data-campaign-theme='broken_sky'] {
   --campaign-accent: #58d7e8;
   --campaign-accent-soft: rgba(88, 215, 232, 0.16);
   --campaign-accent-border: rgba(88, 215, 232, 0.55);
   --campaign-panel-glow: rgba(88, 215, 232, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='crimson_abyss'] {
+.campaign-context-btn[data-campaign-theme='crimson_abyss'] {
   --campaign-accent: #ff6b6b;
   --campaign-accent-soft: rgba(255, 107, 107, 0.16);
   --campaign-accent-border: rgba(255, 107, 107, 0.55);
   --campaign-panel-glow: rgba(255, 107, 107, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='eternal_forge'] {
+.campaign-context-btn[data-campaign-theme='eternal_forge'] {
   --campaign-accent: #ff9a4a;
   --campaign-accent-soft: rgba(255, 154, 74, 0.16);
   --campaign-accent-border: rgba(255, 154, 74, 0.55);
   --campaign-panel-glow: rgba(255, 154, 74, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='ancient_grove'] {
+.campaign-context-btn[data-campaign-theme='ancient_grove'] {
   --campaign-accent: #7fd46a;
   --campaign-accent-soft: rgba(127, 212, 106, 0.16);
   --campaign-accent-border: rgba(127, 212, 106, 0.55);
   --campaign-panel-glow: rgba(127, 212, 106, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='twilight_tower'] {
+.campaign-context-btn[data-campaign-theme='twilight_tower'] {
   --campaign-accent: #b07cff;
   --campaign-accent-soft: rgba(176, 124, 255, 0.16);
   --campaign-accent-border: rgba(176, 124, 255, 0.55);
   --campaign-panel-glow: rgba(176, 124, 255, 0.08);
 }
 
-.campaign-context-pill[data-campaign-theme='void_throne'] {
+.campaign-context-btn[data-campaign-theme='void_throne'] {
   --campaign-accent: #f5c542;
   --campaign-accent-soft: rgba(245, 197, 66, 0.18);
   --campaign-accent-border: rgba(245, 197, 66, 0.65);
   --campaign-panel-glow: rgba(245, 197, 66, 0.1);
-}
-
-.campaign-context-compact {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-  font-size: 11px;
-  line-height: 1.2;
 }
 
 .campaign-tooltip-content {
@@ -491,6 +592,182 @@ h2 {
   background: var(--strip);
   flex-shrink: 0;
   box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Stage Progress Bar — colada no topo da strip (sem gap) */
+.stage-progress-root {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 100%;
+  margin: 0;
+  height: 28px;
+  pointer-events: none;
+}
+
+.stage-progress-root.hidden {
+  display: none !important;
+}
+
+.stage-progress-bar {
+  --stage-track-height: 10px;
+  --stage-marker-size: 22px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+
+.stage-progress-bar__frame {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--stage-track-height);
+  transform: translateY(-50%);
+  border-radius: 999px;
+  border: 1.5px solid rgba(212, 175, 88, 0.85);
+  background:
+    linear-gradient(180deg, rgba(62, 42, 18, 0.92) 0%, rgba(28, 20, 12, 0.95) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 220, 140, 0.22),
+    0 0 8px rgba(90, 160, 255, 0.25);
+}
+
+.stage-progress-bar__track {
+  position: absolute;
+  inset: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(12, 24, 48, 0.95), rgba(18, 36, 64, 0.9));
+}
+
+.stage-progress-bar__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(40, 120, 255, 0.55) 0%,
+    rgba(90, 200, 255, 0.95) 55%,
+    rgba(180, 240, 255, 1) 100%
+  );
+  box-shadow: 0 0 10px rgba(100, 200, 255, 0.75);
+  transition: width 280ms ease-out;
+}
+
+.stage-progress-bar__markers {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage-progress-marker {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.stage-progress-marker--boss {
+  transform: translate(-100%, -50%);
+}
+
+.stage-progress-marker__medallion {
+  width: var(--stage-marker-size);
+  height: var(--stage-marker-size);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(232, 196, 110, 0.95);
+  background: radial-gradient(circle at 35% 30%, #5a4630 0%, #24180e 70%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 230, 160, 0.35);
+}
+
+.stage-progress-marker__icon {
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
+}
+
+.stage-progress-marker__glyph {
+  font-size: 11px;
+  line-height: 1;
+  color: #ffe9a8;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+}
+
+.stage-progress-marker__glyph--crystal {
+  color: #d4a0ff;
+  transform: scale(1.05);
+}
+
+.stage-progress-marker--elite .stage-progress-marker__medallion {
+  border-radius: 4px;
+  transform: rotate(45deg) scale(0.92);
+  border-color: rgba(180, 120, 255, 0.95);
+  background: radial-gradient(circle at 35% 30%, #4a2a6a 0%, #1a1028 75%);
+}
+
+.stage-progress-marker--elite .stage-progress-marker__glyph,
+.stage-progress-marker--elite .stage-progress-marker__icon {
+  transform: rotate(-45deg);
+}
+
+.stage-progress-marker--boss .stage-progress-marker__medallion {
+  width: calc(var(--stage-marker-size) + 4px);
+  height: calc(var(--stage-marker-size) + 4px);
+  border-color: rgba(255, 210, 96, 1);
+  background: radial-gradient(circle at 35% 30%, #7a5420 0%, #2a1808 75%);
+  box-shadow:
+    0 0 8px rgba(255, 200, 80, 0.55),
+    inset 0 1px 0 rgba(255, 240, 180, 0.45);
+}
+
+.stage-progress-marker__glyph--crown {
+  font-size: 13px;
+  color: #ffe08a;
+}
+
+.stage-progress-marker--cleared .stage-progress-marker__medallion {
+  border-color: rgba(120, 220, 160, 0.9);
+  box-shadow: 0 0 6px rgba(80, 200, 140, 0.35);
+}
+
+.stage-progress-marker--current .stage-progress-marker__medallion {
+  box-shadow:
+    0 0 10px rgba(120, 210, 255, 0.85),
+    0 0 0 1px rgba(180, 240, 255, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  animation: stage-progress-pulse 1.6s ease-in-out infinite;
+}
+
+.stage-progress-marker--locked {
+  opacity: 0.48;
+}
+
+.stage-progress-marker--locked .stage-progress-marker__medallion {
+  filter: grayscale(0.35) brightness(0.75);
+}
+
+@keyframes stage-progress-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.18);
+  }
 }
 
 .battle-strip--crowded {
@@ -9985,6 +10262,13 @@ body.act-scene-open {
 .combat-bar-btn-icon {
   font-size: 12px;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+img.combat-bar-btn-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .combat-bar-btn-label {

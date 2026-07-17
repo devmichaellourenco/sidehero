@@ -1,3 +1,5 @@
+import type { StageProgressDto } from './StageProgressDto';
+
 export interface ActSceneDto {
   id: string;
   mapId: string;
@@ -45,4 +47,6 @@ export interface PhaseRunDto {
   waveIndex: number;
   waveCount: number;
   isBossWave: boolean;
+  /** Timeline de progresso da fase (Stage Progress Bar). */
+  stageProgress?: StageProgressDto;
 }

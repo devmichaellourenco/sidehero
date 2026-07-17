@@ -31,12 +31,13 @@ import { BattleLogRenderer } from './BattleLogRenderer';
 import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
 import { BattleSkillVfxController } from './BattleSkillVfxController';
-import { bindCampaignTooltip } from './CampaignTooltipBinder';
+import { bindCampaignTooltip, hideCampaignTooltip } from './CampaignTooltipBinder';
 import { mountNavArrowIcons } from '../assets/NavArrowPresentation';
 import { hydratePanelIcons } from '../assets/PanelIconHydrator';
 import { buildBattleIntermissionPayload } from './BattleVictoryDetector';
 import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
 import { BattleStripRenderer } from './BattleStripRenderer';
+import { StageProgressBarRenderer } from './StageProgressBarRenderer';
 import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
 import { GearSlotKey } from './GearPresentation';
 import { HeroDetailModalRenderer, HeroDetailTab } from './HeroDetailModalRenderer';
@@ -92,7 +93,7 @@ export class GameViewController {
   private pausingLoadout = false;
   private heroDrawerHeroId: string | null = null;
 
-  private readonly campaignContextLabel: HTMLElement;
+  private readonly campaignContextBtn: HTMLButtonElement;
   private readonly goldLabel: HTMLElement;
   private readonly chestLabel: HTMLElement;
   private readonly chestProgressLabel: HTMLElement;
@@ -124,6 +125,7 @@ export class GameViewController {
 
   private readonly battleStripEl: HTMLElement;
   private readonly battleStrip: BattleStripRenderer;
+  private readonly stageProgressBar: StageProgressBarRenderer;
   private readonly battleFloats: BattleFloatingTextController;
   private readonly battleImpacts: BattleImpactFeedbackController;
   private readonly battleSkillVfx: BattleSkillVfxController;
@@ -178,7 +180,7 @@ export class GameViewController {
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
     this.client = client;
 
-    this.campaignContextLabel = root.querySelector('#campaign-context-label')!;
+    this.campaignContextBtn = root.querySelector('#campaign-context-btn') as HTMLButtonElement;
     this.goldLabel = root.querySelector('#gold-label')!;
     this.chestLabel = root.querySelector('#chest-label')!;
     this.chestProgressLabel = root.querySelector('#chest-progress-label')!;
@@ -216,6 +218,9 @@ export class GameViewController {
       this.battleStripEl,
       root.querySelector('[data-strip-bg]')!,
       this.battleStripEl.querySelector('.strip-floor')!,
+    );
+    this.stageProgressBar = new StageProgressBarRenderer(
+      root.querySelector('#stage-progress-root')!,
     );
     this.battleFloats = new BattleFloatingTextController(
       root.querySelector('#battle-float-layer')!,
@@ -306,14 +311,14 @@ export class GameViewController {
     );
     mountNavArrowIcons(root);
     hydratePanelIcons(root);
-    bindCampaignTooltip(this.campaignContextLabel);
+    bindCampaignTooltip(this.campaignContextBtn);
     bindBattleChromeLayout(
       root.querySelector('.battle-combat-bar') as HTMLElement,
       root.querySelector('#app'),
     );
 
     this.hud = new GameHudController(
-      this.campaignContextLabel,
+      this.campaignContextBtn,
       this.goldLabel,
       this.chestLabel,
       this.chestProgressLabel,
@@ -573,6 +578,10 @@ export class GameViewController {
       this.openFormationModal();
     });
     this.openCampaignBtn.addEventListener('click', () => {
+      void this.openCampaignModal();
+    });
+    this.campaignContextBtn.addEventListener('click', () => {
+      hideCampaignTooltip();
       void this.openCampaignModal();
     });
     this.openShopBtn.addEventListener('click', () => {
@@ -1855,6 +1864,7 @@ export class GameViewController {
     });
 
     this.battleStrip.render(mergedState);
+    this.stageProgressBar.render(mergedState);
     this.skillCooldownAnimator.setCombatActive(
       Boolean(mergedState.phaseRun && !mergedState.canEditParty),
     );

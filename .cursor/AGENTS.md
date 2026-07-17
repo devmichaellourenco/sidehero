@@ -47,6 +47,7 @@ Regra crítica: `presentation/` **não** importa `domain/` diretamente.
 | [story-scenes](agents/story-scenes.md) | cenas por ato, overlay, pausa | `specs/story-scenes.spec.md` | `ActSceneCatalog`, `ActSceneFlow`, campanha |
 | [achievements](agents/achievements.md) | conquistas, progresso, Wow | `specs/achievements.spec.md` | `domain/achievements`, storage achievements |
 | [improvement-reset](agents/improvement-reset.md) | respec unitário + massa | `specs/improvement-reset.spec.md` | `FeatureKey` L1/L2, refund use cases, (−) + massa |
+| [stage-progress-bar](agents/stage-progress-bar.md) | timeline de waves da fase | `specs/stage-progress-bar.spec.md` | `StageProgressDto`, barra entre localização e batalha |
 
 ## Comandos (desenvolvedor — agente não executa test/release automaticamente)
 

@@ -23,7 +23,7 @@ export class PauseForLoadoutUseCase {
       .withCombat(null)
       .withLoadoutEditOpen(true)
       .withPhaseRestartOnResume(true)
-      .addLog('🏕 Retorno ao acampamento — a fase reiniciará ao partir');
+      .addLog('🏕 Retorno ao acampamento — a fase reiniciará ao batalhar');
 
     await this.repository.save(nextState);
     return this.presenter.present(nextState);

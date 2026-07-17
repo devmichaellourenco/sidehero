@@ -273,7 +273,7 @@ export class PhaseCombatHandlers {
         .withLoadoutEditOpen(true)
         .withPhaseRestartOnResume(true)
         .addLog(
-          `🏕 Acampamento — ${nextPhase?.displayName ?? targetPhaseId}. Toque em Partir para continuar`,
+          `🏕 Acampamento — ${nextPhase?.displayName ?? targetPhaseId}. Toque em Batalhar para continuar`,
         ),
       events: ['Acampamento'],
     };
