@@ -48,6 +48,7 @@ Regra crítica: `presentation/` **não** importa `domain/` diretamente.
 | [achievements](agents/achievements.md) | conquistas, progresso, Wow | `specs/achievements.spec.md` | `domain/achievements`, storage achievements |
 | [improvement-reset](agents/improvement-reset.md) | respec unitário + massa | `specs/improvement-reset.spec.md` | `FeatureKey` L1/L2, refund use cases, (−) + massa |
 | [stage-progress-bar](agents/stage-progress-bar.md) | timeline de waves da fase | `specs/stage-progress-bar.spec.md` | `StageProgressDto`, barra entre localização e batalha |
+| [medieval-theme](agents/medieval-theme.md) | paleta medieval / cores do painel | `specs/medieval-theme.spec.md` | `panel.css` `:root`, `MedievalThemeTokens` |
 
 ## Comandos (desenvolvedor — agente não executa test/release automaticamente)
 

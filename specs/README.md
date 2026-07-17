@@ -23,10 +23,11 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [achievements](achievements.spec.md) | 7/7 | 4/4 | — |
 | [improvement-reset](improvement-reset.spec.md) | 16/16 | 12/12 | Unitário + massa entregues |
 | [stage-progress-bar](stage-progress-bar.spec.md) | 14/14 | 5/5 | Timeline entre localização e batalha |
+| [medieval-theme](medieval-theme.spec.md) | 8/8 | 1/1 | Paleta medieval (tutorial) |
 
-**Total aceite (features):** 122/130 (94%)  
+**Total aceite (features):** 130/138 (94%)  
 **Balanceamento transversal:** 9/9  
-**Total testes listados nas specs:** 98/98 (100%)
+**Total testes listados nas specs:** 99/99 (100%)
 
 ## Escopo do jogo (v1)
 
@@ -73,6 +74,7 @@ Polish e arte de battle strip das 4 regiões — [`art-scenes.spec.md`](art-scen
 | [achievements](achievements.spec.md) | Conquistas persistentes, progresso por evento, Wow | `.cursor/agents/achievements.md` | `.cursor/skills/achievements/` |
 | [improvement-reset](improvement-reset.spec.md) | Reset unitário + em massa (Runas; Status/Skills) | `.cursor/agents/improvement-reset.md` | `.cursor/skills/improvement-reset/` |
 | [stage-progress-bar](stage-progress-bar.spec.md) | Timeline de waves da fase (Idle RPG) | `.cursor/agents/stage-progress-bar.md` | `.cursor/skills/stage-progress-bar/` |
+| [medieval-theme](medieval-theme.spec.md) | Paleta medieval do painel (tutorial) | `.cursor/agents/medieval-theme.md` | `.cursor/skills/medieval-theme/` |
 
 ## Arquitetura global
 

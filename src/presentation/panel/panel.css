@@ -15,33 +15,51 @@
 }
 
 :root {
-  --bg: #1a1a2e;
-  --surface: #16213e;
-  --accent: #e94560;
-  --gold: #f5c542;
-  --text: #eaeaea;
-  --muted: #8d99ae;
-  --strip: #0f3460;
-  --floor: #533483;
+  /* Tema medieval — canônico em MedievalThemeTokens.ts / specs/medieval-theme.spec.md */
+  --seal-gold: #c9a227;
+  --seal-gold-dark: #8a6510;
+  --parchment-0: #fff9ed;
+  --parchment-1: #f3e4bc;
+  --parchment-2: #e8d4a0;
+  --ink: #1f1710;
+  --ink-muted: #3d3428;
+  --forest: #2f6b38;
+  --forest-hi: #3f8a49;
+  --bg: var(--parchment-1);
+  --surface: var(--parchment-0);
+  --accent: #8b3a2f;
+  --gold: var(--seal-gold-dark);
+  --text: var(--ink);
+  --muted: var(--ink-muted);
+  --strip: #2a2118;
+  --floor: #3d2e1f;
+  --panel-card: linear-gradient(165deg, var(--parchment-0) 0%, var(--parchment-1) 48%, var(--parchment-2) 100%);
+  --panel-chip: rgba(255, 255, 255, 0.72);
+  --panel-border: rgba(201, 162, 39, 0.55);
+  --panel-border-soft: rgba(61, 52, 40, 0.28);
+  --panel-ink: rgba(255, 249, 237, 0.96);
+  --panel-ink-deep: rgba(243, 228, 188, 0.98);
+  --panel-ink-mid: rgba(255, 249, 237, 0.98);
+  --panel-wood: rgba(201, 162, 39, 0.22);
   --rarity-common: #9e9e9e;
   --rarity-uncommon: #4caf50;
   --rarity-rare: #42a5f5;
   --rarity-epic: #c9a0dc;
   --rarity-legendary: #f5c542;
   --rarity-mythic: #f5c542;
-  --rarity-mythic-glow: rgba(245, 197, 66, 0.55);
+  --rarity-mythic-glow: rgba(201, 162, 39, 0.55);
   --common: var(--rarity-common);
   --rare: var(--rarity-rare);
   --epic: var(--rarity-epic);
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
-  --toast-info-bg: linear-gradient(135deg, #0e6b78 0%, #12a0b3 100%);
-  --toast-chest-bg: linear-gradient(135deg, #9a7209 0%, #d4a82a 55%, #8a6508 100%);
-  --toast-level-bg: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  --toast-victory-bg: linear-gradient(135deg, #b71c3a 0%, #f0627a 100%);
-  --toast-loot-bg: linear-gradient(135deg, #6a1b9a 0%, #ab47bc 100%);
-  --toast-idle-bg: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
+  --toast-info-bg: linear-gradient(135deg, #3d4f3a 0%, #5a6e52 100%);
+  --toast-chest-bg: linear-gradient(135deg, #8a6510 0%, #c9a227 55%, #6e500c 100%);
+  --toast-level-bg: linear-gradient(135deg, #3a4a6e 0%, #5c6f9a 100%);
+  --toast-victory-bg: linear-gradient(135deg, #6b241c 0%, #8b3a2f 100%);
+  --toast-loot-bg: linear-gradient(135deg, #4a3560 0%, #6e5080 100%);
+  --toast-idle-bg: linear-gradient(135deg, #2f6b38 0%, #3f8a49 100%);
   --panel-sheet-top: 42%;
   --battle-stage-width: 333px;
 }
@@ -61,7 +79,9 @@ body {
 
 body {
   font-family: var(--font-body);
-  background: var(--bg) url('assets/backgrounds/app.png') center / cover no-repeat;
+  background:
+    linear-gradient(165deg, var(--parchment-0) 0%, var(--parchment-1) 45%, var(--parchment-2) 100%),
+    var(--bg);
   color: var(--text);
 }
 
@@ -73,7 +93,11 @@ body {
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  background: linear-gradient(180deg, rgba(15, 20, 40, 0.72), rgba(26, 26, 46, 0.92));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--parchment-0) 88%, transparent),
+    color-mix(in srgb, var(--parchment-1) 92%, transparent)
+  );
 }
 
 .battle-stage {
@@ -124,15 +148,13 @@ h2 {
   min-width: 0;
 }
 
-.header-support-btn {
+.header-support-btn  {
   flex-shrink: 0;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(245, 197, 66, 0.45);
-  background:
-    radial-gradient(120% 140% at 50% 0%, rgba(245, 197, 66, 0.2), transparent 60%),
-    rgba(40, 28, 12, 0.88);
-  color: #fff6dc;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-chip);
+  color: var(--ink);
   font-family: var(--font-heading);
   font-size: 11px;
   font-weight: 700;
@@ -153,38 +175,36 @@ h2 {
   outline-offset: 2px;
 }
 
-.donation-card {
+.donation-card  {
   width: min(100%, 360px);
-  border-color: rgba(245, 197, 66, 0.42);
-  background:
-    radial-gradient(120% 120% at 50% 0%, rgba(245, 197, 66, 0.14), transparent 58%),
-    linear-gradient(180deg, rgba(28, 20, 12, 0.98), rgba(12, 10, 18, 0.98));
+  border: 2px solid var(--seal-gold);
+  background: var(--panel-card);
   box-shadow:
-    0 0 0 1px rgba(255, 200, 87, 0.08) inset,
-    0 18px 44px rgba(0, 0, 0, 0.55);
+    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
+    0 18px 44px rgba(0, 0, 0, 0.28);
 }
 
 .donation-card__header {
   padding: 14px 16px 0;
 }
 
-.donation-card__eyebrow {
+.donation-card__eyebrow  {
   display: inline-block;
   margin-bottom: 6px;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(245, 197, 66, 0.4);
-  background: rgba(245, 197, 66, 0.1);
+  border: 1px solid var(--panel-border);
+  background: rgba(201, 162, 39, 0.12);
   font-family: var(--font-heading);
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #ffe8a8;
+  color: var(--seal-gold-dark);
 }
 
-.donation-card__title {
-  color: #fff6dc;
-  text-shadow: 0 2px 10px rgba(245, 197, 66, 0.2);
+.donation-card__title  {
+  color: var(--ink);
+  text-shadow: none;
 }
 
 .donation-card__body {
@@ -200,7 +220,7 @@ h2 {
   margin: 0;
   font-size: 12px;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--ink-muted);
 }
 
 .donation-card__lead strong,
@@ -213,7 +233,7 @@ h2 {
   color: var(--muted);
 }
 
-.donation-card__cta {
+.donation-card__cta  {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -222,9 +242,9 @@ h2 {
   margin-top: 4px;
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(245, 197, 66, 0.65);
-  background: linear-gradient(180deg, rgba(245, 197, 66, 0.38), rgba(160, 90, 20, 0.55));
-  color: #fff8e8;
+  border: none;
+  background: linear-gradient(180deg, var(--forest-hi) 0%, var(--forest) 100%);
+  color: #fff;
   font-family: var(--font-heading);
   font-size: 12px;
   font-weight: 700;
@@ -232,6 +252,7 @@ h2 {
   text-decoration: none;
   text-align: center;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(36, 88, 48, 0.35);
   transition:
     filter 0.15s ease,
     transform 0.1s ease;
@@ -246,14 +267,14 @@ h2 {
   justify-content: stretch;
 }
 
-.donation-card__ghost {
+.donation-card__ghost  {
   width: 100%;
   min-height: 34px;
   padding: 8px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--panel-border-soft);
+  background: var(--panel-chip);
+  color: var(--ink-muted);
   font-family: var(--font-heading);
   font-size: 11px;
   cursor: pointer;
@@ -263,7 +284,7 @@ h2 {
   filter: brightness(1.06);
 }
 
-.stat-pill {
+.stat-pill  {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -271,8 +292,9 @@ h2 {
   font-weight: 600;
   padding: 4px 8px;
   border-radius: 999px;
-  background: rgba(15, 52, 96, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--panel-chip);
+  border: 1px solid var(--panel-border-soft);
+  color: var(--ink);
 }
 
 .stat-icon {
@@ -292,7 +314,7 @@ h2 {
   align-self: center;
 }
 
-.campaign-context-btn {
+.campaign-context-btn  {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -301,20 +323,21 @@ h2 {
   min-height: 36px;
   padding: 6px 12px;
   border-radius: 10px;
-  border: 1px solid var(--campaign-accent-border, rgba(255, 255, 255, 0.14));
+  border: 2px solid var(--campaign-accent-border, var(--seal-gold));
   background:
     linear-gradient(
       90deg,
-      var(--campaign-accent-soft, rgba(255, 255, 255, 0.06)) 0%,
-      rgba(18, 28, 48, 0.94) 42%,
-      rgba(18, 28, 48, 0.94) 100%
-    ),
-    radial-gradient(circle at 0% 50%, var(--campaign-panel-glow, transparent), transparent 55%);
-  color: var(--text);
+      var(--campaign-accent-soft, rgba(201, 162, 39, 0.12)) 0%,
+      var(--parchment-0) 40%,
+      var(--parchment-1) 100%
+    );
+  color: var(--ink);
   font-family: var(--font-body);
   cursor: pointer;
   text-align: left;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
+    0 4px 14px rgba(0, 0, 0, 0.12);
   transition:
     border-color 0.15s ease,
     filter 0.15s ease,
@@ -386,7 +409,7 @@ h2 {
   gap: 5px;
   flex-shrink: 0;
   padding-left: 10px;
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 1px solid var(--panel-border-soft);
 }
 
 .campaign-context-btn__right--empty {
@@ -489,13 +512,16 @@ h2 {
   max-width: 260px;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(12, 20, 38, 0.96);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  border: 2px solid var(--seal-gold);
+  background: var(--panel-card);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
+    0 8px 24px rgba(0, 0, 0, 0.22);
   pointer-events: none;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  color: var(--ink);
   --campaign-accent: #6ecf8a;
 }
 
@@ -517,24 +543,24 @@ h2 {
 .campaign-tooltip-title {
   font-family: var(--font-heading);
   font-size: 11px;
-  color: #d8e4ff;
+  color: var(--ink);
   margin-bottom: 2px;
 }
 
 .campaign-tooltip-line {
   font-size: 10px;
-  color: #b8c8e8;
+  color: var(--ink-muted);
   line-height: 1.35;
 }
 
 .campaign-tooltip-biome {
-  color: var(--campaign-accent, #6ecf8a);
+  color: var(--campaign-accent, var(--seal-gold-dark));
   font-weight: 600;
 }
 
 .campaign-tooltip-flavor {
   font-style: italic;
-  color: #98aac8;
+  color: var(--ink-muted);
 }
 
 .campaign-tooltip-progress {
@@ -547,7 +573,7 @@ h2 {
 .campaign-tooltip-progress-track {
   height: 5px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(61, 52, 40, 0.14);
   overflow: hidden;
 }
 
@@ -1283,7 +1309,7 @@ h2 {
   padding: 2px 10px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
-  background: rgba(8, 14, 28, 0.28);
+  background: rgba(12, 8, 6, 0.28);
   color: #fff;
   font: inherit;
   font-size: 9px;
@@ -1293,7 +1319,7 @@ h2 {
 }
 
 .battle-victory-details-btn:hover {
-  background: rgba(8, 14, 28, 0.45);
+  background: rgba(12, 8, 6, 0.45);
 }
 
 .battle-victory-details {
@@ -1301,7 +1327,7 @@ h2 {
   overflow-y: auto;
   padding: 0 10px 4px;
   border-top: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(8, 14, 28, 0.22);
+  background: rgba(12, 8, 6, 0.22);
 }
 
 .battle-victory-details.hidden {
@@ -1671,7 +1697,7 @@ h2 {
   padding: 1px;
   border-radius: 3px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(22, 32, 56, 0.98), rgba(12, 18, 34, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
@@ -1785,7 +1811,7 @@ h2 {
   height: 12px;
   border-radius: 3px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(8, 14, 28, 0.82);
+  background: rgba(232, 212, 160, 0.82);
   cursor: help;
 }
 
@@ -2231,8 +2257,8 @@ h2 {
   min-width: 120px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(12, 18, 36, 0.96);
-  border: 1px solid rgba(233, 69, 96, 0.45);
+  background: rgba(243, 228, 188, 0.96);
+  border: 1px solid rgba(139, 58, 47, 0.45);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
@@ -2249,7 +2275,7 @@ h2 {
 
 .enemy-tooltip-line {
   font-size: 10px;
-  color: #fff8e7;
+  color: var(--ink);
   line-height: 1.35;
 }
 
@@ -2269,7 +2295,7 @@ h2 {
   height: 12px;
   padding: 2px;
   border-radius: 6px;
-  background: linear-gradient(180deg, rgba(22, 32, 56, 0.98), rgba(12, 18, 34, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
   overflow: visible;
@@ -2385,7 +2411,7 @@ h2 {
   padding: 1px;
   border: var(--slot-frame-size) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
   border-image: none;
-  background-color: rgba(18, 28, 48, 0.92);
+  background-color: rgba(255, 249, 237, 0.92);
   background-clip: padding-box;
   border-radius: 0;
 }
@@ -2442,7 +2468,7 @@ h2 {
   background: linear-gradient(
     to top,
     rgba(6, 10, 22, 0.92) 0%,
-    rgba(18, 28, 52, 0.72) 70%,
+    rgba(255, 249, 237, 0.72) 70%,
     rgba(40, 58, 96, 0.35) 100%
   );
   transition: height 0.5s linear;
@@ -2628,7 +2654,7 @@ button.hero-skill-chip:hover {
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid rgba(245, 197, 66, 0.35);
-  background: rgba(10, 16, 32, 0.98);
+  background: rgba(232, 212, 160, 0.98);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
   color: var(--text);
   font-size: 10px;
@@ -2663,7 +2689,7 @@ button.hero-skill-chip:hover {
   height: 12px;
   padding: 2px;
   border-radius: 6px;
-  background: linear-gradient(180deg, rgba(22, 32, 56, 0.98), rgba(12, 18, 34, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
   overflow: visible;
@@ -2672,7 +2698,7 @@ button.hero-skill-chip:hover {
 
 .health-bar.card-bar,
 .xp-bar.card-bar {
-  background: linear-gradient(180deg, rgba(22, 32, 56, 0.98), rgba(12, 18, 34, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
 }
 
 .stat-bar {
@@ -2703,8 +2729,8 @@ button.hero-skill-chip:hover {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #fff8e7;
-  background: rgba(12, 18, 36, 0.96);
+  color: var(--ink);
+  background: rgba(243, 228, 188, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   pointer-events: none;
@@ -2748,7 +2774,7 @@ button.hero-skill-chip:hover {
   border-radius: 8px;
   border: 1px solid rgba(245, 197, 66, 0.35);
   background: rgba(245, 197, 66, 0.12);
-  color: #fff8e7;
+  color: var(--ink);
   font-family: var(--font-heading);
   font-size: 10px;
   letter-spacing: 0.06em;
@@ -2763,7 +2789,7 @@ button.hero-skill-chip:hover {
 .heroes-formation-count {
   padding: 2px 6px;
   border-radius: 999px;
-  background: rgba(12, 18, 36, 0.65);
+  background: rgba(243, 228, 188, 0.65);
   color: var(--gold);
   font-size: 10px;
 }
@@ -2813,7 +2839,7 @@ button.hero-skill-chip:hover {
   padding: 7px 8px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(18, 28, 48, 0.75);
+  background: rgba(255, 249, 237, 0.75);
   color: var(--muted);
   font-family: var(--font-heading);
   font-size: 10px;
@@ -2823,7 +2849,7 @@ button.hero-skill-chip:hover {
 }
 
 .heroes-panel-tab.active {
-  color: #fff8e7;
+  color: var(--ink);
   border-color: rgba(245, 197, 66, 0.45);
   background: rgba(36, 58, 96, 0.9);
 }
@@ -2847,7 +2873,7 @@ button.hero-skill-chip:hover {
   padding: 10px 12px;
   border: var(--panel-frame) solid transparent;
   border-image: url('assets/frames/card.png') 30 / var(--panel-frame) / 0 stretch;
-  background-color: rgba(14, 22, 42, 0.92);
+  background-color: rgba(243, 228, 188, 0.92);
   background-clip: padding-box;
 }
 
@@ -2951,7 +2977,7 @@ button.hero-skill-chip:hover {
   gap: 0;
   padding: 6px 4px;
   border: var(--slot-frame-size) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
-  background-color: rgba(18, 28, 48, 0.92);
+  background-color: rgba(255, 249, 237, 0.92);
   background-clip: padding-box;
   color: var(--text);
   font: inherit;
@@ -3076,7 +3102,7 @@ button.hero-skill-chip:hover {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid rgba(245, 197, 66, 0.35);
-  background: rgba(10, 16, 32, 0.98);
+  background: rgba(232, 212, 160, 0.98);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
   color: var(--text);
   font-size: 10px;
@@ -3494,7 +3520,7 @@ button.hero-skill-chip:hover {
     transform: scale(1.02);
   }
   100% {
-    background-color: rgba(18, 28, 48, 0.92);
+    background-color: rgba(255, 249, 237, 0.92);
     transform: scale(1);
   }
 }
@@ -4102,7 +4128,7 @@ button.hero-skill-chip:hover {
 }
 
 .gear-upgrade-equal {
-  color: #fff8e7;
+  color: var(--ink);
   background: rgba(255, 255, 255, 0.16);
 }
 
@@ -4152,7 +4178,7 @@ button.hero-skill-chip:hover {
   padding: 6px 12px;
   border: none;
   border-radius: 8px;
-  background: rgba(42, 63, 95, 0.95);
+  background: rgba(201, 162, 39, 0.28);
   color: white;
   font-family: var(--font-heading);
   font-size: 11px;
@@ -4179,7 +4205,7 @@ button.hero-skill-chip:hover {
   border: none;
   border-radius: 8px;
   background: rgba(62, 48, 38, 0.95);
-  color: #fff8e7;
+  color: var(--ink);
   font-family: var(--font-heading);
   font-size: 11px;
   font-weight: 700;
@@ -4188,7 +4214,7 @@ button.hero-skill-chip:hover {
 }
 
 .gear-unequip-btn:hover {
-  background: rgba(233, 69, 96, 0.85);
+  background: rgba(139, 58, 47, 0.85);
   transform: translateY(-1px);
 }
 
@@ -4259,7 +4285,7 @@ button.hero-skill-chip:hover {
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  background: rgba(18, 28, 48, 0.85);
+  background: rgba(255, 249, 237, 0.85);
   color: var(--muted);
   cursor: pointer;
 }
@@ -4320,7 +4346,7 @@ button.hero-skill-chip:hover {
   padding: 0 8px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(18, 28, 48, 0.92);
+  background: rgba(255, 249, 237, 0.92);
   cursor: pointer;
   user-select: none;
 }
@@ -4333,7 +4359,7 @@ button.hero-skill-chip:hover {
   font-family: var(--font-heading);
   font-size: 10px;
   font-weight: 700;
-  color: #fff8e7;
+  color: var(--ink);
 }
 
 .auto-battle-speed {
@@ -4342,8 +4368,8 @@ button.hero-skill-chip:hover {
   padding: 0 8px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(18, 28, 48, 0.92);
-  color: #fff8e7;
+  background: rgba(255, 249, 237, 0.92);
+  color: var(--ink);
   font-family: var(--font-heading);
   font-size: 11px;
   font-weight: 700;
@@ -4491,7 +4517,7 @@ button.hero-skill-chip:hover {
 
 .shop-offer-stats-compact {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--ink-muted);
 }
 
 .shop-offer-actions {
@@ -4511,7 +4537,7 @@ button.hero-skill-chip:hover {
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(8, 14, 28, 0.96);
+  background: rgba(232, 212, 160, 0.96);
   font-size: 10px;
   line-height: 1.35;
   color: rgba(255, 255, 255, 0.9);
@@ -4598,8 +4624,8 @@ button.hero-skill-chip:hover {
   padding: 6px 10px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(18, 28, 48, 0.92);
-  color: #fff8e7;
+  background: rgba(255, 249, 237, 0.92);
+  color: var(--ink);
   font: inherit;
   font-size: 10px;
   cursor: pointer;
@@ -4679,12 +4705,12 @@ button.hero-skill-chip:hover {
 
 .upgrade-branch-tab:hover {
   transform: translateY(-1px);
-  border-color: rgba(233, 69, 96, 0.35);
+  border-color: rgba(139, 58, 47, 0.35);
 }
 
 .upgrade-branch-tab--active {
-  border-color: rgba(233, 69, 96, 0.65);
-  background: rgba(233, 69, 96, 0.12);
+  border-color: rgba(139, 58, 47, 0.65);
+  background: rgba(139, 58, 47, 0.12);
 }
 
 .upgrade-branch-tab-label {
@@ -4720,10 +4746,11 @@ button.hero-skill-chip:hover {
   min-height: 220px;
   padding: 0;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.28);
   background:
-    radial-gradient(circle at 50% 0%, rgba(233, 69, 96, 0.08), transparent 55%),
-    linear-gradient(180deg, rgba(10, 16, 32, 0.95), rgba(8, 12, 24, 0.98));
+    radial-gradient(circle at 50% 12%, rgba(139, 58, 47, 0.14), transparent 52%),
+    radial-gradient(circle at 80% 88%, rgba(201, 162, 39, 0.06), transparent 40%),
+    linear-gradient(180deg, #1a1410 0%, #241c16 48%, #14110e 100%);
   overflow: hidden;
   cursor: grab;
   touch-action: none;
@@ -4790,8 +4817,13 @@ button.hero-skill-chip:hover {
   position: absolute;
   inset: 0;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.12), rgba(12, 20, 38, 0.95));
+  border: 2px solid rgba(243, 228, 188, 0.22);
+  background: radial-gradient(
+    circle at 30% 25%,
+    rgba(243, 228, 188, 0.14),
+    rgba(52, 42, 32, 0.96) 55%,
+    rgba(42, 34, 26, 0.98)
+  );
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
   transition:
     border-color 0.15s ease,
@@ -4833,7 +4865,7 @@ button.hero-skill-chip:hover {
   position: absolute;
   inset: -4px;
   border-radius: 999px;
-  border: 2px solid rgba(233, 69, 96, 0.55);
+  border: 2px solid rgba(139, 58, 47, 0.55);
   animation: upgrade-node-pulse 1.6s ease-in-out infinite;
   pointer-events: none;
 }
@@ -4897,7 +4929,7 @@ button.hero-skill-chip:hover {
 .upgrade-node:hover .upgrade-node-ring,
 .upgrade-node:focus-visible .upgrade-node-ring {
   transform: scale(1.06);
-  border-color: rgba(233, 69, 96, 0.75);
+  border-color: rgba(139, 58, 47, 0.75);
 }
 
 .upgrade-node--selected .upgrade-node-ring {
@@ -4927,10 +4959,11 @@ button.hero-skill-chip:hover {
   padding: 12px;
   padding-bottom: 36px;
   border-radius: 12px;
-  border: 2px solid rgba(233, 69, 96, 0.45);
-  background: linear-gradient(160deg, rgba(22, 33, 62, 0.98), rgba(10, 16, 32, 0.99));
+  border: 2px solid rgba(201, 162, 39, 0.45);
+  background: linear-gradient(160deg, #2a2118 0%, #1a1410 55%, #12100c 100%);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   pointer-events: auto;
+  color: #f3e4bc;
 }
 
 .upgrade-node-tooltip-portal.hidden {
@@ -4959,20 +4992,20 @@ button.hero-skill-chip:hover {
   font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: #e8d4a0;
 }
 
 .upgrade-tooltip-title {
   margin: 0 0 6px;
   font-family: var(--font-heading);
   font-size: 14px;
-  color: #fff;
+  color: #fff9ed;
 }
 
 .upgrade-tooltip-desc {
   margin: 0 0 8px;
   font-size: 11px;
-  color: var(--muted);
+  color: rgba(243, 228, 188, 0.9);
   line-height: 1.45;
 }
 
@@ -4980,7 +5013,7 @@ button.hero-skill-chip:hover {
   margin: 0 0 10px;
   padding-left: 16px;
   font-size: 10px;
-  color: var(--muted);
+  color: rgba(243, 228, 188, 0.78);
 }
 
 .upgrade-tooltip-reqs .met {
@@ -5010,7 +5043,7 @@ button.hero-skill-chip:hover {
 }
 
 .upgrade-tooltip-status--locked {
-  color: var(--muted);
+  color: rgba(243, 228, 188, 0.72);
 }
 
 .upgrade-tooltip-price {
@@ -5021,11 +5054,11 @@ button.hero-skill-chip:hover {
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: var(--text);
+  color: #f3e4bc;
 }
 
 .upgrade-tooltip-price strong {
-  color: var(--gold);
+  color: #e8d4a0;
 }
 
 .upgrade-tooltip-gold-icon {
@@ -5068,7 +5101,7 @@ button.hero-skill-chip:hover {
   min-width: 120px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(12, 18, 36, 0.96);
+  background: rgba(243, 228, 188, 0.96);
   border: 1px solid rgba(66, 165, 245, 0.45);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   pointer-events: none;
@@ -5087,7 +5120,7 @@ button.hero-skill-chip:hover {
 .hero-tooltip-line {
   display: block;
   font-size: 10px;
-  color: #fff8e7;
+  color: var(--ink);
   line-height: 1.35;
 }
 
@@ -5178,7 +5211,7 @@ button.hero-skill-chip:hover {
 
 .btn.secondary {
   background: url('assets/buttons/secondary.png') center / 100% 100% no-repeat;
-  color: #fff8e7;
+  color: var(--ink);
 }
 
 .empty-state {
@@ -5281,7 +5314,7 @@ button.hero-skill-chip:hover {
   justify-content: center;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(18, 28, 48, 0.85);
+  background: rgba(255, 249, 237, 0.85);
   cursor: default;
 }
 
@@ -5376,7 +5409,7 @@ button.hero-skill-chip:hover {
   padding: 0;
   border: none;
   border-radius: 8px;
-  background: rgba(42, 63, 95, 0.9);
+  background: rgba(201, 162, 39, 0.22);
   color: var(--text);
   cursor: pointer;
 }
@@ -5571,7 +5604,7 @@ button.hero-skill-chip:hover {
   gap: 8px;
   padding: 6px 8px;
   border-radius: 10px;
-  background: rgba(18, 28, 48, 0.75);
+  background: rgba(255, 249, 237, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -5666,7 +5699,7 @@ body.modal-open {
   max-height: min(90vh, 480px);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(22, 32, 58, 0.98), rgba(12, 18, 36, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   overflow: hidden;
 }
@@ -5790,11 +5823,11 @@ body.modal-open {
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #ffe8a8;
+  color: var(--seal-gold-dark);
 }
 
 .forge-confirm-dialog__title {
-  color: #fff6dc;
+  color: var(--ink);
   text-shadow: 0 2px 10px rgba(245, 197, 66, 0.2);
 }
 
@@ -5944,7 +5977,7 @@ body.modal-open {
   margin: 0;
   font-size: 12px;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--ink-muted);
 }
 
 .forge-confirm-intro strong,
@@ -6009,7 +6042,7 @@ body.modal-open {
   inset: 0;
 }
 
-.modal-dialog {
+.modal-dialog  {
   position: relative;
   z-index: 1;
   display: flex;
@@ -6019,10 +6052,11 @@ body.modal-open {
   max-height: 100%;
   margin: 0;
   border-radius: 12px 12px 0 0;
-  background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(12, 18, 36, 0.98));
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+  background: var(--panel-card);
+  border-top: 2px solid var(--seal-gold);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.22);
   align-self: stretch;
+  color: var(--ink);
 }
 
 .modal-header {
@@ -6061,8 +6095,9 @@ body.modal-open {
   padding: 0;
   border: none;
   border-radius: 8px;
-  background: rgba(42, 63, 95, 0.9);
-  color: var(--text);
+  background: var(--panel-chip);
+  border: 1px solid var(--panel-border-soft);
+  color: var(--ink);
   font-size: 18px;
   cursor: pointer;
 }
@@ -6078,6 +6113,8 @@ body.modal-open {
 .modal-close:hover,
 .modal-back:hover {
   background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .modal-body {
@@ -6116,7 +6153,7 @@ body.modal-open {
 .filter-btn:hover {
   color: white;
   border-color: rgba(245, 197, 66, 0.45);
-  background: rgba(233, 69, 96, 0.35);
+  background: rgba(139, 58, 47, 0.35);
 }
 
 .modal-empty {
@@ -6254,7 +6291,7 @@ body.modal-open {
 
 .equip-hero-card:hover {
   transform: translateY(-2px);
-  background: rgba(233, 69, 96, 0.28);
+  background: rgba(139, 58, 47, 0.28);
 }
 
 .equip-hero-card-icon {
@@ -6376,7 +6413,7 @@ body.modal-open {
   margin-bottom: 14px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(18, 28, 48, 0.92);
+  background: rgba(255, 249, 237, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -6417,7 +6454,7 @@ body.modal-open {
   margin-bottom: 10px;
   border-radius: 8px;
   border: 1px solid rgba(245, 197, 66, 0.45);
-  background: rgba(233, 69, 96, 0.2);
+  background: rgba(139, 58, 47, 0.2);
   font-size: 11px;
 }
 
@@ -6438,7 +6475,7 @@ body.modal-open {
   border: none;
   border-radius: 8px;
   background: var(--gold);
-  color: #1a1a2e;
+  color: var(--ink);
   font-family: var(--font-heading);
   font-size: 11px;
   font-weight: 700;
@@ -6460,7 +6497,7 @@ body.modal-open {
 }
 
 .game-scroll::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, rgba(8, 14, 28, 0.98), rgba(18, 28, 52, 0.98));
+  background: linear-gradient(180deg, rgba(232, 212, 160, 0.98), rgba(255, 249, 237, 0.98));
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
@@ -6475,7 +6512,7 @@ body.modal-open {
 
 .game-scroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ffe494 0%, var(--gold) 35%, var(--accent) 100%);
-  border-color: rgba(233, 69, 96, 0.5);
+  border-color: rgba(139, 58, 47, 0.5);
 }
 
 .game-scroll::-webkit-scrollbar-corner {
@@ -6500,7 +6537,7 @@ body.modal-open {
   gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(18, 28, 48, 0.92);
+  background: rgba(255, 249, 237, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
 }
@@ -6532,8 +6569,8 @@ body.modal-open {
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(12, 18, 36, 0.96);
-  color: #fff8e7;
+  background: rgba(243, 228, 188, 0.96);
+  color: var(--ink);
   font-family: var(--font-heading);
   font-size: 11px;
 }
@@ -6549,7 +6586,7 @@ body.modal-open {
   padding: 2px 6px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(12, 18, 36, 0.96);
+  background: rgba(243, 228, 188, 0.96);
   font-family: var(--font-heading);
   font-size: 10px;
 }
@@ -6608,7 +6645,7 @@ body.modal-open {
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(18, 28, 48, 0.88);
+  background: rgba(255, 249, 237, 0.88);
 }
 
 .meta-legacy-card--owned {
@@ -6622,7 +6659,7 @@ body.modal-open {
 .meta-legacy-card-title {
   margin: 0;
   font-size: 13px;
-  color: #fff8e7;
+  color: var(--ink);
 }
 
 .meta-legacy-card-desc,
@@ -6637,7 +6674,7 @@ body.modal-open {
   padding: 6px 10px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #b71c3a, #e94560);
+  background: linear-gradient(135deg, #6b241c, #8b3a2f);
   color: #fff;
   font: inherit;
   font-size: 11px;
@@ -6793,7 +6830,7 @@ body.modal-open {
   flex-shrink: 0;
   padding: 12px 12px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(14, 22, 42, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
 }
 
 .hero-detail-header .hero-detail {
@@ -6807,7 +6844,7 @@ body.modal-open {
   flex-shrink: 0;
   padding: 10px 12px 8px;
   border-bottom: none;
-  background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(14, 22, 42, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
 }
 
 .hero-detail-improvement-bar {
@@ -6816,7 +6853,7 @@ body.modal-open {
   justify-content: center;
   padding: 0 12px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
+  background: linear-gradient(180deg, rgba(243, 228, 188, 0.98), rgba(243, 228, 188, 0.98));
 }
 
 .hero-improvement-points-row {
@@ -6838,7 +6875,7 @@ body.modal-open {
   padding: 8px 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 200, 87, 0.28);
-  background: linear-gradient(160deg, rgba(255, 200, 87, 0.1), rgba(12, 18, 36, 0.72));
+  background: linear-gradient(160deg, rgba(255, 200, 87, 0.1), rgba(243, 228, 188, 0.72));
   cursor: help;
   transition:
     border-color 0.15s ease,
@@ -6848,7 +6885,7 @@ body.modal-open {
 
 .hero-improvement-points--ascension {
   border-color: rgba(140, 180, 255, 0.35);
-  background: linear-gradient(160deg, rgba(120, 160, 240, 0.12), rgba(12, 18, 36, 0.72));
+  background: linear-gradient(160deg, rgba(120, 160, 240, 0.12), rgba(243, 228, 188, 0.72));
 }
 
 .hero-improvement-points--ascension:hover,
@@ -6925,7 +6962,7 @@ body.modal-open {
   font-family: var(--font-heading);
   font-size: 20px;
   line-height: 1;
-  color: #fff8e7;
+  color: var(--ink);
   text-shadow: 0 0 10px rgba(255, 200, 87, 0.35);
 }
 
@@ -6986,7 +7023,7 @@ body.modal-open {
 }
 
 .hero-improvement-tooltip-line strong {
-  color: #fff8e7;
+  color: var(--ink);
   font-weight: 700;
 }
 
@@ -6994,7 +7031,7 @@ body.modal-open {
   flex-shrink: 0;
   padding: 10px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(14, 22, 42, 0.98), rgba(12, 18, 36, 0.98));
+  background: linear-gradient(180deg, rgba(243, 228, 188, 0.98), rgba(243, 228, 188, 0.98));
 }
 
 .hero-detail-loadout .hero-loadout-strip--featured {
@@ -7076,7 +7113,7 @@ body.modal-open {
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(12, 18, 36, 0.7);
+  background: rgba(243, 228, 188, 0.7);
   color: var(--muted);
   font-family: var(--font-heading);
   font-size: 10px;
@@ -7084,7 +7121,7 @@ body.modal-open {
 }
 
 .hero-tab.active {
-  color: #fff8e7;
+  color: var(--ink);
   border-color: rgba(255, 200, 87, 0.45);
   background: rgba(255, 200, 87, 0.12);
 }
@@ -7111,7 +7148,7 @@ body.modal-open {
   padding: 5px 6px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(12, 18, 36, 0.55);
+  background: rgba(243, 228, 188, 0.55);
 }
 
 .hero-attr-chip .hero-attr-label,
@@ -7161,7 +7198,7 @@ body.modal-open {
   border-radius: 4px;
   border: 1px solid rgba(255, 200, 87, 0.45);
   background: rgba(255, 200, 87, 0.12);
-  color: #fff8e7;
+  color: var(--ink);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -7201,7 +7238,7 @@ body.modal-open {
   border-radius: 8px;
   border: 1px solid rgba(255, 200, 87, 0.35);
   background: rgba(255, 200, 87, 0.1);
-  color: #fff8e7;
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
@@ -7235,7 +7272,7 @@ body.modal-open {
 .improvement-reset-confirm-total {
   margin: 0 0 6px;
   font-size: 13px;
-  color: #fff8e7;
+  color: var(--ink);
 }
 
 .improvement-reset-confirm-breakdown,
@@ -7292,7 +7329,7 @@ body.modal-open {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(12, 18, 36, 0.55);
+  background: rgba(243, 228, 188, 0.55);
 }
 
 .hero-status-skill-header,
@@ -7346,7 +7383,7 @@ body.modal-open {
 }
 
 .hero-status-skill-stat-value {
-  color: #fff8e7;
+  color: var(--ink);
   font-weight: 600;
   text-align: right;
 }
@@ -7431,7 +7468,7 @@ body.modal-open {
   max-width: 340px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(12, 18, 36, 0.96);
+  background: rgba(243, 228, 188, 0.96);
   border: 1px solid rgba(255, 200, 87, 0.35);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   pointer-events: none;
@@ -7453,7 +7490,7 @@ body.modal-open {
   align-items: flex-start;
   gap: 6px;
   font-size: 10px;
-  color: #fff8e7;
+  color: var(--ink);
   line-height: 1.35;
 }
 
@@ -7476,7 +7513,7 @@ body.modal-open {
   padding: 10px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(12, 18, 36, 0.55);
+  background: rgba(243, 228, 188, 0.55);
 }
 
 .hero-attr-label {
@@ -7501,7 +7538,7 @@ body.modal-open {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 200, 87, 0.15);
-  color: #fff8e7;
+  color: var(--ink);
   font-size: 10px;
   cursor: pointer;
 }
@@ -7521,7 +7558,7 @@ body.modal-open {
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(12, 18, 36, 0.55);
+  background: rgba(243, 228, 188, 0.55);
 }
 
 .skill-card--compact {
@@ -7693,7 +7730,7 @@ body.modal-open {
   padding: 8px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(10, 16, 32, 0.55);
+  background: rgba(232, 212, 160, 0.55);
 }
 
 .hero-skill-slot-bar-label {
@@ -7880,7 +7917,7 @@ body.skill-drag-active * {
   --slot-frame-size: 4px;
   border: var(--slot-frame-size) solid transparent;
   border-image: var(--slot-frame) 20 / var(--slot-frame-size) / 0 stretch;
-  background-color: rgba(18, 28, 48, 0.92);
+  background-color: rgba(255, 249, 237, 0.92);
   background-clip: padding-box;
   border-radius: 0;
   line-height: 0;
@@ -7960,7 +7997,7 @@ body.skill-drag-active * {
 .skill-card-badge--equipped {
   border-color: rgba(245, 197, 66, 0.45);
   background: rgba(245, 197, 66, 0.14);
-  color: #ffe8a8;
+  color: var(--seal-gold-dark);
 }
 
 .skill-card-badge--unequipped {
@@ -8103,7 +8140,7 @@ body.skill-drag-active * {
   font-family: var(--font-heading);
   font-size: 15px;
   line-height: 1.2;
-  color: #fff6dc;
+  color: var(--ink);
   cursor: help;
 }
 
@@ -8154,14 +8191,14 @@ body.skill-drag-active * {
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #ffe8a8;
+  color: var(--seal-gold-dark);
 }
 
 .ascension-moment-tooltip-line {
   display: block;
   font-size: 11px;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--ink-muted);
 }
 
 .ascension-moment-tooltip-section {
@@ -8363,7 +8400,7 @@ body.skill-drag-active * {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #ffe8a8;
+  color: var(--seal-gold-dark);
 }
 
 .ascension-path-tooltip-reqs {
@@ -8386,7 +8423,7 @@ body.skill-drag-active * {
   display: block;
   font-size: 10px;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--ink-muted);
 }
 
 .ascension-path-tooltip-cta {
@@ -8441,14 +8478,14 @@ body.skill-drag-active * {
 
 .ascend-confirm-preview__points {
   font-size: 11px;
-  color: #ffe8a8;
+  color: var(--seal-gold-dark);
 }
 
 .ascend-confirm-desc {
   margin: 0;
   font-size: 12px;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--ink-muted);
 }
 
 .ascend-confirm-warning,
@@ -8795,7 +8832,7 @@ body.skill-drag-active * {
   border: 1px solid var(--campaign-accent-border);
   background:
     radial-gradient(circle at 12% 18%, var(--campaign-panel-glow), transparent 42%),
-    linear-gradient(160deg, rgba(22, 32, 58, 0.98), rgba(12, 18, 36, 0.98));
+    linear-gradient(160deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
   overflow: hidden;
 }
 
@@ -8967,7 +9004,7 @@ body.skill-drag-active * {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: linear-gradient(180deg, rgba(12, 18, 36, 0.15), rgba(12, 18, 36, 0.72));
+  background: linear-gradient(180deg, rgba(243, 228, 188, 0.15), rgba(243, 228, 188, 0.72));
   z-index: 2;
 }
 
@@ -9398,7 +9435,7 @@ body.act-scene-open {
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(10, 16, 32, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(232, 212, 160, 0.98));
   flex-shrink: 0;
 }
 
@@ -9440,15 +9477,16 @@ body.act-scene-open {
 
 .campaign-phase-preview-title {
   margin: 0;
+  font-family: var(--font-heading);
   font-size: 13px;
   line-height: 1.25;
-  color: #fff;
+  color: var(--ink);
 }
 
 .campaign-phase-preview-meta {
   margin: 2px 0 0;
   font-size: 10px;
-  color: var(--muted);
+  color: var(--ink-muted);
 }
 
 .campaign-phase-preview-enemies {
@@ -9462,7 +9500,7 @@ body.act-scene-open {
   height: 22px;
   object-fit: contain;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(61, 52, 40, 0.1);
   padding: 2px;
 }
 
@@ -9472,13 +9510,19 @@ body.act-scene-open {
   padding: 10px 14px;
   border: none;
   border-radius: 10px;
-  background: linear-gradient(180deg, var(--campaign-accent), color-mix(in srgb, var(--campaign-accent) 70%, #000));
-  color: #1a1204;
+  background: linear-gradient(
+    180deg,
+    var(--campaign-accent),
+    color-mix(in srgb, var(--campaign-accent) 70%, #000)
+  );
+  color: #fff9ed;
   font-family: var(--font-heading);
   font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   transition: transform 0.15s ease, filter 0.15s ease;
 }
 
@@ -9913,9 +9957,9 @@ body.act-scene-open {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(12, 18, 36, 0.08) 0%,
-    rgba(12, 18, 36, 0.55) 72%,
-    rgba(12, 18, 36, 0.82) 100%
+    rgba(243, 228, 188, 0.08) 0%,
+    rgba(243, 228, 188, 0.55) 72%,
+    rgba(243, 228, 188, 0.82) 100%
   );
 }
 
@@ -10058,7 +10102,7 @@ body.act-scene-open {
   border: 1px solid var(--campaign-accent-border);
   background:
     radial-gradient(circle at 0% 50%, var(--campaign-panel-glow), transparent 55%),
-    linear-gradient(160deg, rgba(22, 32, 58, 0.98), rgba(12, 18, 36, 0.98));
+    linear-gradient(160deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
   overflow: hidden;
   animation: campaign-unlock-banner-in 0.45s ease;
 }
@@ -10176,7 +10220,7 @@ body.act-scene-open {
   border-color: rgba(245, 197, 66, 0.45);
   background:
     radial-gradient(circle at 0% 50%, rgba(245, 197, 66, 0.1), transparent 55%),
-    linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(10, 16, 32, 0.98));
+    linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(232, 212, 160, 0.98));
   animation: campaign-epic-preview-glow 2s ease-in-out infinite;
 }
 
@@ -10243,20 +10287,25 @@ body.act-scene-open {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 34px;
+  min-height: 36px;
   padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 2px solid var(--seal-gold);
   border-radius: 10px;
-  background: rgba(18, 28, 48, 0.92);
-  color: #fff8e7;
+  background: var(--panel-card);
+  color: var(--ink);
   font: inherit;
   font-size: 11px;
   cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
+    0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .combat-bar-btn--continue {
-  border-color: rgba(120, 180, 255, 0.35);
-  background: rgba(36, 58, 96, 0.95);
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--forest-hi) 0%, var(--forest) 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(36, 88, 48, 0.35);
 }
 
 .combat-bar-btn-icon {
@@ -10273,12 +10322,17 @@ img.combat-bar-btn-icon {
 
 .combat-bar-btn-label {
   font-family: var(--font-heading);
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .combat-bar-btn:hover:not(:disabled) {
-  filter: brightness(1.08);
+  filter: brightness(1.04);
+}
+
+.combat-bar-btn--continue:hover:not(:disabled) {
+  filter: brightness(1.06);
 }
 
 .combat-bar-btn:disabled {
@@ -10330,11 +10384,11 @@ img.combat-bar-btn-icon {
   min-height: 88px;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid rgba(245, 197, 66, 0.22);
-  background: linear-gradient(160deg, rgba(36, 28, 12, 0.92), rgba(18, 14, 8, 0.96));
+  border: 2px solid var(--seal-gold);
+  background: var(--panel-card);
   box-shadow:
-    inset 0 0 24px rgba(245, 197, 66, 0.08),
-    0 8px 20px rgba(0, 0, 0, 0.28);
+    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
+    0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
 body.wow-celebration-open {
@@ -10381,7 +10435,7 @@ body.wow-celebration-open {
   inset: 0;
   background:
     radial-gradient(circle at 18% 20%, rgba(245, 197, 66, 0.16), transparent 52%),
-    radial-gradient(circle at 82% 78%, rgba(233, 69, 96, 0.12), transparent 48%);
+    radial-gradient(circle at 82% 78%, rgba(139, 58, 47, 0.12), transparent 48%);
   pointer-events: none;
 }
 
@@ -10638,7 +10692,7 @@ body.wow-celebration-open {
 }
 
 .wow-banner-dismiss:hover {
-  background: rgba(233, 69, 96, 0.45);
+  background: rgba(139, 58, 47, 0.45);
   color: #fff;
 }
 
@@ -10688,7 +10742,7 @@ body.wow-celebration-open {
 .wow-banner--milestone-victory .wow-banner-glow {
   background:
     radial-gradient(circle at 50% 22%, rgba(255, 232, 128, 0.42), transparent 58%),
-    radial-gradient(circle at 18% 78%, rgba(233, 69, 96, 0.16), transparent 48%);
+    radial-gradient(circle at 18% 78%, rgba(139, 58, 47, 0.16), transparent 48%);
 }
 
 .wow-banner--milestone-victory .wow-banner-title {
@@ -10704,7 +10758,7 @@ body.wow-celebration-open {
 
 .wow-banner--unlock .wow-banner-cta,
 .wow-banner--victory .wow-banner-cta {
-  background: linear-gradient(135deg, #b71c3a, #e94560);
+  background: linear-gradient(135deg, #6b241c, #8b3a2f);
 }
 
 .wow-strip-dots {
@@ -10749,7 +10803,7 @@ body.wow-celebration-open {
 }
 
 .pending-action-chip:hover {
-  background: rgba(233, 69, 96, 0.28);
+  background: rgba(139, 58, 47, 0.28);
 }
 
 .actions-icon-bar {
@@ -10759,20 +10813,21 @@ body.wow-celebration-open {
   width: 100%;
 }
 
-.action-icon-btn {
+.action-icon-btn  {
   position: relative;
   width: 100%;
   height: auto;
   min-height: 42px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--panel-border-soft);
   border-radius: 12px;
-  background: rgba(18, 28, 48, 0.92);
-  color: #fff8e7;
+  background: var(--panel-card);
+  color: var(--ink);
   font-size: 16px;
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55) inset;
 }
 
 .action-icon-btn--menu {
@@ -10805,7 +10860,7 @@ body.wow-celebration-open {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #c5d0e4;
+  color: var(--ink);
 }
 
 .action-icon-btn--campaign {
@@ -10878,7 +10933,7 @@ body.wow-celebration-open {
 }
 
 .action-icon-btn--chest.chest-available .action-icon-label {
-  color: #ffe08a;
+  color: var(--seal-gold-dark);
 }
 
 .action-icon-badge {
@@ -10942,7 +10997,7 @@ body.wow-celebration-open {
   margin: 0;
   align-self: stretch;
   border-radius: 12px 12px 0 0;
-  background: linear-gradient(180deg, rgba(18, 28, 52, 0.98), rgba(12, 18, 36, 0.98));
+  background: linear-gradient(180deg, rgba(255, 249, 237, 0.98), rgba(243, 228, 188, 0.98));
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
 }
@@ -10980,7 +11035,7 @@ body.wow-celebration-open {
   padding: 0;
   border: none;
   border-radius: 8px;
-  background: rgba(42, 63, 95, 0.9);
+  background: rgba(201, 162, 39, 0.22);
   color: var(--text);
   font-size: 16px;
   cursor: pointer;
@@ -11041,7 +11096,7 @@ body.wow-celebration-open {
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(12, 18, 36, 0.82);
+  background: rgba(243, 228, 188, 0.82);
   color: var(--muted);
   font-family: var(--font-heading);
   font-size: 11px;
@@ -11055,11 +11110,11 @@ body.wow-celebration-open {
 
 .forge-tab:hover {
   border-color: rgba(245, 197, 66, 0.28);
-  color: #fff8e7;
+  color: var(--ink);
 }
 
 .forge-tab--active {
-  color: #fff6dc;
+  color: var(--ink);
   border-color: rgba(245, 197, 66, 0.5);
   background:
     radial-gradient(120% 140% at 50% 0%, rgba(245, 197, 66, 0.18), transparent 60%),
@@ -11089,7 +11144,7 @@ body.wow-celebration-open {
 }
 
 .forge-capacity-chip strong {
-  color: #fff8e7;
+  color: var(--ink);
 }
 
 .forge-grid-scroll {
@@ -11139,7 +11194,7 @@ body.wow-celebration-open {
   font-family: var(--font-heading);
   font-size: 12px;
   text-align: center;
-  color: #fff8e7;
+  color: var(--ink);
 }
 
 .forge-dock-copy {
@@ -11213,7 +11268,7 @@ body.wow-celebration-open {
 .forge-game-btn--ghost {
   border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--ink-muted);
   text-transform: none;
   letter-spacing: 0.02em;
   font-weight: 600;
@@ -11402,7 +11457,7 @@ body.wow-celebration-open {
 .onboarding-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(10, 16, 32, 0.58);
+  background: rgba(232, 212, 160, 0.58);
   pointer-events: auto;
 }
 
@@ -11412,8 +11467,13 @@ body.wow-celebration-open {
   width: min(320px, calc(100vw - 24px));
   padding: 16px 16px 14px;
   border-radius: 14px;
-  border: 2px solid #c9a227;
-  background: linear-gradient(165deg, #fff9ed 0%, #f3e4bc 48%, #e8d4a0 100%);
+  border: 2px solid var(--seal-gold);
+  background: linear-gradient(
+    165deg,
+    var(--parchment-0) 0%,
+    var(--parchment-1) 48%,
+    var(--parchment-2) 100%
+  );
   box-shadow:
     0 18px 42px rgba(0, 0, 0, 0.38),
     0 0 0 1px rgba(255, 255, 255, 0.65) inset;
@@ -11426,21 +11486,21 @@ body.wow-celebration-open {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #8a6510;
+  color: var(--seal-gold-dark);
 }
 
 .onboarding-title {
   margin: 0 0 8px;
   font-family: var(--font-heading);
   font-size: 16px;
-  color: #1f1710;
+  color: var(--ink);
 }
 
 .onboarding-message {
   margin: 0 0 14px;
   font-size: 12px;
   line-height: 1.5;
-  color: #3d3428;
+  color: var(--ink-muted);
 }
 
 .onboarding-inline-icon {
@@ -11466,7 +11526,7 @@ body.wow-celebration-open {
   border: 1px solid rgba(61, 52, 40, 0.28);
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.72);
-  color: #4a3f32;
+  color: var(--ink-muted);
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -11475,7 +11535,7 @@ body.wow-celebration-open {
 .onboarding-skip:hover {
   background: #fff;
   border-color: rgba(61, 52, 40, 0.45);
-  color: #1f1710;
+  color: var(--ink);
 }
 
 .onboarding-ok {
@@ -11484,7 +11544,7 @@ body.wow-celebration-open {
   padding: 8px 16px;
   border: none;
   border-radius: 9px;
-  background: linear-gradient(180deg, #3f8a49 0%, #2f6b38 100%);
+  background: linear-gradient(180deg, var(--forest-hi) 0%, var(--forest) 100%);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -11500,9 +11560,9 @@ body.wow-celebration-open {
 .onboarding-highlight {
   position: relative;
   z-index: 20040;
-  outline: 3px solid rgba(201, 162, 39, 0.98);
+  outline: 3px solid color-mix(in srgb, var(--seal-gold) 98%, transparent);
   outline-offset: 3px;
-  box-shadow: 0 0 0 8px rgba(245, 197, 66, 0.28);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--seal-gold) 28%, transparent);
   border-radius: 10px;
 }
 

@@ -54,3 +54,4 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 - [`stage-progress-bar.spec.md`](stage-progress-bar.spec.md) — timeline entre localização e a battle strip
 - [`combat-campaign.spec.md`](combat-campaign.spec.md) — waves / fase ativa
+- [`medieval-theme.spec.md`](medieval-theme.spec.md) — paleta medieval do chrome (tutorial)

@@ -26,6 +26,10 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Wow | `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator` |
 | Onboarding | `OnboardingPolicy` |
 
+## Coordenação
+
+Tema de cores do chrome: skill `medieval-theme` (`specs/medieval-theme.spec.md`).
+
 ## Testes de apresentação
 
 Listados em `specs/battle-ui.spec.md` — criar ou atualizar ao mudar markup/CSS crítico (não executar `npm test` automaticamente).
