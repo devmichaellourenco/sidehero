@@ -169,8 +169,8 @@ export class EnemyKillRewardService {
     const replayTag = replay && rewardParts.length > 0 ? '' : '';
     const message =
       rewardParts.length > 0
-        ? `${enemy.name} derrotado! ${rewardParts.join(' · ')}${replayTag}`
-        : `${enemy.name} derrotado!`;
+        ? `O ${enemy.name} foi derrotado!\nRecompensas: ${rewardParts.join(', ')}${replayTag}`
+        : `O ${enemy.name} foi derrotado!`;
 
     nextState = nextState.addLog(message);
 

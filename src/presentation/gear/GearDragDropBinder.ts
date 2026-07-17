@@ -9,6 +9,28 @@ import {
 
 const GEAR_MIME = 'application/x-side-hero-gear';
 const PARTY_MIME = 'application/x-side-hero-party';
+const PARTY_DRAG_ACTIVE_CLASS = 'party-drag-active';
+
+let partyDocumentDragOverHandler: ((event: DragEvent) => void) | null = null;
+
+function beginPartyDragSession(): void {
+  document.body.classList.add(PARTY_DRAG_ACTIVE_CLASS);
+  if (partyDocumentDragOverHandler) return;
+  partyDocumentDragOverHandler = (event: DragEvent) => {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  };
+  document.addEventListener('dragover', partyDocumentDragOverHandler);
+}
+
+function endPartyDragSession(): void {
+  document.body.classList.remove(PARTY_DRAG_ACTIVE_CLASS);
+  if (!partyDocumentDragOverHandler) return;
+  document.removeEventListener('dragover', partyDocumentDragOverHandler);
+  partyDocumentDragOverHandler = null;
+}
 
 export type GearDragDropHandlers = {
   canEditGear: () => boolean;
@@ -206,6 +228,7 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
       event.dataTransfer?.setData(PARTY_MIME, heroId);
       if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
       partyEl.classList.add('party-dragging');
+      beginPartyDragSession();
       return;
     }
 
@@ -234,14 +257,16 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
   const onDragOver = (event: DragEvent) => {
     if (activePartyHeroId) {
       if (!handlers.canEditParty()) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+
       const dropEl = (event.target as HTMLElement).closest(
         '[data-drop-party-slot], [data-drop-party-bench]',
       ) as HTMLElement | null;
-      if (!dropEl) return;
-      event.preventDefault();
-      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
       clearDropHighlights(root);
-      dropEl.classList.add('party-drop-target--active');
+      if (dropEl) {
+        dropEl.classList.add('party-drop-target--active');
+      }
       return;
     }
 
@@ -310,6 +335,7 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
     activePartyHeroId = null;
     activePartyFromIndex = null;
     clearDropHighlights(root);
+    endPartyDragSession();
     root.querySelectorAll('.gear-dragging, .party-dragging').forEach((el) => {
       el.classList.remove('gear-dragging', 'party-dragging');
     });
@@ -321,6 +347,7 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
   root.addEventListener('dragend', onDragEnd);
 
   return () => {
+    endPartyDragSession();
     root.removeEventListener('dragstart', onDragStart);
     root.removeEventListener('dragover', onDragOver);
     root.removeEventListener('drop', onDrop);

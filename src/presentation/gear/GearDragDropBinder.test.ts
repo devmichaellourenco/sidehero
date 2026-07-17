@@ -229,4 +229,46 @@ describe('GearDragDropBinder', () => {
       slot: 'weapon',
     });
   });
+
+  it('ativa cursor de arraste de party no body durante drag de herói', () => {
+    const root = document.createElement('div');
+    root.innerHTML = `
+      <article class="formation-slot" draggable="true" data-drag-party-hero="h1" data-party-from-index="0">
+        <div class="formation-slot-sprite">hero</div>
+      </article>
+      <article class="formation-slot formation-slot--empty" data-drop-party-slot="1"></article>
+    `;
+    document.body.append(root);
+
+    bindGearDragDrop(root, {
+      canEditGear: () => true,
+      canEditParty: () => true,
+      onEquip: vi.fn(),
+      onUnequip: vi.fn(),
+      onMoveToStash: vi.fn(),
+      onMoveFromStashThenEquip: vi.fn(),
+      onEquippedToStash: vi.fn(),
+      onMoveEquippedGear: vi.fn(),
+      onDestroyGear: vi.fn(),
+      onPartySlotDrop: vi.fn(),
+      onPartyActiveToBench: vi.fn(),
+      onPartyReorder: vi.fn(),
+    });
+
+    const source = root.querySelector('[data-drag-party-hero]') as HTMLElement;
+    const dt = dragDataTransfer();
+
+    source.dispatchEvent(createDragEvent('dragstart', dt));
+    expect(document.body.classList.contains('party-drag-active')).toBe(true);
+    expect(source.classList.contains('party-dragging')).toBe(true);
+
+    const gapOver = createDragEvent('dragover', dt, { cancelable: true });
+    root.dispatchEvent(gapOver);
+    expect(gapOver.defaultPrevented).toBe(true);
+    expect(dt.dropEffect).toBe('move');
+
+    source.dispatchEvent(createDragEvent('dragend', dt));
+    expect(document.body.classList.contains('party-drag-active')).toBe(false);
+    expect(source.classList.contains('party-dragging')).toBe(false);
+  });
 });

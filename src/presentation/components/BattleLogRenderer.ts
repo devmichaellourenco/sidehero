@@ -1,6 +1,9 @@
+import { formatBattleLogEntryHtml } from './BattleLogPresentation';
+
 function appendMessage(container: HTMLElement, message: string): void {
   const item = document.createElement('li');
-  item.textContent = message;
+  item.className = 'battle-log-entry';
+  item.innerHTML = formatBattleLogEntryHtml(message);
   container.prepend(item);
 }
 
@@ -8,7 +11,8 @@ function rebuild(container: HTMLElement, messages: readonly string[]): void {
   const fragment = document.createDocumentFragment();
   for (const message of [...messages].reverse()) {
     const item = document.createElement('li');
-    item.textContent = message;
+    item.className = 'battle-log-entry';
+    item.innerHTML = formatBattleLogEntryHtml(message);
     fragment.append(item);
   }
   container.replaceChildren(fragment);

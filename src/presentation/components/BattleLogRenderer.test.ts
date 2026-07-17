@@ -23,8 +23,9 @@ describe('BattleLogRenderer', () => {
     renderer.render(container, ['A']);
     renderer.render(container, ['A', 'B']);
 
-    expect(container.children[0]?.textContent).toBe('B');
-    expect(container.children[1]?.textContent).toBe('A');
+    expect(container.children[0]?.textContent).toContain('B');
+    expect(container.children[1]?.textContent).toContain('A');
+    expect(container.children[0]?.classList.contains('battle-log-entry')).toBe(true);
   });
 
   it('reconstrói quando o filtro remove entradas antigas', () => {

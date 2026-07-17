@@ -713,7 +713,7 @@ export class GameViewController {
     if (this.contextInvalidated) return;
 
     this.closeHeroDrawer();
-    const modalBody = this.modal.open('Campanha');
+    const modalBody = this.modal.open('Mapa');
     await this.campaignFlow.open((state) => this.render(state), modalBody);
   }
 

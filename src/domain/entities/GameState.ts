@@ -82,7 +82,7 @@ export class GameState {
     this.chests = props.chests;
     this.inventory = props.inventory;
     this.stash = props.stash ?? [];
-    this.battleLog = props.battleLog.slice(-20);
+    this.battleLog = props.battleLog.slice(-40);
     this.totalBattlesWon = props.totalBattlesWon;
     this.lastTickAt = props.lastTickAt;
     this.shopRefreshSeed = Math.max(0, props.shopRefreshSeed ?? 0);

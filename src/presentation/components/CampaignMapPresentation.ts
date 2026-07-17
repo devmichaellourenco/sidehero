@@ -579,7 +579,7 @@ export function renderCampaignViewToggle(
   const campaignTooltip = renderCampaignOverviewTooltipContent(campaign);
 
   return `
-    <div class="campaign-view-toggle" role="tablist" aria-label="Visão da campanha">
+    <div class="campaign-view-toggle" role="tablist" aria-label="Visão do mapa">
       <button
         type="button"
         class="campaign-view-toggle-btn ${viewMode === 'world' ? 'active' : ''}"

@@ -1,8 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
-import { ASSETS, getAssetUrl, getGearFrameSprite, getGearRaritySprite, getGearSprite, imgTag } from '../assets/AssetCatalog';
+import { ASSETS, getAssetUrl, getGearFrameSprite, getGearSprite, imgTag } from '../assets/AssetCatalog';
 import {
-  listGearBonusLines,
   renderGearBonusLines,
   GEAR_RARITY_LABELS,
   GEAR_SLOT_LABELS,
@@ -32,50 +31,44 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function formatCompactGearStats(gear: ShopOfferDto['gear']): string {
-  const parts: string[] = [];
-  if (gear.attackBonus > 0) parts.push(`+${gear.attackBonus} ATK`);
-  if (gear.defenseBonus > 0) parts.push(`+${gear.defenseBonus} DEF`);
-  if (gear.healthBonus > 0) parts.push(`+${gear.healthBonus} HP`);
-  if (parts.length > 0) {
-    return parts.slice(0, 2).join(' · ');
-  }
-  return listGearBonusLines(gear).slice(0, 2).join(' · ');
+function renderShopOfferTooltip(offer: ShopOfferDto): string {
+  const { gear } = offer;
+  const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
+  const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
+
+  return `
+    <span class="shop-offer-tooltip" role="tooltip">
+      <span class="shop-offer-tooltip-meta">${escapeHtml(rarityLabel)} · ${escapeHtml(slotLabel)}</span>
+      ${renderGearBonusLines(gear)}
+    </span>
+  `;
 }
 
 function renderShopOfferTile(offer: ShopOfferDto): string {
   const { gear } = offer;
   const frameUrl = getGearFrameSprite(gear.rarity);
-  const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
-  const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
   const disabledAttr = offer.canAfford ? '' : 'disabled';
   const affordClass = offer.canAfford ? '' : ' shop-offer-unaffordable';
-  const compactStats = formatCompactGearStats(gear);
-  const fullStats = renderGearBonusLines(gear);
+  const goldIcon = imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'shop-gold-icon');
 
   return `
     <article class="shop-offer-tile ${gearRaritySurfaceClass(gear.rarity)}${affordClass}" data-shop-offer="${offer.id}">
+      <strong class="shop-offer-name">${escapeHtml(gear.name)}</strong>
       <div class="shop-offer-icon-wrap" style="--gear-frame: url('${frameUrl}')">
         ${imgTag(getGearSprite(gear), gear.name, 'shop-offer-icon')}
-        ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'shop-offer-rarity')}
-      </div>
-      <div class="shop-offer-body">
-        <strong class="shop-offer-name" title="${escapeHtml(gear.name)}">${escapeHtml(gear.name)}</strong>
-        <span class="shop-offer-meta">${rarityLabel} · ${slotLabel}</span>
-        <span class="shop-offer-stats-compact">${escapeHtml(compactStats)}</span>
       </div>
       <div class="shop-offer-actions">
-        <span class="shop-offer-price">${imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'shop-gold-icon')} ${offer.price}</span>
         <button
           type="button"
           class="gear-equip-btn shop-buy-btn"
           data-shop-buy="${offer.id}"
+          aria-label="Comprar por ${offer.price} ouro"
           ${disabledAttr}
         >
-          Comprar
+          ${goldIcon} ${offer.price}
         </button>
       </div>
-      <span class="shop-offer-tooltip" role="tooltip">${fullStats}</span>
+      ${renderShopOfferTooltip(offer)}
     </article>
   `;
 }

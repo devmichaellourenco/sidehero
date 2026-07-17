@@ -107,7 +107,10 @@ const ITEM_WEAPON_SPRITE_MAP = [
 ];
 
 /** Logo e demais assets estáticos em public/. */
-const PUBLIC_ASSET_MAP = [['logo.png', 'ui/brand.png']];
+const PUBLIC_ASSET_MAP = [
+  ['logo.png', 'ui/brand.png'],
+  ['bg_top_principal.png', 'backgrounds/top-principal.png'],
+];
 
 const ASSET_MAP = [
   ['Fonts/Alata-Regular.ttf', 'fonts/Alata-Regular.ttf'],

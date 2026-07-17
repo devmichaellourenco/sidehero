@@ -42,6 +42,20 @@ export class ModalController {
     return this.renderShell(title, onClose, { resetBody: false });
   }
 
+  setTitle(title: string): void {
+    this.titleEl.classList.remove('modal-title--rich');
+    this.titleEl.textContent = title;
+  }
+
+  setTitleHtml(html: string): void {
+    this.titleEl.classList.add('modal-title--rich');
+    this.titleEl.innerHTML = html;
+  }
+
+  getTitleElement(): HTMLElement {
+    return this.titleEl;
+  }
+
   private renderShell(
     title: string,
     onClose: ((reason: ModalCloseReason) => void) | undefined,
@@ -51,7 +65,7 @@ export class ModalController {
       this.onCloseCallback = onClose;
     }
 
-    this.titleEl.textContent = title;
+    this.setTitle(title);
 
     const wasOpen = this.isOpen();
     if (!wasOpen) {
@@ -79,6 +93,7 @@ export class ModalController {
     document.body.classList.remove('modal-open');
     this.unbindEscape();
     this.bodyEl.innerHTML = '';
+    this.setTitle('');
     this.onCloseCallback?.(reason);
     this.onCloseCallback = null;
   }

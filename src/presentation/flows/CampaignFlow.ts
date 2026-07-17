@@ -13,7 +13,10 @@ import {
   isMapUnlocked,
   resolveInitialMapId,
 } from '../components/CampaignModalRenderer';
-import { resolveInitialPendingPhaseId } from '../components/CampaignMapPresentation';
+import {
+  resolveInitialPendingPhaseId,
+  renderCampaignViewToggle,
+} from '../components/CampaignMapPresentation';
 import { bindCampaignTooltips, hideCampaignTooltip } from '../components/CampaignTooltipBinder';
 import { ModalController } from '../components/ModalController';
 
@@ -87,7 +90,18 @@ export class CampaignFlow {
       markMapSeen(this.activeMapId);
     }
 
+    this.mountHeaderToggle();
     bindCampaignTooltips(modalBody);
+  }
+
+  private chromeRoot(modalBody: HTMLElement): HTMLElement {
+    return (modalBody.closest('.modal-dialog') as HTMLElement | null) ?? modalBody;
+  }
+
+  private mountHeaderToggle(): void {
+    if (!this.campaign) return;
+    this.modal.setTitleHtml(renderCampaignViewToggle(this.campaign, this.viewMode));
+    bindCampaignTooltips(this.modal.getTitleElement());
   }
 
   private bindInteractions(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
@@ -116,15 +130,17 @@ export class CampaignFlow {
   }
 
   private bindViewToggle(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-view]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const mode = button.dataset.campaignView as CampaignViewMode | undefined;
-        if (!mode || mode === this.viewMode) return;
-        this.viewMode = mode;
-        setStoredCampaignViewMode(mode);
-        this.refreshViewMode(modalBody, onState);
+    this.chromeRoot(modalBody)
+      .querySelectorAll<HTMLButtonElement>('[data-campaign-view]')
+      .forEach((button) => {
+        button.addEventListener('click', () => {
+          const mode = button.dataset.campaignView as CampaignViewMode | undefined;
+          if (!mode || mode === this.viewMode) return;
+          this.viewMode = mode;
+          setStoredCampaignViewMode(mode);
+          this.refreshViewMode(modalBody, onState);
+        });
       });
-    });
   }
 
   private bindWorldMapNodes(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
@@ -200,12 +216,14 @@ export class CampaignFlow {
   }
 
   private updateViewToggleUi(modalBody: HTMLElement): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-view]').forEach((button) => {
-      const mode = button.dataset.campaignView as CampaignViewMode | undefined;
-      const active = mode === this.viewMode;
-      button.classList.toggle('active', active);
-      button.setAttribute('aria-selected', active ? 'true' : 'false');
-    });
+    this.chromeRoot(modalBody)
+      .querySelectorAll<HTMLButtonElement>('[data-campaign-view]')
+      .forEach((button) => {
+        const mode = button.dataset.campaignView as CampaignViewMode | undefined;
+        const active = mode === this.viewMode;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
 
     modalBody.querySelector('.campaign-modal')?.setAttribute('data-campaign-view', this.viewMode);
 

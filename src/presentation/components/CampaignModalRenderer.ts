@@ -7,7 +7,6 @@ import {
   mapProgress,
   parseMapIndex,
   renderCampaignPath,
-  renderCampaignViewToggle,
   renderCampaignWorldMap,
   renderLockedMapPanel,
   renderMapProgressBar,
@@ -130,7 +129,6 @@ export class CampaignModalRenderer {
 
     return `
       <div class="campaign-modal" data-campaign-theme="${escapeHtml(activeMapId)}" data-campaign-view="${viewMode}">
-        ${renderCampaignViewToggle(campaign, viewMode)}
         <p class="campaign-modal-hint">
           ${
             viewMode === 'world'

@@ -1,6 +1,5 @@
 import { dominantDamageElement, normalizeDamageComponents } from '../../combat/DamageComponent';
 import { rollCriticalHit } from '../../combat/CriticalHitRoll';
-import { DAMAGE_ELEMENT_LABELS } from '../../combat/DamageElement';
 import { DefensiveMitigation, ZERO_DEFENSIVE } from '../../combat/DefensiveMitigation';
 import { defensiveMitigationForEnemy, defensiveMitigationForHero } from '../../combat/HeroDefensiveStatsProvider';
 import { resistanceProfileFromHeroEquipment } from '../../combat/ResistanceProfileAggregator';
@@ -28,6 +27,12 @@ import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 import { StatusApplication } from './CombatStatusEffect';
 import { combatantKey } from './SkillCooldownTracker';
 import { resolveUniqueOnHitEnemyEffects } from '../../unique-effects/UniqueEffectOnHitResolver';
+import {
+  elementsFromAction,
+  formatCombatHitNarrative,
+  formatCombatStatusNarrative,
+  resolveTargetLabel,
+} from './CombatLogNarrative';
 
 export interface CombatExecutionResult {
   heroes: Hero[];
@@ -137,7 +142,7 @@ export class CombatActionExecutor {
     });
 
     const sampleMagnitude = statusApplications[0]?.magnitude ?? action.power;
-    const critTag = floatingEvents.some((entry) => entry.kind === 'crit-buff') ? ' CRÍTICO!' : '';
+    const isCrit = floatingEvents.some((entry) => entry.kind === 'crit-buff');
     const statLabel =
       action.kind === 'buff_attack'
         ? `+${sampleMagnitude} ATK`
@@ -145,8 +150,8 @@ export class CombatActionExecutor {
     const scope =
       targetKeys.length > 1
         ? `${targetKeys.length} alvos (${statLabel}, ${duration}t)`
-        : `${statLabel}, ${duration}t`;
-    const event = `${actorName} usou ${action.skillName} (${scope})${critTag}`;
+        : `${targetKeys[0]?.label ?? 'o alvo'} (${statLabel}, ${duration}t)`;
+    const event = formatCombatStatusNarrative(actorName, action.skillName, scope, isCrit);
 
     return { heroes, enemies, event, floatingEvents, statusApplications };
   }
@@ -191,12 +196,23 @@ export class CombatActionExecutor {
     }
 
     const healedAmount = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
-    const critTag = critAny ? ' CRÍTICO!' : '';
-    const scope =
-      action.targeting === 'all_allies'
-        ? `curou todos os aliados (+${healedAmount} HP total)`
-        : `(+${healedAmount} HP)`;
-    const event = `${actorName} usou ${action.skillName} ${scope}${critTag}`;
+    const isCrit = critAny;
+    const targetNames = targetIds
+      .map((heroId) => heroes.find((hero) => hero.id === heroId)?.name)
+      .filter((name): name is string => Boolean(name));
+    const targetLabel = resolveTargetLabel(
+      targetNames,
+      'todos os aliados',
+      action.targeting === 'all_allies',
+    );
+    const event = formatCombatHitNarrative({
+      actorName,
+      targetLabel,
+      skillName: action.skillName,
+      kind: 'heal',
+      amount: healedAmount,
+      isCrit,
+    });
 
     return {
       heroes: updatedHeroes,
@@ -261,16 +277,23 @@ export class CombatActionExecutor {
     }
 
     const healedAmount = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
-    const critTag = critAny ? ' CRÍTICO!' : '';
-    const scope =
-      action.targeting === 'all_enemies'
-        ? `curou todos os inimigos (+${healedAmount} HP total)`
-        : healedAmount > 0
-          ? `(+${healedAmount} HP)`
-          : blockedAny
-            ? '(cura bloqueada)'
-            : '';
-    const event = `${actorName} usou ${action.skillName} ${scope}${critTag}`.trim();
+    const targetNames = targetIds
+      .map((enemyId) => enemies.find((enemy) => enemy.id === enemyId)?.name)
+      .filter((name): name is string => Boolean(name));
+    const targetLabel = resolveTargetLabel(
+      targetNames,
+      'todos os inimigos',
+      action.targeting === 'all_enemies',
+    );
+    const event = formatCombatHitNarrative({
+      actorName,
+      targetLabel,
+      skillName: action.skillName,
+      kind: 'heal',
+      amount: healedAmount,
+      isCrit: critAny,
+      blockedHeal: blockedAny && healedAmount <= 0,
+    });
 
     return {
       heroes,
@@ -357,15 +380,26 @@ export class CombatActionExecutor {
     }
 
     const dealt = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
-    const mitigationTag = dodgedAny ? ' (ESQUIVOU!)' : blockedAny ? ' (bloqueio)' : '';
-    const critTag = floatingEvents.some((entry) => entry.kind === 'crit') ? ' CRÍTICO!' : '';
-    const scope =
-      action.targeting === 'all_allies'
-        ? `atingiu todos os heróis (${dealt})`
-        : dealt > 0
-          ? `causou ${dealt}`
-          : 'não causou dano';
-    const event = `${actorName} usou ${action.skillName} e ${scope}${mitigationTag}${critTag}`;
+    const isCrit = floatingEvents.some((entry) => entry.kind === 'crit');
+    const mitigation = dodgedAny ? 'dodge' : blockedAny ? 'block' : null;
+    const targetNames = targetIds
+      .map((heroId) => heroes.find((hero) => hero.id === heroId)?.name)
+      .filter((name): name is string => Boolean(name));
+    const targetLabel = resolveTargetLabel(
+      targetNames,
+      'todos os heróis',
+      action.targeting === 'all_allies',
+    );
+    const event = formatCombatHitNarrative({
+      actorName,
+      targetLabel,
+      skillName: action.skillName,
+      kind: 'damage',
+      amount: dealt,
+      isCrit,
+      elements: elementsFromAction(action),
+      mitigation,
+    });
 
     return { heroes: updatedHeroes, enemies, event, floatingEvents, statusApplications };
   }
@@ -450,20 +484,26 @@ export class CombatActionExecutor {
     }
 
     const dealt = floatingEvents.reduce((sum, entry) => sum + entry.amount, 0);
-    const mitigationTag = dodgedAny ? ' (ESQUIVOU!)' : blockedAny ? ' (bloqueio)' : '';
-    const critTag = floatingEvents.some((entry) => entry.kind === 'crit') ? ' CRÍTICO!' : '';
-    const scope =
-      action.targeting === 'all_enemies'
-        ? `atingiu todos os inimigos (${dealt})`
-        : dealt > 0
-          ? `causou ${dealt}`
-          : 'não causou dano';
-    const verb = formatDamageVerb(action);
-    const elementTag = formatElementTag(action);
-    const event =
-      action.skillId === 'basic_attack'
-        ? `${actorName} usou ${action.skillName} (${dealt} dano${mitigationTag}${critTag})`
-        : `${actorName} ${verb} ${action.skillName}${elementTag} e ${scope}${mitigationTag}${critTag}`;
+    const isCrit = floatingEvents.some((entry) => entry.kind === 'crit');
+    const mitigation = dodgedAny ? 'dodge' : blockedAny ? 'block' : null;
+    const targetNames = targetIds
+      .map((enemyId) => enemies.find((enemy) => enemy.id === enemyId)?.name)
+      .filter((name): name is string => Boolean(name));
+    const targetLabel = resolveTargetLabel(
+      targetNames,
+      'todos os inimigos',
+      action.targeting === 'all_enemies',
+    );
+    const event = formatCombatHitNarrative({
+      actorName,
+      targetLabel,
+      skillName: action.skillName,
+      kind: 'damage',
+      amount: dealt,
+      isCrit,
+      elements: elementsFromAction(action),
+      mitigation,
+    });
 
     return { heroes, enemies: updatedEnemies, event, floatingEvents, statusApplications };
   }
@@ -541,20 +581,4 @@ export class CombatActionExecutor {
       },
     ];
   }
-}
-
-function formatDamageVerb(action: CombatAction): string {
-  const primary = action.damageComponents?.[0]?.element;
-  if (!primary || primary === 'physical') {
-    return 'usou';
-  }
-  return 'lançou';
-}
-
-function formatElementTag(action: CombatAction): string {
-  const components = action.damageComponents;
-  if (!components?.length) return '';
-
-  const labels = [...new Set(components.map((entry) => DAMAGE_ELEMENT_LABELS[entry.element]))];
-  return labels.length === 1 ? ` (${labels[0]})` : ` (${labels.join(' + ')})`;
 }

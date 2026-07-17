@@ -84,9 +84,7 @@ describe('CampaignModalRenderer', () => {
     expect(html).not.toContain('campaign-hero-banner');
     expect(html).not.toContain('campaign-region-banner');
     expect(html).not.toContain('campaign_stendra_banner.png');
-    expect(html).toContain('campaign-view-toggle');
-    expect(html).toContain('data-campaign-view="world"');
-    expect(html).toContain('data-campaign-tooltip');
+    expect(html).not.toContain('campaign-view-toggle');
     expect(html).toContain('Ascensão de Nix');
     expect(html).toContain('Nix e seus companheiros rumo a Vorax');
     expect(html).toContain('data-campaign-view="region"');

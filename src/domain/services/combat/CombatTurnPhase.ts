@@ -20,6 +20,7 @@ import { listHeroCombatSkills } from '../../progression/combat/HeroCombatSkillCa
 import { BASIC_ATTACK_SKILL_ID } from '../../progression/combat/BasicAttackSkill';
 import { ActionTimerService } from './ActionTimerService';
 import { CombatActionExecutor } from './CombatActionExecutor';
+import { formatCombatDotNarrative } from './CombatLogNarrative';
 import { CombatFloatingEvent, createDamageEvent, createLevelUpEvent } from './CombatFloatingEvent';
 import { CombatSkillVfxEvent, createSkillVfxEvent } from './CombatSkillVfxEvent';
 import { CombatSkillSelector } from './CombatSkillSelector';
@@ -143,10 +144,15 @@ export class CombatTurnPhase {
       this.actionTimers.removeDead(combat.actionTimers, workingState.activeHeroes(), combat.enemies),
     );
 
-    const logMessage = events.join(' · ');
+    let loggedState = workingState;
+    for (const event of events) {
+      if (event.trim()) {
+        loggedState = loggedState.addLog(event);
+      }
+    }
 
     return this.finish(
-      (logMessage ? workingState.addLog(logMessage) : workingState).withCombat(combat).touchTick(),
+      loggedState.withCombat(combat).touchTick(),
       events,
       floatingEvents,
       skillVfxEvents,
@@ -363,7 +369,9 @@ export class CombatTurnPhase {
                 : dotBatch.blockedAny
                   ? ' (bloqueio parcial)'
                   : '';
-            events.push(`${hero.name} sofre ${dotBatch.totalDamage} de dano contínuo${mitigationTag}`);
+            events.push(
+              formatCombatDotNarrative(hero.name, dotBatch.totalDamage, mitigationTag),
+            );
           }
         }
       } else {
@@ -401,7 +409,9 @@ export class CombatTurnPhase {
                 : dotBatch.blockedAny
                   ? ' (bloqueio parcial)'
                   : '';
-            events.push(`${enemy.name} sofre ${dotBatch.totalDamage} de dano contínuo${mitigationTag}`);
+            events.push(
+              formatCombatDotNarrative(enemy.name, dotBatch.totalDamage, mitigationTag),
+            );
           }
         }
       }

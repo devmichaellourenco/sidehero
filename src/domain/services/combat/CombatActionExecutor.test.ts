@@ -290,7 +290,7 @@ describe('CombatActionExecutor', () => {
     );
 
     expect(result.heroes[0].currentHealth).toBe(hpBefore);
-    expect(result.event).toContain('ESQUIVOU');
+    expect(result.event).toContain('esquivou');
   });
 
   it('aplica DOT ao acertar com onHitDot', () => {
@@ -505,6 +505,6 @@ describe('CombatActionExecutor', () => {
 
     expect(result.enemies[0].stats.currentHealth).toBe(hpBefore);
     expect(result.floatingEvents).toHaveLength(0);
-    expect(result.event).toContain('cura bloqueada');
+    expect(result.event).toContain('bloqueada');
   });
 });
