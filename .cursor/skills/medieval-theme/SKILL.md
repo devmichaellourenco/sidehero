@@ -32,12 +32,15 @@ Card do tutorial (`.onboarding-card`): borda ouro `#c9a227`, fundo `#fff9ed → 
 
 `src/presentation/theme/MedievalThemeTokens.ts` → `panel.css` `:root`
 
-## Fluxo ao alterar cor
+Inclui base (pergaminho/tinta/ouro/floresta), **semântica** (`danger`, `info`, `crit`, `element*`), aliases (`--log-damage`, …) e **tokens por contexto** (CTA, badges, floats, mapas, scrollbar, toast). Mesmo hex em contextos diferentes = variáveis distintas.
 
-1. Spec + `MedievalThemeTokens.ts`
-2. Espelhar em `:root` / chrome (não em battle/waves)
-3. Teste de tokens
-4. Marcar aceite
+## Fluxo ao alterar cor / tema
+
+1. Spec + `MedievalThemeTokens.ts` (e `MEDIEVAL_THEME_SEMANTICS` se o mapeamento mudar)
+2. Espelhar hex/aliases em `:root` (definição única de literais)
+3. Componentes só usam `var(--*)` — sem hex solto fora de `:root`
+4. Teste de tokens (inclui separação por contexto)
+5. Marcar aceite
 
 ## Testes
 
