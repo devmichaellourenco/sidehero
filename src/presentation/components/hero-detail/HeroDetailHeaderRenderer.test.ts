@@ -15,6 +15,7 @@ function minimalHero(overrides: Partial<HeroDto> = {}): HeroDto {
     ascensionId: null,
     experience: 0,
     experienceToNextLevel: 100,
+    unspentImprovementPoints: 0,
     ...overrides,
   } as HeroDto;
 }
@@ -38,5 +39,23 @@ describe('renderHeroDetailHeader', () => {
     );
 
     expect(html).toContain('Lv.8 Knight - Guerreiro');
+  });
+
+  it('omite barra de vida, mantém barra de XP e exibe chip de Aprimoramento na linha de stats', () => {
+    const html = renderHeroDetailHeader(minimalHero({ unspentImprovementPoints: 3 }));
+
+    expect(html).not.toContain('health-bar');
+    expect(html).toContain('xp-bar');
+    expect(html).toContain('hero-improvement-stat');
+    expect(html).toContain('aria-label="Aprimoramento: 3"');
+    expect(html).toContain('data-hero-improvement-tooltip');
+  });
+
+  it('adiciona tooltips nos ícones de ataque, defesa e vida', () => {
+    const html = renderHeroDetailHeader(minimalHero());
+
+    expect(html).toContain('title="Ataque"');
+    expect(html).toContain('title="Defesa"');
+    expect(html).toContain('title="Vida"');
   });
 });

@@ -20,7 +20,6 @@ import {
 import { renderHeroAttributesTab } from './hero-detail/HeroAttributesTabRenderer';
 import { renderHeroClassTab } from './hero-detail/HeroClassTabRenderer';
 import { renderHeroDetailHeader } from './hero-detail/HeroDetailHeaderRenderer';
-import { renderHeroImprovementPoints } from './hero-detail/HeroImprovementPointsPresentation';
 import { renderHeroSheetTab } from './hero-detail/HeroSheetTabRenderer';
 import { renderHeroSkillsTab } from './hero-detail/HeroSkillsTabRenderer';
 import { renderHeroLoadoutStrip } from './HeroLoadoutStripPresentation';
@@ -145,9 +144,6 @@ export class HeroDetailModalRenderer {
           <button type="button" class="hero-tab ${this.activeTab === 'skills' ? 'active' : ''}" data-hero-tab="skills">Skills</button>
           <button type="button" class="hero-tab ${this.activeTab === 'class' ? 'active' : ''}" data-hero-tab="class">Classe</button>
         </nav>
-        <div class="hero-detail-improvement-bar">
-          ${renderHeroImprovementPoints(hero)}
-        </div>
         ${loadoutSection}
         <div class="hero-detail-panel game-scroll">${this.renderTabContent(hero, state)}</div>
       </div>

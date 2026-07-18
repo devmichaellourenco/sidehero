@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { HeroDto } from '../../application/dto/GameStateDto';
 import {
   improvementSpendLabel,
-  renderHeroImprovementPoints,
+  renderHeroImprovementStat,
 } from './HeroImprovementPointsPresentation';
 
 function minimalHero(overrides: Partial<HeroDto> = {}): HeroDto {
@@ -45,13 +45,13 @@ function minimalHero(overrides: Partial<HeroDto> = {}): HeroDto {
   } as HeroDto;
 }
 
-describe('renderHeroImprovementPoints', () => {
-  it('renderiza chip unificado Aprimoramento com tooltip', () => {
-    const html = renderHeroImprovementPoints(minimalHero());
+describe('renderHeroImprovementStat', () => {
+  it('renderiza chip compacto Aprimoramento com tooltip rico', () => {
+    const html = renderHeroImprovementStat(minimalHero());
 
-    expect(html).toContain('hero-improvement-points');
-    expect(html).toContain('hero-improvement-points--available');
-    expect(html).toContain('Aprimoramento');
+    expect(html).toContain('hero-improvement-stat');
+    expect(html).toContain('hero-improvement-stat--available');
+    expect(html).toContain('aria-label="Aprimoramento: 2"');
     expect(html).toContain('>2<');
     expect(html).toContain('data-hero-improvement-tooltip');
     expect(html).toContain('hero-improvement-tooltip-content');
@@ -62,25 +62,25 @@ describe('renderHeroImprovementPoints', () => {
   });
 
   it('não mostra chip separado de Evolução após ascensão', () => {
-    const html = renderHeroImprovementPoints(
+    const html = renderHeroImprovementStat(
       minimalHero({
         ascensionId: 'knight_military_guerreiro',
         unspentImprovementPoints: 4,
         unspentAscensionPoints: 2,
       }),
     );
-    expect(html).not.toContain('hero-improvement-points--ascension');
+    expect(html).not.toContain('hero-improvement-stat--ascension');
     expect(html).not.toContain('>Evolução<');
-    expect(html).toContain('Aprimoramento');
+    expect(html).toContain('aria-label="Aprimoramento: 4"');
     expect(html).toContain('>4<');
   });
 
   it('omite destaque quando não há saldo', () => {
-    const html = renderHeroImprovementPoints(
+    const html = renderHeroImprovementStat(
       minimalHero({ unspentImprovementPoints: 0, hasUnspentPoints: false }),
     );
 
-    expect(html).not.toContain('hero-improvement-points--available');
+    expect(html).not.toContain('hero-improvement-stat--available');
     expect(html).toContain('>0<');
   });
 

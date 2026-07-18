@@ -21,27 +21,22 @@ function renderImprovementTooltipContent(): string {
   `;
 }
 
-export function renderHeroImprovementPoints(hero: HeroDto): string {
+/** Chip compacto de Aprimoramento para a linha de stats do header (ícone + valor + tooltip rico). */
+export function renderHeroImprovementStat(hero: HeroDto): string {
   const points = hero.unspentImprovementPoints;
-  const availableClass = points > 0 ? ' hero-improvement-points--available' : '';
-  const icon = imgTag(getAssetUrl(ASSETS.ui.improvement), 'Aprimoramento', 'hero-improvement-points-icon');
+  const availableClass = points > 0 ? ' hero-improvement-stat--available' : '';
+  const icon = imgTag(getAssetUrl(ASSETS.ui.improvement), 'Aprimoramento', 'stat-icon');
 
   return `
-    <div class="hero-improvement-points-row">
-      <div
-        class="hero-improvement-points${availableClass}"
-        data-hero-improvement-tooltip
-        tabindex="0"
-        aria-label="Aprimoramento: ${points}"
-      >
-        ${icon}
-        <span class="hero-improvement-points-copy">
-          <span class="hero-improvement-points-label">Aprimoramento</span>
-          <span class="hero-improvement-points-value">${points}</span>
-        </span>
-        <span class="hero-improvement-tooltip-content hidden">${renderImprovementTooltipContent()}</span>
-      </div>
-    </div>
+    <span
+      class="hero-improvement-stat${availableClass}"
+      data-hero-improvement-tooltip
+      tabindex="0"
+      aria-label="Aprimoramento: ${points}"
+    >
+      ${icon}<span class="hero-improvement-stat-value">${points}</span>
+      <span class="hero-improvement-tooltip-content hidden">${renderImprovementTooltipContent()}</span>
+    </span>
   `;
 }
 

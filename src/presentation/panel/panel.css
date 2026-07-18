@@ -231,8 +231,6 @@
   --toast-chest-ink: #1f1400;
 
   /* Hero improvement / skills */
-  --improvement-points-label: #ffe8b8;
-  --improvement-points-available: #ffd56a;
   --improvement-reset-warning: #ffd59a;
   --skill-slot-remove-label: #f0b0b0;
   --hero-detail-warning: #8a5020;
@@ -455,8 +453,6 @@ html[data-ui-theme='dark'] {
   --destroy-confirm-btn-start: #d32f2f;
   --destroy-confirm-btn-end: #b71c1c;
   --toast-chest-ink: #1f1400;
-  --improvement-points-label: #ffe8b8;
-  --improvement-points-available: #ffd56a;
   --improvement-reset-warning: #ffd59a;
   --skill-slot-remove-label: #f0b0b0;
   --hero-detail-warning: #e0a060;
@@ -666,8 +662,6 @@ html[data-ui-theme='dark'] .battle-stage {
   --destroy-confirm-btn-start: #d32f2f;
   --destroy-confirm-btn-end: #b71c1c;
   --toast-chest-ink: #1f1400;
-  --improvement-points-label: #ffe8b8;
-  --improvement-points-available: #ffd56a;
   --improvement-reset-warning: #ffd59a;
   --skill-slot-remove-label: #f0b0b0;
   --hero-detail-warning: #8a5020;
@@ -7168,7 +7162,17 @@ body.modal-open {
 }
 
 .hero-detail-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 6px;
+}
+
+.hero-detail-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .hero-detail-health {
@@ -7814,76 +7818,37 @@ body.modal-open {
   background: linear-gradient(180deg, color-mix(in srgb, var(--parchment-0) 98%, transparent), color-mix(in srgb, var(--parchment-1) 98%, transparent));
 }
 
-.hero-detail-improvement-bar {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  padding: 0 12px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--parchment-1) 98%, transparent), color-mix(in srgb, var(--parchment-1) 98%, transparent));
-}
-
-.hero-improvement-points-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-  max-width: 420px;
-  justify-content: center;
-}
-
-.hero-improvement-points {
+.hero-improvement-stat {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  flex: 1 1 140px;
-  min-width: 0;
-  max-width: 320px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 200, 87, 0.28);
-  background: linear-gradient(160deg, rgba(255, 200, 87, 0.1), color-mix(in srgb, var(--parchment-1) 72%, transparent));
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--seal-gold) 40%, transparent);
+  background: color-mix(in srgb, var(--seal-gold) 12%, transparent);
   cursor: help;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.hero-improvement-points--ascension {
-  border-color: rgba(140, 180, 255, 0.35);
-  background: linear-gradient(160deg, rgba(120, 160, 240, 0.12), color-mix(in srgb, var(--parchment-1) 72%, transparent));
-}
-
-.hero-improvement-points--ascension:hover,
-.hero-improvement-points--ascension:focus-visible {
-  border-color: rgba(160, 200, 255, 0.6);
-  box-shadow: 0 0 0 1px rgba(140, 180, 255, 0.22);
+.hero-improvement-stat:hover,
+.hero-improvement-stat:focus-visible {
+  border-color: var(--seal-gold);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--seal-gold) 22%, transparent);
   outline: none;
 }
 
-.hero-improvement-points--ascension.hero-improvement-points--available {
-  border-color: rgba(66, 120, 200, 0.55);
-  background: linear-gradient(160deg, rgba(120, 160, 240, 0.2), color-mix(in srgb, var(--parchment-1) 92%, transparent));
-  box-shadow:
-    0 0 0 1px rgba(100, 140, 200, 0.22),
-    0 0 14px rgba(100, 150, 255, 0.12);
+.hero-improvement-stat-value {
+  font-weight: 700;
+  color: var(--ink);
 }
 
-.hero-improvement-points:hover,
-.hero-improvement-points:focus-visible {
-  border-color: rgba(255, 200, 87, 0.55);
-  box-shadow: 0 0 0 1px rgba(255, 200, 87, 0.2);
-  outline: none;
-}
-
-.hero-improvement-points--available {
-  border-color: rgba(255, 200, 87, 0.62);
-  background: linear-gradient(160deg, rgba(255, 200, 87, 0.22), rgba(32, 24, 8, 0.88));
-  box-shadow:
-    0 0 0 1px rgba(255, 200, 87, 0.24),
-    0 0 18px rgba(255, 200, 87, 0.14);
+.hero-improvement-stat--available {
+  border-color: color-mix(in srgb, var(--seal-gold) 75%, transparent);
   animation: hero-improvement-pulse 2.4s ease-in-out infinite;
+}
+
+.hero-improvement-stat--available .hero-improvement-stat-value {
+  color: var(--gold);
 }
 
 @keyframes hero-improvement-pulse {
@@ -7898,43 +7863,6 @@ body.modal-open {
       0 0 0 1px rgba(255, 200, 87, 0.42),
       0 0 22px rgba(255, 200, 87, 0.22);
   }
-}
-
-.hero-improvement-points-icon {
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 6px rgba(255, 200, 87, 0.45));
-}
-
-.hero-improvement-points-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.hero-improvement-points-label {
-  font-family: var(--font-heading);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--improvement-points-label);
-}
-
-.hero-improvement-points-value {
-  font-family: var(--font-heading);
-  font-size: 20px;
-  line-height: 1;
-  color: var(--ink);
-  text-shadow: 0 0 10px rgba(255, 200, 87, 0.35);
-}
-
-.hero-improvement-points--available .hero-improvement-points-value {
-  color: var(--improvement-points-available);
 }
 
 .hero-improvement-tooltip-content {
@@ -10233,6 +10161,12 @@ body.skill-drag-active * {
   max-height: 180px;
 }
 
+.act-scene-overlay-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .act-scene-overlay-image {
   display: block;
   width: 100%;
@@ -10269,8 +10203,9 @@ body.skill-drag-active * {
 
 .act-scene-overlay-dismiss {
   margin-top: 4px;
-  align-self: stretch;
-  padding: 10px 14px;
+  align-self: center;
+  min-width: 60%;
+  padding: 10px 24px;
   border: none;
   border-radius: 10px;
   background: linear-gradient(180deg, var(--rarity-legendary), var(--act-scene-dismiss-mid));
@@ -10750,6 +10685,16 @@ body.act-scene-open {
     90deg,
     var(--campaign-accent, var(--seal-gold)),
     color-mix(in srgb, var(--campaign-accent, var(--seal-gold)) 65%, var(--mix-light))
+  );
+}
+
+/* No dark o rótulo é creme: escurece o preenchimento (acento + preto) para manter contraste.
+   Definido aqui (e não nos blocos de tema) porque --campaign-accent varia por mapa no escopo do modal. */
+html[data-ui-theme='dark'] .campaign-map-progress-block-fill {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--campaign-accent, var(--seal-gold)) 40%, var(--campaign-mix-dark)),
+    color-mix(in srgb, var(--campaign-accent, var(--seal-gold)) 55%, var(--campaign-mix-dark))
   );
 }
 

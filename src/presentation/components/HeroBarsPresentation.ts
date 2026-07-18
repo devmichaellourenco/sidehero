@@ -19,15 +19,19 @@ export function renderHeroStripHealthBar(hero: HeroDto): string {
   });
 }
 
-export function renderHeroBars(hero: HeroDto, options: { compact?: boolean } = {}): string {
+export function renderHeroBars(
+  hero: HeroDto,
+  options: { compact?: boolean; showHealth?: boolean } = {},
+): string {
   const healthPercent = clampHealthPercent(hero.health, hero.maxHealth);
   const xpPercent = clampHealthPercent(hero.experience, hero.experienceToNextLevel);
   const compactClass = options.compact ? ' hero-bars-compact' : '';
   const healthLabel = formatHealthLabel(hero);
   const xpLabel = formatExperienceLabel(hero);
-
-  return `
-    <div class="hero-bars${compactClass}">
+  const healthBar =
+    options.showHealth === false
+      ? ''
+      : `
       <div
         class="stat-bar health-bar hero card-bar"
         data-bar-label="${healthLabel}"
@@ -37,7 +41,10 @@ export function renderHeroBars(hero: HeroDto, options: { compact?: boolean } = {
         <div class="stat-bar-track">
           <div class="health-fill hero" style="width: ${healthPercent}%"></div>
         </div>
-      </div>
+      </div>`;
+
+  return `
+    <div class="hero-bars${compactClass}">${healthBar}
       <div
         class="stat-bar xp-bar card-bar"
         data-bar-label="${xpLabel}"

@@ -2,6 +2,7 @@ import { HeroDto } from '../../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getHeroSprite, imgTag } from '../../assets/AssetCatalog';
 import { renderHeroBars } from '../HeroBarsPresentation';
 import { formatHeroLevelClassLine } from './HeroClassLinePresentation';
+import { renderHeroImprovementStat } from './HeroImprovementPointsPresentation';
 
 export function renderHeroDetailHeader(hero: HeroDto, ascensionName: string | null = null): string {
   const glowUrl = getAssetUrl(ASSETS.characters.glow);
@@ -20,11 +21,12 @@ export function renderHeroDetailHeader(hero: HeroDto, ascensionName: string | nu
           <span class="hero-level hero-level-class-line">${formatHeroLevelClassLine(hero, ascensionName)}</span>
         </div>
         <div class="hero-stats hero-detail-stats">
-          ${imgTag(attackIcon, 'Ataque', 'stat-icon')} ${hero.attack}
-          ${imgTag(defenseIcon, 'Defesa', 'stat-icon')} ${hero.defense}
-          ${imgTag(healthIcon, 'Vida', 'stat-icon')} ${hero.health}/${hero.maxHealth}
+          <span class="hero-detail-stat" title="Ataque">${imgTag(attackIcon, 'Ataque', 'stat-icon')} ${hero.attack}</span>
+          <span class="hero-detail-stat" title="Defesa">${imgTag(defenseIcon, 'Defesa', 'stat-icon')} ${hero.defense}</span>
+          <span class="hero-detail-stat" title="Vida">${imgTag(healthIcon, 'Vida', 'stat-icon')} ${hero.health}/${hero.maxHealth}</span>
+          ${renderHeroImprovementStat(hero)}
         </div>
-        ${renderHeroBars(hero)}
+        ${renderHeroBars(hero, { showHealth: false })}
       </div>
     </div>
   `;

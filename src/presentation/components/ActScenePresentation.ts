@@ -66,7 +66,7 @@ export function renderActSceneOverlay(scene: ActSceneDto): string {
           <p>${escapeHtml(scene.preview)}</p>
         </section>
         <button type="button" class="act-scene-overlay-dismiss" data-act-scene-dismiss>
-          Continuar
+          CONTINUAR
         </button>
       </div>
     </div>
