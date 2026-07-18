@@ -291,7 +291,7 @@ export class GameHudController {
 
     if (atCamp && state.storageCapacity.stashUnlocked) {
       this.openStashBtn.classList.remove('hidden');
-      this.openStashBtn.title = `Cofre (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
+      this.openStashBtn.title = `Baús (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
       updateBadge(this.stashBadgeEl, state.storageCapacity.stashUsed);
     } else {
       this.openStashBtn.classList.add('hidden');

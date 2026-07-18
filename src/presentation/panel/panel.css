@@ -64,6 +64,22 @@
   --improvement-refund-bg-hover: color-mix(in srgb, var(--ink-muted) 22%, var(--surface));
   --improvement-refund-fg: var(--text);
   --improvement-refund-border: var(--panel-border-soft);
+  /* Ícones de seta (PNG): escuro no claro, claro no dark */
+  --nav-arrow-filter: brightness(0);
+  --nav-arrow-filter-on-accent: brightness(0) invert(1);
+  /* Pills de filtro/ordenar ativas: fundo claro (mix-light) → texto sempre tinta escura */
+  --filter-btn-active-fg: #1f1710;
+  --filter-btn-active-bg: color-mix(in srgb, var(--seal-gold) 28%, var(--mix-light));
+  /* Formação: [−] [⇄] [+] — fundo via surface (adapta claro/escuro) */
+  --party-btn-remove-bg: color-mix(in srgb, var(--danger) 14%, var(--surface));
+  --party-btn-remove-fg: var(--danger);
+  --party-btn-remove-border: color-mix(in srgb, var(--danger) 40%, transparent);
+  --party-btn-add-bg: color-mix(in srgb, var(--forest) 16%, var(--surface));
+  --party-btn-add-fg: var(--forest-hi);
+  --party-btn-add-border: color-mix(in srgb, var(--forest) 45%, transparent);
+  --formation-swap-bg: color-mix(in srgb, var(--seal-gold) 22%, var(--surface));
+  --formation-swap-fg: var(--gold);
+  --formation-swap-border: var(--panel-border);
   --on-accent-label: #ffffff;
   --danger-cta-label: #ffffff;
   --battle-overlay-label: #ffffff;
@@ -102,11 +118,17 @@
   --xp-fill-end: #ffe9a8;
 
   /* Scrollbar */
-  --scrollbar-track: rgba(10, 18, 36, 0.98);
+  --scrollbar-track: var(--parchment-2);
   --scrollbar-thumb: #c9892f;
   --scrollbar-thumb-hi: #f8d56b;
   --scrollbar-thumb-lo: #a56f22;
   --scrollbar-thumb-hover-hi: #ffe494;
+
+  /* Combat bar (chrome dentro do battle-stage — segue o tema, não o reset da batalha) */
+  --combat-bar-btn-border: var(--seal-gold);
+  --combat-bar-btn-bg: var(--panel-card);
+  --combat-bar-btn-ink: var(--ink);
+  --combat-bar-btn-ring: rgba(255, 255, 255, 0.65);
 
   /* Toast / Wow */
   --toast-info-start: #3d4f3a;
@@ -216,8 +238,14 @@
   --hero-detail-warning: #8a5020;
 
   /* Act scene / campaign path */
+  --act-scene-backdrop: rgba(4, 6, 12, 0.72);
+  --act-scene-card-bg: var(--panel-card);
+  --act-scene-card-border: var(--panel-border);
+  --act-scene-card-ink: var(--text);
+  --act-scene-eyebrow: var(--gold);
   --act-scene-dismiss-mid: #c9981f;
   --act-scene-dismiss-ink: #1a1408;
+  --campaign-scene-badge-new-ink: var(--gold);
   --campaign-node-pending-ink: #1a1204;
   --campaign-mix-dark: #000000;
   --campaign-map-flavor: #98aac8;
@@ -263,6 +291,7 @@
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
+  --z-act-scene: 13000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -340,11 +369,15 @@ html[data-ui-theme='dark'] {
   --xp-fill-start: var(--seal-gold);
   --xp-fill-mid: #f5d76e;
   --xp-fill-end: #ffe9a8;
-  --scrollbar-track: rgba(10, 18, 36, 0.98);
+  --scrollbar-track: var(--parchment-2);
   --scrollbar-thumb: #d4a82a;
   --scrollbar-thumb-hi: #ffe494;
   --scrollbar-thumb-lo: #c9892f;
   --scrollbar-thumb-hover-hi: #fff0b0;
+  --combat-bar-btn-border: var(--seal-gold);
+  --combat-bar-btn-bg: var(--panel-card);
+  --combat-bar-btn-ink: var(--ink);
+  --combat-bar-btn-ring: rgba(255, 249, 237, 0.12);
   --toast-info-start: #2a3a28;
   --toast-info-end: #3d5240;
   --toast-chest-mid: var(--seal-gold);
@@ -427,8 +460,14 @@ html[data-ui-theme='dark'] {
   --improvement-reset-warning: #ffd59a;
   --skill-slot-remove-label: #f0b0b0;
   --hero-detail-warning: #e0a060;
+  --act-scene-backdrop: rgba(4, 6, 12, 0.72);
+  --act-scene-card-bg: var(--panel-card);
+  --act-scene-card-border: var(--panel-border);
+  --act-scene-card-ink: var(--text);
+  --act-scene-eyebrow: var(--gold);
   --act-scene-dismiss-mid: #c9981f;
   --act-scene-dismiss-ink: #1a1408;
+  --campaign-scene-badge-new-ink: var(--rarity-legendary);
   --campaign-node-pending-ink: #1a1204;
   --campaign-mix-dark: #000000;
   --campaign-map-flavor: #a8b8d0;
@@ -465,6 +504,7 @@ html[data-ui-theme='dark'] {
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
+  --z-act-scene: 13000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -543,11 +583,12 @@ html[data-ui-theme='dark'] .battle-stage {
   --xp-fill-start: var(--seal-gold);
   --xp-fill-mid: #f5d76e;
   --xp-fill-end: #ffe9a8;
-  --scrollbar-track: rgba(10, 18, 36, 0.98);
+  --scrollbar-track: var(--parchment-2);
   --scrollbar-thumb: #c9892f;
   --scrollbar-thumb-hi: #f8d56b;
   --scrollbar-thumb-lo: #a56f22;
   --scrollbar-thumb-hover-hi: #ffe494;
+  /* --combat-bar-btn-*: omitidos de propósito — a combat bar é chrome e herda o tema do html */
   --toast-info-start: #3d4f3a;
   --toast-info-end: #5a6e52;
   --toast-chest-mid: var(--seal-gold);
@@ -630,8 +671,14 @@ html[data-ui-theme='dark'] .battle-stage {
   --improvement-reset-warning: #ffd59a;
   --skill-slot-remove-label: #f0b0b0;
   --hero-detail-warning: #8a5020;
+  --act-scene-backdrop: rgba(4, 6, 12, 0.72);
+  --act-scene-card-bg: var(--panel-card);
+  --act-scene-card-border: var(--panel-border);
+  --act-scene-card-ink: var(--text);
+  --act-scene-eyebrow: var(--gold);
   --act-scene-dismiss-mid: #c9981f;
   --act-scene-dismiss-ink: #1a1408;
+  --campaign-scene-badge-new-ink: var(--gold);
   --campaign-node-pending-ink: #1a1204;
   --campaign-mix-dark: #000000;
   --campaign-map-flavor: #98aac8;
@@ -668,6 +715,7 @@ html[data-ui-theme='dark'] .battle-stage {
   --font-body: 'Alata', system-ui, sans-serif;
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
+  --z-act-scene: 13000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -683,6 +731,10 @@ html[data-ui-theme='dark'] body {
     linear-gradient(165deg, var(--parchment-0) 0%, var(--parchment-1) 45%, var(--parchment-2) 100%),
     var(--bg);
   color: var(--text);
+}
+
+html[data-ui-theme='dark'] {
+  --nav-arrow-filter: brightness(0) invert(1);
 }
 
 
@@ -4224,8 +4276,8 @@ button.hero-skill-chip:hover {
 }
 
 .inventory-upgrades-toggle.active {
-  border-color: rgba(126, 231, 135, 0.55);
-  color: var(--badge-upgrade-fill);
+  border-color: color-mix(in srgb, var(--badge-upgrade-fill) 55%, transparent);
+  color: var(--filter-btn-active-fg);
 }
 
 .inventory-count {
@@ -4929,7 +4981,10 @@ button.hero-skill-chip:hover {
 }
 
 .battle-log-header h2 {
+  flex: 1;
+  min-width: 0;
   margin: 0;
+  text-align: center;
   font-family: var(--font-heading);
   font-size: 12px;
   letter-spacing: 0.04em;
@@ -6423,26 +6478,26 @@ button.hero-skill-chip:hover {
 }
 
 .party-btn-add {
-  border-color: rgba(47, 107, 56, 0.45);
-  background: color-mix(in srgb, var(--forest) 12%, var(--mix-light));
-  color: var(--forest);
+  border-color: var(--party-btn-add-border);
+  background: var(--party-btn-add-bg);
+  color: var(--party-btn-add-fg);
 }
 
 .party-btn-remove {
-  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
-  background: color-mix(in srgb, var(--danger) 8%, var(--mix-light));
-  color: var(--danger);
+  border-color: var(--party-btn-remove-border);
+  background: var(--party-btn-remove-bg);
+  color: var(--party-btn-remove-fg);
 }
 
 .formation-swap-btn {
-  border-color: var(--panel-border);
-  background: color-mix(in srgb, var(--seal-gold) 16%, var(--mix-light));
-  color: var(--seal-gold-dark);
+  border-color: var(--formation-swap-border);
+  background: var(--formation-swap-bg);
+  color: var(--formation-swap-fg);
 }
 
 .formation-swap-btn:hover:not(:disabled),
 .party-btn:hover:not(:disabled) {
-  filter: brightness(0.97);
+  filter: brightness(1.08);
 }
 
 .party-bench-list {
@@ -6975,8 +7030,8 @@ body.modal-open {
   height: 16px;
   object-fit: contain;
   pointer-events: none;
-  filter: brightness(0);
-  opacity: 0.82;
+  filter: var(--nav-arrow-filter);
+  opacity: 0.88;
 }
 
 .modal-close:hover,
@@ -6990,7 +7045,7 @@ body.modal-open {
 
 .modal-back:hover .nav-arrow-icon,
 .modal-back:focus-visible .nav-arrow-icon {
-  filter: brightness(0) invert(1);
+  filter: var(--nav-arrow-filter-on-accent);
   opacity: 1;
 }
 
@@ -7037,9 +7092,9 @@ body.modal-open {
 }
 
 .filter-btn.active {
-  color: var(--ink);
+  color: var(--filter-btn-active-fg);
   border-color: var(--seal-gold);
-  background: color-mix(in srgb, var(--seal-gold) 28%, var(--mix-light));
+  background: var(--filter-btn-active-bg);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--seal-gold) 35%, transparent);
 }
 
@@ -7377,7 +7432,7 @@ body.modal-open {
 
 .game-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) rgba(10, 18, 36, 0.98);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 .game-scroll::-webkit-scrollbar {
@@ -10029,7 +10084,11 @@ body.skill-drag-active * {
   padding: 10px;
   border-radius: 12px;
   border: 1px solid var(--campaign-accent-soft);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--mix-light) 4%, transparent),
+    color-mix(in srgb, var(--campaign-mix-dark) 18%, transparent)
+  );
 }
 
 .campaign-act-scene--locked {
@@ -10041,7 +10100,7 @@ body.skill-drag-active * {
   overflow: hidden;
   border-radius: 8px;
   min-height: 72px;
-  background: rgba(0, 0, 0, 0.25);
+  background: color-mix(in srgb, var(--campaign-mix-dark) 25%, transparent);
 }
 
 .campaign-act-scene-image {
@@ -10054,7 +10113,11 @@ body.skill-drag-active * {
 
 .campaign-act-scene-image--placeholder {
   min-height: 72px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--mix-light) 8%, transparent),
+    color-mix(in srgb, var(--campaign-mix-dark) 20%, transparent)
+  );
 }
 
 .campaign-act-scene-copy {
@@ -10082,13 +10145,13 @@ body.skill-drag-active * {
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--panel-chip);
   color: var(--muted);
 }
 
 .campaign-act-scene-badge--new {
-  background: rgba(245, 197, 66, 0.18);
-  color: var(--map-void-throne);
+  background: color-mix(in srgb, var(--rarity-legendary) 18%, transparent);
+  color: var(--campaign-scene-badge-new-ink);
 }
 
 .campaign-act-scene-title {
@@ -10114,7 +10177,7 @@ body.skill-drag-active * {
   padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid var(--campaign-accent-soft);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--mix-light) 4%, transparent);
   color: inherit;
   font-size: 11px;
   cursor: pointer;
@@ -10123,7 +10186,8 @@ body.skill-drag-active * {
 .act-scene-root {
   position: fixed;
   inset: 0;
-  z-index: 1200;
+  /* Acima de modais (1400), drawers, tooltips (12000) e toasts (11000); abaixo só do onboarding (20050) */
+  z-index: var(--z-act-scene, 13000);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -10136,7 +10200,7 @@ body.skill-drag-active * {
 .act-scene-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(4, 6, 12, 0.72);
+  background: var(--act-scene-backdrop);
 }
 
 .act-scene-backdrop.hidden {
@@ -10157,8 +10221,9 @@ body.skill-drag-active * {
   gap: 12px;
   padding: 14px;
   border-radius: 16px;
-  border: 1px solid rgba(245, 197, 66, 0.28);
-  background: linear-gradient(180deg, rgba(24, 28, 38, 0.98), rgba(10, 12, 18, 0.98));
+  border: 1px solid var(--act-scene-card-border);
+  background: var(--act-scene-card-bg);
+  color: var(--act-scene-card-ink);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
 }
 
@@ -10179,7 +10244,7 @@ body.skill-drag-active * {
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--rarity-legendary);
+  color: var(--act-scene-eyebrow);
 }
 
 .act-scene-overlay-title {
@@ -11254,15 +11319,15 @@ body.act-scene-open {
   gap: 8px;
   min-height: 36px;
   padding: 0 12px;
-  border: 2px solid var(--seal-gold);
+  border: 2px solid var(--combat-bar-btn-border);
   border-radius: 10px;
-  background: var(--panel-card);
-  color: var(--ink);
+  background: var(--combat-bar-btn-bg);
+  color: var(--combat-bar-btn-ink);
   font: inherit;
   font-size: 11px;
   cursor: pointer;
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
+    0 0 0 1px var(--combat-bar-btn-ring) inset,
     0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
@@ -11771,6 +11836,73 @@ body.wow-celebration-open {
   background: rgba(139, 58, 47, 0.28);
 }
 
+.quick-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border-soft);
+}
+
+.quick-action-bar::before {
+  content: 'Ações rápidas';
+  flex: 1 1 100%;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quick-action-btn {
+  position: relative;
+  display: inline-flex;
+  flex: 1 1 120px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 7px 10px;
+  border: 1px solid var(--panel-border-soft);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--seal-gold) 12%, var(--surface));
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 7px color-mix(in srgb, var(--campaign-mix-dark) 16%, transparent);
+}
+
+.quick-action-btn--optimize {
+  flex-basis: 100%;
+  border-color: color-mix(in srgb, var(--rare) 52%, var(--panel-border-soft));
+  background: color-mix(in srgb, var(--rare) 12%, var(--surface));
+}
+
+.quick-action-btn .btn-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.quick-action-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.quick-action-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.quick-action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .actions-icon-bar {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -11856,10 +11988,6 @@ body.wow-celebration-open {
   border-color: rgba(255, 140, 80, 0.42);
 }
 
-.action-icon-btn--optimize {
-  border-color: rgba(100, 200, 255, 0.38);
-}
-
 .action-icon-btn--upgrades {
   border-color: rgba(245, 197, 66, 0.42);
 }
@@ -11870,10 +11998,6 @@ body.wow-celebration-open {
 
 .action-icon-btn--log {
   border-color: rgba(196, 170, 120, 0.38);
-}
-
-.action-icon-btn--chest-all {
-  border-color: rgba(245, 197, 66, 0.35);
 }
 
 .action-icon-btn--settings {
@@ -11889,7 +12013,7 @@ body.wow-celebration-open {
   cursor: not-allowed;
 }
 
-.action-icon-btn.chest-available {
+.quick-action-btn.chest-available {
   border-color: rgba(245, 197, 66, 0.75);
   box-shadow:
     0 0 0 1px rgba(245, 197, 66, 0.35),
@@ -11897,7 +12021,7 @@ body.wow-celebration-open {
   animation: chest-available-pulse 1.8s ease-in-out infinite;
 }
 
-.action-icon-btn--chest.chest-available .action-icon-label {
+.quick-action-btn--chest.chest-available .quick-action-label {
   color: var(--seal-gold-dark);
 }
 
@@ -11924,8 +12048,8 @@ body.wow-celebration-open {
   right: 2px;
 }
 
-.action-icon-btn--chest .action-icon-badge,
-.action-icon-btn--chest-all .action-icon-badge {
+.quick-action-btn--chest .action-icon-badge,
+.quick-action-btn--chest-all .action-icon-badge {
   min-width: 18px;
   height: 18px;
   font-size: 10px;
@@ -12018,18 +12142,19 @@ body.wow-celebration-open {
   height: 16px;
   object-fit: contain;
   pointer-events: none;
-  filter: brightness(0);
-  opacity: 0.82;
+  filter: var(--nav-arrow-filter);
+  opacity: 0.9;
 }
 
 .hero-drawer-nav:hover:not(:disabled),
 .hero-drawer-nav:focus-visible:not(:disabled) {
-  background: color-mix(in srgb, var(--seal-gold) 26%, var(--mix-light));
+  background: color-mix(in srgb, var(--seal-gold) 26%, var(--surface));
   border-color: var(--seal-gold);
 }
 
 .hero-drawer-nav:hover:not(:disabled) .nav-arrow-icon,
 .hero-drawer-nav:focus-visible:not(:disabled) .nav-arrow-icon {
+  filter: var(--nav-arrow-filter);
   opacity: 1;
 }
 

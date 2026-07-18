@@ -17,11 +17,11 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Baú flutuante na batalha quando pendente
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
-- [x] Footer em ícones com badges (baús, pendências)
+- [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)
 - [x] Barras de vida verdes; HP na strip
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
-- [x] Heróis / Formação / Loja / Inventário / Cofre / Otimizar só aparecem no **acampamento** (`canEditParty`)
+- [x] Heróis / Formação / Loja / Inventário / Baús / Otimizar equipe só aparecem no **acampamento** (`canEditParty`)
 
 ## Camadas e arquivos-chave
 

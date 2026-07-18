@@ -139,6 +139,7 @@ describe('GameHudController — acesso no acampamento', () => {
     expect(buttons.shop.classList.contains('hidden')).toBe(false);
     expect(buttons.inventory.classList.contains('hidden')).toBe(false);
     expect(buttons.stash.classList.contains('hidden')).toBe(false);
+    expect(buttons.stash.title).toBe('Baús (0/20)');
     expect(buttons.optimize.classList.contains('hidden')).toBe(false);
   });
 
