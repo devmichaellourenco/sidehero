@@ -1,7 +1,8 @@
 import { GearDto, HeroActiveSkillDto, HeroActiveSkillStatDto, HeroDto } from '../../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl } from '../../assets/AssetCatalog';
 import { getSkillIconUrl } from '../../assets/SkillIconCatalog';
-import { GEAR_SLOT_LABELS, GearSlotKey, listGearBonusLines, renderUniqueEffectLine } from '../GearPresentation';
+import { statIconImg } from '../../assets/StatIconCatalog';
+import { GEAR_SLOT_LABELS, GearSlotKey, listGearBonusEntries, renderUniqueEffectLine } from '../GearPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -144,9 +145,9 @@ function renderEquippedGearCard(
 ): string {
   const slotKey = gear.slot as GearSlotKey;
   const slotLabel = GEAR_SLOT_LABELS[slotKey] ?? gear.slot;
-  const bonusLines = listGearBonusLines(gear);
+  const bonusEntries = listGearBonusEntries(gear);
   const uniqueLine = renderUniqueEffectLine(gear);
-  const hasBody = bonusLines.length > 0 || Boolean(uniqueLine);
+  const hasBody = bonusEntries.length > 0 || Boolean(uniqueLine);
 
   return `
     <article class="hero-status-gear-card" data-status-gear-id="${escapeHtml(gear.id)}">
@@ -158,7 +159,12 @@ function renderEquippedGearCard(
         hasBody
           ? `
             <ul class="hero-status-gear-bonuses">
-              ${bonusLines.map((line) => `<li>${escapeHtml(line)}</li>`).join('')}
+              ${bonusEntries
+                .map(
+                  (entry) =>
+                    `<li class="hero-status-gear-bonus">${statIconImg(entry.icon, 'gear-stat-icon')}<span class="gear-stat-line-text">${escapeHtml(entry.text)}</span></li>`,
+                )
+                .join('')}
             </ul>
             ${uniqueLine ? `<div class="hero-status-gear-unique">${uniqueLine}</div>` : ''}
           `

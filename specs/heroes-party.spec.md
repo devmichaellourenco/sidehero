@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 11/11 (100%)  
-**Testes obrigatórios:** 14/14 presentes na suite
+**Aceite:** 12/12 (100%)  
+**Testes obrigatórios:** 15/15 presentes na suite
 
 ## Objetivo
 
@@ -22,6 +22,7 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] Aba Inventário: **sem** abas texto Todos/Armas/Armaduras/Acessórios; categoria só via ícones do loadout; grid único com ordenação compartilhada; slot ativo filtra o mesmo grid in-place
 - [x] Header do modal exibe `Lv.{n} {Classe} - {Evolução}` (ex.: `Lv.2 Priest - Aprendiz`); aba Classe **sem** retrato/classe atual — só próxima(s) ascensão(ões) e skills de evolução
 - [x] Aba Classe apresenta título compacto **Escolha seu destino** + cards temáticos; detalhes do momento de ascensão ficam no tooltip do título; requisitos e CTA dos cards ficam no tooltip do card
+- [x] Ícones padronizados de estatística (`StatIconCatalog`, assets em `ui/stats/*`): chips STR/DEX/INT, linhas da ficha de combate (rows + título do tooltip) e linhas de bônus de gear em cards/tooltips; tingidos por tema via `--stat-icon-filter`
 
 ## Camadas e arquivos-chave
 
@@ -60,3 +61,4 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] `AscendClassConfirmPresentation.test.ts` — modal de confirmação com preview e aviso permanente
 - [x] `HeroAttributesTabRenderer.test.ts` / `HeroStatusSkillsPresentation.test.ts` — Status com skills + equipamento
 - [x] `SkillBattleStatsMapper.test.ts` — DPS estimado por skill
+- [x] `StatIconCatalog.test.ts` — mapeamento estatística → ícone cobre toda a ficha de combate

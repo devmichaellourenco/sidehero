@@ -67,6 +67,8 @@
   /* Ícones de seta (PNG): escuro no claro, claro no dark */
   --nav-arrow-filter: brightness(0);
   --nav-arrow-filter-on-accent: brightness(0) invert(1);
+  /* Ícones de estatística (PictoIcons brancos): tinta no claro, claro no dark */
+  --stat-icon-filter: brightness(0);
   /* Pills de filtro/ordenar ativas: fundo claro (mix-light) → texto sempre tinta escura */
   --filter-btn-active-fg: #1f1710;
   --filter-btn-active-bg: color-mix(in srgb, var(--seal-gold) 28%, var(--mix-light));
@@ -729,6 +731,7 @@ html[data-ui-theme='dark'] body {
 
 html[data-ui-theme='dark'] {
   --nav-arrow-filter: brightness(0) invert(1);
+  --stat-icon-filter: brightness(0) invert(1);
 }
 
 
@@ -3739,8 +3742,24 @@ button.hero-skill-chip:hover {
 }
 
 .gear-stat-line {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   line-height: 1.35;
+}
+
+.gear-stat-icon {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: var(--stat-icon-filter);
+  opacity: 0.75;
+}
+
+.gear-stat-line-text {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .gear-stat-line--empty {
@@ -7175,6 +7194,11 @@ body.modal-open {
   gap: 4px;
 }
 
+.hero-detail-stat .stat-icon {
+  filter: var(--stat-icon-filter);
+  opacity: 0.85;
+}
+
 .hero-detail-health {
   width: 100%;
 }
@@ -8074,11 +8098,21 @@ body.modal-open {
 }
 
 .hero-attr-chip .hero-attr-label {
+  gap: 3px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-muted);
+}
+
+.hero-attr-icon {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: var(--stat-icon-filter);
+  opacity: 0.8;
 }
 
 .hero-attr-chip .hero-attr-value {
@@ -8312,10 +8346,17 @@ body.modal-open {
 
 .hero-status-gear-bonuses {
   margin: 0;
-  padding-left: 16px;
+  padding-left: 0;
+  list-style: none;
   font-size: 10px;
   color: var(--ink);
   line-height: 1.45;
+}
+
+.hero-status-gear-bonus {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .hero-status-gear-unique {
@@ -8360,8 +8401,20 @@ body.modal-open {
 }
 
 .hero-stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 10px;
   color: var(--ink-muted);
+}
+
+.hero-stat-icon {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: var(--stat-icon-filter);
+  opacity: 0.75;
 }
 
 .hero-stat-value {
@@ -8396,6 +8449,9 @@ body.modal-open {
 }
 
 .hero-stat-tooltip-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-heading);
   font-size: 11px;
   color: var(--gold);

@@ -110,6 +110,8 @@ const ITEM_WEAPON_SPRITE_MAP = [
 const PUBLIC_ASSET_MAP = [
   ['logo.png', 'ui/brand.png'],
   ['bg_top_principal.png', 'backgrounds/top-principal.png'],
+  ['sprites/icons/attack-speed.png', 'ui/stats/attack-speed.png'],
+  ['sprites/icons/cast-speed.png', 'ui/stats/cast-speed.png'],
 ];
 
 const ASSET_MAP = [
@@ -140,6 +142,28 @@ const ASSET_MAP = [
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_inventory.png', 'ui/inventory.png'],
   ['Sprites/Demo/Demo_Icon/icon_white_arrow_prev.png', 'ui/arrow-prev.png'],
   ['Sprites/Demo/Demo_Icon/icon_white_arrow_next.png', 'ui/arrow-next.png'],
+
+  // Ícones de estatísticas (PictoIcons brancos, tingidos via --stat-icon-filter)
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_strength.png', 'ui/stats/str.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_feather.png', 'ui/stats/dex.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_magicball.png', 'ui/stats/int.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_sword_1.png', 'ui/stats/attack.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_shield.png', 'ui/stats/defense.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_life.png', 'ui/stats/health.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_guage.png', 'ui/stats/dps.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_horuglass.png', 'ui/stats/cooldown.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_target_1.png', 'ui/stats/crit-chance.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_blast.png', 'ui/stats/crit-damage.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_jump.png', 'ui/stats/dodge.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_buckler.png', 'ui/stats/block.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_helmet_2.png', 'ui/stats/damage-reduction.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_fist.png', 'ui/stats/physical-damage.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_fire.png', 'ui/stats/fire.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_snowflake.png', 'ui/stats/cold.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_thunder.png', 'ui/stats/lightning.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_cyclone.png', 'ui/stats/chaos.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_shield_magic.png', 'ui/stats/all-elemental.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_energy.png', 'ui/stats/elemental-damage.png'],
 
   ['Sprites/Demo/Demo_Background/background_gradient_01.png', 'backgrounds/battle.png'],
   ['Sprites/Demo/Demo_Background/background_05_sample_01.png', 'backgrounds/app.png'],

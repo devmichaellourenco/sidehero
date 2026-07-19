@@ -1,5 +1,6 @@
 import { FeatureFlagsDto } from '../../../application/dto/FeatureFlagsDto';
 import { HeroDto } from '../../../application/dto/GameStateDto';
+import { STAT_LINE_ICON_BY_ID, statIconImg } from '../../assets/StatIconCatalog';
 import { improvementRefundLabel, improvementSpendLabel } from './HeroImprovementPointsPresentation';
 import { renderHeroStatusExtras } from './HeroStatusSkillsPresentation';
 
@@ -24,7 +25,7 @@ function renderAttributeChip(
 
   return `
     <div class="hero-attr-chip">
-      <span class="hero-attr-label">${label}</span>
+      <span class="hero-attr-label">${statIconImg(key, 'hero-attr-icon')}${label}</span>
       <span class="hero-attr-value">${total}${allocatedHint}</span>
       <div class="hero-attr-actions">
         ${
@@ -55,13 +56,14 @@ function renderStatRow(line: HeroDto['combatStatSheet'][number]['lines'][number]
   const tooltip = line.tooltipLines
     .map((entry) => `<span class="hero-stat-tooltip-line">${escapeHtml(entry)}</span>`)
     .join('');
+  const icon = statIconImg(STAT_LINE_ICON_BY_ID[line.id], 'hero-stat-icon');
 
   return `
     <div class="hero-stat-row" data-hero-stat-tooltip tabindex="0" aria-label="${escapeHtml(line.label)}: ${escapeHtml(line.value)}">
-      <span class="hero-stat-label">${escapeHtml(line.label)}</span>
+      <span class="hero-stat-label">${icon}${escapeHtml(line.label)}</span>
       <span class="hero-stat-value">${escapeHtml(line.value)}</span>
       <span class="hero-stat-tooltip-content hidden">
-        <strong class="hero-stat-tooltip-title">${escapeHtml(line.label)}</strong>
+        <strong class="hero-stat-tooltip-title">${icon}${escapeHtml(line.label)}</strong>
         ${tooltip}
       </span>
     </div>

@@ -72,6 +72,15 @@ describe('renderHeroAttributesTab', () => {
     expect(html).toContain('hero-stat-tooltip-content');
   });
 
+  it('exibe ícones de estatística nos chips de atributo e nas linhas da ficha', () => {
+    const html = renderHeroAttributesTab(minimalHero());
+
+    // Um ícone por chip STR/DEX/INT
+    expect(html.match(/hero-attr-icon/g)?.length).toBe(3);
+    // Linha "DPS estimado" (id: dps) com ícone na linha e no tooltip
+    expect(html.match(/hero-stat-icon/g)?.length).toBe(2);
+  });
+
   it('exibe (−) e reset em massa conforme nível da feature', () => {
     const withoutMass = renderHeroAttributesTab(minimalHero(), { improvementReset: 1 });
     expect(withoutMass).toContain('data-attr-refund="str"');

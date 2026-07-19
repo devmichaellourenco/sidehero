@@ -6,6 +6,7 @@ import {
   getGearSprite,
   imgTag,
 } from '../assets/AssetCatalog';
+import { StatIconKey, statIconImg } from '../assets/StatIconCatalog';
 import { canHeroEquipGear } from '../../application/mappers/GearRequirementPresentationMapper';
 import { renderGearRequirementLines } from './GearRequirementPresentation';
 import { gearDragAttr, gearDropTargetAttr } from '../gear/GearDragDropBinder';
@@ -61,7 +62,13 @@ function formatSigned(value: number, suffix: string, label: string): string {
   return `${sign}${value}${suffix} ${label}`;
 }
 
-function formatElementalDamageBonuses(
+/** Linha de bônus de gear com ícone contextual da estatística. */
+export interface GearBonusEntry {
+  icon: StatIconKey;
+  text: string;
+}
+
+function elementalDamageBonusEntries(
   gear: Pick<
     GearDto,
     | 'fireDamageBonus'
@@ -75,28 +82,51 @@ function formatElementalDamageBonuses(
     | 'lightningDamageFlat'
     | 'chaosDamageFlat'
   >,
-): string[] {
-  const parts: string[] = [];
-  if (gear.fireDamageBonus !== 0) parts.push(formatSigned(gear.fireDamageBonus, '%', 'Dano Fogo'));
+): GearBonusEntry[] {
+  const parts: GearBonusEntry[] = [];
+  if (gear.fireDamageBonus !== 0) {
+    parts.push({ icon: 'fire', text: formatSigned(gear.fireDamageBonus, '%', 'Dano Fogo') });
+  }
   if (gear.fireResistPenetrationBonus !== 0) {
-    parts.push(formatSigned(gear.fireResistPenetrationBonus, '%', 'Ignora Res. Fogo'));
+    parts.push({
+      icon: 'fire',
+      text: formatSigned(gear.fireResistPenetrationBonus, '%', 'Ignora Res. Fogo'),
+    });
   }
-  if (gear.coldDamageBonus !== 0) parts.push(formatSigned(gear.coldDamageBonus, '%', 'Dano Gelo'));
+  if (gear.coldDamageBonus !== 0) {
+    parts.push({ icon: 'cold', text: formatSigned(gear.coldDamageBonus, '%', 'Dano Gelo') });
+  }
   if (gear.lightningDamageBonus !== 0) {
-    parts.push(formatSigned(gear.lightningDamageBonus, '%', 'Dano Raio'));
+    parts.push({
+      icon: 'lightning',
+      text: formatSigned(gear.lightningDamageBonus, '%', 'Dano Raio'),
+    });
   }
-  if (gear.chaosDamageBonus !== 0) parts.push(formatSigned(gear.chaosDamageBonus, '%', 'Dano Caos'));
+  if (gear.chaosDamageBonus !== 0) {
+    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosDamageBonus, '%', 'Dano Caos') });
+  }
   if (gear.allElementalDamageBonus !== 0) {
-    parts.push(formatSigned(gear.allElementalDamageBonus, '%', 'Dano Elemental'));
+    parts.push({
+      icon: 'elementalDamage',
+      text: formatSigned(gear.allElementalDamageBonus, '%', 'Dano Elemental'),
+    });
   }
-  if (gear.fireDamageFlat !== 0) parts.push(formatSigned(gear.fireDamageFlat, '', 'Dano Fogo'));
-  if (gear.coldDamageFlat !== 0) parts.push(formatSigned(gear.coldDamageFlat, '', 'Dano Gelo'));
-  if (gear.lightningDamageFlat !== 0) parts.push(formatSigned(gear.lightningDamageFlat, '', 'Dano Raio'));
-  if (gear.chaosDamageFlat !== 0) parts.push(formatSigned(gear.chaosDamageFlat, '', 'Dano Caos'));
+  if (gear.fireDamageFlat !== 0) {
+    parts.push({ icon: 'fire', text: formatSigned(gear.fireDamageFlat, '', 'Dano Fogo') });
+  }
+  if (gear.coldDamageFlat !== 0) {
+    parts.push({ icon: 'cold', text: formatSigned(gear.coldDamageFlat, '', 'Dano Gelo') });
+  }
+  if (gear.lightningDamageFlat !== 0) {
+    parts.push({ icon: 'lightning', text: formatSigned(gear.lightningDamageFlat, '', 'Dano Raio') });
+  }
+  if (gear.chaosDamageFlat !== 0) {
+    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosDamageFlat, '', 'Dano Caos') });
+  }
   return parts;
 }
 
-function formatResistBonuses(
+function resistBonusEntries(
   gear: Pick<
     GearDto,
     | 'fireResistBonus'
@@ -109,23 +139,41 @@ function formatResistBonuses(
     | 'lightningResistFlat'
     | 'chaosResistFlat'
   >,
-): string[] {
-  const parts: string[] = [];
-  if (gear.fireResistBonus !== 0) parts.push(formatSigned(gear.fireResistBonus, '%', 'Res. Fogo'));
-  if (gear.coldResistBonus !== 0) parts.push(formatSigned(gear.coldResistBonus, '%', 'Res. Gelo'));
+): GearBonusEntry[] {
+  const parts: GearBonusEntry[] = [];
+  if (gear.fireResistBonus !== 0) {
+    parts.push({ icon: 'fire', text: formatSigned(gear.fireResistBonus, '%', 'Res. Fogo') });
+  }
+  if (gear.coldResistBonus !== 0) {
+    parts.push({ icon: 'cold', text: formatSigned(gear.coldResistBonus, '%', 'Res. Gelo') });
+  }
   if (gear.lightningResistBonus !== 0) {
-    parts.push(formatSigned(gear.lightningResistBonus, '%', 'Res. Raio'));
+    parts.push({
+      icon: 'lightning',
+      text: formatSigned(gear.lightningResistBonus, '%', 'Res. Raio'),
+    });
   }
-  if (gear.chaosResistBonus !== 0) parts.push(formatSigned(gear.chaosResistBonus, '%', 'Res. Caos'));
+  if (gear.chaosResistBonus !== 0) {
+    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosResistBonus, '%', 'Res. Caos') });
+  }
   if (gear.allElementalResistBonus !== 0) {
-    parts.push(formatSigned(gear.allElementalResistBonus, '%', 'Res. Elemental'));
+    parts.push({
+      icon: 'allElemental',
+      text: formatSigned(gear.allElementalResistBonus, '%', 'Res. Elemental'),
+    });
   }
-  if (gear.fireResistFlat !== 0) parts.push(formatSigned(gear.fireResistFlat, '', 'Res. Fogo'));
-  if (gear.coldResistFlat !== 0) parts.push(formatSigned(gear.coldResistFlat, '', 'Res. Gelo'));
+  if (gear.fireResistFlat !== 0) {
+    parts.push({ icon: 'fire', text: formatSigned(gear.fireResistFlat, '', 'Res. Fogo') });
+  }
+  if (gear.coldResistFlat !== 0) {
+    parts.push({ icon: 'cold', text: formatSigned(gear.coldResistFlat, '', 'Res. Gelo') });
+  }
   if (gear.lightningResistFlat !== 0) {
-    parts.push(formatSigned(gear.lightningResistFlat, '', 'Res. Raio'));
+    parts.push({ icon: 'lightning', text: formatSigned(gear.lightningResistFlat, '', 'Res. Raio') });
   }
-  if (gear.chaosResistFlat !== 0) parts.push(formatSigned(gear.chaosResistFlat, '', 'Res. Caos'));
+  if (gear.chaosResistFlat !== 0) {
+    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosResistFlat, '', 'Res. Caos') });
+  }
   return parts;
 }
 
@@ -141,9 +189,9 @@ function formatPercent(value: number): string {
   return `${Math.round(value * 1000) / 10}%`;
 }
 
-export function listGearBonusLines(
+export function listGearBonusEntries(
   gear: Partial<GearDto> & Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
-): string[] {
+): GearBonusEntry[] {
   const stats = {
     attackPercentBonus: gear.attackPercentBonus ?? 0,
     defensePercentBonus: gear.defensePercentBonus ?? 0,
@@ -178,38 +226,67 @@ export function listGearBonusLines(
     damageReductionBonus: gear.damageReductionBonus ?? 0,
   };
 
-  const parts: string[] = [];
+  const parts: GearBonusEntry[] = [];
 
-  if (gear.attackBonus !== 0) parts.push(`+${gear.attackBonus} ATK`);
-  if (gear.defenseBonus !== 0) parts.push(`+${gear.defenseBonus} DEF`);
-  if (gear.healthBonus !== 0) parts.push(`+${gear.healthBonus} HP`);
+  if (gear.attackBonus !== 0) parts.push({ icon: 'attack', text: `+${gear.attackBonus} ATK` });
+  if (gear.defenseBonus !== 0) parts.push({ icon: 'defense', text: `+${gear.defenseBonus} DEF` });
+  if (gear.healthBonus !== 0) parts.push({ icon: 'health', text: `+${gear.healthBonus} HP` });
 
   if (stats.attackPercentBonus !== 0) {
-    parts.push(formatSigned(stats.attackPercentBonus, '%', 'ATK'));
+    parts.push({ icon: 'attack', text: formatSigned(stats.attackPercentBonus, '%', 'ATK') });
   }
   if (stats.defensePercentBonus !== 0) {
-    parts.push(formatSigned(stats.defensePercentBonus, '%', 'DEF'));
+    parts.push({ icon: 'defense', text: formatSigned(stats.defensePercentBonus, '%', 'DEF') });
   }
-  if (stats.healthPercentBonus !== 0) parts.push(formatSigned(stats.healthPercentBonus, '%', 'HP'));
+  if (stats.healthPercentBonus !== 0) {
+    parts.push({ icon: 'health', text: formatSigned(stats.healthPercentBonus, '%', 'HP') });
+  }
   if (stats.physicalDamagePercentBonus !== 0) {
-    parts.push(formatSigned(stats.physicalDamagePercentBonus, '%', 'Dano Físico'));
+    parts.push({
+      icon: 'physicalDamage',
+      text: formatSigned(stats.physicalDamagePercentBonus, '%', 'Dano Físico'),
+    });
   }
-  if (stats.attackSpeedBonus !== 0) parts.push(formatSigned(stats.attackSpeedBonus, '', 'ASPD'));
-  if (stats.castSpeedBonus !== 0) parts.push(formatSigned(stats.castSpeedBonus, '', 'Cast'));
+  if (stats.attackSpeedBonus !== 0) {
+    parts.push({ icon: 'attackSpeed', text: formatSigned(stats.attackSpeedBonus, '', 'ASPD') });
+  }
+  if (stats.castSpeedBonus !== 0) {
+    parts.push({ icon: 'castSpeed', text: formatSigned(stats.castSpeedBonus, '', 'Cast') });
+  }
   if (stats.cooldownReductionBonus !== 0) {
-    parts.push(formatSigned(stats.cooldownReductionBonus, '%', 'Red. CD'));
+    parts.push({
+      icon: 'cooldown',
+      text: formatSigned(stats.cooldownReductionBonus, '%', 'Red. CD'),
+    });
   }
-  if (stats.critChanceBonus > 0) parts.push(`+${formatPercent(stats.critChanceBonus)} Crít`);
-  if (stats.critDamageBonus > 0) parts.push(`+${formatPercent(stats.critDamageBonus)} Crít Dmg`);
-  if (stats.dodgeChanceBonus > 0) parts.push(`+${formatPercent(stats.dodgeChanceBonus)} Esquiva`);
-  if (stats.blockChanceBonus > 0) parts.push(`+${formatPercent(stats.blockChanceBonus)} Bloqueio`);
+  if (stats.critChanceBonus > 0) {
+    parts.push({ icon: 'critChance', text: `+${formatPercent(stats.critChanceBonus)} Crít` });
+  }
+  if (stats.critDamageBonus > 0) {
+    parts.push({ icon: 'critDamage', text: `+${formatPercent(stats.critDamageBonus)} Crít Dmg` });
+  }
+  if (stats.dodgeChanceBonus > 0) {
+    parts.push({ icon: 'dodge', text: `+${formatPercent(stats.dodgeChanceBonus)} Esquiva` });
+  }
+  if (stats.blockChanceBonus > 0) {
+    parts.push({ icon: 'block', text: `+${formatPercent(stats.blockChanceBonus)} Bloqueio` });
+  }
   if (stats.damageReductionBonus > 0) {
-    parts.push(`+${formatPercent(stats.damageReductionBonus)} Red. Dano`);
+    parts.push({
+      icon: 'damageReduction',
+      text: `+${formatPercent(stats.damageReductionBonus)} Red. Dano`,
+    });
   }
-  parts.push(...formatResistBonuses(stats));
-  parts.push(...formatElementalDamageBonuses(stats));
+  parts.push(...resistBonusEntries(stats));
+  parts.push(...elementalDamageBonusEntries(stats));
 
   return parts;
+}
+
+export function listGearBonusLines(
+  gear: Partial<GearDto> & Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
+): string[] {
+  return listGearBonusEntries(gear).map((entry) => entry.text);
 }
 
 export function renderUniqueEffectLine(gear: Pick<GearDto, 'uniqueEffectDescription'>): string {
@@ -226,13 +303,16 @@ export function formatGearBonuses(
 export function renderGearBonusLines(
   gear: Partial<GearDto> & Pick<GearDto, 'attackBonus' | 'defenseBonus' | 'healthBonus'>,
 ): string {
-  const lines = listGearBonusLines(gear);
-  if (lines.length === 0) {
+  const entries = listGearBonusEntries(gear);
+  if (entries.length === 0) {
     return '<span class="gear-stat-lines"><span class="gear-stat-line gear-stat-line--empty">Sem bônus</span></span>';
   }
 
-  const rendered = lines
-    .map((line) => `<span class="gear-stat-line">${escapeHtml(line)}</span>`)
+  const rendered = entries
+    .map(
+      (entry) =>
+        `<span class="gear-stat-line">${statIconImg(entry.icon, 'gear-stat-icon')}<span class="gear-stat-line-text">${escapeHtml(entry.text)}</span></span>`,
+    )
     .join('');
 
   return `<span class="gear-stat-lines">${rendered}</span>`;
