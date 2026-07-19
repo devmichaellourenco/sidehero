@@ -9,7 +9,7 @@ export function elementalDamageFlatFromGear(gear: Gear): ElementalDamageFlatProf
     fire: gear.fireDamageFlat,
     cold: gear.coldDamageFlat,
     lightning: gear.lightningDamageFlat,
-    chaos: gear.chaosDamageFlat,
+    air: gear.airDamageFlat,
   };
 }
 
@@ -24,7 +24,7 @@ export function aggregateElementalDamageFlat(
     total.fire += profile.fire;
     total.cold += profile.cold;
     total.lightning += profile.lightning;
-    total.chaos += profile.chaos;
+    total.air += profile.air;
   }
 
   return total;

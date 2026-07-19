@@ -9,7 +9,7 @@ export function elementalPenetrationProfileFromGear(gear: Gear): ElementalPenetr
     fire: gear.fireResistPenetrationBonus,
     cold: 0,
     lightning: 0,
-    chaos: 0,
+    air: 0,
     allElemental: 0,
   };
 }
@@ -25,7 +25,7 @@ export function aggregateElementalPenetrationProfile(
     total.fire += profile.fire;
     total.cold += profile.cold;
     total.lightning += profile.lightning;
-    total.chaos += profile.chaos;
+    total.air += profile.air;
     total.allElemental += profile.allElemental;
   }
 

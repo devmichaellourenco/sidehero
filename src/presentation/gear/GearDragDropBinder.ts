@@ -38,6 +38,7 @@ export type GearDragDropHandlers = {
   onEquip: (heroId: string, gearId: string) => void;
   onUnequip: (heroId: string, slot: GearSlotKey) => void;
   onMoveToStash: (gearId: string) => void;
+  onMoveFromStash: (gearId: string) => void;
   onMoveFromStashThenEquip: (gearId: string, heroId: string) => void;
   onEquippedToStash: (heroId: string, slot: GearSlotKey, gearId: string) => void;
   onMoveEquippedGear: (
@@ -92,6 +93,10 @@ function handleGearDrop(source: GearDragSource, target: HTMLElement, handlers: G
   if (zone === 'inventory') {
     if (source.kind === 'equipped') {
       handlers.onUnequip(source.heroId, source.slot);
+      return;
+    }
+    if (source.kind === 'stash') {
+      handlers.onMoveFromStash(source.gearId);
     }
     return;
   }
@@ -139,7 +144,7 @@ function previewGearDrop(source: GearDragSource, target: HTMLElement): 'valid' |
     return source.kind === 'inventory' || source.kind === 'stash' ? 'valid' : null;
   }
   if (zone === 'inventory') {
-    return source.kind === 'equipped' ? 'valid' : null;
+    return source.kind === 'equipped' || source.kind === 'stash' ? 'valid' : null;
   }
   if (zone === 'stash') {
     return source.kind === 'inventory' || source.kind === 'equipped' ? 'valid' : null;
@@ -184,7 +189,7 @@ function highlightCompatibleGearTargets(root: HTMLElement, source: GearDragSourc
     markDropTarget(slotEl, 'valid');
   });
 
-  if (source.kind === 'equipped') {
+  if (source.kind === 'equipped' || source.kind === 'stash') {
     root.querySelectorAll('[data-drop-zone="inventory"]').forEach((element) => {
       markDropTarget(element as HTMLElement, 'valid');
     });
@@ -322,7 +327,7 @@ export function bindGearDragDrop(root: HTMLElement, handlers: GearDragDropHandle
       return;
     }
 
-    const raw = event.dataTransfer?.getData(GEAR_MIME);
+    const raw = event.dataTransfer?.getData(GEAR_MIME) ?? null;
     const source = activeGearSource ?? parseGearDragSource(raw);
     activeGearSource = null;
     if (!source || !handlers.canEditGear()) return;

@@ -36,7 +36,7 @@ export function resolveDotTickDamage(
   stageLevel: number,
 ): ResolvedDamage {
   const scaled = scaledDotDamage(baseMagnitude, stageLevel);
-  const damageElement = element ?? 'chaos';
+  const damageElement = element ?? 'air';
 
   return resolveOutgoingDamage(
     scaled,
@@ -74,7 +74,7 @@ export function resolveDotTickBatch(
     }
     if (resolved.amount > 0) {
       totalDamage += resolved.amount;
-      primaryElement ??= dot.dotElement ?? 'chaos';
+      primaryElement ??= dot.dotElement ?? 'air';
     }
   }
 

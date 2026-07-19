@@ -51,7 +51,7 @@ describe('CombatDamageResolver', () => {
         { element: 'fire', delivery: 'aoe', weight: 0.85 },
         { element: 'physical', delivery: 'aoe', weight: 0.15 },
       ],
-      { armor: 10, stageLevel: 1, resistances: { fire: 50, cold: 0, lightning: 0, chaos: 0, allElemental: 0 } },
+      { armor: 10, stageLevel: 1, resistances: { fire: 50, cold: 0, lightning: 0, air: 0, allElemental: 0 } },
       { attackSpeed: 1, castSpeed: 1, cooldownReduction: 0, critChance: 0, critDamage: 1.4 },
     );
 
@@ -68,7 +68,7 @@ describe('CombatDamageResolver', () => {
       {
         armor: 5,
         stageLevel: 1,
-        resistances: { fire: 0, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 0, cold: 0, lightning: 0, air: 0, allElemental: 0 },
         defensive: { dodgeChance: 1, blockChance: 0, damageReduction: 0 },
       },
       { attackSpeed: 1, castSpeed: 1, cooldownReduction: 0, critChance: 0, critDamage: 1.4 },

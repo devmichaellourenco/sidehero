@@ -47,7 +47,7 @@ export interface CombatResistSummaryDto {
   fire: number;
   cold: number;
   lightning: number;
-  chaos: number;
+  air: number;
 }
 
 export interface HeroDto {
@@ -96,22 +96,22 @@ export interface HeroDto {
       fireResistBonus: number;
       coldResistBonus: number;
       lightningResistBonus: number;
-      chaosResistBonus: number;
+      airResistBonus: number;
       allElementalResistBonus: number;
       fireDamageBonus: number;
       fireResistPenetrationBonus: number;
       coldDamageBonus: number;
       lightningDamageBonus: number;
-      chaosDamageBonus: number;
+      airDamageBonus: number;
       allElementalDamageBonus: number;
       fireDamageFlat: number;
       coldDamageFlat: number;
       lightningDamageFlat: number;
-      chaosDamageFlat: number;
+      airDamageFlat: number;
       fireResistFlat: number;
       coldResistFlat: number;
       lightningResistFlat: number;
-      chaosResistFlat: number;
+      airResistFlat: number;
       attackPercentBonus: number;
       defensePercentBonus: number;
       healthPercentBonus: number;
@@ -214,22 +214,22 @@ export interface GearDto {
   fireResistBonus: number;
   coldResistBonus: number;
   lightningResistBonus: number;
-  chaosResistBonus: number;
+  airResistBonus: number;
   allElementalResistBonus: number;
   fireDamageBonus: number;
   fireResistPenetrationBonus: number;
   coldDamageBonus: number;
   lightningDamageBonus: number;
-  chaosDamageBonus: number;
+  airDamageBonus: number;
   allElementalDamageBonus: number;
   fireDamageFlat: number;
   coldDamageFlat: number;
   lightningDamageFlat: number;
-  chaosDamageFlat: number;
+  airDamageFlat: number;
   fireResistFlat: number;
   coldResistFlat: number;
   lightningResistFlat: number;
-  chaosResistFlat: number;
+  airResistFlat: number;
   attackPercentBonus: number;
   defensePercentBonus: number;
   healthPercentBonus: number;

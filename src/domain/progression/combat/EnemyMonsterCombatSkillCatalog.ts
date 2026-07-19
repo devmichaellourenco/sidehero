@@ -51,7 +51,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   {
     skillId: 'poison_spit',
     kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
+    damageComponents: standardDamage('air', 'single'),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -62,7 +62,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 5,
     powerPerRank: 0,
     attributeFactor: 0,
-    onHitDot: { element: 'chaos', damagePerTurn: 3, durationTurns: 3, applyChance: 0.7 },
+    onHitDot: { element: 'air', damagePerTurn: 3, durationTurns: 3, applyChance: 0.7 },
   },
   {
     skillId: 'ground_slam',
@@ -96,7 +96,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   {
     skillId: 'slime_acid',
     kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
+    damageComponents: standardDamage('air', 'single'),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -107,12 +107,12 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 4,
     powerPerRank: 0,
     attributeFactor: 0,
-    onHitDot: { element: 'chaos', damagePerTurn: 2, durationTurns: 4, applyChance: 0.85 },
+    onHitDot: { element: 'air', damagePerTurn: 2, durationTurns: 4, applyChance: 0.85 },
   },
   {
     skillId: 'wraith_drain',
     kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
+    damageComponents: standardDamage('air', 'single'),
     targetPool: 'heroes',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',

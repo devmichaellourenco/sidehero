@@ -7,7 +7,7 @@ describe('CombatResistMapper', () => {
       fire: 10,
       cold: 0,
       lightning: 0,
-      chaos: 0,
+      air: 0,
       allElemental: 5,
     });
 
@@ -20,7 +20,7 @@ describe('CombatResistMapper', () => {
       fire: 12,
       cold: 0,
       lightning: 8,
-      chaos: 0,
+      air: 0,
     });
 
     expect(line).toBe('Resiste: Fogo −12% dano · Raio −8% dano');
@@ -32,7 +32,7 @@ describe('CombatResistMapper', () => {
         fire: 0,
         cold: 0,
         lightning: 0,
-        chaos: 0,
+        air: 0,
       }),
     ).toBeNull();
   });
@@ -42,7 +42,7 @@ describe('CombatResistMapper', () => {
       fire: 0,
       cold: -20,
       lightning: 0,
-      chaos: 0,
+      air: 0,
     });
 
     expect(line).toBe('Vulnerável: Gelo +20% dano');

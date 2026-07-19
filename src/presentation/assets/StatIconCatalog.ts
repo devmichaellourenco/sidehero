@@ -24,7 +24,7 @@ export type StatIconKey =
   | 'fire'
   | 'cold'
   | 'lightning'
-  | 'chaos'
+  | 'air'
   | 'allElemental'
   | 'elementalDamage';
 
@@ -48,7 +48,7 @@ const STAT_ICON_PATHS: Record<StatIconKey, string> = {
   fire: 'ui/stats/fire.png',
   cold: 'ui/stats/cold.png',
   lightning: 'ui/stats/lightning.png',
-  chaos: 'ui/stats/chaos.png',
+  air: 'ui/stats/air.png',
   allElemental: 'ui/stats/all-elemental.png',
   elementalDamage: 'ui/stats/elemental-damage.png',
 };
@@ -70,7 +70,7 @@ export const STAT_LINE_ICON_BY_ID: Record<string, StatIconKey> = {
   'resist-fire': 'fire',
   'resist-cold': 'cold',
   'resist-lightning': 'lightning',
-  'resist-chaos': 'chaos',
+  'resist-air': 'air',
 };
 
 export function getStatIconUrl(key: StatIconKey): string {

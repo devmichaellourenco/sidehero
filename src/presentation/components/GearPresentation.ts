@@ -48,13 +48,32 @@ export interface EquippedGearDto {
   fireResistBonus?: number;
   coldResistBonus?: number;
   lightningResistBonus?: number;
-  chaosResistBonus?: number;
+  airResistBonus?: number;
   allElementalResistBonus?: number;
   fireDamageBonus?: number;
+  fireResistPenetrationBonus?: number;
   coldDamageBonus?: number;
   lightningDamageBonus?: number;
-  chaosDamageBonus?: number;
+  airDamageBonus?: number;
   allElementalDamageBonus?: number;
+  fireDamageFlat?: number;
+  coldDamageFlat?: number;
+  lightningDamageFlat?: number;
+  airDamageFlat?: number;
+  fireResistFlat?: number;
+  coldResistFlat?: number;
+  lightningResistFlat?: number;
+  airResistFlat?: number;
+  attackPercentBonus?: number;
+  defensePercentBonus?: number;
+  healthPercentBonus?: number;
+  physicalDamagePercentBonus?: number;
+  cooldownReductionBonus?: number;
+  dodgeChanceBonus?: number;
+  blockChanceBonus?: number;
+  damageReductionBonus?: number;
+  uniqueEffectDescription?: string | null;
+  requirements?: GearDto['requirements'];
 }
 
 function formatSigned(value: number, suffix: string, label: string): string {
@@ -75,12 +94,12 @@ function elementalDamageBonusEntries(
     | 'fireResistPenetrationBonus'
     | 'coldDamageBonus'
     | 'lightningDamageBonus'
-    | 'chaosDamageBonus'
+    | 'airDamageBonus'
     | 'allElementalDamageBonus'
     | 'fireDamageFlat'
     | 'coldDamageFlat'
     | 'lightningDamageFlat'
-    | 'chaosDamageFlat'
+    | 'airDamageFlat'
   >,
 ): GearBonusEntry[] {
   const parts: GearBonusEntry[] = [];
@@ -102,8 +121,8 @@ function elementalDamageBonusEntries(
       text: formatSigned(gear.lightningDamageBonus, '%', 'Dano Raio'),
     });
   }
-  if (gear.chaosDamageBonus !== 0) {
-    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosDamageBonus, '%', 'Dano Caos') });
+  if (gear.airDamageBonus !== 0) {
+    parts.push({ icon: 'air', text: formatSigned(gear.airDamageBonus, '%', 'Dano Ar') });
   }
   if (gear.allElementalDamageBonus !== 0) {
     parts.push({
@@ -120,8 +139,8 @@ function elementalDamageBonusEntries(
   if (gear.lightningDamageFlat !== 0) {
     parts.push({ icon: 'lightning', text: formatSigned(gear.lightningDamageFlat, '', 'Dano Raio') });
   }
-  if (gear.chaosDamageFlat !== 0) {
-    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosDamageFlat, '', 'Dano Caos') });
+  if (gear.airDamageFlat !== 0) {
+    parts.push({ icon: 'air', text: formatSigned(gear.airDamageFlat, '', 'Dano Ar') });
   }
   return parts;
 }
@@ -132,12 +151,12 @@ function resistBonusEntries(
     | 'fireResistBonus'
     | 'coldResistBonus'
     | 'lightningResistBonus'
-    | 'chaosResistBonus'
+    | 'airResistBonus'
     | 'allElementalResistBonus'
     | 'fireResistFlat'
     | 'coldResistFlat'
     | 'lightningResistFlat'
-    | 'chaosResistFlat'
+    | 'airResistFlat'
   >,
 ): GearBonusEntry[] {
   const parts: GearBonusEntry[] = [];
@@ -153,8 +172,8 @@ function resistBonusEntries(
       text: formatSigned(gear.lightningResistBonus, '%', 'Res. Raio'),
     });
   }
-  if (gear.chaosResistBonus !== 0) {
-    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosResistBonus, '%', 'Res. Caos') });
+  if (gear.airResistBonus !== 0) {
+    parts.push({ icon: 'air', text: formatSigned(gear.airResistBonus, '%', 'Res. Ar') });
   }
   if (gear.allElementalResistBonus !== 0) {
     parts.push({
@@ -171,8 +190,8 @@ function resistBonusEntries(
   if (gear.lightningResistFlat !== 0) {
     parts.push({ icon: 'lightning', text: formatSigned(gear.lightningResistFlat, '', 'Res. Raio') });
   }
-  if (gear.chaosResistFlat !== 0) {
-    parts.push({ icon: 'chaos', text: formatSigned(gear.chaosResistFlat, '', 'Res. Caos') });
+  if (gear.airResistFlat !== 0) {
+    parts.push({ icon: 'air', text: formatSigned(gear.airResistFlat, '', 'Res. Ar') });
   }
   return parts;
 }
@@ -205,22 +224,22 @@ export function listGearBonusEntries(
     fireResistBonus: gear.fireResistBonus ?? 0,
     coldResistBonus: gear.coldResistBonus ?? 0,
     lightningResistBonus: gear.lightningResistBonus ?? 0,
-    chaosResistBonus: gear.chaosResistBonus ?? 0,
+    airResistBonus: gear.airResistBonus ?? 0,
     allElementalResistBonus: gear.allElementalResistBonus ?? 0,
     fireResistFlat: gear.fireResistFlat ?? 0,
     coldResistFlat: gear.coldResistFlat ?? 0,
     lightningResistFlat: gear.lightningResistFlat ?? 0,
-    chaosResistFlat: gear.chaosResistFlat ?? 0,
+    airResistFlat: gear.airResistFlat ?? 0,
     fireDamageBonus: gear.fireDamageBonus ?? 0,
     fireResistPenetrationBonus: gear.fireResistPenetrationBonus ?? 0,
     coldDamageBonus: gear.coldDamageBonus ?? 0,
     lightningDamageBonus: gear.lightningDamageBonus ?? 0,
-    chaosDamageBonus: gear.chaosDamageBonus ?? 0,
+    airDamageBonus: gear.airDamageBonus ?? 0,
     allElementalDamageBonus: gear.allElementalDamageBonus ?? 0,
     fireDamageFlat: gear.fireDamageFlat ?? 0,
     coldDamageFlat: gear.coldDamageFlat ?? 0,
     lightningDamageFlat: gear.lightningDamageFlat ?? 0,
-    chaosDamageFlat: gear.chaosDamageFlat ?? 0,
+    airDamageFlat: gear.airDamageFlat ?? 0,
     dodgeChanceBonus: gear.dodgeChanceBonus ?? 0,
     blockChanceBonus: gear.blockChanceBonus ?? 0,
     damageReductionBonus: gear.damageReductionBonus ?? 0,
@@ -552,15 +571,32 @@ export function renderEquippedGearCard(
       fireResistBonus: gear.fireResistBonus ?? 0,
       coldResistBonus: gear.coldResistBonus ?? 0,
       lightningResistBonus: gear.lightningResistBonus ?? 0,
-      chaosResistBonus: gear.chaosResistBonus ?? 0,
+      airResistBonus: gear.airResistBonus ?? 0,
       allElementalResistBonus: gear.allElementalResistBonus ?? 0,
       fireDamageBonus: gear.fireDamageBonus ?? 0,
       fireResistPenetrationBonus: gear.fireResistPenetrationBonus ?? 0,
       coldDamageBonus: gear.coldDamageBonus ?? 0,
       lightningDamageBonus: gear.lightningDamageBonus ?? 0,
-      chaosDamageBonus: gear.chaosDamageBonus ?? 0,
+      airDamageBonus: gear.airDamageBonus ?? 0,
       allElementalDamageBonus: gear.allElementalDamageBonus ?? 0,
-      requirements: { minLevel: 1 },
+      fireDamageFlat: gear.fireDamageFlat ?? 0,
+      coldDamageFlat: gear.coldDamageFlat ?? 0,
+      lightningDamageFlat: gear.lightningDamageFlat ?? 0,
+      airDamageFlat: gear.airDamageFlat ?? 0,
+      fireResistFlat: gear.fireResistFlat ?? 0,
+      coldResistFlat: gear.coldResistFlat ?? 0,
+      lightningResistFlat: gear.lightningResistFlat ?? 0,
+      airResistFlat: gear.airResistFlat ?? 0,
+      attackPercentBonus: gear.attackPercentBonus ?? 0,
+      defensePercentBonus: gear.defensePercentBonus ?? 0,
+      healthPercentBonus: gear.healthPercentBonus ?? 0,
+      physicalDamagePercentBonus: gear.physicalDamagePercentBonus ?? 0,
+      cooldownReductionBonus: gear.cooldownReductionBonus ?? 0,
+      dodgeChanceBonus: gear.dodgeChanceBonus ?? 0,
+      blockChanceBonus: gear.blockChanceBonus ?? 0,
+      damageReductionBonus: gear.damageReductionBonus ?? 0,
+      uniqueEffectDescription: gear.uniqueEffectDescription,
+      requirements: gear.requirements ?? { minLevel: 1 },
     },
     {
       actionLabel: 'Desequipar',

@@ -6,7 +6,7 @@ export function resistanceProfileFromGear(gear: Gear): ResistanceProfile {
     fire: gear.fireResistBonus + gear.fireResistFlat,
     cold: gear.coldResistBonus + gear.coldResistFlat,
     lightning: gear.lightningResistBonus + gear.lightningResistFlat,
-    chaos: gear.chaosResistBonus + gear.chaosResistFlat,
+    air: gear.airResistBonus + gear.airResistFlat,
     allElemental: gear.allElementalResistBonus,
   };
 }
@@ -20,7 +20,7 @@ export function aggregateResistanceProfile(gears: Iterable<Gear | null | undefin
     total.fire += profile.fire;
     total.cold += profile.cold;
     total.lightning += profile.lightning;
-    total.chaos += profile.chaos;
+    total.air += profile.air;
     total.allElemental += profile.allElemental;
   }
 

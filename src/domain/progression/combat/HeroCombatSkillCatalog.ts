@@ -602,7 +602,7 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 1,
     powerPerRank: 4,
     attributeFactor: 0.675,
-    onHitDot: { element: 'chaos', damagePerTurn: 4, durationTurns: 3, applyChance: 0.75 },
+    onHitDot: { element: 'air', damagePerTurn: 4, durationTurns: 3, applyChance: 0.75 },
   },
   {
     skillId: 'mar_mes_flow',
@@ -747,7 +747,7 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   {
     skillId: 'arc_arq_rift',
     kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
+    damageComponents: standardDamage('air', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -902,7 +902,7 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   {
     skillId: 'inn_fil_ether',
     kind: 'damage',
-    damageComponents: standardDamage('chaos', 'single'),
+    damageComponents: standardDamage('air', 'single'),
     targetPool: 'enemies',
     targetScope: 'single',
     targetPriority: 'lowest_hp_percent',
@@ -916,7 +916,7 @@ export const HERO_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
   {
     skillId: 'inn_fil_storm',
     kind: 'damage',
-    damageComponents: standardDamage('chaos', 'all', { delivery: 'aoe' }),
+    damageComponents: standardDamage('air', 'all', { delivery: 'aoe' }),
     targetPool: 'enemies',
     targetScope: 'all',
     targetPriority: 'lowest_hp_percent',

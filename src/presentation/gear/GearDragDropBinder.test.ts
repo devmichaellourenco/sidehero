@@ -75,6 +75,7 @@ describe('GearDragDropBinder', () => {
       onEquip,
       onUnequip: vi.fn(),
       onMoveToStash: vi.fn(),
+      onMoveFromStash: vi.fn(),
       onMoveFromStashThenEquip: vi.fn(),
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
@@ -119,6 +120,7 @@ describe('GearDragDropBinder', () => {
       onEquip: vi.fn(),
       onUnequip: vi.fn(),
       onMoveToStash: vi.fn(),
+      onMoveFromStash: vi.fn(),
       onMoveFromStashThenEquip: vi.fn(),
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
@@ -165,6 +167,7 @@ describe('GearDragDropBinder', () => {
       onEquip: vi.fn(),
       onUnequip,
       onMoveToStash: vi.fn(),
+      onMoveFromStash: vi.fn(),
       onMoveFromStashThenEquip: vi.fn(),
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
@@ -187,6 +190,93 @@ describe('GearDragDropBinder', () => {
     expect(onUnequip).toHaveBeenCalledWith('h1', 'armor');
   });
 
+  it('envia item do baú ao inventário ao soltar na zona do inventário', () => {
+    const root = document.createElement('div');
+    const payload = encodeURIComponent(
+      serializeGearDragSource({ kind: 'stash', gearId: 'g5', slot: 'weapon' }),
+    );
+    root.innerHTML = `
+      <div role="button" draggable="true" data-drag-gear="${payload}">stash item</div>
+      <div class="inventory-dock-slot stash-inventory-slot" data-drop-zone="inventory">inventário</div>
+    `;
+    document.body.append(root);
+
+    const onMoveFromStash = vi.fn();
+    bindGearDragDrop(root, {
+      canEditGear: () => true,
+      canEditParty: () => true,
+      onEquip: vi.fn(),
+      onUnequip: vi.fn(),
+      onMoveToStash: vi.fn(),
+      onMoveFromStash,
+      onMoveFromStashThenEquip: vi.fn(),
+      onEquippedToStash: vi.fn(),
+      onMoveEquippedGear: vi.fn(),
+      onDestroyGear: vi.fn(),
+      onPartySlotDrop: vi.fn(),
+      onPartyActiveToBench: vi.fn(),
+      onPartyReorder: vi.fn(),
+    });
+
+    const source = root.querySelector('[data-drag-gear]') as HTMLElement;
+    const zone = root.querySelector('[data-drop-zone="inventory"]') as HTMLElement;
+    const dt = dragDataTransfer();
+
+    source.dispatchEvent(createDragEvent('dragstart', dt));
+    expect(zone.classList.contains('gear-drop-target--valid')).toBe(true);
+
+    const over = createDragEvent('dragover', dt, { cancelable: true });
+    zone.dispatchEvent(over);
+    expect(over.defaultPrevented).toBe(true);
+
+    zone.dispatchEvent(createDragEvent('drop', dt, { cancelable: true }));
+    expect(onMoveFromStash).toHaveBeenCalledWith('g5');
+  });
+
+  it('destrói item do baú ao soltar no slot destruir', () => {
+    const root = document.createElement('div');
+    const payload = encodeURIComponent(
+      serializeGearDragSource({ kind: 'stash', gearId: 'g6', slot: 'armor' }),
+    );
+    root.innerHTML = `
+      <div role="button" draggable="true" data-drag-gear="${payload}">stash item</div>
+      <div class="inventory-destroy-slot" data-drop-zone="destroy">destroy</div>
+    `;
+    document.body.append(root);
+
+    const onDestroyGear = vi.fn();
+    bindGearDragDrop(root, {
+      canEditGear: () => true,
+      canEditParty: () => true,
+      onEquip: vi.fn(),
+      onUnequip: vi.fn(),
+      onMoveToStash: vi.fn(),
+      onMoveFromStash: vi.fn(),
+      onMoveFromStashThenEquip: vi.fn(),
+      onEquippedToStash: vi.fn(),
+      onMoveEquippedGear: vi.fn(),
+      onDestroyGear,
+      onPartySlotDrop: vi.fn(),
+      onPartyActiveToBench: vi.fn(),
+      onPartyReorder: vi.fn(),
+    });
+
+    const source = root.querySelector('[data-drag-gear]') as HTMLElement;
+    const destroySlot = root.querySelector('[data-drop-zone="destroy"]') as HTMLElement;
+    const dt = dragDataTransfer();
+
+    source.dispatchEvent(createDragEvent('dragstart', dt));
+    expect(destroySlot.classList.contains('gear-drop-target--valid')).toBe(true);
+
+    destroySlot.dispatchEvent(createDragEvent('dragover', dt, { cancelable: true }));
+    destroySlot.dispatchEvent(createDragEvent('drop', dt, { cancelable: true }));
+    expect(onDestroyGear).toHaveBeenCalledWith({
+      kind: 'stash',
+      gearId: 'g6',
+      slot: 'armor',
+    });
+  });
+
   it('abre destruição ao soltar item do inventário no slot destruir', () => {
     const root = document.createElement('div');
     const payload = encodeURIComponent(
@@ -205,6 +295,7 @@ describe('GearDragDropBinder', () => {
       onEquip: vi.fn(),
       onUnequip: vi.fn(),
       onMoveToStash: vi.fn(),
+      onMoveFromStash: vi.fn(),
       onMoveFromStashThenEquip: vi.fn(),
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
@@ -246,6 +337,7 @@ describe('GearDragDropBinder', () => {
       onEquip: vi.fn(),
       onUnequip: vi.fn(),
       onMoveToStash: vi.fn(),
+      onMoveFromStash: vi.fn(),
       onMoveFromStashThenEquip: vi.fn(),
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),

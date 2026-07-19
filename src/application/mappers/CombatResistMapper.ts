@@ -8,14 +8,14 @@ export interface CombatResistSummaryDto {
   fire: number;
   cold: number;
   lightning: number;
-  chaos: number;
+  air: number;
 }
 
 const RESIST_KEYS: Array<keyof CombatResistSummaryDto> = [
   'fire',
   'cold',
   'lightning',
-  'chaos',
+  'air',
 ];
 
 export function mapCombatResistSummary(profile: ResistanceProfile): CombatResistSummaryDto {
@@ -23,7 +23,7 @@ export function mapCombatResistSummary(profile: ResistanceProfile): CombatResist
     fire: getEffectiveResistance(profile, 'fire'),
     cold: getEffectiveResistance(profile, 'cold'),
     lightning: getEffectiveResistance(profile, 'lightning'),
-    chaos: getEffectiveResistance(profile, 'chaos'),
+    air: getEffectiveResistance(profile, 'air'),
   };
 }
 

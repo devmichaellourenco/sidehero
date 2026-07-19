@@ -12,7 +12,7 @@ describe('EnemyInnateResists', () => {
   it('infere tema por id quando não há override', () => {
     const profile = resolveEnemyInnateResists('giant_spider');
 
-    expect(profile.chaos).toBeGreaterThan(0);
+    expect(profile.air).toBeGreaterThan(0);
   });
 
   it('boss recebe bônus de role', () => {
@@ -25,6 +25,6 @@ describe('EnemyInnateResists', () => {
     const low = resolveEnemyInnateResists('giant_spider', 5);
     const high = resolveEnemyInnateResists('giant_spider', 100);
 
-    expect(high.chaos).toBeGreaterThan(low.chaos);
+    expect(high.air).toBeGreaterThan(low.air);
   });
 });

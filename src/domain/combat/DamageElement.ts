@@ -1,4 +1,4 @@
-export const DAMAGE_ELEMENTS = ['physical', 'fire', 'cold', 'lightning', 'chaos'] as const;
+export const DAMAGE_ELEMENTS = ['physical', 'fire', 'cold', 'lightning', 'air'] as const;
 
 export type DamageElement = (typeof DAMAGE_ELEMENTS)[number];
 
@@ -7,5 +7,5 @@ export const DAMAGE_ELEMENT_LABELS: Record<DamageElement, string> = {
   fire: 'Fogo',
   cold: 'Gelo',
   lightning: 'Raio',
-  chaos: 'Caos',
+  air: 'Ar',
 };

@@ -490,6 +490,9 @@ export class GameViewController {
       onMoveToStash: (gearId) => {
         void this.gearStorageFlow.moveToStash(gearId);
       },
+      onMoveFromStash: (gearId) => {
+        void this.gearStorageFlow.moveFromStash(gearId);
+      },
       onMoveFromStashThenEquip: (gearId, heroId) => {
         void (async () => {
           await this.gearStorageFlow.moveFromStash(gearId);

@@ -54,7 +54,9 @@ Referência canônica: card `.onboarding-card`.
 | `--element-fire` | `#b85a10` | Elemento fogo (claro) |
 | `--element-cold` | `#156a8a` | Elemento gelo |
 | `--element-lightning` | `#8a7010` | Elemento raio |
-| `--element-chaos` | `#6a3a8a` | Elemento caos |
+| `--element-air` | `#3f7f73` | Elemento ar |
+| `--legend-heroes` | `#6a3a8a` | Legenda Heróis na árvore (não acoplar a `--element-air`) |
+| `--ascension-arcane` | `#6a3a8a` | Título do caminho arcano (não acoplar a `--element-air`) |
 
 Canônico TS: `MedievalThemeTokens.ts` (`MEDIEVAL_THEME` + `MEDIEVAL_THEME_SEMANTICS`). Ao mudar tema, alterar tokens → espelhar `:root` → UI via `var(--*)`.
 

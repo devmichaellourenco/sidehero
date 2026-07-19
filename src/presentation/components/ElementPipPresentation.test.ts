@@ -15,7 +15,7 @@ describe('ElementPipPresentation', () => {
       fire: 12,
       cold: 0,
       lightning: 0,
-      chaos: 0,
+      air: 0,
     });
 
     expect(html).toContain('element-stat--resist');
@@ -29,7 +29,7 @@ describe('ElementPipPresentation', () => {
       fire: 0,
       cold: -20,
       lightning: 0,
-      chaos: 0,
+      air: 0,
     });
 
     expect(html).toContain('element-stat--weakness');

@@ -25,14 +25,14 @@ describe('ResistanceProfileAggregator', () => {
       attackBonus: 0,
       defenseBonus: 0,
       healthBonus: 10,
-      chaosResistBonus: 6,
+      airResistBonus: 6,
       allElementalResistBonus: 4,
     });
 
     const profile = aggregateResistanceProfile([armor, accessory]);
 
     expect(profile.fire).toBe(8);
-    expect(profile.chaos).toBe(6);
+    expect(profile.air).toBe(6);
     expect(profile.allElemental).toBe(4);
   });
 

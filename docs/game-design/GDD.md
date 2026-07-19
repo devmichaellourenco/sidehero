@@ -138,7 +138,7 @@ O combate acontece em tempo real por ticks e é resolvido automaticamente. Heró
 O sistema contempla:
 
 - Dano físico mitigado por defesa.
-- Dano elemental de fogo, gelo, raio e caos, mitigado por resistências.
+- Dano elemental de fogo, gelo, raio e ar, mitigado por resistências.
 - Crítico, esquiva, bloqueio e redução de dano.
 - Cura, dano ao longo do tempo, buffs e debuffs.
 - Waves com inimigos comuns, elites e chefes.

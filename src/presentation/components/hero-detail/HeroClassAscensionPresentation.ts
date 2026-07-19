@@ -43,10 +43,9 @@ export function renderAscensionMomentBanner(isUpgrade: boolean, heroName: string
           class="ascension-moment-header__title"
           data-ascension-moment-tooltip
           tabindex="0"
-          aria-label="Próximo capítulo — passe o mouse para detalhes"
+          aria-label="Próxima Classe — passe o mouse para detalhes"
         >
-          Próximo capítulo
-          <span class="ascension-moment-header__hint" aria-hidden="true">ⓘ</span>
+          Próxima Classe
         </h3>
         <span class="ascension-moment-tooltip-content hidden">
           <strong class="ascension-moment-tooltip-title">Evolução iminente</strong>

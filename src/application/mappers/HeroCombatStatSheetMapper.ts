@@ -114,7 +114,7 @@ function buildResistanceLine(
           ? gear.coldResistBonus + gear.coldResistFlat
           : element === 'lightning'
             ? gear.lightningResistBonus + gear.lightningResistFlat
-            : gear.chaosResistBonus + gear.chaosResistFlat;
+            : gear.airResistBonus + gear.airResistFlat;
     const allElemental = gear.allElementalResistBonus;
     const parts: string[] = [];
     if (direct !== 0) parts.push(`${direct >= 0 ? '+' : ''}${Math.round(direct)}%`);
@@ -333,7 +333,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   ];
 
   const resistances: HeroCombatStatLineDto[] = (
-    ['fire', 'cold', 'lightning', 'chaos'] as const
+    ['fire', 'cold', 'lightning', 'air'] as const
   ).map((element) => buildResistanceLine(element, resistProfile, equipment));
 
   if (resistProfile.allElemental === 0 && resistances.every((line) => line.value === '+0%')) {

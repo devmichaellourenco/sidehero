@@ -122,7 +122,7 @@
   "void_shroud": {
     "common": "shadow_mantle",
     "uncommon": "abyss_cloak",
-    "rare": "chaos_mantle",
+    "rare": "air_mantle",
     "epic": "deep_night_veil",
     "legendary": "ancient_void_mantle",
     "mythic": "world_devourer_shroud"
@@ -185,7 +185,7 @@
   },
   "entropy_pendant": {
     "common": "obsidian_pendant",
-    "uncommon": "chaos_pendant",
+    "uncommon": "air_pendant",
     "rare": "entropy_pendant",
     "epic": "void_medallion",
     "legendary": "ancient_abyss_pendant",

@@ -17,13 +17,30 @@ import { Hero, HeroProps } from '../../domain/entities/Hero';
 import { Enemy, EnemyProps } from '../../domain/entities/Enemy';
 import { EnemyRole } from '../../domain/campaign/WaveDefinition';
 import { inferEnemyType, migrateLegacyEnemyType } from '../../domain/entities/EnemyType';
-import { Chest, ChestProps } from '../../domain/entities/Chest';
+import { Chest } from '../../domain/entities/Chest';
 import { CombatState } from '../../domain/entities/CombatState';
 import { ActionTimerService } from '../../domain/services/combat/ActionTimerService';
 import { normalizeActionTimerMap } from '../../domain/services/combat/ActionTimerTypes';
 import { ChestType } from '../../domain/combat/ChestType';
+import {
+  CombatStatusEffect,
+  StatusEffectMap,
+} from '../../domain/services/combat/CombatStatusEffect';
 
 type RawRecord = Record<string, unknown>;
+
+/** IDs de catálogo/template pré-renomeação Caos → Ar. */
+const LEGACY_CHAOS_GEAR_IDS: Record<string, string> = {
+  chaos_mantle: 'air_mantle',
+  chaos_pendant: 'air_pendant',
+};
+
+const LEGACY_CHAOS_GEAR_STAT_FIELDS = [
+  ['chaosResistBonus', 'airResistBonus'],
+  ['chaosResistFlat', 'airResistFlat'],
+  ['chaosDamageBonus', 'airDamageBonus'],
+  ['chaosDamageFlat', 'airDamageFlat'],
+] as const;
 
 const LEGACY_HERO_NAMES: Record<string, string> = {
   Arthos: 'Galneon',
@@ -287,10 +304,7 @@ export function migrateCombat(
           combat.skillCooldowns && typeof combat.skillCooldowns === 'object'
             ? (combat.skillCooldowns as CombatState['skillCooldowns'])
             : {},
-        statusEffects:
-          combat.statusEffects && typeof combat.statusEffects === 'object'
-            ? (combat.statusEffects as CombatState['statusEffects'])
-            : {},
+        statusEffects: migrateStatusEffects(combat.statusEffects),
         encounterMeta:
           combat.encounterMeta && typeof combat.encounterMeta === 'object'
             ? (combat.encounterMeta as CombatState['encounterMeta'])
@@ -303,6 +317,55 @@ export function migrateCombat(
   if (!legacyEnemy) return null;
 
   return CombatState.fromLegacyEnemy(legacyEnemy, heroes, new ActionTimerService());
+}
+
+/** Converte `dotElement: 'chaos'` legado para `'air'`. */
+export function migrateStatusEffects(raw: unknown): StatusEffectMap {
+  if (!raw || typeof raw !== 'object') {
+    return {};
+  }
+
+  const result: StatusEffectMap = {};
+  for (const [combatantKey, effects] of Object.entries(asRecord(raw))) {
+    if (!Array.isArray(effects)) continue;
+    result[combatantKey] = effects.map((effect) => migrateStatusEffect(effect));
+  }
+  return result;
+}
+
+function migrateStatusEffect(raw: unknown): CombatStatusEffect {
+  const effect = { ...asRecord(raw) };
+  if (effect.dotElement === 'chaos') {
+    effect.dotElement = 'air';
+  }
+  return effect as unknown as CombatStatusEffect;
+}
+
+/**
+ * Renomeia campos/IDs de gear do elemento Caos legado para Ar.
+ * Não sobrescreve `air*` se já existir; remove chaves `chaos*` da saída.
+ */
+export function migrateLegacyChaosGearFields(raw: RawRecord): void {
+  for (const [legacyKey, airKey] of LEGACY_CHAOS_GEAR_STAT_FIELDS) {
+    if (raw[airKey] === undefined && typeof raw[legacyKey] === 'number') {
+      raw[airKey] = raw[legacyKey];
+    }
+    delete raw[legacyKey];
+  }
+
+  if (typeof raw.catalogItemId === 'string') {
+    const mapped = LEGACY_CHAOS_GEAR_IDS[raw.catalogItemId];
+    if (mapped) {
+      raw.catalogItemId = mapped;
+    }
+  }
+
+  if (typeof raw.templateId === 'string') {
+    const mapped = LEGACY_CHAOS_GEAR_IDS[raw.templateId];
+    if (mapped) {
+      raw.templateId = mapped;
+    }
+  }
 }
 
 export function migrateChest(raw: unknown): Chest {
@@ -324,7 +387,8 @@ export function migrateChest(raw: unknown): Chest {
 }
 
 export function migrateGear(raw: unknown): Gear {
-  const props = { ...(raw as GearProps) };
+  const props = { ...(raw as GearProps & RawRecord) } as GearProps & RawRecord;
+  migrateLegacyChaosGearFields(props);
 
   if (!props.templateId && props.catalogItemId) {
     props.templateId = getGearCatalogItem(props.catalogItemId)?.spriteId ?? props.catalogItemId;

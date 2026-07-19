@@ -10,7 +10,7 @@ describe('MitigationPipeline', () => {
       {
         armor: 0,
         stageLevel: 1,
-        resistances: { fire: 25, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 25, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
     );
 
@@ -27,7 +27,7 @@ describe('MitigationPipeline', () => {
       {
         armor: 40,
         stageLevel: 1,
-        resistances: { fire: 0, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 0, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
     );
 
@@ -42,7 +42,7 @@ describe('MitigationPipeline', () => {
       {
         armor: 0,
         stageLevel: 1,
-        resistances: { fire: 0, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 0, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
     );
     const boosted = resolveMultiComponentDamage(
@@ -51,9 +51,9 @@ describe('MitigationPipeline', () => {
       {
         armor: 0,
         stageLevel: 1,
-        resistances: { fire: 0, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 0, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
-      { fire: 20, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+      { fire: 20, cold: 0, lightning: 0, air: 0, allElemental: 0 },
     );
 
     expect(boosted).toBeGreaterThan(baseline);
@@ -67,10 +67,10 @@ describe('MitigationPipeline', () => {
       {
         armor: 0,
         stageLevel: 1,
-        resistances: { fire: 0, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 0, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
       ZERO_ELEMENTAL_DAMAGE,
-      { fire: 8, cold: 0, lightning: 0, chaos: 0 },
+      { fire: 8, cold: 0, lightning: 0, air: 0 },
     );
 
     expect(amount).toBe(58);
@@ -83,7 +83,7 @@ describe('MitigationPipeline', () => {
       {
         armor: 0,
         stageLevel: 1,
-        resistances: { fire: 40, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 40, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
     );
     const penetrated = resolveMultiComponentDamage(
@@ -92,12 +92,12 @@ describe('MitigationPipeline', () => {
       {
         armor: 0,
         stageLevel: 1,
-        resistances: { fire: 40, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        resistances: { fire: 40, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
       ZERO_ELEMENTAL_DAMAGE,
-      { fire: 0, cold: 0, lightning: 0, chaos: 0 },
+      { fire: 0, cold: 0, lightning: 0, air: 0 },
       0,
-      { fire: 30, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+      { fire: 30, cold: 0, lightning: 0, air: 0, allElemental: 0 },
     );
 
     expect(baseline).toBe(60);

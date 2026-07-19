@@ -19,7 +19,8 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] Seleção de fase: apenas desbloqueadas ou já concluídas (replay)
 - [x] Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase
 - [x] Scaling de inimigos segue `StageScalingCatalog` por tier global
-- [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos e status
+- [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos (`physical`/`fire`/`cold`/`lightning`/`air`) e status
+- [x] Persistência migra saves legados: gear/stats `chaos*` → `air*`, IDs `chaos_mantle`/`chaos_pendant` → `air_*`, `dotElement: chaos` → `air`
 
 ## Escopo do jogo base (v1)
 

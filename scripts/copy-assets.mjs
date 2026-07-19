@@ -161,7 +161,7 @@ const ASSET_MAP = [
   ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_fire.png', 'ui/stats/fire.png'],
   ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_snowflake.png', 'ui/stats/cold.png'],
   ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_thunder.png', 'ui/stats/lightning.png'],
-  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_cyclone.png', 'ui/stats/chaos.png'],
+  ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_cyclone.png', 'ui/stats/air.png'],
   ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_shield_magic.png', 'ui/stats/all-elemental.png'],
   ['Sprites/Component/Icon_PictoIcons_(Original)/btn_icon_energy.png', 'ui/stats/elemental-damage.png'],
 

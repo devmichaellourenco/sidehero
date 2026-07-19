@@ -12,7 +12,7 @@ describe('DotTickResolver', () => {
       fire: 50,
       cold: 0,
       lightning: 0,
-      chaos: 0,
+      air: 0,
       allElemental: 0,
     });
 
@@ -31,7 +31,7 @@ describe('DotTickResolver', () => {
         fire: 0,
         cold: 0,
         lightning: 0,
-        chaos: 0,
+        air: 0,
         allElemental: 0,
       }),
       1,
@@ -43,7 +43,7 @@ describe('DotTickResolver', () => {
         fire: 0,
         cold: 40,
         lightning: 0,
-        chaos: 0,
+        air: 0,
         allElemental: 0,
       }),
       1,
@@ -70,7 +70,7 @@ describe('DotTickResolver', () => {
       fire: 0,
       cold: 25,
       lightning: 0,
-      chaos: 0,
+      air: 0,
       allElemental: 0,
     });
 
@@ -85,5 +85,13 @@ describe('DotTickResolver', () => {
 
     expect(batch.totalDamage).toBeGreaterThan(0);
     expect(batch.primaryElement).toBe('fire');
+  });
+
+  it('DOT sem elemento explícito usa air', () => {
+    const resolved = resolveDotTickDamage(10, undefined, buildMitigationTarget(0, 1, ZERO_RESISTANCES), 1);
+    expect(resolved.amount).toBeGreaterThan(0);
+
+    const batch = applyMitigatedDotTicks([{ magnitude: 5 }], buildMitigationTarget(0, 1, ZERO_RESISTANCES), 1);
+    expect(batch.primaryElement).toBe('air');
   });
 });

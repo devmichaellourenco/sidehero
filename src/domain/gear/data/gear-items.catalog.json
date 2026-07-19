@@ -763,8 +763,8 @@
     "attackBonus": 24,
     "defenseBonus": 1,
     "healthBonus": 0,
-    "chaosDamageBonus": 6,
-    "chaosDamageFlat": 2,
+    "airDamageBonus": 6,
+    "airDamageFlat": 2,
     "requirements": {
       "minLevel": 6,
       "str": 3
@@ -782,8 +782,8 @@
     "healthBonus": 0,
     "attackPercentBonus": 8,
     "physicalDamagePercentBonus": 4,
-    "chaosDamageBonus": 10,
-    "chaosDamageFlat": 4,
+    "airDamageBonus": 10,
+    "airDamageFlat": 4,
     "requirements": {
       "minLevel": 10,
       "str": 6
@@ -802,8 +802,8 @@
     "attackPercentBonus": 10,
     "physicalDamagePercentBonus": 5,
     "critChanceBonus": 0.026000000000000002,
-    "chaosDamageBonus": 14,
-    "chaosDamageFlat": 6,
+    "airDamageBonus": 14,
+    "airDamageFlat": 6,
     "requirements": {
       "minLevel": 15,
       "str": 10
@@ -822,8 +822,8 @@
     "attackPercentBonus": 12,
     "physicalDamagePercentBonus": 6,
     "critChanceBonus": 0.03,
-    "chaosDamageBonus": 18,
-    "chaosDamageFlat": 8,
+    "airDamageBonus": 18,
+    "airDamageFlat": 8,
     "requirements": {
       "minLevel": 22,
       "str": 15
@@ -1537,21 +1537,21 @@
     "sprite": "gear/items/abyss_cloak.png"
   },
   {
-    "id": "chaos_mantle",
-    "name": "Manto do Caos (rare)",
+    "id": "air_mantle",
+    "name": "Manto do Ar (rare)",
     "slot": "armor",
     "rarity": "rare",
     "attackBonus": 0,
     "defenseBonus": 24,
     "healthBonus": 43,
-    "chaosResistBonus": 6,
-    "chaosResistFlat": 2,
+    "airResistBonus": 6,
+    "airResistFlat": 2,
     "requirements": {
       "minLevel": 6,
       "dex": 3
     },
-    "spriteId": "chaos_mantle",
-    "sprite": "gear/items/chaos_mantle.png"
+    "spriteId": "air_mantle",
+    "sprite": "gear/items/air_mantle.png"
   },
   {
     "id": "deep_night_veil",
@@ -1562,8 +1562,8 @@
     "defenseBonus": 42,
     "healthBonus": 75,
     "defensePercentBonus": 8,
-    "chaosResistBonus": 10,
-    "chaosResistFlat": 4,
+    "airResistBonus": 10,
+    "airResistFlat": 4,
     "requirements": {
       "minLevel": 10,
       "dex": 6
@@ -1580,8 +1580,8 @@
     "defenseBonus": 72,
     "healthBonus": 129,
     "defensePercentBonus": 10,
-    "chaosResistBonus": 14,
-    "chaosResistFlat": 6,
+    "airResistBonus": 14,
+    "airResistFlat": 6,
     "requirements": {
       "minLevel": 15,
       "dex": 10
@@ -1598,8 +1598,8 @@
     "defenseBonus": 125,
     "healthBonus": 225,
     "defensePercentBonus": 12,
-    "chaosResistBonus": 18,
-    "chaosResistFlat": 8,
+    "airResistBonus": 18,
+    "airResistFlat": 8,
     "requirements": {
       "minLevel": 22,
       "dex": 15
@@ -2322,8 +2322,8 @@
     "sprite": "gear/items/obsidian_pendant.png"
   },
   {
-    "id": "chaos_pendant",
-    "name": "Pingente do Caos (uncommon)",
+    "id": "air_pendant",
+    "name": "Pingente do Ar (uncommon)",
     "slot": "accessory",
     "rarity": "uncommon",
     "attackBonus": 2,
@@ -2333,8 +2333,8 @@
       "minLevel": 3,
       "int": 0
     },
-    "spriteId": "chaos_pendant",
-    "sprite": "gear/items/chaos_pendant.png"
+    "spriteId": "air_pendant",
+    "sprite": "gear/items/air_pendant.png"
   },
   {
     "id": "entropy_pendant",
@@ -2344,10 +2344,10 @@
     "attackBonus": 3,
     "defenseBonus": 0,
     "healthBonus": 57,
-    "chaosDamageBonus": 4,
-    "chaosDamageFlat": 2,
-    "chaosResistBonus": 4,
-    "chaosResistFlat": 2,
+    "airDamageBonus": 4,
+    "airDamageFlat": 2,
+    "airResistBonus": 4,
+    "airResistFlat": 2,
     "requirements": {
       "minLevel": 6,
       "int": 3
@@ -2363,10 +2363,10 @@
     "attackBonus": 6,
     "defenseBonus": 0,
     "healthBonus": 100,
-    "chaosDamageBonus": 8,
-    "chaosDamageFlat": 4,
-    "chaosResistBonus": 8,
-    "chaosResistFlat": 4,
+    "airDamageBonus": 8,
+    "airDamageFlat": 4,
+    "airResistBonus": 8,
+    "airResistFlat": 4,
     "requirements": {
       "minLevel": 10,
       "int": 6
@@ -2383,10 +2383,10 @@
     "defenseBonus": 0,
     "healthBonus": 172,
     "healthPercentBonus": 6,
-    "chaosDamageBonus": 12,
-    "chaosDamageFlat": 6,
-    "chaosResistBonus": 12,
-    "chaosResistFlat": 6,
+    "airDamageBonus": 12,
+    "airDamageFlat": 6,
+    "airResistBonus": 12,
+    "airResistFlat": 6,
     "requirements": {
       "minLevel": 15,
       "int": 10
@@ -2404,10 +2404,10 @@
     "healthBonus": 300,
     "healthPercentBonus": 7,
     "critDamageBonus": 0.18,
-    "chaosDamageBonus": 16,
-    "chaosDamageFlat": 8,
-    "chaosResistBonus": 16,
-    "chaosResistFlat": 8,
+    "airDamageBonus": 16,
+    "airDamageFlat": 8,
+    "airResistBonus": 16,
+    "airResistFlat": 8,
     "requirements": {
       "minLevel": 22,
       "int": 15

@@ -6,6 +6,8 @@ import {
 import { GEAR_SLOTS, GEAR_SLOT_LABELS, GearSlotKey } from './GearPresentation';
 import { compareGearRarityRank } from './GearRarityPresentation';
 import { renderStashGrid } from './StorageGridPresentation';
+import { renderInventoryDestroySlot } from './InventoryDestroySlotPresentation';
+import { renderStashInventorySlot } from './StashInventorySlotPresentation';
 import { InventorySortMode } from './InventoryModalRenderer';
 
 export type StashModalHandlers = {
@@ -73,7 +75,15 @@ export class StashModalRenderer {
         ${countLabel}
         ${renderStashGrid(sorted, { canWithdraw })}
         <footer class="inventory-footer stash-footer">
-          <p class="stash-capacity-hint">Inventário: ${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit}</p>
+          ${renderStashInventorySlot({
+            canWithdraw,
+            used: state.storageCapacity.inventoryUsed,
+            limit: state.storageCapacity.inventoryLimit,
+          })}
+          <div class="inventory-footer-center">
+            <p class="stash-capacity-hint">Arraste um item para enviar ao inventário ou destruir</p>
+          </div>
+          ${renderInventoryDestroySlot()}
         </footer>
       </div>
     `;

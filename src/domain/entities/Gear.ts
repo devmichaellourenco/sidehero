@@ -41,22 +41,22 @@ export interface GearProps {
   fireResistBonus?: number;
   coldResistBonus?: number;
   lightningResistBonus?: number;
-  chaosResistBonus?: number;
+  airResistBonus?: number;
   allElementalResistBonus?: number;
   fireDamageBonus?: number;
   fireResistPenetrationBonus?: number;
   coldDamageBonus?: number;
   lightningDamageBonus?: number;
-  chaosDamageBonus?: number;
+  airDamageBonus?: number;
   allElementalDamageBonus?: number;
   fireDamageFlat?: number;
   coldDamageFlat?: number;
   lightningDamageFlat?: number;
-  chaosDamageFlat?: number;
+  airDamageFlat?: number;
   fireResistFlat?: number;
   coldResistFlat?: number;
   lightningResistFlat?: number;
-  chaosResistFlat?: number;
+  airResistFlat?: number;
   attackPercentBonus?: number;
   defensePercentBonus?: number;
   healthPercentBonus?: number;
@@ -87,22 +87,22 @@ export class Gear {
   readonly fireResistBonus: number;
   readonly coldResistBonus: number;
   readonly lightningResistBonus: number;
-  readonly chaosResistBonus: number;
+  readonly airResistBonus: number;
   readonly allElementalResistBonus: number;
   readonly fireDamageBonus: number;
   readonly fireResistPenetrationBonus: number;
   readonly coldDamageBonus: number;
   readonly lightningDamageBonus: number;
-  readonly chaosDamageBonus: number;
+  readonly airDamageBonus: number;
   readonly allElementalDamageBonus: number;
   readonly fireDamageFlat: number;
   readonly coldDamageFlat: number;
   readonly lightningDamageFlat: number;
-  readonly chaosDamageFlat: number;
+  readonly airDamageFlat: number;
   readonly fireResistFlat: number;
   readonly coldResistFlat: number;
   readonly lightningResistFlat: number;
-  readonly chaosResistFlat: number;
+  readonly airResistFlat: number;
   readonly attackPercentBonus: number;
   readonly defensePercentBonus: number;
   readonly healthPercentBonus: number;
@@ -130,22 +130,22 @@ export class Gear {
     this.fireResistBonus = props.fireResistBonus ?? 0;
     this.coldResistBonus = props.coldResistBonus ?? 0;
     this.lightningResistBonus = props.lightningResistBonus ?? 0;
-    this.chaosResistBonus = props.chaosResistBonus ?? 0;
+    this.airResistBonus = props.airResistBonus ?? 0;
     this.allElementalResistBonus = props.allElementalResistBonus ?? 0;
     this.fireDamageBonus = props.fireDamageBonus ?? 0;
     this.fireResistPenetrationBonus = props.fireResistPenetrationBonus ?? 0;
     this.coldDamageBonus = props.coldDamageBonus ?? 0;
     this.lightningDamageBonus = props.lightningDamageBonus ?? 0;
-    this.chaosDamageBonus = props.chaosDamageBonus ?? 0;
+    this.airDamageBonus = props.airDamageBonus ?? 0;
     this.allElementalDamageBonus = props.allElementalDamageBonus ?? 0;
     this.fireDamageFlat = props.fireDamageFlat ?? 0;
     this.coldDamageFlat = props.coldDamageFlat ?? 0;
     this.lightningDamageFlat = props.lightningDamageFlat ?? 0;
-    this.chaosDamageFlat = props.chaosDamageFlat ?? 0;
+    this.airDamageFlat = props.airDamageFlat ?? 0;
     this.fireResistFlat = props.fireResistFlat ?? 0;
     this.coldResistFlat = props.coldResistFlat ?? 0;
     this.lightningResistFlat = props.lightningResistFlat ?? 0;
-    this.chaosResistFlat = props.chaosResistFlat ?? 0;
+    this.airResistFlat = props.airResistFlat ?? 0;
     this.attackPercentBonus = props.attackPercentBonus ?? 0;
     this.defensePercentBonus = props.defensePercentBonus ?? 0;
     this.healthPercentBonus = props.healthPercentBonus ?? 0;
@@ -179,22 +179,22 @@ export class Gear {
       fireResistBonus: this.fireResistBonus,
       coldResistBonus: this.coldResistBonus,
       lightningResistBonus: this.lightningResistBonus,
-      chaosResistBonus: this.chaosResistBonus,
+      airResistBonus: this.airResistBonus,
       allElementalResistBonus: this.allElementalResistBonus,
       fireDamageBonus: this.fireDamageBonus,
       fireResistPenetrationBonus: this.fireResistPenetrationBonus,
       coldDamageBonus: this.coldDamageBonus,
       lightningDamageBonus: this.lightningDamageBonus,
-      chaosDamageBonus: this.chaosDamageBonus,
+      airDamageBonus: this.airDamageBonus,
       allElementalDamageBonus: this.allElementalDamageBonus,
       fireDamageFlat: this.fireDamageFlat,
       coldDamageFlat: this.coldDamageFlat,
       lightningDamageFlat: this.lightningDamageFlat,
-      chaosDamageFlat: this.chaosDamageFlat,
+      airDamageFlat: this.airDamageFlat,
       fireResistFlat: this.fireResistFlat,
       coldResistFlat: this.coldResistFlat,
       lightningResistFlat: this.lightningResistFlat,
-      chaosResistFlat: this.chaosResistFlat,
+      airResistFlat: this.airResistFlat,
       attackPercentBonus: this.attackPercentBonus,
       defensePercentBonus: this.defensePercentBonus,
       healthPercentBonus: this.healthPercentBonus,

@@ -13,7 +13,7 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 
 - [x] Baú a cada N vitórias; abrir 1 ou todos (se melhoria desbloqueada)
 - [x] **Abrir todos** preenche inventário vazio, depois baú de itens (se desbloqueado); baús restantes ficam pendentes — nunca falha em silêncio por falta de espaço total
-- [x] Loot procedural por raridade/template (`LootService`, `GearTemplateCatalog`)
+- [x] Loot procedural por raridade/template (`LootService`, `GearTemplateCatalog`); stats elementais usam `air*` (não `chaos*`); itens `air_mantle` / `air_pendant`
 - [x] Combate nunca insere gear diretamente no inventário: drops comuns viram baús sorteados na abertura; lendários de boss ficam reservados como loot garantido dentro do baú
 - [x] Loot garantido de boss (Ignus Ix, Vorpal Lupnus e Soler Plégius) persiste no baú e é entregue sem novo sorteio ao abrir
 - [x] Equipar valida slot, nível e classe (`GearRequirementChecker`)
@@ -62,5 +62,5 @@ Adicionar critérios `[ ]` aqui antes de codar:
 - [x] `EquipGearRace.test.ts`
 - [x] `ChestService.test.ts` — abrir todos parcial (inventário + baú de itens)
 - [x] `EnemyKillRewardService.test.ts`, `UniqueGearLootService.test.ts` — drops diretos e lendários reservados em baús
-- [x] `GameStateMigration.test.ts`, `ChromeStorageGameRepository.test.ts` — persistência do loot garantido e conversão de excesso legado
+- [x] `GameStateMigration.test.ts`, `ChromeStorageGameRepository.test.ts` — persistência do loot garantido, conversão de excesso legado e migração Caos→Ar (`chaos*` → `air*`)
 - [x] `GearRarityPresentation.test.ts` — normalização e ordenação das 6 raridades

@@ -17,7 +17,7 @@ function minimalHero() {
     critDamage: 1.5,
     experience: 40,
     experienceToNextLevel: 100,
-    combatResists: { fire: 12, cold: 0, lightning: 0, chaos: 5 },
+    combatResists: { fire: 12, cold: 0, lightning: 0, air: 5 },
   } as Parameters<typeof renderHeroTooltipContent>[0];
 }
 
@@ -31,7 +31,7 @@ function minimalEnemy() {
     goldReward: 5,
     xpReward: 0,
     signatureSkills: [],
-    combatResists: { fire: 0, cold: 15, lightning: 0, chaos: 0 },
+    combatResists: { fire: 0, cold: 15, lightning: 0, air: 0 },
   } as Parameters<typeof renderEnemyTooltipContent>[0];
 }
 
@@ -58,7 +58,7 @@ describe('battle tooltip resists', () => {
       fire: 0,
       cold: -20,
       lightning: 0,
-      chaos: 0,
+      air: 0,
     });
 
     expect(html).toContain('element-stat--weakness');

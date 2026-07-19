@@ -47,7 +47,10 @@
   --element-fire: #b85a10;
   --element-cold: #156a8a;
   --element-lightning: #8a7010;
-  --element-chaos: #6a3a8a;
+  --element-air: #3f7f73;
+  /* Roxo semântico (não elemental): legenda da árvore / caminho arcano */
+  --legend-heroes: #6a3a8a;
+  --ascension-arcane: #6a3a8a;
 
   /* Rótulos sobre cor / CTA (contexto ≠ só o hex) */
   --forest-cta-label: var(--parchment-0);
@@ -158,7 +161,7 @@
   --float-fire: #ff7a1a;
   --float-cold: #42d8ff;
   --float-lightning: #fff44d;
-  --float-chaos: #e070ff;
+  --float-air: #7ee8d0;
   --float-crit: #ffcc00;
   --float-crit-buff: #ffcc00;
   --float-crit-heal: #fff44d;
@@ -177,7 +180,7 @@
   --element-pip-fire: #ff8c42;
   --element-pip-cold: #5eb8ff;
   --element-pip-lightning: #c9a0ff;
-  --element-pip-chaos: #c76bff;
+  --element-pip-air: #5fc9b0;
   --element-pip-physical: #c8c8c8;
   --resist-strong-label: #b8d8ff;
   --resist-weak-label: #ffc0c0;
@@ -332,7 +335,9 @@ html[data-ui-theme='dark'] {
   --element-fire: #ff9a4a;
   --element-cold: #5eb8ff;
   --element-lightning: #e8d060;
-  --element-chaos: #c9a0ff;
+  --element-air: #78cbb8;
+  --legend-heroes: #c9a0ff;
+  --ascension-arcane: #c9a0ff;
   --forest-cta-label: #fff9ed;
   --on-dark-panel-title: #fff9ed;
   --on-dark-panel-body: #f3e4bc;
@@ -401,7 +406,7 @@ html[data-ui-theme='dark'] {
   --float-fire: #ff7a1a;
   --float-cold: #42d8ff;
   --float-lightning: #fff44d;
-  --float-chaos: #e070ff;
+  --float-air: #7ee8d0;
   --float-crit: #ffcc00;
   --float-crit-buff: #ffcc00;
   --float-crit-heal: #fff44d;
@@ -420,7 +425,7 @@ html[data-ui-theme='dark'] {
   --element-pip-fire: #ff8c42;
   --element-pip-cold: #5eb8ff;
   --element-pip-lightning: #c9a0ff;
-  --element-pip-chaos: #c76bff;
+  --element-pip-air: #5fc9b0;
   --element-pip-physical: #c8c8c8;
   --resist-strong-label: #b8d8ff;
   --resist-weak-label: #ffc0c0;
@@ -544,7 +549,9 @@ html[data-ui-theme='dark'] .battle-stage {
   --element-fire: #b85a10;
   --element-cold: #156a8a;
   --element-lightning: #8a7010;
-  --element-chaos: #6a3a8a;
+  --element-air: #3f7f73;
+  --legend-heroes: #6a3a8a;
+  --ascension-arcane: #6a3a8a;
   --forest-cta-label: var(--parchment-0);
   --on-dark-panel-title: #fff9ed;
   --on-dark-panel-body: #f3e4bc;
@@ -610,7 +617,7 @@ html[data-ui-theme='dark'] .battle-stage {
   --float-fire: #ff7a1a;
   --float-cold: #42d8ff;
   --float-lightning: #fff44d;
-  --float-chaos: #e070ff;
+  --float-air: #7ee8d0;
   --float-crit: #ffcc00;
   --float-crit-buff: #ffcc00;
   --float-crit-heal: #fff44d;
@@ -629,7 +636,7 @@ html[data-ui-theme='dark'] .battle-stage {
   --element-pip-fire: #ff8c42;
   --element-pip-cold: #5eb8ff;
   --element-pip-lightning: #c9a0ff;
-  --element-pip-chaos: #c76bff;
+  --element-pip-air: #5fc9b0;
   --element-pip-physical: #c8c8c8;
   --resist-strong-label: #b8d8ff;
   --resist-weak-label: #ffc0c0;
@@ -2107,8 +2114,8 @@ h2 {
     0 0 1px rgba(0, 0, 0, 1);
 }
 
-.battle-float--damage-chaos {
-  color: var(--float-chaos);
+.battle-float--damage-air {
+  color: var(--float-air);
   text-shadow:
     0 0 14px rgba(224, 112, 255, 0.85),
     0 2px 4px rgba(0, 0, 0, 0.92),
@@ -2828,8 +2835,8 @@ h2 {
   background: var(--element-pip-lightning);
 }
 
-.element-pip--chaos {
-  background: var(--element-pip-chaos);
+.element-pip--air {
+  background: var(--element-pip-air);
 }
 
 .element-pip--physical {
@@ -4657,14 +4664,17 @@ button.hero-skill-chip:hover {
   opacity: 0.45;
 }
 
-.inventory-stash-slot {
+.inventory-stash-slot,
+.stash-inventory-slot {
   border-color: rgba(66, 165, 245, 0.5);
   background: rgba(66, 165, 245, 0.12);
   color: var(--inventory-stash-slot-label);
 }
 
 .inventory-stash-slot.gear-drop-target--valid,
-.inventory-stash-slot.gear-drop-target--active {
+.inventory-stash-slot.gear-drop-target--active,
+.stash-inventory-slot.gear-drop-target--valid,
+.stash-inventory-slot.gear-drop-target--active {
   outline: none;
   border-style: solid;
   border-color: rgba(129, 198, 255, 0.9);
@@ -5111,8 +5121,8 @@ button.hero-skill-chip:hover {
   color: var(--element-lightning);
 }
 
-.battle-log-el--chaos {
-  color: var(--element-chaos);
+.battle-log-el--air {
+  color: var(--element-air);
 }
 
 .battle-log-list li:not(.battle-log-entry) {
@@ -5570,9 +5580,9 @@ button.hero-skill-chip:hover {
 }
 
 .upgrade-tree-legend-item--heroes {
-  color: var(--element-chaos);
-  border-color: color-mix(in srgb, var(--element-chaos) 40%, transparent);
-  background: color-mix(in srgb, var(--element-chaos) 10%, var(--mix-light));
+  color: var(--legend-heroes);
+  border-color: color-mix(in srgb, var(--legend-heroes) 40%, transparent);
+  background: color-mix(in srgb, var(--legend-heroes) 10%, var(--mix-light));
 }
 
 .upgrade-tree-legend-item--qol {
@@ -9557,7 +9567,7 @@ body.skill-drag-active * {
 }
 
 .ascension-path-card--arcane .ascension-path-card__title {
-  color: var(--element-chaos);
+  color: var(--ascension-arcane);
 }
 
 .ascension-path-card--innate .ascension-path-card__glow,

@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 9/9 (100%) · auditoria 2026-07-15  
-**Testes obrigatórios:** 7/7
+**Aceite:** 10/10 (100%) · auditoria 2026-07-19  
+**Testes obrigatórios:** 8/8
 
 ## Objetivo
 
@@ -20,6 +20,7 @@ Guardar gear extra no **baú** (capacidade por melhoria) e usar a **Forja Divina
 - [x] UX game-like da Forja: abas temáticas (⚒ Fundir / 💰 Destruir), chips de capacidade, grid com scroll, dock fixo com badge de seleção e botões `forge-game-btn`; confirmação com eyebrow “Forja Divina”, ritual 9→1 e cards de recompensa — sem `primary-btn` nem painéis estilo site
 - [x] Seleção de itens no grid da Forja **preserva** a posição do scroll (não volta ao topo ao clicar)
 - [x] Botão **Limpar seleção** no dock (aba Fundir e Destruir) remove todos os itens selecionados de uma vez
+- [x] Tela do baú tem drag & drop espelhando o inventário: arrastar item para o slot **Inventário** (`data-drop-zone="inventory"`, ativo só com espaço livre) envia ao inventário; arrastar para o slot **Destruir** abre a confirmação de destruição; itens do baú continuam arrastáveis com inventário cheio (destruir segue válido)
 
 ## Camadas e arquivos-chave
 
@@ -27,7 +28,7 @@ Guardar gear extra no **baú** (capacidade por melhoria) e usar a **Forja Divina
 |--------|-------|
 | Domain | `DivineForgeService`, `DivineForgePolicy`, `GameState` stash fields |
 | Application | `MoveGearToStashUseCase`, `MoveGearFromStashUseCase`, `FuseGearInForgeUseCase`, `SalvageGearInForgeUseCase`, `DestroyGearUseCase` |
-| Presentation | `StorageGridPresentation`, `DivineForgeModalRenderer`, `DivineForgePresentation`, `DivineForgeConfirmPresentation`, `ForgeGridScrollPresentation`, modal Forja |
+| Presentation | `StorageGridPresentation`, `StashModalRenderer`, `StashInventorySlotPresentation`, `GearDragDropBinder`, `DivineForgeModalRenderer`, `DivineForgePresentation`, `DivineForgeConfirmPresentation`, `ForgeGridScrollPresentation`, modal Forja |
 
 ## Invariantes
 
@@ -46,3 +47,4 @@ Guardar gear extra no **baú** (capacidade por melhoria) e usar a **Forja Divina
 - [x] `DivineForgePresentation.test.ts` — `listForgeEligibleGear` une inventário + baú; abas, dock e botões game-like
 - [x] `DivineForgeConfirmPresentation.test.ts` — ritual de fusão e card de recompensa no salvage
 - [x] `ForgeGridScrollPresentation.test.ts` — preserva scrollTop do grid ao re-render
+- [x] `GearDragDropBinder.test.ts` + `StashInventorySlotPresentation.test.ts` — drop de item do baú na zona inventário/destruir e slot desabilitado com inventário cheio

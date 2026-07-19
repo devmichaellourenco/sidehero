@@ -24,7 +24,7 @@ function hero(id: string, name: string): HeroDto {
     activeSkills: [],
     totalAttributes: { str: 1, dex: 1, int: 1 },
     baseAttributes: { str: 1, dex: 1, int: 1 },
-    combatResists: { fire: 0, cold: 0, lightning: 0, chaos: 0 },
+    combatResists: { fire: 0, cold: 0, lightning: 0, air: 0 },
   } as HeroDto;
 }
 

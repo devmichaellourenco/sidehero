@@ -55,7 +55,7 @@ function minimalHero(): HeroDto {
     combatSkills: [],
     combatSkillCooldowns: [],
     statusEffects: [],
-    combatResists: { fire: 0, cold: 0, lightning: 0, chaos: 0 },
+    combatResists: { fire: 0, cold: 0, lightning: 0, air: 0 },
     combatStatSheet: [],
   } as HeroDto;
 }

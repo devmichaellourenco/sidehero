@@ -7,7 +7,7 @@ const RESIST_KEYS: Array<keyof CombatResistSummaryDto> = [
   'fire',
   'cold',
   'lightning',
-  'chaos',
+  'air',
 ];
 
 function escapeHtml(text: string): string {

@@ -40,7 +40,7 @@ describe('StatIconCatalog', () => {
       'resist-fire',
       'resist-cold',
       'resist-lightning',
-      'resist-chaos',
+      'resist-air',
     ];
 
     for (const lineId of statSheetLineIds) {
@@ -48,6 +48,11 @@ describe('StatIconCatalog', () => {
       expect(iconKey, `linha sem ícone: ${lineId}`).toBeTruthy();
       expect(getStatIconUrl(iconKey)).toContain('ui/stats/');
     }
+  });
+
+  it('resolve ícone do elemento ar em ui/stats/air.png', () => {
+    expect(getStatIconUrl('air')).toContain('ui/stats/air.png');
+    expect(STAT_LINE_ICON_BY_ID['resist-air']).toBe('air');
   });
 
   it('gera img decorativa com classe customizada', () => {

@@ -37,7 +37,9 @@ describe('MedievalThemeTokens', () => {
     expect(MEDIEVAL_THEME.elementFire).toBe('#b85a10');
     expect(MEDIEVAL_THEME.elementCold).toBe('#156a8a');
     expect(MEDIEVAL_THEME.elementLightning).toBe('#8a7010');
-    expect(MEDIEVAL_THEME.elementChaos).toBe('#6a3a8a');
+    expect(MEDIEVAL_THEME.elementAir).toBe('#3f7f73');
+    expect(MEDIEVAL_THEME.legendHeroes).toBe('#6a3a8a');
+    expect(MEDIEVAL_THEME.ascensionArcane).toBe('#6a3a8a');
   });
 
   it('mapeia aliases semânticos para tokens canônicos', () => {

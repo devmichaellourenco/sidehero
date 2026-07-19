@@ -4,14 +4,14 @@ export interface ElementalDamageFlatProfile {
   fire: number;
   cold: number;
   lightning: number;
-  chaos: number;
+  air: number;
 }
 
 export const ZERO_ELEMENTAL_DAMAGE_FLAT: ElementalDamageFlatProfile = {
   fire: 0,
   cold: 0,
   lightning: 0,
-  chaos: 0,
+  air: 0,
 };
 
 export function getEffectiveElementalDamageFlat(

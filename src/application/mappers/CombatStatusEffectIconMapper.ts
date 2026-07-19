@@ -11,7 +11,7 @@ const STATUS_EFFECT_ICON_PATH: Record<CombatStatusEffectDto['kind'], string> = {
 
 const DOT_ELEMENT_ICON_PATH: Partial<Record<DamageElement, string>> = {
   fire: 'skills/fireball.png',
-  chaos: 'skills/magic.png',
+  air: 'skills/magic.png',
   cold: 'skills/magic.png',
   lightning: 'skills/magic.png',
 };

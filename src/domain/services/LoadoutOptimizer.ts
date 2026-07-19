@@ -44,7 +44,7 @@ export function scoreGearForHero(gear: Gear, hero: Hero): number {
     gear.fireResistBonus +
     gear.coldResistBonus +
     gear.lightningResistBonus +
-    gear.chaosResistBonus;
+    gear.airResistBonus;
 
   if (isCasterHeroClass(hero.heroClass)) {
     return (
@@ -56,11 +56,11 @@ export function scoreGearForHero(gear: Gear, hero: Hero): number {
       gear.fireDamageBonus +
       gear.coldDamageBonus +
       gear.lightningDamageBonus +
-      gear.chaosDamageBonus +
+      gear.airDamageBonus +
       gear.fireDamageFlat +
       gear.coldDamageFlat +
       gear.lightningDamageFlat +
-      gear.chaosDamageFlat +
+      gear.airDamageFlat +
       gear.fireResistPenetrationBonus
     );
   }

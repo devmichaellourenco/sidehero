@@ -2,7 +2,6 @@ import { GearDto } from '../../application/dto/GameStateDto';
 import {
   getGearFrameSprite,
   getGearRaritySprite,
-  getGearSlotSprite,
   getGearSprite,
   imgTag,
 } from '../assets/AssetCatalog';
@@ -69,16 +68,14 @@ export function renderStashGridSlot(
   const frameUrl = getGearFrameSprite(gear.rarity);
   const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
   const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
-  const dragAttrs =
-    options.canWithdraw
-      ? gearDragAttr({ kind: 'stash', gearId: gear.id, slot: gear.slot as GearSlotKey })
-      : '';
+  // Sempre arrastável: destruir continua válido mesmo com inventário cheio.
+  const dragAttrs = gearDragAttr({ kind: 'stash', gearId: gear.id, slot: gear.slot as GearSlotKey });
 
   return `
     <div
       role="button"
       tabindex="0"
-      class="inventory-grid-slot inventory-grid-slot--stash ${gearRaritySurfaceClass(gear.rarity)}${options.canWithdraw ? '' : ' inventory-grid-slot--locked'}"
+      class="inventory-grid-slot inventory-grid-slot--stash ${gearRaritySurfaceClass(gear.rarity)}"
       data-stash-gear-id="${escapeHtml(gear.id)}"
       data-can-withdraw="${options.canWithdraw ? 'true' : 'false'}"
       ${dragAttrs}

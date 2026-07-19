@@ -12,7 +12,7 @@ describe('resolveBattleFloatClass', () => {
   });
 
   it('usa elemento dominante em dano normal', () => {
-    expect(resolveBattleFloatClass({ kind: 'damage', damageElement: 'chaos' })).toBe('damage-chaos');
+    expect(resolveBattleFloatClass({ kind: 'damage', damageElement: 'air' })).toBe('damage-air');
     expect(resolveBattleFloatClass({ kind: 'damage' })).toBe('damage');
   });
 

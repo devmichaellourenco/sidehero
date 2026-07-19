@@ -6,7 +6,7 @@ export function elementalDamageProfileFromGear(gear: Gear): ElementalDamageProfi
     fire: gear.fireDamageBonus,
     cold: gear.coldDamageBonus,
     lightning: gear.lightningDamageBonus,
-    chaos: gear.chaosDamageBonus,
+    air: gear.airDamageBonus,
     allElemental: gear.allElementalDamageBonus,
   };
 }
@@ -22,7 +22,7 @@ export function aggregateElementalDamageProfile(
     total.fire += profile.fire;
     total.cold += profile.cold;
     total.lightning += profile.lightning;
-    total.chaos += profile.chaos;
+    total.air += profile.air;
     total.allElemental += profile.allElemental;
   }
 

@@ -54,7 +54,7 @@ const ELEMENT_ICON: Partial<Record<string, SkillIconKey>> = {
   fire: 'fireball',
   cold: 'frost_shard',
   lightning: 'arcane_bolt',
-  chaos: 'debuff',
+  air: 'debuff',
   physical: 'power_attack',
 };
 

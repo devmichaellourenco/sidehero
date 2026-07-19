@@ -24,7 +24,7 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | Domínio | O que verificar | Spec parceira | Arquivos-chave |
 |---------|-----------------|---------------|----------------|
 | **Combate e fórmulas** | Dano, cura, crítico, status, turnos/tick | `combat-campaign` | `MitigationPipeline`, `CombatDamageResolver`, `CombatActionExecutor`, `CombatTurnPhase` |
-| **Elementos** | Cada elemento usa mitigação do tipo; multi-componente; DOT | `combat-campaign`, `skills-progression` | `DamageElement`, `ResistanceProfile`, `HeroCombatSkillCatalog`, `EnemyMonsterCombatSkillCatalog` |
+| **Elementos** | Cada elemento (`physical`/`fire`/`cold`/`lightning`/`air`) usa mitigação do tipo; multi-componente; DOT | `combat-campaign`, `skills-progression` | `DamageElement`, `ResistanceProfile`, `HeroCombatSkillCatalog`, `EnemyMonsterCombatSkillCatalog` |
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
 | **Waves e fases** | HP/ATK/DEF inimigos por tier; boss vs trash; handcrafted | `combat-campaign` | `StageScalingCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
 | **Skills e progressão** | `Base × (powerPerRank × nível) × (attr × fator)`; cooldowns; ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `SkillDamageBalance`, `HeroLevelXpCatalog` |
@@ -73,8 +73,9 @@ Poder × crítico → split damageComponents[]
 ## Invariantes
 
 - Fórmulas de combate vivem em `domain/combat` e `domain/services/combat`, não na UI
-- Resistência física = stat DEF; resistência elemental = profile separado
+- Resistência física = stat DEF; resistência elemental = profile separado (`fire`/`cold`/`lightning`/`air` + `allElemental`)
 - `allElemental` soma a **todos** os elementos (não a físico)
+- Elemento canônico de DOT sem `dotElement` explícito = `air` (ex-caos)
 - Scaling de inimigo usa `difficultyTier` global da fase, não stage local arbitrário
 - Determinismo: IDs de oferta/seed não podem mudar item ao recomprar no mesmo tier+seed
 
@@ -101,19 +102,21 @@ Auditoria de balanceamento do release inicial cobre **tier 1–200** (fases `1-1
 Criar ou atualizar; **não executar** automaticamente.
 
 - [x] `MitigationPipeline.test.ts` — resist por elemento; físico vs elemental
+- [x] `DamageElement.test.ts` — elementos canônicos incluem `air` e excluem `chaos`
 - [x] `CombatDamageResolver.test.ts` — multi-componente, crítico, dodge
 - [x] `CombatActionExecutor.test.ts` — resist gear, DOT apply, debuff defesa
 - [x] `DifficultyCombatScaling.test.ts` — scaling por tier
 - [x] `ResistanceProfileAggregator.test.ts` — soma de resist no equip
 - [x] `EnemyInnateResists.test.ts` — temas e fraquezas
 - [x] `ShopService.test.ts` — cap de raridade por tier, preços
-- [x] `DotTickResolver.test.ts` — DOT mitigado (equivalente a turn phase)
+- [x] `DotTickResolver.test.ts` — DOT mitigado; default sem elemento = `air`
 - [x] `BalanceAudit.test.ts` — curva por tier, economia loja/forja, tempo de clear
 - [x] `PhaseGoldBudget.test.ts` — teto de ouro por fase normal alinhado à referência
 - [x] `MilestoneGoldCap.test.ts` — teto de ouro em milestones (BAL-007)
 - [x] `MapGearLevelPolicy.test.ts` — faixa de nível de item por mapa
 - [x] `ProgressionPowerScale.test.ts` — curva de XP e stats de gear por nível
 - [x] `CampaignXpScaling.test.ts` — XP por mapa, early boost e metas de progressão
+- [x] `GameStateMigration.test.ts` — migração legada `chaos*` → `air*` (gear, IDs, DOT)
 
 ## Backlog conhecido (auditoria 2026-07-03)
 

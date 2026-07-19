@@ -248,7 +248,7 @@ describe('CombatActionExecutor', () => {
       {
         attackerProfile: { attackSpeed: 1, castSpeed: 1, cooldownReduction: 0, critChance: 0, critDamage: 1.4 },
         stageLevel: 1,
-        attackerElementalBonus: { fire: 25, cold: 0, lightning: 0, chaos: 0, allElemental: 0 },
+        attackerElementalBonus: { fire: 25, cold: 0, lightning: 0, air: 0, allElemental: 0 },
       },
     );
 

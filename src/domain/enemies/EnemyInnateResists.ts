@@ -12,7 +12,7 @@ function inferThemeWeaknesses(enemyType: string): PartialResistanceProfile {
     return { fire: -20 };
   }
   if (id.includes('lightning') || id.includes('void') || id.includes('arcane')) {
-    return { chaos: -15 };
+    return { air: -15 };
   }
   if (
     id.includes('undead') ||
@@ -64,10 +64,10 @@ function inferThemeResists(enemyType: string): PartialResistanceProfile {
     id.includes('manticore') ||
     id.includes('aberrant')
   ) {
-    return { chaos: 10 };
+    return { air: 10 };
   }
   if (id.includes('demon') || id.includes('cultist')) {
-    return { fire: 8, chaos: 6 };
+    return { fire: 8, air: 6 };
   }
 
   return {};
@@ -94,7 +94,7 @@ export function resolveEnemyInnateResists(
     cold: (explicit.cold ?? theme.cold ?? weakness.cold ?? 0) + roleBonus + globalTierBonus,
     lightning:
       (explicit.lightning ?? theme.lightning ?? weakness.lightning ?? 0) + roleBonus + globalTierBonus,
-    chaos: (explicit.chaos ?? theme.chaos ?? weakness.chaos ?? 0) + roleBonus + globalTierBonus,
+    air: (explicit.air ?? theme.air ?? weakness.air ?? 0) + roleBonus + globalTierBonus,
     allElemental: (explicit.allElemental ?? 0) + tierBonus,
   };
 }
