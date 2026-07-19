@@ -7,6 +7,7 @@ import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
 import { Hero } from '../entities/Hero';
+import { ILootService } from '../services/ILootService';
 import { Experience } from '../value-objects/Experience';
 import { Stats } from '../value-objects/Stats';
 import { ActionTimerService } from '../services/combat/ActionTimerService';
@@ -143,7 +144,40 @@ describe('EnemyKillRewardService', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.99);
     const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
 
-    expect(result.state.inventory.some((gear) => gear.templateId === 'ignus_ix')).toBe(true);
+    expect(result.state.inventory.some((gear) => gear.templateId === 'ignus_ix')).toBe(false);
+    expect(
+      result.state.chests.some(
+        (chest) => chest.guaranteedLoot?.templateId === 'ignus_ix' && !chest.opened,
+      ),
+    ).toBe(true);
+    vi.restoreAllMocks();
+  });
+
+  it('converte drop de gear em baú comum sem sortear item na hora do kill', () => {
+    const loot: ILootService = {
+      generateGear: vi.fn(),
+      generateGearForChest: vi.fn(),
+      generateGearForSlot: vi.fn(),
+      generateDeterministicGearForSlot: vi.fn(),
+      generateGearFromCatalogItem: vi.fn(),
+      generateGearFromTemplate: vi.fn(),
+    };
+    const rewardService = new EnemyKillRewardService(loot);
+    const phaseId = buildPhaseId(1, 2);
+    const state = GameState.initial().withCampaignProgress(
+      GameState.initial().campaignProgress.withSelectedPhase(phaseId),
+    );
+    const combat = combatWithEnemies(state, phaseId, 0);
+    const enemy = combat.enemies[0];
+    const defeated = defeatEnemy(combat.enemies, enemy.id);
+
+    vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0.99);
+    const result = rewardService.applyKillRewards(state, combat, combat.enemies, defeated);
+
+    expect(result.state.inventory).toHaveLength(0);
+    expect(result.state.chests).toHaveLength(1);
+    expect(result.state.chests[0]?.guaranteedLoot).toBeNull();
+    expect(loot.generateGear).not.toHaveBeenCalled();
     vi.restoreAllMocks();
   });
 });

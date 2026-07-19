@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildPhaseId } from '../../domain/campaign/CampaignIds';
-import { migrateEnemy, migrateGear, migrateHero } from './GameStateMigration';
+import { migrateChest, migrateEnemy, migrateGear, migrateHero } from './GameStateMigration';
 import { IGNUS_IX_TEMPLATE_ID } from '../../domain/gear/UniqueGearCatalog';
 import { getGearCatalogItem } from '../../domain/gear/GearItemCatalog';
 
@@ -53,6 +53,31 @@ describe('migrateGear', () => {
     expect(weapon?.id).toBe('eq-oracle');
     expect(weapon?.cooldownReductionBonus).toBe(catalog.cooldownReductionBonus);
     expect(weapon?.castSpeedBonus).toBe(catalog.castSpeedBonus);
+  });
+});
+
+describe('migrateChest', () => {
+  it('restaura o loot garantido de um baú ainda não aberto', () => {
+    const chest = migrateChest({
+      id: 'boss-chest',
+      stageEarned: 50,
+      chestType: 'act_boss',
+      opened: false,
+      loot: null,
+      guaranteedLoot: {
+        id: 'reserved-ignus',
+        name: 'Ignus Ix',
+        templateId: IGNUS_IX_TEMPLATE_ID,
+        slot: 'accessory',
+        rarity: 'legendary',
+        attackBonus: 1,
+        defenseBonus: 0,
+        healthBonus: 0,
+      },
+    });
+
+    expect(chest.guaranteedLoot?.templateId).toBe(IGNUS_IX_TEMPLATE_ID);
+    expect(chest.opened).toBe(false);
   });
 });
 
@@ -116,7 +141,12 @@ describe('PhaseCombatHandlers — lendários de marco', () => {
     const victory = handlers.onBossDefeated(state, bossWave!.enemies, state.heroes, bossWave!.meta);
 
     expect(victory.state.inventory.some((gear) => gear.templateId === IGNUS_IX_TEMPLATE_ID)).toBe(
-      true,
+      false,
     );
+    expect(
+      victory.state.chests.some(
+        (chest) => chest.guaranteedLoot?.templateId === IGNUS_IX_TEMPLATE_ID,
+      ),
+    ).toBe(true);
   });
 });

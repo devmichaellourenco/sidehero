@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 15/15 (100%) · escopo base v1  
+**Aceite:** 16/16 (100%) · escopo base v1  
 **Testes obrigatórios:** 7/7 grupos (inclui `CampaignReleaseScope`)
 
 ## Objetivo
@@ -14,6 +14,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] Tick avança combate quando não pausado; respeita `combatIntermission` e pausa de loadout
 - [x] Recompensas por kill: ouro, XP e loot ao derrotar cada inimigo (tabela por mundo/monstro)
 - [x] Boss: loot garantido na 1ª vitória da fase; replay com chance reduzida; progresso de fase no fim
+- [x] Recompensas de gear comuns e únicas chegam em baús; Ignus Ix, Vorpal Lupnus e Soler Plégius só entram no storage quando o baú é aberto
 - [x] Wipe na fase: cura completa + reinicia wave 1 da mesma fase
 - [x] Seleção de fase: apenas desbloqueadas ou já concluídas (replay)
 - [x] Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase

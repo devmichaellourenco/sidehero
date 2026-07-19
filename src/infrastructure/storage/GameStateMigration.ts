@@ -316,6 +316,10 @@ export function migrateChest(raw: unknown): Chest {
     chestType,
     opened: Boolean(c.opened),
     loot: c.loot && typeof c.loot === 'object' ? migrateGear(c.loot) : null,
+    guaranteedLoot:
+      c.guaranteedLoot && typeof c.guaranteedLoot === 'object'
+        ? migrateGear(c.guaranteedLoot)
+        : null,
   });
 }
 

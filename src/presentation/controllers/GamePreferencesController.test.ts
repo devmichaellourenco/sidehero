@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { GamePreferencesController } from './GamePreferencesController';

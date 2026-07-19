@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PhaseRun } from '../../domain/campaign/PhaseRun';
 import { GameState } from '../../domain/entities/GameState';
+import { Gear } from '../../domain/entities/Gear';
+import { INVENTORY_CAPACITY } from '../../domain/storage/StorageCapacityPolicy';
 import { ChromeStorageGameRepository } from './ChromeStorageGameRepository';
 
 const STORAGE_KEY = 'side_hero_game_state';
@@ -83,5 +85,31 @@ describe('ChromeStorageGameRepository', () => {
     const loaded = await repository.load();
     expect(loaded.phaseRun?.phaseId).toBe('3-4');
     expect(loaded.roster.length).toBeGreaterThan(0);
+  });
+
+  it('converte excesso de inventário legado em baús com loot garantido', async () => {
+    const repository = new ChromeStorageGameRepository();
+    const inventory = Array.from({ length: INVENTORY_CAPACITY + 2 }, (_, index) =>
+      Gear.create({
+        id: `legacy-${index}`,
+        name: `Item ${index}`,
+        templateId: 'equip_axe_1',
+        slot: 'weapon',
+        rarity: 'common',
+        attackBonus: 1,
+        defenseBonus: 0,
+        healthBonus: 0,
+      }),
+    );
+
+    await repository.save(GameState.initial().withInventory(inventory));
+    const loaded = await repository.load();
+
+    expect(loaded.inventory).toHaveLength(INVENTORY_CAPACITY);
+    expect(loaded.chests).toHaveLength(2);
+    expect(loaded.chests.map((chest) => chest.guaranteedLoot?.id)).toEqual([
+      'legacy-30',
+      'legacy-31',
+    ]);
   });
 });

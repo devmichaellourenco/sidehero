@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+
 import { describe, expect, it } from 'vitest';
 import { applyUiTheme, readUiThemeFromDom, UI_THEME_ATTR } from './applyUiTheme';
 

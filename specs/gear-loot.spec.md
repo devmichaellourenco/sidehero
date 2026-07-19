@@ -2,18 +2,20 @@
 
 ## Status
 
-**Aceite:** 8/8 (100%)  
-**Testes obrigatórios:** 8/8
+**Aceite:** 10/10 (100%)  
+**Testes obrigatórios:** 10/10
 
 ## Objetivo
 
-Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara e otimiza loadout da party.
+Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao inventário ou ao baú de itens. O jogador equipa, compara e otimiza o loadout da party.
 
 ## Critérios de aceite
 
 - [x] Baú a cada N vitórias; abrir 1 ou todos (se melhoria desbloqueada)
 - [x] **Abrir todos** preenche inventário vazio, depois baú de itens (se desbloqueado); baús restantes ficam pendentes — nunca falha em silêncio por falta de espaço total
 - [x] Loot procedural por raridade/template (`LootService`, `GearTemplateCatalog`)
+- [x] Combate nunca insere gear diretamente no inventário: drops comuns viram baús sorteados na abertura; lendários de boss ficam reservados como loot garantido dentro do baú
+- [x] Loot garantido de boss (Ignus Ix, Vorpal Lupnus e Soler Plégius) persiste no baú e é entregue sem novo sorteio ao abrir
 - [x] Equipar valida slot, nível e classe (`GearRequirementChecker`)
 - [x] Otimizar equipe sugere upgrades por herói (`LoadoutOptimizer`)
 - [x] Comparação visual no picker/modal (setas ▲)
@@ -31,6 +33,8 @@ Loot de baús e combate vira **gear** no inventário; o jogador equipa, compara 
 ## Invariantes
 
 - IDs de gear únicos no inventário
+- Inventário nunca cresce além de 30 por recompensa de combate; saves legados excedentes convertem o excesso em baús pendentes sem perder gear
+- Gear único reservado em baú pendente conta como posse para impedir duplicação
 - Abrir todos consome espaço disponível (inventário → baú de itens) antes de parar
 - Equipar fora da pausa só via auto-equip se melhoria ativa
 - Race de equip: `EquipGearRace` / fila de mutação no UI
@@ -57,4 +61,6 @@ Adicionar critérios `[ ]` aqui antes de codar:
 - [x] `GearDragDropPolicy.test.ts`, `InventoryGridPresentation.test.ts`
 - [x] `EquipGearRace.test.ts`
 - [x] `ChestService.test.ts` — abrir todos parcial (inventário + baú de itens)
+- [x] `EnemyKillRewardService.test.ts`, `UniqueGearLootService.test.ts` — drops diretos e lendários reservados em baús
+- [x] `GameStateMigration.test.ts`, `ChromeStorageGameRepository.test.ts` — persistência do loot garantido e conversão de excesso legado
 - [x] `GearRarityPresentation.test.ts` — normalização e ordenação das 6 raridades

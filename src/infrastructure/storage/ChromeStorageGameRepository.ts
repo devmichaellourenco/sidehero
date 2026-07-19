@@ -2,12 +2,15 @@ import { CampaignProgressProps } from '../../domain/campaign/CampaignProgress';
 import { CombatIntermissionProps } from '../../domain/campaign/CombatIntermission';
 import { Hero } from '../../domain/entities/Hero';
 import { GameState } from '../../domain/entities/GameState';
+import { Chest } from '../../domain/entities/Chest';
+import { Gear } from '../../domain/entities/Gear';
 import {
   getUnlockedBattleSkillSlotCount,
   trimEquippedSkillIds,
 } from '../../domain/progression/SkillBattleSlots';
 import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
+import { StorageCapacityPolicy } from '../../domain/storage/StorageCapacityPolicy';
 import {
   chromeStorageGet,
   chromeStorageRemove,
@@ -49,6 +52,26 @@ function serializeHero(hero: Hero): Record<string, unknown> {
     skillRanks: heroProps.skillRanks,
     equippedSkillIds: heroProps.equippedSkillIds,
     ascensionId: heroProps.ascensionId,
+  };
+}
+
+function normalizeLegacyInventory(
+  chests: Chest[],
+  inventory: Gear[],
+  stage: number,
+): { chests: Chest[]; inventory: Gear[] } {
+  const limit = StorageCapacityPolicy.inventoryLimit();
+  if (inventory.length <= limit) {
+    return { chests, inventory };
+  }
+
+  const overflowChests = inventory
+    .slice(limit)
+    .map((gear) => Chest.createWithGuaranteedLoot(stage, 'monster', gear));
+
+  return {
+    chests: [...chests, ...overflowChests],
+    inventory: inventory.slice(0, limit),
   };
 }
 
@@ -133,6 +156,13 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
 
     const normalizedRoster = normalizeHeroEquippedSkills(roster, upgradeLevels);
 
+    const stage = typeof raw.stage === 'number' ? raw.stage : 1;
+    const migratedStorage = normalizeLegacyInventory(
+      Array.isArray(raw.chests) ? raw.chests.map((c) => migrateChest(c)) : [],
+      Array.isArray(raw.inventory) ? raw.inventory.map((g) => migrateGear(g)) : [],
+      stage,
+    );
+
     return GameState.restore({
       roster: normalizedRoster,
       heroes: normalizedRoster,
@@ -146,10 +176,10 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
         raw.phaseRun && typeof raw.phaseRun === 'object'
           ? (raw.phaseRun as { phaseId: string; waveIndex: number })
           : null,
-      stage: typeof raw.stage === 'number' ? raw.stage : 1,
+      stage,
       gold: typeof raw.gold === 'number' ? raw.gold : 0,
-      chests: Array.isArray(raw.chests) ? raw.chests.map((c) => migrateChest(c)) : [],
-      inventory: Array.isArray(raw.inventory) ? raw.inventory.map((g) => migrateGear(g)) : [],
+      chests: migratedStorage.chests,
+      inventory: migratedStorage.inventory,
       stash: Array.isArray(raw.stash) ? raw.stash.map((g) => migrateGear(g)) : [],
       battleLog: Array.isArray(raw.battleLog)
         ? (raw.battleLog as { message: string; timestamp: number }[])

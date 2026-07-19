@@ -52,6 +52,7 @@ function createService(lootIds: string[]): ChestService {
     generateGear: vi.fn(),
     generateGearForChest: vi.fn().mockImplementation(() => lootGear(lootIds[index++] ?? `loot-${index}`)),
     generateDeterministicGearForSlot: vi.fn(),
+    generateGearFromCatalogItem: vi.fn(),
     generateGearFromTemplate: vi.fn(),
     generateGearForSlot: vi.fn(),
   };
@@ -60,6 +61,29 @@ function createService(lootIds: string[]): ChestService {
 }
 
 describe('ChestService.openAll', () => {
+  it('entrega o loot garantido sem sortear outro gear', () => {
+    const guaranteed = lootGear('unique-ignus');
+    const chest = Chest.createWithGuaranteedLoot(50, 'act_boss', guaranteed);
+    const lootService: ILootService = {
+      generateGear: vi.fn(),
+      generateGearForChest: vi.fn(),
+      generateDeterministicGearForSlot: vi.fn(),
+      generateGearFromCatalogItem: vi.fn(),
+      generateGearFromTemplate: vi.fn(),
+      generateGearForSlot: vi.fn(),
+    };
+    const service = new ChestService(lootService);
+    const state = stateWithOpenAll({ chests: [chest] });
+
+    const result = service.openAll(state);
+
+    expect(result.loots).toEqual([guaranteed]);
+    expect(result.state.inventory).toEqual([guaranteed]);
+    expect(result.state.chests[0]?.opened).toBe(true);
+    expect(result.state.chests[0]?.guaranteedLoot).toBeNull();
+    expect(lootService.generateGearForChest).not.toHaveBeenCalled();
+  });
+
   it('abre todos os baús quando há espaço no inventário', () => {
     const service = createService(['loot-1', 'loot-2']);
     const chests = [pendingChest('c1'), pendingChest('c2')];

@@ -1,5 +1,6 @@
 import { CombatIntermission } from './CombatIntermission';
 import { CombatState } from '../entities/CombatState';
+import { Chest } from '../entities/Chest';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
 import { Hero } from '../entities/Hero';
@@ -135,7 +136,12 @@ export class PhaseCombatHandlers {
       this.lootService,
     );
     if (milestoneGear) {
-      nextState = nextState.withInventory([...nextState.inventory, milestoneGear]);
+      const milestoneChest = Chest.createWithGuaranteedLoot(
+        phase.difficultyTier,
+        'act_boss',
+        milestoneGear,
+      );
+      nextState = nextState.withChests([...nextState.chests, milestoneChest]);
     }
 
     if (phase.seasonFinale) {

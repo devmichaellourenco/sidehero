@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { buildPhaseId } from './CampaignIds';
 import { GameState } from '../entities/GameState';
 import { Gear } from '../entities/Gear';
+import { Chest } from '../entities/Chest';
 import {
   IGNUS_IX_TEMPLATE_ID,
   SOLER_PLEGIUS_TEMPLATE_ID,
@@ -23,6 +24,7 @@ describe('UniqueGearLootService', () => {
     generateGearForChest: vi.fn(),
     generateGearForSlot: vi.fn(),
     generateDeterministicGearForSlot: vi.fn(),
+    generateGearFromCatalogItem: vi.fn(),
     generateGearFromTemplate: vi.fn().mockImplementation((templateId: string) =>
       Gear.create({
         id: `unique-${templateId}`,
@@ -195,5 +197,35 @@ describe('UniqueGearLootService', () => {
         loot,
       ),
     ).toBeNull();
+  });
+
+  it('não duplica lendário reservado em baú ainda não aberto', () => {
+    const reservedIgnus = Gear.create({
+      id: 'reserved-ignus',
+      name: 'Ignus Ix',
+      templateId: IGNUS_IX_TEMPLATE_ID,
+      slot: 'accessory',
+      rarity: 'legendary',
+      attackBonus: 1,
+      defenseBonus: 0,
+      healthBonus: 0,
+    });
+    const state = GameState.initial().withChests([
+      Chest.createWithGuaranteedLoot(50, 'act_boss', reservedIgnus),
+    ]);
+
+    const drop = tryCreateSaciIgnusDrop(
+      state,
+      {
+        phaseId: buildPhaseId(1, 50),
+        mapIndex: 1,
+        enemyType: 'saci',
+        role: 'boss',
+        isPhaseBoss: true,
+      },
+      loot,
+    );
+
+    expect(drop).toBeNull();
   });
 });

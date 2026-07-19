@@ -1,10 +1,12 @@
 import { Chest } from '../entities/Chest';
+import { ChestType } from '../combat/ChestType';
 import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
 import { MetaBonusScope } from '../meta/MetaBonusScope';
 import { BenchXpPolicy } from '../party/BenchXpPolicy';
 import { LootService } from '../services/LootService';
+import { ILootService } from '../services/ILootService';
 import { resolvePhase } from './CampaignCatalog';
 import { parsePhaseId } from './CampaignIds';
 import { EncounterMeta } from './EncounterResolver';
@@ -26,7 +28,7 @@ export interface KillRewardBatchResult {
 }
 
 export class EnemyKillRewardService {
-  constructor(private readonly lootService = new LootService()) {}
+  constructor(private readonly lootService: ILootService = new LootService()) {}
 
   applyKillRewards(
     state: GameState,
@@ -145,6 +147,7 @@ export class EnemyKillRewardService {
         nextState,
         lootDrop,
         phase?.difficultyTier ?? enemy.stage,
+        enemy.role === 'boss' ? 'boss' : 'monster',
       );
       nextState = lootApplied.state;
       rewardParts.push(lootApplied.label);
@@ -162,8 +165,13 @@ export class EnemyKillRewardService {
       this.lootService,
     );
     if (uniqueGear) {
-      nextState = nextState.withInventory([...nextState.inventory, uniqueGear]);
-      rewardParts.push(uniqueGear.name);
+      const uniqueChest = Chest.createWithGuaranteedLoot(
+        phase?.difficultyTier ?? enemy.stage,
+        'act_boss',
+        uniqueGear,
+      );
+      nextState = nextState.withChests([...nextState.chests, uniqueChest]);
+      rewardParts.push('baú de chefe de ato');
     }
 
     const replayTag = replay && rewardParts.length > 0 ? '' : '';
@@ -186,12 +194,14 @@ export class EnemyKillRewardService {
     state: GameState,
     drop: LootDropResult,
     difficultyTier: number,
+    directGearChestType: ChestType,
   ): { state: GameState; label: string } {
     if (drop.kind === 'gear') {
-      const gear = this.lootService.generateGear(difficultyTier);
+      // Recompensa de batalha nunca entrega gear direto: vira baú comum, sorteado ao abrir.
+      const chest = Chest.create(difficultyTier, directGearChestType);
       return {
-        state: state.withInventory([...state.inventory, gear]),
-        label: gear.name,
+        state: state.withChests([...state.chests, chest]),
+        label: directGearChestType === 'boss' ? 'baú de boss' : 'baú',
       };
     }
 

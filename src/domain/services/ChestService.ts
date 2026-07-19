@@ -32,7 +32,7 @@ export class ChestService {
     }
 
     this.gearStorageService.assertCanAddToInventory(state);
-    const loot = this.lootService.generateGearForChest(chest.chestType, chest.stageEarned);
+    const loot = this.resolveChestLoot(chest);
     const updatedChests = state.chests.map((entry) =>
       entry.id === chestId ? entry.open(loot) : entry,
     );
@@ -72,7 +72,7 @@ export class ChestService {
         break;
       }
 
-      const loot = this.lootService.generateGearForChest(chest.chestType, chest.stageEarned);
+      const loot = this.resolveChestLoot(chest);
       updatedChests = updatedChests.map((entry) =>
         entry.id === chest.id ? entry.open(loot) : entry,
       );
@@ -104,5 +104,12 @@ export class ChestService {
       .addLog(logMessage);
 
     return { state: nextState, loots };
+  }
+
+  private resolveChestLoot(chest: GameState['chests'][number]): Gear {
+    return (
+      chest.guaranteedLoot ??
+      this.lootService.generateGearForChest(chest.chestType, chest.stageEarned)
+    );
   }
 }

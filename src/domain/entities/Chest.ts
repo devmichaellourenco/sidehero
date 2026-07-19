@@ -7,6 +7,8 @@ export interface ChestProps {
   chestType: ChestType;
   opened: boolean;
   loot: Gear | null;
+  /** Loot já definido na concessão; só é revelado e entregue ao abrir. */
+  guaranteedLoot?: Gear | null;
 }
 
 export class Chest {
@@ -15,6 +17,7 @@ export class Chest {
   readonly chestType: ChestType;
   readonly opened: boolean;
   readonly loot: Gear | null;
+  readonly guaranteedLoot: Gear | null;
 
   private constructor(props: ChestProps) {
     this.id = props.id;
@@ -22,6 +25,7 @@ export class Chest {
     this.chestType = props.chestType;
     this.opened = props.opened;
     this.loot = props.loot;
+    this.guaranteedLoot = props.guaranteedLoot ?? null;
   }
 
   static create(stageEarned: number, chestType: ChestType = 'monster'): Chest {
@@ -31,6 +35,22 @@ export class Chest {
       chestType,
       opened: false,
       loot: null,
+      guaranteedLoot: null,
+    });
+  }
+
+  static createWithGuaranteedLoot(
+    stageEarned: number,
+    chestType: ChestType,
+    guaranteedLoot: Gear,
+  ): Chest {
+    return new Chest({
+      id: `chest-${chestType}-${stageEarned}-${guaranteedLoot.id}`,
+      stageEarned,
+      chestType,
+      opened: false,
+      loot: null,
+      guaranteedLoot,
     });
   }
 
@@ -38,6 +58,7 @@ export class Chest {
     return new Chest({
       ...props,
       chestType: props.chestType ?? 'monster',
+      guaranteedLoot: props.guaranteedLoot ?? null,
     });
   }
 
@@ -48,6 +69,7 @@ export class Chest {
       chestType: this.chestType,
       opened: true,
       loot,
+      guaranteedLoot: null,
     });
   }
 
@@ -58,6 +80,7 @@ export class Chest {
       chestType: this.chestType,
       opened: this.opened,
       loot: this.loot,
+      guaranteedLoot: this.guaranteedLoot,
     };
   }
 }

@@ -53,6 +53,12 @@ export function playerOwnsGearTemplate(state: GameState, templateId: string): bo
   const inStash = state.stash.some((gear) => gearMatchesTemplate(gear, templateId));
   if (inStash) return true;
 
+  const inPendingChest = state.chests.some((chest) => {
+    const guaranteedLoot = chest.guaranteedLoot;
+    return !chest.opened && guaranteedLoot !== null && gearMatchesTemplate(guaranteedLoot, templateId);
+  });
+  if (inPendingChest) return true;
+
   return state.roster.some((hero) =>
     Object.values(hero.toProps().equipment ?? {}).some(
       (gear) => gear && gearMatchesTemplate(gear, templateId),
