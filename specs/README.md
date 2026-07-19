@@ -30,6 +30,10 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 **Balanceamento transversal:** 9/9  
 **Total testes listados nas specs:** 101/101 (100%)
 
+## Documentação de produto
+
+- [Game Design Document](game-design-document.spec.md) — 8/8 critérios editoriais; GDD completo + pitch e roteiro audiovisual
+
 ## Escopo do jogo (v1)
 
 Campanha jogável até **Morthaven** (`4-50`, tier 200). Regiões 5–10 (DLC) permanecem no código mas ocultas — ver [`combat-campaign.spec.md`](combat-campaign.spec.md) (seção Escopo do jogo base).
@@ -77,6 +81,7 @@ Polish e arte de battle strip das 4 regiões — [`art-scenes.spec.md`](art-scen
 | [stage-progress-bar](stage-progress-bar.spec.md) | Timeline de waves da fase (Idle RPG) | `.cursor/agents/stage-progress-bar.md` | `.cursor/skills/stage-progress-bar/` |
 | [medieval-theme](medieval-theme.spec.md) | Paleta medieval do painel (tutorial) | `.cursor/agents/medieval-theme.md` | `.cursor/skills/medieval-theme/` |
 | [ui-theme](ui-theme.spec.md) | Tema claro/escuro do painel (preferência) | `.cursor/agents/medieval-theme.md` | `.cursor/skills/medieval-theme/` |
+| [game-design-document](game-design-document.spec.md) | Visão do produto, GDD, pitch e apresentação | `.cursor/agents/game-design-document.md` | `.cursor/skills/game-design-document/` |
 
 ## Arquitetura global
 
