@@ -16,6 +16,19 @@ describe('buildSkillBattleStats — throughput alinhado ao combate', () => {
     expect(stats.every((entry) => (entry.tooltipLines?.length ?? 0) > 0)).toBe(true);
   });
 
+  it('passivas defensivas expõem efeito numérico no tooltip', () => {
+    const base = Hero.createStarter('h4', 'knight', 'Galneon');
+    const hero = Hero.restore({
+      ...base.toProps(),
+      skillRanks: { ...base.toProps().skillRanks, evasion: 1 },
+      equippedSkillIds: ['basic_attack', 'evasion'],
+    });
+
+    const stats = buildSkillBattleStats(hero, 'evasion', 'dex');
+    expect(stats.find((entry) => entry.label === 'Esquiva')?.value).toContain('2.5%');
+    expect(stats.some((entry) => entry.label === 'Recarga')).toBe(false);
+  });
+
   it('inclui DPS finito para skill de dano e mostra recarga com CDR quando há gear', () => {
     const base = Hero.createStarter('h2', 'sorcerer', 'Nix');
     const wand = Gear.create({

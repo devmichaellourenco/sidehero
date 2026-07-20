@@ -4,6 +4,14 @@ import { getClassCombatBaseline } from '../../domain/combat/ClassCombatBaselines
 import { DAMAGE_ELEMENT_LABELS, DamageElement } from '../../domain/combat/DamageElement';
 import { defensiveMitigationForHero } from '../../domain/combat/HeroDefensiveStatsProvider';
 import {
+  evasionDodgeBonusAtRank,
+  ironSkinDamageReductionAtRank,
+  isPassiveSkillActive,
+  manaShieldBlockAtRank,
+  passiveSkillRank,
+  passiveVitalityHealthBonus,
+} from '../../domain/combat/PassiveSkillEffects';
+import {
   getEffectiveResistance,
   ResistanceProfile,
 } from '../../domain/combat/ResistanceProfile';
@@ -38,10 +46,6 @@ function gearContributionLines(
     lines.push(`${gear.name}: ${formatter(value)}`);
   }
   return lines;
-}
-
-function isSkillEquipped(equippedSkillIds: Array<string | null>, skillId: string): boolean {
-  return equippedSkillIds.some((id) => id === skillId);
 }
 
 function fmtInt(value: number): string {
@@ -286,6 +290,11 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
         `Base da classe: ${fmtInt(hero.baseMaxHealth)}`,
         `Nível: +${fmtInt(healthLevelBonus)}`,
         `STR (${hero.totalAttributes.str} × 2): +${fmtInt(healthAttrBonus)}`,
+        ...(isPassiveSkillActive(hero, 'vitality')
+          ? [
+              `Skill Vitalidade (level ${passiveSkillRank(hero, 'vitality')}): +${fmtInt(passiveVitalityHealthBonus(hero))} HP`,
+            ]
+          : []),
         ...(healthGearFlat > 0
           ? [`Equipamento: +${fmtInt(healthGearFlat)}`, ...gearContributionLines(equipment, (g) => g.healthBonus, (v) => `+${fmtInt(v)} HP`)]
           : []),
@@ -300,8 +309,8 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       tooltipLines: [
         `DEX (${hero.totalAttributes.dex}): +${fmtPct(passiveDodge, 1)}`,
         ...(gearDodge > 0 ? [`Equipamento: +${fmtPct(gearDodge, 1)}`, ...gearContributionLines(equipment, (g) => g.dodgeChanceBonus, (v) => `+${fmtPct(v, 1)}`)] : []),
-        ...(isSkillEquipped(props.equippedSkillIds, 'evasion') && (props.skillRanks.evasion ?? 0) >= 1
-          ? [`Skill Evasão (rank ${props.skillRanks.evasion}): +${fmtPct((props.skillRanks.evasion ?? 0) * 0.025, 1)}`]
+        ...(isPassiveSkillActive(hero, 'evasion')
+          ? [`Skill Esquiva (level ${passiveSkillRank(hero, 'evasion')}): +${fmtPct(evasionDodgeBonusAtRank(passiveSkillRank(hero, 'evasion')), 1)}`]
           : []),
         `Total (máx. 50%): ${fmtPct(defensive.dodgeChance, 1)}`,
       ],
@@ -312,8 +321,8 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       value: fmtPct(defensive.blockChance, 1),
       tooltipLines: [
         ...(gearBlock > 0 ? [`Equipamento: +${fmtPct(gearBlock, 1)}`, ...gearContributionLines(equipment, (g) => g.blockChanceBonus, (v) => `+${fmtPct(v, 1)}`)] : ['Equipamento: —']),
-        ...(isSkillEquipped(props.equippedSkillIds, 'mana_shield') && (props.skillRanks.mana_shield ?? 0) >= 1
-          ? [`Skill Escudo de Mana (rank ${props.skillRanks.mana_shield}): +${fmtPct((props.skillRanks.mana_shield ?? 0) * 0.03, 1)}`]
+        ...(isPassiveSkillActive(hero, 'mana_shield')
+          ? [`Skill Escudo de Mana (level ${passiveSkillRank(hero, 'mana_shield')}): +${fmtPct(manaShieldBlockAtRank(passiveSkillRank(hero, 'mana_shield')), 1)}`]
           : []),
         `Total (máx. 50%): ${fmtPct(defensive.blockChance, 1)}`,
       ],
@@ -324,8 +333,8 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       value: fmtPct(defensive.damageReduction, 1),
       tooltipLines: [
         ...(gearDr > 0 ? [`Equipamento: +${fmtPct(gearDr, 1)}`, ...gearContributionLines(equipment, (g) => g.damageReductionBonus, (v) => `+${fmtPct(v, 1)}`)] : ['Equipamento: —']),
-        ...(isSkillEquipped(props.equippedSkillIds, 'iron_skin') && (props.skillRanks.iron_skin ?? 0) >= 1
-          ? [`Skill Pele de Ferro (rank ${props.skillRanks.iron_skin}): +${fmtPct((props.skillRanks.iron_skin ?? 0) * 0.04, 1)}`]
+        ...(isPassiveSkillActive(hero, 'iron_skin')
+          ? [`Skill Pele de Ferro (level ${passiveSkillRank(hero, 'iron_skin')}): +${fmtPct(ironSkinDamageReductionAtRank(passiveSkillRank(hero, 'iron_skin')), 1)}`]
           : []),
         `Total (máx. 75%): ${fmtPct(defensive.damageReduction, 1)}`,
       ],

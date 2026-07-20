@@ -22,6 +22,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 - [x] Cards da lista de skills **sem** badges Ativa/Inativa nem Disponível; skill equipada usa fundo verde no card; rank disponível comunicado só pelo botão `[+]`
 - [x] Aba Skills exibe skills de classe e evolução em **grade 2 colunas** de tiles (título no topo, arte full-bleed, borda superior por ramo, level com bookmark, meta rápida de atributo/elemento); detalhes permanecem no tooltip
 - [x] Nomenclatura de progressão da skill na UI: **Level** (não Rank)
+- [x] Skills passivas equipadas (`evasion`, `vitality`, `iron_skin`, `mana_shield`) exibem efeito numérico em **Na batalha** no tooltip (%, HP, mecânica e condição de slot)
 - [x] Aba Classe lista apenas próxima(s) ascensão(ões) e skills de evolução; classe/tier atual ficam no header do modal
 - [x] Cards de ascensão usam tema por caminho (military/martial/arcane/innate/sacred/life), showcase ampliado do sprite e CTA com estado pronto/bloqueado
 - [x] Cards de ascensão **sem** requisitos, status nem CTA no corpo visível — detalhes no tooltip ao apontar; nome e `+N Aprim.` em linhas separadas; ascensão disponível abre modal de confirmação ao clicar no card

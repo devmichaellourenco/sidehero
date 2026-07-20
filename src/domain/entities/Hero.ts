@@ -9,6 +9,7 @@ import {
   HERO_LEVEL_UP_DEFENSE_GAIN,
   HERO_LEVEL_UP_HEALTH_GAIN,
 } from '../balance/ProgressionPowerScale';
+import { passiveVitalityHealthBonus } from '../combat/PassiveSkillEffects';
 import { AscensionId, SkillId } from '../progression/SkillId';
 import { canHeroEquip } from '../services/GearEquipService';
 import { Gear, GearSlot } from './Gear';
@@ -153,7 +154,8 @@ export class Hero {
     const gearBonus = this.sumGear((g) => g.healthBonus);
     const levelBonus = (this.level - 1) * HERO_HEALTH_PER_LEVEL;
     const attrBonus = this.totalAttributes.str * 2;
-    const raw = this.baseMaxHealth + gearBonus + levelBonus + attrBonus;
+    const vitalityBonus = passiveVitalityHealthBonus(this);
+    const raw = this.baseMaxHealth + gearBonus + levelBonus + attrBonus + vitalityBonus;
     const percent = this.sumGear((g) => g.healthPercentBonus);
     return Math.max(1, Math.floor(raw * (1 + percent / 100)));
   }

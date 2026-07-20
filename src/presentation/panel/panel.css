@@ -12579,8 +12579,10 @@ body.wow-celebration-open {
   align-self: stretch;
   border-radius: 12px 12px 0 0;
   background: linear-gradient(180deg, color-mix(in srgb, var(--parchment-0) 98%, transparent), color-mix(in srgb, var(--parchment-1) 98%, transparent));
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+  border: none;
+  border-top: 2px solid var(--seal-gold);
+  box-shadow: 0 -8px 24px rgba(31, 23, 16, 0.18);
+  color: var(--ink);
 }
 
 .hero-drawer-header {

@@ -6,6 +6,13 @@ import {
   DefensiveMitigation,
   ZERO_DEFENSIVE,
 } from './DefensiveMitigation';
+import {
+  evasionDodgeBonusAtRank,
+  ironSkinDamageReductionAtRank,
+  isPassiveSkillActive,
+  manaShieldBlockAtRank,
+  passiveSkillRank,
+} from './PassiveSkillEffects';
 import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
 
 function sumGearDefensive(gears: Iterable<Gear | null | undefined>): DefensiveMitigation {
@@ -24,24 +31,23 @@ function sumGearDefensive(gears: Iterable<Gear | null | undefined>): DefensiveMi
 }
 
 function passiveDefensiveForHero(hero: Hero): DefensiveMitigation {
-  const props = hero.toProps();
-  const ranks = props.skillRanks;
-  const equipped = new Set(props.equippedSkillIds);
-
   let dodgeChance = hero.totalAttributes.dex * 0.0015;
   let blockChance = 0;
   let damageReduction = 0;
 
-  if (equipped.has('evasion') && (ranks.evasion ?? 0) >= 1) {
-    dodgeChance += (ranks.evasion ?? 0) * 0.025;
+  const evasionRank = passiveSkillRank(hero, 'evasion');
+  if (isPassiveSkillActive(hero, 'evasion')) {
+    dodgeChance += evasionDodgeBonusAtRank(evasionRank);
   }
 
-  if (equipped.has('iron_skin') && (ranks.iron_skin ?? 0) >= 1) {
-    damageReduction += (ranks.iron_skin ?? 0) * 0.04;
+  const ironSkinRank = passiveSkillRank(hero, 'iron_skin');
+  if (isPassiveSkillActive(hero, 'iron_skin')) {
+    damageReduction += ironSkinDamageReductionAtRank(ironSkinRank);
   }
 
-  if (equipped.has('mana_shield') && (ranks.mana_shield ?? 0) >= 1) {
-    blockChance += (ranks.mana_shield ?? 0) * 0.03;
+  const manaShieldRank = passiveSkillRank(hero, 'mana_shield');
+  if (isPassiveSkillActive(hero, 'mana_shield')) {
+    blockChance += manaShieldBlockAtRank(manaShieldRank);
   }
 
   return { dodgeChance, blockChance, damageReduction };

@@ -81,6 +81,37 @@ describe('HeroDetailModalRenderer', () => {
     expect(container.innerHTML).not.toContain('Toque em um slot de equipamento');
   });
 
+  it('mostra badge de aprimoramento em Status e Skills quando há pontos', () => {
+    const container = document.createElement('div');
+    const renderer = new HeroDetailModalRenderer();
+
+    renderer.render(
+      container,
+      { heroes: [minimalHero({ hasUnspentPoints: true, unspentImprovementPoints: 2 })] } as GameStateDto,
+      'h1',
+      noopHandlers(),
+    );
+
+    const badges = container.querySelectorAll('.inventory-upgrade-badge');
+    expect(badges.length).toBe(2);
+    expect(container.innerHTML).toMatch(/data-hero-tab="attributes"[^>]*>Status<span class="inventory-upgrade-badge">!<\/span>/);
+    expect(container.innerHTML).toMatch(/data-hero-tab="skills"[^>]*>Skills<span class="inventory-upgrade-badge">!<\/span>/);
+  });
+
+  it('não mostra badge de aprimoramento sem pontos disponíveis', () => {
+    const container = document.createElement('div');
+    const renderer = new HeroDetailModalRenderer();
+
+    renderer.render(
+      container,
+      { heroes: [minimalHero({ hasUnspentPoints: false, unspentImprovementPoints: 0 })] } as GameStateDto,
+      'h1',
+      noopHandlers(),
+    );
+
+    expect(container.querySelectorAll('.inventory-upgrade-badge').length).toBe(0);
+  });
+
   it('destaca slot ativo no loadout quando em modo equipar', () => {
     const container = document.createElement('div');
     const renderer = new HeroDetailModalRenderer();
