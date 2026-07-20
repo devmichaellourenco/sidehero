@@ -31,13 +31,27 @@ const cardOptions = {
 };
 
 describe('SkillCardPresentation', () => {
-  it('mostra apenas resumo compacto no card', () => {
+  it('mostra tile com título, arte full-bleed, level e meta rápida', () => {
     const html = renderSkillCard(skillNode(), cardOptions);
 
-    expect(html).toContain('skill-card--compact');
+    expect(html).toContain('skill-card--tile');
+    expect(html).toContain('skill-card-tile');
+    expect(html).toContain('skill-card-header');
+    expect(html).toContain('skill-card-visual__glow');
+    expect(html).toContain('skill-card-visual__spark');
+    expect(html).toContain('skill-card-level');
+    expect(html).toContain('skill-card-level-shape');
+    expect(html).toContain('skill-card-level-value');
+    expect(html).toContain('>1<');
+    expect(html).toContain('skill-card-meta');
+    expect(html).toContain('skill-card-meta-row');
+    expect(html).toContain('Ofensivo');
+    expect(html).toContain('INT');
+    expect(html).toContain('Fogo');
     expect(html).toContain('skill-card--equipped-active');
     expect(html).toContain('Bola de Fogo');
-    expect(html).toContain('skill-card-essentials');
+    expect(html).not.toContain('skill-card-body');
+    expect(html).not.toContain('skill-card-essentials-row');
     expect(html).not.toContain('skill-card-desc');
     expect(html).not.toContain('skill-card-combat');
     expect(html).not.toContain('skill-card-reqs');
@@ -46,6 +60,7 @@ describe('SkillCardPresentation', () => {
     expect(html).not.toContain('Ativa');
     expect(html).not.toContain('Inativa');
     expect(html).not.toContain('+1 rank');
+    expect(html).not.toContain('Rank ');
     expect(html).toContain('skill-card-rank-up');
     expect(html).toContain('skill-card-rank-up--available');
     expect(html).not.toContain('Toque para equipar');
@@ -53,7 +68,7 @@ describe('SkillCardPresentation', () => {
     expect(html).not.toContain('skill-card-equip-hint');
   });
 
-  it('não exibe badge Disponível quando rank pode subir', () => {
+  it('não exibe badge Disponível quando level pode subir', () => {
     const html = renderSkillCard(
       skillNode({ status: 'ready', currentRank: 0, isEquipped: false, canAllocateRank: true }),
       cardOptions,
@@ -79,6 +94,7 @@ describe('SkillCardPresentation', () => {
     expect(html).toContain('Lança uma esfera flamejante');
     expect(html).toContain('hero-skill-chip-tooltip-stat-label');
     expect(html).toContain('hero-skill-chip-tooltip-reqs');
+    expect(html).toContain('Level 1/3');
   });
 
   it('exibe cadeado no ícone quando a skill está bloqueada', () => {
@@ -87,7 +103,7 @@ describe('SkillCardPresentation', () => {
       { ...cardOptions, canAllocate: false },
     );
 
-    expect(html).toContain('skill-card-icon-wrap--locked');
+    expect(html).toContain('skill-card-visual--locked');
     expect(html).toContain('skill-card-lock');
     expect(html).toContain('🔒');
     expect(html).not.toContain('Não desbloqueada');

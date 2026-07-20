@@ -41,6 +41,8 @@ describe('renderHeroSkillsTab', () => {
     const html = renderHeroSkillsTab(minimalHero(), [skillNode()]);
 
     expect(html).toContain('hero-skills-tab-scroll');
+    expect(html).toContain('skill-list');
+    expect(html).toContain('skill-card--tile');
     expect(html).toContain('Investida');
     expect(html).not.toContain('hero-skills-tab-meta');
     expect(html).not.toContain('Skills equipadas');

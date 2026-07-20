@@ -91,7 +91,7 @@ export function renderSkillRankLabel(
   status?: SkillNodeStatusDto,
 ): string {
   if (maxRank <= 1) {
-    if (currentRank > 0) return 'Rank único';
+    if (currentRank > 0) return 'Level único';
     return status === 'locked' ? 'Bloqueada' : 'Disponível';
   }
 
@@ -101,7 +101,7 @@ export function renderSkillRankLabel(
     return `Não desbloqueada (máx. ${maxRank})`;
   }
 
-  return `Rank ${currentRank}/${maxRank}`;
+  return `Level ${currentRank}/${maxRank}`;
 }
 
 export function renderSkillRankDisplay(

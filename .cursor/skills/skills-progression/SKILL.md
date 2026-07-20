@@ -24,7 +24,7 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 - Scroll ao `+1 rank`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`
 - Aba Skills: carregar `GET_HERO_SKILL_TREE` **e** `GET_HERO_ASCENSION_TREE` (skills de evolução vivem aqui)
 - Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltips nos cards; skills de classe + skills de evolução
-- Cards da lista: estado equipado = fundo verde; sem badge Disponível (botão `[+]` basta)
+- Cards da lista: estado equipado = fundo verde; sem badge Disponível (botão `[+]` basta); layout em **grade 2 colunas** de tiles (`.skill-card--tile`) com título no topo, arte full-bleed, level (bookmark) e meta rápida (ramo/atributo/elemento)
 - Cards de ascensão: requisitos/CTA no tooltip; clique no card disponível abre confirmação; `+N Aprim.` (não pool separado)
 - Ascensão libera skills/passivas do caminho e concede Aprimoramento (`pointsGranted`); skills `pointType: 'ascension'` gastam o mesmo saldo até rank 3
 - Aba Classe: sem retrato/classe atual (vai no header); banner + cards temáticos (`HeroClassAscensionPresentation`) — sem lista de skills

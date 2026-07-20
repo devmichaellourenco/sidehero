@@ -107,7 +107,7 @@ function renderBattleSkillCard(skill: HeroActiveSkillDto): string {
         <div class="hero-status-skill-titles">
           <h4 class="hero-status-skill-name">${escapeHtml(skill.name)}</h4>
           <p class="hero-status-skill-meta">
-            ${escapeHtml(skill.branchLabel)} · Rank ${skill.currentRank}/${skill.maxRank} · escala ${escapeHtml(skill.scalingLabel)}
+            ${escapeHtml(skill.branchLabel)} · Level ${skill.currentRank}/${skill.maxRank} · escala ${escapeHtml(skill.scalingLabel)}
           </p>
         </div>
       </header>
