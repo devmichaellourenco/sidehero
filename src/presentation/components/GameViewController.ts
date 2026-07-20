@@ -1962,7 +1962,9 @@ export class GameViewController {
     this.battleLogRenderer.render(this.battleLog, logMessages);
 
     if (mergedState.featureFlags.battleStats) {
-      this.battleStatsPanel.setContent(renderBattleStatsBody(mergedState));
+      this.battleStatsPanel.setContent(
+        renderBattleStatsBody(mergedState, this.battleStatsPanel.getActiveTab()),
+      );
     } else {
       this.battleStatsPanel.hide();
     }

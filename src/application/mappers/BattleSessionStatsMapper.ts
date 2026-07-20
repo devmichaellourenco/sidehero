@@ -24,6 +24,7 @@ export function mapBattleSessionStats(
       healingDone: hero.healingDone,
       damageTaken: hero.damageTaken,
       damageMitigated: hero.damageMitigated,
+      critCount: hero.critCount,
       basicAttackUses: hero.basicAttackUses,
       skillUses: hero.skillUses,
       damageByElement: { ...hero.damageByElement },

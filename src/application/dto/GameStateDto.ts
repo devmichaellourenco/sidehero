@@ -294,6 +294,7 @@ export interface BattleSessionStatsDto {
     healingDone: number;
     damageTaken: number;
     damageMitigated: number;
+    critCount: number;
     basicAttackUses: number;
     skillUses: number;
     damageByElement: BattleSessionStatsDto['damageByElement'];

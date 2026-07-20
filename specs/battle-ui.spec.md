@@ -17,7 +17,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Baú flutuante na batalha quando pendente
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
-- [x] Menu **Stats** (runa): painel flutuante como o Log, atualiza em tempo real (e na pausa); geral + por herói + por skill + elementos + mitigação
+- [x] Menu **Stats** (runa): painel flutuante como o Log, atualiza em tempo real (e na pausa); abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos (ranking com barras por herói)
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)

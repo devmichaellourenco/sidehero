@@ -45,6 +45,7 @@ describe('BattleSessionStats', () => {
     expect(next.damageByElement.physical).toBe(40);
     expect(next.damageByElement.fire).toBe(20);
     expect(next.heroes.h1.damageDealt).toBe(60);
+    expect(next.heroes.h1.critCount).toBe(1);
     expect(next.heroes.h1.basicAttackUses).toBe(1);
     expect(next.heroes.h1.skillUses).toBe(1);
     expect(next.heroes.h1.healingDone).toBe(15);

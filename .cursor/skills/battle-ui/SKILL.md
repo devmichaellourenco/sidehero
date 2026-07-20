@@ -22,7 +22,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Strip | `BattleStripRenderer`, `BattleActorCardPresentation`, `BattleFloatingTextController` (`Lv UP`) |
 | Stage progress | Ver skill `stage-progress-bar` — timeline entre localização e a strip |
 | Pausa | Acampamento (`PauseForLoadout`) ≠ pausa de batalha (`PauseBattle` / `ResumeBattle`) |
-| Stats | Runa `battle_stats` → menu Stats (`BattleStatsPanelController` + `BattleStatsPresentation`) |
+| Stats | Runa `battle_stats` → menu Stats (`BattleStatsPanelController` + `BattleStatsPresentation` com abas) |
 | Modais | `ModalStackController`, `GameViewController` |
 | Apoio | `DonationPromptController`, `DonationCardPresentation`, `DonationConfig` |
 | Wow | `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator` |

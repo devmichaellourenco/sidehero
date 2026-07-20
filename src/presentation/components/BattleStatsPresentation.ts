@@ -1,5 +1,24 @@
 import { BattleSessionStatsDto, GameStateDto } from '../../application/dto/GameStateDto';
-import { DAMAGE_ELEMENT_LABELS } from '../../domain/combat/DamageElement';
+import { DAMAGE_ELEMENT_LABELS, DamageElement, DAMAGE_ELEMENTS } from '../../domain/combat/DamageElement';
+
+export type BattleStatsTabId =
+  | 'general'
+  | 'damage'
+  | 'healing'
+  | 'taken'
+  | 'mitigated'
+  | 'crits';
+
+const BATTLE_STATS_TABS: Array<{ id: BattleStatsTabId; label: string }> = [
+  { id: 'general', label: 'Geral' },
+  { id: 'damage', label: 'Dano causado' },
+  { id: 'healing', label: 'Cura realizada' },
+  { id: 'taken', label: 'Dano sofrido' },
+  { id: 'mitigated', label: 'Dano mitigado' },
+  { id: 'crits', label: 'Críticos' },
+];
+
+type HeroStatRow = BattleSessionStatsDto['heroes'][number];
 
 function formatStat(value: number): string {
   return String(Math.max(0, Math.floor(value)));
@@ -11,6 +30,11 @@ function escapeHtml(text: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function barPercent(value: number, max: number): number {
+  if (max <= 0 || value <= 0) return 0;
+  return Math.max(4, Math.min(100, Math.round((value / max) * 100)));
 }
 
 function renderGeneralRows(stats: BattleSessionStatsDto): string {
@@ -101,6 +125,10 @@ function renderHeroSection(stats: BattleSessionStatsDto): string {
               <span class="battle-stats-label">Mitigado</span>
               <strong class="battle-stats-value">${formatStat(hero.damageMitigated)}</strong>
             </li>
+            <li class="battle-stats-row battle-stats-row--sub">
+              <span class="battle-stats-label">Críticos</span>
+              <strong class="battle-stats-value">${formatStat(hero.critCount)}</strong>
+            </li>
             ${elementRows}
           </ul>
         </article>`;
@@ -134,35 +162,183 @@ function renderSkillSection(stats: BattleSessionStatsDto): string {
   `;
 }
 
+function renderHeroBarRow(name: string, value: number, max: number): string {
+  const pct = barPercent(value, max);
+  return `
+    <div class="battle-stats-bar-row">
+      <span class="battle-stats-bar-name">${escapeHtml(name)}</span>
+      <div class="battle-stats-bar-track" aria-hidden="true">
+        <span class="battle-stats-bar-fill" style="width: ${pct}%"></span>
+      </div>
+      <strong class="battle-stats-bar-value">${formatStat(value)}</strong>
+    </div>
+  `;
+}
+
+function renderRankingGroup(
+  title: string,
+  rows: Array<{ name: string; value: number }>,
+): string {
+  const withValues = rows.filter((row) => row.value > 0);
+  if (withValues.length === 0) return '';
+
+  const sorted = [...withValues].sort((a, b) => b.value - a.value || a.name.localeCompare(b.name));
+  const max = sorted[0]?.value ?? 0;
+
+  return `
+    <section class="battle-stats-rank-group">
+      <h3 class="battle-stats-subtitle">${escapeHtml(title)}</h3>
+      <div class="battle-stats-rank-list">
+        ${sorted.map((row) => renderHeroBarRow(row.name, row.value, max)).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function heroMetricRows(
+  heroes: readonly HeroStatRow[],
+  pick: (hero: HeroStatRow) => number,
+): Array<{ name: string; value: number }> {
+  return heroes.map((hero) => ({ name: hero.name, value: pick(hero) }));
+}
+
+function renderDamageTab(stats: BattleSessionStatsDto): string {
+  if (stats.heroes.length === 0) {
+    return '<p class="battle-stats-empty">Ainda sem dano causado nesta tentativa.</p>';
+  }
+
+  const totalGroup = renderRankingGroup('Total', heroMetricRows(stats.heroes, (h) => h.damageDealt));
+  const elementGroups = DAMAGE_ELEMENTS.map((element: DamageElement) =>
+    renderRankingGroup(
+      DAMAGE_ELEMENT_LABELS[element],
+      heroMetricRows(stats.heroes, (h) => h.damageByElement[element]),
+    ),
+  ).join('');
+
+  return `${totalGroup}${elementGroups}`;
+}
+
+function renderMetricTab(
+  stats: BattleSessionStatsDto,
+  title: string,
+  pick: (hero: HeroStatRow) => number,
+  emptyLabel: string,
+): string {
+  if (stats.heroes.length === 0) {
+    return `<p class="battle-stats-empty">${escapeHtml(emptyLabel)}</p>`;
+  }
+
+  const group = renderRankingGroup(title, heroMetricRows(stats.heroes, pick));
+  return group || `<p class="battle-stats-empty">${escapeHtml(emptyLabel)}</p>`;
+}
+
+function renderTabsNav(activeTab: BattleStatsTabId): string {
+  return `
+    <nav class="battle-stats-tabs" role="tablist" aria-label="Categorias de estatísticas">
+      ${BATTLE_STATS_TABS.map(
+        (tab) => `
+        <button
+          type="button"
+          class="battle-stats-tab${tab.id === activeTab ? ' battle-stats-tab--active' : ''}"
+          role="tab"
+          data-battle-stats-tab="${tab.id}"
+          aria-selected="${tab.id === activeTab ? 'true' : 'false'}"
+        >${escapeHtml(tab.label)}</button>`,
+      ).join('')}
+    </nav>
+  `;
+}
+
+function renderTabPanel(id: BattleStatsTabId, activeTab: BattleStatsTabId, content: string): string {
+  const hidden = id === activeTab ? '' : ' hidden';
+  return `
+    <div
+      class="battle-stats-tab-panel${hidden}"
+      role="tabpanel"
+      data-battle-stats-tab-panel="${id}"
+      ${id === activeTab ? '' : 'hidden'}
+    >${content}</div>
+  `;
+}
+
 export function renderBattleStatsPanel(
   stats: BattleSessionStatsDto,
-  options: { live?: boolean; paused?: boolean } = {},
+  options: { live?: boolean; paused?: boolean; activeTab?: BattleStatsTabId } = {},
 ): string {
+  const activeTab = options.activeTab ?? 'general';
   const lead = options.live
     ? options.paused
       ? 'Totais da tentativa atual · batalha pausada (atualiza ao continuar).'
       : 'Totais da tentativa atual · atualizando em tempo real.'
     : 'Totais da tentativa atual de fase.';
 
+  const generalContent = `
+    ${renderGeneralRows(stats)}
+    <h3 class="battle-stats-subtitle">Por herói</h3>
+    <div class="battle-stats-heroes">${renderHeroSection(stats)}</div>
+    <h3 class="battle-stats-subtitle">Por skill</h3>
+    ${renderSkillSection(stats)}
+  `;
+
   return `
     <section class="battle-stats-panel" aria-label="Estatísticas da batalha">
       <p class="battle-stats-lead">${lead}</p>
-
-      <h3 class="battle-stats-subtitle">Geral</h3>
-      ${renderGeneralRows(stats)}
-
-      <h3 class="battle-stats-subtitle">Por herói</h3>
-      <div class="battle-stats-heroes">${renderHeroSection(stats)}</div>
-
-      <h3 class="battle-stats-subtitle">Por skill</h3>
-      ${renderSkillSection(stats)}
+      ${renderTabsNav(activeTab)}
+      ${renderTabPanel('general', activeTab, generalContent)}
+      ${renderTabPanel('damage', activeTab, renderDamageTab(stats))}
+      ${renderTabPanel(
+        'healing',
+        activeTab,
+        renderMetricTab(
+          stats,
+          'Total',
+          (hero) => hero.healingDone,
+          'Ainda sem cura realizada nesta tentativa.',
+        ),
+      )}
+      ${renderTabPanel(
+        'taken',
+        activeTab,
+        renderMetricTab(
+          stats,
+          'Total',
+          (hero) => hero.damageTaken,
+          'Ainda sem dano sofrido nesta tentativa.',
+        ),
+      )}
+      ${renderTabPanel(
+        'mitigated',
+        activeTab,
+        renderMetricTab(
+          stats,
+          'Total',
+          (hero) => hero.damageMitigated,
+          'Ainda sem dano mitigado nesta tentativa.',
+        ),
+      )}
+      ${renderTabPanel(
+        'crits',
+        activeTab,
+        renderMetricTab(
+          stats,
+          'Total',
+          (hero) => hero.critCount,
+          'Ainda sem críticos nesta tentativa.',
+        ),
+      )}
     </section>
   `;
 }
 
-export function renderBattleStatsBody(state: GameStateDto): string {
+export function renderBattleStatsBody(
+  state: GameStateDto,
+  activeTab: BattleStatsTabId = 'general',
+): string {
   return renderBattleStatsPanel(state.battleSessionStats, {
     live: true,
     paused: state.battlePaused,
+    activeTab,
   });
 }
+
+export { BATTLE_STATS_TABS };

@@ -15,6 +15,7 @@ export interface HeroBattleSessionStats {
   healingDone: number;
   damageTaken: number;
   damageMitigated: number;
+  critCount: number;
   basicAttackUses: number;
   skillUses: number;
   damageByElement: ElementDamageMap;
@@ -74,6 +75,7 @@ function emptyHeroStats(heroId: string): HeroBattleSessionStats {
     healingDone: 0,
     damageTaken: 0,
     damageMitigated: 0,
+    critCount: 0,
     basicAttackUses: 0,
     skillUses: 0,
     damageByElement: emptyElementDamageMap(),
@@ -102,6 +104,7 @@ function normalizeHero(
     healingDone: Math.max(0, Math.floor(raw?.healingDone ?? 0)),
     damageTaken: Math.max(0, Math.floor(raw?.damageTaken ?? 0)),
     damageMitigated: Math.max(0, Math.floor(raw?.damageMitigated ?? 0)),
+    critCount: Math.max(0, Math.floor(raw?.critCount ?? 0)),
     basicAttackUses: Math.max(0, Math.floor(raw?.basicAttackUses ?? 0)),
     skillUses: Math.max(0, Math.floor(raw?.skillUses ?? 0)),
     damageByElement: normalizeElementMap(raw?.damageByElement),
@@ -219,6 +222,7 @@ export function accumulateBattleStatsStrikes(
             const hero = ensureHero(next.heroes, strike.actorId);
             hero.damageDealt += event.amount;
             addElement(hero.damageByElement, event.damageElement, event.amount);
+            if (event.kind === 'crit') hero.critCount += 1;
           }
         } else if (event.target === 'hero') {
           next.damageTaken += event.amount;
@@ -236,6 +240,7 @@ export function accumulateBattleStatsStrikes(
         if (strike.actorSide === 'hero') {
           const healer = ensureHero(next.heroes, strike.actorId);
           healer.healingDone += event.amount;
+          if (event.kind === 'crit-heal') healer.critCount += 1;
         }
       }
     }
