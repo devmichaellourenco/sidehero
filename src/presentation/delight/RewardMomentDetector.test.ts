@@ -73,6 +73,7 @@ function baseState(overrides: Partial<GameStateDto> = {}): GameStateDto {
       autoEquipLoot: false,
       autoEquipSilent: false,
       logFilter: false,
+      battleStats: false,
       shopRefresh: false,
       backgroundTick: false,
       backgroundTickMultiplier: 1,

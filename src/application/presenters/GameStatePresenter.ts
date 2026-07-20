@@ -5,6 +5,7 @@ import { Chest } from '../../domain/entities/Chest';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { mapChestProgress } from '../mappers/ChestProgressMapper';
 import { mapFeatureFlags } from '../mappers/FeatureFlagsMapper';
+import { mapBattleSessionStats } from '../mappers/BattleSessionStatsMapper';
 import { mapHeroToDto as mapHeroBaseToDto } from '../mappers/HeroDtoMapper';
 import { Hero } from '../../domain/entities/Hero';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
@@ -101,6 +102,8 @@ export class GameStatePresenter {
       canEditParty: PartyEditPolicy.canEdit(state),
       loadoutEditOpen: state.loadoutEditOpen,
       phaseRestartOnResume: state.phaseRestartOnResume,
+      battlePaused: state.battlePaused,
+      battleSessionStats: mapBattleSessionStats(state.battleSessionStats, state.roster),
       enemies,
       enemy: enemies[0] ?? null,
       activeTurn: activeActor ? { side: activeActor.side, id: activeActor.id } : null,

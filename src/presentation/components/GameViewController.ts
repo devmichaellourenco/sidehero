@@ -5,6 +5,7 @@ import { IGameClient } from '../../application/ports/IGameClient';
 import { getDefaultGameClient } from '../../infrastructure/messaging/defaultGameClient';
 import { AutoBattleController } from '../controllers/AutoBattleController';
 import { BattleLogPanelController } from '../controllers/BattleLogPanelController';
+import { BattleStatsPanelController } from '../controllers/BattleStatsPanelController';
 import { GearMutationQueue } from '../controllers/GearMutationQueue';
 import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
@@ -37,6 +38,7 @@ import { hydratePanelIcons } from '../assets/PanelIconHydrator';
 import { buildBattleIntermissionPayload } from './BattleVictoryDetector';
 import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
 import { BattleStripRenderer } from './BattleStripRenderer';
+import { renderBattleStatsBody } from './BattleStatsPresentation';
 import { StageProgressBarRenderer } from './StageProgressBarRenderer';
 import { EquipPickerModalRenderer } from './EquipPickerModalRenderer';
 import { GearSlotKey } from './GearPresentation';
@@ -100,6 +102,8 @@ export class GameViewController {
   private readonly battleLog: HTMLElement;
   private readonly pauseLoadoutBtn: HTMLButtonElement;
   private readonly continueLoadoutBtn: HTMLButtonElement;
+  private readonly pauseBattleBtn: HTMLButtonElement;
+  private readonly resumeBattleBtn: HTMLButtonElement;
   private readonly openChestBtn: HTMLButtonElement;
   private readonly openAllChestsBtn: HTMLButtonElement;
     private readonly openInventoryBtn: HTMLButtonElement;
@@ -119,6 +123,7 @@ export class GameViewController {
   private readonly openWowInboxBtn: HTMLButtonElement;
   private readonly battleLogOverlayEl: HTMLElement;
   private readonly openBattleLogBtn: HTMLButtonElement;
+  private readonly openBattleStatsBtn: HTMLButtonElement;
   private readonly openHeroesBtn: HTMLButtonElement;
   private readonly openFormationBtn: HTMLButtonElement;
   private readonly heroesContainerEl: HTMLElement;
@@ -154,6 +159,7 @@ export class GameViewController {
   private readonly hud: GameHudController;
   private readonly wowCelebration: WowCelebrationController;
   private readonly battleLogPanel: BattleLogPanelController;
+  private readonly battleStatsPanel: BattleStatsPanelController;
   private readonly battleLogRenderer = new BattleLogRenderer();
   private readonly skillCooldownAnimator = new SkillCooldownDisplayAnimator();
 
@@ -186,10 +192,13 @@ export class GameViewController {
     this.chestProgressLabel = root.querySelector('#chest-progress-label')!;
     this.battleLog = document.querySelector('#battle-log')!;
     this.openBattleLogBtn = root.querySelector('#open-battle-log-btn') as HTMLButtonElement;
+    this.openBattleStatsBtn = root.querySelector('#open-battle-stats-btn') as HTMLButtonElement;
     this.openHeroesBtn = root.querySelector('#open-heroes-btn') as HTMLButtonElement;
     this.openFormationBtn = root.querySelector('#open-formation-btn') as HTMLButtonElement;
     this.pauseLoadoutBtn = root.querySelector('#pause-loadout-btn') as HTMLButtonElement;
     this.continueLoadoutBtn = root.querySelector('#continue-loadout-btn') as HTMLButtonElement;
+    this.pauseBattleBtn = root.querySelector('#pause-battle-btn') as HTMLButtonElement;
+    this.resumeBattleBtn = root.querySelector('#resume-battle-btn') as HTMLButtonElement;
     this.openChestBtn = root.querySelector('#open-chest-btn') as HTMLButtonElement;
     this.openAllChestsBtn = root.querySelector('#open-all-chests-btn') as HTMLButtonElement;
     this.openInventoryBtn = root.querySelector('#open-inventory-btn') as HTMLButtonElement;
@@ -332,14 +341,23 @@ export class GameViewController {
       this.openAllChestsBtn,
       this.openUpgradesBtn,
       this.openChestBtn,
+      this.pauseBattleBtn,
+      this.resumeBattleBtn,
       this.pauseLoadoutBtn,
       this.continueLoadoutBtn,
+      this.openBattleStatsBtn,
     );
 
     this.battleLogPanel = new BattleLogPanelController(
       this.battleLogOverlayEl,
       this.openBattleLogBtn,
       document.querySelector('#battle-log-close') as HTMLButtonElement,
+    );
+    this.battleStatsPanel = new BattleStatsPanelController(
+      root.querySelector('#battle-stats-overlay') as HTMLElement,
+      this.openBattleStatsBtn,
+      root.querySelector('#battle-stats-close') as HTMLButtonElement,
+      root.querySelector('#battle-stats-body') as HTMLElement,
     );
 
     this.heroDetailFlow = new HeroDetailFlow(
@@ -555,6 +573,12 @@ export class GameViewController {
     this.continueLoadoutBtn.addEventListener('click', () => {
       void this.continueFromLoadoutPause();
     });
+    this.pauseBattleBtn.addEventListener('click', () => {
+      void this.pauseBattle();
+    });
+    this.resumeBattleBtn.addEventListener('click', () => {
+      void this.resumeBattle();
+    });
     this.openChestBtn.addEventListener('click', () => {
       this.dismissOnboardingStep('first-chest');
       void this.chestLootFlow.openNextChest();
@@ -621,8 +645,8 @@ export class GameViewController {
 
     if (this.contextInvalidated) return;
 
-    if (this.isManualLoadoutPause(this.state)) {
-      this.syncLoadoutPauseBanner(this.state);
+    if (this.isManualLoadoutPause(this.state) || this.state?.battlePaused) {
+      this.syncLoadoutPauseBanner(this.state!);
     }
 
     this.syncAutoBattleTimer();
@@ -691,6 +715,7 @@ export class GameViewController {
     if (this.wowCelebration.isBlockingAdvance()) return true;
     if (this.actSceneFlow.isBlocking()) return true;
     if (this.pausingLoadout) return true;
+    if (state?.battlePaused) return true;
     return this.isManualLoadoutPause(state);
   }
 
@@ -889,7 +914,8 @@ export class GameViewController {
   }
 
   private async pauseForLoadout(): Promise<void> {
-    if (this.contextInvalidated || this.isAdvanceBlocked()) return;
+    if (this.contextInvalidated) return;
+    if (this.isAdvanceBlocked() && !this.state?.battlePaused) return;
 
     this.stopAutoBattle();
     this.pausingLoadout = true;
@@ -906,6 +932,36 @@ export class GameViewController {
     } finally {
       this.pausingLoadout = false;
     }
+  }
+
+  private async pauseBattle(): Promise<void> {
+    if (this.contextInvalidated || this.state?.battlePaused) return;
+    if (this.isManualLoadoutPause(this.state)) return;
+
+    this.stopAutoBattle();
+
+    const response = await this.client.send({ type: 'PAUSE_BATTLE' });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    this.render(response.state);
+    this.toasts.show('Batalha pausada', 'info');
+  }
+
+  private async resumeBattle(): Promise<void> {
+    if (!this.state?.battlePaused) return;
+
+    const response = await this.client.send({ type: 'RESUME_BATTLE' });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    this.render(response.state);
+    this.syncAutoBattleTimer();
+    this.toasts.show('Batalha retomada', 'info');
   }
 
   private async continueFromLoadoutPause(): Promise<void> {
@@ -1803,17 +1859,29 @@ export class GameViewController {
   }
 
   private syncLoadoutPauseBanner(state: GameStateDto): void {
-    if (!this.isManualLoadoutPause(state)) {
-      this.hideBattlePauseOverlay();
+    const label = this.battlePauseOverlay.querySelector('.battle-pause-label');
+
+    if (this.isManualLoadoutPause(state)) {
+      this.battlePauseOverlay.classList.remove('hidden', 'battle-pause-overlay--battle');
+      if (label) label.textContent = 'Acampamento';
+      this.stopAutoBattle();
       return;
     }
 
-    this.battlePauseOverlay.classList.remove('hidden');
-    this.stopAutoBattle();
+    if (state.battlePaused) {
+      this.battlePauseOverlay.classList.add('battle-pause-overlay--battle');
+      this.battlePauseOverlay.classList.remove('hidden');
+      if (label) label.textContent = 'Pausa';
+      this.stopAutoBattle();
+      return;
+    }
+
+    this.hideBattlePauseOverlay();
   }
 
   private hideBattlePauseOverlay(): void {
     this.battlePauseOverlay.classList.add('hidden');
+    this.battlePauseOverlay.classList.remove('battle-pause-overlay--battle');
   }
 
   private render(
@@ -1871,6 +1939,7 @@ export class GameViewController {
     this.hud.render(mergedState, {
       openingChests: this.chestLootFlow.openingChests,
       loadoutPauseActive: this.isManualLoadoutPause(mergedState),
+      battlePauseActive: Boolean(mergedState.battlePaused),
     });
 
     this.battleStrip.render(mergedState);
@@ -1891,6 +1960,12 @@ export class GameViewController {
     );
 
     this.battleLogRenderer.render(this.battleLog, logMessages);
+
+    if (mergedState.featureFlags.battleStats) {
+      this.battleStatsPanel.setContent(renderBattleStatsBody(mergedState));
+    } else {
+      this.battleStatsPanel.hide();
+    }
 
     this.enforceUpgradeGates();
     if (!this.onboarding.isActive()) {

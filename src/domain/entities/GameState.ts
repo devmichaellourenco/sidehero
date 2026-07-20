@@ -5,6 +5,11 @@ import { isPhaseReleased, maxReleasedTier } from '../campaign/CampaignReleaseSco
 import { CombatIntermission, CombatIntermissionProps } from '../campaign/CombatIntermission';
 import { PhaseRun, PhaseRunProps } from '../campaign/PhaseRun';
 import { resolvePhase } from '../campaign/CampaignCatalog';
+import {
+  BattleSessionStatsProps,
+  emptyBattleSessionStats,
+  normalizeBattleSessionStats,
+} from '../combat/BattleSessionStats';
 import { Chest } from './Chest';
 import { CombatState } from './CombatState';
 import { Enemy } from './Enemy';
@@ -46,6 +51,10 @@ export interface GameStateProps {
   phaseRestartOnResume?: boolean;
   /** Pausa entre waves/fases até o jogador ver o overlay de resultado. */
   combatIntermission?: CombatIntermissionProps | null;
+  /** Pausa de batalha (mantém combate; sem edição de party/loadout). */
+  battlePaused?: boolean;
+  /** Totais da tentativa atual de fase (dano/cura/sofrido). */
+  battleSessionStats?: BattleSessionStatsProps;
 }
 
 export class GameState {
@@ -68,6 +77,8 @@ export class GameState {
   readonly loadoutEditOpen: boolean;
   readonly phaseRestartOnResume: boolean;
   readonly combatIntermission: CombatIntermission | null;
+  readonly battlePaused: boolean;
+  readonly battleSessionStats: BattleSessionStatsProps;
 
   private constructor(props: GameStateProps) {
     const legacyHeroes = props.heroes ?? [];
@@ -93,6 +104,8 @@ export class GameState {
     this.combatIntermission = props.combatIntermission
       ? CombatIntermission.restore(props.combatIntermission)
       : null;
+    this.battlePaused = props.battlePaused === true;
+    this.battleSessionStats = normalizeBattleSessionStats(props.battleSessionStats);
   }
 
   static initial(): GameState {
@@ -123,6 +136,8 @@ export class GameState {
       loadoutEditOpen: false,
       phaseRestartOnResume: false,
       combatIntermission: null,
+      battlePaused: false,
+      battleSessionStats: emptyBattleSessionStats(),
     });
   }
 
@@ -231,6 +246,18 @@ export class GameState {
     return this.clone({ combatIntermission: combatIntermission?.toProps() ?? null });
   }
 
+  withBattlePaused(battlePaused: boolean): GameState {
+    return this.clone({ battlePaused });
+  }
+
+  withBattleSessionStats(battleSessionStats: BattleSessionStatsProps): GameState {
+    return this.clone({ battleSessionStats: normalizeBattleSessionStats(battleSessionStats) });
+  }
+
+  clearBattleSessionStats(): GameState {
+    return this.clone({ battleSessionStats: emptyBattleSessionStats() });
+  }
+
   withStage(stage: number): GameState {
     return this.clone({ stage, shopRefreshSeed: 0, shopRefreshUses: 0 });
   }
@@ -302,6 +329,8 @@ export class GameState {
       loadoutEditOpen: this.loadoutEditOpen,
       phaseRestartOnResume: this.phaseRestartOnResume,
       combatIntermission: this.combatIntermission?.toProps() ?? null,
+      battlePaused: this.battlePaused,
+      battleSessionStats: { ...this.battleSessionStats },
     };
   }
 

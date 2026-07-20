@@ -21,6 +21,8 @@ export type GameMessage =
   | { type: 'SELECT_PHASE'; phaseId: string }
   | { type: 'NEW_GAME' }
   | { type: 'PAUSE_FOR_LOADOUT' }
+  | { type: 'PAUSE_BATTLE' }
+  | { type: 'RESUME_BATTLE' }
   | { type: 'TICK'; ticks?: number; restartCurrentPhase?: boolean }
   | { type: 'RESUME_COMBAT_INTERMISSION' }
   | { type: 'OPEN_CHEST'; chestId: string }

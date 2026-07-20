@@ -18,6 +18,8 @@ import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
 
 export interface ResolvedDamage {
   amount: number;
+  /** Quanto do poder bruto foi absorvido (armadura/resist/bloqueio). 0 se esquivou. */
+  mitigated: number;
   isCrit: boolean;
   dodged: boolean;
   blocked: boolean;
@@ -99,8 +101,13 @@ export function resolveOutgoingDamage(
     rng,
   );
 
+  const mitigated = defensive.dodged
+    ? 0
+    : Math.max(0, powered - defensive.amount);
+
   return {
     amount: defensive.amount,
+    mitigated,
     isCrit,
     dodged: defensive.dodged,
     blocked: defensive.blocked,

@@ -1846,6 +1846,10 @@ h2 {
   pointer-events: none;
 }
 
+.battle-pause-overlay--battle {
+  background: rgba(96, 140, 200, 0.42);
+}
+
 .battle-pause-overlay.hidden {
   display: none;
 }
@@ -1860,6 +1864,168 @@ h2 {
   text-transform: uppercase;
   color: var(--battle-overlay-label);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.battle-stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 2px 8px;
+}
+
+.battle-stats-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 10px 12px;
+}
+
+.battle-stats-floating {
+  max-height: min(70vh, 520px);
+}
+
+.battle-stats-lead,
+.battle-stats-note,
+.battle-stats-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.battle-stats-subtitle {
+  margin: 4px 0 0;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.battle-stats-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.battle-stats-list--compact {
+  gap: 4px;
+}
+
+.battle-stats-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--panel-border-soft);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.battle-stats-row--sub {
+  padding: 5px 8px;
+}
+
+.battle-stats-label {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.battle-stats-value {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+html[data-ui-theme='dark'] .battle-stats-value {
+  color: var(--seal-gold);
+}
+
+.battle-stats-heroes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.battle-stats-hero-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--panel-border-soft);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  overflow: hidden;
+}
+
+.battle-stats-hero-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  min-width: 0;
+}
+
+.battle-stats-hero-header strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battle-stats-hero-uses,
+.battle-stats-skill-meta {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.battle-stats-skill-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--panel-border-soft);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.battle-stats-skill-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.battle-stats-skill-name {
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.battle-stats-skill-nums {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+html[data-ui-theme='dark'] .battle-stats-skill-nums {
+  color: var(--seal-gold);
 }
 
 .battle-victory-overlay.hidden {
@@ -7178,12 +7344,20 @@ body.modal-open {
 }
 
 .hero-detail-title .hero-level {
+  flex-shrink: 0;
   font-family: var(--font-heading);
-  font-size: 13px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   color: var(--gold);
+  line-height: 1.1;
 }
 
 .hero-detail-title .hero-level-class-line {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -11317,9 +11491,22 @@ html[data-ui-theme='dark'] .campaign-map-progress-block-fill {
 
 .battle-combat-bar {
   display: flex;
+  flex-direction: column;
   flex-shrink: 0;
   width: 100%;
-  margin-top: 1px;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.combat-bar-row {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+}
+
+.combat-bar-row:empty,
+.combat-bar-row:not(:has(button:not(.hidden))) {
+  display: none;
 }
 
 .combat-bar-btn {
@@ -11328,7 +11515,7 @@ html[data-ui-theme='dark'] .campaign-map-progress-block-fill {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 36px;
+  min-height: 34px;
   padding: 0 12px;
   border: 2px solid var(--combat-bar-btn-border);
   border-radius: 10px;
@@ -12117,13 +12304,18 @@ body.wow-celebration-open {
   margin: 0;
   text-align: center;
   font-family: var(--font-heading);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: var(--gold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+html[data-ui-theme='dark'] .hero-drawer-title {
+  color: var(--seal-gold);
 }
 
 .hero-drawer-nav,

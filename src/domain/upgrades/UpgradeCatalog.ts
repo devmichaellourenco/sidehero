@@ -9,7 +9,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-batalha II',
     description: 'Desbloqueia velocidade 2x na auto-batalha.',
     cost: 600,
-    parents: ['optimize_loadout_1'],
+    parents: ['battle_stats_1'],
     requirements: [
       { type: 'min_stage', value: 2 },
       { type: 'min_battles_won', value: 10 },
@@ -240,6 +240,18 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     cost: 1500,
     parents: ['auto_battle_3'],
     requirements: [{ type: 'min_stage', value: 2 }],
+  },
+  {
+    id: 'battle_stats_1',
+    feature: 'battle_stats',
+    level: 1,
+    branch: 'qol',
+    name: 'Estatísticas de batalha',
+    description:
+      'Desbloqueia o painel de estatísticas: totais, dano por herói/skill, elementos e mitigação em tempo real.',
+    cost: 200,
+    parents: ['optimize_loadout_1'],
+    requirements: [],
   },
   {
     id: 'shop_refresh_1',

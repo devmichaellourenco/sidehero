@@ -25,8 +25,11 @@ function createHud(): {
     openAllChests: HTMLButtonElement;
     upgrades: HTMLButtonElement;
     chest: HTMLButtonElement;
+    pauseBattle: HTMLButtonElement;
+    resumeBattle: HTMLButtonElement;
     pause: HTMLButtonElement;
     continue: HTMLButtonElement;
+    battleStats: HTMLButtonElement;
   };
 } {
   const campaign = document.createElement('button');
@@ -47,8 +50,11 @@ function createHud(): {
     openAllChests: createButton('open-all-chests-btn'),
     upgrades: createButton('open-upgrades-btn'),
     chest: createButton('open-chest-btn'),
+    pauseBattle: createButton('pause-battle-btn'),
+    resumeBattle: createButton('resume-battle-btn'),
     pause: createButton('pause-loadout-btn'),
     continue: createButton('continue-loadout-btn'),
+    battleStats: createButton('open-battle-stats-btn'),
   };
 
   const hud = new GameHudController(
@@ -66,8 +72,11 @@ function createHud(): {
     buttons.openAllChests,
     buttons.upgrades,
     buttons.chest,
+    buttons.pauseBattle,
+    buttons.resumeBattle,
     buttons.pause,
     buttons.continue,
+    buttons.battleStats,
   );
 
   return { hud, campaign, buttons };
@@ -104,6 +113,7 @@ function mockState(overrides: Partial<GameStateDto> = {}): GameStateDto {
       autoEquipLoot: false,
       autoEquipSilent: false,
       logFilter: false,
+      battleStats: false,
       shopRefresh: false,
       backgroundTick: false,
       backgroundTickMultiplier: 1,
@@ -206,5 +216,61 @@ describe('GameHudController — acesso no acampamento', () => {
     expect(campaign.querySelector('.campaign-context-btn__wave-label')?.textContent).toBe('Wave');
     expect(campaign.querySelector('.campaign-context-btn__wave-value')?.textContent).toBe('1/3');
     expect(campaign.getAttribute('data-campaign-theme')).toBe('stendra');
+  });
+
+  it('mostra Pausar em missão e Continuar na pausa de batalha', () => {
+    const { hud, buttons } = createHud();
+
+    hud.render(
+      mockState({
+        canEditParty: false,
+        battlePaused: false,
+        combatIntermission: null,
+        phaseRun: {
+          phaseId: '1-1',
+          waveIndex: 0,
+          waveCount: 3,
+          isBossWave: false,
+        } as GameStateDto['phaseRun'],
+      }),
+      { openingChests: false, battlePauseActive: false },
+    );
+
+    expect(buttons.pauseBattle.classList.contains('hidden')).toBe(false);
+    expect(buttons.resumeBattle.classList.contains('hidden')).toBe(true);
+
+    hud.render(
+      mockState({
+        canEditParty: false,
+        battlePaused: true,
+        combatIntermission: null,
+        phaseRun: {
+          phaseId: '1-1',
+          waveIndex: 0,
+          waveCount: 3,
+          isBossWave: false,
+        } as GameStateDto['phaseRun'],
+      }),
+      { openingChests: false, battlePauseActive: true },
+    );
+
+    expect(buttons.pauseBattle.classList.contains('hidden')).toBe(true);
+    expect(buttons.resumeBattle.classList.contains('hidden')).toBe(false);
+    expect(buttons.heroes.classList.contains('hidden')).toBe(true);
+    expect(buttons.formation.classList.contains('hidden')).toBe(true);
+  });
+
+  it('exibe menu Stats somente com runa battle_stats', () => {
+    const { hud, buttons } = createHud();
+
+    hud.render(mockState({ featureFlags: { ...mockState().featureFlags, battleStats: false } }), {
+      openingChests: false,
+    });
+    expect(buttons.battleStats.classList.contains('hidden')).toBe(true);
+
+    hud.render(mockState({ featureFlags: { ...mockState().featureFlags, battleStats: true } }), {
+      openingChests: false,
+    });
+    expect(buttons.battleStats.classList.contains('hidden')).toBe(false);
   });
 });

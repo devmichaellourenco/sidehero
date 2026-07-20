@@ -40,6 +40,8 @@ export interface CombatExecutionResult {
   event: string | null;
   floatingEvents: CombatFloatingEvent[];
   statusApplications: StatusApplication[];
+  /** Dano mitigado em heróis neste golpe. */
+  mitigatedDamage: number;
 }
 
 export class CombatActionExecutor {
@@ -52,7 +54,7 @@ export class CombatActionExecutor {
     context?: CombatActionContext,
   ): CombatExecutionResult {
     if (action.power <= 0 && action.kind !== 'heal_ally' && !isStatusCombatKind(action.kind)) {
-      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
+      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [], mitigatedDamage: 0 };
     }
 
     if (isStatusCombatKind(action.kind)) {
@@ -111,7 +113,7 @@ export class CombatActionExecutor {
     }
 
     if (targetKeys.length === 0) {
-      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
+      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [], mitigatedDamage: 0 };
     }
 
     const duration = action.effectDurationTurns ?? 1;
@@ -153,7 +155,7 @@ export class CombatActionExecutor {
         : `${targetKeys[0]?.label ?? 'o alvo'} (${statLabel}, ${duration}t)`;
     const event = formatCombatStatusNarrative(actorName, action.skillName, scope, isCrit);
 
-    return { heroes, enemies, event, floatingEvents, statusApplications };
+    return { heroes, enemies, event, floatingEvents, statusApplications, mitigatedDamage: 0 };
   }
 
   private applyHeal(
@@ -171,7 +173,7 @@ export class CombatActionExecutor {
           : [];
 
     if (targetIds.length === 0) {
-      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
+      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [], mitigatedDamage: 0 };
     }
 
     const floatingEvents: CombatFloatingEvent[] = [];
@@ -239,7 +241,7 @@ export class CombatActionExecutor {
           : [];
 
     if (targetIds.length === 0) {
-      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
+      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [], mitigatedDamage: 0 };
     }
 
     const floatingEvents: CombatFloatingEvent[] = [];
@@ -320,7 +322,7 @@ export class CombatActionExecutor {
           : [];
 
     if (targetIds.length === 0) {
-      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
+      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [], mitigatedDamage: 0 };
     }
 
     const floatingEvents: CombatFloatingEvent[] = [];
@@ -328,6 +330,7 @@ export class CombatActionExecutor {
     const statusApplications: StatusApplication[] = [];
     let dodgedAny = false;
     let blockedAny = false;
+    let mitigatedDamage = 0;
 
     for (const heroId of targetIds) {
       const target = updatedHeroes.find((hero) => hero.id === heroId);
@@ -352,6 +355,7 @@ export class CombatActionExecutor {
 
       if (resolved.dodged) dodgedAny = true;
       if (resolved.blocked) blockedAny = true;
+      mitigatedDamage += resolved.mitigated;
 
       if (!resolved.dodged) {
         updatedHeroes = updatedHeroes.map((hero) =>
@@ -401,7 +405,7 @@ export class CombatActionExecutor {
       mitigation,
     });
 
-    return { heroes: updatedHeroes, enemies, event, floatingEvents, statusApplications };
+    return { heroes: updatedHeroes, enemies, event, floatingEvents, statusApplications, mitigatedDamage };
   }
 
   private applyEnemyDamage(
@@ -420,7 +424,7 @@ export class CombatActionExecutor {
           : [];
 
     if (targetIds.length === 0) {
-      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [] };
+      return { heroes, enemies, event: null, floatingEvents: [], statusApplications: [], mitigatedDamage: 0 };
     }
 
     const floatingEvents: CombatFloatingEvent[] = [];
@@ -505,7 +509,7 @@ export class CombatActionExecutor {
       mitigation,
     });
 
-    return { heroes, enemies: updatedEnemies, event, floatingEvents, statusApplications };
+    return { heroes, enemies: updatedEnemies, event, floatingEvents, statusApplications, mitigatedDamage: 0 };
   }
 
   private resolveDamageAmount(

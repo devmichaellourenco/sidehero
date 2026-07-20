@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 16/16 (100%) · escopo base v1  
-**Testes obrigatórios:** 7/7 grupos (inclui `CampaignReleaseScope`)
+**Aceite:** 17/17 (100%) · escopo base v1  
+**Testes obrigatórios:** 8/8 grupos (inclui `CampaignReleaseScope`)
 
 ## Objetivo
 
@@ -11,7 +11,8 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 
 ## Critérios de aceite
 
-- [x] Tick avança combate quando não pausado; respeita `combatIntermission` e pausa de loadout
+- [x] Tick avança combate quando não pausado; respeita `combatIntermission`, pausa de loadout e **pausa de batalha** (`battlePaused`)
+- [x] Pausa de batalha: congela o combate no estado atual (sem reiniciar fase); Continuar retoma; sem edição de party/loadout; Detalhes exibe totais da tentativa (dano/cura/sofrido)
 - [x] Recompensas por kill: ouro, XP e loot ao derrotar cada inimigo (tabela por mundo/monstro)
 - [x] Boss: loot garantido na 1ª vitória da fase; replay com chance reduzida; progresso de fase no fim
 - [x] Recompensas de gear comuns e únicas chegam em baús; Ignus Ix, Vorpal Lupnus e Soler Plégius só entram no storage quando o baú é aberto
@@ -61,7 +62,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 | Camada | Paths |
 |--------|-------|
 | Domain | `src/domain/campaign/*` (incl. `CampaignReleaseScope`), `src/domain/services/combat/*`, `src/domain/combat/*` |
-| Application | `TickGameUseCase`, `ResumeCombatIntermissionUseCase`, `SelectPhaseUseCase`, `GetCampaignOverviewUseCase` |
+| Application | `TickGameUseCase`, `ResumeCombatIntermissionUseCase`, `PauseBattleUseCase`, `ResumeBattleUseCase`, `SelectPhaseUseCase`, `GetCampaignOverviewUseCase` |
 | Presentation | `BattleStripRenderer`, `BattleVictoryFlow`, `CampaignMapPresentation`, `CampaignModalRenderer`, `CampaignTooltipBinder`, `CampaignFlow` |
 
 ## Invariantes
@@ -91,6 +92,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] `PhaseCombatHandlers.test.ts`, `EnemyKillRewardService.test.ts`, `EnemyLootTable.test.ts`
 - [x] `CombatTurnPhase.test.ts`, `CombatActionExecutor.test.ts`
 - [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`
+- [x] `PauseBattleUseCase.test.ts` — pausa/retoma preservando combate e phaseRun
 - [x] `BattleVictoryFlow.test.ts`
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
 

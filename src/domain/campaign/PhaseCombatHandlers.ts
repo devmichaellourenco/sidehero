@@ -40,7 +40,11 @@ export class PhaseCombatHandlers {
     const waveLabel = `${phaseRun.waveIndex + 1}/${resolved.meta.waveCount}`;
 
     return {
-      state: state.withPhaseRun(phaseRun).withCombat(combat),
+      state: state
+        .withPhaseRun(phaseRun)
+        .withCombat(combat)
+        .withBattlePaused(false)
+        .clearBattleSessionStats(),
       events: [`Iniciou ${phase.displayName} · Wave ${waveLabel}`],
     };
   }
@@ -195,6 +199,8 @@ export class PhaseCombatHandlers {
         .withHeroes(recovered)
         .withPhaseRun(resetRun)
         .withCombat(combat)
+        .withBattlePaused(false)
+        .clearBattleSessionStats()
         .addLog(`⏯ Fase reiniciada em ${phase.displayName} · Wave ${waveLabel}`),
       events: [`Fase reiniciada · Wave ${waveLabel}`],
     };
@@ -276,6 +282,8 @@ export class PhaseCombatHandlers {
         .withCampaignProgress(state.campaignProgress.withSelectedPhase(targetPhaseId))
         .withPhaseRun(phaseRun)
         .withCombat(null)
+        .withBattlePaused(false)
+        .clearBattleSessionStats()
         .withLoadoutEditOpen(true)
         .withPhaseRestartOnResume(true)
         .addLog(
@@ -303,7 +311,7 @@ export class PhaseCombatHandlers {
     const waveLabel = `${phaseRun.waveIndex + 1}/${resolved.meta.waveCount}`;
 
     return {
-      state: state.withPhaseRun(phaseRun).withCombat(combat).touchTick(),
+      state: state.withPhaseRun(phaseRun).withCombat(combat).withBattlePaused(false).touchTick(),
       events: [`Wave ${waveLabel} iniciada`],
     };
   }

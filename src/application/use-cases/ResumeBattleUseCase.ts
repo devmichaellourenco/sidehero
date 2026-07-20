@@ -2,7 +2,7 @@ import { IGameStateRepository } from '../../domain/repositories/IGameStateReposi
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
 
-export class PauseForLoadoutUseCase {
+export class ResumeBattleUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly presenter: GameStatePresenter,
@@ -11,21 +11,11 @@ export class PauseForLoadoutUseCase {
   async execute(): Promise<GameStateDto> {
     const state = await this.repository.load();
 
-    if (state.loadoutEditOpen) {
+    if (!state.battlePaused) {
       return this.presenter.present(state);
     }
 
-    if (!state.phaseRun) {
-      throw new Error('Não há missão ativa para voltar ao acampamento');
-    }
-
-    const nextState = state
-      .withCombat(null)
-      .withBattlePaused(false)
-      .clearBattleSessionStats()
-      .withLoadoutEditOpen(true)
-      .withPhaseRestartOnResume(true)
-      .addLog('🏕 Retorno ao acampamento — a fase reiniciará ao batalhar');
+    const nextState = state.withBattlePaused(false).addLog('▶ Batalha retomada');
 
     await this.repository.save(nextState);
     return this.presenter.present(nextState);

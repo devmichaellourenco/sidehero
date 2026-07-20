@@ -129,6 +129,8 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       loadoutEditOpen: props.loadoutEditOpen && props.phaseRestartOnResume,
       phaseRestartOnResume: props.phaseRestartOnResume,
       combatIntermission: props.combatIntermission,
+      battlePaused: props.battlePaused === true,
+      battleSessionStats: props.battleSessionStats ?? { damageDealt: 0, healingDone: 0, damageTaken: 0 },
     };
   }
 
@@ -196,6 +198,15 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
         raw.combatIntermission && typeof raw.combatIntermission === 'object'
           ? (raw.combatIntermission as CombatIntermissionProps)
           : null,
+      battlePaused: raw.battlePaused === true,
+      battleSessionStats:
+        raw.battleSessionStats && typeof raw.battleSessionStats === 'object'
+          ? (raw.battleSessionStats as {
+              damageDealt?: number;
+              healingDone?: number;
+              damageTaken?: number;
+            })
+          : undefined,
     });
   }
 }

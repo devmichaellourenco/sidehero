@@ -32,9 +32,20 @@ describe('UpgradeService', () => {
   });
 
   it('permite auto_battle_2 com tier implícito 1x antes da primeira compra', () => {
+    const state = progressionReadyState().withUpgradeLevels({
+      optimize_loadout: 1,
+      battle_stats: 1,
+    });
+
+    expect(nodeStatus(state, 'battle_stats_1')).toBe('owned');
+    expect(nodeStatus(state, 'auto_battle_2')).toBe('available');
+  });
+
+  it('libera estatísticas logo após Otimizar equipe I', () => {
     const state = progressionReadyState().withUpgradeLevels({ optimize_loadout: 1 });
 
-    expect(nodeStatus(state, 'auto_battle_2')).toBe('available');
+    expect(nodeStatus(state, 'battle_stats_1')).toBe('available');
+    expect(nodeStatus(state, 'auto_battle_2')).toBe('locked');
   });
 
   it('libera slot de skill após Otimizar equipe I com herói nível 3+', () => {

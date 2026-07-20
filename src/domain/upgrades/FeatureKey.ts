@@ -6,6 +6,7 @@ export const FEATURE_KEYS = [
   'optimize_loadout',
   'auto_equip_loot',
   'log_filter',
+  'battle_stats',
   'shop_refresh',
   'battle_skill_slots',
   'hero_unlock_berserker',

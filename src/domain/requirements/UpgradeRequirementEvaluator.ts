@@ -59,6 +59,7 @@ export class UpgradeRequirementEvaluator {
       optimize_loadout: 'Otimizar equipe',
       auto_equip_loot: 'Auto-equipar loot',
       log_filter: 'Log resumido',
+      battle_stats: 'Estatísticas de batalha',
       shop_refresh: 'Renovar loja',
       battle_skill_slots: 'Slots de skill',
       hero_unlock_berserker: 'Berserker',

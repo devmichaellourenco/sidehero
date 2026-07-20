@@ -20,7 +20,7 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] Aba Status lista skills de batalha equipadas (efeitos + DPS estimado) e bônus/únicos do equipamento
 - [x] Aba Inventário do herói **sem** hint estático de equipamento; slots clicáveis e picker inline comunicam a ação
 - [x] Aba Inventário: **sem** abas texto Todos/Armas/Armaduras/Acessórios; categoria só via ícones do loadout; grid único com ordenação compartilhada; slot ativo filtra o mesmo grid in-place
-- [x] Header do modal exibe `Lv.{n} {Classe} - {Evolução}` (ex.: `Lv.2 Priest - Aprendiz`); aba Classe **sem** retrato/classe atual — só próxima(s) ascensão(ões) e skills de evolução
+- [x] Header do modal exibe level destacado + título atual (ex.: `Lv.25` + `Arquimaga`); aba Classe **sem** retrato/classe atual — só próxima(s) ascensão(ões) e skills de evolução
 - [x] Aba Classe apresenta título compacto **Escolha seu destino** + cards temáticos; detalhes do momento de ascensão ficam no tooltip do título; requisitos e CTA dos cards ficam no tooltip do card
 - [x] Ícones padronizados de estatística (`StatIconCatalog`, assets em `ui/stats/*`): chips STR/DEX/INT, linhas da ficha de combate (rows + título do tooltip) e linhas de bônus de gear em cards/tooltips; tingidos por tema via `--stat-icon-filter`
 
@@ -54,9 +54,9 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] `HeroUnlockService.test.ts`, `PartyDragDropPresentation.test.ts`
 - [x] `HeroDetailModalRenderer.test.ts` — aba Inventário sem parágrafo “Toque em um slot de equipamento…”; slot ativo destacado no loadout
 - [x] `InventoryModalRenderer.test.ts` — embedded sem filtros texto de categoria; modo slot ativo filtra grid in-place
-- [x] `HeroDetailHeaderRenderer.test.ts` — linha `Lv.{n} {Classe} - {Evolução}` no topo
+- [x] `HeroDetailHeaderRenderer.test.ts` — level destacado + título atual no topo
 - [x] `HeroClassTabRenderer.test.ts` — aba Classe sem retrato/classe atual; só ascensões disponíveis
-- [x] `HeroClassLinePresentation.test.ts` — formatação da linha classe/evolução
+- [x] `HeroClassLinePresentation.test.ts` — formatação da linha level + título atual
 - [x] `HeroClassAscensionPresentation.test.ts` — cards com requisitos/CTA só no tooltip; seleção por clique quando disponível
 - [x] `AscendClassConfirmPresentation.test.ts` — modal de confirmação com preview e aviso permanente
 - [x] `HeroAttributesTabRenderer.test.ts` / `HeroStatusSkillsPresentation.test.ts` — Status com skills + equipamento

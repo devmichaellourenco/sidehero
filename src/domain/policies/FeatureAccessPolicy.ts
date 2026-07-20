@@ -12,6 +12,7 @@ export interface FeatureAccessSnapshot {
   autoEquipLoot: boolean;
   autoEquipSilent: boolean;
   logFilter: boolean;
+  battleStats: boolean;
   shopRefresh: boolean;
   backgroundTick: boolean;
   backgroundTickMultiplier: number;
@@ -42,6 +43,7 @@ export class FeatureAccessPolicy {
       autoEquipLoot: autoEquipLevel >= 1,
       autoEquipSilent: autoEquipLevel >= 2,
       logFilter: getFeatureLevel(levels, 'log_filter') >= 1,
+      battleStats: getFeatureLevel(levels, 'battle_stats') >= 1,
       shopRefresh: getFeatureLevel(levels, 'shop_refresh') >= 1,
       backgroundTick: backgroundTickLevel >= 1,
       backgroundTickMultiplier: backgroundTickLevel >= 2 ? 2 : 1,

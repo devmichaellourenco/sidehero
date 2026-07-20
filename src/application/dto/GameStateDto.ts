@@ -274,6 +274,41 @@ export interface CombatIntermissionDto {
   nextPhaseName: string | null;
 }
 
+export interface BattleSessionStatsDto {
+  damageDealt: number;
+  healingDone: number;
+  damageTaken: number;
+  damageMitigated: number;
+  critCount: number;
+  damageByElement: {
+    physical: number;
+    fire: number;
+    cold: number;
+    lightning: number;
+    air: number;
+  };
+  heroes: Array<{
+    heroId: string;
+    name: string;
+    damageDealt: number;
+    healingDone: number;
+    damageTaken: number;
+    damageMitigated: number;
+    basicAttackUses: number;
+    skillUses: number;
+    damageByElement: BattleSessionStatsDto['damageByElement'];
+  }>;
+  skills: Array<{
+    heroId: string;
+    heroName: string;
+    skillId: string;
+    skillName: string;
+    uses: number;
+    damageDealt: number;
+    healingDone: number;
+  }>;
+}
+
 export interface StorageCapacityDto {
   inventoryLimit: number;
   inventoryUsed: number;
@@ -290,6 +325,8 @@ export interface GameStateDto {
   canEditParty: boolean;
   loadoutEditOpen: boolean;
   phaseRestartOnResume: boolean;
+  battlePaused: boolean;
+  battleSessionStats: BattleSessionStatsDto;
   enemies: EnemyDto[];
   enemy: EnemyDto | null;
   activeTurn: ActiveTurnDto | null;

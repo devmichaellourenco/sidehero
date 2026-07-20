@@ -78,33 +78,57 @@
         </section>
 
         <div class="battle-combat-bar">
-          <button
-            id="pause-loadout-btn"
-            class="combat-bar-btn"
-            type="button"
-            aria-label="Voltar ao acampamento"
-            title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao batalhar."
-          >
-            <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
-            <span class="combat-bar-btn-label">Acampamento</span>
-          </button>
-          <button
-            id="continue-loadout-btn"
-            class="combat-bar-btn combat-bar-btn--continue hidden"
-            type="button"
-            aria-label="Batalhar"
-            title="Sair do acampamento e reiniciar a fase do início"
-          >
-            <img
-              class="combat-bar-btn-icon"
-              src="assets/ui/attack.png"
-              alt=""
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-            />
-            <span class="combat-bar-btn-label">Batalhar</span>
-          </button>
+          <div class="combat-bar-row combat-bar-row--battle">
+            <button
+              id="pause-battle-btn"
+              class="combat-bar-btn hidden"
+              type="button"
+              aria-label="Pausar batalha"
+              title="Pausar a batalha sem voltar ao acampamento. Você pode ver as estatísticas e continuar de onde parou."
+            >
+              <span class="combat-bar-btn-icon" aria-hidden="true">⏸</span>
+              <span class="combat-bar-btn-label">Pausar</span>
+            </button>
+            <button
+              id="resume-battle-btn"
+              class="combat-bar-btn combat-bar-btn--continue hidden"
+              type="button"
+              aria-label="Continuar batalha"
+              title="Retomar a batalha de onde parou"
+            >
+              <span class="combat-bar-btn-icon" aria-hidden="true">▶</span>
+              <span class="combat-bar-btn-label">Continuar</span>
+            </button>
+          </div>
+          <div class="combat-bar-row combat-bar-row--camp">
+            <button
+              id="pause-loadout-btn"
+              class="combat-bar-btn"
+              type="button"
+              aria-label="Voltar ao acampamento"
+              title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao batalhar."
+            >
+              <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
+              <span class="combat-bar-btn-label">Acampamento</span>
+            </button>
+            <button
+              id="continue-loadout-btn"
+              class="combat-bar-btn combat-bar-btn--continue hidden"
+              type="button"
+              aria-label="Batalhar"
+              title="Sair do acampamento e reiniciar a fase do início"
+            >
+              <img
+                class="combat-bar-btn-icon"
+                src="assets/ui/attack.png"
+                alt=""
+                aria-hidden="true"
+                loading="eager"
+                decoding="async"
+              />
+              <span class="combat-bar-btn-label">Batalhar</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -135,6 +159,10 @@
           <button id="open-battle-log-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--log" type="button" title="Log de batalha" aria-label="Log de batalha" aria-expanded="false">
             <span class="action-icon-glyph" aria-hidden="true">📜</span>
             <span class="action-icon-label">Log</span>
+          </button>
+          <button id="open-battle-stats-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--stats hidden" type="button" title="Estatísticas de batalha" aria-label="Estatísticas de batalha" aria-expanded="false">
+            <span class="action-icon-glyph" aria-hidden="true">📊</span>
+            <span class="action-icon-label">Stats</span>
           </button>
           <button id="open-campaign-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--campaign" type="button" title="Mapa" aria-label="Mapa">
             <img class="btn-icon" src="assets/ui/campaign.png" alt="" aria-hidden="true" loading="eager" decoding="async" />
@@ -204,6 +232,17 @@
           <button id="battle-log-close" type="button" class="battle-log-close-btn" aria-label="Fechar log">×</button>
         </div>
         <ul id="battle-log" class="battle-log-list game-scroll"></ul>
+      </section>
+    </div>
+
+    <div id="battle-stats-overlay" class="battle-log-overlay battle-stats-overlay hidden" aria-hidden="true">
+      <div class="battle-log-backdrop" data-battle-stats-close></div>
+      <section class="battle-log-floating battle-stats-floating" aria-label="Estatísticas de batalha">
+        <div class="battle-log-header">
+          <h2>Estatísticas</h2>
+          <button id="battle-stats-close" type="button" class="battle-log-close-btn" aria-label="Fechar estatísticas">×</button>
+        </div>
+        <div id="battle-stats-body" class="battle-stats-body game-scroll"></div>
       </section>
     </div>
 

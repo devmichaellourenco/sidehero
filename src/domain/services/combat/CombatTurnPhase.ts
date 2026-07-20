@@ -23,6 +23,10 @@ import { CombatActionExecutor } from './CombatActionExecutor';
 import { formatCombatDotNarrative } from './CombatLogNarrative';
 import { CombatFloatingEvent, createDamageEvent, createLevelUpEvent } from './CombatFloatingEvent';
 import { CombatSkillVfxEvent, createSkillVfxEvent } from './CombatSkillVfxEvent';
+import {
+  accumulateBattleStatsStrikes,
+  BattleStatsStrike,
+} from '../../combat/BattleSessionStats';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { SkillCooldownTracker, combatantKey } from './SkillCooldownTracker';
 import { CombatStatusEffectTracker } from './CombatStatusEffectTracker';
@@ -55,6 +59,10 @@ export class CombatTurnPhase {
     let workingState = state;
 
     if (workingState.loadoutEditOpen && workingState.phaseRestartOnResume) {
+      return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
+    }
+
+    if (workingState.battlePaused) {
       return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
     }
 
@@ -132,6 +140,12 @@ export class CombatTurnPhase {
       events.push(...strike.events);
       floatingEvents.push(...strike.floatingEvents);
       skillVfxEvents.push(...strike.skillVfxEvents);
+
+      if (strike.statsStrike) {
+        workingState = workingState.withBattleSessionStats(
+          accumulateBattleStatsStrikes(workingState.battleSessionStats, [strike.statsStrike]),
+        );
+      }
 
       if (strike.usedSkillId === null) {
         break;
@@ -218,6 +232,7 @@ export class CombatTurnPhase {
     floatingEvents: CombatFloatingEvent[];
     skillVfxEvents: CombatSkillVfxEvent[];
     usedSkillId: string | null;
+    statsStrike: BattleStatsStrike | null;
   } {
     const enemiesBeforeStrike = combat.enemies;
     let heroes = state.activeHeroes();
@@ -231,13 +246,14 @@ export class CombatTurnPhase {
     let usedSkillId: string | null = null;
     let skillList = [] as ReturnType<typeof listHeroCombatSkills>;
     let statusApplications: ReturnType<typeof this.actionExecutor.execute>['statusApplications'] = [];
+    let mitigatedDamage = 0;
     const stageLevel = state.difficultyTier;
     let attackerProfile = this.profiles.forHero(heroes[0]);
 
     if (actor.side === 'hero') {
       const hero = heroes.find((entry) => entry.id === actor.id);
       if (!hero?.isAlive()) {
-        return { state, combat, events, floatingEvents, skillVfxEvents, usedSkillId: null };
+        return { state, combat, events, floatingEvents, skillVfxEvents, usedSkillId: null, statsStrike: null };
       }
 
       attackerProfile = this.profiles.forHero(hero);
@@ -276,12 +292,13 @@ export class CombatTurnPhase {
       heroes = result.heroes;
       enemies = result.enemies;
       statusApplications = result.statusApplications;
+      mitigatedDamage = result.mitigatedDamage;
       if (result.event) events.push(result.event);
       floatingEvents.push(...result.floatingEvents);
     } else {
       const enemy = enemies.find((entry) => entry.id === actor.id);
       if (!enemy?.isAlive()) {
-        return { state, combat, events, floatingEvents, skillVfxEvents, usedSkillId: null };
+        return { state, combat, events, floatingEvents, skillVfxEvents, usedSkillId: null, statsStrike: null };
       }
 
       attackerProfile = this.profiles.forEnemy(enemy, combat.encounterMeta?.isBossWave);
@@ -306,6 +323,7 @@ export class CombatTurnPhase {
       heroes = result.heroes;
       enemies = result.enemies;
       statusApplications = result.statusApplications;
+      mitigatedDamage = result.mitigatedDamage;
       if (result.event) events.push(result.event);
       floatingEvents.push(...result.floatingEvents);
     }
@@ -458,6 +476,18 @@ export class CombatTurnPhase {
       }
     }
 
+    const statsStrike: BattleStatsStrike | null =
+      usedSkillId || floatingEvents.length > 0 || mitigatedDamage > 0
+        ? {
+            actorSide: actor.side,
+            actorId: actor.id,
+            skillId: usedSkillId,
+            isBasicAttack: usedSkillId === BASIC_ATTACK_SKILL_ID,
+            events: [...floatingEvents],
+            mitigatedDamage,
+          }
+        : null;
+
     return {
       state: nextState,
       combat: nextCombat,
@@ -465,6 +495,7 @@ export class CombatTurnPhase {
       floatingEvents,
       skillVfxEvents,
       usedSkillId,
+      statsStrike,
     };
   }
 
@@ -480,6 +511,7 @@ export class CombatTurnPhase {
     floatingEvents: CombatFloatingEvent[];
     skillVfxEvents: CombatSkillVfxEvent[];
     usedSkillId: string | null;
+    statsStrike: BattleStatsStrike | null;
   } {
     const updatedTimers = this.actionTimers.scheduleAfterAction(
       combat.actionTimers,
@@ -496,6 +528,7 @@ export class CombatTurnPhase {
       floatingEvents: [],
       skillVfxEvents: [],
       usedSkillId: null,
+      statsStrike: null,
     };
   }
 }

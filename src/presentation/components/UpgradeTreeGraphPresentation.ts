@@ -131,6 +131,8 @@ export function upgradeNodeShortLabel(node: UpgradeNodeDto): string {
 
   if (node.feature === 'log_filter') return '📋';
 
+  if (node.feature === 'battle_stats') return '📊';
+
   if (node.level > 1) {
     return toRoman(node.level);
   }

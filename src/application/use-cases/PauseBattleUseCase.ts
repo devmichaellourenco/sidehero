@@ -2,7 +2,7 @@ import { IGameStateRepository } from '../../domain/repositories/IGameStateReposi
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
 
-export class PauseForLoadoutUseCase {
+export class PauseBattleUseCase {
   constructor(
     private readonly repository: IGameStateRepository,
     private readonly presenter: GameStatePresenter,
@@ -11,21 +11,23 @@ export class PauseForLoadoutUseCase {
   async execute(): Promise<GameStateDto> {
     const state = await this.repository.load();
 
-    if (state.loadoutEditOpen) {
+    if (state.battlePaused) {
       return this.presenter.present(state);
     }
 
-    if (!state.phaseRun) {
-      throw new Error('Não há missão ativa para voltar ao acampamento');
+    if (state.loadoutEditOpen && state.phaseRestartOnResume) {
+      throw new Error('Não é possível pausar a batalha no acampamento');
     }
 
-    const nextState = state
-      .withCombat(null)
-      .withBattlePaused(false)
-      .clearBattleSessionStats()
-      .withLoadoutEditOpen(true)
-      .withPhaseRestartOnResume(true)
-      .addLog('🏕 Retorno ao acampamento — a fase reiniciará ao batalhar');
+    if (!state.phaseRun || !state.combat) {
+      throw new Error('Não há batalha ativa para pausar');
+    }
+
+    if (state.combatIntermission) {
+      throw new Error('Aguarde o resultado da wave para pausar');
+    }
+
+    const nextState = state.withBattlePaused(true).addLog('⏸ Batalha pausada');
 
     await this.repository.save(nextState);
     return this.presenter.present(nextState);

@@ -18,17 +18,18 @@ function minimalHero(overrides: Partial<HeroDto> = {}): HeroDto {
 
 describe('HeroClassLinePresentation', () => {
   it('formata Aprendiz quando herói ainda não ascendeu', () => {
-    expect(formatHeroLevelClassLine(minimalHero())).toBe('Lv.2 Priest - Aprendiz');
+    expect(formatHeroLevelClassLine(minimalHero())).toBe('Lv.2 Aprendiz');
     expect(getHeroEvolutionLabel(minimalHero())).toBe(HERO_BASE_TIER_LABEL);
   });
 
-  it('formata evolução atual quando herói já ascendeu', () => {
+  it('formata só o título atual quando herói já ascendeu', () => {
     const hero = minimalHero({
       heroClass: 'knight',
       level: 8,
       ascensionId: 'knight_military_guerreiro',
     });
 
-    expect(formatHeroLevelClassLine(hero)).toBe('Lv.8 Knight - Guerreiro');
+    expect(formatHeroLevelClassLine(hero)).toBe('Lv.8 Guerreiro');
+    expect(getHeroEvolutionLabel(hero)).toBe('Guerreiro');
   });
 });

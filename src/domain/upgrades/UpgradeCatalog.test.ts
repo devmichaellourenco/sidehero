@@ -71,7 +71,7 @@ describe('UpgradeCatalog', () => {
     const autoBattle = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_battle_2');
     const autoChests = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_open_chests_1');
 
-    expect(autoBattle?.parents).toEqual(['optimize_loadout_1']);
+    expect(autoBattle?.parents).toEqual(['battle_stats_1']);
     expect(autoChests?.parents).toEqual(['optimize_loadout_1']);
     expect(tick?.parents).toEqual(['auto_battle_2']);
     expect(skillSlot?.parents).toEqual(['optimize_loadout_1']);
@@ -84,9 +84,13 @@ describe('UpgradeCatalog', () => {
     expect(shop?.parents).toEqual(['auto_battle_2']);
   });
 
-  it('qol integra log resumido na árvore principal de combate', () => {
-    const logFilter = UPGRADE_CATALOG.find((entry) => entry.id === 'log_filter_1');
+  it('qol libera estatísticas cedo e log após auto-batalha III', () => {
+    const battleStats = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_stats_1');
+    expect(battleStats?.feature).toBe('battle_stats');
+    expect(battleStats?.cost).toBe(200);
+    expect(battleStats?.parents).toEqual(['optimize_loadout_1']);
 
+    const logFilter = UPGRADE_CATALOG.find((entry) => entry.id === 'log_filter_1');
     expect(logFilter?.branch).toBe('qol');
     expect(logFilter?.parents).toEqual(['auto_battle_3']);
   });

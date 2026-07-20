@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 10/10 (100%) · auditoria 2026-07-14  
-**Testes obrigatórios:** 9/9 presentes na suite
+**Aceite:** 11/11 (100%) · auditoria 2026-07-19  
+**Testes obrigatórios:** 10/10 presentes na suite
 
 ## Objetivo
 
@@ -16,6 +16,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Todo card Wow exibe botão de rodapé (padrão **Entendi** para dispensar); o [×] só aparece em CTAs de ação no modo center
 - [x] Baú flutuante na batalha quando pendente
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
+- [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
+- [x] Menu **Stats** (runa): painel flutuante como o Log, atualiza em tempo real (e na pausa); geral + por herói + por skill + elementos + mitigação
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)
@@ -48,7 +50,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `BattleLogRenderer.test.ts` — log incremental no painel
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts` (campanha — ver também `combat-campaign.spec.md`)
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
-- [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`
+- [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`; Pausar/Continuar/Detalhes na pausa de batalha
+- [x] `BattleStatsPresentation.test.ts` — painel de estatísticas da batalha pausada
 
 ## Relacionado
 

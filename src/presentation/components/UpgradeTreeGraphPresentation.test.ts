@@ -24,7 +24,8 @@ function node(partial: Partial<UpgradeNodeDto> & Pick<UpgradeNodeDto, 'id' | 'br
 describe('UpgradeTreeGraphPresentation', () => {
   it('resolve pais via parents explícitos ou requisito upgrade_level', () => {
     expect(resolveUpgradeParentIds('auto_battle_3')).toEqual(['auto_battle_2']);
-    expect(resolveUpgradeParentIds('auto_battle_2')).toEqual(['optimize_loadout_1']);
+    expect(resolveUpgradeParentIds('auto_battle_2')).toEqual(['battle_stats_1']);
+    expect(resolveUpgradeParentIds('battle_stats_1')).toEqual(['optimize_loadout_1']);
     expect(resolveUpgradeParentIds('open_all_chests_1')).toEqual(['auto_open_chests_1']);
     expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual(['optimize_loadout_1']);
     expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['auto_battle_2']);
@@ -38,6 +39,7 @@ describe('UpgradeTreeGraphPresentation', () => {
   it('monta arestas entre nodos visíveis, inclusive entre ramos', () => {
     const nodes = [
       node({ id: 'optimize_loadout_1', branch: 'equipment' }),
+      node({ id: 'battle_stats_1', branch: 'qol' }),
       node({ id: 'auto_battle_2', branch: 'combat' }),
       node({ id: 'background_tick_1', branch: 'combat' }),
       node({ id: 'battle_skill_slot_2', branch: 'combat' }),
@@ -47,14 +49,15 @@ describe('UpgradeTreeGraphPresentation', () => {
 
     expect(buildUpgradeTreeEdges(nodes)).toEqual(
       expect.arrayContaining([
-        { fromId: 'optimize_loadout_1', toId: 'auto_battle_2' },
+        { fromId: 'optimize_loadout_1', toId: 'battle_stats_1' },
+        { fromId: 'battle_stats_1', toId: 'auto_battle_2' },
         { fromId: 'optimize_loadout_1', toId: 'battle_skill_slot_2' },
         { fromId: 'auto_battle_2', toId: 'background_tick_1' },
         { fromId: 'auto_battle_2', toId: 'hero_unlock_berserker' },
         { fromId: 'hero_unlock_berserker', toId: 'hero_unlock_paladin' },
       ]),
     );
-    expect(buildUpgradeTreeEdges(nodes)).toHaveLength(5);
+    expect(buildUpgradeTreeEdges(nodes)).toHaveLength(6);
   });
 
   it('posiciona nodos com layout unificado', () => {

@@ -150,8 +150,11 @@ export class GameHudController {
     private readonly openAllChestsBtn: HTMLButtonElement,
     private readonly openUpgradesBtn: HTMLButtonElement,
     private readonly openChestBtn: HTMLButtonElement,
+    private readonly pauseBattleBtn: HTMLButtonElement,
+    private readonly resumeBattleBtn: HTMLButtonElement,
     private readonly pauseLoadoutBtn: HTMLButtonElement,
     private readonly continueLoadoutBtn: HTMLButtonElement,
+    private readonly openBattleStatsBtn: HTMLButtonElement,
   ) {
     const left = document.createElement('span');
     left.className = 'campaign-context-btn__left';
@@ -224,6 +227,7 @@ export class GameHudController {
     options: {
       openingChests: boolean;
       loadoutPauseActive?: boolean;
+      battlePauseActive?: boolean;
     },
   ): void {
     const phaseId = state.phaseRun?.phaseId ?? state.campaignProgress.selectedPhaseId;
@@ -334,12 +338,29 @@ export class GameHudController {
       ? `Abrir baú (${state.pendingChestCount})`
       : 'Nenhum baú disponível';
 
-    const canPause =
+    const loadoutPause = Boolean(options.loadoutPauseActive);
+    const battlePause = Boolean(options.battlePauseActive);
+    const canPauseBattle =
       Boolean(state.phaseRun) &&
-      !options.loadoutPauseActive;
-    this.pauseLoadoutBtn.disabled = !canPause;
-    this.pauseLoadoutBtn.classList.toggle('hidden', options.loadoutPauseActive);
+      !state.canEditParty &&
+      !loadoutPause &&
+      !battlePause &&
+      !state.combatIntermission;
 
-    this.continueLoadoutBtn.classList.toggle('hidden', !options.loadoutPauseActive);
+    this.pauseBattleBtn.classList.toggle('hidden', !canPauseBattle);
+    this.pauseBattleBtn.disabled = !canPauseBattle;
+
+    this.resumeBattleBtn.classList.toggle('hidden', !battlePause || loadoutPause);
+
+    this.pauseLoadoutBtn.disabled = !Boolean(state.phaseRun) || loadoutPause;
+    this.pauseLoadoutBtn.classList.toggle('hidden', loadoutPause);
+
+    this.continueLoadoutBtn.classList.toggle('hidden', !loadoutPause);
+
+    const statsUnlocked = Boolean(flags.battleStats);
+    this.openBattleStatsBtn.classList.toggle('hidden', !statsUnlocked);
+    this.openBattleStatsBtn.title = statsUnlocked
+      ? 'Estatísticas de batalha'
+      : 'Desbloqueie nas Runas';
   }
 }

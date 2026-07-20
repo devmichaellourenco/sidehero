@@ -9,6 +9,7 @@ export interface FeatureFlagsDto {
   autoEquipLoot: boolean;
   autoEquipSilent: boolean;
   logFilter: boolean;
+  battleStats: boolean;
   shopRefresh: boolean;
   backgroundTick: boolean;
   backgroundTickMultiplier: number;
