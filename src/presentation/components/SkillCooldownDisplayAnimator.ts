@@ -2,6 +2,21 @@ import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownT
 
 const UPDATE_INTERVAL_MS = 100;
 
+/** Timers visuais só avançam com combate simulando (não em pausa/intermissão/acampamento). */
+export function shouldAnimateBattleStripTimers(state: {
+  phaseRun: unknown;
+  canEditParty: boolean;
+  battlePaused: boolean;
+  combatIntermission: unknown;
+}): boolean {
+  return Boolean(
+    state.phaseRun &&
+      !state.canEditParty &&
+      !state.battlePaused &&
+      !state.combatIntermission,
+  );
+}
+
 function updateOverlayElement(overlay: HTMLElement, remaining: number, total: number): void {
   const shade = overlay.querySelector<HTMLElement>('.hero-skill-cooldown-shade, .combat-skill-cooldown-shade');
   const label = overlay.querySelector<HTMLElement>('.hero-skill-cooldown-label, .combat-skill-cooldown-label');

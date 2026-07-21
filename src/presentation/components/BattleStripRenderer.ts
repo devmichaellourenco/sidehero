@@ -2,10 +2,15 @@ import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
 import { applyBattleScene } from './BattleScenePresentation';
+import { freezeActionTimeVisualOnCard } from './BattleActorHealthPresentation';
 import { patchBattleStripInPlace, syncBattleStripCrowdedLayout } from './BattleStripPatcher';
+import { shouldAnimateBattleStripTimers } from './SkillCooldownDisplayAnimator';
+import { freezeCombatSkillCooldownVisuals } from './CombatSkillIntentPresentation';
 import {
   battleStripDomMatchesStructure,
   buildBattleStripStructureKey,
+  hasBattleStripPhaseChanged,
+  resolveBattleStripPhaseId,
 } from './BattleStripStructure';
 import { renderEnemyBattleCard } from './EnemyBattlePresentation';
 import { bindEnemyTooltips } from './EnemyTooltipBinder';
@@ -15,6 +20,7 @@ import { bindHeroTooltips } from './HeroTooltipBinder';
 export class BattleStripRenderer {
   private structureKey: string | null = null;
   private sceneMapId: string | null = null;
+  private lastPhaseId: string | null = null;
 
   constructor(
     private readonly heroesContainer: HTMLElement,
@@ -25,6 +31,9 @@ export class BattleStripRenderer {
   ) {}
 
   render(state: GameStateDto): void {
+    const freezeTimers = !shouldAnimateBattleStripTimers(state);
+    this.battleStrip.classList.toggle('battle-strip--timers-frozen', freezeTimers);
+
     if (state.mapId !== this.sceneMapId) {
       applyBattleScene(this.stripBg, state.mapId, this.stripFloor);
       this.sceneMapId = state.mapId;
@@ -36,17 +45,24 @@ export class BattleStripRenderer {
       state.enemies.length,
     );
 
+    const currentPhaseId = resolveBattleStripPhaseId(state);
+    const forceResetActionTime = hasBattleStripPhaseChanged(this.lastPhaseId, currentPhaseId);
+
     const nextStructureKey = buildBattleStripStructureKey(state);
     if (
       nextStructureKey === this.structureKey &&
       battleStripDomMatchesStructure(state, this.heroesContainer, this.enemyContainer)
     ) {
-      patchBattleStripInPlace(state, this.heroesContainer, this.enemyContainer);
+      patchBattleStripInPlace(state, this.heroesContainer, this.enemyContainer, {
+        forceResetActionTime,
+      });
+      this.lastPhaseId = currentPhaseId;
       return;
     }
 
     this.structureKey = nextStructureKey;
     this.renderFull(state);
+    this.lastPhaseId = currentPhaseId;
   }
 
   private renderFull(state: GameStateDto): void {
@@ -91,5 +107,14 @@ export class BattleStripRenderer {
 
     bindBarTooltips(this.enemyContainer);
     bindEnemyTooltips(this.enemyContainer);
+  }
+
+  /** Congela timers visuais no frame atual (pausa imediata, sem reaplicar DTO). */
+  freezeTimersVisual(): void {
+    this.battleStrip.classList.add('battle-strip--timers-frozen');
+    for (const card of this.battleStrip.querySelectorAll<HTMLElement>('.battle-actor-card')) {
+      freezeActionTimeVisualOnCard(card);
+      freezeCombatSkillCooldownVisuals(card);
+    }
   }
 }

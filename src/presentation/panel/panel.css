@@ -2662,6 +2662,11 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   transition: width 0.2s linear;
 }
 
+.battle-strip--timers-frozen .action-time-fill,
+.battle-strip--timers-frozen .combat-skill-cooldown-shade {
+  transition: none !important;
+}
+
 .hero-battle-card .health-bar.strip-bar .stat-bar-track {
   border-radius: 2px;
 }

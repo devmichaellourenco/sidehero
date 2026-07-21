@@ -49,17 +49,40 @@ export function stampActionTimeBar(
   bar.dataset.atCapturedAt = String(performance.now());
 }
 
+export function clearActionTimeAnimationStamp(bar: HTMLElement): void {
+  delete bar.dataset.atRemaining;
+  delete bar.dataset.atTotal;
+  delete bar.dataset.atCapturedAt;
+}
+
+/** Mantém a largura atual da barra e só remove stamps de interpolação client-side. */
+export function freezeActionTimeVisualOnCard(card: HTMLElement): void {
+  const bar = card.querySelector<HTMLElement>('[data-action-time-bar]');
+  if (!bar) return;
+  clearActionTimeAnimationStamp(bar);
+}
+
 export function patchActionTimeBar(
   card: HTMLElement,
   actionTimeRatio: number,
   actionTimeRemaining: number,
   actionTimeTotal: number,
+  freeze = false,
+  applyWidth = !freeze,
 ): void {
   const fill = card.querySelector<HTMLElement>('.action-time-fill');
   const bar = card.querySelector<HTMLElement>('[data-action-time-bar]');
   if (!fill || !bar) return;
 
+  if (freeze) {
+    clearActionTimeAnimationStamp(bar);
+  }
+
+  if (!applyWidth) return;
+
   const width = Math.max(0, Math.min(100, actionTimeRatio * 100));
   fill.style.width = `${width}%`;
-  stampActionTimeBar(bar, actionTimeRemaining, actionTimeTotal);
+  if (!freeze) {
+    stampActionTimeBar(bar, actionTimeRemaining, actionTimeTotal);
+  }
 }

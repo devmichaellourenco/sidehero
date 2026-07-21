@@ -1,9 +1,10 @@
 import { EnemyDto, GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
+import { shouldAnimateBattleStripTimers } from './SkillCooldownDisplayAnimator';
 import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
 import { patchCombatSkillBar } from './CombatSkillIntentPresentation';
 import { formatEnemyHealthLabel } from './EnemyBattlePresentation';
 import { formatHealthLabel } from './HeroBarsPresentation';
-import { clampHealthPercent, patchActionTimeBar } from './BattleActorHealthPresentation';
+import { clampHealthPercent, freezeActionTimeVisualOnCard, patchActionTimeBar } from './BattleActorHealthPresentation';
 
 function updateHealthBar(
   card: HTMLElement,
@@ -53,26 +54,41 @@ function patchActorCard(
     actionTimeTotal: number;
     statusEffectsHtml: string;
     combatSkills: HeroDto['combatSkills'] | EnemyDto['combatSkills'];
+    freezeTimers: boolean;
+    forceResetActionTime: boolean;
   },
 ): void {
   card.classList.toggle(options.activeTurnClass, options.isActiveTurn);
 
   updateHealthBar(card, '.health-bar', options.healthLabel, options.healthPercent);
+  replaceOrRemoveStatusBadges(card, options.statusEffectsHtml);
+
+  if (options.freezeTimers && !options.forceResetActionTime) {
+    freezeActionTimeVisualOnCard(card);
+    patchCombatSkillBar(card, options.combatSkills, true);
+    return;
+  }
+
+  const applyActionTimeWidth = !options.freezeTimers || options.forceResetActionTime;
   patchActionTimeBar(
     card,
     options.actionTimeRatio,
     options.actionTimeRemaining,
     options.actionTimeTotal,
+    options.freezeTimers,
+    applyActionTimeWidth,
   );
-  replaceOrRemoveStatusBadges(card, options.statusEffectsHtml);
-  patchCombatSkillBar(card, options.combatSkills);
+  patchCombatSkillBar(card, options.combatSkills, options.freezeTimers);
 }
 
 export function patchBattleStripInPlace(
   state: GameStateDto,
   heroesContainer: HTMLElement,
   enemyContainer: HTMLElement,
+  options: { forceResetActionTime?: boolean } = {},
 ): void {
+  const freezeTimers = !shouldAnimateBattleStripTimers(state);
+  const forceResetActionTime = options.forceResetActionTime ?? false;
   const activeTurn = state.activeTurn;
 
   for (const hero of state.activeParty) {
@@ -89,6 +105,8 @@ export function patchBattleStripInPlace(
       actionTimeTotal: hero.actionTimeTotal,
       statusEffectsHtml: renderCombatStatusEffects(hero.statusEffects),
       combatSkills: hero.combatSkills,
+      freezeTimers,
+      forceResetActionTime,
     });
   }
 
@@ -108,6 +126,8 @@ export function patchBattleStripInPlace(
       actionTimeTotal: enemy.actionTimeTotal,
       statusEffectsHtml: renderCombatStatusEffects(enemy.statusEffects),
       combatSkills: enemy.combatSkills,
+      freezeTimers,
+      forceResetActionTime,
     });
   }
 }

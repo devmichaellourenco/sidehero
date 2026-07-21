@@ -71,7 +71,7 @@ import { AscendClassConfirmDialog } from './AscendClassConfirmDialog';
 import { ImprovementResetConfirmDialog } from './ImprovementResetConfirmDialog';
 import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
 import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
-import { SkillCooldownDisplayAnimator } from './SkillCooldownDisplayAnimator';
+import { SkillCooldownDisplayAnimator, shouldAnimateBattleStripTimers } from './SkillCooldownDisplayAnimator';
 import { DivineForgeFlow } from '../flows/DivineForgeFlow';
 import { InlineEquipController, InlineEquipHandlers } from '../gear/InlineEquipController';
 import { bindGearDragDrop } from '../gear/GearDragDropBinder';
@@ -907,6 +907,11 @@ export class GameViewController {
     if (this.isManualLoadoutPause(this.state)) return;
 
     this.stopAutoBattle();
+    this.skillCooldownAnimator.setCombatActive(false);
+    this.battleStrip.freezeTimersVisual();
+    if (this.state) {
+      this.syncLoadoutPauseBanner({ ...this.state, battlePaused: true });
+    }
 
     const response = await this.client.send({ type: 'PAUSE_BATTLE' });
     if (!response.ok) {
@@ -1900,6 +1905,8 @@ export class GameViewController {
 
     this.syncLoadoutPauseBanner(mergedState);
 
+    const animateStripTimers = shouldAnimateBattleStripTimers(mergedState);
+
     this.hud.render(mergedState, {
       openingChests: this.chestLootFlow.openingChests,
       loadoutPauseActive: this.isManualLoadoutPause(mergedState),
@@ -1907,11 +1914,9 @@ export class GameViewController {
     });
 
     this.battleStrip.render(mergedState);
+    this.skillCooldownAnimator.setCombatActive(animateStripTimers);
     this.stageProgressBar.render(mergedState);
     this.syncPersistentWowInbox(mergedState);
-    this.skillCooldownAnimator.setCombatActive(
-      Boolean(mergedState.phaseRun && !mergedState.canEditParty),
-    );
 
     this.shopFlow.state.shopRefreshUnlocked = mergedState.featureFlags.shopRefresh;
     this.shopFlow.state.shopRefreshRemaining = Math.max(

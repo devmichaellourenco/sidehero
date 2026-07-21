@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { buildBattleStripStructureKey } from './BattleStripStructure';
+import {
+  buildBattleStripStructureKey,
+  hasBattleStripPhaseChanged,
+  resolveBattleStripPhaseId,
+} from './BattleStripStructure';
 
 function minimalState(overrides: Partial<GameStateDto> = {}): GameStateDto {
   return {
@@ -36,5 +40,28 @@ describe('buildBattleStripStructureKey', () => {
     });
 
     expect(buildBattleStripStructureKey(first)).not.toBe(buildBattleStripStructureKey(swapped));
+  });
+});
+
+describe('resolveBattleStripPhaseId', () => {
+  it('prefere phaseRun e cai para selectedPhaseId', () => {
+    const withRun = minimalState({
+      phaseRun: { phaseId: '1-2' } as GameStateDto['phaseRun'],
+      campaignProgress: { selectedPhaseId: '1-3' } as GameStateDto['campaignProgress'],
+    });
+    const withoutRun = minimalState({
+      campaignProgress: { selectedPhaseId: '1-3' } as GameStateDto['campaignProgress'],
+    });
+
+    expect(resolveBattleStripPhaseId(withRun)).toBe('1-2');
+    expect(resolveBattleStripPhaseId(withoutRun)).toBe('1-3');
+  });
+});
+
+describe('hasBattleStripPhaseChanged', () => {
+  it('detecta troca de fase', () => {
+    expect(hasBattleStripPhaseChanged('1-2', '1-3')).toBe(true);
+    expect(hasBattleStripPhaseChanged('1-2', '1-2')).toBe(false);
+    expect(hasBattleStripPhaseChanged(null, '1-2')).toBe(false);
   });
 });

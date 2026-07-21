@@ -117,7 +117,13 @@ export function combatSkillBarKey(skills: CombatBattleSkillDto[] | null | undefi
 export function patchCombatSkillBar(
   card: HTMLElement,
   skills: CombatBattleSkillDto[] | null | undefined,
+  freeze = false,
 ): void {
+  if (freeze) {
+    freezeCombatSkillCooldownVisuals(card);
+    return;
+  }
+
   if (!skills || skills.length === 0) {
     card.querySelector('[data-combat-skill-bar]')?.remove();
     return;
@@ -139,14 +145,33 @@ export function patchCombatSkillBar(
     );
   }
 
-  patchCombatSkillCooldowns(card, skills);
+  patchCombatSkillCooldowns(card, skills, freeze);
+}
+
+function clearSkillCooldownAnimationStamp(overlay: HTMLElement): void {
+  delete overlay.dataset.cdRemaining;
+  delete overlay.dataset.cdTotal;
+  delete overlay.dataset.cdCapturedAt;
+}
+
+/** Mantém overlay/ratio visuais e só remove stamps de interpolação client-side. */
+export function freezeCombatSkillCooldownVisuals(card: HTMLElement): void {
+  card.querySelectorAll<HTMLElement>('.combat-skill-cooldown').forEach((overlay) => {
+    clearSkillCooldownAnimationStamp(overlay);
+  });
 }
 
 export function patchCombatSkillCooldowns(
   card: HTMLElement,
   skills: CombatBattleSkillDto[] | null | undefined,
+  freeze = false,
 ): void {
   if (!skills || skills.length === 0) return;
+
+  if (freeze) {
+    freezeCombatSkillCooldownVisuals(card);
+    return;
+  }
 
   for (const skill of skills) {
     const slot = card.querySelector<HTMLElement>(`[data-skill-id="${skill.skillId}"]`);
@@ -172,9 +197,7 @@ export function patchCombatSkillCooldowns(
       overlay.classList.add('combat-skill-cooldown--ready');
       shade.style.setProperty('--cooldown-ratio', '0');
       overlay.removeAttribute('data-remaining-label');
-      delete overlay.dataset.cdRemaining;
-      delete overlay.dataset.cdTotal;
-      delete overlay.dataset.cdCapturedAt;
+      clearSkillCooldownAnimationStamp(overlay);
       continue;
     }
 

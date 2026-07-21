@@ -1,5 +1,17 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 
+export function resolveBattleStripPhaseId(state: GameStateDto): string | null {
+  return state.phaseRun?.phaseId ?? state.campaignProgress.selectedPhaseId ?? null;
+}
+
+export function hasBattleStripPhaseChanged(
+  previousPhaseId: string | null,
+  nextPhaseId: string | null,
+): boolean {
+  if (!previousPhaseId || !nextPhaseId) return false;
+  return previousPhaseId !== nextPhaseId;
+}
+
 export function buildBattleStripStructureKey(state: GameStateDto): string {
   return [
     state.activeParty.map((hero) => hero.id).join(','),
