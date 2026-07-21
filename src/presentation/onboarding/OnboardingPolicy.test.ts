@@ -64,6 +64,22 @@ describe('OnboardingPolicy', () => {
     expect(step?.message).not.toContain('estrela');
   });
 
+  it('sugere mapa da campanha após clear', () => {
+    const dismissed = new Set([
+      'first-chest',
+      'pause-loadout',
+      'hero-points',
+      'first-upgrade',
+    ] as const);
+    const step = resolveOnboardingStep(
+      mockState({
+        campaignProgress: { clearedPhaseIds: ['1-1'] } as GameStateDto['campaignProgress'],
+      }),
+      dismissed,
+    );
+    expect(step?.id).toBe('open-campaign');
+  });
+
   it('marca onboarding completo quando todos os passos foram dispensados', () => {
     expect(isOnboardingComplete(new Set(ONBOARDING_STEP_ORDER))).toBe(true);
   });

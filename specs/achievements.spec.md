@@ -15,13 +15,22 @@ Registrar progresso em conquistas persistentes (estilo TaskBar Hero / Steam). Ev
 - [x] Progresso persistente fora do `GameState` (sobrevive a Novo Jogo)
 - [x] Eventos de jogo avançam progresso (`AchievementService`)
 - [x] Primeiro achievement: **Hero - Out of the Side** — Clear stage 1-1 for the first time
+- [x] Achievements de arco: Stendra (`1-50`), Gruftall (`2-50`), Valdris (`3-50`), Morthaven (`4-50`)
 - [x] Wow ao progredir e ao completar achievement
 - [x] Botão no menu do painel (ícone book open) abre a tela de achievements
 - [x] Tela/modal lista conquistas com progresso e estado desbloqueado
 
 ## Escopo v1
 
-Um único achievement binary (0→1). UI de lista somente-leitura (sem recompensas materiais).
+Achievements binários por marco de campanha (0→1). UI de lista somente-leitura (sem recompensas materiais).
+
+| ID | Título | Condição |
+|----|--------|----------|
+| `hero_out_of_the_side` | Hero - Out of the Side | Clear `1-1` |
+| `stendra_guardian` | Guardião de Stendra | Clear `1-50` (Saci) |
+| `gruftall_ember` | Centelha de Gruftall | Clear `2-50` |
+| `valdris_shadow` | Sombra de Valdris | Clear `3-50` |
+| `morthaven_finale` | Queda de Morthaven | Clear `4-50` (fim) |
 
 Referência conceitual: [TaskBar Hero Achievements](https://taskbarhero.wiki/achievements) (`Hero Out of the Taskbar` → adaptação Side Hero).
 

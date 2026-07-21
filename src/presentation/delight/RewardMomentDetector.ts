@@ -32,6 +32,22 @@ function nextMomentId(prefix: string): string {
   return `${prefix}-${momentCounter}-${Date.now()}`;
 }
 
+/** Atos têm 10 fases (1–10, 11–20, …). */
+function actNumberFromPhaseId(phaseId: string): number | null {
+  const match = /^(\d+)-(\d+)$/.exec(phaseId);
+  if (!match) return null;
+  const phaseNumber = Number(match[2]);
+  if (phaseNumber < 1) return null;
+  return Math.ceil(phaseNumber / 10);
+}
+
+function isActCheckpointPhaseId(phaseId: string): boolean {
+  const match = /^(\d+)-(\d+)$/.exec(phaseId);
+  if (!match) return false;
+  const phaseNumber = Number(match[2]);
+  return phaseNumber > 0 && phaseNumber % 10 === 0 && phaseNumber < 50;
+}
+
 function buildMoment(
   kind: RewardMoment['kind'],
   partial: Omit<RewardMoment, 'id' | 'kind' | 'tier' | 'priority'> & { priority?: number },
@@ -104,11 +120,11 @@ export class RewardMomentDetector {
       moments.push(
         buildMoment('season_complete', {
           title: 'Jornada concluída!',
-          subtitle: 'Você venceu Morthaven — fim do jogo base por enquanto',
+          subtitle: 'Você venceu o Duque de Morthaven — fim da campanha',
           tone: 'victory',
           iconUrl: getAssetUrl(ASSETS.ui.victoryFrame),
           detailLines: [
-            'Novas regiões virão em atualizações futuras.',
+            'Stendra · Gruftall · Valdris · Morthaven',
             'Repita fases liberadas quando quiser — toque em Batalhar no acampamento.',
           ],
         }),
@@ -118,14 +134,7 @@ export class RewardMomentDetector {
       if (isChapterMilestonePhaseId(phase)) {
         moments.push(this.buildMilestoneBossMoment(phase));
       } else {
-        moments.push(
-          buildMoment('phase_cleared', {
-            title: `Fase ${phase} limpa!`,
-            subtitle: 'Campanha avançando',
-            tone: 'victory',
-            iconUrl: getAssetUrl(ASSETS.ui.campaign),
-          }),
-        );
+        moments.push(this.buildPhaseClearedMoment(phase));
       }
     }
 
@@ -325,6 +334,27 @@ export class RewardMomentDetector {
       ],
       priority: REWARD_KIND_PRIORITY.milestone_boss_defeated,
       autoDismissMs: REWARD_AUTO_DISMISS_MS.milestone_boss_defeated,
+    });
+  }
+
+  buildPhaseClearedMoment(phaseId: string): RewardMoment {
+    const actNumber = actNumberFromPhaseId(phaseId);
+    const isActCheckpoint = isActCheckpointPhaseId(phaseId);
+    const subtitle =
+      actNumber !== null
+        ? isActCheckpoint
+          ? `Ato ${actNumber} concluído — abra a Campanha`
+          : `Ato ${actNumber} · continue pela trilha`
+        : 'Campanha avançando';
+
+    return buildMoment('phase_cleared', {
+      title: `Fase ${phaseId} limpa!`,
+      subtitle,
+      tone: 'victory',
+      iconUrl: getAssetUrl(ASSETS.ui.campaign),
+      detailLines: isActCheckpoint
+        ? ['Marco do ato — revise formação e siga para a próxima fase.']
+        : undefined,
     });
   }
 

@@ -8,7 +8,6 @@ export type SettingsModalHandlers = {
     value: GamePreferences[K],
   ) => void;
   onOpenUpgrades: () => void;
-  onOpenMetaLegacy: () => void;
 };
 
 export class SettingsModalRenderer {
@@ -52,15 +51,6 @@ export class SettingsModalRenderer {
         })}
         ${this.renderSpeedSelect(state, preferences)}
       </div>
-      <div class="settings-meta-legacy">
-        <div class="settings-item-text">
-          <strong>Legado entre temporadas</strong>
-          <small>
-            ${state.meta?.sigils ?? 0} selos · bônus permanentes que sobrevivem ao novo jogo
-          </small>
-        </div>
-        <button type="button" class="settings-link-btn" data-open-meta-legacy>Abrir legado</button>
-      </div>
       <p class="settings-hint">Atalho: <kbd>Espaço</kbd> avança batalha (com painel focado)</p>
     `;
 
@@ -93,10 +83,6 @@ export class SettingsModalRenderer {
 
     container.querySelector('[data-open-upgrades]')?.addEventListener('click', () => {
       handlers.onOpenUpgrades();
-    });
-
-    container.querySelector('[data-open-meta-legacy]')?.addEventListener('click', () => {
-      handlers.onOpenMetaLegacy();
     });
   }
 

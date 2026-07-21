@@ -31,10 +31,16 @@ export class BattleVictoryOverlayRenderer {
     const nextPhaseLine = payload.nextPhaseName
       ? `<p class="battle-victory-detail-line">Próxima fase: <strong>${payload.nextPhaseName}</strong></p>`
       : payload.seasonCompleted
-        ? '<p class="battle-victory-detail-line">Temporada concluída!</p>'
+        ? '<p class="battle-victory-detail-line">Jornada concluída!</p>'
         : '';
+    const defeatHint =
+      isDefeat && payload.defeatHint
+        ? `<p class="battle-victory-defeat-hint">${payload.defeatHint}</p>`
+        : isDefeat
+          ? `<p class="battle-victory-defeat-hint">No Acampamento: ajuste formação, skills ou resistências e tente de novo.</p>`
+          : '';
     const detailsSection = isDefeat
-      ? ''
+      ? defeatHint
       : `
         <div class="battle-victory-details hidden" data-victory-details-panel>
           <p class="battle-victory-detail-line">${payload.clearedPhaseName}</p>

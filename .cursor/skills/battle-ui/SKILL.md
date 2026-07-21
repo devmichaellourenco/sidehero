@@ -25,7 +25,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Stats | Runa `battle_stats` → menu Stats (`BattleStatsPanelController` + `BattleStatsPresentation` com abas) |
 | Modais | `ModalStackController`, `GameViewController` |
 | Apoio | `DonationPromptController`, `DonationCardPresentation`, `DonationConfig` |
-| Wow | `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator` |
+| Wow | `WowBannerBuilder`, `WowCelebrationController.syncPersistentBanners`, `WowStripRenderer` |
 | Onboarding | `OnboardingPolicy` |
 
 ## Coordenação

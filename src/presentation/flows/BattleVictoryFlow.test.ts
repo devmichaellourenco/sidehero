@@ -17,6 +17,7 @@ function basePayload(): BattleVictoryPayload {
     seasonCompleted: false,
     heroRewards: [],
     milestoneVictory: null,
+    defeatHint: null,
   };
 }
 

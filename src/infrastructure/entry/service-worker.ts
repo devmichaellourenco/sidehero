@@ -1,4 +1,5 @@
 import { GameMessage, GameResponse } from '../../application/ports/GameClientTypes';
+import { META_LEGACY_ENABLED } from '../../application/ProductGates';
 import { createGameApplication } from '../di/createGameApplication';
 import {
   configureSidePanelBehavior,
@@ -82,6 +83,9 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       return { ok: true, state };
     }
     case 'NEW_GAME': {
+      if (!META_LEGACY_ENABLED) {
+        return { ok: false, error: 'Novo jogo está desabilitado nesta versão' };
+      }
       const state = await app.newGame.execute();
       return { ok: true, state };
     }
@@ -213,6 +217,9 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       };
     }
     case 'GET_META_TREE': {
+      if (!META_LEGACY_ENABLED) {
+        return { ok: false, error: 'Legado não está disponível nesta versão' };
+      }
       const result = await app.getMetaTree.execute();
       return {
         ok: true,
@@ -232,6 +239,9 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       };
     }
     case 'PURCHASE_META_UPGRADE': {
+      if (!META_LEGACY_ENABLED) {
+        return { ok: false, error: 'Legado não está disponível nesta versão' };
+      }
       const result = await app.purchaseMetaUpgrade.execute(message.upgradeId);
       return {
         ok: true,

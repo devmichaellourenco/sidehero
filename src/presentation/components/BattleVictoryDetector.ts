@@ -4,6 +4,7 @@ import {
 } from '../../application/mappers/MilestoneRewardPresentation';
 import { GameStateDto, CombatIntermissionDto } from '../../application/dto/GameStateDto';
 import { resolvePhase } from '../../domain/campaign/CampaignCatalog';
+import { resolveDefeatHint } from './DefeatHintPolicy';
 
 export type BattleVictoryVariant = 'wave-clear' | 'boss-approach' | 'phase-clear' | 'defeat';
 
@@ -28,6 +29,7 @@ export interface BattleVictoryPayload {
   tierReached: number | null;
   seasonCompleted: boolean;
   milestoneVictory: MilestoneVictoryPresentation | null;
+  defeatHint: string | null;
 }
 
 export function detectBattleVictory(
@@ -59,6 +61,10 @@ export function buildBattleIntermissionPayload(
     tierReached: null,
     seasonCompleted: state.seasonCompleted,
     milestoneVictory: null,
+    defeatHint:
+      intermission.variant === 'defeat'
+        ? resolveDefeatHint(previous?.enemies ?? state.enemies ?? [])
+        : null,
   };
 }
 
@@ -174,5 +180,6 @@ function buildVictoryPayload(
             context.clearedPhaseName,
           )
         : null,
+    defeatHint: null,
   };
 }

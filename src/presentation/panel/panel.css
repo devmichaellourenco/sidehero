@@ -10848,6 +10848,43 @@ body.skill-drag-active * {
   cursor: pointer;
 }
 
+.act-scene-overlay-card--finale .act-scene-credits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.act-scene-credit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--seal-gold);
+  background: color-mix(in srgb, var(--seal-gold) 12%, transparent);
+}
+
+.act-scene-credit-row strong {
+  font-size: 13px;
+  color: var(--ink-strong, var(--ink));
+}
+
+.act-scene-credit-row span {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.battle-victory-defeat-hint {
+  margin: 6px 0 0;
+  padding: 0 4px;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0.9;
+}
+
 body.act-scene-open {
   overflow: hidden;
 }

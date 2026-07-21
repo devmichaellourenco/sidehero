@@ -152,7 +152,7 @@ export class PhaseCombatHandlers {
       nextState = nextState.addLog(
         replay
           ? `🏆 Boss final derrotado em ${phase.displayName}! · Party recuperada`
-          : `🏆 Temporada concluída! Boss final derrotado em ${phase.displayName}! · Party recuperada`,
+          : `🏆 Jornada concluída! Boss final derrotado em ${phase.displayName}! · Party recuperada`,
       );
     } else {
       nextState = nextState.addLog(
@@ -163,7 +163,7 @@ export class PhaseCombatHandlers {
     const events = replay
       ? [`${phase.displayName} repetida!`]
       : phase.seasonFinale
-        ? ['🏆 Temporada concluída!', `${phase.displayName} finalizada!`]
+        ? ['🏆 Jornada concluída!', `${phase.displayName} finalizada!`]
         : [`${phase.displayName} concluída!`];
 
     return { state: nextState.touchTick(), events };

@@ -70,7 +70,7 @@ Polish e arte de battle strip das 4 regiões — [`art-scenes.spec.md`](art-scen
 | [stash-forge](stash-forge.spec.md) | Baú de itens, Forja Divina | `.cursor/agents/stash-forge.md` | `.cursor/skills/stash-forge/` |
 | [shop-economy](shop-economy.spec.md) | Loja, ouro, renovar | `.cursor/agents/shop-economy.md` | `.cursor/skills/shop-economy/` |
 | [upgrade-tree](upgrade-tree.spec.md) | Árvore de melhorias | `.cursor/agents/upgrade-tree.md` | `.cursor/skills/upgrade-tree/` |
-| [meta-legacy](meta-legacy.spec.md) | Meta entre temporadas | `.cursor/agents/meta-legacy.md` | `.cursor/skills/meta-legacy/` |
+| [meta-legacy](meta-legacy.spec.md) | Meta entre temporadas — **fora do produto canônico** (campanha finita) | `.cursor/agents/meta-legacy.md` | `.cursor/skills/meta-legacy/` |
 | [battle-ui](battle-ui.spec.md) | Battle strip, modais, Wow, UX | `.cursor/agents/battle-ui.md` | `.cursor/skills/battle-ui/` |
 | [art-scenes](art-scenes.spec.md) | Cenários de batalha e banners por região | — | `.cursor/skills/battle-ui/` |
 | [chrome-infra](chrome-infra.spec.md) | Extension, storage, SW, panel | `.cursor/agents/chrome-infra.md` | `.cursor/skills/chrome-infra/` |

@@ -2,7 +2,7 @@ import { GearDto } from '../../../application/dto/GameStateDto';
 import { RewardHeroPortrait } from '../../delight/RewardHeroPortrait';
 import { PendingActionKind } from '../../policies/PendingActionsPolicy';
 
-export type WowBannerAction = PendingActionKind | 'new-game' | 'dismiss';
+export type WowBannerAction = PendingActionKind | 'achievements' | 'dismiss';
 
 export type WowBannerKind =
   | PendingActionKind

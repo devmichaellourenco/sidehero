@@ -16,18 +16,18 @@ export function buildActSceneId(mapId: MapId, actNumber: number): string {
   return `${mapId}-act-${actNumber}`;
 }
 
-/** Epílogo exibido uma vez ao concluir a temporada (4-50) no jogo base. */
+/** Epílogo exibido uma vez ao concluir a campanha (4-50) no jogo base. */
 export const SEASON_FINALE_EPILOGUE_ID = 'morthaven-season-epilogue';
 
 export const SEASON_FINALE_EPILOGUE: ActSceneDefinition = {
   id: SEASON_FINALE_EPILOGUE_ID,
   mapId: 'morthaven',
   actNumber: 5,
-  title: 'Fim da jornada — por enquanto',
+  title: 'Fim da jornada',
   recap:
-    'O Duque de Morthaven caiu. A party atravessou quatro regiões, derrotou lordes e bestas, e encerrou a ameaça que pairava sobre o reino.',
+    'O Duque de Morthaven caiu. A party atravessou Stendra, Gruftall, Valdris e o castelo sombrio — e encerrou a ameaça que pairava sobre o reino.',
   preview:
-    'Por enquanto, esta é a **última fase do jogo**. Novas regiões e capítulos virão em atualizações futuras. Você pode repetir qualquer fase liberada quando quiser — use o acampamento e toque em **Batalhar** para reviver a batalha.',
+    'Esta é a última fase do jogo base. Você pode repetir qualquer fase liberada quando quiser — use o acampamento e toque em **Batalhar**. Novas regiões, se vierem, serão conteúdo futuro — não um reinício de temporada.',
 };
 
 type ActCopy = Pick<ActSceneDefinition, 'title' | 'recap' | 'preview'>;

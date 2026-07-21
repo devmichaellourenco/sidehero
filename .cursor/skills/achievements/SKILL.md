@@ -25,11 +25,15 @@ description: Achievements persistentes do Side Hero — catálogo, progresso por
 - Presentation só vê DTOs (`AchievementUpdateDto` / `AchievementListEntryDto`)
 - Botão do menu: ícone `ui/book-open.png` (`icon_itemicon_book_open`)
 
-## Achievement v1
+## Achievement v1+
 
 | ID | Título | Condição |
 |----|--------|----------|
 | `hero_out_of_the_side` | Hero - Out of the Side | Clear stage `1-1` first time |
+| `stendra_guardian` | Guardião de Stendra | Clear `1-50` |
+| `gruftall_ember` | Centelha de Gruftall | Clear `2-50` |
+| `valdris_shadow` | Sombra de Valdris | Clear `3-50` |
+| `morthaven_finale` | Queda de Morthaven | Clear `4-50` |
 
 ## Testes
 

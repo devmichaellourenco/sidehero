@@ -12,7 +12,7 @@ Jogos normalmente disputam a tela e a atenção do usuário. Side Hero ocupa um 
 
 Enquanto a pessoa navega, três heróis iniciam uma campanha automática por regiões, waves e chefes. Nos momentos de interação, o jogador abre baús, monta builds, escolhe skills, reorganiza a party e compra automações.
 
-O resultado é uma experiência de RPG que permanece próxima sem exigir dedicação exclusiva — simples para acompanhar, profunda para dominar e estruturada para crescer por temporadas e novas regiões.
+O resultado é uma experiência de RPG que permanece próxima sem exigir dedicação exclusiva — simples para acompanhar, profunda para dominar e estruturada como uma jornada completa: começo, meio e fim.
 
 ## 3. Estrutura sugerida da apresentação
 
@@ -70,17 +70,17 @@ O resultado é uma experiência de RPG que permanece próxima sem exigir dedica�
 - Resistências e contramedidas por região.
 - Loja, armazenamento e Forja Divina.
 
-### Slide 6 — Progressão de longo prazo
+### Slide 6 — Progressão até o fim
 
-**Mensagem:** cada temporada termina, mas o progresso deixa legado.
+**Mensagem:** uma campanha completa, com marcos claros e um final.
 
 **Pontos:**
 
 - 200 fases no jogo base.
 - Quatro regiões e vinte atos.
 - Chefes e cenas narrativas por marco.
-- Selos persistentes após Morthaven.
-- Nova run fortalecida por uma árvore meta.
+- Vitória em Morthaven encerra a jornada.
+- Sem temporada, selos de legado ou NG+ no escopo atual.
 
 ### Slide 7 — Diferencial de plataforma
 
@@ -91,7 +91,7 @@ O resultado é uma experiência de RPG que permanece próxima sem exigir dedica�
 - Não ocupa a janela principal.
 - Pode avançar com o painel fechado quando desbloqueado, dentro dos limites do Chrome.
 - Interações rápidas e contextuais.
-- Save local-first, sem conta obrigatória, com run, meta e conquistas separados.
+- Save local-first, sem conta obrigatória.
 
 ### Slide 8 — Identidade
 
@@ -140,7 +140,7 @@ O resultado é uma experiência de RPG que permanece próxima sem exigir dedica�
 - Ativação e retorno.
 - Ritmo de progressão por região.
 - Engajamento com builds e automações.
-- Conclusão de temporada.
+- Conclusão da campanha.
 - Interesse em apoio e expansão.
 
 ### Slide 12 — Convite
@@ -179,11 +179,11 @@ O resultado é uma experiência de RPG que permanece próxima sem exigir dedica�
 
 **Narração:** “Atravesse quatro regiões, duzentas fases e vinte atos. Derrote chefes, desbloqueie automações e transforme pequenas sessões em uma jornada de longo prazo.”
 
-### 62–76s — Legado
+### 62–76s — Final
 
-**Imagem:** vitória em Morthaven, selos e árvore meta.
+**Imagem:** vitória em Morthaven e fechamento da jornada.
 
-**Narração:** “Ao concluir a temporada, sua jornada deixa um legado. Bônus permanentes fortalecem a próxima run e abrem novas formas de evoluir.”
+**Narração:** “A campanha tem começo, meio e fim. Derrote o Duque de Morthaven e conclua a Ascensão de Nix.”
 
 ### 76–90s — Fechamento
 
@@ -193,7 +193,7 @@ O resultado é uma experiência de RPG que permanece próxima sem exigir dedica�
 
 ## 5. Versão curta — 30 segundos
 
-“Side Hero transforma o painel lateral do Chrome em um idle RPG persistente. Enquanto você navega, uma party enfrenta waves, chefes e quatro regiões. Quando quiser interagir, abra baús, monte builds, evolua skills e desbloqueie automações. Complete a temporada, construa seu legado e comece mais forte. Side Hero: uma aventura que progride ao seu lado.”
+“Side Hero transforma o painel lateral do Chrome em um idle RPG persistente. Enquanto você navega, uma party enfrenta waves, chefes e quatro regiões. Quando quiser interagir, abra baús, monte builds, evolua skills e desbloqueie automações. Complete a jornada até Morthaven. Side Hero: uma aventura que progride ao seu lado.”
 
 ## 6. Ideias de vídeos
 
@@ -231,7 +231,7 @@ Explique por que o jogo usa extensão Chrome, service worker, estado local, cat�
 - Árvore de skills e ascensão.
 - Mapa com progresso dos atos.
 - Cena narrativa e vitória de chefe.
-- Árvore de melhorias e legado.
+- Árvore de melhorias e conclusão da campanha.
 - Temas escuro e claro lado a lado.
 
 ## 8. Afirmações que exigem dados antes de publicação

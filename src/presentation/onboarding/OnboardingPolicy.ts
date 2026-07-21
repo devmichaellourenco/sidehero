@@ -5,7 +5,8 @@ export type OnboardingStepId =
   | 'first-chest'
   | 'pause-loadout'
   | 'hero-points'
-  | 'first-upgrade';
+  | 'first-upgrade'
+  | 'open-campaign';
 
 export interface OnboardingStep {
   id: OnboardingStepId;
@@ -19,6 +20,7 @@ export const ONBOARDING_STEP_ORDER: OnboardingStepId[] = [
   'pause-loadout',
   'hero-points',
   'first-upgrade',
+  'open-campaign',
 ];
 
 function runeInlineIcon(): string {
@@ -49,6 +51,12 @@ const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
     message: `Há uma runa disponível com o ouro acumulado. Toque em ${runeInlineIcon()} Runas para abrir a árvore.`,
     anchorSelector: '#open-upgrades-btn',
   },
+  'open-campaign': {
+    title: 'Mapa da campanha',
+    message:
+      'Toque em Campanha para ver a trilha, escolher a próxima fase e acompanhar os atos da jornada.',
+    anchorSelector: '#open-campaign-btn',
+  },
 };
 
 export function isOnboardingStepTriggered(stepId: OnboardingStepId, state: GameStateDto): boolean {
@@ -63,6 +71,8 @@ export function isOnboardingStepTriggered(stepId: OnboardingStepId, state: GameS
       );
     case 'first-upgrade':
       return state.purchasableUpgradeCount > 0;
+    case 'open-campaign':
+      return (state.campaignProgress?.clearedPhaseIds?.length ?? 0) > 0;
     default:
       return false;
   }

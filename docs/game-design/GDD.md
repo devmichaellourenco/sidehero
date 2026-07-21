@@ -21,7 +21,7 @@ A experiência combina baixa exigência de atenção com profundidade de constru
 
 ### Fantasia do jogador
 
-Liderar uma pequena companhia de aventureiros que cresce de aprendizes a campeões, atravessa regiões hostis, adapta builds aos inimigos e deixa um legado permanente entre temporadas.
+Liderar uma pequena companhia de aventureiros que cresce de aprendizes a campeões, atravessa regiões hostis, adapta builds aos inimigos e conclui uma jornada com começo, meio e fim.
 
 ### Experiência-alvo
 
@@ -45,7 +45,7 @@ Jogos tradicionais competem pela tela e atenção total. Side Hero ocupa um espa
 
 ### Posicionamento
 
-Um idle RPG nativo do painel lateral do navegador, com campanha, party, builds e progressão sazonal em uma interface projetada para coexistir com a navegação.
+Um idle RPG nativo do painel lateral do navegador, com campanha finita, party, builds e progressão até o final, em uma interface projetada para coexistir com a navegação.
 
 ## 4. Pilares de design
 
@@ -65,9 +65,9 @@ Formação, atributos, skills, ascensões, gear e resistências criam rotas de e
 
 Loot de combate chega em baús. Abrir, comparar, equipar, guardar, fundir ou destruir itens cria um ciclo de antecipação e gestão sem ultrapassar a capacidade do inventário.
 
-### 4.5 Temporadas que constroem legado
+### 4.5 Começo, meio e fim
 
-Concluir a campanha encerra uma temporada, concede selos persistentes e fortalece a próxima jornada. O reset transforma conclusão em reinício significativo.
+A campanha base é uma história finita: Stendra → Gruftall → Valdris → Morthaven. Derrotar o Duque encerra a jornada. Não há temporada, selos de legado nem reinício com bônus permanentes no escopo de produto atual.
 
 ## 5. Loops de jogo
 
@@ -88,9 +88,9 @@ Abrir o painel, observar o estado da batalha, resolver recompensas pendentes, ap
 
 Completar cinco atos, enfrentar o chefe regional, assistir às cenas de marco e liberar a região seguinte.
 
-### Loop de temporada
+### Loop de conclusão
 
-Avançar pelas quatro regiões do jogo base, derrotar o Duque de Morthaven, receber selos de legado e iniciar uma nova run com bônus permanentes.
+Avançar pelas quatro regiões do jogo base e derrotar o Duque de Morthaven. A vitória final é o fechamento da experiência — não o início de uma nova run meta.
 
 ## 6. Campanha e estrutura de conteúdo
 
@@ -99,7 +99,7 @@ A campanha “Ascensão de Nix” possui, no jogo base, 200 fases distribuídas 
 - **Stendra — tiers 1–50:** planícies verdes ameaçadas por goblins, bandoleiros e forças elementais. O Saci testa se o grupo merece avançar.
 - **Gruftall — tiers 51–100:** terra de cinzas, ruínas e crateras sob a sombra de Gonodor. O arco termina diante de uma centelha de seu poder.
 - **Valdris — tiers 101–150:** vale espectral de tumbas abertas, mortos-vivos e rituais corrompidos. O Espectro de Valdris guarda a passagem.
-- **Morthaven — tiers 151–200:** castelo decadente dominado por cultistas, criaturas e lordes sombrios. O Duque de Morthaven encerra a temporada.
+- **Morthaven — tiers 151–200:** castelo decadente dominado por cultistas, criaturas e lordes sombrios. O Duque de Morthaven encerra a campanha.
 
 O catálogo reserva seis regiões adicionais até o tier 500. Esse conteúdo representa capacidade de expansão, não uma promessa de data, formato comercial ou disponibilidade.
 
@@ -180,15 +180,36 @@ Uma árvore única desbloqueia qualidade de vida e automação:
 - Otimização e autoequipamento.
 - Armazenamento, forja, slots de skills, loja e novos heróis.
 
-### Legado
-
-Ao concluir a temporada, o jogador recebe selos persistentes. Eles compram bônus permanentes que aceleram ou diversificam a próxima run.
-
 ### Conquistas
 
-Conquistas persistem fora do save da run e celebram marcos. O sistema é extensível por catálogo; o conteúdo inicial valida o fluxo completo de progresso e desbloqueio.
+Conquistas celebram marcos da jornada (desbloqueios, chefes, builds). São objetivos opcionais dentro da campanha finita, não um ciclo pós-game obrigatório.
 
-## 12. UX e apresentação
+## 12. Mapa de retenção por estágio
+
+Objetivo de retenção: o jogador quer **continuar até o fim** (Morthaven), não “resetar para forever”.
+
+| Estágio | Faixa | O que prende | Mecânicas-âncora | Risco de abandono | Prioridade de design |
+|---------|-------|--------------|------------------|-------------------|----------------------|
+| **Early** | Tiers ~1–20 · Atos iniciais de Stendra | “Já estou avançando sem esforço” + primeira decisão que importa | Idle na strip, onboarding, baú, 1º gear, primeiros aprimoramentos, primeiras runas de QoL | Passividade sem recompensa; complexidade cedo demais | Clareza do próximo passo; celebração de marcos pequenos |
+| **Mid early** | ~21–50 · resto de Stendra + Saci | “Minha build está nascendo” | Party/formação, skills em slots, loja, resistências leves, árvore de runas | Wall sem ferramenta clara; loot irrelevante | Walls com contramedida óbvia (resist, cura, formação) |
+| **Mid** | ~51–100 · Gruftall | “Preciso adaptar para passar” | Elementos/resist, forja, stash, otimizar equipe, ascensão de classe | Estagnação longa; inventário cheio | Feedback de poder; gestão de inventário fluida |
+| **Late mid** | ~101–150 · Valdris | “Estou no arco difícil da história” | Builds especializadas, skills de evolução, automações mid/late, cenas de ato | Fadiga de grind; sensação de platô | Ritmo de marcos (atos/boss); variedade de inimigos |
+| **Late / fim** | ~151–200 · Morthaven | “Quero ver o final” | Pico de desafio, Duque, fechamento narrativo, conquistas finais | Sensação de “ainda falta grind sem payoff”; expectativa de NG+ | Final cinematográfico/Wow; créditos de conclusão; sem obrigar nova temporada |
+
+### Âncoras transversais (todas as faixas)
+
+1. **Poder perceptível** — level, aprimoramento, gear, skills.
+2. **Expectativa de baú** — abrir, comparar, equipar.
+3. **Build de party** — formação, atributos, skills, ascensão.
+4. **Runas / automação** — cada compra melhora a vida idle.
+5. **Marcos de campanha** — atos, cenas, bosses regionais.
+6. **Conquistas** — marcos opcionais, sem exigir pós-game.
+
+### Fora do mapa (neste momento)
+
+- Selos de legado, árvore meta e nova run pós-Morthaven — **fora do produto canônico**. Código legado pode existir; a visão de produto não depende deles.
+
+## 13. UX e apresentação
 
 A interface é organizada em três níveis:
 
@@ -200,7 +221,7 @@ Interações principais usam clique, hover, tooltips e drag-and-drop. Ações im
 
 O onboarding é contextual e pausa entre dicas. Celebrações “Wow” destacam conquistas, desbloqueios e marcos sem se repetirem indevidamente.
 
-## 13. Direção visual e sonora
+## 14. Direção visual e sonora
 
 ### Visual
 
@@ -212,7 +233,7 @@ Sprites 2D, retratos, ícones e cenas reforçam leitura rápida no espaço verti
 
 O projeto ainda não define um sistema sonoro canônico. A direção recomendada é discreta e opcional: impactos curtos, alertas de recompensa e ambiências regionais leves, com mute imediato para respeitar o contexto de trabalho e estudo.
 
-## 14. Plataforma e tecnologia
+## 15. Plataforma e tecnologia
 
 Side Hero é uma extensão Chrome Manifest V3 para Chrome 116 ou superior. O painel comunica-se com um service worker, que executa ações e pode avançar o jogo com o painel fechado quando a melhoria correspondente está ativa, dentro dos limites da plataforma.
 
@@ -223,13 +244,13 @@ Características técnicas:
 - Mensagens tipadas entre painel e background.
 - Domínio independente de Chrome e DOM.
 - Estado imutável e catálogos declarativos.
-- Saves de run, meta e conquistas separados.
+- Saves de run e conquistas separados (legado/meta fora do produto canônico atual).
 - Migrações tolerantes para evolução do produto.
 - Sem telemetria nem injeção de conteúdo nas páginas visitadas.
 
 A arquitetura em camadas reduz acoplamento entre regras, infraestrutura e apresentação, facilitando balanceamento, testes e expansão de conteúdo.
 
-## 15. Modelo de produto e distribuição
+## 16. Modelo de produto e distribuição
 
 O jogo é apresentado como gratuito. O painel inclui apoio voluntário por link externo, sem bloquear conteúdo ou vender poder.
 
@@ -237,32 +258,32 @@ Qualquer monetização adicional — expansões pagas, cosméticos, assinatura o
 
 O Chrome é a plataforma inicial confirmada. Chrome Web Store, outros navegadores ou versões desktop independentes são oportunidades de distribuição a avaliar, não compromissos atuais.
 
-## 16. Estratégia de conteúdo
+## 17. Estratégia de conteúdo
 
-O jogo base encerra sua temporada em Morthaven. A estrutura de mapas, atos, catálogos e tiers permite adicionar regiões, inimigos, classes, gear, conquistas e cenas sem alterar o core loop.
+O jogo base **termina** em Morthaven. A estrutura de mapas, atos, catálogos e tiers permite expandir conteúdo no futuro, mas o produto atual é uma campanha completa com final — não um serviço de temporadas.
 
 Prioridades de conteúdo:
 
 1. Consolidar qualidade e balanceamento dos tiers 1–200.
 2. Completar arte dedicada, feedback e variedade das quatro regiões.
-3. Expandir conquistas e objetivos de longo prazo.
-4. Validar retenção e ritmo de temporada com jogadores.
-5. Liberar novas regiões somente após validar qualidade e sustentabilidade.
+3. Expandir conquistas e marcos **dentro** da jornada.
+4. Validar retenção early → mid → late até a conclusão.
+5. Tratar novas regiões só como hipótese de expansão, após validar o jogo base.
 
-## 17. Indicadores a validar
+## 18. Indicadores a validar
 
 Nenhuma meta quantitativa é assumida neste documento. Os indicadores recomendados para instrumentação e playtest são:
 
 - Conclusão do onboarding e da fase 1-1.
 - Retorno após primeira sessão e recorrência semanal.
 - Tempo e tentativas por região, ato e chefe.
-- Pontos de abandono ou estagnação por tier.
+- Pontos de abandono ou estagnação por faixa (early / mid / late).
 - Frequência de abertura do painel e duração das sessões.
 - Uso de formação, skills, gear, forja e árvore de melhorias.
-- Taxa de conclusão da temporada e início de nova run.
+- Taxa de conclusão da campanha (vitória em Morthaven).
 - Interesse em apoio voluntário e conteúdo futuro.
 
-## 18. Riscos e respostas de design
+## 19. Riscos e respostas de design
 
 - **Descoberta limitada de extensões:** comunicar claramente o diferencial do painel lateral e demonstrá-lo em vídeos.
 - **Excesso de passividade:** garantir decisões periódicas de build, capacidade e progressão.
@@ -271,17 +292,17 @@ Nenhuma meta quantitativa é assumida neste documento. Os indicadores recomendad
 - **Dependência do ciclo de vida do navegador:** persistência robusta, migrações e idle em background calibrado às restrições reais do Chrome MV3.
 - **Custo de conteúdo:** reutilizar estruturas declarativas e priorizar identidade forte por região.
 
-## 19. Marcos recomendados
+## 20. Marcos recomendados
 
 Sem datas ou orçamento aprovados, os próximos marcos de produto são:
 
 1. Vertical slice externo com onboarding, primeira região e ciclo completo de loot.
-2. Playtest fechado da campanha base e da progressão de temporada.
-3. Instrumentação dos indicadores de comportamento e balanceamento.
+2. Playtest fechado da campanha base até a conclusão em Morthaven.
+3. Instrumentação dos indicadores de comportamento e balanceamento por faixa.
 4. Polish audiovisual e materiais de loja/apresentação.
 5. Validação pública do produto gratuito e do apoio voluntário.
 6. Decisão baseada em dados sobre expansão de conteúdo e novas plataformas.
 
-## 20. Fontes canônicas
+## 21. Fontes canônicas
 
 Este documento resume `specs/*.spec.md`, catálogos em `src/domain/**`, `manifest.json`, `package.json` e os testes do projeto. Detalhes de regra devem ser alterados primeiro na spec da feature correspondente e depois refletidos aqui.

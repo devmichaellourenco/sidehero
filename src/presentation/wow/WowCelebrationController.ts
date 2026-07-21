@@ -2,7 +2,7 @@ import { RewardMoment } from '../delight/types/RewardMoment';
 import { isCelebrationMoment } from './WowCelebrationPolicy';
 import { resolveWowBannerCta } from './WowBannerCtaPresentation';
 import { mapRewardMomentToWowBanner } from './WowMomentMapper';
-import { recordWowBannerDismiss } from './WowStripDismissStore';
+import { filterUndismissedBanners, recordWowBannerDismiss } from './WowStripDismissStore';
 import { WowStripRenderer } from './WowStripRenderer';
 import { buildWowStripSnapshot } from './WowStripRenderPolicy';
 import { WowBanner, WowBannerAction } from './types/WowBanner';
@@ -72,6 +72,27 @@ export class WowCelebrationController {
 
     this.updateInboxChrome();
     this.pumpCelebrationQueue();
+  }
+
+  /**
+   * Atualiza pendências persistentes no inbox (✦) sem abrir celebração central.
+   * Ephemeral em curso / na fila são preservados.
+   */
+  syncPersistentBanners(banners: WowBanner[]): void {
+    const nextPersistent = filterUndismissedBanners(
+      banners.filter((banner) => banner.persistence === 'persistent'),
+    );
+    const ephemeral = this.inbox.filter((banner) => banner.persistence !== 'persistent');
+
+    this.inbox.length = 0;
+    this.inbox.push(...nextPersistent, ...ephemeral);
+    this.inbox.sort((left, right) => right.priority - left.priority);
+
+    this.clampInboxIndex();
+    this.updateInboxChrome();
+    if (this.inboxOpen) {
+      this.renderInbox(true);
+    }
   }
 
   isBlockingAdvance(): boolean {
@@ -207,6 +228,8 @@ export class WowCelebrationController {
 
       if (action === 'dismiss') {
         onDismiss();
+      } else if (active.persistence === 'persistent' && active.onCtaClick) {
+        this.closeInbox();
       }
       return;
     }
@@ -216,6 +239,9 @@ export class WowCelebrationController {
     if (bannerEl && !actionEl) {
       if (active.onCtaClick) {
         active.onCtaClick();
+        if (active.persistence === 'persistent') {
+          this.closeInbox();
+        }
       } else if (cta.action === 'dismiss') {
         onDismiss();
       }
@@ -293,7 +319,7 @@ export class WowCelebrationController {
     this.inboxButton.classList.toggle('hidden', count === 0);
     this.inboxButton.disabled = count === 0;
     this.inboxButton.title =
-      count > 0 ? `Celebrações recentes (${count})` : 'Sem celebrações recentes';
+      count > 0 ? `Celebrações e pendências (${count})` : 'Sem celebrações recentes';
 
     if (countEl) {
       countEl.textContent = count > 0 ? String(count) : '';

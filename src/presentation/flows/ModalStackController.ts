@@ -69,7 +69,6 @@ export class ModalStackController {
       value: GamePreferences[K],
     ) => void,
     private readonly onOpenUpgrades: () => void,
-    private readonly onOpenMetaLegacy: () => void,
     private readonly onEquipPickerFromSlot: (heroId: string, slot: string) => void,
     private readonly onEquipPickerFromGear: (gearId: string) => void,
     private readonly onEquipRecommendedLoot: (gearIds: string[]) => void,
@@ -237,7 +236,6 @@ export class ModalStackController {
         this.settingsModal.render(container, state, this.getPreferences(), {
           onPreferenceChange: (key, value) => this.onPreferenceChange(key, value),
           onOpenUpgrades: () => this.onOpenUpgrades(),
-          onOpenMetaLegacy: () => this.onOpenMetaLegacy(),
         });
         break;
       case 'upgrades':

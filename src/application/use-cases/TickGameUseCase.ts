@@ -6,6 +6,7 @@ import { ICombatService } from '../../domain/services/ICombatService';
 import { IAchievementProgressRepository } from '../../domain/repositories/IAchievementProgressRepository';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { IMetaProgressRepository } from '../../domain/repositories/IMetaProgressRepository';
+import { META_LEGACY_ENABLED } from '../ProductGates';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { mapAchievementUpdates } from '../mappers/AchievementMapper';
 import { mapMetaSummary } from '../mappers/MetaMapper';
@@ -78,7 +79,9 @@ export class TickGameUseCase {
     }
 
     const metaBeforeTick = await this.metaRepository.load();
-    MetaBonusScope.set(this.metaService.resolveBonuses(metaBeforeTick));
+    if (META_LEGACY_ENABLED) {
+      MetaBonusScope.set(this.metaService.resolveBonuses(metaBeforeTick));
+    }
 
     try {
       for (let i = 0; i < ticks; i++) {
@@ -92,7 +95,11 @@ export class TickGameUseCase {
     }
 
     let sigilsAwarded = 0;
-    if (!wasSeasonCompleted && state.campaignProgress.seasonCompleted) {
+    if (
+      META_LEGACY_ENABLED &&
+      !wasSeasonCompleted &&
+      state.campaignProgress.seasonCompleted
+    ) {
       const awarded = this.metaService.awardSeasonCompletion(
         metaBeforeTick,
         state.campaignProgress.highestTierReached,

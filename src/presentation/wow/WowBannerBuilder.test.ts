@@ -12,7 +12,10 @@ const handlers = {
   onInventoryOpen: noop,
   onUpgradesOpen: noop,
   onHeroPointsOpen: noop,
-  onNewGame: noop,
+  onAchievementsOpen: noop,
+  onCampaignOpen: noop,
+  onStashOpen: noop,
+  onForgeOpen: noop,
 };
 
 function baseState(overrides: Partial<GameStateDto> = {}): GameStateDto {
@@ -20,7 +23,7 @@ function baseState(overrides: Partial<GameStateDto> = {}): GameStateDto {
     pendingChestCount: 0,
     purchasableUpgradeCount: 0,
     seasonCompleted: false,
-    chestProgress: { current: 1, target: 3, ratio: 1 / 3 },
+    chestProgress: { current: 1, target: 3 },
     heroes: [],
     inventory: [],
     ...overrides,
@@ -39,6 +42,14 @@ describe('WowBannerBuilder', () => {
   it('prioriza baú pendente acima do fallback', () => {
     const banners = buildPersistentWowBanners(baseState({ pendingChestCount: 2 }), handlers);
     expect(banners[0].kind).toBe('chest');
+  });
+
+  it('banner de campanha concluída aponta conquistas, não novo jogo', () => {
+    const banners = buildPersistentWowBanners(baseState({ seasonCompleted: true }), handlers);
+    const season = banners.find((banner) => banner.kind === 'season-complete');
+    expect(season?.title).toBe('Campanha concluída!');
+    expect(season?.cta).toEqual({ label: 'Ver conquistas', action: 'achievements' });
+    expect(season?.subtitle).not.toMatch(/selo|legado|temporada/i);
   });
 });
 

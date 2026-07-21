@@ -26,6 +26,7 @@ import { AchievementsFlow } from '../flows/AchievementsFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation, listNavigableHeroIds } from '../helpers/HeroNavigationHelper';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
+import { buildPersistentWowBanners } from '../wow/WowBannerBuilder';
 import { DonationPromptController } from '../support/DonationPromptController';
 import { filterBattleLogMessages } from './BattleLogFilter';
 import { BattleLogRenderer } from './BattleLogRenderer';
@@ -476,9 +477,6 @@ export class GameViewController {
       () => {
         void this.openUpgradesModal();
       },
-      () => {
-        void this.openMetaLegacyModal();
-      },
       (heroId, slot) => this.openEquipPickerFromSlot(heroId, slot),
       (gearId) => this.openEquipPickerFromGear(gearId),
       (gearIds) => {
@@ -725,28 +723,10 @@ export class GameViewController {
     this.pushModal({ type: 'settings' });
   }
 
-  private async startNewGame(): Promise<void> {
-    if (this.contextInvalidated) return;
-
-    const confirmed = window.confirm(
-      'Iniciar um novo jogo? O progresso da temporada será apagado, mas seus selos de legado permanecem.',
-    );
-    if (!confirmed) return;
-
-    const response = await this.client.send({ type: 'NEW_GAME' });
-    if (!response.ok) {
-      this.toasts.show(response.error ?? 'Falha ao iniciar novo jogo', 'idle');
-      return;
-    }
-
-    this.modal.close('action');
-    this.render(response.state);
-    this.toasts.show('Novo jogo iniciado!', 'victory');
-  }
-
   private async openCampaignModal(): Promise<void> {
     if (this.contextInvalidated) return;
 
+    this.dismissOnboardingStep('open-campaign');
     this.closeHeroDrawer();
     const modalBody = this.modal.open('Mapa');
     await this.campaignFlow.open((state) => this.render(state), modalBody);
@@ -802,18 +782,6 @@ export class GameViewController {
     this.upgradeTreeModal.beginSession();
     this.modalStack.length = 0;
     this.pushModal({ type: 'upgrades' });
-  }
-
-  private async openMetaLegacyModal(): Promise<void> {
-    if (this.contextInvalidated) return;
-
-    this.closeHeroDrawer();
-    const state = await this.metaLegacyFlow.loadTree();
-    if (!state) return;
-
-    this.state = state;
-    this.modalStack.length = 0;
-    this.pushModal({ type: 'meta-legacy' });
   }
 
   private async openAchievementsModal(): Promise<void> {
@@ -1115,10 +1083,6 @@ export class GameViewController {
 
     if (response.achievementUpdates?.length) {
       this.rewards.celebrateAchievementUpdates(response.achievementUpdates);
-    }
-
-    if (response.sigilsAwarded && response.sigilsAwarded > 0) {
-      this.toasts.show(`+${response.sigilsAwarded} selos de legado!`, 'victory');
     }
   }
 
@@ -1944,6 +1908,7 @@ export class GameViewController {
 
     this.battleStrip.render(mergedState);
     this.stageProgressBar.render(mergedState);
+    this.syncPersistentWowInbox(mergedState);
     this.skillCooldownAnimator.setCombatActive(
       Boolean(mergedState.phaseRun && !mergedState.canEditParty),
     );
@@ -1995,6 +1960,37 @@ export class GameViewController {
     }
     this.syncOnboarding(mergedState);
     this.tryShowAutoActScene(previous, mergedState);
+  }
+
+  private syncPersistentWowInbox(state: GameStateDto): void {
+    this.wowCelebration.syncPersistentBanners(
+      buildPersistentWowBanners(state, {
+        onChestOpen: () => {
+          if (this.isAdvanceBlocked()) return;
+          void this.chestLootFlow.openNextChest();
+        },
+        onInventoryOpen: () => this.openInventoryModal(),
+        onUpgradesOpen: () => {
+          void this.openUpgradesModal();
+        },
+        onHeroPointsOpen: () => {
+          const hero = state.heroes.find((entry) => entry.hasUnspentPoints);
+          if (hero) {
+            this.openHeroDrawer(hero.id, 'sheet');
+            return;
+          }
+          this.openHeroesModal();
+        },
+        onAchievementsOpen: () => {
+          void this.openAchievementsModal();
+        },
+        onCampaignOpen: () => {
+          void this.openCampaignModal();
+        },
+        onStashOpen: () => this.openStashModal(),
+        onForgeOpen: () => this.openForgeModal(),
+      }),
+    );
   }
 
   private tryShowAutoActScene(

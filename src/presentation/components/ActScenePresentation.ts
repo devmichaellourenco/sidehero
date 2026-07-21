@@ -2,6 +2,15 @@ import { ActSceneDto } from '../../application/dto/CampaignDto';
 import { getAssetUrl } from '../assets/AssetCatalog';
 import { escapeHtml } from './CampaignMapPresentation';
 
+const CAMPAIGN_FINALE_SCENE_ID = 'morthaven-season-epilogue';
+
+const FINALE_CREDITS = [
+  { label: 'Stendra', detail: 'Planícies e o Guardião Saci' },
+  { label: 'Gruftall', detail: 'Ruínas e a Centelha de Gonodor' },
+  { label: 'Valdris', detail: 'Terras espectrais e o arco sombrio' },
+  { label: 'Morthaven', detail: 'O castelo e a queda do Duque' },
+] as const;
+
 export function resolveActSceneImageUrl(scene: ActSceneDto): string | null {
   return scene.imageAssetPath ? getAssetUrl(scene.imageAssetPath) : null;
 }
@@ -46,6 +55,10 @@ export function renderActSceneCard(scene: ActSceneDto): string {
 }
 
 export function renderActSceneOverlay(scene: ActSceneDto): string {
+  if (scene.id === CAMPAIGN_FINALE_SCENE_ID) {
+    return renderFinaleCreditsOverlay(scene);
+  }
+
   const imageUrl = resolveActSceneImageUrl(scene);
   const imageMarkup = imageUrl
     ? `<img class="act-scene-overlay-image" src="${escapeHtml(imageUrl)}" alt="" />`
@@ -67,6 +80,46 @@ export function renderActSceneOverlay(scene: ActSceneDto): string {
         </section>
         <button type="button" class="act-scene-overlay-dismiss" data-act-scene-dismiss>
           CONTINUAR
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderFinaleCreditsOverlay(scene: ActSceneDto): string {
+  const imageUrl = resolveActSceneImageUrl(scene);
+  const imageMarkup = imageUrl
+    ? `<img class="act-scene-overlay-image" src="${escapeHtml(imageUrl)}" alt="" />`
+    : '';
+
+  const creditRows = FINALE_CREDITS.map(
+    (entry) => `
+      <li class="act-scene-credit-row">
+        <strong>${escapeHtml(entry.label)}</strong>
+        <span>${escapeHtml(entry.detail)}</span>
+      </li>
+    `,
+  ).join('');
+
+  return `
+    <div class="act-scene-overlay-card act-scene-overlay-card--finale" data-act-scene-overlay="${escapeHtml(scene.id)}">
+      <div class="act-scene-overlay-media">${imageMarkup}</div>
+      <div class="act-scene-overlay-copy">
+        <span class="act-scene-overlay-eyebrow">Créditos da campanha</span>
+        <h2 class="act-scene-overlay-title">${escapeHtml(scene.title)}</h2>
+        <section class="act-scene-overlay-section">
+          <h3>A jornada</h3>
+          <p>${escapeHtml(scene.recap)}</p>
+        </section>
+        <ul class="act-scene-credits" aria-label="Regiões conquistadas">
+          ${creditRows}
+        </ul>
+        <section class="act-scene-overlay-section">
+          <h3>Depois do fim</h3>
+          <p>${escapeHtml(scene.preview)}</p>
+        </section>
+        <button type="button" class="act-scene-overlay-dismiss" data-act-scene-dismiss>
+          ENCERRAR
         </button>
       </div>
     </div>
