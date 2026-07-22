@@ -3,6 +3,13 @@ import { getAssetUrl } from '../assets/AssetCatalog';
 import { escapeHtml } from './CampaignMapPresentation';
 
 const CAMPAIGN_FINALE_SCENE_ID = 'morthaven-season-epilogue';
+/** Arte dedicada full-bleed (proporção do painel 355×895). */
+const FULL_BLEED_ACT_SCENE_IDS = new Set([
+  'stendra-act-1',
+  'gruftall-act-1',
+  'valdris-act-1',
+  'morthaven-act-1',
+]);
 
 const FINALE_CREDITS = [
   { label: 'Stendra', detail: 'Planícies e o Guardião Saci' },
@@ -59,6 +66,10 @@ export function renderActSceneOverlay(scene: ActSceneDto): string {
     return renderFinaleCreditsOverlay(scene);
   }
 
+  if (FULL_BLEED_ACT_SCENE_IDS.has(scene.id)) {
+    return renderFullBleedActSceneOverlay(scene);
+  }
+
   const imageUrl = resolveActSceneImageUrl(scene);
   const imageMarkup = imageUrl
     ? `<img class="act-scene-overlay-image" src="${escapeHtml(imageUrl)}" alt="" />`
@@ -82,6 +93,25 @@ export function renderActSceneOverlay(scene: ActSceneDto): string {
           CONTINUAR
         </button>
       </div>
+    </div>
+  `;
+}
+
+function renderFullBleedActSceneOverlay(scene: ActSceneDto): string {
+  const imageUrl = resolveActSceneImageUrl(scene);
+  const imageMarkup = imageUrl
+    ? `<img class="act-scene-overlay-image" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(scene.title)}" />`
+    : '';
+
+  return `
+    <div
+      class="act-scene-overlay-card act-scene-overlay-card--full-bleed"
+      data-act-scene-overlay="${escapeHtml(scene.id)}"
+    >
+      <div class="act-scene-overlay-media">${imageMarkup}</div>
+      <button type="button" class="act-scene-overlay-dismiss" data-act-scene-dismiss>
+        CONTINUAR
+      </button>
     </div>
   `;
 }

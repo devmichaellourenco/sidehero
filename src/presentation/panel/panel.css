@@ -1313,11 +1313,18 @@ h2 {
   width: 100%;
   margin: 0;
   height: 28px;
+  min-height: 28px;
   pointer-events: none;
 }
 
+/* Reserva altura mesmo oculta — evita salto da strip/combat bar entre fases. */
 .stage-progress-root.hidden {
-  display: none !important;
+  display: flex !important;
+  visibility: hidden;
+  overflow: hidden;
+  height: 28px;
+  min-height: 28px;
+  pointer-events: none;
 }
 
 .stage-progress-bar {
@@ -10853,6 +10860,60 @@ body.skill-drag-active * {
   cursor: pointer;
 }
 
+/* Cena full-bleed (ex.: stendra-act-1 / scene_1) — preenche o painel 355×895 */
+.act-scene-root:has(.act-scene-overlay-card--full-bleed) {
+  padding: 0;
+  place-items: stretch;
+}
+
+.act-scene-stage:has(.act-scene-overlay-card--full-bleed) {
+  width: 355px;
+  height: 895px;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.act-scene-overlay-card--full-bleed {
+  position: relative;
+  width: 355px;
+  height: 895px;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
+  gap: 0;
+  border: none;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+}
+
+.act-scene-overlay-card--full-bleed .act-scene-overlay-media {
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.act-scene-overlay-card--full-bleed .act-scene-overlay-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.act-scene-overlay-card--full-bleed .act-scene-overlay-dismiss {
+  position: absolute;
+  z-index: 2;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
 .act-scene-overlay-card--finale .act-scene-credits {
   list-style: none;
   margin: 0;
@@ -11940,9 +12001,38 @@ html[data-ui-theme='dark'] .campaign-map-progress-block-fill {
   gap: 4px;
 }
 
-.combat-bar-row:empty,
-.combat-bar-row:not(:has(button:not(.hidden))) {
-  display: none;
+.combat-bar-row--primary {
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.combat-bar-slot {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.combat-bar-slot--left {
+  flex: 0 1 auto;
+}
+
+.combat-bar-slot--right {
+  flex: 0 1 52%;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.combat-bar-slot--left:not(:has(button:not(.hidden))) {
+  /* Slot vazio: não ocupa espaço horizontal, mas a linha permanece estável. */
+  flex-basis: 0;
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.combat-bar-slot .combat-bar-btn.hidden {
+  display: none !important;
 }
 
 .combat-bar-btn {
@@ -11963,6 +12053,16 @@ html[data-ui-theme='dark'] .campaign-map-progress-block-fill {
   box-shadow:
     0 0 0 1px var(--combat-bar-btn-ring) inset,
     0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.combat-bar-btn--side {
+  flex: 0 0 auto;
+  min-width: 7.5rem;
+}
+
+.combat-bar-slot--right .combat-bar-btn {
+  width: 100%;
+  flex: 1 1 auto;
 }
 
 .combat-bar-btn--continue {
@@ -12940,7 +13040,7 @@ html[data-ui-theme='dark'] .hero-drawer-title {
 
 .forge-dock-status {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
 }
 
@@ -12971,6 +13071,7 @@ html[data-ui-theme='dark'] .hero-drawer-title {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
   min-width: 0;
 }
 
@@ -12984,6 +13085,33 @@ html[data-ui-theme='dark'] .hero-drawer-title {
 .forge-dock-line--highlight {
   color: var(--gold);
   font-family: var(--font-heading);
+}
+
+.forge-clear-btn {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.forge-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: color-mix(in srgb, var(--on-dark-panel-title) 45%, transparent);
+}
+
+.forge-clear-btn-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.88;
+  pointer-events: none;
 }
 
 .forge-dock-actions {

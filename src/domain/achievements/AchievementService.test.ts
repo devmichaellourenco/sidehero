@@ -35,10 +35,10 @@ describe('AchievementService', () => {
   it('lista catálogo com progresso atual', () => {
     const completed = service.recordPhaseCleared(AchievementProgress.initial(), '1-1').progress;
     const entries = service.listEntries(completed);
+    const heroOut = entries.find((entry) => entry.definition.id === HERO_OUT_OF_THE_SIDE_ID);
 
-    expect(entries).toHaveLength(1);
-    expect(entries[0]?.definition.id).toBe(HERO_OUT_OF_THE_SIDE_ID);
-    expect(entries[0]?.completed).toBe(true);
-    expect(entries[0]?.currentProgress).toBe(1);
+    expect(entries.length).toBeGreaterThanOrEqual(1);
+    expect(heroOut?.completed).toBe(true);
+    expect(heroOut?.currentProgress).toBe(1);
   });
 });

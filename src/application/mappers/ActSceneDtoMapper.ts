@@ -15,7 +15,7 @@ export function mapActSceneToDto(
     title: scene.title,
     recap: scene.recap,
     preview: scene.preview,
-    imageAssetPath: actSceneImageAssetPath(scene.mapId),
+    imageAssetPath: actSceneImageAssetPath(scene.mapId, scene.actNumber),
     unlocked: options.unlocked,
     viewed: options.viewed,
   };

@@ -78,56 +78,58 @@
         </section>
 
         <div class="battle-combat-bar">
-          <div class="combat-bar-row combat-bar-row--battle">
-            <button
-              id="pause-battle-btn"
-              class="combat-bar-btn hidden"
-              type="button"
-              aria-label="Pausar batalha"
-              title="Pausar a batalha sem voltar ao acampamento. Você pode ver as estatísticas e continuar de onde parou."
-            >
-              <span class="combat-bar-btn-icon" aria-hidden="true">⏸</span>
-              <span class="combat-bar-btn-label">Pausar</span>
-            </button>
-            <button
-              id="resume-battle-btn"
-              class="combat-bar-btn combat-bar-btn--continue hidden"
-              type="button"
-              aria-label="Continuar batalha"
-              title="Retomar a batalha de onde parou"
-            >
-              <span class="combat-bar-btn-icon" aria-hidden="true">▶</span>
-              <span class="combat-bar-btn-label">Continuar</span>
-            </button>
-          </div>
-          <div class="combat-bar-row combat-bar-row--camp">
-            <button
-              id="pause-loadout-btn"
-              class="combat-bar-btn"
-              type="button"
-              aria-label="Voltar ao acampamento"
-              title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao batalhar."
-            >
-              <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
-              <span class="combat-bar-btn-label">Acampamento</span>
-            </button>
-            <button
-              id="continue-loadout-btn"
-              class="combat-bar-btn combat-bar-btn--continue hidden"
-              type="button"
-              aria-label="Batalhar"
-              title="Sair do acampamento e reiniciar a fase do início"
-            >
-              <img
-                class="combat-bar-btn-icon"
-                src="assets/ui/attack.png"
-                alt=""
-                aria-hidden="true"
-                loading="eager"
-                decoding="async"
-              />
-              <span class="combat-bar-btn-label">Batalhar</span>
-            </button>
+          <div class="combat-bar-row combat-bar-row--primary">
+            <div class="combat-bar-slot combat-bar-slot--left">
+              <button
+                id="pause-battle-btn"
+                class="combat-bar-btn combat-bar-btn--side hidden"
+                type="button"
+                aria-label="Pausar batalha"
+                title="Pausar a batalha sem voltar ao acampamento. Você pode ver as estatísticas e continuar de onde parou."
+              >
+                <span class="combat-bar-btn-icon" aria-hidden="true">⏸</span>
+                <span class="combat-bar-btn-label">Pausar</span>
+              </button>
+              <button
+                id="resume-battle-btn"
+                class="combat-bar-btn combat-bar-btn--side combat-bar-btn--continue hidden"
+                type="button"
+                aria-label="Continuar batalha"
+                title="Retomar a batalha de onde parou"
+              >
+                <span class="combat-bar-btn-icon" aria-hidden="true">▶</span>
+                <span class="combat-bar-btn-label">Continuar</span>
+              </button>
+            </div>
+            <div class="combat-bar-slot combat-bar-slot--right">
+              <button
+                id="pause-loadout-btn"
+                class="combat-bar-btn"
+                type="button"
+                aria-label="Voltar ao acampamento"
+                title="Voltar ao acampamento para ajustar equipe e loadout. A fase reinicia ao batalhar."
+              >
+                <span class="combat-bar-btn-icon" aria-hidden="true">⛺</span>
+                <span class="combat-bar-btn-label">Acampamento</span>
+              </button>
+              <button
+                id="continue-loadout-btn"
+                class="combat-bar-btn combat-bar-btn--continue hidden"
+                type="button"
+                aria-label="Batalhar"
+                title="Sair do acampamento e reiniciar a fase do início"
+              >
+                <img
+                  class="combat-bar-btn-icon"
+                  src="assets/ui/attack.png"
+                  alt=""
+                  aria-hidden="true"
+                  loading="eager"
+                  decoding="async"
+                />
+                <span class="combat-bar-btn-label">Batalhar</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

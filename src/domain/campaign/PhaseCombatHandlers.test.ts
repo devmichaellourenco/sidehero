@@ -142,7 +142,7 @@ describe('PhaseCombatHandlers', () => {
     );
 
     expect(victory.state.campaignProgress.seasonCompleted).toBe(true);
-    expect(victory.events.some((event) => event.includes('Temporada concluída'))).toBe(true);
+    expect(victory.events.some((event) => event.includes('Jornada concluída'))).toBe(true);
 
     const camp = handlers.resumeIntermission(victory.state);
 

@@ -44,6 +44,7 @@ Início    W5      W10      Elite      Boss
 - [x] Altura alvo ~40px no side panel (legível; arte base pode ser 64–128px e escalar)
 - [x] Aspecto aproximado **6:1**; moldura ornamental sem “chrome” extra ao redor do componente
 - [x] Visível com fase ativa (`phaseRun`); oculta no mapa-mundo sem combate / fora de fase
+- [x] Entre fases (intermissão), mantém a última barra e **reserva altura** para não saltar a strip/combat bar
 - [x] Atualiza no tick / clear de wave / wipe (volta wave 1) / Batalhar após acampamento
 - [x] Não bloqueia cliques da combat bar nem dos actors da strip (`pointer-events: none` no root)
 

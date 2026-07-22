@@ -6,6 +6,8 @@ import {
   getGearRaritySprite,
   getGearSlotSprite,
   getGearSprite,
+  getAssetUrl,
+  ASSETS,
   imgTag,
 } from '../assets/AssetCatalog';
 import {
@@ -167,6 +169,19 @@ export function renderForgeCapacityBar(
   `;
 }
 
+function renderForgeClearSelectionButton(ariaLabel: string): string {
+  return `
+    <button
+      type="button"
+      class="forge-clear-btn"
+      data-forge-clear-selection
+      title="Limpar seleção"
+      aria-label="${escapeHtml(ariaLabel)}"
+    >
+      ${imgTag(getAssetUrl(ASSETS.ui.clear), '', 'forge-clear-btn-icon')}
+    </button>`;
+}
+
 export function renderCreateTabPanel(
   status: ForgeSelectionStatus,
 ): string {
@@ -184,17 +199,7 @@ export function renderCreateTabPanel(
         : '';
 
   const clearSelectionBtn =
-    status.count > 0
-      ? `
-      <button
-        type="button"
-        class="forge-game-btn forge-game-btn--ghost"
-        data-forge-clear-selection
-        aria-label="Limpar seleção de todos os itens"
-      >
-        Limpar seleção
-      </button>`
-      : '';
+    status.count > 0 ? renderForgeClearSelectionButton('Limpar seleção de todos os itens') : '';
 
   return `
     <div class="forge-dock">
@@ -204,6 +209,7 @@ export function renderCreateTabPanel(
           <p class="forge-dock-line">${statusCopy}</p>
           ${resultCopy ? `<p class="forge-dock-line forge-dock-line--highlight">${resultCopy}</p>` : ''}
         </div>
+        ${clearSelectionBtn}
       </div>
       <div class="forge-dock-actions">
         <button
@@ -214,7 +220,6 @@ export function renderCreateTabPanel(
         >
           Fundir itens
         </button>
-        ${clearSelectionBtn}
       </div>
     </div>
   `;
@@ -229,15 +234,7 @@ export function renderSalvageTabPanel(
     : 0;
 
   const clearSelectionBtn = selectedGear
-    ? `
-      <button
-        type="button"
-        class="forge-game-btn forge-game-btn--ghost"
-        data-forge-clear-selection
-        aria-label="Limpar seleção do item"
-      >
-        Limpar seleção
-      </button>`
+    ? renderForgeClearSelectionButton('Limpar seleção do item')
     : '';
 
   return `
@@ -252,6 +249,7 @@ export function renderSalvageTabPanel(
               : '<p class="forge-dock-line">Selecione um item para destruir.</p>'
           }
         </div>
+        ${clearSelectionBtn}
       </div>
       <div class="forge-dock-actions">
         <button
@@ -262,7 +260,6 @@ export function renderSalvageTabPanel(
         >
           Destruir por ouro${selectedGear ? ` (+${goldPreview})` : ''}
         </button>
-        ${clearSelectionBtn}
       </div>
     </div>
   `;

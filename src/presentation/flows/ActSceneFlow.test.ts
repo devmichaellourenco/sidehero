@@ -10,7 +10,7 @@ const scene: ActSceneDto = {
   title: 'Portões de Stendra',
   recap: 'Recap',
   preview: 'Preview',
-  imageUrl: null,
+  imageAssetPath: 'campaign/stendra/scene_1.png',
   unlocked: true,
   viewed: false,
 };
@@ -47,7 +47,9 @@ describe('ActSceneFlow', () => {
 
     expect(flow.isBlocking()).toBe(true);
     expect(root.classList.contains('hidden')).toBe(false);
-    expect(stage.innerHTML).toContain('Portões de Stendra');
+    expect(stage.innerHTML).toContain('act-scene-overlay-card--full-bleed');
+    expect(stage.innerHTML).toContain('data-act-scene-overlay="stendra-act-1"');
+    expect(stage.innerHTML).toContain('data-act-scene-dismiss');
     expect(document.body.classList.contains('act-scene-open')).toBe(true);
   });
 

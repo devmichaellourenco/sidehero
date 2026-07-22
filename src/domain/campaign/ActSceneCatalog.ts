@@ -248,8 +248,21 @@ export function listActScenesForMap(mapId: MapId): ActSceneDefinition[] {
   return ACT_SCENE_CATALOG.filter((scene) => scene.mapId === mapId);
 }
 
-/** Caminho relativo de asset para banner da região (v1). */
-export function actSceneImageAssetPath(mapId: MapId): string | null {
+/** Arte full-bleed por cena (proporção do painel) — fallback: banner da região. */
+const ACT_SCENE_IMAGE_OVERRIDES: Partial<Record<string, string>> = {
+  'stendra-act-1': 'campaign/stendra/scene_1.png',
+  'gruftall-act-1': 'campaign/grutfall/scene_1.png',
+  'valdris-act-1': 'campaign/valdris/scene_1.png',
+  'morthaven-act-1': 'campaign/morthaven/scene_1.png',
+};
+
+/** Caminho relativo de asset para a cena (arte dedicada ou banner da região). */
+export function actSceneImageAssetPath(mapId: MapId, actNumber?: number): string | null {
+  if (actNumber != null) {
+    const dedicated = ACT_SCENE_IMAGE_OVERRIDES[buildActSceneId(mapId, actNumber)];
+    if (dedicated) return dedicated;
+  }
+
   const paths: Partial<Record<MapId, string>> = {
     stendra: 'campaign/stendra/campaign_stendra_banner.png',
     gruftall: 'campaign/grutfall/campaign_grutfall_banner.png',

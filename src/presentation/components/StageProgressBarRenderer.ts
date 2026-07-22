@@ -9,6 +9,11 @@ export class StageProgressBarRenderer {
   render(state: GameStateDto): void {
     const progress = state.phaseRun?.stageProgress ?? null;
     if (!progress || progress.markers.length === 0) {
+      // Mantém a última barra durante intermissão (troca de fase) para não colapsar o layout.
+      if (state.combatIntermission && this.lastKey && this.lastKey !== 'hidden') {
+        return;
+      }
+
       if (this.lastKey !== 'hidden') {
         this.root.innerHTML = '';
         this.root.classList.add('hidden');

@@ -81,7 +81,10 @@ describe('renderCreateTabPanel', () => {
     expect(readyHtml).not.toContain('disabled');
     expect(readyHtml).toContain('forge-dock-line--highlight');
     expect(readyHtml).toContain('data-forge-clear-selection');
-    expect(readyHtml).toContain('Limpar seleção');
+    expect(readyHtml).toContain('forge-clear-btn');
+    expect(readyHtml).toContain('title="Limpar seleção"');
+    expect(readyHtml).toContain('ui/clear.png');
+    expect(readyHtml).not.toMatch(/>\s*Limpar seleção\s*</);
   });
 
   it('mostra Limpar seleção quando há itens parcialmente selecionados', () => {
@@ -93,7 +96,8 @@ describe('renderCreateTabPanel', () => {
     const html = renderCreateTabPanel(partial);
 
     expect(html).toContain('data-forge-clear-selection');
-    expect(html).toContain('Limpar seleção');
+    expect(html).toContain('forge-clear-btn');
+    expect(html).toContain('title="Limpar seleção"');
     expect(html).toContain('3/9');
   });
 });
@@ -110,6 +114,8 @@ describe('renderSalvageTabPanel', () => {
     expect(selectedHtml).not.toContain('disabled');
     expect(selectedHtml).toContain('forge-dock-line--highlight');
     expect(selectedHtml).toContain('data-forge-clear-selection');
-    expect(selectedHtml).toContain('Limpar seleção');
+    expect(selectedHtml).toContain('forge-clear-btn');
+    expect(selectedHtml).toContain('title="Limpar seleção"');
+    expect(selectedHtml).not.toMatch(/>\s*Limpar seleção\s*</);
   });
 });

@@ -19,7 +19,7 @@ Guardar gear extra no **baú** (capacidade por melhoria) e usar a **Forja Divina
 - [x] Forja lista itens do **inventário e do baú**; fusão/salvage remove da origem correta
 - [x] UX game-like da Forja: abas temáticas (⚒ Fundir / 💰 Destruir), chips de capacidade, grid com scroll, dock fixo com badge de seleção e botões `forge-game-btn`; confirmação com eyebrow “Forja Divina”, ritual 9→1 e cards de recompensa — sem `primary-btn` nem painéis estilo site
 - [x] Seleção de itens no grid da Forja **preserva** a posição do scroll (não volta ao topo ao clicar)
-- [x] Botão **Limpar seleção** no dock (aba Fundir e Destruir) remove todos os itens selecionados de uma vez
+- [x] Botão **Limpar seleção** (ícone) à direita do status no dock (Fundir e Destruir); texto só no tooltip
 - [x] Tela do baú tem drag & drop espelhando o inventário: arrastar item para o slot **Inventário** (`data-drop-zone="inventory"`, ativo só com espaço livre) envia ao inventário; arrastar para o slot **Destruir** abre a confirmação de destruição; itens do baú continuam arrastáveis com inventário cheio (destruir segue válido)
 
 ## Camadas e arquivos-chave
