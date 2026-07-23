@@ -10391,13 +10391,6 @@ body.skill-drag-active * {
   margin-top: 4px;
 }
 
-.campaign-modal-hint {
-  font-size: 11px;
-  color: var(--muted);
-  margin: 0;
-  flex-shrink: 0;
-}
-
 .campaign-modal {
   display: flex;
   flex-direction: column;
@@ -10633,7 +10626,7 @@ body.skill-drag-active * {
 }
 
 .campaign-map-tab[data-campaign-tooltip] {
-  cursor: help;
+  cursor: pointer;
 }
 
 .campaign-map-tab[aria-disabled='true'] {
@@ -11644,6 +11637,10 @@ html[data-ui-theme='dark'] .campaign-map-progress-block-fill {
     box-shadow 0.15s ease;
 }
 
+.campaign-view-toggle-btn[data-campaign-tooltip] {
+  cursor: pointer;
+}
+
 .campaign-view-toggle-btn.active {
   color: var(--ink, var(--text));
   background: var(--panel-chip);
@@ -11826,7 +11823,7 @@ html[data-ui-theme='dark'] .campaign-map-progress-block-fill {
 }
 
 .campaign-world-node[data-campaign-tooltip] {
-  cursor: help;
+  cursor: pointer;
 }
 
 .campaign-world-node[aria-disabled='true'] {

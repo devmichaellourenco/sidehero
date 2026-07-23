@@ -129,13 +129,6 @@ export class CampaignModalRenderer {
 
     return `
       <div class="campaign-modal" data-campaign-theme="${escapeHtml(activeMapId)}" data-campaign-view="${viewMode}">
-        <p class="campaign-modal-hint">
-          ${
-            viewMode === 'world'
-              ? 'Toque em uma região para abrir a trilha de fases.'
-              : 'Toque em uma fase desbloqueada para voltar a jogá-la.'
-          }
-        </p>
         ${
           viewMode === 'region'
             ? `

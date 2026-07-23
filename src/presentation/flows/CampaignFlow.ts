@@ -226,14 +226,6 @@ export class CampaignFlow {
       });
 
     modalBody.querySelector('.campaign-modal')?.setAttribute('data-campaign-view', this.viewMode);
-
-    const hint = modalBody.querySelector('.campaign-modal-hint');
-    if (hint) {
-      hint.textContent =
-        this.viewMode === 'world'
-          ? 'Toque em uma região para abrir a trilha de fases.'
-          : 'Toque em uma fase desbloqueada para voltar a jogá-la.';
-    }
   }
 
   private refreshViewMode(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
