@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 11/11 (100%) · auditoria 2026-07-19  
-**Testes obrigatórios:** 10/10 presentes na suite
+**Aceite:** 12/12 (100%) · auditoria 2026-07-23  
+**Testes obrigatórios:** 11/11 presentes na suite
 
 ## Objetivo
 
@@ -21,6 +21,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Menu **Stats** (runa): painel flutuante como o Log, atualiza em tempo real (e na pausa); abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos (ranking com barras por herói)
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
+- [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)
 - [x] Barras de vida verdes; HP na strip
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
@@ -32,7 +33,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 |--------|-------|
 | Presentation | `panel/panel.html`, `panel.css`, `GameViewController`, `GameHudController` |
 | Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy`, `DonationCardPresentation` |
-| Presentation | `ModalStackController`, `BattleChestAffordanceController` |
+| Presentation | `ModalStackController`, `SystemsMenuNavigation`, `BattleChestAffordanceController` |
 
 ## Invariantes
 
@@ -53,6 +54,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
 - [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`; Pausar/Continuar/Detalhes na pausa de batalha
 - [x] `BattleStatsPresentation.test.ts` — painel de estatísticas da batalha pausada
+- [x] `SystemsMenuNavigation.test.ts` — disponibilidade por camp/unlock + wrap prev/next
 
 ## Relacionado
 

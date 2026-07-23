@@ -73,6 +73,14 @@ import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
 import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
 import { SkillCooldownDisplayAnimator, shouldAnimateBattleStripTimers } from './SkillCooldownDisplayAnimator';
 import { DivineForgeFlow } from '../flows/DivineForgeFlow';
+import {
+  listAvailableSystemsMenus,
+  resolveCurrentSystemsMenu,
+  systemsMenuFromModalViewType,
+  type SystemsMenuAvailability,
+  type SystemsMenuId,
+} from '../flows/SystemsMenuNavigation';
+import { renderSystemsMenuIconStrip } from './SystemsMenuIconPresentation';
 import { InlineEquipController, InlineEquipHandlers } from '../gear/InlineEquipController';
 import { bindGearDragDrop } from '../gear/GearDragDropBinder';
 import { OnboardingController } from '../onboarding/OnboardingController';
@@ -88,6 +96,9 @@ export class GameViewController {
   private readonly prefsController = new GamePreferencesController();
   private readonly autoBattleController = new AutoBattleController();
   private readonly gearMutations = new GearMutationQueue();
+  private trackedSystemsMenuId: SystemsMenuId | null = null;
+  private campaignModalOpen = false;
+  private systemsIconsSignature = '';
   private readonly client: IGameClient;
   private refreshTimer: number | null = null;
   private contextInvalidated = false;
@@ -320,6 +331,7 @@ export class GameViewController {
       root.querySelector('#support-btn') as HTMLButtonElement,
     );
     mountNavArrowIcons(root);
+
     hydratePanelIcons(root);
     bindCampaignTooltip(this.campaignContextBtn);
     bindBattleChromeLayout(
@@ -482,7 +494,7 @@ export class GameViewController {
       (gearIds) => {
         void this.equipRecommendedLoot(gearIds);
       },
-      () => this.openStashModal(),
+      () => this.openStashModal('push'),
       () => this.openInventoryModal(),
       (heroId) => {
         const active = this.inlineEquip.getActiveSlot();
@@ -585,8 +597,8 @@ export class GameViewController {
       void this.chestLootFlow.openAllChests();
     });
     this.openInventoryBtn.addEventListener('click', () => this.openInventoryModal());
-    this.openStashBtn.addEventListener('click', () => this.openStashModal());
-    this.openForgeBtn.addEventListener('click', () => this.openForgeModal());
+    this.openStashBtn.addEventListener('click', () => this.openStashModal('replace'));
+    this.openForgeBtn.addEventListener('click', () => this.openForgeModal('replace'));
     this.optimizeLoadoutBtn.addEventListener('click', () => {
       if (!this.canEditParty()) {
         this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
@@ -599,9 +611,7 @@ export class GameViewController {
       this.dismissOnboardingStep('hero-points');
       this.openHeroesModal();
     });
-    this.openFormationBtn.addEventListener('click', () => {
-      this.openFormationModal();
-    });
+    this.openFormationBtn.addEventListener('click', () => this.openFormationModal());
     this.openCampaignBtn.addEventListener('click', () => {
       void this.openCampaignModal();
     });
@@ -618,6 +628,14 @@ export class GameViewController {
     });
     this.openAchievementsBtn.addEventListener('click', () => {
       void this.openAchievementsModal();
+    });
+    this.openBattleLogBtn.addEventListener('click', () => {
+      this.trackedSystemsMenuId = 'log';
+      this.syncSystemsNavChrome();
+    });
+    this.openBattleStatsBtn.addEventListener('click', () => {
+      this.trackedSystemsMenuId = 'stats';
+      this.syncSystemsNavChrome();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -719,8 +737,14 @@ export class GameViewController {
 
   private openSettingsModal(): void {
     if (this.contextInvalidated) return;
+    this.closeHeroDrawer();
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
+    this.trackedSystemsMenuId = 'settings';
+    this.campaignModalOpen = false;
     this.modalStack.length = 0;
     this.pushModal({ type: 'settings' });
+    this.syncSystemsNavChrome();
   }
 
   private async openCampaignModal(): Promise<void> {
@@ -728,7 +752,20 @@ export class GameViewController {
 
     this.dismissOnboardingStep('open-campaign');
     this.closeHeroDrawer();
-    const modalBody = this.modal.open('Mapa');
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
+    this.modalStack.length = 0;
+    this.trackedSystemsMenuId = 'campaign';
+    this.campaignModalOpen = true;
+    const modalBody = this.modal.open('Mapa', () => {
+      this.campaignModalOpen = false;
+      if (this.trackedSystemsMenuId === 'campaign') {
+        this.trackedSystemsMenuId = null;
+      }
+      this.syncSystemsNavChrome();
+    });
+    this.modal.setBackVisible(false);
+    this.syncSystemsNavChrome();
     await this.campaignFlow.open((state) => this.render(state), modalBody);
   }
 
@@ -740,6 +777,8 @@ export class GameViewController {
     }
 
     this.closeHeroDrawer();
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
     const response = await this.client.send({ type: 'GET_SHOP_OFFERS' });
     if (!response.ok) {
       this.handleFailedResponse(response.error);
@@ -761,8 +800,11 @@ export class GameViewController {
     const state = response.state;
 
     this.state = state;
+    this.trackedSystemsMenuId = 'shop';
+    this.campaignModalOpen = false;
     this.modalStack.length = 0;
     this.pushModal({ type: 'shop' });
+    this.syncSystemsNavChrome();
   }
 
   private async openUpgradesModal(): Promise<void> {
@@ -770,6 +812,8 @@ export class GameViewController {
 
     this.dismissOnboardingStep('first-upgrade');
     this.closeHeroDrawer();
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
     const response = await this.client.send({ type: 'GET_UPGRADE_TREE' });
     if (!response.ok) {
       this.handleFailedResponse(response.error);
@@ -780,20 +824,28 @@ export class GameViewController {
 
     this.state = state;
     this.upgradeTreeModal.beginSession();
+    this.trackedSystemsMenuId = 'upgrades';
+    this.campaignModalOpen = false;
     this.modalStack.length = 0;
     this.pushModal({ type: 'upgrades' });
+    this.syncSystemsNavChrome();
   }
 
   private async openAchievementsModal(): Promise<void> {
     if (this.contextInvalidated) return;
 
     this.closeHeroDrawer();
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
     const state = await this.achievementsFlow.loadList();
     if (!state) return;
 
     this.state = state;
+    this.trackedSystemsMenuId = 'achievements';
+    this.campaignModalOpen = false;
     this.modalStack.length = 0;
     this.pushModal({ type: 'achievements' });
+    this.syncSystemsNavChrome();
   }
 
   private syncAutoBattleTimer(): void {
@@ -1209,7 +1261,7 @@ export class GameViewController {
       onOptimizeLoadout: () => {
         void this.gearEquipFlow.optimizeLoadout(undefined, { fromInventory: true });
       },
-      onOpenStash: () => this.openStashModal(),
+      onOpenStash: () => this.openStashModal('push'),
     };
   }
 
@@ -1355,12 +1407,17 @@ export class GameViewController {
 
       this.bindHeroDetailDrawer(container, heroId);
       this.syncInlineEquipHosts();
+      this.syncSystemsNavChrome();
     });
   }
 
   private closeHeroDrawer(): void {
     this.heroDrawerHeroId = null;
     this.heroDrawer.close('action');
+    if (this.trackedSystemsMenuId === 'heroes' || this.trackedSystemsMenuId === 'inventory') {
+      this.trackedSystemsMenuId = null;
+    }
+    this.syncSystemsNavChrome();
   }
 
   private isCampOnlyModal(type: ModalView['type']): boolean {
@@ -1520,6 +1577,10 @@ export class GameViewController {
       return;
     }
 
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
+    this.trackedSystemsMenuId = 'heroes';
+    this.campaignModalOpen = false;
     this.openHeroDrawer(firstId, 'sheet');
   }
 
@@ -1536,8 +1597,14 @@ export class GameViewController {
       return;
     }
 
+    this.closeHeroDrawer();
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
+    this.trackedSystemsMenuId = 'formation';
+    this.campaignModalOpen = false;
     this.modalStack.length = 0;
     this.pushModal({ type: 'formation' });
+    this.syncSystemsNavChrome();
   }
 
   private async handlePartyPanelAction(target: HTMLElement): Promise<void> {
@@ -1695,10 +1762,14 @@ export class GameViewController {
       return;
     }
     const heroId = resolveDefaultInventoryHeroId(this.state);
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
+    this.trackedSystemsMenuId = 'inventory';
+    this.campaignModalOpen = false;
     this.openHeroDrawer(heroId, 'sheet');
   }
 
-  private openStashModal(): void {
+  private openStashModal(mode: 'replace' | 'push' = 'replace'): void {
     if (this.contextInvalidated) return;
     if (!this.canEditParty()) {
       this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
@@ -1709,28 +1780,40 @@ export class GameViewController {
       return;
     }
     this.closeHeroDrawer();
-    if (this.modal.isOpen() && this.modalStack.length > 0) {
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
+    this.trackedSystemsMenuId = 'stash';
+    this.campaignModalOpen = false;
+    if (mode === 'push' && this.modal.isOpen() && this.modalStack.length > 0) {
       this.pushModal({ type: 'stash' });
+      this.syncSystemsNavChrome();
       return;
     }
     this.modalStack.length = 0;
     this.pushModal({ type: 'stash' });
+    this.syncSystemsNavChrome();
   }
 
-  private openForgeModal(): void {
+  private openForgeModal(mode: 'replace' | 'push' = 'replace'): void {
     if (this.contextInvalidated) return;
     if (!this.state?.featureFlags.divineForge) {
       this.toasts.show('Desbloqueie Forja Divina em Runas', 'info');
       return;
     }
     this.closeHeroDrawer();
+    this.battleLogPanel.hide();
+    this.battleStatsPanel.hide();
     this.divineForgeModal.resetSelection();
-    if (this.modal.isOpen() && this.modalStack.length > 0) {
+    this.trackedSystemsMenuId = 'forge';
+    this.campaignModalOpen = false;
+    if (mode === 'push' && this.modal.isOpen() && this.modalStack.length > 0) {
       this.pushModal({ type: 'divine-forge' });
+      this.syncSystemsNavChrome();
       return;
     }
     this.modalStack.length = 0;
     this.pushModal({ type: 'divine-forge' });
+    this.syncSystemsNavChrome();
   }
 
   private openHeroDetailModal(heroId: string, tab: HeroDetailTab = 'sheet'): void {
@@ -1811,6 +1894,148 @@ export class GameViewController {
       canEditGear: this.canEditGear(),
     });
     this.syncInlineEquipHosts();
+    this.syncSystemsNavChrome();
+  }
+
+  private getSystemsAvailability(): SystemsMenuAvailability {
+    return {
+      canEditParty: this.canEditParty(),
+      stashUnlocked: Boolean(this.state?.storageCapacity.stashUnlocked),
+      battleStats: Boolean(this.state?.featureFlags.battleStats),
+      divineForge: Boolean(this.state?.featureFlags.divineForge),
+    };
+  }
+
+  private resolveSystemsMenuCurrent(): SystemsMenuId | null {
+    const rootType =
+      this.modalStack.find((view) => systemsMenuFromModalViewType(view.type) !== null)?.type ??
+      this.modalStack[0]?.type ??
+      null;
+
+    return resolveCurrentSystemsMenu({
+      logVisible: this.battleLogPanel.isVisible(),
+      statsVisible: this.battleStatsPanel.isVisible(),
+      drawerOpen: this.heroDrawer.isOpen(),
+      modalOpen: this.modal.isOpen(),
+      modalStackRootType: rootType,
+      campaignOpen: this.campaignModalOpen,
+      trackedId: this.trackedSystemsMenuId,
+    });
+  }
+
+  private syncSystemsNavChrome(): void {
+    const sheetOpen =
+      this.modal.isOpen() ||
+      this.heroDrawer.isOpen() ||
+      this.battleLogPanel.isVisible() ||
+      this.battleStatsPanel.isVisible();
+
+    if (!sheetOpen) {
+      this.systemsIconsSignature = '';
+      document.querySelectorAll('[data-systems-menu-icons]').forEach((host) => {
+        (host as HTMLElement).replaceChildren();
+      });
+      return;
+    }
+
+    const current = this.resolveSystemsMenuCurrent();
+    const available = listAvailableSystemsMenus(this.getSystemsAvailability());
+    const signature = [
+      available.join(','),
+      current ?? '',
+      this.modal.isOpen() ? '1' : '0',
+      this.heroDrawer.isOpen() ? '1' : '0',
+      this.battleLogPanel.isVisible() ? '1' : '0',
+      this.battleStatsPanel.isVisible() ? '1' : '0',
+    ].join('|');
+
+    if (signature === this.systemsIconsSignature) return;
+    this.systemsIconsSignature = signature;
+
+    document.querySelectorAll<HTMLElement>('[data-systems-menu-icons]').forEach((host) => {
+      const inModal = Boolean(host.closest('#modal-root'));
+      const inDrawer = Boolean(host.closest('#hero-drawer-root'));
+      const inLog = Boolean(host.closest('#battle-log-overlay'));
+      const inStats = Boolean(host.closest('#battle-stats-overlay'));
+      const active =
+        (inModal && this.modal.isOpen()) ||
+        (inDrawer && this.heroDrawer.isOpen()) ||
+        (inLog && this.battleLogPanel.isVisible()) ||
+        (inStats && this.battleStatsPanel.isVisible());
+
+      if (!active) {
+        host.replaceChildren();
+        return;
+      }
+
+      renderSystemsMenuIconStrip(host, {
+        available,
+        current,
+        onSelect: (id) => {
+          void this.openSystemsMenu(id);
+        },
+      });
+    });
+  }
+
+  private async openSystemsMenu(id: SystemsMenuId): Promise<void> {
+    switch (id) {
+      case 'heroes':
+        this.openHeroesModal();
+        return;
+      case 'formation':
+        this.openFormationModal();
+        return;
+      case 'log':
+        this.closeHeroDrawer();
+        if (this.modal.isOpen()) {
+          this.modalStack.length = 0;
+          this.campaignModalOpen = false;
+          this.modal.close('action');
+        }
+        this.battleStatsPanel.hide();
+        this.trackedSystemsMenuId = 'log';
+        this.battleLogPanel.show();
+        this.syncSystemsNavChrome();
+        return;
+      case 'stats':
+        this.closeHeroDrawer();
+        if (this.modal.isOpen()) {
+          this.modalStack.length = 0;
+          this.campaignModalOpen = false;
+          this.modal.close('action');
+        }
+        this.battleLogPanel.hide();
+        this.trackedSystemsMenuId = 'stats';
+        this.battleStatsPanel.show();
+        this.syncSystemsNavChrome();
+        return;
+      case 'campaign':
+        await this.openCampaignModal();
+        return;
+      case 'shop':
+        await this.openShopModal();
+        return;
+      case 'inventory':
+        this.openInventoryModal();
+        return;
+      case 'stash':
+        this.openStashModal('replace');
+        return;
+      case 'forge':
+        this.openForgeModal('replace');
+        return;
+      case 'upgrades':
+        await this.openUpgradesModal();
+        return;
+      case 'achievements':
+        await this.openAchievementsModal();
+        return;
+      case 'settings':
+        this.closeHeroDrawer();
+        this.openSettingsModal();
+        return;
+    }
   }
 
   private maybeShowIdleSummary(state: GameStateDto): void {
@@ -1965,6 +2190,7 @@ export class GameViewController {
     }
     this.syncOnboarding(mergedState);
     this.tryShowAutoActScene(previous, mergedState);
+    this.syncSystemsNavChrome();
   }
 
   private syncPersistentWowInbox(state: GameStateDto): void {

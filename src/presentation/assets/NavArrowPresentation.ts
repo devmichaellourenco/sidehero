@@ -1,6 +1,6 @@
 import { ASSETS, getAssetUrl, imgTag } from './AssetCatalog';
 
-export type NavArrowDirection = 'prev' | 'next';
+export type NavArrowDirection = 'prev' | 'next' | 'down';
 
 export function getNavArrowIconUrl(direction: NavArrowDirection): string {
   const path = direction === 'prev' ? ASSETS.ui.arrowPrev : ASSETS.ui.arrowNext;
@@ -8,14 +8,16 @@ export function getNavArrowIconUrl(direction: NavArrowDirection): string {
 }
 
 export function navArrowIconHtml(direction: NavArrowDirection, className = 'nav-arrow-icon'): string {
-  return imgTag(getNavArrowIconUrl(direction), '', className);
+  const classes =
+    direction === 'down' ? `${className} nav-arrow-icon--down` : className;
+  return imgTag(getNavArrowIconUrl(direction), '', classes);
 }
 
-/** Preenche botões estáticos do HTML com ícones de seta. */
+/** Preenche botões/spans estáticos do HTML com ícones de seta. */
 export function mountNavArrowIcons(root: ParentNode): void {
-  root.querySelectorAll<HTMLButtonElement>('[data-nav-arrow]').forEach((button) => {
-    const direction = button.dataset.navArrow;
-    if (direction !== 'prev' && direction !== 'next') return;
-    button.innerHTML = navArrowIconHtml(direction);
+  root.querySelectorAll<HTMLElement>('[data-nav-arrow]').forEach((element) => {
+    const direction = element.dataset.navArrow;
+    if (direction !== 'prev' && direction !== 'next' && direction !== 'down') return;
+    element.innerHTML = navArrowIconHtml(direction);
   });
 }

@@ -41,11 +41,22 @@ export class BattleLogPanelController {
     this.applyVisibility();
   }
 
+  show(): void {
+    if (this.visible) return;
+    this.visible = true;
+    this.writeVisiblePreference(true);
+    this.applyVisibility();
+  }
+
   hide(): void {
     if (!this.visible) return;
     this.visible = false;
     this.writeVisiblePreference(false);
     this.applyVisibility();
+  }
+
+  isVisible(): boolean {
+    return this.visible;
   }
 
   private applyVisibility(): void {
