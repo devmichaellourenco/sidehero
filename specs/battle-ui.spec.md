@@ -11,7 +11,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 ## Critérios de aceite
 
-- [x] Modais de inventário/heróis/melhorias limitados abaixo da combat bar (`--panel-sheet-top`)
+- [x] Modais de inventário/heróis/melhorias limitados abaixo da barra Pausar/Acampamento (`--panel-sheet-top` = base de `.battle-combat-bar`)
 - [x] Wow: celebrações centrais; inbox no header (✦) com pendências persistentes (`buildPersistentWowBanners` + `syncPersistentBanners`); strip dismiss sem repetir
 - [x] Overlay de derrota sugere contramedida (resist elemental quando detectável)
 - [x] Todo card Wow exibe botão de rodapé (padrão **Entendi** para dispensar); o [×] só aparece em CTAs de ação no modo center

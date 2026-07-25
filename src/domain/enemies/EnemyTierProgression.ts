@@ -58,7 +58,7 @@ export function milestoneBossForMapIndex(mapIndex: number): EnemyType {
     1: 'saci',
     2: 'gonodor',
     3: 'bloody_orc_chief',
-    4: 'mountain_troll',
+    4: 'morthaven_duke',
     5: 'three_head_hydra',
     6: 'young_green_dragon',
     7: 'lesser_lich',

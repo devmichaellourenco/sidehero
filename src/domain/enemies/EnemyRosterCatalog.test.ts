@@ -3,12 +3,13 @@ import { ENEMY_ROSTER, getBossForPowerTier, getCommonsForPowerTier } from './Ene
 import { pickCommonForGlobalTier, getPowerTierForGlobalTier, unlockedCommonsForGlobalTier } from './EnemyTierProgression';
 
 describe('EnemyRosterCatalog', () => {
-  it('contém 50 inimigos de campanha + Saci, Gonodor e Vorax únicos', () => {
-    const uniques = new Set(['saci', 'gonodor', 'vorax']);
+  it('contém 50 inimigos de campanha + Saci, Gonodor, Duque de Morthaven e Vorax únicos', () => {
+    const uniques = new Set(['saci', 'gonodor', 'morthaven_duke', 'vorax']);
     const campaign = ENEMY_ROSTER.filter((e) => !uniques.has(e.id));
     expect(campaign).toHaveLength(50);
     expect(ENEMY_ROSTER.some((e) => e.id === 'saci')).toBe(true);
     expect(ENEMY_ROSTER.some((e) => e.id === 'gonodor')).toBe(true);
+    expect(ENEMY_ROSTER.some((e) => e.id === 'morthaven_duke')).toBe(true);
     expect(ENEMY_ROSTER.some((e) => e.id === 'vorax')).toBe(true);
   });
 

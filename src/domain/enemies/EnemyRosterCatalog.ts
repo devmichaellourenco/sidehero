@@ -48,6 +48,7 @@ const SK = {
   god5: ['basic_attack', 'arcane_surge', 'dragon_breath', 'saci_wind'] as const,
   saci: ['basic_attack', 'saci_fire', 'saci_wind'] as const,
   gonodor: ['basic_attack', 'pyro_ember', 'power_attack', 'ground_slam'] as const,
+  morthavenDuke: ['basic_attack', 'power_attack', 'reaver_cleave', 'wraith_curse'] as const,
 };
 
 /** 50 inimigos de campanha + Saci (único narrativo). */
@@ -115,6 +116,7 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   // Únicos narrativos
   { id: 'saci', name: 'Saci', powerTier: T1, rosterRole: 'boss', spriteVariant: 'saci', skillIds: SK.saci },
   { id: 'gonodor', name: 'Gonodor', powerTier: T1, rosterRole: 'boss', spriteVariant: 'gonodor', skillIds: SK.gonodor },
+  { id: 'morthaven_duke', name: 'Duque de Morthaven', powerTier: T2, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.morthavenDuke },
   { id: 'vorax', name: 'Vorax', powerTier: T5, rosterRole: 'boss', spriteVariant: 'vorax', skillIds: SK.god5 },
 ];
 
@@ -134,7 +136,7 @@ export function getSubbossesForPowerTier(tier: EnemyPowerTier): EnemyRosterEntry
   return ENEMY_ROSTER.filter((e) => e.powerTier === tier && e.rosterRole === 'subboss');
 }
 
-const UNIQUE_BOSS_IDS = new Set(['saci', 'gonodor', 'vorax']);
+const UNIQUE_BOSS_IDS = new Set(['saci', 'gonodor', 'morthaven_duke', 'vorax']);
 
 export function getBossForPowerTier(tier: EnemyPowerTier): EnemyRosterEntry {
   const boss = ENEMY_ROSTER.find(

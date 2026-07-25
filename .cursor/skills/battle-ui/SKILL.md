@@ -11,8 +11,8 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 
 ## Princípios
 
-- Batalha sempre visível no topo
-- Modais/drawers abaixo de `--panel-sheet-top` (`BattleChromeLayout`)
+- Batalha e barra Pausar/Acampamento sempre visíveis no topo
+- Modais/drawers abaixo de `--panel-sheet-top` (`BattleChromeLayout` — base da `.battle-combat-bar`)
 - Presentation só usa `GameStateDto`
 
 ## Áreas

@@ -1282,7 +1282,7 @@ h2 {
   --strip-actor-gap: 2px;
   --strip-hero-slot: 46px;
   --strip-enemy-slot: 50px;
-  --strip-enemy-boss-slot: 56px;
+  --strip-enemy-boss-slot: 67px;
   --strip-sprite-zoom: 1.22;
   --strip-skill-size: 16px;
   --strip-skill-wrap: 18px;
@@ -1491,7 +1491,7 @@ h2 {
 .battle-strip--crowded {
   --strip-hero-slot: 40px;
   --strip-enemy-slot: 44px;
-  --strip-enemy-boss-slot: 50px;
+  --strip-enemy-boss-slot: 60px;
   --strip-sprite-zoom: 1.12;
   --strip-actor-gap: 2px;
   --strip-skill-size: 14px;
@@ -6840,7 +6840,7 @@ body.modal-open {
   overflow: hidden;
 }
 
-/* Painéis secundários ocupam só a área abaixo da batalha; wow celebração fica fora deste grupo. */
+/* Painéis secundários ocupam a área abaixo dos botões Pausar/Acampamento. */
 .modal-root,
 .hero-drawer-root,
 .confirm-dialog-root,

@@ -114,7 +114,7 @@ const MILESTONE_BOSS_BY_MAP_INDEX: Record<
   1: { enemyType: 'saci', displayName: 'Saci', bossLabel: 'Guardião Elemental' },
   2: { enemyType: 'gonodor', displayName: 'Gonodor', bossLabel: 'Centelha de Gonodor' },
   3: { enemyType: 'bloody_orc_chief', displayName: 'Chefe Orc', bossLabel: 'Espectro de Valdris' },
-  4: { enemyType: 'mountain_troll', displayName: 'Troll', bossLabel: 'Duque de Morthaven' },
+  4: { enemyType: 'morthaven_duke', displayName: 'Duque', bossLabel: 'Duque de Morthaven' },
   5: { enemyType: 'three_head_hydra', displayName: 'Hidra', bossLabel: 'Colosso do Céu Quebrado' },
   6: { enemyType: 'young_green_dragon', displayName: 'Dragão', bossLabel: 'Senhor do Abismo' },
   7: { enemyType: 'lesser_lich', displayName: 'Lich', bossLabel: 'Forjador Eterno' },

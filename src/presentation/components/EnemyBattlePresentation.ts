@@ -46,14 +46,14 @@ export function renderEnemyBattleCard(
   enemy: EnemyDto,
   stage: number,
   spriteHtml: string,
-  options: { isActiveTurn?: boolean; isBossWave?: boolean } = {},
+  options: { isActiveTurn?: boolean } = {},
 ): string {
   return renderBattleActorCard({
     side: 'enemy',
     id: enemy.id,
     name: enemy.name,
     isActiveTurn: options.isActiveTurn ?? false,
-    isBoss: options.isBossWave,
+    isBoss: enemy.role === 'boss',
     spriteInnerHtml: spriteHtml,
     tooltipHtml: renderEnemyTooltipContent(enemy, stage),
     healthLabel: formatEnemyHealthLabel(enemy),

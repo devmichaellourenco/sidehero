@@ -182,6 +182,7 @@ export interface EnemyDto {
   id: string;
   name: string;
   enemyType: string;
+  role: 'trash' | 'elite' | 'boss';
   health: number;
   maxHealth: number;
   attack: number;

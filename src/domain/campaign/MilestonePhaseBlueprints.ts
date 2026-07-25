@@ -75,7 +75,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
       wave('w1', [trash('orc_berserker', 2), trash('minor_fire_elemental', 1)]),
       wave('w2', [elite('renegade_necromancer'), elite('giant_spider')], 1.2),
       wave('w3', [elite('mountain_troll'), trash('rot_zombie', 2)], 1.3),
-      wave('w4', [boss('mountain_troll', 1, 'Troll das Montanhas'), elite('orc_warrior')], 1.7),
+      wave('w4', [boss('morthaven_duke', 1, 'Duque de Morthaven'), elite('orc_warrior')], 1.7),
     ],
   },
   [buildPhaseId(5, 50)]: {

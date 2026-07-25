@@ -82,35 +82,35 @@ const SCENES_BY_MAP: Record<
         recap:
           'Após Stendra, o ar quente e seco anuncia Gruftall, terra sob a sombra de Gonodor.',
         preview:
-          'Monstros errantes e scavengers vagam entre crateras. A party precisa se adaptar ao terreno hostil.',
+          'Monstros errantes e scavengers vagam entre crateras. Os aventureiros precisam se adaptar ao terreno hostil.',
       },
       {
         title: 'Cinzas Profundas',
         recap:
-          'A travessia inicial provou que Gruftall não perdoa hesitação; cinzas grossas encobrem armadilhas.',
+          'A travessia inicial provou que Gruftall não perdoa hesitação. cinzas grossas encobrem armadilhas.',
         preview:
-          'Patrulhas maiores e conjuradores goblins testam resistências. O calor drena forças lentamente.',
+          'Patrulhas maiores e conjuradores goblins testam asresistências. O calor drena forças lentamente.',
       },
       {
         title: 'Ruína Fumegante',
         recap:
-          'Os heróis encontraram acampamentos abandonados — sinais de que algo maior varreu a região.',
+          'Os heróis encontraram acampamentos abandonados. Sinais de que algo maior varreu a região.',
         preview:
-          'Elites e aberrações de cinza bloqueiam passagens estreitas entre torres desmoronadas.',
+          'Elites e aberrações de cinza bloqueiam as passagens estreitas entre torres desmoronadas.',
       },
       {
         title: 'Voz de Gonodor',
         recap:
-          'Ecos de risada distante percorrem as ruínas; o nome Gonodor volta em canções de medo.',
+          'Ecos de estrondos e chao tremendo  distante percorrem as ruínas. O nome Gonodor volta em canções de medo.',
         preview:
-          'A party sente a influência destrutiva do deus afro antes de vê-lo. Waves mais brutais e sincronizadas.',
+          'A influência destrutiva do titã é palpável. Ondas de monstros mais brutais e sincronizadas.',
       },
       {
         title: 'Centelha de Gonodor',
         recap:
-          'O epicentro do poder destrutivo finalmente responde — apenas uma centelha, dizem, mas suficiente para incendiar um exército.',
+          'O epicentro do poder destrutivo finalmente responde. Apenas uma centelha, dizem, mas é suficiente para incendiar um exército.',
         preview:
-          'O confronto com a Centelha de Gonodor marca o fim de Gruftall e abre Valdris àqueles que sobreviverem.',
+          'O confronto com a Centelha de Gonodor marca o fim de a passagem de Gruftall e exibe Valdris para aqueles que sobreviverem.',
       },
     ],
   },
@@ -121,7 +121,7 @@ const SCENES_BY_MAP: Record<
         recap:
           'Valdris surge como um vale de colunas quebradas, onde a luz do dia não dissipa o frio.',
         preview:
-          'Mortos-vivos e predadores das ruínas caçam em silêncio. A party avança entre ecos e sombras.',
+          'Mortos-vivos e predadores das ruínas caçam em silêncio. Os aventureiros avançam entre sussuros de mortos-vivos e sombras.',
       },
       {
         title: 'Tumbas Abertas',
@@ -133,23 +133,23 @@ const SCENES_BY_MAP: Record<
       {
         title: 'Sussurros do Vale',
         recap:
-          'Inscrições antigas contam um espectro que vigia Valdris desde a queda da cidade.',
+          'Inscrições antigas contam sobre um espectro que vigia Valdris desde a queda da cidade.',
         preview:
           'Elites espectrais e elementalistas corrompidos atacam em pares. Coordenação é essencial.',
       },
       {
         title: 'Corte Quebrada',
         recap:
-          'O espectro de Valdris manipula os vivos restantes; a party interrompe rituais em câmaras ocultas.',
+          'O espectro de Valdris manipula os vivos restantes. os aventureiros interrompem rituais em câmaras ocultas.',
         preview:
-          'Capitães orcs e invocações mistas guardam o penúltimo anel do vale.',
+          'Capitães orcs e invocações mistas guardam o penúltimo anel do vale. A pressão aumenta.',
       },
       {
         title: 'Espectro de Valdris',
         recap:
-          'O vale inteiro treme quando o guardião espectral se manifesta para julgar os intrusos.',
+          'O vale inteiro treme quando o guardião espectral se manifesta para aniquilar os intrusos.',
         preview:
-          'Derrotar o espectro abre o caminho para Morthaven — castelo decadente e último bastião do jogo base.',
+          'Derrotar o espectro abre o caminho para Morthaven. O castelo decadente e último bastião para recuperar a chave para o Céu Quebrado.',
       },
     ],
   },
@@ -160,7 +160,7 @@ const SCENES_BY_MAP: Record<
         recap:
           'O castelo sombrio de Morthaven domina o horizonte; seus lordes preferem a escuridão à paz.',
         preview:
-          'Orcs, trolls menores e cultistas patrulham os primeiros pátios. A party entra pela brecha leste.',
+          'Orcs, trolls menores e cultistas patrulham os primeiros pátios. Os aventureiros entram pela brecha leste.',
       },
       {
         title: 'Salões Opressores',
@@ -172,14 +172,14 @@ const SCENES_BY_MAP: Record<
       {
         title: 'Criptas do Duque',
         recap:
-          'Rumores apontam o Duque de Morthaven como mente por trás dos ataques coordenados.',
+          'Rumores apontam o Duque de Morthaven como a mente por trás dos ataques coordenados.',
         preview:
           'Elites vampíricas e constructos de carne bloqueiam as criptas. Cada vitória revela mais do complô.',
       },
       {
         title: 'Ascensão ao Trono Menor',
         recap:
-          'O Duque recuou para a torre central; só restam os mais leais — e os mais monstruosos.',
+          'O Duque recuou para a torre central; só restam os mais leais, e os mais monstruosos.',
         preview:
           'Trolls das montanhas e magos de sangue defendem a escadaria final do castelo.',
       },
@@ -188,7 +188,7 @@ const SCENES_BY_MAP: Record<
         recap:
           'No ápice do castelo, o Duque concentra o que resta de seu domínio para esmagar os heróis.',
         preview:
-          'Este é o **finale do jogo base**. Vencer encerra a temporada e consolida tudo o que a party conquistou até aqui.',
+          'Este é o **fim**. A chave para o Céu Quebrado foi recuperada. Um novo patamar de poder e ameaças aguarda.',
       },
     ],
   },

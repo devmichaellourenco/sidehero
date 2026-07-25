@@ -1,18 +1,18 @@
 const PANEL_SHEET_TOP_VAR = '--panel-sheet-top';
 
-export function formatPanelSheetTop(boundaryTop: number): string {
-  return `${Math.max(0, Math.ceil(boundaryTop))}px`;
+export function formatPanelSheetTop(boundaryBottom: number): string {
+  return `${Math.max(0, Math.ceil(boundaryBottom))}px`;
 }
 
-/** Sincroniza o topo da área de painéis com o limite da zona de batalha visível. */
+/** Sincroniza o topo dos sheets com a base da barra Pausar/Acampamento. */
 export function syncBattleChromeLayout(boundaryEl: HTMLElement): void {
   document.documentElement.style.setProperty(
     PANEL_SHEET_TOP_VAR,
-    formatPanelSheetTop(boundaryEl.getBoundingClientRect().top),
+    formatPanelSheetTop(boundaryEl.getBoundingClientRect().bottom),
   );
 }
 
-/** Observa mudanças de layout e mantém `--panel-sheet-top` alinhado ao botão de acampamento. */
+/** Observa mudanças de layout e mantém `--panel-sheet-top` abaixo dos botões de combate. */
 export function bindBattleChromeLayout(
   boundaryEl: HTMLElement,
   layoutRoot?: HTMLElement | null,

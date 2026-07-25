@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { EnemyDto } from '../../application/dto/GameStateDto';
 import { renderBattleActorCard } from './BattleActorCardPresentation';
+import { renderEnemyBattleCard } from './EnemyBattlePresentation';
 
 describe('renderBattleActorCard', () => {
   it('renderiza card de herói com hitbox interativo e barra de vida', () => {
@@ -42,5 +44,38 @@ describe('renderBattleActorCard', () => {
     expect(html).toContain('enemy-battle-card--boss');
     expect(html).toContain('data-enemy-id="e1"');
     expect(html).toContain('health-bar enemy strip-bar');
+  });
+
+  it('aumenta somente inimigos com papel de boss', () => {
+    const enemy = {
+      id: 'e1',
+      name: 'Duque de Morthaven',
+      enemyType: 'morthaven_duke',
+      role: 'boss',
+      health: 100,
+      maxHealth: 100,
+      attack: 10,
+      defense: 10,
+      goldReward: 10,
+      xpReward: 10,
+      signatureSkills: [],
+      combatIntent: null,
+      combatSkills: [],
+      actionTimeRatio: 0,
+      actionTimeRemaining: 1,
+      actionTimeTotal: 1,
+      statusEffects: [],
+      combatResists: { fire: 0, cold: 0, lightning: 0, air: 0 },
+    } satisfies EnemyDto;
+
+    const bossHtml = renderEnemyBattleCard(enemy, 200, '<span></span>');
+    const eliteHtml = renderEnemyBattleCard(
+      { ...enemy, id: 'e2', role: 'elite' },
+      200,
+      '<span></span>',
+    );
+
+    expect(bossHtml).toContain('enemy-battle-card--boss');
+    expect(eliteHtml).not.toContain('enemy-battle-card--boss');
   });
 });

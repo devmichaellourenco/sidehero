@@ -98,7 +98,6 @@ export class BattleStripRenderer {
             const isActive = activeTurn?.side === 'enemy' && activeTurn.id === enemy.id;
             return renderEnemyBattleCard(enemy, state.difficultyTier, spriteHtml, {
               isActiveTurn: isActive,
-              isBossWave: state.phaseRun?.isBossWave ?? false,
             });
           })
           .join('')}

@@ -211,6 +211,7 @@ function mapEnemyToDto(
     id: enemy.id,
     name: enemy.name,
     enemyType: enemy.enemyType,
+    role: enemy.role,
     health: enemy.stats.currentHealth,
     maxHealth: enemy.stats.maxHealth,
     attack: enemy.stats.attack,
