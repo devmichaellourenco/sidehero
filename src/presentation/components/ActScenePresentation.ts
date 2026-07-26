@@ -6,6 +6,10 @@ const CAMPAIGN_FINALE_SCENE_ID = 'morthaven-season-epilogue';
 /** Arte dedicada full-bleed (proporção do painel 355×895). */
 const FULL_BLEED_ACT_SCENE_IDS = new Set([
   'stendra-act-1',
+  'stendra-act-2',
+  'stendra-act-3',
+  'stendra-act-4',
+  'stendra-act-5',
   'gruftall-act-1',
   'valdris-act-1',
   'morthaven-act-1',

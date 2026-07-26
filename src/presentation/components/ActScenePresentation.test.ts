@@ -26,7 +26,8 @@ describe('ActScenePresentation', () => {
   it('renderiza overlay com recap e preview', () => {
     const html = renderActSceneOverlay({
       ...scene,
-      id: 'stendra-act-2',
+      id: 'gruftall-act-2',
+      mapId: 'gruftall',
       actNumber: 2,
     });
 
@@ -44,6 +45,66 @@ describe('ActScenePresentation', () => {
 
     expect(html).toContain('act-scene-overlay-card--full-bleed');
     expect(html).toContain('scene_1.png');
+    expect(html).toContain('data-act-scene-dismiss');
+    expect(html).not.toContain('O que passou');
+  });
+
+  it('renderiza cena 2 de Stendra em overlay full-bleed', () => {
+    const html = renderActSceneOverlay({
+      ...scene,
+      id: 'stendra-act-2',
+      actNumber: 2,
+      title: 'Trilha dos Salteadores',
+      imageAssetPath: 'campaign/stendra/scene_2.png',
+    });
+
+    expect(html).toContain('act-scene-overlay-card--full-bleed');
+    expect(html).toContain('scene_2.png');
+    expect(html).toContain('data-act-scene-dismiss');
+    expect(html).not.toContain('O que passou');
+  });
+
+  it('renderiza cena 3 de Stendra em overlay full-bleed', () => {
+    const html = renderActSceneOverlay({
+      ...scene,
+      id: 'stendra-act-3',
+      actNumber: 3,
+      title: 'Ruínas da Vigília',
+      imageAssetPath: 'campaign/stendra/scene_3.png',
+    });
+
+    expect(html).toContain('act-scene-overlay-card--full-bleed');
+    expect(html).toContain('scene_3.png');
+    expect(html).toContain('data-act-scene-dismiss');
+    expect(html).not.toContain('O que passou');
+  });
+
+  it('renderiza cena 4 de Stendra em overlay full-bleed', () => {
+    const html = renderActSceneOverlay({
+      ...scene,
+      id: 'stendra-act-4',
+      actNumber: 4,
+      title: 'Sopro do Guardião',
+      imageAssetPath: 'campaign/stendra/scene_4.png',
+    });
+
+    expect(html).toContain('act-scene-overlay-card--full-bleed');
+    expect(html).toContain('scene_4.png');
+    expect(html).toContain('data-act-scene-dismiss');
+    expect(html).not.toContain('O que passou');
+  });
+
+  it('renderiza cena 5 de Stendra em overlay full-bleed', () => {
+    const html = renderActSceneOverlay({
+      ...scene,
+      id: 'stendra-act-5',
+      actNumber: 5,
+      title: 'Julgamento de Stendra',
+      imageAssetPath: 'campaign/stendra/scene_5.png',
+    });
+
+    expect(html).toContain('act-scene-overlay-card--full-bleed');
+    expect(html).toContain('scene_5.png');
     expect(html).toContain('data-act-scene-dismiss');
     expect(html).not.toContain('O que passou');
   });

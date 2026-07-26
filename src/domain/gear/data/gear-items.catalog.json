@@ -110,7 +110,7 @@
       "str": 0
     },
     "spriteId": "field_axe",
-    "sprite": "gear/items/field_axe.png"
+    "sprite": "gear/items/machado_de_campo.png"
   },
   {
     "id": "lumber_axe",
@@ -415,7 +415,7 @@
       "str": 0
     },
     "spriteId": "scorched_sword",
-    "sprite": "gear/items/scorched_sword.png"
+    "sprite": "gear/items/espada_calcinada.png"
   },
   {
     "id": "ember_blade",
@@ -646,7 +646,7 @@
       "int": 1
     },
     "spriteId": "wind_rod",
-    "sprite": "gear/items/wind_rod.png"
+    "sprite": "gear/items/vara_do_vento.png"
   },
   {
     "id": "thunder_rod",
@@ -738,7 +738,7 @@
       "str": 0
     },
     "spriteId": "venom_dagger",
-    "sprite": "gear/items/venom_dagger.png"
+    "sprite": "gear/items/adaga_envenenada.png"
   },
   {
     "id": "viper_fang",
@@ -753,7 +753,7 @@
       "str": 0
     },
     "spriteId": "viper_fang",
-    "sprite": "gear/items/viper_fang.png"
+    "sprite": "gear/items/presa_de_vibora.png"
   },
   {
     "id": "toxic_fang",
@@ -1418,7 +1418,7 @@
       "dex": 0
     },
     "spriteId": "rain_shield",
-    "sprite": "gear/items/rain_shield.png"
+    "sprite": "gear/items/escudo_da_chuva.png"
   },
   {
     "id": "gale_buckler",
@@ -2210,7 +2210,7 @@
       "int": 0
     },
     "spriteId": "copper_bracelet",
-    "sprite": "gear/items/copper_bracelet.png"
+    "sprite": "gear/items/bracelete_de_cobre.png"
   },
   {
     "id": "voltaic_bracelet",

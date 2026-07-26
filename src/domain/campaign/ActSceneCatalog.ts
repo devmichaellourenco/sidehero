@@ -251,6 +251,10 @@ export function listActScenesForMap(mapId: MapId): ActSceneDefinition[] {
 /** Arte full-bleed por cena (proporção do painel) — fallback: banner da região. */
 const ACT_SCENE_IMAGE_OVERRIDES: Partial<Record<string, string>> = {
   'stendra-act-1': 'campaign/stendra/scene_1.png',
+  'stendra-act-2': 'campaign/stendra/scene_2.png',
+  'stendra-act-3': 'campaign/stendra/scene_3.png',
+  'stendra-act-4': 'campaign/stendra/scene_4.png',
+  'stendra-act-5': 'campaign/stendra/scene_5.png',
   'gruftall-act-1': 'campaign/grutfall/scene_1.png',
   'valdris-act-1': 'campaign/valdris/scene_1.png',
   'morthaven-act-1': 'campaign/morthaven/scene_1.png',
