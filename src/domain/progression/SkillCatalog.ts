@@ -55,7 +55,7 @@ export const SKILL_CATALOG: SkillDefinition[] = [
     scope: 'class',
     heroClass: 'knight',
     branch: 'offense',
-    name: 'Investida',
+    name: 'Investida Mortal',
     description: 'Golpe pesado do cavaleiro.',
     maxRank: 3,
     requirements: [{ type: 'hero_class', heroClass: 'knight' }, { type: 'hero_level', min: 3 }],
