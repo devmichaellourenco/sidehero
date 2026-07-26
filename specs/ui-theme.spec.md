@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 7/7 (100%)  
+**Aceite:** 8/8 (100%)  
 **Testes obrigatórios:** 2/2 presentes na suite
 
 ## Objetivo
@@ -19,6 +19,7 @@ Permitir escolher o **tema de UI** do painel Side Hero entre **claro** (pergamin
 - [x] Ao mudar o tema, `document.documentElement` recebe `data-ui-theme` imediatamente
 - [x] `.battle-stage` sob tema escuro restaura tokens canônicos claros (batalha inalterada)
 - [x] Raridades (`--rarity-*`) e acentos de mapa (`--map-*` / `data-campaign-theme`) preservados no escuro (podem herdar; não forçar recolor)
+- [x] Poço de ícone (`--icon-well*`) permanece creme/ouro nos dois temas — contraste para sprites com linha escura
 - [x] Testes de tokens dark + preferência/aplicação de tema
 - [x] Superfícies chrome usam `var(--parchment-*)` / `color-mix` (sem `rgba` de pergaminho fixo)
 - [x] Rótulos em painéis sempre-escuros usam `--on-dark-panel-*` / `--forest-cta-label` (não invertem)

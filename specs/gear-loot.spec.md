@@ -20,7 +20,7 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 - [x] Otimizar equipe sugere upgrades por herói (`LoadoutOptimizer`)
 - [x] Comparação visual no picker/modal (setas ▲)
 - [x] Inventário (global e embedded): filtro por categoria exclusivamente pelos ícones do loadout; toolbar de ordenação única; sem painel inline duplicado para escolha por slot
-- [x] Bordas de raridade consistentes em inventário, loadout, loja, forja, loot e tooltips: common cinza, uncommon verde, rare azul, epic lilás, legendary dourado, mythic dourado com brilho
+- [x] Bordas de raridade consistentes em inventário, loadout, loja, forja, loot e tooltips: common cinza, uncommon verde, rare azul, epic lilás, legendary dourado, mythic vermelho com brilho
 
 ## Camadas e arquivos-chave
 

@@ -14,6 +14,9 @@ describe('MedievalThemeTokens', () => {
     expect(MEDIEVAL_THEME.parchment0).toBe('#fff9ed');
     expect(MEDIEVAL_THEME.parchment1).toBe('#f3e4bc');
     expect(MEDIEVAL_THEME.parchment2).toBe('#e8d4a0');
+    expect(MEDIEVAL_THEME.iconWell).toBe('#e8d4a0');
+    expect(MEDIEVAL_THEME.iconWellDeep).toBe('#c9a050');
+    expect(MEDIEVAL_THEME.iconWellBorder).toBe('#c9a227');
     expect(MEDIEVAL_THEME.ink).toBe('#1f1710');
     expect(MEDIEVAL_THEME.inkMuted).toBe('#3d3428');
     expect(MEDIEVAL_THEME.forest).toBe('#2f6b38');
@@ -82,6 +85,13 @@ describe('MedievalThemeTokens', () => {
     expect(parseUiThemeId('nope')).toBe('dark');
     expect(parseUiThemeId(null)).toBe('dark');
     expect(parseUiThemeId('light')).toBe('light');
+  });
+
+  it('poço de ícone permanece claro no tema escuro (contraste de sprites)', () => {
+    expect(MEDIEVAL_THEME_DARK.iconWell).toBe(MEDIEVAL_THEME.iconWell);
+    expect(MEDIEVAL_THEME_DARK.iconWellDeep).toBe(MEDIEVAL_THEME.iconWellDeep);
+    expect(MEDIEVAL_THEME_DARK.iconWellBorder).toBe(MEDIEVAL_THEME.iconWellBorder);
+    expect(MEDIEVAL_THEME_DARK.iconWell).not.toBe(MEDIEVAL_THEME_DARK.parchment0);
   });
 
   it('mantém tokens de batalha iguais entre light e dark (isolamento v1)', () => {

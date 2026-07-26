@@ -16,6 +16,10 @@ export const MEDIEVAL_THEME = {
   parchment0: '#fff9ed',
   parchment1: '#f3e4bc',
   parchment2: '#e8d4a0',
+  /** Poço atrás de sprites: dourado → creme (não branco prateado). */
+  iconWell: '#e8d4a0',
+  iconWellDeep: '#c9a050',
+  iconWellBorder: '#c9a227',
   ink: '#1f1710',
   inkMuted: '#3d3428',
   forest: '#2f6b38',
@@ -131,6 +135,10 @@ export const MEDIEVAL_THEME_DARK: { readonly [K in keyof typeof MEDIEVAL_THEME]:
   parchment0: '#2a2118',
   parchment1: '#1f1710',
   parchment2: '#16110c',
+  /* Poço de ícone: dourado → creme (contraste sem fundo branco) */
+  iconWell: '#e8d4a0',
+  iconWellDeep: '#c9a050',
+  iconWellBorder: '#c9a227',
   ink: '#fff9ed',
   inkMuted: '#d4c4a0',
   forest: '#4a9e58',

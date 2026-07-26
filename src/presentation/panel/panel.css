@@ -21,6 +21,9 @@
   --parchment-0: #fff9ed;
   --parchment-1: #f3e4bc;
   --parchment-2: #e8d4a0;
+  --icon-well: #e8d4a0;
+  --icon-well-deep: #c9a050;
+  --icon-well-border: #c9a227;
   --ink: #1f1710;
   --ink-muted: #3d3428;
   --forest: #2f6b38;
@@ -291,8 +294,8 @@
   --rarity-rare: #42a5f5;
   --rarity-epic: #c9a0dc;
   --rarity-legendary: #f5c542;
-  --rarity-mythic: #f5c542;
-  --rarity-mythic-glow: rgba(201, 162, 39, 0.55);
+  --rarity-mythic: #e53935;
+  --rarity-mythic-glow: rgba(229, 57, 53, 0.55);
   --common: var(--rarity-common);
   --rare: var(--rarity-rare);
   --epic: var(--rarity-epic);
@@ -316,6 +319,9 @@ html[data-ui-theme='dark'] {
   --parchment-0: #2a2118;
   --parchment-1: #1f1710;
   --parchment-2: #16110c;
+  --icon-well: #e8d4a0;
+  --icon-well-deep: #c9a050;
+  --icon-well-border: #c9a227;
   --ink: #fff9ed;
   --ink-muted: #d4c4a0;
   --forest: #4a9e58;
@@ -509,8 +515,8 @@ html[data-ui-theme='dark'] {
   --rarity-rare: #42a5f5;
   --rarity-epic: #c9a0dc;
   --rarity-legendary: #f5c542;
-  --rarity-mythic: #f5c542;
-  --rarity-mythic-glow: rgba(224, 192, 80, 0.45);
+  --rarity-mythic: #e53935;
+  --rarity-mythic-glow: rgba(255, 100, 90, 0.45);
   --common: var(--rarity-common);
   --rare: var(--rarity-rare);
   --epic: var(--rarity-epic);
@@ -535,6 +541,9 @@ html[data-ui-theme='dark'] .battle-stage {
   --parchment-0: #fff9ed;
   --parchment-1: #f3e4bc;
   --parchment-2: #e8d4a0;
+  --icon-well: #e8d4a0;
+  --icon-well-deep: #c9a050;
+  --icon-well-border: #c9a227;
   --ink: #1f1710;
   --ink-muted: #3d3428;
   --forest: #2f6b38;
@@ -720,8 +729,8 @@ html[data-ui-theme='dark'] .battle-stage {
   --rarity-rare: #42a5f5;
   --rarity-epic: #c9a0dc;
   --rarity-legendary: #f5c542;
-  --rarity-mythic: #f5c542;
-  --rarity-mythic-glow: rgba(201, 162, 39, 0.55);
+  --rarity-mythic: #e53935;
+  --rarity-mythic-glow: rgba(229, 57, 53, 0.55);
   --common: var(--rarity-common);
   --rare: var(--rarity-rare);
   --epic: var(--rarity-epic);
@@ -3047,6 +3056,9 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   height: var(--strip-skill-wrap);
   overflow: hidden;
   border-radius: 4px;
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
+  border: 1px solid color-mix(in srgb, var(--icon-well-border) 40%, transparent);
 }
 
 .combat-skill-icon-wrap .element-pip--skill {
@@ -3374,7 +3386,8 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   padding: 1px;
   border: var(--slot-frame-size) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
   border-image: none;
-  background-color: color-mix(in srgb, var(--parchment-0) 92%, transparent);
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
   background-clip: padding-box;
   border-radius: 0;
 }
@@ -3407,6 +3420,11 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   justify-content: center;
   width: 22px;
   height: 22px;
+  border-radius: 4px;
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
+  border: 1px solid color-mix(in srgb, var(--icon-well-border) 45%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mix-light) 40%, transparent);
 }
 
 .hero-skill-cooldown {
@@ -3940,7 +3958,8 @@ button.hero-skill-chip:hover {
   gap: 0;
   padding: 6px 4px;
   border: var(--slot-frame-size) solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
-  background-color: color-mix(in srgb, var(--parchment-0) 92%, transparent);
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
   background-clip: padding-box;
   color: var(--text);
   font: inherit;
@@ -3983,6 +4002,7 @@ button.hero-skill-chip:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 6px;
 }
 
 .equipment-slot-icon {
@@ -4684,31 +4704,32 @@ button.hero-skill-chip:hover {
 .loadout-slot.mythic,
 .gear-item.mythic {
   background-image: radial-gradient(
-    circle at 50% 35%,
-    var(--rarity-mythic-glow),
-    transparent 68%
-  );
-  background-color: color-mix(in srgb, var(--parchment-0) 96%, transparent);
+      circle at 50% 35%,
+      var(--rarity-mythic-glow),
+      transparent 68%
+    ),
+    linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
+  background-color: var(--icon-well);
   background-clip: padding-box;
   box-shadow:
     0 0 14px color-mix(in srgb, var(--rarity-mythic-glow) 80%, transparent),
-    inset 0 0 12px rgba(245, 197, 66, 0.22);
+    inset 0 0 12px color-mix(in srgb, var(--rarity-mythic) 22%, transparent);
 }
 
 .shop-offer-tile .shop-offer-icon-wrap {
-  background-image: none;
   border: 2px solid var(--gear-rarity-color, var(--panel-border-soft));
   border-radius: 8px;
-  background-color: var(--parchment-0);
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
   box-sizing: border-box;
 }
 
 .destroy-confirm-gear-icon-wrap,
 .forge-confirm-gear-icon-wrap {
-  background-image: none;
   border: 2px solid var(--gear-rarity-color, rgba(255, 255, 255, 0.14));
   border-radius: 8px;
-  background-color: rgba(12, 20, 38, 0.92);
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
   box-sizing: border-box;
 }
 
@@ -4722,7 +4743,7 @@ button.hero-skill-chip:hover {
   );
   box-shadow:
     0 0 12px color-mix(in srgb, var(--rarity-mythic-glow) 75%, transparent),
-    inset 0 0 10px rgba(245, 197, 66, 0.25);
+    inset 0 0 10px color-mix(in srgb, var(--rarity-mythic) 25%, transparent);
 }
 
 .shop-offer-tile {
@@ -4777,19 +4798,22 @@ button.hero-skill-chip:hover {
   aspect-ratio: 1;
   padding: 0;
   border: var(--grid-frame) solid var(--gear-rarity-color, rgba(61, 52, 40, 0.22));
-  background: var(--parchment-0);
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
   background-clip: padding-box;
   cursor: pointer;
   overflow: visible;
   box-sizing: border-box;
   color: inherit;
   font: inherit;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mix-light) 40%, transparent);
 }
 
 .inventory-grid-slot.empty {
-  background: color-mix(in srgb, var(--parchment-1) 70%, var(--mix-light));
+  background-color: color-mix(in srgb, var(--parchment-1) 70%, var(--mix-light));
+  background-image: none;
   border-color: rgba(61, 52, 40, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 
 .inventory-grid-slot:focus-visible {
@@ -4817,10 +4841,12 @@ button.hero-skill-chip:hover {
 
 .inventory-grid-slot-icon-wrap {
   position: absolute;
-  inset: 6px;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .inventory-grid-slot-icon {
@@ -5085,6 +5111,14 @@ button.hero-skill-chip:hover {
   width: 34px;
   height: 34px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
+  border: 1px solid color-mix(in srgb, var(--icon-well-border) 45%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mix-light) 40%, transparent);
 }
 
 .gear-slot-icon {
@@ -8696,6 +8730,13 @@ body.modal-open {
   height: 32px;
   object-fit: contain;
   flex: 0 0 auto;
+  padding: 3px;
+  border-radius: 6px;
+  box-sizing: content-box;
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
+  border: 1px solid color-mix(in srgb, var(--icon-well-border) 45%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mix-light) 40%, transparent);
 }
 
 .hero-status-skill-name,
@@ -9572,7 +9613,8 @@ body.skill-drag-active * {
   --slot-frame-size: 4px;
   border: var(--slot-frame-size) solid transparent;
   border-image: var(--slot-frame) 20 / var(--slot-frame-size) / 0 stretch;
-  background-color: color-mix(in srgb, var(--parchment-0) 92%, transparent);
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
   background-clip: padding-box;
   border-radius: 0;
   line-height: 0;
@@ -12388,7 +12430,10 @@ body.wow-celebration-open {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
+  background-color: var(--icon-well);
+  background-image: linear-gradient(165deg, var(--icon-well-deep) 0%, var(--icon-well) 100%);
+  border: 1px solid color-mix(in srgb, var(--icon-well-border) 50%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mix-light) 40%, transparent);
 }
 
 .wow-banner--center .wow-banner-gear-frame {
@@ -12561,7 +12606,7 @@ body.wow-celebration-open {
 }
 
 .wow-banner--loot-mythic .wow-banner-glow {
-  background: radial-gradient(circle at 20% 30%, rgba(245, 197, 66, 0.42), transparent 62%);
+  background: radial-gradient(circle at 20% 30%, var(--rarity-mythic-glow), transparent 62%);
 }
 
 .wow-banner--loot-epic .wow-banner-title {
@@ -12573,8 +12618,8 @@ body.wow-celebration-open {
 }
 
 .wow-banner--loot-mythic .wow-banner-title {
-  color: var(--wave-marker-boss-label);
-  text-shadow: 0 0 14px rgba(245, 197, 66, 0.55);
+  color: var(--rarity-mythic);
+  text-shadow: 0 0 14px var(--rarity-mythic-glow);
 }
 
 .wow-banner--milestone-victory.wow-banner--center {

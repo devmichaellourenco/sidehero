@@ -32,6 +32,9 @@ Referência canônica: card `.onboarding-card`.
 | `--parchment-0` | `#fff9ed` | Superfície principal / cards |
 | `--parchment-1` | `#f3e4bc` | Fundo do app / meio do gradiente |
 | `--parchment-2` | `#e8d4a0` | Base / sombra do pergaminho |
+| `--icon-well` | `#e8d4a0` | Poço de item/skill — extremo creme do gradiente |
+| `--icon-well-deep` | `#c9a050` | Poço — extremo dourado (gradiente dourado → creme) |
+| `--icon-well-border` | `#c9a227` | Filete dourado discreto do poço |
 | `--ink` / `--text` | `#1f1710` | Texto principal no chrome |
 | `--ink-muted` / `--muted` | `#3d3428` | Texto secundário |
 | `--seal-gold` | `#c9a227` | Bordas |
