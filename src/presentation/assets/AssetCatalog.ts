@@ -86,6 +86,7 @@ export const ASSETS = {
     inventory: 'ui/inventory.png',
     forge: 'ui/forge.png',
     improvement: 'ui/improvement.png',
+    xp: 'ui/xp.png',
     stage: 'ui/stage.png',
     /** Stage Progress — wave comum (reusa battle/swords). */
     stageSwords: 'ui/attack.png',

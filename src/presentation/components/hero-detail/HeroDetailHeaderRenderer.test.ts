@@ -49,6 +49,8 @@ describe('renderHeroDetailHeader', () => {
 
     expect(html).not.toContain('health-bar');
     expect(html).toContain('xp-bar');
+    expect(html).toContain('data-bar-icon=');
+    expect(html).toContain('ui/xp.png');
     expect(html).toContain('hero-improvement-stat');
     expect(html).toContain('aria-label="Aprimoramento: 3"');
     expect(html).toContain('data-hero-improvement-tooltip');

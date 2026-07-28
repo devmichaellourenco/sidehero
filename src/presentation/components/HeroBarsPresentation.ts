@@ -1,4 +1,5 @@
 import { HeroDto } from '../../application/dto/GameStateDto';
+import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
 import { clampHealthPercent, renderStripHealthBar } from './BattleActorHealthPresentation';
 
 export function formatHealthLabel(hero: Pick<HeroDto, 'health' | 'maxHealth'>): string {
@@ -28,6 +29,7 @@ export function renderHeroBars(
   const compactClass = options.compact ? ' hero-bars-compact' : '';
   const healthLabel = formatHealthLabel(hero);
   const xpLabel = formatExperienceLabel(hero);
+  const xpIconUrl = getAssetUrl(ASSETS.ui.xp) || ASSETS.ui.xp;
   const healthBar =
     options.showHealth === false
       ? ''
@@ -48,6 +50,7 @@ export function renderHeroBars(
       <div
         class="stat-bar xp-bar card-bar"
         data-bar-label="${xpLabel}"
+        data-bar-icon="${xpIconUrl}"
         tabindex="0"
         aria-label="Experiência ${xpLabel}"
       >

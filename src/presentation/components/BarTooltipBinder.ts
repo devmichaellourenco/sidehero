@@ -1,5 +1,13 @@
 const PORTAL_ID = 'bar-tooltip-portal';
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function ensurePortal(): HTMLElement {
   let portal = document.getElementById(PORTAL_ID);
   if (portal) return portal;
@@ -38,7 +46,7 @@ function hidePortal(): void {
   if (!portal) return;
   portal.classList.add('hidden');
   portal.style.visibility = '';
-  portal.textContent = '';
+  portal.replaceChildren();
 }
 
 function showPortal(bar: HTMLElement): void {
@@ -47,7 +55,14 @@ function showPortal(bar: HTMLElement): void {
 
   const portal = ensurePortal();
   portal.className = 'bar-tooltip-portal';
-  portal.textContent = label;
+
+  const iconUrl = bar.getAttribute('data-bar-icon');
+  if (iconUrl) {
+    portal.innerHTML = `<img class="bar-tooltip-icon" src="${escapeHtml(iconUrl)}" alt="" aria-hidden="true" /><span class="bar-tooltip-text">${escapeHtml(label)}</span>`;
+  } else {
+    portal.textContent = label;
+  }
+
   positionPortal(portal, bar.getBoundingClientRect());
 }
 
