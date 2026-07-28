@@ -24,10 +24,10 @@ export class BattleStatsPanelController {
     private readonly toggleBtn: HTMLButtonElement,
     closeBtn: HTMLButtonElement,
     private readonly bodyEl: HTMLElement,
+    private readonly pinBtn: HTMLButtonElement | null = null,
   ) {
     this.visible = this.readVisiblePreference();
     this.activeTab = this.readTabPreference();
-    toggleBtn.addEventListener('click', () => this.toggle());
     closeBtn.addEventListener('click', () => this.hide());
 
     overlay.querySelectorAll('[data-battle-stats-close]').forEach((element) => {
@@ -46,6 +46,13 @@ export class BattleStatsPanelController {
     });
 
     this.applyVisibility();
+  }
+
+  onPinClick(handler: () => void): void {
+    this.pinBtn?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      handler();
+    });
   }
 
   private readVisiblePreference(): boolean {

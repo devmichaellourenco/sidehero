@@ -162,7 +162,7 @@
             <span class="action-icon-glyph" aria-hidden="true">📜</span>
             <span class="action-icon-label">Log</span>
           </button>
-          <button id="open-battle-stats-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--stats hidden" type="button" title="Estatísticas de batalha" aria-label="Estatísticas de batalha" aria-expanded="false">
+          <button id="open-battle-stats-btn" class="action-icon-btn action-icon-btn--menu action-icon-btn--stats hidden" type="button" title="Estatísticas de batalha (janela destacável)" aria-label="Estatísticas de batalha" aria-expanded="false">
             <span class="action-icon-glyph" aria-hidden="true">📊</span>
             <span class="action-icon-label">Stats</span>
           </button>
@@ -248,7 +248,17 @@
             <div class="systems-menu-icons" data-systems-menu-icons></div>
             <button type="button" class="sheet-dismiss-btn" id="battle-stats-close" data-nav-arrow="down" aria-label="Fechar estatísticas"></button>
           </div>
-          <h2>Estatísticas</h2>
+          <div class="sheet-title-row">
+            <h2>Estatísticas</h2>
+            <button
+              type="button"
+              id="battle-stats-pin"
+              class="stats-pin-btn"
+              aria-pressed="true"
+              title="Desafixar"
+              aria-label="Desafixar estatísticas para janela"
+            ><img class="stats-pin-btn__icon" src="assets/ui/unpin.png" alt="" aria-hidden="true" /></button>
+          </div>
         </div>
         <div id="battle-stats-body" class="battle-stats-body game-scroll"></div>
       </section>

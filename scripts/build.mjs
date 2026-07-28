@@ -13,6 +13,7 @@ const watch = process.argv.includes('--watch');
 const moduleEntryPoints = {
   'background/service-worker': join(root, 'src/infrastructure/entry/service-worker.ts'),
   'panel/panel': join(root, 'src/presentation/panel/panel.ts'),
+  'panel/stats': join(root, 'src/presentation/panel/stats.ts'),
 };
 
 async function copyStaticAssets() {
@@ -21,6 +22,7 @@ async function copyStaticAssets() {
 
   await copyFile(join(root, 'manifest.json'), join(dist, 'manifest.json'));
   await copyFile(join(root, 'src/presentation/panel/panel.html'), join(dist, 'panel/panel.html'));
+  await copyFile(join(root, 'src/presentation/panel/stats.html'), join(dist, 'panel/stats.html'));
   await copyFile(join(root, 'src/presentation/panel/panel.css'), join(dist, 'panel/panel.css'));
   await copyFile(join(root, 'src/presentation/icons/icon-16.png'), join(dist, 'icons/icon-16.png'));
   await copyFile(join(root, 'src/presentation/icons/icon-48.png'), join(dist, 'icons/icon-48.png'));

@@ -56,7 +56,9 @@ export type GameMessage =
   | { type: 'ADD_TO_PARTY'; heroId: string }
   | { type: 'REMOVE_FROM_PARTY'; heroId: string }
   | { type: 'MOVE_PARTY_MEMBER'; fromIndex: number; toIndex: number }
-  | { type: 'SET_PARTY_SLOT'; slotIndex: number; heroId: string };
+  | { type: 'SET_PARTY_SLOT'; slotIndex: number; heroId: string }
+  | { type: 'OPEN_BATTLE_STATS_WINDOW' }
+  | { type: 'CLOSE_BATTLE_STATS_WINDOW' };
 
 export type GameResponse =
   | {

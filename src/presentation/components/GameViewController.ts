@@ -25,6 +25,12 @@ import { MetaLegacyFlow } from '../flows/MetaLegacyFlow';
 import { AchievementsFlow } from '../flows/AchievementsFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation, listNavigableHeroIds } from '../helpers/HeroNavigationHelper';
+import {
+  BATTLE_STATS_DOCK_REQUEST_KEY,
+  readBattleStatsPinned,
+  requestDockBattleStatsToSidePanel,
+  writeBattleStatsPinned,
+} from '../helpers/BattleStatsPinPreference';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
 import { buildPersistentWowBanners } from '../wow/WowBannerBuilder';
 import { DonationPromptController } from '../support/DonationPromptController';
@@ -371,7 +377,12 @@ export class GameViewController {
       this.openBattleStatsBtn,
       root.querySelector('#battle-stats-close') as HTMLButtonElement,
       root.querySelector('#battle-stats-body') as HTMLElement,
+      root.querySelector('#battle-stats-pin') as HTMLButtonElement | null,
     );
+    this.battleStatsPanel.onPinClick(() => {
+      void this.unpinBattleStatsToWindow();
+    });
+    this.bindBattleStatsDockListener();
 
     this.heroDetailFlow = new HeroDetailFlow(
       this.client,
@@ -634,8 +645,7 @@ export class GameViewController {
       this.syncSystemsNavChrome();
     });
     this.openBattleStatsBtn.addEventListener('click', () => {
-      this.trackedSystemsMenuId = 'stats';
-      this.syncSystemsNavChrome();
+      void this.openBattleStats();
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -1978,6 +1988,77 @@ export class GameViewController {
     });
   }
 
+  private bindBattleStatsDockListener(): void {
+    try {
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local') return;
+        if (!changes[BATTLE_STATS_DOCK_REQUEST_KEY]) return;
+        if (!this.state?.featureFlags.battleStats) return;
+        void this.dockBattleStatsInSidePanel();
+      });
+    } catch {
+      // chrome.storage indisponível
+    }
+  }
+
+  private async openBattleStats(): Promise<void> {
+    if (!this.state?.featureFlags.battleStats) return;
+
+    const pinned = await readBattleStatsPinned();
+    if (pinned) {
+      if (this.battleStatsPanel.isVisible()) {
+        this.battleStatsPanel.hide();
+        this.syncSystemsNavChrome();
+        return;
+      }
+      await this.dockBattleStatsInSidePanel();
+      return;
+    }
+
+    this.battleStatsPanel.hide();
+    this.trackedSystemsMenuId = null;
+    this.syncSystemsNavChrome();
+    const response = await this.client.send({ type: 'OPEN_BATTLE_STATS_WINDOW' });
+    if (!response.ok) {
+      this.toasts.show(response.error, 'info');
+    }
+  }
+
+  private async dockBattleStatsInSidePanel(): Promise<void> {
+    if (!this.state?.featureFlags.battleStats) return;
+
+    await writeBattleStatsPinned(true);
+    await this.client.send({ type: 'CLOSE_BATTLE_STATS_WINDOW' });
+
+    this.closeHeroDrawer();
+    if (this.modal.isOpen()) {
+      this.modalStack.length = 0;
+      this.campaignModalOpen = false;
+      this.modal.close('action');
+    }
+    this.battleLogPanel.hide();
+    this.trackedSystemsMenuId = 'stats';
+    this.battleStatsPanel.setContent(
+      renderBattleStatsBody(this.state, this.battleStatsPanel.getActiveTab()),
+    );
+    this.battleStatsPanel.show();
+    this.syncSystemsNavChrome();
+  }
+
+  private async unpinBattleStatsToWindow(): Promise<void> {
+    if (!this.state?.featureFlags.battleStats) return;
+    await writeBattleStatsPinned(false);
+    this.battleStatsPanel.hide();
+    this.trackedSystemsMenuId = null;
+    this.syncSystemsNavChrome();
+    const response = await this.client.send({ type: 'OPEN_BATTLE_STATS_WINDOW' });
+    if (!response.ok) {
+      this.toasts.show(response.error, 'info');
+      await requestDockBattleStatsToSidePanel();
+      await this.dockBattleStatsInSidePanel();
+    }
+  }
+
   private async openSystemsMenu(id: SystemsMenuId): Promise<void> {
     switch (id) {
       case 'heroes':
@@ -2006,9 +2087,7 @@ export class GameViewController {
           this.modal.close('action');
         }
         this.battleLogPanel.hide();
-        this.trackedSystemsMenuId = 'stats';
-        this.battleStatsPanel.show();
-        this.syncSystemsNavChrome();
+        await this.openBattleStats();
         return;
       case 'campaign':
         await this.openCampaignModal();
@@ -2156,11 +2235,11 @@ export class GameViewController {
 
     this.battleLogRenderer.render(this.battleLog, logMessages);
 
-    if (mergedState.featureFlags.battleStats) {
+    if (mergedState.featureFlags.battleStats && this.battleStatsPanel.isVisible()) {
       this.battleStatsPanel.setContent(
         renderBattleStatsBody(mergedState, this.battleStatsPanel.getActiveTab()),
       );
-    } else {
+    } else if (!mergedState.featureFlags.battleStats) {
       this.battleStatsPanel.hide();
     }
 

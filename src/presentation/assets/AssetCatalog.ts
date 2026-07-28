@@ -95,6 +95,8 @@ export const ASSETS = {
     rune: 'ui/rune.png',
     achievement: 'ui/achievement.png',
     bookmark: 'ui/bookmark.png',
+    pin: 'ui/pin.png',
+    unpin: 'ui/unpin.png',
     clear: 'ui/clear.png',
     bookOpen: 'ui/book-open.png',
     arrowPrev: 'ui/arrow-prev.png',

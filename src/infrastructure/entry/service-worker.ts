@@ -7,6 +7,11 @@ import {
   registerSidePanelLifecycle,
 } from '../background/SidePanelLifecycle';
 import {
+  closeBattleStatsWindow,
+  openOrFocusBattleStatsWindow,
+  registerBattleStatsWindowLifecycle,
+} from '../background/BattleStatsWindowOpener';
+import {
   syncBackgroundTickAlarm,
   TICK_ALARM,
 } from '../background/BackgroundTickScheduler';
@@ -22,6 +27,7 @@ async function syncTickAlarmFromState(): Promise<void> {
 
 void configureSidePanelBehavior();
 registerSidePanelLifecycle();
+registerBattleStatsWindowLifecycle();
 
 chrome.runtime.onInstalled.addListener(async () => {
   await syncTickAlarmFromState();
@@ -324,6 +330,16 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
     }
     case 'SET_PARTY_SLOT': {
       const state = await app.setPartySlot.execute(message.slotIndex, message.heroId);
+      return { ok: true, state };
+    }
+    case 'OPEN_BATTLE_STATS_WINDOW': {
+      await openOrFocusBattleStatsWindow();
+      const state = await app.getState.execute();
+      return { ok: true, state };
+    }
+    case 'CLOSE_BATTLE_STATS_WINDOW': {
+      await closeBattleStatsWindow();
+      const state = await app.getState.execute();
       return { ok: true, state };
     }
     default:

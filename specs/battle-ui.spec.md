@@ -18,7 +18,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Baú flutuante na batalha quando pendente
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
-- [x] Menu **Stats** (runa): painel flutuante como o Log, atualiza em tempo real (e na pausa); abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos (ranking com barras por herói)
+- [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
@@ -34,6 +34,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 | Presentation | `panel/panel.html`, `panel.css`, `GameViewController`, `GameHudController` |
 | Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy`, `DonationCardPresentation` |
 | Presentation | `ModalStackController`, `SystemsMenuNavigation`, `BattleChestAffordanceController` |
+| Infra | `BattleStatsWindowOpener`, `BattleStatsWindowManager`, `panel/stats.html` |
 
 ## Invariantes
 
@@ -54,6 +55,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
 - [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`; Pausar/Continuar/Detalhes na pausa de batalha
 - [x] `BattleStatsPresentation.test.ts` — painel de estatísticas da batalha pausada
+- [x] `BattleStatsWindowManager.test.ts` — reuso de janela popup de Stats
+- [x] `stats.html.test.ts` — shell da janela destacável
 - [x] `SystemsMenuNavigation.test.ts` — disponibilidade por camp/unlock + wrap prev/next
 
 ## Relacionado

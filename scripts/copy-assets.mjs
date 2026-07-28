@@ -112,6 +112,8 @@ const PUBLIC_ASSET_MAP = [
   ['bg_top_principal.png', 'backgrounds/top-principal.png'],
   ['sprites/icons/attack-speed.png', 'ui/stats/attack-speed.png'],
   ['sprites/icons/cast-speed.png', 'ui/stats/cast-speed.png'],
+  ['sprites/icons/pin.png', 'ui/pin.png'],
+  ['sprites/icons/unpin.png', 'ui/unpin.png'],
 ];
 
 const ASSET_MAP = [

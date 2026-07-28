@@ -1910,6 +1910,104 @@ h2 {
   max-height: min(70vh, 520px);
 }
 
+/* Janela popup destacável de Estatísticas */
+body.stats-window {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--parchment-0);
+  color: var(--ink);
+}
+
+.stats-window-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-height: 100vh;
+}
+
+.stats-window-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background: color-mix(in srgb, var(--parchment-1) 92%, transparent);
+  flex-shrink: 0;
+}
+
+.stats-window-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Título do sheet + pin (reutilizável em vários modais) */
+.sheet-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sheet-title-row > h1,
+.sheet-title-row > h2,
+.sheet-title-row .stats-window-title {
+  margin: 0;
+  min-width: 0;
+}
+
+.battle-log-header .sheet-title-row h2 {
+  flex: 0 1 auto;
+  text-align: left;
+}
+
+.stats-pin-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.stats-pin-btn:hover {
+  background: color-mix(in srgb, var(--seal-gold) 22%, transparent);
+}
+
+.stats-pin-btn__icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: var(--stat-icon-filter, none);
+  pointer-events: none;
+}
+
+.stats-pin-btn[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--seal-gold) 28%, transparent);
+}
+
+.stats-window-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.stats-window-body {
+  flex: 1;
+  min-height: 0;
+  padding: 10px 12px 16px;
+}
+
 .battle-stats-lead,
 .battle-stats-note,
 .battle-stats-empty {
