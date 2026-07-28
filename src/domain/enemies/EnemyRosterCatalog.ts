@@ -15,6 +15,8 @@ export interface EnemyRosterEntry {
   skillIds: readonly string[];
   /** Resistências inatas explícitas (somadas ao tema inferido por id). */
   innateResists?: PartialResistanceProfile;
+  /** Passivas sempre ativas (fase D — opcional). */
+  passiveIds?: readonly import('../passives/PassiveTypes').PassiveId[];
 }
 
 const T1: EnemyPowerTier = 1;

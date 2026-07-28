@@ -199,8 +199,45 @@ export function renderStatusEquipmentEffectsSection(hero: HeroDto): string {
   `;
 }
 
+export function renderStatusPassivesSection(hero: HeroDto): string {
+  const passives = hero.activePassives ?? [];
+
+  if (passives.length === 0) {
+    return `
+      <section class="hero-status-section" aria-label="Passivas">
+        <h3 class="hero-stat-section-title">Passivas</h3>
+        <p class="hero-status-empty">Nenhuma passiva ativa.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="hero-status-section" aria-label="Passivas">
+      <h3 class="hero-stat-section-title">Passivas</h3>
+      <p class="hero-status-section-intro">Traços sempre ativos da classe, ascensão e itens.</p>
+      <ul class="hero-status-passive-list">
+        ${passives
+          .map(
+            (passive) => `
+          <li class="hero-status-passive-card" data-passive-id="${escapeHtml(passive.id)}">
+            <div class="hero-status-passive-heading">
+              <strong class="hero-status-passive-name">${escapeHtml(passive.name)}</strong>
+              <span class="hero-status-passive-source">${escapeHtml(passive.sourceLabel)}</span>
+            </div>
+            <p class="hero-status-passive-summary">${escapeHtml(passive.effectiveSummary)}</p>
+            <p class="hero-status-passive-desc">${escapeHtml(passive.description)}</p>
+          </li>
+        `,
+          )
+          .join('')}
+      </ul>
+    </section>
+  `;
+}
+
 export function renderHeroStatusExtras(hero: HeroDto): string {
   return `
+    ${renderStatusPassivesSection(hero)}
     ${renderStatusBattleSkillsSection(hero)}
     ${renderStatusEquipmentEffectsSection(hero)}
   `;

@@ -12,6 +12,7 @@ import { HeroCombatStatSectionDto } from '../dto/HeroCombatStatSheetDto';
 import { mapCombatResistSummary } from './CombatResistMapper';
 import { mapGearToDto } from './GearDtoMapper';
 import { mapHeroActiveSkills } from './HeroActiveSkillMapper';
+import { mapHeroActivePassives } from './ActivePassiveMapper';
 import { mapHeroCombatStatSheet } from './HeroCombatStatSheetMapper';
 
 const combatProfiles = new CombatProfileProvider();
@@ -59,6 +60,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     unlockedActiveSkillSlots: getUnlockedBattleSkillSlotCount(upgradeLevels),
     ascensionId: props.ascensionId,
     hasUnspentPoints: hero.hasUnspentPoints,
+    activePassives: mapHeroActivePassives(hero),
     equipment,
     combatIntent: null,
     combatSkills: [],

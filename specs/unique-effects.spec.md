@@ -125,3 +125,4 @@ Itens e skills podem ter **um efeito único** com comportamento de combate **rea
 - [`gear-loot.spec.md`](gear-loot.spec.md) — templates e loot
 - [`stash-forge.spec.md`](stash-forge.spec.md) — Forja Divina
 - [`combat-campaign.spec.md`](combat-campaign.spec.md) — executor e status
+- [`passives.spec.md`](passives.spec.md) — passivas cumulativas (scaling contínuo; não usar unique-effect para % por atributo)

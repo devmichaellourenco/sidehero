@@ -50,6 +50,15 @@ export interface CombatResistSummaryDto {
   air: number;
 }
 
+export interface ActivePassiveDto {
+  id: string;
+  name: string;
+  description: string;
+  sourceLabel: string;
+  /** Valor efetivo atual (ex.: "+24% vida (2%×DEF 12)"). */
+  effectiveSummary: string;
+}
+
 export interface HeroDto {
   id: string;
   name: string;
@@ -78,6 +87,8 @@ export interface HeroDto {
   unlockedActiveSkillSlots: number;
   ascensionId: string | null;
   hasUnspentPoints: boolean;
+  /** Passivas sempre ativas (classe, ascensão, gear). */
+  activePassives: ActivePassiveDto[];
   equipment: Record<
     string,
     {

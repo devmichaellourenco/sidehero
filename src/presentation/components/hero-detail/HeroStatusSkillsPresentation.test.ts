@@ -4,6 +4,7 @@ import {
   renderHeroStatusExtras,
   renderStatusBattleSkillsSection,
   renderStatusEquipmentEffectsSection,
+  renderStatusPassivesSection,
 } from './HeroStatusSkillsPresentation';
 
 function minimalHero(overrides: Partial<HeroDto> = {}): HeroDto {
@@ -171,7 +172,29 @@ describe('HeroStatusSkillsPresentation', () => {
 
   it('combina seções extras', () => {
     const html = renderHeroStatusExtras(minimalHero());
+    expect(html).toContain('Passivas');
     expect(html).toContain('Skills de batalha');
     expect(html).toContain('Equipamento e passivas');
+  });
+
+  it('lista passivas ativas com valor efetivo', () => {
+    const html = renderStatusPassivesSection(
+      minimalHero({
+        activePassives: [
+          {
+            id: 'titan_health',
+            name: 'Saúde de Titã',
+            description: '+2% vida por DEF',
+            sourceLabel: 'Classe',
+            effectiveSummary: '+16% vida (2%×DEF 8)',
+          },
+        ],
+      }),
+    );
+
+    expect(html).toContain('data-passive-id="titan_health"');
+    expect(html).toContain('Saúde de Titã');
+    expect(html).toContain('+16% vida');
+    expect(html).toContain('Classe');
   });
 });

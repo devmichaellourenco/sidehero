@@ -9,6 +9,11 @@ import {
 } from './SkillDamageBalance';
 import { resolveEffectiveAttack } from '../../services/combat/CombatStatResolver';
 import { CombatStatusEffectTracker } from '../../services/combat/CombatStatusEffectTracker';
+import {
+  applyPercentBonus,
+  heroPassiveAllySupportPercent,
+  heroPassiveTreeDamagePercent,
+} from '../../passives/PassiveModifiers';
 
 export class SkillPowerCalculator {
   calculateForHero(
@@ -30,7 +35,10 @@ export class SkillPowerCalculator {
     const attributeValue = hero.totalAttributes[scalingKey];
 
     const raw = calculateHeroSkillRawPower(skill, rank, attributeValue);
-    return applyHeroDamageSkillPower(skill, raw, effectiveAttack);
+    let power = applyHeroDamageSkillPower(skill, raw, effectiveAttack);
+    power = applyPercentBonus(power, heroPassiveTreeDamagePercent(hero, skill));
+    power = applyPercentBonus(power, heroPassiveAllySupportPercent(hero, skill));
+    return power;
   }
 
   calculateForEnemy(skill: CombatSkillDefinition, enemy: Enemy): number {

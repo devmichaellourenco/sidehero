@@ -51,6 +51,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 ## Relacionado
 
 - [`improvement-reset.spec.md`](improvement-reset.spec.md) — devolver ranks `pointType: 'improvement'` e `'ascension'` (unitário + massa); **não** desfaz `ascensionId`
+- [`passives.spec.md`](passives.spec.md) — passivas sempre ativas de classe/ascensão (não confundir com skills passivas equipáveis)
 
 ## Testes obrigatórios
 
