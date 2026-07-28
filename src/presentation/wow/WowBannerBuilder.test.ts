@@ -76,11 +76,18 @@ describe('WowMomentMapper', () => {
       title: 'Progresso Offline',
       tone: 'idle',
       detailLines: ['12 min fora', '+2 fases'],
+      heroPortrait: {
+        id: 'hero-1',
+        heroClass: 'knight',
+        name: 'Galneon',
+        ascensionId: null,
+      },
     });
 
     expect(banner?.kind).toBe('idle-report');
     expect(banner?.cta).toEqual({ label: 'Entendi', action: 'dismiss' });
     expect(banner?.detailLines).toHaveLength(2);
+    expect(banner?.heroPortrait?.id).toBe('hero-1');
   });
 });
 

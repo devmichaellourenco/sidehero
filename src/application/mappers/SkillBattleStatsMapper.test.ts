@@ -60,6 +60,8 @@ describe('buildSkillBattleStats — throughput alinhado ao combate', () => {
     expect(poder?.tooltipLines?.some((line) => line.text.includes('Fórmula:'))).toBe(true);
     expect(poder?.tooltipLines?.some((line) => line.text.includes('Produto ='))).toBe(true);
     expect(poder?.tooltipLines?.some((line) => line.text.includes('powerPerRank'))).toBe(true);
+    expect(poder?.tooltipLines?.some((line) => line.text.includes('Afinidade Mágica'))).toBe(true);
+    expect(poder?.tooltipLines?.some((line) => line.text.includes('Após passivas:'))).toBe(true);
     expect(poder?.tooltipLines?.some((line) => line.text.includes('Poder final'))).toBe(true);
     expect(poder?.tooltipLines?.some((line) => line.text.includes('1.9'))).toBe(false);
     expect(stats.some((entry) => entry.label === 'Casts/s')).toBe(true);
@@ -84,6 +86,8 @@ describe('buildSkillBattleStats — throughput alinhado ao combate', () => {
     expect(lines).toContain('Base = 1');
     expect(lines).toContain('Rank: 5 × nível 2 = 10');
     expect(lines).toContain('Produto =');
+    expect(lines).toContain('Afinidade Mágica');
+    expect(lines).toContain('Após passivas:');
     expect(lines).toContain('Poder final ≈');
     expect(lines).not.toContain('1.9');
   });

@@ -12,6 +12,12 @@ import {
   passiveVitalityHealthBonus,
 } from '../../domain/combat/PassiveSkillEffects';
 import {
+  heroPassiveAttackContributionLines,
+  heroPassiveDefenseContributionLines,
+  heroPassiveMaxHealthContributionLines,
+  heroPassiveMaxHealthPercent,
+} from '../../domain/passives/PassiveModifiers';
+import {
   getEffectiveResistance,
   ResistanceProfile,
 } from '../../domain/combat/ResistanceProfile';
@@ -73,6 +79,7 @@ function buildScaledStatLines(
   gearFlat: number,
   gearFlatLines: string[],
   percentBonus: number,
+  passiveLines: string[],
   total: number,
 ): HeroCombatStatLineDto {
   const tooltipLines = [
@@ -90,6 +97,7 @@ function buildScaledStatLines(
     tooltipLines.push(`Bônus % do equipamento: +${fmtInt(percentBonus)}%`);
   }
 
+  tooltipLines.push(...passiveLines);
   tooltipLines.push(`Total: ${fmtInt(total)}`);
 
   return {
@@ -161,7 +169,13 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const healthAttrBonus = hero.totalAttributes.str * 2;
   const healthGearFlat = sumGear(equipment, (g) => g.healthBonus);
   const healthPercent = sumGear(equipment, (g) => g.healthPercentBonus);
+  const healthPassivePercent = heroPassiveMaxHealthPercent(hero);
   const healthLevelBonus = (level - 1) * 10;
+  const vitalityBonus = isPassiveSkillActive(hero, 'vitality')
+    ? passiveVitalityHealthBonus(hero)
+    : 0;
+  const healthRaw =
+    hero.baseMaxHealth + healthGearFlat + healthLevelBonus + healthAttrBonus + vitalityBonus;
 
   const critMultiplier = 1 + profile.critChance * (profile.critDamage - 1);
   const basicThroughput = estimateHeroSkillThroughput(hero, BASIC_ATTACK_SKILL);
@@ -187,6 +201,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       attackGearFlat,
       gearContributionLines(equipment, (g) => g.attackBonus, (v) => `+${fmtInt(v)} ATK`),
       attackPercent,
+      heroPassiveAttackContributionLines(hero),
       hero.attack,
     ),
     {
@@ -280,6 +295,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       defenseGearFlat,
       gearContributionLines(equipment, (g) => g.defenseBonus, (v) => `+${fmtInt(v)} DEF`),
       defensePercent,
+      heroPassiveDefenseContributionLines(hero),
       hero.defense,
     ),
     {
@@ -290,15 +306,25 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
         `Base da classe: ${fmtInt(hero.baseMaxHealth)}`,
         `Nível: +${fmtInt(healthLevelBonus)}`,
         `STR (${hero.totalAttributes.str} × 2): +${fmtInt(healthAttrBonus)}`,
-        ...(isPassiveSkillActive(hero, 'vitality')
+        ...(vitalityBonus > 0
           ? [
-              `Skill Vitalidade (level ${passiveSkillRank(hero, 'vitality')}): +${fmtInt(passiveVitalityHealthBonus(hero))} HP`,
+              `Skill Vitalidade (level ${passiveSkillRank(hero, 'vitality')}): +${fmtInt(vitalityBonus)} HP`,
             ]
           : []),
         ...(healthGearFlat > 0
-          ? [`Equipamento: +${fmtInt(healthGearFlat)}`, ...gearContributionLines(equipment, (g) => g.healthBonus, (v) => `+${fmtInt(v)} HP`)]
+          ? [
+              `Equipamento: +${fmtInt(healthGearFlat)}`,
+              ...gearContributionLines(equipment, (g) => g.healthBonus, (v) => `+${fmtInt(v)} HP`),
+            ]
           : []),
+        `Subtotal (antes de %): ${fmtInt(healthRaw)}`,
         ...(healthPercent !== 0 ? [`Bônus % do equipamento: +${Math.round(healthPercent)}%`] : []),
+        ...heroPassiveMaxHealthContributionLines(hero),
+        ...(healthPercent !== 0 || healthPassivePercent !== 0
+          ? [
+              `Bônus % total: +${(healthPercent + healthPassivePercent).toFixed(1)}% → ×${(1 + (healthPercent + healthPassivePercent) / 100).toFixed(3)}`,
+            ]
+          : []),
         `Total: ${fmtInt(hero.maxHealth)}`,
       ],
     },

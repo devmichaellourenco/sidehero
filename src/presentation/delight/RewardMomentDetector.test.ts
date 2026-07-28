@@ -152,6 +152,66 @@ describe('RewardMomentDetector', () => {
     const levelMoments = moments.filter((moment) => moment.kind === 'level_up');
     expect(levelMoments).toHaveLength(1);
     expect(levelMoments[0].title).toContain('2 heróis');
+    expect(levelMoments[0].heroEmoji).toBeUndefined();
+    expect(levelMoments[0].heroPortrait).toEqual({
+      id: 'hero-1',
+      heroClass: 'knight',
+      name: 'Galneon',
+      ascensionId: null,
+    });
+    expect(levelMoments[0].heroPortraits).toHaveLength(2);
+    expect(levelMoments[0].detailLines).toEqual([
+      'Galneon → Lv.5',
+      'Nix → Lv.4',
+    ]);
+  });
+
+  it('usa portrait do herói em level-up único', () => {
+    const previous = baseState({
+      heroes: [{ ...baseState().heroes[0], level: 4 }],
+    });
+    const next = baseState({
+      heroes: [{ ...previous.heroes[0], level: 5 }],
+    });
+
+    const moments = detector.detect(previous, next);
+    const levelMoment = moments.find((moment) => moment.kind === 'level_up');
+    expect(levelMoment?.title).toBe('Lv.5');
+    expect(levelMoment?.heroEmoji).toBeUndefined();
+    expect(levelMoment?.heroPortrait).toEqual({
+      id: 'hero-1',
+      heroClass: 'knight',
+      name: 'Galneon',
+      ascensionId: null,
+    });
+    expect(levelMoment?.heroPortraits).toBeUndefined();
+  });
+
+  it('relatório idle usa portrait dos heróis em vez de ícone genérico', () => {
+    const moment = detector.buildIdleReport(
+      {
+        at: Date.now() - 60_000,
+        stage: 1,
+        gold: 100,
+        pendingChestCount: 0,
+        heroLevels: { 'hero-1': 4 },
+      },
+      baseState({
+        stage: 2,
+        gold: 150,
+        heroes: [{ ...baseState().heroes[0], level: 5 }],
+        activeParty: [{ ...baseState().heroes[0], level: 5 }],
+      }),
+    );
+
+    expect(moment?.kind).toBe('idle_report');
+    expect(moment?.iconUrl).toBeUndefined();
+    expect(moment?.heroPortrait).toEqual({
+      id: 'hero-1',
+      heroClass: 'knight',
+      name: 'Galneon',
+      ascensionId: null,
+    });
   });
 
   it('ignora recompensas de vitória quando skipVictoryRewards', () => {

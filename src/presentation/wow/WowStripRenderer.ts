@@ -1,6 +1,7 @@
 import { getGearSprite, getHeroSprite, imgTag } from '../assets/AssetCatalog';
+import { RewardHeroPortrait } from '../delight/RewardHeroPortrait';
 import { resolveWowBannerCta } from './WowBannerCtaPresentation';
-import { WowBanner } from './types/WowBanner';
+import { WowBanner, WowBannerCta } from './types/WowBanner';
 
 export type WowBannerVariant = 'center' | 'compact';
 
@@ -100,9 +101,15 @@ export class WowStripRenderer {
       return `<div class="wow-banner-gear-frame wow-banner-gear-frame--${banner.gear.rarity} ${visualClass}">${imgTag(sprite, banner.gear.name, 'wow-banner-gear-sprite')}</div>`;
     }
 
-    if (banner.heroPortrait) {
-      const sprite = getHeroSprite(banner.heroPortrait);
-      return imgTag(sprite, banner.heroPortrait.name, `wow-banner-hero-portrait ${visualClass}`);
+    const heroPortraits =
+      banner.heroPortraits && banner.heroPortraits.length > 0
+        ? banner.heroPortraits
+        : banner.heroPortrait
+          ? [banner.heroPortrait]
+          : [];
+
+    if (heroPortraits.length > 0) {
+      return this.buildHeroPortraitsMarkup(heroPortraits, visualClass, variant);
     }
 
     if (banner.heroEmoji) {
@@ -114,5 +121,27 @@ export class WowStripRenderer {
     }
 
     return '<span class="wow-banner-spark wow-banner-spark--center" aria-hidden="true">✦</span>';
+  }
+
+  private buildHeroPortraitsMarkup(
+    portraits: RewardHeroPortrait[],
+    visualClass: string,
+    variant: WowBannerVariant,
+  ): string {
+    if (portraits.length === 1) {
+      const hero = portraits[0];
+      return imgTag(getHeroSprite(hero), hero.name, `wow-banner-hero-portrait ${visualClass}`);
+    }
+
+    const stack = portraits.slice(0, 3);
+    return `<div class="wow-banner-hero-stack wow-banner-hero-stack--${variant} ${visualClass}" aria-hidden="true">${stack
+      .map((hero, index) =>
+        imgTag(
+          getHeroSprite(hero),
+          hero.name,
+          `wow-banner-hero-portrait wow-banner-hero-stack__item wow-banner-hero-stack__item--${index}`,
+        ),
+      )
+      .join('')}</div>`;
   }
 }

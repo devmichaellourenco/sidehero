@@ -145,34 +145,31 @@ export class RewardMomentDetector {
     }
 
     if (!skipVictoryRewards) {
-      const levelUps = next.heroes
-        .map((hero) => {
-          const oldHero = previous.heroes.find((entry) => entry.id === hero.id);
-          if (!oldHero || hero.level <= oldHero.level) return null;
-          return `${hero.emoji} ${hero.name} → Lv.${hero.level}`;
-        })
-        .filter((line): line is string => Boolean(line));
+      const leveledHeroes = next.heroes.filter((hero) => {
+        const oldHero = previous.heroes.find((entry) => entry.id === hero.id);
+        return Boolean(oldHero && hero.level > oldHero.level);
+      });
 
-      if (levelUps.length === 1) {
-        const hero = next.heroes.find((entry) => {
-          const oldHero = previous.heroes.find((old) => old.id === entry.id);
-          return oldHero && entry.level > oldHero.level;
-        });
+      if (leveledHeroes.length === 1) {
+        const hero = leveledHeroes[0];
         moments.push(
           buildMoment('level_up', {
-            title: `Lv.${hero?.level ?? ''}`,
-            subtitle: hero ? `${hero.name} ficou mais forte` : levelUps[0],
+            title: `Lv.${hero.level}`,
+            subtitle: `${hero.name} ficou mais forte`,
             tone: 'level',
-            heroEmoji: hero?.emoji,
+            heroPortrait: rewardHeroPortraitFromDto(hero),
           }),
         );
-      } else if (levelUps.length > 1) {
+      } else if (leveledHeroes.length > 1) {
+        const portraits = leveledHeroes.map(rewardHeroPortraitFromDto);
         moments.push(
           buildMoment('level_up', {
-            title: `${levelUps.length} heróis subiram!`,
+            title: `${leveledHeroes.length} heróis subiram!`,
             subtitle: 'A party evoluiu na batalha',
             tone: 'level',
-            detailLines: levelUps,
+            heroPortrait: portraits[0],
+            heroPortraits: portraits,
+            detailLines: leveledHeroes.map((hero) => `${hero.name} → Lv.${hero.level}`),
           }),
         );
       }
@@ -386,11 +383,18 @@ export class RewardMomentDetector {
     const progress = buildIdleProgress(snapshot, state);
     if (!progress) return null;
 
+    const portraitHeroes =
+      progress.leveledHeroes.length > 0
+        ? progress.leveledHeroes
+        : (state.activeParty?.length ? state.activeParty : state.heroes);
+    const portraits = portraitHeroes.slice(0, 3).map(rewardHeroPortraitFromDto);
+
     return buildMoment('idle_report', {
       title: 'Progresso Offline',
       subtitle: 'Sua party continuou avançando',
       tone: 'idle',
-      iconUrl: getAssetUrl(ASSETS.ui.energy),
+      heroPortrait: portraits[0],
+      heroPortraits: portraits.length > 1 ? portraits : undefined,
       detailLines: progress.detailLines,
       priority: REWARD_KIND_PRIORITY.idle_report,
       autoDismissMs: REWARD_AUTO_DISMISS_MS.idle_report,

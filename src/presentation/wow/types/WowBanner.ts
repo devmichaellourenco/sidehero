@@ -52,6 +52,8 @@ export interface WowBanner {
   iconUrl?: string;
   gear?: GearDto;
   heroPortrait?: RewardHeroPortrait;
+  /** Vários heróis (level-up em grupo / idle); tem precedência visual sobre heroPortrait. */
+  heroPortraits?: RewardHeroPortrait[];
   heroEmoji?: string;
   cta?: WowBannerCta;
   onCtaClick?: () => void;

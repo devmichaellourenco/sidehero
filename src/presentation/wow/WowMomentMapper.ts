@@ -22,6 +22,7 @@ export function mapRewardMomentToWowBanner(moment: RewardMoment): WowBanner | nu
     iconUrl: moment.iconUrl,
     gear: moment.gear,
     heroPortrait: moment.heroPortrait,
+    heroPortraits: moment.heroPortraits,
     heroEmoji: moment.heroEmoji,
     cta: moment.cta
       ? {

@@ -4,7 +4,9 @@ import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefiniti
 import { SkillPowerCalculator } from '../progression/combat/SkillPowerCalculator';
 import {
   heroPassiveAllySupportPercent,
+  heroPassiveMaxHealthContributionLines,
   heroPassiveMaxHealthPercent,
+  heroPassiveSkillPowerContributionLines,
   heroPassiveTreeDamagePercent,
   isAllySupportSkill,
   isTreeDamageSkill,
@@ -85,5 +87,22 @@ describe('PassiveModifiers', () => {
     const calc = new SkillPowerCalculator();
     const withPassive = calc.calculateForHero(treeDamageSkill, nix);
     expect(withPassive).toBeGreaterThan(0);
+  });
+
+  it('expõe linhas de contribuição para tooltips de vida e skill', () => {
+    const knight = Hero.createStarter('k1', 'knight', 'Galneon');
+    const nix = Hero.createStarter('n1', 'sorcerer', 'Nix');
+    const elara = Hero.createStarter('e1', 'priest', 'Elara');
+
+    const healthLines = heroPassiveMaxHealthContributionLines(knight);
+    expect(healthLines.some((line) => line.includes('Saúde de Titã'))).toBe(true);
+    expect(healthLines.some((line) => line.includes('DEF'))).toBe(true);
+
+    const treeLines = heroPassiveSkillPowerContributionLines(nix, treeDamageSkill);
+    expect(treeLines.some((line) => line.includes('Afinidade Mágica'))).toBe(true);
+    expect(heroPassiveSkillPowerContributionLines(nix, basicAttack)).toEqual([]);
+
+    const supportLines = heroPassiveSkillPowerContributionLines(elara, healSkill);
+    expect(supportLines.some((line) => line.includes('Elo com a Vida'))).toBe(true);
   });
 });

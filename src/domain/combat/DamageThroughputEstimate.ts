@@ -26,6 +26,7 @@ import { Hero } from '../entities/Hero';
 import { getSkillById } from '../progression/SkillCatalog';
 import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefinition';
 import {
+  applyHeroDamageSkillPower,
   calculateHeroSkillRawPower,
   isPhysicalDamageSkill,
   PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
@@ -33,6 +34,12 @@ import {
   skillRankMultiplier,
 } from '../progression/combat/SkillDamageBalance';
 import { SkillPowerCalculator } from '../progression/combat/SkillPowerCalculator';
+import {
+  applyPercentBonus,
+  heroPassiveAllySupportPercent,
+  heroPassiveSkillPowerContributionLines,
+  heroPassiveTreeDamagePercent,
+} from '../passives/PassiveModifiers';
 
 /** Chaves de ícone mapeadas na apresentação (`ASSETS.ui` / `ASSETS.skills`). */
 export type ThroughputIconKey =
@@ -172,6 +179,25 @@ export function buildHeroSkillPowerBreakdown(
     });
     if (rawPower === floor && floor > afterFloor) {
       lines.push({ text: `Piso físico venceu o produto (${afterFloor} → ${rawPower}).` });
+    }
+  }
+
+  const beforePassives = applyHeroDamageSkillPower(combat, product, hero.attack);
+  const treePercent = heroPassiveTreeDamagePercent(hero, combat);
+  const allyPercent = heroPassiveAllySupportPercent(hero, combat);
+  const passiveLines = heroPassiveSkillPowerContributionLines(hero, combat);
+
+  if (passiveLines.length > 0) {
+    for (const text of passiveLines) {
+      lines.push({ text });
+    }
+    let afterPassives = beforePassives;
+    afterPassives = applyPercentBonus(afterPassives, treePercent);
+    afterPassives = applyPercentBonus(afterPassives, allyPercent);
+    if (treePercent !== 0 || allyPercent !== 0) {
+      lines.push({
+        text: `Após passivas: ${beforePassives} → ${afterPassives}`,
+      });
     }
   }
 

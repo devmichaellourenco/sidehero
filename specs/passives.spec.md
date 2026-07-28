@@ -197,6 +197,7 @@ Visual: reutilizar poço `--icon-well*` e tipografia medieval; sem cards desnece
 - [x] `PassiveResolver.test.ts` — classe + cadeia de ascensão
 - [x] `PassiveModifiers.test.ts` — Saúde de Titã / Afinidade / Elo
 - [x] `HeroStatusSkillsPresentation.test.ts` — seção Passivas
+- [x] `HeroCombatStatSheetMapper.test.ts` — tooltip de vida com contribuição de passiva
 - [ ] Gear `passiveIds` no tooltip mapper (quando houver item piloto)
 - [ ] Passivas de inimigo (fase D)
 

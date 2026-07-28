@@ -45,6 +45,8 @@ export interface RewardMoment {
   iconUrl?: string;
   gear?: GearDto;
   heroPortrait?: RewardHeroPortrait;
+  /** Vários heróis (level-up em grupo / idle); tem precedência visual sobre heroPortrait. */
+  heroPortraits?: RewardHeroPortrait[];
   heroEmoji?: string;
   tone: RewardTone;
   cta?: RewardMomentCta;

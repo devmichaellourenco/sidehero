@@ -1,4 +1,4 @@
-import { GameStateDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { PanelSnapshot } from './PanelStateSnapshot';
 
 const MIN_IDLE_MS = 8000;
@@ -7,6 +7,7 @@ export interface IdleProgressSummary {
   idleMs: number;
   detailLines: string[];
   toastLine: string;
+  leveledHeroes: HeroDto[];
 }
 
 export function formatIdleDuration(idleMs: number): string {
@@ -31,12 +32,11 @@ export function buildIdleProgress(
   const goldGained = state.gold - snapshot.gold;
   const chestsGained = state.pendingChestCount - snapshot.pendingChestCount;
 
-  const levelUps = state.heroes
-    .filter((hero) => {
-      const previousLevel = snapshot.heroLevels[hero.id];
-      return previousLevel !== undefined && hero.level > previousLevel;
-    })
-    .map((hero) => `${hero.emoji} ${hero.name} → Lv.${hero.level}`);
+  const leveledHeroes = state.heroes.filter((hero) => {
+    const previousLevel = snapshot.heroLevels[hero.id];
+    return previousLevel !== undefined && hero.level > previousLevel;
+  });
+  const levelUps = leveledHeroes.map((hero) => `${hero.name} → Lv.${hero.level}`);
 
   const statLines: string[] = [];
 
@@ -53,11 +53,12 @@ export function buildIdleProgress(
   if (statLines.length === 0 && levelUps.length === 0) return null;
 
   const detailLines = [formatIdleDuration(idleMs), ...statLines, ...levelUps];
-  const toastParts = [...statLines, ...levelUps.map((line) => line.replace(' → ', ' '))];
+  const toastParts = [...statLines, ...levelUps];
 
   return {
     idleMs,
     detailLines,
     toastLine: `Enquanto você estava fora: ${toastParts.join(' · ')}`,
+    leveledHeroes,
   };
 }

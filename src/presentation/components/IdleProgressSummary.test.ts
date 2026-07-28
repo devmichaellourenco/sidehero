@@ -46,5 +46,7 @@ describe('buildIdleProgress', () => {
     expect(progress?.detailLines).toContain('+1 baú');
     expect(progress?.detailLines.some((line) => line.includes('Aria'))).toBe(true);
     expect(progress?.toastLine).toContain('Enquanto você estava fora');
+    expect(progress?.leveledHeroes).toHaveLength(1);
+    expect(progress?.leveledHeroes[0].id).toBe('hero_a');
   });
 });

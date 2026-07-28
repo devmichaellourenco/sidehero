@@ -162,18 +162,24 @@ describe('WowStripPresentation', () => {
     expect(named?.gear?.rarity).toBe('legendary');
   });
 
-  it('mapeia achievement unlocked com eyebrow correto', () => {
+  it('mapeia level-up com portrait do herói', () => {
     const mapped = mapRewardMomentToWowBanner({
-      id: 'ach-1',
-      kind: 'achievement_unlocked',
-      tier: 'macro',
-      priority: 90,
-      title: 'Hero - Out of the Side',
-      subtitle: 'Achievement desbloqueado!',
-      tone: 'unlock',
+      id: 'lvl-1',
+      kind: 'level_up',
+      tier: 'meso',
+      priority: 35,
+      title: 'Lv.5',
+      tone: 'level',
+      heroPortrait: {
+        id: 'hero-1',
+        heroClass: 'knight',
+        name: 'Galneon',
+        ascensionId: null,
+      },
     });
 
-    expect(mapped?.kind).toBe('achievement-unlocked');
-    expect(mapped?.eyebrow).toBe('Achievement');
+    expect(mapped?.kind).toBe('level-up');
+    expect(mapped?.heroPortrait?.name).toBe('Galneon');
+    expect(mapped?.eyebrow).toBe('Level Up');
   });
 });

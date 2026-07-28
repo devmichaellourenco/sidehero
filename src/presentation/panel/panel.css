@@ -12463,6 +12463,51 @@ body.wow-celebration-open {
   object-position: center bottom;
 }
 
+.wow-banner-hero-stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.wow-banner-hero-stack__item {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  transform: translateY(-50%);
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+}
+
+.wow-banner-hero-stack__item--0 {
+  left: 0;
+  z-index: 3;
+}
+
+.wow-banner-hero-stack__item--1 {
+  left: 10px;
+  z-index: 2;
+}
+
+.wow-banner-hero-stack__item--2 {
+  left: 20px;
+  z-index: 1;
+}
+
+.wow-banner-hero-stack--center .wow-banner-hero-stack__item {
+  width: 78px;
+  height: 78px;
+}
+
+.wow-banner-hero-stack--center .wow-banner-hero-stack__item--1 {
+  left: 22px;
+}
+
+.wow-banner-hero-stack--center .wow-banner-hero-stack__item--2 {
+  left: 44px;
+}
+
 .wow-banner-emoji,
 .wow-banner-spark {
   font-size: 34px;
