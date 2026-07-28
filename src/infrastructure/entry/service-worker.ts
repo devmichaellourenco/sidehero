@@ -7,10 +7,11 @@ import {
   registerSidePanelLifecycle,
 } from '../background/SidePanelLifecycle';
 import {
-  closeBattleStatsWindow,
-  openOrFocusBattleStatsWindow,
-  registerBattleStatsWindowLifecycle,
-} from '../background/BattleStatsWindowOpener';
+  closeDetachedSurface,
+  openOrFocusDetachedSurface,
+  parseDetachedSurfaceId,
+  registerDetachedSurfaceWindowLifecycle,
+} from '../background/DetachedSurfaceWindowOpener';
 import {
   syncBackgroundTickAlarm,
   TICK_ALARM,
@@ -27,7 +28,7 @@ async function syncTickAlarmFromState(): Promise<void> {
 
 void configureSidePanelBehavior();
 registerSidePanelLifecycle();
-registerBattleStatsWindowLifecycle();
+registerDetachedSurfaceWindowLifecycle();
 
 chrome.runtime.onInstalled.addListener(async () => {
   await syncTickAlarmFromState();
@@ -332,13 +333,21 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.setPartySlot.execute(message.slotIndex, message.heroId);
       return { ok: true, state };
     }
-    case 'OPEN_BATTLE_STATS_WINDOW': {
-      await openOrFocusBattleStatsWindow();
+    case 'OPEN_DETACHED_SURFACE': {
+      const surfaceId = parseDetachedSurfaceId(message.surfaceId);
+      if (!surfaceId) {
+        return { ok: false, error: 'Superfície destacável inválida' };
+      }
+      await openOrFocusDetachedSurface(surfaceId);
       const state = await app.getState.execute();
       return { ok: true, state };
     }
-    case 'CLOSE_BATTLE_STATS_WINDOW': {
-      await closeBattleStatsWindow();
+    case 'CLOSE_DETACHED_SURFACE': {
+      const surfaceId = parseDetachedSurfaceId(message.surfaceId);
+      if (!surfaceId) {
+        return { ok: false, error: 'Superfície destacável inválida' };
+      }
+      await closeDetachedSurface(surfaceId);
       const state = await app.getState.execute();
       return { ok: true, state };
     }

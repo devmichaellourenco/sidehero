@@ -1994,6 +1994,53 @@ body.stats-window {
   background: color-mix(in srgb, var(--seal-gold) 28%, transparent);
 }
 
+/* Janela destacável genérica: panel.html?detached=<menu> */
+body.detached-surface {
+  --panel-sheet-top: 0px;
+  margin: 0;
+  min-height: 100vh;
+  background: var(--parchment-0);
+  color: var(--ink);
+}
+
+body.detached-surface #app,
+body.detached-surface #wow-celebration-root,
+body.detached-surface #act-scene-root,
+body.detached-surface #donation-prompt-root,
+body.detached-surface #destroy-gear-confirm-root,
+body.detached-surface #ascend-confirm-root,
+body.detached-surface #improvement-reset-confirm-root,
+body.detached-surface #forge-confirm-root {
+  display: none !important;
+}
+
+body.detached-surface .battle-log-overlay:not(.hidden),
+body.detached-surface .battle-stats-overlay:not(.hidden),
+body.detached-surface .hero-drawer-root:not(.hidden),
+body.detached-surface .modal-root:not(.hidden) {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+
+body.detached-surface .battle-log-floating,
+body.detached-surface .battle-stats-floating,
+body.detached-surface .hero-drawer-panel,
+body.detached-surface .modal-dialog {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+  inset: 0;
+}
+
+body.detached-surface .battle-log-backdrop,
+body.detached-surface .hero-drawer-backdrop,
+body.detached-surface .modal-backdrop {
+  display: none;
+}
+
 .stats-window-title {
   margin: 0;
   font-family: var(--font-heading);
@@ -7414,6 +7461,17 @@ body.modal-open {
   flex: 1;
   min-width: 0;
   margin: 0;
+  overflow: visible;
+}
+
+.modal-title > .sheet-title-row {
+  width: 100%;
+  justify-content: center;
+}
+
+.modal-title-main {
+  flex: 1;
+  min-width: 0;
   text-align: center;
   font-family: var(--font-heading);
   font-size: 12px;
@@ -7425,7 +7483,7 @@ body.modal-open {
   white-space: nowrap;
 }
 
-.modal-title--rich {
+.modal-title-main.modal-title--rich {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7435,7 +7493,7 @@ body.modal-open {
   white-space: normal;
 }
 
-.modal-title--rich .campaign-view-toggle {
+.modal-title-main.modal-title--rich .campaign-view-toggle {
   margin: 0;
 }
 

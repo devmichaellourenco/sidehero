@@ -1,37 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-ui-theme="dark">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="0;url=panel.html?detached=stats" />
     <title>Estatísticas — Side Hero</title>
-    <link rel="stylesheet" href="panel.css" />
+    <script>
+      location.replace('panel.html?detached=stats');
+    </script>
   </head>
-  <body class="stats-window">
-    <div id="stats-app" class="stats-window-app">
-      <header class="stats-window-header">
-        <div class="sheet-title-row">
-          <h1 class="stats-window-title">Estatísticas</h1>
-          <button
-            type="button"
-            id="stats-window-pin"
-            class="stats-pin-btn"
-            aria-pressed="false"
-            title="Fixar"
-            aria-label="Fixar estatísticas no painel lateral"
-          ><img class="stats-pin-btn__icon" src="assets/ui/pin.png" alt="" aria-hidden="true" /></button>
-        </div>
-        <div class="stats-window-header-actions">
-          <button
-            type="button"
-            id="stats-window-close"
-            class="sheet-dismiss-btn"
-            data-nav-arrow="down"
-            aria-label="Fechar estatísticas"
-          ></button>
-        </div>
-      </header>
-      <div id="battle-stats-body" class="battle-stats-body stats-window-body game-scroll"></div>
-    </div>
-    <script type="module" src="stats.js"></script>
+  <body>
+    <p>Redirecionando para a janela de estatísticas…</p>
   </body>
 </html>

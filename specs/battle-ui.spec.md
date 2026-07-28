@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 12/12 (100%) · auditoria 2026-07-23  
-**Testes obrigatórios:** 11/11 presentes na suite
+**Aceite:** 13/13 (100%) · auditoria 2026-07-28  
+**Testes obrigatórios:** 15/15 presentes na suite
 
 ## Objetivo
 
@@ -19,6 +19,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
 - [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos
+- [x] Todos os menus da barra de sistemas (`SystemsMenuId`) suportam **Fixar/Desafixar** com preferência por menu (padrão: janela popup `panel.html?detached=<id>`, 520×832 sem resize); modo detached não inicia auto-battle
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
@@ -34,7 +35,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 | Presentation | `panel/panel.html`, `panel.css`, `GameViewController`, `GameHudController` |
 | Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy`, `DonationCardPresentation` |
 | Presentation | `ModalStackController`, `SystemsMenuNavigation`, `BattleChestAffordanceController` |
-| Infra | `BattleStatsWindowOpener`, `BattleStatsWindowManager`, `panel/stats.html` |
+| Presentation | `SurfacePinPreference`, `SurfacePinPresentation` |
+| Infra | `DetachedSurfaceWindowOpener`, `DetachedSurfaceWindowManager`; redirect legado `panel/stats.html` → `?detached=stats` |
 
 ## Invariantes
 
@@ -55,8 +57,10 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
 - [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`; Pausar/Continuar/Detalhes na pausa de batalha
 - [x] `BattleStatsPresentation.test.ts` — painel de estatísticas da batalha pausada
-- [x] `BattleStatsWindowManager.test.ts` — reuso de janela popup de Stats
-- [x] `stats.html.test.ts` — shell da janela destacável
+- [x] `DetachedSurfaceWindowManager.test.ts` — tamanho/reuso de janela popup destacável
+- [x] `SurfacePinPreference.test.ts`, `SurfacePinPresentation.test.ts` — preferência e markup de pin
+- [x] `ModalController.test.ts` — título + shell de pin
+- [x] `stats.html.test.ts` — redirect legado para `?detached=stats`
 - [x] `SystemsMenuNavigation.test.ts` — disponibilidade por camp/unlock + wrap prev/next
 
 ## Relacionado

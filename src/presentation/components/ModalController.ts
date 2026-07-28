@@ -52,6 +52,7 @@ export class ModalController {
     this.titleEl.innerHTML = html;
   }
 
+  /** Elemento que recebe texto/HTML do título (pode ser `#modal-title-main`). */
   getTitleElement(): HTMLElement {
     return this.titleEl;
   }

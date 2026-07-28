@@ -7,9 +7,12 @@ export class BattleLogPanelController {
     private readonly overlay: HTMLElement,
     private readonly toggleBtn: HTMLButtonElement,
     closeBtn: HTMLButtonElement,
+    options: { bindToggleButton?: boolean } = {},
   ) {
     this.visible = this.readVisiblePreference();
-    toggleBtn.addEventListener('click', () => this.toggle());
+    if (options.bindToggleButton !== false) {
+      toggleBtn.addEventListener('click', () => this.toggle());
+    }
     closeBtn.addEventListener('click', () => this.hide());
 
     overlay.querySelectorAll('[data-battle-log-close]').forEach((element) => {

@@ -26,11 +26,20 @@ import { AchievementsFlow } from '../flows/AchievementsFlow';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import { getHeroNavigation, listNavigableHeroIds } from '../helpers/HeroNavigationHelper';
 import {
-  BATTLE_STATS_DOCK_REQUEST_KEY,
-  readBattleStatsPinned,
-  requestDockBattleStatsToSidePanel,
-  writeBattleStatsPinned,
-} from '../helpers/BattleStatsPinPreference';
+  LEGACY_BATTLE_STATS_DOCK_REQUEST_KEY,
+  SURFACE_DOCK_REQUEST_KEY,
+  parseSurfaceDockRequest,
+  readDetachedSurfaceFromLocation,
+  readSurfacePinned,
+  requestDockSurfaceToSidePanel,
+  writeSurfacePinned,
+} from '../helpers/SurfacePinPreference';
+import {
+  applySurfacePinButton,
+  hideSurfacePinButton,
+  systemsMenuLabel,
+  type SurfacePinMode,
+} from '../helpers/SurfacePinPresentation';
 import { WowCelebrationController } from '../wow/WowCelebrationController';
 import { buildPersistentWowBanners } from '../wow/WowBannerBuilder';
 import { DonationPromptController } from '../support/DonationPromptController';
@@ -80,6 +89,7 @@ import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
 import { SkillCooldownDisplayAnimator, shouldAnimateBattleStripTimers } from './SkillCooldownDisplayAnimator';
 import { DivineForgeFlow } from '../flows/DivineForgeFlow';
 import {
+  isSystemsMenuAvailable,
   listAvailableSystemsMenus,
   resolveCurrentSystemsMenu,
   systemsMenuFromModalViewType,
@@ -105,6 +115,9 @@ export class GameViewController {
   private trackedSystemsMenuId: SystemsMenuId | null = null;
   private campaignModalOpen = false;
   private systemsIconsSignature = '';
+  /** Quando `panel.html?detached=<id>`, esta janela só exibe aquela superfície. */
+  private readonly detachedSurfaceId: SystemsMenuId | null;
+  private detachedSurfaceReady = false;
   private readonly client: IGameClient;
   private refreshTimer: number | null = null;
   private contextInvalidated = false;
@@ -203,6 +216,11 @@ export class GameViewController {
 
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
     this.client = client;
+    this.detachedSurfaceId = readDetachedSurfaceFromLocation();
+    if (this.detachedSurfaceId) {
+      document.body.classList.add('detached-surface');
+      document.title = `${systemsMenuLabel(this.detachedSurfaceId)} — Side Hero`;
+    }
 
     this.campaignContextBtn = root.querySelector('#campaign-context-btn') as HTMLButtonElement;
     this.goldLabel = root.querySelector('#gold-label')!;
@@ -269,7 +287,7 @@ export class GameViewController {
 
     this.modal = new ModalController(
       root.querySelector('#modal-root')!,
-      root.querySelector('#modal-title')!,
+      root.querySelector('#modal-title-main') ?? root.querySelector('#modal-title')!,
       root.querySelector('#modal-body')!,
     );
 
@@ -342,7 +360,7 @@ export class GameViewController {
     bindCampaignTooltip(this.campaignContextBtn);
     bindBattleChromeLayout(
       root.querySelector('.battle-combat-bar') as HTMLElement,
-      root.querySelector('#app'),
+      root.querySelector('#app') as HTMLElement | null,
     );
 
     this.hud = new GameHudController(
@@ -371,6 +389,7 @@ export class GameViewController {
       this.battleLogOverlayEl,
       this.openBattleLogBtn,
       document.querySelector('#battle-log-close') as HTMLButtonElement,
+      { bindToggleButton: false },
     );
     this.battleStatsPanel = new BattleStatsPanelController(
       root.querySelector('#battle-stats-overlay') as HTMLElement,
@@ -379,10 +398,11 @@ export class GameViewController {
       root.querySelector('#battle-stats-body') as HTMLElement,
       root.querySelector('#battle-stats-pin') as HTMLButtonElement | null,
     );
-    this.battleStatsPanel.onPinClick(() => {
-      void this.unpinBattleStatsToWindow();
-    });
-    this.bindBattleStatsDockListener();
+    this.bindSurfacePinControls(root);
+    this.bindSurfaceDockListener();
+    if (this.detachedSurfaceId) {
+      this.bindDetachedSheetDismissSync();
+    }
 
     this.heroDetailFlow = new HeroDetailFlow(
       this.client,
@@ -607,9 +627,15 @@ export class GameViewController {
     this.openAllChestsBtn.addEventListener('click', () => {
       void this.chestLootFlow.openAllChests();
     });
-    this.openInventoryBtn.addEventListener('click', () => this.openInventoryModal());
-    this.openStashBtn.addEventListener('click', () => this.openStashModal('replace'));
-    this.openForgeBtn.addEventListener('click', () => this.openForgeModal('replace'));
+    this.openInventoryBtn.addEventListener('click', () => {
+      void this.openSystemsSurface('inventory');
+    });
+    this.openStashBtn.addEventListener('click', () => {
+      void this.openSystemsSurface('stash');
+    });
+    this.openForgeBtn.addEventListener('click', () => {
+      void this.openSystemsSurface('forge');
+    });
     this.optimizeLoadoutBtn.addEventListener('click', () => {
       if (!this.canEditParty()) {
         this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
@@ -617,38 +643,42 @@ export class GameViewController {
       }
       void this.gearEquipFlow.optimizeLoadout();
     });
-    this.openSettingsBtn.addEventListener('click', () => this.openSettingsModal());
+    this.openSettingsBtn.addEventListener('click', () => {
+      void this.openSystemsSurface('settings');
+    });
     this.openHeroesBtn.addEventListener('click', () => {
       this.dismissOnboardingStep('hero-points');
-      this.openHeroesModal();
+      void this.openSystemsSurface('heroes');
     });
-    this.openFormationBtn.addEventListener('click', () => this.openFormationModal());
+    this.openFormationBtn.addEventListener('click', () => {
+      void this.openSystemsSurface('formation');
+    });
     this.openCampaignBtn.addEventListener('click', () => {
-      void this.openCampaignModal();
+      void this.openSystemsSurface('campaign');
     });
     this.campaignContextBtn.addEventListener('click', () => {
       hideCampaignTooltip();
-      void this.openCampaignModal();
+      void this.openSystemsSurface('campaign');
     });
     this.openShopBtn.addEventListener('click', () => {
-      void this.openShopModal();
+      void this.openSystemsSurface('shop');
     });
     this.openUpgradesBtn.addEventListener('click', () => {
       this.dismissOnboardingStep('first-upgrade');
-      void this.openUpgradesModal();
+      void this.openSystemsSurface('upgrades');
     });
     this.openAchievementsBtn.addEventListener('click', () => {
-      void this.openAchievementsModal();
+      void this.openSystemsSurface('achievements');
     });
     this.openBattleLogBtn.addEventListener('click', () => {
-      this.trackedSystemsMenuId = 'log';
-      this.syncSystemsNavChrome();
+      void this.openSystemsSurface('log');
     });
     this.openBattleStatsBtn.addEventListener('click', () => {
-      void this.openBattleStats();
+      void this.openSystemsSurface('stats');
     });
 
     document.addEventListener('visibilitychange', () => {
+      if (this.detachedSurfaceId) return;
       if (document.hidden && this.state) {
         touchPanelSnapshot(this.state);
         this.idleSummaryShown = false;
@@ -663,13 +693,23 @@ export class GameViewController {
 
   async init(): Promise<void> {
     try {
-      await this.refresh({ checkIdleSummary: true });
+      await this.refresh({ checkIdleSummary: !this.detachedSurfaceId });
     } catch {
       this.handleContextInvalidated();
       return;
     }
 
     if (this.contextInvalidated) return;
+
+    if (this.detachedSurfaceId) {
+      await this.openSystemsMenu(this.detachedSurfaceId);
+      this.detachedSurfaceReady = true;
+      this.syncSurfacePinChrome();
+      this.refreshTimer = window.setInterval(() => {
+        void this.refresh();
+      }, 2000);
+      return;
+    }
 
     if (this.isManualLoadoutPause(this.state) || this.state?.battlePaused) {
       this.syncLoadoutPauseBanner(this.state!);
@@ -859,6 +899,10 @@ export class GameViewController {
   }
 
   private syncAutoBattleTimer(): void {
+    if (this.detachedSurfaceId) {
+      this.stopAutoBattle();
+      return;
+    }
     if (this.prefsController.autoBattleEnabled && !this.isAdvanceBlocked()) {
       this.stopAutoBattle();
       this.startAutoBattle();
@@ -868,6 +912,7 @@ export class GameViewController {
   }
 
   private startAutoBattle(): void {
+    if (this.detachedSurfaceId) return;
     if (this.contextInvalidated || this.isAdvanceBlocked()) return;
     this.autoBattleController.restart(
       this.prefsController.getAutoBattleIntervalMs(this.state),
@@ -884,8 +929,17 @@ export class GameViewController {
   private async refresh(options: { checkIdleSummary?: boolean } = {}): Promise<void> {
     if (this.contextInvalidated) return;
     if (this.pausingLoadout) return;
-    if (this.state && !this.state.canEditParty && !this.isManualLoadoutPause(this.state)) return;
-    if (this.modal.isOpen() && this.isManualLoadoutPause(this.state)) return;
+    if (
+      !this.detachedSurfaceId &&
+      this.state &&
+      !this.state.canEditParty &&
+      !this.isManualLoadoutPause(this.state)
+    ) {
+      return;
+    }
+    if (!this.detachedSurfaceId && this.modal.isOpen() && this.isManualLoadoutPause(this.state)) {
+      return;
+    }
 
     const response = await this.client.send({ type: 'GET_STATE' });
     if (!response.ok) {
@@ -1945,6 +1999,7 @@ export class GameViewController {
       document.querySelectorAll('[data-systems-menu-icons]').forEach((host) => {
         (host as HTMLElement).replaceChildren();
       });
+      this.maybeCloseDetachedWindow();
       return;
     }
 
@@ -1982,81 +2037,284 @@ export class GameViewController {
         available,
         current,
         onSelect: (id) => {
-          void this.openSystemsMenu(id);
+          void this.openSystemsSurface(id);
         },
       });
     });
+    this.syncSurfacePinChrome();
   }
 
-  private bindBattleStatsDockListener(): void {
+  private maybeCloseDetachedWindow(): void {
+    if (!this.detachedSurfaceId || !this.detachedSurfaceReady) return;
+    void this.client.send({
+      type: 'CLOSE_DETACHED_SURFACE',
+      surfaceId: this.detachedSurfaceId,
+    });
+    window.close();
+  }
+
+  private bindDetachedSheetDismissSync(): void {
+    const syncAfterDismiss = () => {
+      queueMicrotask(() => this.syncSystemsNavChrome());
+    };
+    document
+      .querySelectorAll(
+        '#battle-log-close, [data-battle-log-close], #battle-stats-close, [data-battle-stats-close], [data-modal-close], [data-drawer-close]',
+      )
+      .forEach((element) => {
+        element.addEventListener('click', syncAfterDismiss);
+      });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') syncAfterDismiss();
+    });
+  }
+
+  private bindSurfacePinControls(root: HTMLElement): void {
+    const handlePinClick = (event: Event) => {
+      const target = event.target as HTMLElement | null;
+      const button = target?.closest('[data-surface-pin]') as HTMLButtonElement | null;
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const attrId = button.getAttribute('data-surface-pin');
+      const surfaceId =
+        (attrId && (attrId as SystemsMenuId)) ||
+        this.resolveSystemsMenuCurrent() ||
+        this.detachedSurfaceId;
+      if (!surfaceId) return;
+      void this.handleSurfacePinClick(surfaceId);
+    };
+
+    root.querySelectorAll('[data-surface-pin]').forEach((button) => {
+      button.addEventListener('click', handlePinClick);
+    });
+    document.querySelectorAll('[data-surface-pin]').forEach((button) => {
+      if (root.contains(button)) return;
+      button.addEventListener('click', handlePinClick);
+    });
+  }
+
+  private bindSurfaceDockListener(): void {
     try {
       chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local') return;
-        if (!changes[BATTLE_STATS_DOCK_REQUEST_KEY]) return;
-        if (!this.state?.featureFlags.battleStats) return;
-        void this.dockBattleStatsInSidePanel();
+        if (area !== 'local' || this.detachedSurfaceId) return;
+
+        const dockChange =
+          changes[SURFACE_DOCK_REQUEST_KEY] ?? changes[LEGACY_BATTLE_STATS_DOCK_REQUEST_KEY];
+        if (!dockChange) return;
+
+        const request = parseSurfaceDockRequest(dockChange.newValue);
+        if (!request) return;
+        void this.dockSurfaceInSidePanel(request.surfaceId);
       });
     } catch {
       // chrome.storage indisponível
     }
   }
 
-  private async openBattleStats(): Promise<void> {
-    if (!this.state?.featureFlags.battleStats) return;
+  private surfacePinMode(): SurfacePinMode {
+    return this.detachedSurfaceId ? 'dock' : 'undock';
+  }
 
-    const pinned = await readBattleStatsPinned();
-    if (pinned) {
-      if (this.battleStatsPanel.isVisible()) {
-        this.battleStatsPanel.hide();
-        this.syncSystemsNavChrome();
-        return;
+  private syncSurfacePinChrome(): void {
+    const mode = this.surfacePinMode();
+
+    const modalPin = document.querySelector('#modal-surface-pin') as HTMLButtonElement | null;
+    const drawerPin = document.querySelector('#hero-drawer-pin') as HTMLButtonElement | null;
+    const logPin = document.querySelector('#battle-log-pin') as HTMLButtonElement | null;
+    const statsPin = document.querySelector('#battle-stats-pin') as HTMLButtonElement | null;
+
+    if (modalPin) {
+      const rootType =
+        this.modalStack.find((view) => systemsMenuFromModalViewType(view.type) !== null)?.type ??
+        this.modalStack[0]?.type ??
+        null;
+      const modalSurface = this.modal.isOpen()
+        ? this.campaignModalOpen
+          ? 'campaign'
+          : systemsMenuFromModalViewType(rootType ?? '')
+        : null;
+      if (modalSurface) {
+        applySurfacePinButton(modalPin, mode, systemsMenuLabel(modalSurface));
+        modalPin.setAttribute('data-surface-pin', modalSurface);
+      } else {
+        hideSurfacePinButton(modalPin);
       }
-      await this.dockBattleStatsInSidePanel();
+    }
+
+    if (drawerPin) {
+      const drawerSurface =
+        this.trackedSystemsMenuId === 'inventory' || this.trackedSystemsMenuId === 'heroes'
+          ? this.trackedSystemsMenuId
+          : null;
+      if (this.heroDrawer.isOpen() && drawerSurface) {
+        applySurfacePinButton(drawerPin, mode, systemsMenuLabel(drawerSurface));
+        drawerPin.setAttribute('data-surface-pin', drawerSurface);
+      } else {
+        hideSurfacePinButton(drawerPin);
+      }
+    }
+
+    if (logPin) {
+      if (this.battleLogPanel.isVisible()) {
+        applySurfacePinButton(logPin, mode, systemsMenuLabel('log'));
+      } else {
+        hideSurfacePinButton(logPin);
+      }
+    }
+
+    if (statsPin) {
+      if (this.battleStatsPanel.isVisible()) {
+        applySurfacePinButton(statsPin, mode, systemsMenuLabel('stats'));
+      } else {
+        hideSurfacePinButton(statsPin);
+      }
+    }
+  }
+
+  private async handleSurfacePinClick(surfaceId: SystemsMenuId): Promise<void> {
+    if (this.detachedSurfaceId) {
+      await requestDockSurfaceToSidePanel(surfaceId);
+      await this.client.send({ type: 'CLOSE_DETACHED_SURFACE', surfaceId });
+      window.close();
       return;
     }
 
-    this.battleStatsPanel.hide();
-    this.trackedSystemsMenuId = null;
+    await this.unpinSurfaceToWindow(surfaceId);
+  }
+
+  private async openSystemsSurface(id: SystemsMenuId): Promise<void> {
+    if (!(this.detachedSurfaceId && id === this.detachedSurfaceId)) {
+      if (!isSystemsMenuAvailable(id, this.getSystemsAvailability())) {
+        this.notifySystemsMenuUnavailable(id);
+        return;
+      }
+    }
+
+    if (this.detachedSurfaceId) {
+      if (id === this.detachedSurfaceId) {
+        await this.openSystemsMenu(id);
+        this.syncSurfacePinChrome();
+        return;
+      }
+
+      const pinned = await readSurfacePinned(id);
+      if (pinned) {
+        await requestDockSurfaceToSidePanel(id);
+        return;
+      }
+
+      const response = await this.client.send({ type: 'OPEN_DETACHED_SURFACE', surfaceId: id });
+      if (!response.ok) {
+        this.toasts.show(response.error, 'info');
+      }
+      return;
+    }
+
+    const pinned = await readSurfacePinned(id);
+    if (pinned) {
+      if (this.isSystemsSurfaceOpen(id)) {
+        this.closeSystemsSurfaceLocal(id);
+        this.syncSystemsNavChrome();
+        this.syncSurfacePinChrome();
+        return;
+      }
+      await this.openSystemsMenu(id);
+      this.syncSurfacePinChrome();
+      return;
+    }
+
+    this.closeSystemsSurfaceLocal(id);
     this.syncSystemsNavChrome();
-    const response = await this.client.send({ type: 'OPEN_BATTLE_STATS_WINDOW' });
+    const response = await this.client.send({ type: 'OPEN_DETACHED_SURFACE', surfaceId: id });
     if (!response.ok) {
       this.toasts.show(response.error, 'info');
+      await writeSurfacePinned(id, true);
+      await this.openSystemsMenu(id);
+    }
+    this.syncSurfacePinChrome();
+  }
+
+  private notifySystemsMenuUnavailable(id: SystemsMenuId): void {
+    switch (id) {
+      case 'stats':
+        return;
+      case 'forge':
+        this.toasts.show('Desbloqueie Forja Divina em Runas', 'info');
+        return;
+      case 'stash':
+        this.toasts.show('Desbloqueie Baú de itens em Runas', 'info');
+        return;
+      case 'heroes':
+      case 'formation':
+      case 'shop':
+      case 'inventory':
+        this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
+        return;
+      default:
+        return;
     }
   }
 
-  private async dockBattleStatsInSidePanel(): Promise<void> {
-    if (!this.state?.featureFlags.battleStats) return;
-
-    await writeBattleStatsPinned(true);
-    await this.client.send({ type: 'CLOSE_BATTLE_STATS_WINDOW' });
-
-    this.closeHeroDrawer();
-    if (this.modal.isOpen()) {
-      this.modalStack.length = 0;
-      this.campaignModalOpen = false;
-      this.modal.close('action');
+  private isSystemsSurfaceOpen(id: SystemsMenuId): boolean {
+    switch (id) {
+      case 'log':
+        return this.battleLogPanel.isVisible();
+      case 'stats':
+        return this.battleStatsPanel.isVisible();
+      case 'heroes':
+      case 'inventory':
+        return this.heroDrawer.isOpen() && this.trackedSystemsMenuId === id;
+      default:
+        return this.resolveSystemsMenuCurrent() === id;
     }
-    this.battleLogPanel.hide();
-    this.trackedSystemsMenuId = 'stats';
-    this.battleStatsPanel.setContent(
-      renderBattleStatsBody(this.state, this.battleStatsPanel.getActiveTab()),
-    );
-    this.battleStatsPanel.show();
-    this.syncSystemsNavChrome();
   }
 
-  private async unpinBattleStatsToWindow(): Promise<void> {
-    if (!this.state?.featureFlags.battleStats) return;
-    await writeBattleStatsPinned(false);
-    this.battleStatsPanel.hide();
-    this.trackedSystemsMenuId = null;
+  private closeSystemsSurfaceLocal(id: SystemsMenuId): void {
+    switch (id) {
+      case 'log':
+        this.battleLogPanel.hide();
+        break;
+      case 'stats':
+        this.battleStatsPanel.hide();
+        break;
+      case 'heroes':
+      case 'inventory':
+        if (this.trackedSystemsMenuId === id) {
+          this.closeHeroDrawer();
+        }
+        break;
+      default:
+        if (this.resolveSystemsMenuCurrent() === id && this.modal.isOpen()) {
+          this.modalStack.length = 0;
+          this.campaignModalOpen = false;
+          this.modal.close('action');
+        }
+        break;
+    }
+    if (this.trackedSystemsMenuId === id) {
+      this.trackedSystemsMenuId = null;
+    }
+  }
+
+  private async dockSurfaceInSidePanel(surfaceId: SystemsMenuId): Promise<void> {
+    await writeSurfacePinned(surfaceId, true);
+    await this.client.send({ type: 'CLOSE_DETACHED_SURFACE', surfaceId });
+    await this.openSystemsMenu(surfaceId);
+    this.syncSurfacePinChrome();
+  }
+
+  private async unpinSurfaceToWindow(surfaceId: SystemsMenuId): Promise<void> {
+    await writeSurfacePinned(surfaceId, false);
+    this.closeSystemsSurfaceLocal(surfaceId);
     this.syncSystemsNavChrome();
-    const response = await this.client.send({ type: 'OPEN_BATTLE_STATS_WINDOW' });
+    const response = await this.client.send({ type: 'OPEN_DETACHED_SURFACE', surfaceId });
     if (!response.ok) {
       this.toasts.show(response.error, 'info');
-      await requestDockBattleStatsToSidePanel();
-      await this.dockBattleStatsInSidePanel();
+      await requestDockSurfaceToSidePanel(surfaceId);
+      await this.dockSurfaceInSidePanel(surfaceId);
     }
+    this.syncSurfacePinChrome();
   }
 
   private async openSystemsMenu(id: SystemsMenuId): Promise<void> {
@@ -2078,6 +2336,7 @@ export class GameViewController {
         this.trackedSystemsMenuId = 'log';
         this.battleLogPanel.show();
         this.syncSystemsNavChrome();
+        this.syncSurfacePinChrome();
         return;
       case 'stats':
         this.closeHeroDrawer();
@@ -2087,37 +2346,58 @@ export class GameViewController {
           this.modal.close('action');
         }
         this.battleLogPanel.hide();
-        await this.openBattleStats();
+        await this.showBattleStatsSheet();
         return;
       case 'campaign':
         await this.openCampaignModal();
+        this.syncSurfacePinChrome();
         return;
       case 'shop':
         await this.openShopModal();
+        this.syncSurfacePinChrome();
         return;
       case 'inventory':
         this.openInventoryModal();
+        this.syncSurfacePinChrome();
         return;
       case 'stash':
         this.openStashModal('replace');
+        this.syncSurfacePinChrome();
         return;
       case 'forge':
         this.openForgeModal('replace');
+        this.syncSurfacePinChrome();
         return;
       case 'upgrades':
         await this.openUpgradesModal();
+        this.syncSurfacePinChrome();
         return;
       case 'achievements':
         await this.openAchievementsModal();
+        this.syncSurfacePinChrome();
         return;
       case 'settings':
         this.closeHeroDrawer();
         this.openSettingsModal();
+        this.syncSurfacePinChrome();
         return;
     }
   }
 
+  private async showBattleStatsSheet(): Promise<void> {
+    if (!this.state?.featureFlags.battleStats && !this.detachedSurfaceId) return;
+
+    this.trackedSystemsMenuId = 'stats';
+    this.battleStatsPanel.setContent(
+      renderBattleStatsBody(this.state!, this.battleStatsPanel.getActiveTab()),
+    );
+    this.battleStatsPanel.show();
+    this.syncSystemsNavChrome();
+    this.syncSurfacePinChrome();
+  }
+
   private maybeShowIdleSummary(state: GameStateDto): void {
+    if (this.detachedSurfaceId) return;
     if (this.idleSummaryShown) return;
 
     const snapshot = loadPanelSnapshot();
@@ -2239,7 +2519,7 @@ export class GameViewController {
       this.battleStatsPanel.setContent(
         renderBattleStatsBody(mergedState, this.battleStatsPanel.getActiveTab()),
       );
-    } else if (!mergedState.featureFlags.battleStats) {
+    } else if (!mergedState.featureFlags.battleStats && !this.detachedSurfaceId) {
       this.battleStatsPanel.hide();
     }
 

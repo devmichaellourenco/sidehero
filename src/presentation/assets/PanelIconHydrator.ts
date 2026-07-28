@@ -15,7 +15,9 @@ const PANEL_ICON_TARGETS: Array<{ selector: string; assetPath: string }> = [
   { selector: '#open-chest-btn .btn-icon', assetPath: ASSETS.ui.chest },
   { selector: '#open-all-chests-btn .btn-icon', assetPath: ASSETS.ui.chestOpen },
   { selector: '#battle-stats-pin .stats-pin-btn__icon', assetPath: ASSETS.ui.unpin },
-  { selector: '#stats-window-pin .stats-pin-btn__icon', assetPath: ASSETS.ui.pin },
+  { selector: '#battle-log-pin .stats-pin-btn__icon', assetPath: ASSETS.ui.unpin },
+  { selector: '#modal-surface-pin .stats-pin-btn__icon', assetPath: ASSETS.ui.unpin },
+  { selector: '#hero-drawer-pin .stats-pin-btn__icon', assetPath: ASSETS.ui.unpin },
 ];
 
 function hydrateImage(img: HTMLImageElement, assetPath: string): void {
