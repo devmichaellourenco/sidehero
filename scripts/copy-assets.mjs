@@ -114,6 +114,7 @@ const PUBLIC_ASSET_MAP = [
   ['sprites/icons/cast-speed.png', 'ui/stats/cast-speed.png'],
   ['sprites/icons/pin.png', 'ui/pin.png'],
   ['sprites/icons/unpin.png', 'ui/unpin.png'],
+  ['sprites/icons/xp.png', 'ui/xp.png'],
 ];
 
 const ASSET_MAP = [
@@ -140,7 +141,6 @@ const ASSET_MAP = [
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_shop.png', 'ui/shop.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_anvil.png', 'ui/forge.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_star.png', 'ui/improvement.png'],
-  ['Sprites/Demo/Demo_Icon/icon_star_rate_s.png', 'ui/xp.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_battle.png', 'ui/attack.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_shield.png', 'ui/defense.png'],
   ['Sprites/Component/Icon_ItemIcons_(Original)/icon_itemicon_life.png', 'ui/health.png'],

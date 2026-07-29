@@ -2006,11 +2006,7 @@ body.detached-surface {
 body.detached-surface #app,
 body.detached-surface #wow-celebration-root,
 body.detached-surface #act-scene-root,
-body.detached-surface #donation-prompt-root,
-body.detached-surface #destroy-gear-confirm-root,
-body.detached-surface #ascend-confirm-root,
-body.detached-surface #improvement-reset-confirm-root,
-body.detached-surface #forge-confirm-root {
+body.detached-surface #donation-prompt-root {
   display: none !important;
 }
 
