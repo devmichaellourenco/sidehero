@@ -219,7 +219,7 @@ export class GameViewController {
     this.detachedSurfaceId = readDetachedSurfaceFromLocation();
     if (this.detachedSurfaceId) {
       document.body.classList.add('detached-surface');
-      document.title = `${systemsMenuLabel(this.detachedSurfaceId)} — Side Hero`;
+      document.title = `${systemsMenuLabel(this.detachedSurfaceId)} Side Hero`;
     }
 
     this.campaignContextBtn = root.querySelector('#campaign-context-btn') as HTMLButtonElement;
