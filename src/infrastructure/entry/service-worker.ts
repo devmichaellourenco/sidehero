@@ -39,6 +39,8 @@ chrome.runtime.onStartup.addListener(() => {
   void syncTickAlarmFromState();
 });
 
+// OFFLINE PROGRESS DESATIVADO (2026-07): não avança combate/recursos com painel fechado.
+// O listener ainda limpa alarm legado; o tick em si fica comentado para reativação futura.
 chrome.alarms.onAlarm.addListener(async (alarm: chrome.alarms.Alarm) => {
   if (alarm.name !== TICK_ALARM) return;
 
@@ -46,10 +48,10 @@ chrome.alarms.onAlarm.addListener(async (alarm: chrome.alarms.Alarm) => {
     const state = await app.getState.execute();
     await syncBackgroundTickAlarm(state.upgradeLevels);
 
-    const tickLevel = state.upgradeLevels.background_tick ?? 0;
-    if (tickLevel < 1) return;
-
-    await stateMutations.run(() => app.tick.execute(1));
+    // --- original (reativar offline progress) ---
+    // const tickLevel = state.upgradeLevels.background_tick ?? 0;
+    // if (tickLevel < 1) return;
+    // await stateMutations.run(() => app.tick.execute(1));
   } catch (error) {
     console.error('[Side Hero] Erro no tick idle:', error);
   }

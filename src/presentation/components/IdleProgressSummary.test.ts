@@ -33,20 +33,26 @@ describe('formatIdleDuration', () => {
 });
 
 describe('buildIdleProgress', () => {
-  it('retorna null quando o afastamento foi curto', () => {
+  // OFFLINE PROGRESS DESATIVADO (2026-07)
+  it('sempre null enquanto progresso offline estiver desativado', () => {
     expect(buildIdleProgress(snapshot({ at: Date.now() - 2000 }), state())).toBeNull();
+    expect(buildIdleProgress(snapshot(), state())).toBeNull();
   });
 
-  it('monta linhas de progresso offline', () => {
-    const progress = buildIdleProgress(snapshot(), state());
-    expect(progress).not.toBeNull();
-    expect(progress?.detailLines[0]).toMatch(/fora$/);
-    expect(progress?.detailLines).toContain('+2 fases');
-    expect(progress?.detailLines).toContain('+80 ouro');
-    expect(progress?.detailLines).toContain('+1 baú');
-    expect(progress?.detailLines.some((line) => line.includes('Aria'))).toBe(true);
-    expect(progress?.toastLine).toContain('Enquanto você estava fora');
-    expect(progress?.leveledHeroes).toHaveLength(1);
-    expect(progress?.leveledHeroes[0].id).toBe('hero_a');
-  });
+  // it('retorna null quando o afastamento foi curto', () => {
+  //   expect(buildIdleProgress(snapshot({ at: Date.now() - 2000 }), state())).toBeNull();
+  // });
+  //
+  // it('monta linhas de progresso offline', () => {
+  //   const progress = buildIdleProgress(snapshot(), state());
+  //   expect(progress).not.toBeNull();
+  //   expect(progress?.detailLines[0]).toMatch(/fora$/);
+  //   expect(progress?.detailLines).toContain('+2 fases');
+  //   expect(progress?.detailLines).toContain('+80 ouro');
+  //   expect(progress?.detailLines).toContain('+1 baú');
+  //   expect(progress?.detailLines.some((line) => line.includes('Aria'))).toBe(true);
+  //   expect(progress?.toastLine).toContain('Enquanto você estava fora');
+  //   expect(progress?.leveledHeroes).toHaveLength(1);
+  //   expect(progress?.leveledHeroes[0].id).toBe('hero_a');
+  // });
 });

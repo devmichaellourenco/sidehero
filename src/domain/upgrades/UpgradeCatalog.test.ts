@@ -65,15 +65,17 @@ describe('UpgradeCatalog', () => {
     expect(roots.map((entry) => entry.id)).toEqual(['optimize_loadout_1']);
   });
 
-  it('combate integra tick idle e slots de skill a partir da raiz', () => {
-    const tick = UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1');
+  it('combate integra slots de skill a partir da raiz (tick idle desativado)', () => {
+    // OFFLINE PROGRESS DESATIVADO (2026-07)
+    // const tick = UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1');
     const skillSlot = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_skill_slot_2');
     const autoBattle = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_battle_2');
     const autoChests = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_open_chests_1');
 
     expect(autoBattle?.parents).toEqual(['battle_stats_1']);
     expect(autoChests?.parents).toEqual(['optimize_loadout_1']);
-    expect(tick?.parents).toEqual(['auto_battle_2']);
+    // expect(tick?.parents).toEqual(['auto_battle_2']);
+    expect(UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1')).toBeUndefined();
     expect(skillSlot?.parents).toEqual(['optimize_loadout_1']);
   });
 

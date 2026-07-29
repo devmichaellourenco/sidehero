@@ -67,12 +67,13 @@ import { LootBatchModalRenderer } from './LootBatchModalRenderer';
 import { LootModalRenderer } from './LootModalRenderer';
 import { ModalController } from './ModalController';
 import { SideDrawerController } from './SideDrawerController';
-import {
-  buildIdleSummary,
-  loadPanelSnapshot,
-  seedPanelSnapshotIfMissing,
-  touchPanelSnapshot,
-} from './PanelStateSnapshot';
+// OFFLINE PROGRESS DESATIVADO (2026-07):
+// import {
+//   buildIdleSummary,
+//   loadPanelSnapshot,
+//   seedPanelSnapshotIfMissing,
+//   touchPanelSnapshot,
+// } from './PanelStateSnapshot';
 import { GamePreferences } from './GamePreferences';
 import { SettingsModalRenderer } from './SettingsModalRenderer';
 import { ShopModalRenderer } from './ShopModalRenderer';
@@ -123,7 +124,8 @@ export class GameViewController {
   private readonly client: IGameClient;
   private refreshTimer: number | null = null;
   private contextInvalidated = false;
-  private idleSummaryShown = false;
+  // OFFLINE PROGRESS DESATIVADO (2026-07)
+  // private idleSummaryShown = false;
   /** Bloqueia ticks em voo enquanto a pausa está sendo aplicada no servidor. */
   private pausingLoadout = false;
   private heroDrawerHeroId: string | null = null;
@@ -335,7 +337,6 @@ export class GameViewController {
       this.tryShowSeasonFinaleEpilogue();
       if (this.state) {
         this.tryShowAutoActScene(null, this.state);
-        this.syncOnboarding(this.state);
         this.syncAutoBattleTimer();
       }
     });
@@ -701,23 +702,26 @@ export class GameViewController {
       void this.openSystemsSurface('stats');
     });
 
-    document.addEventListener('visibilitychange', () => {
-      if (this.detachedSurfaceId) return;
-      if (document.hidden && this.state) {
-        touchPanelSnapshot(this.state);
-        this.idleSummaryShown = false;
-        return;
-      }
-
-      if (!document.hidden && this.state) {
-        this.maybeShowIdleSummary(this.state);
-      }
-    });
+    // OFFLINE PROGRESS DESATIVADO (2026-07): sem relatório de ganhos ao voltar ao painel.
+    // document.addEventListener('visibilitychange', () => {
+    //   if (this.detachedSurfaceId) return;
+    //   if (document.hidden && this.state) {
+    //     touchPanelSnapshot(this.state);
+    //     this.idleSummaryShown = false;
+    //     return;
+    //   }
+    //
+    //   if (!document.hidden && this.state) {
+    //     this.maybeShowIdleSummary(this.state);
+    //   }
+    // });
   }
 
   async init(): Promise<void> {
     try {
-      await this.refresh({ checkIdleSummary: !this.detachedSurfaceId });
+      await this.refresh();
+      // OFFLINE PROGRESS DESATIVADO (2026-07)
+      // await this.refresh({ checkIdleSummary: !this.detachedSurfaceId });
     } catch {
       this.handleContextInvalidated();
       return;
@@ -1024,7 +1028,7 @@ export class GameViewController {
     this.autoBattleController.stop();
   }
 
-  private async refresh(options: { checkIdleSummary?: boolean } = {}): Promise<void> {
+  private async refresh(_options: { /* checkIdleSummary?: boolean */ } = {}): Promise<void> {
     if (this.contextInvalidated) return;
     if (this.pausingLoadout) return;
     if (
@@ -1045,7 +1049,9 @@ export class GameViewController {
       return;
     }
 
-    this.render(response.state, { checkIdleSummary: options.checkIdleSummary });
+    this.render(response.state);
+    // OFFLINE PROGRESS DESATIVADO (2026-07)
+    // this.render(response.state, { checkIdleSummary: options.checkIdleSummary });
   }
 
   private handleFailedResponse(error?: string): void {
@@ -2513,20 +2519,21 @@ export class GameViewController {
     this.syncSurfacePinChrome();
   }
 
-  private maybeShowIdleSummary(state: GameStateDto): void {
-    if (this.detachedSurfaceId) return;
-    if (this.idleSummaryShown) return;
-
-    const snapshot = loadPanelSnapshot();
-    if (!snapshot) return;
-
-    const summary = buildIdleSummary(snapshot, state);
-    if (!summary) return;
-
-    this.rewards.showIdleReport(snapshot, state);
-    this.idleSummaryShown = true;
-    touchPanelSnapshot(state);
-  }
+  // OFFLINE PROGRESS DESATIVADO (2026-07)
+  // private maybeShowIdleSummary(state: GameStateDto): void {
+  //   if (this.detachedSurfaceId) return;
+  //   if (this.idleSummaryShown) return;
+  //
+  //   const snapshot = loadPanelSnapshot();
+  //   if (!snapshot) return;
+  //
+  //   const summary = buildIdleSummary(snapshot, state);
+  //   if (!summary) return;
+  //
+  //   this.rewards.showIdleReport(snapshot, state);
+  //   this.idleSummaryShown = true;
+  //   touchPanelSnapshot(state);
+  // }
 
   private syncLoadoutPauseBanner(state: GameStateDto): void {
     const label = this.battlePauseOverlay.querySelector('.battle-pause-label');
@@ -2558,7 +2565,8 @@ export class GameViewController {
     state: GameStateDto,
     options: {
       skipChestToast?: boolean;
-      checkIdleSummary?: boolean;
+      // OFFLINE PROGRESS DESATIVADO (2026-07)
+      // checkIdleSummary?: boolean;
       previousState?: GameStateDto | null;
     } = {},
   ): void {
@@ -2567,10 +2575,11 @@ export class GameViewController {
       return;
     }
 
-    if (options.checkIdleSummary) {
-      seedPanelSnapshotIfMissing(state);
-      this.maybeShowIdleSummary(state);
-    }
+    // OFFLINE PROGRESS DESATIVADO (2026-07)
+    // if (options.checkIdleSummary) {
+    //   seedPanelSnapshotIfMissing(state);
+    //   this.maybeShowIdleSummary(state);
+    // }
 
     const previous =
       options.previousState !== undefined ? options.previousState : this.state;
@@ -2767,7 +2776,8 @@ export class GameViewController {
       });
 
       if (!this.onboarding.isActive()) {
-        this.overlayOrchestrator.release('onboarding', step.id);
+        // Cooldown / falha de show: libera sem idle para não reentrar em syncOnboarding.
+        this.overlayOrchestrator.release('onboarding', step.id, { notifyIdle: false });
         return;
       }
 

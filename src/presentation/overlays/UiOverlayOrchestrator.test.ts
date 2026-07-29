@@ -104,4 +104,16 @@ describe('UiOverlayOrchestrator', () => {
     orch.release('wow', 'w1');
     expect(idle).toHaveBeenCalledTimes(1);
   });
+
+  it('release silencioso não notifica idle (evita loop de reentrada)', () => {
+    const orch = new UiOverlayOrchestrator();
+    const idle = vi.fn();
+    orch.onIdle(idle);
+
+    orch.request('onboarding', 'tip', () => undefined);
+    orch.release('onboarding', 'tip', { notifyIdle: false });
+
+    expect(orch.isBusy()).toBe(false);
+    expect(idle).not.toHaveBeenCalled();
+  });
 });

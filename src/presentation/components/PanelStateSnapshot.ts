@@ -1,6 +1,8 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { buildIdleProgress } from './IdleProgressSummary';
 
+// Snapshot / diff de progresso offline — feature DESATIVADA (2026-07); helpers preservados.
+
 const SNAPSHOT_KEY = 'sidehero_panel_snapshot';
 
 export interface PanelSnapshot {

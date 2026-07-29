@@ -16,8 +16,9 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   auto_battle_3: { x: 140, y: 400 },
   log_filter_1: { x: 20, y: 400 },
 
-  background_tick_1: { x: 140, y: 280 },
-  background_tick_2: { x: 140, y: 160 },
+  // OFFLINE PROGRESS DESATIVADO (2026-07)
+  // background_tick_1: { x: 140, y: 280 },
+  // background_tick_2: { x: 140, y: 160 },
 
   shop_refresh_1: { x: 260, y: 280 },
   shop_refresh_2: { x: 260, y: 160 },

@@ -30,7 +30,9 @@ describe('UpgradeTreeGraphPresentation', () => {
     expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual(['optimize_loadout_1']);
     expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('hero_unlock_paladin')).toEqual(['hero_unlock_berserker']);
-    expect(resolveUpgradeParentIds('background_tick_1')).toEqual(['auto_battle_2']);
+    // OFFLINE PROGRESS DESATIVADO (2026-07)
+    // expect(resolveUpgradeParentIds('background_tick_1')).toEqual(['auto_battle_2']);
+    expect(resolveUpgradeParentIds('background_tick_1')).toEqual([]);
     expect(resolveUpgradeParentIds('battle_skill_slot_2')).toEqual(['optimize_loadout_1']);
     expect(resolveUpgradeParentIds('shop_refresh_1')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('log_filter_1')).toEqual(['auto_battle_3']);
@@ -41,7 +43,8 @@ describe('UpgradeTreeGraphPresentation', () => {
       node({ id: 'optimize_loadout_1', branch: 'equipment' }),
       node({ id: 'battle_stats_1', branch: 'qol' }),
       node({ id: 'auto_battle_2', branch: 'combat' }),
-      node({ id: 'background_tick_1', branch: 'combat' }),
+      // OFFLINE PROGRESS DESATIVADO (2026-07)
+      // node({ id: 'background_tick_1', branch: 'combat' }),
       node({ id: 'battle_skill_slot_2', branch: 'combat' }),
       node({ id: 'hero_unlock_berserker', branch: 'heroes' }),
       node({ id: 'hero_unlock_paladin', branch: 'heroes' }),
@@ -52,12 +55,12 @@ describe('UpgradeTreeGraphPresentation', () => {
         { fromId: 'optimize_loadout_1', toId: 'battle_stats_1' },
         { fromId: 'battle_stats_1', toId: 'auto_battle_2' },
         { fromId: 'optimize_loadout_1', toId: 'battle_skill_slot_2' },
-        { fromId: 'auto_battle_2', toId: 'background_tick_1' },
+        // { fromId: 'auto_battle_2', toId: 'background_tick_1' },
         { fromId: 'auto_battle_2', toId: 'hero_unlock_berserker' },
         { fromId: 'hero_unlock_berserker', toId: 'hero_unlock_paladin' },
       ]),
     );
-    expect(buildUpgradeTreeEdges(nodes)).toHaveLength(6);
+    expect(buildUpgradeTreeEdges(nodes)).toHaveLength(5);
   });
 
   it('posiciona nodos com layout unificado', () => {

@@ -7,7 +7,9 @@
 
 ## Objetivo
 
-Extensão MV3 com **side panel**, service worker para tick idle, persistência local e messaging tipado entre panel ↔ background.
+Extensão MV3 com **side panel**, service worker, persistência local e messaging tipado entre panel ↔ background.
+
+**Nota de produto (2026-07):** progresso offline / tick em background **desativado** — sem aquisição de recursos com o painel fechado. Código preservado comentado para possível reativação (`BackgroundTickScheduler`, upgrades `background_tick_*`, relatório idle).
 
 ## Critérios de aceite
 
@@ -15,7 +17,7 @@ Extensão MV3 com **side panel**, service worker para tick idle, persistência l
 - [x] Build esbuild → `dist/`; assets copiados para `dist/panel/assets/`
 - [x] Save em `side_hero_game_state`; migração de `taskbar_hero_game_state`
 - [x] Mensagens tipadas em `GameClientTypes`; handler em `service-worker.ts`
-- [x] Tick alarm em background quando melhoria `background_tick` ativa
+- [x] Tick alarm em background **desativado** (código comentado; alarm legado é limpo)
 - [x] Release automatizável via `npm run release` → zip sem `.map` (só quando o usuário pedir)
 - [x] Backup criptografado (AES-GCM) export/import em Configurações (`.sidehero`) — ofuscação local, não anti-cheat absoluto
 

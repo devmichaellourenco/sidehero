@@ -31,6 +31,10 @@ npm run release  # zip → releases/ — só quando o usuário pedir (agente nã
 - Meta: repositório separado
 - Backup: `SaveBackupCodec` (AES-GCM ofuscado) + `EXPORT_SAVE_BACKUP` / `IMPORT_SAVE_BACKUP`; UI em Configurações
 
+## Progresso offline
+
+**Desativado (2026-07).** Sem tick/recursos com painel fechado. Para reativar: `BackgroundTickScheduler`, alarm no `service-worker`, upgrades `background_tick_*` no `UpgradeCatalog`, flags em `FeatureAccessPolicy`, fluxo idle no `GameViewController` / `IdleProgressSummary`.
+
 ## DI
 
 Composition root: `infrastructure/di/createGameApplication.ts`

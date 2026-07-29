@@ -53,7 +53,7 @@ export class UpgradeRequirementEvaluator {
   private featureLabel(feature: FeatureKey): string {
     const labels: Record<FeatureKey, string> = {
       auto_battle: 'Auto-batalha',
-      background_tick: 'Tick idle',
+      background_tick: 'Tick idle', // OFFLINE PROGRESS DESATIVADO (2026-07) — label legado
       auto_open_chests: 'Auto-abrir baús',
       open_all_chests: 'Abrir todos',
       optimize_loadout: 'Otimizar equipe',

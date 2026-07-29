@@ -50,11 +50,12 @@ const FEATURE_UNLOCK_META: Partial<Record<FeatureFlagKey, FeatureUnlockMeta>> = 
     subtitle: 'Novas ofertas disponíveis',
     iconUrl: getAssetUrl(ASSETS.ui.shop),
   },
-  backgroundTick: {
-    title: 'Progresso Offline',
-    subtitle: 'O jogo avança com o painel fechado',
-    iconUrl: getAssetUrl(ASSETS.ui.energy),
-  },
+  // OFFLINE PROGRESS DESATIVADO (2026-07)
+  // backgroundTick: {
+  //   title: 'Progresso Offline',
+  //   subtitle: 'O jogo avança com o painel fechado',
+  //   iconUrl: getAssetUrl(ASSETS.ui.energy),
+  // },
 };
 
 export function getFeatureUnlockMeta(flag: FeatureFlagKey): FeatureUnlockMeta | null {

@@ -1,6 +1,7 @@
 import { GameStateDto, GearDto, HeroDto } from '../../application/dto/GameStateDto';
 import { AchievementUpdateDto } from '../../application/dto/AchievementDto';
-import { PanelSnapshot } from '../components/PanelStateSnapshot';
+// OFFLINE PROGRESS DESATIVADO (2026-07)
+// import { PanelSnapshot } from '../components/PanelStateSnapshot';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 import { RewardMomentKind } from '../delight/types/RewardMoment';
 import { RewardMomentDetector, StateChangeDetectOptions, StateChangeHandlers } from '../delight/RewardMomentDetector';
@@ -78,8 +79,9 @@ export class RewardPresentationController implements RewardCelebrationPort {
     this.wowCelebration.enqueueMoment(moment);
   }
 
-  showIdleReport(snapshot: PanelSnapshot, state: GameStateDto): void {
-    const moment = this.detector.buildIdleReport(snapshot, state);
-    if (moment) this.wowCelebration.enqueueMoment(moment);
-  }
+  // OFFLINE PROGRESS DESATIVADO (2026-07)
+  // showIdleReport(snapshot: PanelSnapshot, state: GameStateDto): void {
+  //   const moment = this.detector.buildIdleReport(snapshot, state);
+  //   if (moment) this.wowCelebration.enqueueMoment(moment);
+  // }
 }

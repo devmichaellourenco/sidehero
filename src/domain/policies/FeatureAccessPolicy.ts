@@ -30,7 +30,8 @@ export class FeatureAccessPolicy {
     const openAllLevel = getFeatureLevel(levels, 'open_all_chests');
     const optimizeLevel = getFeatureLevel(levels, 'optimize_loadout');
     const autoEquipLevel = getFeatureLevel(levels, 'auto_equip_loot');
-    const backgroundTickLevel = getFeatureLevel(levels, 'background_tick');
+    // OFFLINE PROGRESS DESATIVADO (2026-07): flags sempre off.
+    // const backgroundTickLevel = getFeatureLevel(levels, 'background_tick');
 
     return {
       autoBattle: true,
@@ -45,8 +46,11 @@ export class FeatureAccessPolicy {
       logFilter: getFeatureLevel(levels, 'log_filter') >= 1,
       battleStats: getFeatureLevel(levels, 'battle_stats') >= 1,
       shopRefresh: getFeatureLevel(levels, 'shop_refresh') >= 1,
-      backgroundTick: backgroundTickLevel >= 1,
-      backgroundTickMultiplier: backgroundTickLevel >= 2 ? 2 : 1,
+      backgroundTick: false,
+      backgroundTickMultiplier: 1,
+      // --- original (reativar offline progress) ---
+      // backgroundTick: backgroundTickLevel >= 1,
+      // backgroundTickMultiplier: backgroundTickLevel >= 2 ? 2 : 1,
       itemStash: StorageCapacityPolicy.isStashUnlocked(levels),
       stashCapacity: StorageCapacityPolicy.stashLimit(levels),
       inventoryCapacity: StorageCapacityPolicy.inventoryLimit(),

@@ -71,11 +71,17 @@ export class UiOverlayOrchestrator {
   }
 
   /** Libera o overlay ativo (ou remove da fila se ainda não subiu). */
-  release(kind: UiOverlayKind, id?: UiOverlayRequestId): void {
+  release(
+    kind: UiOverlayKind,
+    id?: UiOverlayRequestId,
+    options: { notifyIdle?: boolean } = {},
+  ): void {
     if (this.active && this.active.kind === kind && (id == null || this.active.id === id)) {
       this.active = null;
       this.pump();
-      this.notifyIdleIfReady();
+      if (options.notifyIdle !== false) {
+        this.notifyIdleIfReady();
+      }
       return;
     }
 

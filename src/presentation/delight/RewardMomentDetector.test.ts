@@ -187,7 +187,8 @@ describe('RewardMomentDetector', () => {
     expect(levelMoment?.heroPortraits).toBeUndefined();
   });
 
-  it('relatório idle usa portrait dos heróis em vez de ícone genérico', () => {
+  // OFFLINE PROGRESS DESATIVADO (2026-07)
+  it('relatório idle desativado (sem progresso offline)', () => {
     const moment = detector.buildIdleReport(
       {
         at: Date.now() - 60_000,
@@ -204,15 +205,35 @@ describe('RewardMomentDetector', () => {
       }),
     );
 
-    expect(moment?.kind).toBe('idle_report');
-    expect(moment?.iconUrl).toBeUndefined();
-    expect(moment?.heroPortrait).toEqual({
-      id: 'hero-1',
-      heroClass: 'knight',
-      name: 'Galneon',
-      ascensionId: null,
-    });
+    expect(moment).toBeNull();
   });
+
+  // it('relatório idle usa portrait dos heróis em vez de ícone genérico', () => {
+  //   const moment = detector.buildIdleReport(
+  //     {
+  //       at: Date.now() - 60_000,
+  //       stage: 1,
+  //       gold: 100,
+  //       pendingChestCount: 0,
+  //       heroLevels: { 'hero-1': 4 },
+  //     },
+  //     baseState({
+  //       stage: 2,
+  //       gold: 150,
+  //       heroes: [{ ...baseState().heroes[0], level: 5 }],
+  //       activeParty: [{ ...baseState().heroes[0], level: 5 }],
+  //     }),
+  //   );
+  //
+  //   expect(moment?.kind).toBe('idle_report');
+  //   expect(moment?.iconUrl).toBeUndefined();
+  //   expect(moment?.heroPortrait).toEqual({
+  //     id: 'hero-1',
+  //     heroClass: 'knight',
+  //     name: 'Galneon',
+  //     ascensionId: null,
+  //   });
+  // });
 
   it('ignora recompensas de vitória quando skipVictoryRewards', () => {
     const previous = baseState({ stage: 1 });
