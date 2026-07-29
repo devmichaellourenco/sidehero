@@ -336,7 +336,9 @@ export class GameViewController {
     this.overlayOrchestrator.onIdle(() => {
       this.tryShowSeasonFinaleEpilogue();
       if (this.state) {
-        this.tryShowAutoActScene(null, this.state);
+        // Não chamar tryShowAutoActScene aqui: com previous=null qualquer cena
+        // não vista vira "nova" e reentra no orquestrador (stack overflow).
+        // O render() já faz o catch-up com previous correto.
         this.syncAutoBattleTimer();
       }
     });
@@ -1282,7 +1284,7 @@ export class GameViewController {
 
     this.overlayOrchestrator.request('battle_result', key, () => {
       if (this.victoryFlow.isActive() || this.shownIntermissionKey === key) {
-        this.overlayOrchestrator.release('battle_result', key);
+        this.overlayOrchestrator.release('battle_result', key, { notifyIdle: false });
         return;
       }
       this.shownIntermissionKey = key;
@@ -2742,6 +2744,11 @@ export class GameViewController {
 
   private dismissOnboardingStep(stepId: OnboardingStepId): void {
     this.onboarding.dismissStep(stepId);
+    // CTA externo (abrir heróis, baú, etc.) esconde o tip sem passar pelo release
+    // do card — libera ghost lock sem disparar onIdle síncrono.
+    if (this.overlayOrchestrator.getActiveId() === stepId) {
+      this.overlayOrchestrator.release('onboarding', stepId, { notifyIdle: false });
+    }
   }
 
   private syncOnboarding(state: GameStateDto): void {
@@ -2760,7 +2767,8 @@ export class GameViewController {
           this.overlayOrchestrator.release('onboarding', step.id);
           if (this.state) {
             this.syncOnboarding(this.state);
-            this.tryShowAutoActScene(null, this.state);
+            // previous=state evita falso positivo de "cena recém-desbloqueada".
+            this.tryShowAutoActScene(this.state, this.state);
           }
           this.syncAutoBattleTimer();
         },
@@ -2769,14 +2777,14 @@ export class GameViewController {
           this.onboarding.hide();
           this.overlayOrchestrator.cancelKind('onboarding');
           if (this.state) {
-            this.tryShowAutoActScene(null, this.state);
+            this.tryShowAutoActScene(this.state, this.state);
           }
           this.syncAutoBattleTimer();
         },
       });
 
       if (!this.onboarding.isActive()) {
-        // Cooldown / falha de show: libera sem idle para não reentrar em syncOnboarding.
+        // Cooldown / falha de show: libera sem idle para não reentrar.
         this.overlayOrchestrator.release('onboarding', step.id, { notifyIdle: false });
         return;
       }

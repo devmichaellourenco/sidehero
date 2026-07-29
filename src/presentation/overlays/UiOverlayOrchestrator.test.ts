@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { UiOverlayOrchestrator, UI_OVERLAY_PRIORITY } from './UiOverlayOrchestrator';
 
+async function flushMicrotasks(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
 describe('UiOverlayOrchestrator', () => {
   it('apresenta imediatamente quando livre', () => {
     const orch = new UiOverlayOrchestrator();
@@ -95,17 +100,19 @@ describe('UiOverlayOrchestrator', () => {
     expect(wow).toHaveBeenCalledTimes(1);
   });
 
-  it('notifica idle quando fila e ativo esvaziam', () => {
+  it('notifica idle em microtask quando fila e ativo esvaziam', async () => {
     const orch = new UiOverlayOrchestrator();
     const idle = vi.fn();
     orch.onIdle(idle);
 
     orch.request('wow', 'w1', () => undefined);
     orch.release('wow', 'w1');
+    expect(idle).not.toHaveBeenCalled();
+    await flushMicrotasks();
     expect(idle).toHaveBeenCalledTimes(1);
   });
 
-  it('release silencioso não notifica idle (evita loop de reentrada)', () => {
+  it('release silencioso não notifica idle (evita loop de reentrada)', async () => {
     const orch = new UiOverlayOrchestrator();
     const idle = vi.fn();
     orch.onIdle(idle);
@@ -114,6 +121,28 @@ describe('UiOverlayOrchestrator', () => {
     orch.release('onboarding', 'tip', { notifyIdle: false });
 
     expect(orch.isBusy()).toBe(false);
+    await flushMicrotasks();
     expect(idle).not.toHaveBeenCalled();
+  });
+
+  it('onIdle reentrante não estoura a pilha síncrona', async () => {
+    const orch = new UiOverlayOrchestrator();
+    let depth = 0;
+    orch.onIdle(() => {
+      depth += 1;
+      if (depth > 5) return;
+      orch.request('act_scene', 'loop', () => {
+        orch.release('act_scene', 'loop');
+      });
+    });
+
+    expect(() => {
+      orch.request('wow', 'seed', () => undefined);
+      orch.release('wow', 'seed');
+    }).not.toThrow();
+
+    expect(depth).toBe(0);
+    await flushMicrotasks();
+    expect(depth).toBeGreaterThanOrEqual(1);
   });
 });

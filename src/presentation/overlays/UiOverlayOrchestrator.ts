@@ -2,6 +2,9 @@
  * Orquestra overlays exclusivos do painel: só um ativo por vez.
  * Prioridade (maior → menor): tutorial → cena → resultado de batalha → Wow.
  * Pedidos concorrentes entram na fila e sobem quando o ativo libera.
+ *
+ * `notifyIdle` é sempre adiado a um microtask para impedir reentrada síncrona
+ * (release → onIdle → request → release → … → Maximum call stack size exceeded).
  */
 
 export type UiOverlayKind = 'onboarding' | 'act_scene' | 'battle_result' | 'wow';
@@ -25,6 +28,9 @@ export class UiOverlayOrchestrator {
   private active: QueuedOverlay | null = null;
   private readonly queue: QueuedOverlay[] = [];
   private readonly idleListeners: Array<() => void> = [];
+  private idleNotifyScheduled = false;
+  /** Evita present() reentrante no mesmo tick. */
+  private presenting = false;
 
   getActiveKind(): UiOverlayKind | null {
     return this.active?.kind ?? null;
@@ -62,7 +68,7 @@ export class UiOverlayOrchestrator {
 
     if (!this.active) {
       this.active = entry;
-      present();
+      this.runPresent(entry);
       return;
     }
 
@@ -80,7 +86,7 @@ export class UiOverlayOrchestrator {
       this.active = null;
       this.pump();
       if (options.notifyIdle !== false) {
-        this.notifyIdleIfReady();
+        this.scheduleNotifyIdle();
       }
       return;
     }
@@ -103,7 +109,7 @@ export class UiOverlayOrchestrator {
     if (this.active?.kind === kind) {
       this.active = null;
       this.pump();
-      this.notifyIdleIfReady();
+      this.scheduleNotifyIdle();
     }
   }
 
@@ -113,12 +119,26 @@ export class UiOverlayOrchestrator {
 
   /** Reordena a fila e tenta apresentar o próximo se estiver livre. */
   pump(): void {
-    if (this.active) return;
+    if (this.active || this.presenting) return;
     this.sortQueue();
     const next = this.queue.shift();
     if (!next) return;
     this.active = next;
-    next.present();
+    this.runPresent(next);
+  }
+
+  private runPresent(entry: QueuedOverlay): void {
+    if (this.presenting) return;
+    this.presenting = true;
+    try {
+      entry.present();
+    } finally {
+      this.presenting = false;
+    }
+    // present() pode ter feito release; retoma a fila após sair do present.
+    if (!this.active) {
+      this.pump();
+    }
   }
 
   private sortQueue(): void {
@@ -129,10 +149,16 @@ export class UiOverlayOrchestrator {
     });
   }
 
-  private notifyIdleIfReady(): void {
+  private scheduleNotifyIdle(): void {
     if (this.active || this.queue.length > 0) return;
-    for (const listener of this.idleListeners) {
-      listener();
-    }
+    if (this.idleNotifyScheduled) return;
+    this.idleNotifyScheduled = true;
+    queueMicrotask(() => {
+      this.idleNotifyScheduled = false;
+      if (this.active || this.queue.length > 0) return;
+      for (const listener of this.idleListeners) {
+        listener();
+      }
+    });
   }
 }

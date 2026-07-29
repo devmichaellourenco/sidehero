@@ -147,7 +147,7 @@ export class WowCelebrationController {
 
     const present = () => {
       if (this.activeCelebration || this.displayQueue.length === 0) {
-        this.overlayOrchestrator?.release('wow', 'wow-display');
+        this.overlayOrchestrator?.release('wow', 'wow-display', { notifyIdle: false });
         return;
       }
       const banner = this.displayQueue.shift()!;
