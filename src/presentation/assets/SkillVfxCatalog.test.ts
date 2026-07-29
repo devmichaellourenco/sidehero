@@ -17,23 +17,48 @@ describe('SkillVfxCatalog', () => {
     );
   });
 
-  it('registra fireball com SVG dedicado', () => {
+  it('registra fireball com folha de sprites em linha (9x1)', () => {
     expect(listSkillVfxIds()).toContain('fireball');
-    expect(getSkillVfxDefinition('fireball')?.motion).toBe('projectile');
-    expect(getSkillVfxSvgPath('fireball')).toBe('skills/svg/fireball.svg');
+    const definition = getSkillVfxDefinition('fireball');
+    expect(definition?.motion).toBe('projectile');
+    expect(definition?.spriteSheet).toEqual({
+      path: 'skills/vfx/fireball/fireball_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 360,
+    });
   });
 
-  it('registra impacto da fireball', () => {
+  it('registra impacto da fireball com folha de sprites', () => {
     const impact = getSkillVfxDefinition('fireball')?.impact;
-    expect(impact).toBeDefined();
-    expect(getSkillVfxImpactSvgPath('fireball', impact!)).toBe('skills/svg/impact_fireball.svg');
+    expect(impact?.spriteSheet).toEqual({
+      path: 'skills/vfx/fireball/fireball_impact_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 520,
+    });
+  });
+
+  it('registra arcane_bolt com folha thunder_bolt e impacto', () => {
+    const definition = getSkillVfxDefinition('arcane_bolt');
+    expect(definition?.motion).toBe('projectile');
+    expect(definition?.spriteSheet).toEqual({
+      path: 'skills/vfx/thunder_bolt/thunder_bolt_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 320,
+    });
+    expect(definition?.impact?.spriteSheet).toEqual({
+      path: 'skills/vfx/thunder_bolt/thunder_bolt_impact_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 480,
+    });
   });
 
   it('registra arcane_bolt com thunder_bolt.svg', () => {
-    const definition = getSkillVfxDefinition('arcane_bolt');
-    expect(definition?.svgFile).toBe('thunder_bolt.svg');
-    expect(definition?.rotationDeg).toBe(-90);
-    expect(getSkillVfxSvgPath('arcane_bolt', definition?.svgFile)).toBe(
+    // legado: aliases ainda resolvem a skill; SVG permanece no disco para fallback
+    expect(getSkillVfxSvgPath('arcane_bolt', 'thunder_bolt.svg')).toBe(
       'skills/svg/thunder_bolt.svg',
     );
   });
@@ -102,7 +127,9 @@ describe('SkillVfxCatalog', () => {
       expect(getSkillVfxDefinition(skillId)).not.toBeNull();
     }
 
-    expect(getSkillVfxDefinition('arc_mag_bolt')?.svgFile).toBe('thunder_bolt.svg');
+    expect(getSkillVfxDefinition('arc_mag_bolt')?.spriteSheet?.path).toBe(
+      'skills/vfx/thunder_bolt/thunder_bolt_sheet.png',
+    );
     expect(getSkillVfxDefinition('goblin_stab')?.svgFile).toBe('thrust.svg');
     expect(getSkillVfxDefinition('reaver_cleave')?.svgFile).toBe('cleave.svg');
     expect(getSkillVfxDefinition('frost_breath')?.svgFile).toBe('blizzard.svg');

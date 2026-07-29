@@ -94,6 +94,36 @@ async function copySkillSvgSprites() {
   return copied;
 }
 
+/** Folhas VFX em public/sprites/skills/vfx/<skill>/ → panel/assets/skills/vfx/<skill>/. */
+async function copySkillVfxSheets() {
+  const vfxRoot = join(skillsSpritesRoot, 'vfx');
+  let copied = 0;
+
+  let skillDirs;
+  try {
+    skillDirs = await readdir(vfxRoot);
+  } catch {
+    return 0;
+  }
+
+  for (const skillId of skillDirs) {
+    const sourceDir = join(vfxRoot, skillId);
+    const sourceStat = await stat(sourceDir).catch(() => null);
+    if (!sourceStat?.isDirectory()) continue;
+
+    const files = await readdir(sourceDir);
+    for (const file of files) {
+      if (!/\.(png|jpe?g|webp)$/i.test(file)) continue;
+      const destPath = join(outRoot, 'skills', 'vfx', skillId, file);
+      await mkdir(dirname(destPath), { recursive: true });
+      await copyFile(join(sourceDir, file), destPath);
+      copied += 1;
+    }
+  }
+
+  return copied;
+}
+
 /** Sprites de itens customizados em public/sprites/items. */
 const ITEM_WEAPON_SPRITE_MAP = [
   ['weapons/standard_common_sword.png', 'gear/items/standard_common_sword.png'],
@@ -279,6 +309,7 @@ export async function copyAssets() {
   const enemySpriteCount = await copyEnemySprites();
   await copyAssetBatch(skillsSpritesRoot, SKILL_SPRITE_MAP);
   const skillSvgCount = await copySkillSvgSprites();
+  const skillVfxSheetCount = await copySkillVfxSheets();
   await copyAssetBatch(itemsSpritesRoot, ITEM_WEAPON_SPRITE_MAP);
   await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
   const campaignSceneCount = await copyCampaignScenes();
@@ -291,6 +322,7 @@ export async function copyAssets() {
     enemySpriteCount +
     SKILL_SPRITE_MAP.length +
     skillSvgCount +
+    skillVfxSheetCount +
     ITEM_WEAPON_SPRITE_MAP.length +
     PUBLIC_ASSET_MAP.length +
     campaignSceneCount;

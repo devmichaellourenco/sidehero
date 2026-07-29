@@ -5,6 +5,7 @@ import {
   getSkillVfxImpactSvgPath,
   getSkillVfxSvgPath,
   SkillVfxDefinition,
+  SkillVfxSpriteSheetDefinition,
 } from '../assets/SkillVfxCatalog';
 
 const DEFAULT_DURATION_MS = 520;
@@ -195,8 +196,8 @@ export class BattleSkillVfxController {
     definition: SkillVfxDefinition,
     coords: { startX: number; startY: number; endX: number; endY: number },
   ): void {
-    const svgUrl = getAssetUrl(getSkillVfxSvgPath(event.skillId, definition.svgFile));
-    if (!svgUrl) return;
+    const visual = this.createProjectileVisual(event.skillId, definition);
+    if (!visual) return;
 
     const host = document.createElement('div');
     host.className = 'battle-skill-vfx battle-skill-vfx--projectile';
@@ -214,11 +215,73 @@ export class BattleSkillVfxController {
       host.classList.add('battle-skill-vfx--rtl');
     }
 
-    host.appendChild(this.createSvgFrame(svgUrl, definition.rotationDeg));
+    host.appendChild(visual);
     this.layer.appendChild(host);
 
     const duration = definition.durationMs || DEFAULT_DURATION_MS;
     window.setTimeout(() => host.remove(), duration + 80);
+  }
+
+  private createProjectileVisual(
+    skillId: string,
+    definition: SkillVfxDefinition,
+  ): HTMLElement | null {
+    if (definition.spriteSheet) {
+      return this.createSpriteSheetFrame(definition.spriteSheet, {
+        durationMs: definition.durationMs,
+        loop: true,
+      });
+    }
+
+    const svgUrl = getAssetUrl(getSkillVfxSvgPath(skillId, definition.svgFile));
+    if (!svgUrl) return null;
+    return this.createSvgFrame(svgUrl, definition.rotationDeg);
+  }
+
+  private createSpriteSheetFrame(
+    sheet: SkillVfxSpriteSheetDefinition,
+    options: { durationMs: number; loop?: boolean },
+  ): HTMLElement | null {
+    const sheetUrl = getAssetUrl(sheet.path);
+    if (!sheetUrl) return null;
+
+    const frameCount = sheet.columns * sheet.rows;
+    const cycleMs = sheet.frameDurationMs ?? options.durationMs;
+    const cols = sheet.columns;
+    const rows = sheet.rows;
+    const loop = options.loop ?? true;
+
+    const el = document.createElement('div');
+    el.className = 'battle-skill-vfx__sheet';
+    el.style.backgroundImage = `url("${sheetUrl}")`;
+    el.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
+    el.style.setProperty('--vfx-sheet-duration', `${cycleMs}ms`);
+    el.setAttribute('aria-hidden', 'true');
+
+    const keyframes: Keyframe[] = [];
+    for (let i = 0; i < frameCount; i += 1) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = cols <= 1 ? 0 : (col / (cols - 1)) * 100;
+      const y = rows <= 1 ? 0 : (row / (rows - 1)) * 100;
+      keyframes.push({
+        backgroundPosition: `${x}% ${y}%`,
+        offset: i / frameCount,
+        easing: 'step-end',
+      });
+    }
+    keyframes.push({
+      backgroundPosition: keyframes[frameCount - 1]?.backgroundPosition ?? '0% 0%',
+      offset: 1,
+    });
+
+    el.animate(keyframes, {
+      duration: cycleMs,
+      iterations: loop ? Infinity : 1,
+      fill: loop ? 'none' : 'forwards',
+    });
+
+    return el;
   }
 
   private spawnSelfPulse(
@@ -260,12 +323,6 @@ export class BattleSkillVfxController {
     const impact = definition.impact;
     if (!impact) return;
 
-    const impactPath = getSkillVfxImpactSvgPath(skillId, impact);
-    if (!impactPath) return;
-
-    const svgUrl = getAssetUrl(impactPath);
-    if (!svgUrl) return;
-
     const left = centerX - impact.width / 2;
     const top = centerY - impact.height / 2;
 
@@ -277,9 +334,23 @@ export class BattleSkillVfxController {
     host.style.setProperty('--vfx-from-x', `${left}px`);
     host.style.setProperty('--vfx-from-y', `${top}px`);
     host.style.setProperty('--vfx-duration', `${impact.durationMs}ms`);
-    host.appendChild(this.createSvgObject(svgUrl));
-    this.layer.appendChild(host);
 
+    if (impact.spriteSheet) {
+      const sheet = this.createSpriteSheetFrame(impact.spriteSheet, {
+        durationMs: impact.durationMs,
+        loop: false,
+      });
+      if (!sheet) return;
+      host.appendChild(sheet);
+    } else {
+      const impactPath = getSkillVfxImpactSvgPath(skillId, impact);
+      if (!impactPath) return;
+      const svgUrl = getAssetUrl(impactPath);
+      if (!svgUrl) return;
+      host.appendChild(this.createSvgObject(svgUrl));
+    }
+
+    this.layer.appendChild(host);
     window.setTimeout(() => host.remove(), impact.durationMs + 80);
   }
 

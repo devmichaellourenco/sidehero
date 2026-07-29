@@ -1719,6 +1719,17 @@ h2 {
   pointer-events: none;
 }
 
+.battle-skill-vfx__sheet {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: 0% 0%;
+  /* Fundo preto da folha some; chama fica luminosa no stage. */
+  mix-blend-mode: screen;
+}
+
 .battle-skill-vfx__rotator {
   width: 100%;
   height: 100%;

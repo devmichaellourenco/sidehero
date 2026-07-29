@@ -8,6 +8,18 @@ export interface SkillVfxImpactDefinition {
   delayMs?: number;
   /** Arquivo em `public/sprites/skills/svg/`; padrão = `impact_{skillId}.svg`. */
   svgFile?: string;
+  /** Folha PNG animada no lugar do SVG de impacto. */
+  spriteSheet?: SkillVfxSpriteSheetDefinition;
+}
+
+/** Folha de sprites PNG (grade) no lugar do SVG estático. */
+export interface SkillVfxSpriteSheetDefinition {
+  /** Caminho sob `panel/assets/` (ex.: `skills/vfx/fireball/fireball_sheet.png`). */
+  path: string;
+  columns: number;
+  rows: number;
+  /** Duração de um ciclo completo da folha; padrão = durationMs do VFX. */
+  frameDurationMs?: number;
 }
 
 export interface SkillVfxDefinition {
@@ -18,6 +30,8 @@ export interface SkillVfxDefinition {
   height: number;
   /** Arquivo em `public/sprites/skills/svg/`; padrão = `{skillId}.svg`. */
   svgFile?: string;
+  /** Quando definido, o projétil usa a folha animada em vez do SVG. */
+  spriteSheet?: SkillVfxSpriteSheetDefinition;
   /** Rotação do SVG (ex.: raio vertical → projétil horizontal). */
   rotationDeg?: number;
   glow?: 'fire' | 'lightning' | 'heal' | 'slash' | 'cold' | 'holy' | 'poison' | 'arcane' | 'shadow' | 'shield';
@@ -66,25 +80,52 @@ const SKILL_VFX_BY_ID: Record<string, SkillVfxDefinition> = {
   fireball: {
     skillId: 'fireball',
     motion: 'projectile',
-    durationMs: 520,
-    width: 148,
-    height: 74,
+    durationMs: 560,
+    width: 140,
+    height: 80,
     glow: 'fire',
+    spriteSheet: {
+      path: 'skills/vfx/fireball/fireball_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 360,
+    },
     impact: {
-      durationMs: 580,
-      width: 132,
-      height: 132,
+      durationMs: 520,
+      width: 160,
+      height: 136,
+      spriteSheet: {
+        path: 'skills/vfx/fireball/fireball_impact_sheet.png',
+        columns: 9,
+        rows: 1,
+        frameDurationMs: 520,
+      },
     },
   },
   arcane_bolt: {
     skillId: 'arcane_bolt',
     motion: 'projectile',
-    svgFile: 'thunder_bolt.svg',
-    rotationDeg: -90,
-    durationMs: 400,
-    width: 64,
-    height: 136,
+    durationMs: 480,
+    width: 148,
+    height: 56,
     glow: 'lightning',
+    spriteSheet: {
+      path: 'skills/vfx/thunder_bolt/thunder_bolt_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 320,
+    },
+    impact: {
+      durationMs: 480,
+      width: 148,
+      height: 134,
+      spriteSheet: {
+        path: 'skills/vfx/thunder_bolt/thunder_bolt_impact_sheet.png',
+        columns: 9,
+        rows: 1,
+        frameDurationMs: 480,
+      },
+    },
   },
   frost_shard: {
     skillId: 'frost_shard',
@@ -404,6 +445,13 @@ export function getSkillVfxDefinition(skillId: string): SkillVfxDefinition | nul
 /** SVG animado em `public/sprites/skills/svg/{skillId}.svg` → `panel/assets/skills/svg/`. */
 export function getSkillVfxSvgPath(skillId: string, svgFile?: string): string {
   return `skills/svg/${svgFile ?? `${skillId}.svg`}`;
+}
+
+/** Folha PNG em `public/sprites/skills/vfx/...` → `panel/assets/skills/vfx/...`. */
+export function getSkillVfxSpriteSheetPath(
+  sheet?: SkillVfxSpriteSheetDefinition,
+): string | null {
+  return sheet?.path ?? null;
 }
 
 /** Impacto em `public/sprites/skills/svg/impact_{skillId}.svg` (ou nome custom no catálogo). */
