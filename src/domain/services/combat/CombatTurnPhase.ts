@@ -102,6 +102,7 @@ export class CombatTurnPhase {
       .withPendingSkillActions([]);
 
     let actionsResolved = 0;
+    const actedThisTick = new Set<string>();
 
     while (actionsResolved < MAX_ACTIONS_PER_TICK) {
       const heroes = workingState.activeHeroes();
@@ -124,17 +125,16 @@ export class CombatTurnPhase {
         return outcome;
       }
 
-      const readyActors = this.actionTimers.listReadyActors(
-        combat.actionTimers,
-        heroes,
-        combat.enemies,
-      );
+      const readyActors = this.actionTimers
+        .listReadyActors(combat.actionTimers, heroes, combat.enemies)
+        .filter((actor) => !actedThisTick.has(combatantKey(actor.side, actor.id)));
 
       if (readyActors.length === 0) {
         break;
       }
 
-      const strike = this.executeSkillStrike(workingState, combat, readyActors[0]);
+      const actor = readyActors[0];
+      const strike = this.executeSkillStrike(workingState, combat, actor);
       workingState = strike.state;
       combat = strike.combat;
       events.push(...strike.events);
@@ -151,6 +151,7 @@ export class CombatTurnPhase {
         break;
       }
 
+      actedThisTick.add(combatantKey(actor.side, actor.id));
       actionsResolved += 1;
     }
 

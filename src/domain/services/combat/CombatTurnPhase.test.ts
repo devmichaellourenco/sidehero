@@ -192,4 +192,54 @@ describe('CombatTurnPhase', () => {
     expect(nextTick.state.phaseRun?.waveIndex).toBe(0);
     expect(nextTick.state.combat?.encounterMeta?.phaseId).toBe(buildPhaseId(1, 3));
   });
+
+  it('mesmo herói dispara só uma skill por tick mesmo com timer atrasado e 2 skills prontas', () => {
+    let sorcerer = Hero.createStarter('s1', 'sorcerer', 'Nix');
+    sorcerer = Hero.restore({
+      ...sorcerer.toProps(),
+      skillRanks: { fireball: 1, arcane_bolt: 1 },
+      equippedSkillIds: ['basic_attack', 'fireball', 'arcane_bolt'],
+    });
+
+    const enemy = Enemy.restore({
+      id: 'e1',
+      name: 'Dummy',
+      enemyType: 'giant_rat',
+      stage: 1,
+      stats: Stats.fromBase(1, 0, 500),
+      goldReward: 1,
+      xpReward: 1,
+    });
+
+    const combat = CombatState.restore({
+      ...createCombat([sorcerer], [enemy], {
+        phaseId: buildPhaseId(1, 1),
+        waveIndex: 0,
+        waveCount: 1,
+        isBossWave: false,
+      }).toProps(),
+      // Dívida típica após COMBAT_DELTA_SECONDS = 1 com recovery de skill < 1s.
+      actionTimers: { 'hero:s1': { remaining: -0.9, total: 1 }, 'enemy:e1': { remaining: 5, total: 5 } },
+      skillCooldowns: {},
+    });
+
+    const state = GameState.restore({
+      ...GameState.initial().toProps(),
+      heroes: [sorcerer],
+      campaignProgress: {
+        ...GameState.initial().campaignProgress.toProps(),
+        selectedPhaseId: buildPhaseId(1, 1),
+      },
+      phaseRun: PhaseRun.start(buildPhaseId(1, 1)).toProps(),
+      combat,
+    });
+
+    const result = phase.execute(state);
+    const heroVfx = result.skillVfxEvents.filter((event) => event.attackerId === 's1');
+    const heroSkillEvents = result.events.filter((event) => event.includes('Nix'));
+
+    expect(heroVfx).toHaveLength(1);
+    expect(heroSkillEvents.length).toBeLessThanOrEqual(1);
+    expect(result.state.combat?.actionTimers['hero:s1']?.remaining).toBeGreaterThan(0);
+  });
 });

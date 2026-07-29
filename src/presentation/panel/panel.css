@@ -1703,12 +1703,31 @@ h2 {
   animation-name: battle-skill-vfx-travel-rtl;
 }
 
+.battle-skill-vfx--rise {
+  /* Sprites já animam o crescimento; só ancora no chão do alvo. */
+  animation: none;
+}
+
 .battle-skill-vfx--self {
   animation-name: battle-skill-vfx-pulse;
 }
 
 .battle-skill-vfx--impact {
   animation: battle-skill-vfx-impact var(--vfx-duration, 580ms) ease-out forwards;
+}
+
+.battle-skill-vfx--impact:not(
+  .battle-skill-vfx--fire,
+  .battle-skill-vfx--lightning,
+  .battle-skill-vfx--heal,
+  .battle-skill-vfx--slash,
+  .battle-skill-vfx--cold,
+  .battle-skill-vfx--holy,
+  .battle-skill-vfx--poison,
+  .battle-skill-vfx--arcane,
+  .battle-skill-vfx--shadow,
+  .battle-skill-vfx--shield
+) {
   filter: drop-shadow(0 0 16px rgba(255, 96, 32, 0.75));
 }
 

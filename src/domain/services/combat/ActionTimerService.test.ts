@@ -35,6 +35,23 @@ describe('ActionTimerService', () => {
     expect(resolveActionTimeRatio(updated[key])).toBe(0);
   });
 
+  it('não carrega dívida negativa — uma ação por TTA mesmo após tick grande', () => {
+    const hero = Hero.createStarter('h1', 'sorcerer', 'Nix');
+    const key = 'hero:h1';
+    const overdue = { [key]: { remaining: -0.9, total: 1 } };
+
+    const afterSkill = service.scheduleAfterAction(
+      overdue,
+      { side: 'hero', id: 'h1' },
+      1,
+      1,
+      true,
+    );
+
+    expect(afterSkill[key]?.remaining).toBeGreaterThan(0);
+    expect(service.listReadyActors(afterSkill, [hero], [])).toHaveLength(0);
+  });
+
   it('migra timers legados numéricos via normalize no advance', () => {
     const hero = Hero.createStarter('h1', 'knight', 'Gal');
     const legacy = { 'hero:h1': 0.4 } as unknown as ReturnType<ActionTimerService['createInitial']>;

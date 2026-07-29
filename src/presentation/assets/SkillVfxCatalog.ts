@@ -1,4 +1,4 @@
-export type SkillVfxMotion = 'projectile' | 'melee' | 'aoe' | 'self';
+export type SkillVfxMotion = 'projectile' | 'melee' | 'aoe' | 'self' | 'rise';
 
 export interface SkillVfxImpactDefinition {
   durationMs: number;
@@ -129,12 +129,29 @@ const SKILL_VFX_BY_ID: Record<string, SkillVfxDefinition> = {
   },
   frost_shard: {
     skillId: 'frost_shard',
-    motion: 'projectile',
-    svgFile: 'frost_shard.svg',
-    durationMs: 420,
-    width: 72,
-    height: 96,
+    motion: 'rise',
+    placement: 'target',
+    durationMs: 520,
+    width: 118,
+    height: 130,
     glow: 'cold',
+    spriteSheet: {
+      path: 'skills/vfx/frost_shard/frost_shard_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 520,
+    },
+    impact: {
+      durationMs: 480,
+      width: 132,
+      height: 132,
+      spriteSheet: {
+        path: 'skills/vfx/frost_shard/frost_shard_impact_sheet.png',
+        columns: 9,
+        rows: 1,
+        frameDurationMs: 480,
+      },
+    },
   },
   power_attack: {
     skillId: 'power_attack',

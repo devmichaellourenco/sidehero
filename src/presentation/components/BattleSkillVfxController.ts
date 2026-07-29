@@ -54,6 +54,23 @@ export class BattleSkillVfxController {
       return;
     }
 
+    const impactCenterX = toRect.left - stripRect.left + toRect.width / 2;
+    const impactCenterY = toRect.top - stripRect.top + toRect.height * 0.32;
+
+    if (definition.motion === 'rise') {
+      // Hitbox do ator (= sprite), não o card inteiro (barras/skills).
+      const riseX = toRect.left - stripRect.left + toRect.width / 2 - definition.width / 2;
+      const riseY = toRect.bottom - stripRect.top - definition.height;
+      this.spawnRise(event, definition, { x: riseX, y: riseY });
+      if (definition.impact) {
+        const impactDelay = definition.impact.delayMs ?? definition.durationMs;
+        window.setTimeout(() => {
+          this.spawnImpact(definition, impactCenterX, impactCenterY, event.skillId);
+        }, impactDelay);
+      }
+      return;
+    }
+
     const needsAttacker =
       definition.motion === 'projectile' || definition.placement === 'caster';
     const attackerAnchor = needsAttacker
@@ -71,8 +88,6 @@ export class BattleSkillVfxController {
       : 0;
     const endX = toRect.left - stripRect.left + toRect.width / 2 - definition.width / 2;
     const endY = toRect.top - stripRect.top + toRect.height * 0.32 - definition.height / 2;
-    const impactCenterX = toRect.left - stripRect.left + toRect.width / 2;
-    const impactCenterY = toRect.top - stripRect.top + toRect.height * 0.32;
 
     const placementTarget = definition.placement === 'target';
     const anchorRect = placementTarget ? toRect : fromRect ?? toRect;
@@ -191,12 +206,35 @@ export class BattleSkillVfxController {
     window.setTimeout(() => host.remove(), definition.durationMs + 80);
   }
 
+  private spawnRise(
+    event: CombatSkillVfxDto,
+    definition: SkillVfxDefinition,
+    coords: { x: number; y: number },
+  ): void {
+    const visual = this.createSkillVisual(event.skillId, definition, { loop: false });
+    if (!visual) return;
+
+    const host = document.createElement('div');
+    host.className = 'battle-skill-vfx battle-skill-vfx--rise';
+    this.applyGlowClass(host, definition.glow);
+    host.setAttribute('aria-hidden', 'true');
+    host.style.width = `${definition.width}px`;
+    host.style.height = `${definition.height}px`;
+    host.style.setProperty('--vfx-from-x', `${coords.x}px`);
+    host.style.setProperty('--vfx-from-y', `${coords.y}px`);
+    host.style.setProperty('--vfx-duration', `${definition.durationMs}ms`);
+    host.appendChild(visual);
+    this.layer.appendChild(host);
+
+    window.setTimeout(() => host.remove(), definition.durationMs + 80);
+  }
+
   private spawnProjectile(
     event: CombatSkillVfxDto,
     definition: SkillVfxDefinition,
     coords: { startX: number; startY: number; endX: number; endY: number },
   ): void {
-    const visual = this.createProjectileVisual(event.skillId, definition);
+    const visual = this.createSkillVisual(event.skillId, definition, { loop: true });
     if (!visual) return;
 
     const host = document.createElement('div');
@@ -222,14 +260,15 @@ export class BattleSkillVfxController {
     window.setTimeout(() => host.remove(), duration + 80);
   }
 
-  private createProjectileVisual(
+  private createSkillVisual(
     skillId: string,
     definition: SkillVfxDefinition,
+    options: { loop: boolean },
   ): HTMLElement | null {
     if (definition.spriteSheet) {
       return this.createSpriteSheetFrame(definition.spriteSheet, {
         durationMs: definition.durationMs,
-        loop: true,
+        loop: options.loop,
       });
     }
 
@@ -328,6 +367,7 @@ export class BattleSkillVfxController {
 
     const host = document.createElement('div');
     host.className = 'battle-skill-vfx battle-skill-vfx--impact';
+    this.applyGlowClass(host, definition.glow);
     host.setAttribute('aria-hidden', 'true');
     host.style.width = `${impact.width}px`;
     host.style.height = `${impact.height}px`;

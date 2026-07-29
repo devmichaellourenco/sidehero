@@ -82,12 +82,13 @@ export class ActionTimerService {
     const interval = usedSkill
       ? Math.max(MIN_ACTION_INTERVAL_SECONDS, SKILL_ACTION_RECOVERY_SECONDS / castSpeed)
       : Math.max(MIN_ACTION_INTERVAL_SECONDS, 1 / attackSpeed);
-    const current = normalizeActionTimerEntry(timers[key]);
-    const debt = Math.min(current.remaining, 0);
 
+    // Sem carregar dívida negativa: um TTA cheio = uma ação.
+    // Com COMBAT_DELTA_SECONDS ≈ 1s e recovery de skill < 1s, a dívida
+    // faria o mesmo ator disparar várias skills no mesmo tick.
     return {
       ...normalizeActionTimerMap(timers),
-      [key]: { remaining: debt + interval, total: interval },
+      [key]: { remaining: interval, total: interval },
     };
   }
 

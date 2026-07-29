@@ -63,6 +63,24 @@ describe('SkillVfxCatalog', () => {
     );
   });
 
+  it('registra frost_shard como rise vertical com folhas de sprites', () => {
+    const definition = getSkillVfxDefinition('frost_shard');
+    expect(definition?.motion).toBe('rise');
+    expect(definition?.placement).toBe('target');
+    expect(definition?.spriteSheet).toEqual({
+      path: 'skills/vfx/frost_shard/frost_shard_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 520,
+    });
+    expect(definition?.impact?.spriteSheet).toEqual({
+      path: 'skills/vfx/frost_shard/frost_shard_impact_sheet.png',
+      columns: 9,
+      rows: 1,
+      frameDurationMs: 480,
+    });
+  });
+
   it('registra minor_heal com heal.svg no alvo', () => {
     const definition = getSkillVfxDefinition('minor_heal');
     expect(definition?.svgFile).toBe('heal.svg');
@@ -99,7 +117,7 @@ describe('SkillVfxCatalog', () => {
       expect(getSkillVfxDefinition(skillId)).not.toBeNull();
     }
 
-    expect(getSkillVfxDefinition('frost_shard')?.motion).toBe('projectile');
+    expect(getSkillVfxDefinition('frost_shard')?.motion).toBe('rise');
     expect(getSkillVfxDefinition('power_attack')?.motion).toBe('melee');
     expect(getSkillVfxDefinition('thrust')?.svgFile).toBe('thrust.svg');
     expect(getSkillVfxDefinition('blessing')?.placement).toBe('caster');
