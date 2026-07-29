@@ -139,8 +139,8 @@ export class OnboardingController {
 
     const rect = anchor.getBoundingClientRect();
     const cardRect = card.getBoundingClientRect();
-    const margin = 12;
-    const viewportPadding = 8;
+    const margin = 16;
+    const viewportPadding = 12;
 
     let top = rect.bottom + margin;
     let placement: 'top' | 'bottom' = 'bottom';

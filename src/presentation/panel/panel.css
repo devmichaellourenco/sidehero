@@ -13817,16 +13817,16 @@ body.party-drag-active * {
 .onboarding-backdrop {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--parchment-2) 58%, transparent);
+  background: color-mix(in srgb, var(--ink) 42%, transparent);
   pointer-events: auto;
 }
 
 .onboarding-card {
   position: fixed;
   z-index: 1;
-  width: min(320px, calc(100vw - 24px));
-  padding: 16px 16px 14px;
-  border-radius: 14px;
+  width: min(380px, calc(100vw - 20px));
+  padding: 22px 22px 18px;
+  border-radius: 16px;
   border: 2px solid var(--seal-gold);
   background: linear-gradient(
     165deg,
@@ -13835,39 +13835,46 @@ body.party-drag-active * {
     var(--parchment-2) 100%
   );
   box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.38),
-    0 0 0 1px rgba(255, 255, 255, 0.65) inset;
+    0 22px 56px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
+    0 0 0 6px color-mix(in srgb, var(--seal-gold) 22%, transparent);
   pointer-events: auto;
 }
 
 .onboarding-kicker {
-  margin: 0 0 6px;
-  font-size: 10px;
+  margin: 0 0 8px;
+  font-family: var(--font-heading);
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   color: var(--seal-gold-dark);
 }
 
 .onboarding-title {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   font-family: var(--font-heading);
-  font-size: 16px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
   color: var(--ink);
 }
 
 .onboarding-message {
-  margin: 0 0 14px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--ink-muted);
+  margin: 0 0 18px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--ink);
 }
 
 .onboarding-inline-icon {
   display: inline-block;
-  width: 1.15em;
-  height: 1.15em;
-  vertical-align: -0.2em;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.22em;
   object-fit: contain;
   margin: 0 0.15em;
 }
@@ -13876,18 +13883,18 @@ body.party-drag-active * {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
 .onboarding-skip {
   flex: 0 1 auto;
-  min-height: 38px;
-  padding: 8px 12px;
+  min-height: 44px;
+  padding: 10px 14px;
   border: 1px solid var(--panel-border-soft);
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--panel-chip);
   color: var(--ink-muted);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -13900,17 +13907,18 @@ body.party-drag-active * {
 
 .onboarding-ok {
   flex: 1;
-  min-height: 38px;
-  padding: 8px 16px;
+  min-height: 44px;
+  padding: 10px 18px;
   border: none;
-  border-radius: 9px;
+  border-radius: 10px;
   background: linear-gradient(180deg, var(--forest-hi) 0%, var(--forest) 100%);
   color: var(--on-accent-label);
-  font-size: 12px;
+  font-family: var(--font-heading);
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(36, 88, 48, 0.35);
+  box-shadow: 0 4px 14px rgba(36, 88, 48, 0.4);
 }
 
 .onboarding-ok:hover {
