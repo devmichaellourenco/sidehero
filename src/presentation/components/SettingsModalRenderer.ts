@@ -8,6 +8,8 @@ export type SettingsModalHandlers = {
     value: GamePreferences[K],
   ) => void;
   onOpenUpgrades: () => void;
+  onExportSave?: () => void;
+  onImportSave?: () => void;
 };
 
 export class SettingsModalRenderer {
@@ -51,6 +53,20 @@ export class SettingsModalRenderer {
         })}
         ${this.renderSpeedSelect(state, preferences)}
       </div>
+      <section class="settings-backup" aria-label="Backup do save">
+        <h3 class="settings-backup-title">Backup do progresso</h3>
+        <p class="settings-backup-hint">
+          Exporte um arquivo criptografado para guardar fora da extensão. Útil antes de reinstalar.
+        </p>
+        <div class="settings-backup-actions">
+          <button type="button" class="primary-btn settings-backup-btn" data-export-save>
+            Exportar save
+          </button>
+          <button type="button" class="settings-backup-btn settings-backup-btn--secondary" data-import-save>
+            Importar save
+          </button>
+        </div>
+      </section>
       <p class="settings-hint">Atalho: <kbd>Espaço</kbd> avança batalha (com painel focado)</p>
     `;
 
@@ -83,6 +99,14 @@ export class SettingsModalRenderer {
 
     container.querySelector('[data-open-upgrades]')?.addEventListener('click', () => {
       handlers.onOpenUpgrades();
+    });
+
+    container.querySelector('[data-export-save]')?.addEventListener('click', () => {
+      handlers.onExportSave?.();
+    });
+
+    container.querySelector('[data-import-save]')?.addEventListener('click', () => {
+      handlers.onImportSave?.();
     });
   }
 

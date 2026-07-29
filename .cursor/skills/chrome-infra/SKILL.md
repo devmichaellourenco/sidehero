@@ -29,6 +29,7 @@ npm run release  # zip → releases/ — só quando o usuário pedir (agente nã
 - Chave: `side_hero_game_state`
 - Legado: `taskbar_hero_game_state` (migração automática)
 - Meta: repositório separado
+- Backup: `SaveBackupCodec` (AES-GCM ofuscado) + `EXPORT_SAVE_BACKUP` / `IMPORT_SAVE_BACKUP`; UI em Configurações
 
 ## DI
 
@@ -36,7 +37,7 @@ Composition root: `infrastructure/di/createGameApplication.ts`
 
 ## Testes
 
-`ChromeStorageGameRepository.test.ts`, `SerialTaskRunner.test.ts` — criar ou atualizar; não executar automaticamente.
+`ChromeStorageGameRepository.test.ts`, `SerialTaskRunner.test.ts`, `SaveBackupCodec.test.ts` — criar ou atualizar; não executar automaticamente.
 
 ## Workflow do agente
 

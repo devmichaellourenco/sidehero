@@ -351,6 +351,35 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const state = await app.getState.execute();
       return { ok: true, state };
     }
+    case 'EXPORT_SAVE_BACKUP': {
+      try {
+        const result = await app.exportSaveBackup.execute();
+        const state = await app.getState.execute();
+        return {
+          ok: true,
+          state,
+          backupFile: result.backupFile,
+          backupFileName: result.fileName,
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error: error instanceof Error ? error.message : 'Falha ao exportar save',
+        };
+      }
+    }
+    case 'IMPORT_SAVE_BACKUP': {
+      try {
+        const state = await app.importSaveBackup.execute(message.backupFile);
+        await syncTickAlarmFromState();
+        return { ok: true, state };
+      } catch (error) {
+        return {
+          ok: false,
+          error: error instanceof Error ? error.message : 'Falha ao importar save',
+        };
+      }
+    }
     default:
       return { ok: false, error: 'Mensagem desconhecida' };
   }

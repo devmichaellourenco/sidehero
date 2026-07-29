@@ -8153,6 +8153,64 @@ body.modal-open {
   font-size: 10px;
 }
 
+.settings-backup {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border-soft);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.settings-backup-title {
+  margin: 0 0 6px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.settings-backup-hint {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.settings-backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings-backup-btn {
+  appearance: none;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border-soft);
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.settings-backup-btn--secondary {
+  background: transparent;
+  color: var(--text);
+}
+
+.import-save-confirm-lead {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.import-save-confirm-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
 .settings-meta-legacy {
   display: flex;
   align-items: center;

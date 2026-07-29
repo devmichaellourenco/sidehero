@@ -75,6 +75,8 @@ export class ModalStackController {
     private readonly onOpenStash: () => void,
     private readonly onOpenInventory: () => void,
     private readonly onInventoryHeroChange: (heroId: string) => void = () => {},
+    private readonly onExportSave: () => void = () => {},
+    private readonly onImportSave: () => void = () => {},
   ) {}
 
   getModalTitle(view: ModalView, state: GameStateDto): string {
@@ -236,6 +238,8 @@ export class ModalStackController {
         this.settingsModal.render(container, state, this.getPreferences(), {
           onPreferenceChange: (key, value) => this.onPreferenceChange(key, value),
           onOpenUpgrades: () => this.onOpenUpgrades(),
+          onExportSave: () => this.onExportSave(),
+          onImportSave: () => this.onImportSave(),
         });
         break;
       case 'upgrades':

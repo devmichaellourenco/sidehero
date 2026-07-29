@@ -85,6 +85,7 @@ import { DestroyGearConfirmDialog } from './DestroyGearConfirmDialog';
 import { AscendClassConfirmDialog } from './AscendClassConfirmDialog';
 import { ImprovementResetConfirmDialog } from './ImprovementResetConfirmDialog';
 import { DivineForgeConfirmDialog } from './DivineForgeConfirmDialog';
+import { ImportSaveConfirmDialog } from './ImportSaveConfirmDialog';
 import { DivineForgeModalRenderer } from './DivineForgeModalRenderer';
 import { SkillCooldownDisplayAnimator, shouldAnimateBattleStripTimers } from './SkillCooldownDisplayAnimator';
 import { DivineForgeFlow } from '../flows/DivineForgeFlow';
@@ -187,6 +188,7 @@ export class GameViewController {
   private readonly ascendClassConfirmDialog: AscendClassConfirmDialog;
   private readonly improvementResetConfirmDialog: ImprovementResetConfirmDialog;
   private readonly forgeConfirmDialog: DivineForgeConfirmDialog;
+  private readonly importSaveConfirmDialog: ImportSaveConfirmDialog;
   private readonly donationPrompt: DonationPromptController;
   private readonly hud: GameHudController;
   private readonly wowCelebration: WowCelebrationController;
@@ -359,6 +361,12 @@ export class GameViewController {
       root.querySelector('#improvement-reset-confirm-title')!,
       root.querySelector('#improvement-reset-confirm-body')!,
       root.querySelector('[data-improvement-reset-confirm-accept]') as HTMLButtonElement,
+    );
+    this.importSaveConfirmDialog = new ImportSaveConfirmDialog(
+      root.querySelector('#import-save-confirm-root')!,
+      root.querySelector('#import-save-confirm-title')!,
+      root.querySelector('#import-save-confirm-body')!,
+      root.querySelector('[data-import-save-confirm-accept]') as HTMLButtonElement,
     );
     this.donationPrompt = new DonationPromptController(
       root.querySelector('#donation-prompt-root')!,
@@ -542,6 +550,12 @@ export class GameViewController {
         if (active && active.heroId !== heroId) {
           this.inlineEquip.close();
         }
+      },
+      () => {
+        void this.exportSaveBackup();
+      },
+      () => {
+        void this.importSaveBackup();
       },
     );
 
@@ -806,6 +820,79 @@ export class GameViewController {
     this.modalStack.length = 0;
     this.pushModal({ type: 'settings' });
     this.syncSystemsNavChrome();
+  }
+
+  private downloadSaveBackupFile(contents: string, fileName: string): void {
+    const blob = new Blob([contents], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private async exportSaveBackup(): Promise<void> {
+    if (this.contextInvalidated) return;
+    const response = await this.client.send({ type: 'EXPORT_SAVE_BACKUP' });
+    if (!response.ok) {
+      this.toasts.show(response.error, 'info');
+      return;
+    }
+    if (!response.backupFile || !response.backupFileName) {
+      this.toasts.show('Falha ao gerar backup', 'info');
+      return;
+    }
+    this.downloadSaveBackupFile(response.backupFile, response.backupFileName);
+    this.toasts.show('Save exportado', 'info');
+  }
+
+  private async importSaveBackup(): Promise<void> {
+    if (this.contextInvalidated) return;
+
+    const confirmed = await this.importSaveConfirmDialog.open();
+    if (!confirmed) return;
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.sidehero,text/plain';
+
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        void (async () => {
+          const backupFile = typeof reader.result === 'string' ? reader.result : '';
+          if (!backupFile.trim()) {
+            this.toasts.show('Arquivo de backup vazio', 'info');
+            return;
+          }
+
+          const response = await this.client.send({
+            type: 'IMPORT_SAVE_BACKUP',
+            backupFile,
+          });
+          if (!response.ok) {
+            this.toasts.show(response.error, 'info');
+            return;
+          }
+
+          this.render(response.state, { previousState: this.state });
+          this.toasts.show('Save importado', 'info');
+          if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'settings') {
+            this.renderModalTop();
+          }
+        })();
+      };
+      reader.onerror = () => {
+        this.toasts.show('Não foi possível ler o arquivo', 'info');
+      };
+      reader.readAsText(file);
+    });
+
+    input.click();
   }
 
   private async openCampaignModal(): Promise<void> {

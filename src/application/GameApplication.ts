@@ -41,8 +41,11 @@ import { GetMetaTreeUseCase } from './use-cases/GetMetaTreeUseCase';
 import { PurchaseMetaUpgradeUseCase } from './use-cases/PurchaseMetaUpgradeUseCase';
 import { MarkActSceneViewedUseCase } from './use-cases/MarkActSceneViewedUseCase';
 import { GetAchievementsUseCase } from './use-cases/GetAchievementsUseCase';
+import { ExportSaveBackupUseCase } from './use-cases/ExportSaveBackupUseCase';
+import { ImportSaveBackupUseCase } from './use-cases/ImportSaveBackupUseCase';
 import { IMetaProgressRepository } from '../domain/repositories/IMetaProgressRepository';
 import { IAchievementProgressRepository } from '../domain/repositories/IAchievementProgressRepository';
+import { ISaveBackupStore } from './ports/ISaveBackupStore';
 
 export class GameApplication {
   readonly getState: GetGameStateUseCase;
@@ -87,11 +90,14 @@ export class GameApplication {
   readonly purchaseMetaUpgrade: PurchaseMetaUpgradeUseCase;
   readonly markActSceneViewed: MarkActSceneViewedUseCase;
   readonly getAchievements: GetAchievementsUseCase;
+  readonly exportSaveBackup: ExportSaveBackupUseCase;
+  readonly importSaveBackup: ImportSaveBackupUseCase;
 
   constructor(
     repository: IGameStateRepository,
     metaRepository: IMetaProgressRepository,
     achievementRepository: IAchievementProgressRepository,
+    backupStore: ISaveBackupStore,
     deps: GameApplicationDependencies,
   ) {
     const {
@@ -190,6 +196,14 @@ export class GameApplication {
       repository,
       achievementRepository,
       achievementService,
+      presenter,
+    );
+    this.exportSaveBackup = new ExportSaveBackupUseCase(backupStore);
+    this.importSaveBackup = new ImportSaveBackupUseCase(
+      backupStore,
+      repository,
+      metaRepository,
+      metaService,
       presenter,
     );
   }

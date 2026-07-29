@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 6/6 (100%) · auditoria 2026-07-03  
-**Testes obrigatórios:** 3/3 presentes na suite
+**Aceite:** 7/7 (100%) · auditoria 2026-07-29  
+**Testes obrigatórios:** 4/4 presentes na suite
 
 ## Objetivo
 
@@ -17,13 +17,15 @@ Extensão MV3 com **side panel**, service worker para tick idle, persistência l
 - [x] Mensagens tipadas em `GameClientTypes`; handler em `service-worker.ts`
 - [x] Tick alarm em background quando melhoria `background_tick` ativa
 - [x] Release automatizável via `npm run release` → zip sem `.map` (só quando o usuário pedir)
+- [x] Backup criptografado (AES-GCM) export/import em Configurações (`.sidehero`) — ofuscação local, não anti-cheat absoluto
 
 ## Camadas e arquivos-chave
 
 | Camada | Paths |
 |--------|-------|
 | Infrastructure | `ChromeStorageGameRepository`, `BackgroundTickScheduler`, `GameMessageBus` |
-| Infrastructure | `createGameApplication.ts`, `service-worker.ts` |
+| Infrastructure | `ChromeSaveBackupStore`, `createGameApplication.ts`, `service-worker.ts` |
+| Application | `SaveBackupCodec`, `ExportSaveBackupUseCase`, `ImportSaveBackupUseCase` |
 | Root | `manifest.json`, `scripts/build.mjs`, `scripts/pack-release.mjs` |
 
 ## Invariantes
@@ -41,3 +43,4 @@ Extensão MV3 com **side panel**, service worker para tick idle, persistência l
 
 - [x] `ChromeStorageGameRepository.test.ts` (migração legado)
 - [x] `SerialTaskRunner.test.ts`, `SidePanelLifecycle.test.ts`
+- [x] `SaveBackupCodec.test.ts` — roundtrip e rejeição de arquivo adulterado

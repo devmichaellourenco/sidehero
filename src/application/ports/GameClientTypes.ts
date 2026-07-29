@@ -58,7 +58,9 @@ export type GameMessage =
   | { type: 'MOVE_PARTY_MEMBER'; fromIndex: number; toIndex: number }
   | { type: 'SET_PARTY_SLOT'; slotIndex: number; heroId: string }
   | { type: 'OPEN_DETACHED_SURFACE'; surfaceId: string }
-  | { type: 'CLOSE_DETACHED_SURFACE'; surfaceId: string };
+  | { type: 'CLOSE_DETACHED_SURFACE'; surfaceId: string }
+  | { type: 'EXPORT_SAVE_BACKUP' }
+  | { type: 'IMPORT_SAVE_BACKUP'; backupFile: string };
 
 export type GameResponse =
   | {
@@ -97,5 +99,7 @@ export type GameResponse =
       pointsRefunded?: number;
       ascensionPointsRefunded?: number;
       massRefundPreview?: MassRefundPreviewDto;
+      backupFile?: string;
+      backupFileName?: string;
     }
   | { ok: false; error: string };

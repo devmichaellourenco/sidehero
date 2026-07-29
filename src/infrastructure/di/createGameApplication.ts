@@ -14,6 +14,7 @@ import { GameStatePresenter } from '../../application/presenters/GameStatePresen
 import { ChromeStorageGameRepository } from '../storage/ChromeStorageGameRepository';
 import { ChromeStorageMetaRepository } from '../storage/ChromeStorageMetaRepository';
 import { ChromeStorageAchievementRepository } from '../storage/ChromeStorageAchievementRepository';
+import { ChromeSaveBackupStore } from '../storage/ChromeSaveBackupStore';
 import { MetaService } from '../../domain/meta/MetaService';
 import { AchievementService } from '../../domain/achievements/AchievementService';
 
@@ -48,10 +49,12 @@ export function createGameApplication(): GameApplication {
     const repository = new ChromeStorageGameRepository();
     const metaRepository = new ChromeStorageMetaRepository();
     const achievementRepository = new ChromeStorageAchievementRepository();
+    const backupStore = new ChromeSaveBackupStore();
     appInstance = new GameApplication(
       repository,
       metaRepository,
       achievementRepository,
+      backupStore,
       createDependencies(),
     );
   }
