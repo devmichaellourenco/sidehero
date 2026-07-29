@@ -6,6 +6,7 @@ import { Gear } from '../entities/Gear';
 import { milestoneBossForMapIndex } from '../enemies/EnemyTierProgression';
 import {
   IGNUS_IX_TEMPLATE_ID,
+  MORTHAVEN_SEAL_TEMPLATE_ID,
   playerOwnsGearTemplate,
   SOLER_PLEGIUS_TEMPLATE_ID,
   SWORD_VORPAL_LUPNUS_TEMPLATE_ID,
@@ -98,6 +99,23 @@ export function tryCreatePhase3SolerDrop(
   return createNamedLegendaryDrop(state, SOLER_PLEGIUS_TEMPLATE_ID, lootService);
 }
 
+/** Drop garantido do Duque de Morthaven (4-50) se o jogador ainda não possui. */
+export function tryCreateMorthavenSealDrop(
+  state: GameState,
+  params: UniqueBossDropParams,
+  lootService: ILootService,
+): Gear | null {
+  if (
+    params.mapIndex !== 4 ||
+    params.enemyType !== 'morthaven_duke' ||
+    !isNamedChapterBossKill(params)
+  ) {
+    return null;
+  }
+
+  return createNamedLegendaryDrop(state, MORTHAVEN_SEAL_TEMPLATE_ID, lootService);
+}
+
 export function tryCreateUniqueBossGearDrop(
   state: GameState,
   params: UniqueBossDropParams,
@@ -106,7 +124,8 @@ export function tryCreateUniqueBossGearDrop(
   return (
     tryCreateSaciIgnusDrop(state, params, lootService) ??
     tryCreateGonodorVorpalDrop(state, params, lootService) ??
-    tryCreatePhase3SolerDrop(state, params, lootService)
+    tryCreatePhase3SolerDrop(state, params, lootService) ??
+    tryCreateMorthavenSealDrop(state, params, lootService)
   );
 }
 
@@ -117,7 +136,7 @@ export function tryGrantMilestoneUniqueGearOnPhaseClear(
   lootService: ILootService,
 ): Gear | null {
   const { mapIndex, phaseNumber } = parsePhaseId(phaseId);
-  if (!isMilestonePhase(phaseNumber) || mapIndex > 3) {
+  if (!isMilestonePhase(phaseNumber) || mapIndex > 4) {
     return null;
   }
 

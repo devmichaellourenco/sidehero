@@ -40,6 +40,7 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | Loot primário | itemLevel, raridade | `rolledGearPrimaryStat` | `DifficultyCombatScaling.ts`, `MapGearLevelPolicy.ts` |
 | Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → referência | `PhaseGoldBudget.ts`, `EconomyReference.ts` |
 | Loja | tier, seed | cap raridade + pesos | `ShopCatalog.ts` |
+| Identidade de mapa | mapId | bias pool + resists soft (−15/+20) | `MapCombatIdentityCatalog.ts`, `EnemyTierProgression.ts` |
 
 ## Faixas alvo (orientação — calibrar com playtest)
 

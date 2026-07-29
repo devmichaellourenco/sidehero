@@ -1,4 +1,5 @@
 import { PartialResistanceProfile } from '../combat/ResistanceProfile';
+import type { EnemyThemeTag } from './EnemyThemeTags';
 
 export type EnemyPowerTier = 1 | 2 | 3 | 4 | 5;
 export type EnemyRosterRole = 'common' | 'subboss' | 'boss';
@@ -15,6 +16,8 @@ export interface EnemyRosterEntry {
   skillIds: readonly string[];
   /** Resistências inatas explícitas (somadas ao tema inferido por id). */
   innateResists?: PartialResistanceProfile;
+  /** Override de tags temáticas; se omitido, inferidas do id. */
+  tags?: readonly EnemyThemeTag[];
   /** Passivas sempre ativas (fase D — opcional). */
   passiveIds?: readonly import('../passives/PassiveTypes').PassiveId[];
 }
@@ -116,9 +119,36 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'fallen_magic_god', name: 'Deus Caído da Magia', powerTier: T5, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.god5 },
 
   // Únicos narrativos
-  { id: 'saci', name: 'Saci', powerTier: T1, rosterRole: 'boss', spriteVariant: 'saci', skillIds: SK.saci },
-  { id: 'gonodor', name: 'Gonodor', powerTier: T1, rosterRole: 'boss', spriteVariant: 'gonodor', skillIds: SK.gonodor },
-  { id: 'morthaven_duke', name: 'Duque de Morthaven', powerTier: T2, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.morthavenDuke },
+  {
+    id: 'saci',
+    name: 'Saci',
+    powerTier: T1,
+    rosterRole: 'boss',
+    spriteVariant: 'saci',
+    skillIds: SK.saci,
+    tags: ['fire', 'arcane'],
+    innateResists: { fire: 12, cold: -15 },
+  },
+  {
+    id: 'gonodor',
+    name: 'Gonodor',
+    powerTier: T1,
+    rosterRole: 'boss',
+    spriteVariant: 'gonodor',
+    skillIds: SK.gonodor,
+    tags: ['fire', 'physical'],
+    innateResists: { fire: 20, cold: -15 },
+  },
+  {
+    id: 'morthaven_duke',
+    name: 'Duque de Morthaven',
+    powerTier: T2,
+    rosterRole: 'boss',
+    spriteVariant: 'boss',
+    skillIds: SK.morthavenDuke,
+    tags: ['shadow', 'physical', 'undead'],
+    innateResists: { cold: 15, air: 10, fire: -10, lightning: -10 },
+  },
   { id: 'vorax', name: 'Vorax', powerTier: T5, rosterRole: 'boss', spriteVariant: 'vorax', skillIds: SK.god5 },
 ];
 

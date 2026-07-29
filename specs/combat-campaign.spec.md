@@ -15,13 +15,14 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] Pausa de batalha: congela o combate no estado atual (sem reiniciar fase); Continuar retoma; sem edição de party/loadout; Detalhes exibe totais da tentativa (dano/cura/sofrido)
 - [x] Recompensas por kill: ouro, XP e loot ao derrotar cada inimigo (tabela por mundo/monstro)
 - [x] Boss: loot garantido na 1ª vitória da fase; replay com chance reduzida; progresso de fase no fim
-- [x] Recompensas de gear comuns e únicas chegam em baús; Ignus Ix, Vorpal Lupnus e Soler Plégius só entram no storage quando o baú é aberto
 - [x] Wipe na fase: cura completa + reinicia wave 1 da mesma fase
 - [x] Seleção de fase: apenas desbloqueadas ou já concluídas (replay)
 - [x] Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase
 - [x] Scaling de inimigos segue `StageScalingCatalog` por tier global
 - [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos (`physical`/`fire`/`cold`/`lightning`/`air`) e status
 - [x] Persistência migra saves legados: gear/stats `chaos*` → `air*`, IDs `chaos_mantle`/`chaos_pendant` → `air_*`, `dotElement: chaos` → `air`
+- [x] Identidade de combate por mapa base (Stendra→Morthaven): bias soft de pool + resists (−15/+20); X-50 temáticos
+- [x] Recompensas de gear comuns e únicas chegam em baús; Ignus Ix, Vorpal Lupnus, Soler Plégius e Selo de Morthaven só entram no storage quando o baú é aberto
 
 ## Escopo do jogo base (v1)
 
@@ -95,6 +96,8 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] `PauseBattleUseCase.test.ts` — pausa/retoma preservando combate e phaseRun
 - [x] `BattleVictoryFlow.test.ts`
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
+- [x] `MapCombatIdentityCatalog.test.ts`, `EnemyTierProgression.mapBias.test.ts`, `MilestonePhaseBlueprints.theme.test.ts` — identidade por mapa
+- [x] `UniqueGearLootService.test.ts` — inclui Selo de Morthaven (4-50)
 
 ## Relacionado
 

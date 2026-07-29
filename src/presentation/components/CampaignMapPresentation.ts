@@ -8,6 +8,7 @@ import { releasedCampaignPhaseCount } from '../../domain/campaign/CampaignReleas
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, imgTag } from '../assets/AssetCatalog';
 import { getCampaignScene, hasCampaignBanner } from '../assets/CampaignSceneCatalog';
 import { CampaignViewMode } from '../campaign/CampaignViewStorage';
+import { mapCombatHintLine } from '../../domain/campaign/MapCombatIdentityCatalog';
 
 export type CampaignMapThemeId = (typeof CAMPAIGN_MAPS)[number]['id'];
 
@@ -141,6 +142,10 @@ export function getMapBiomeKind(mapId: string): CampaignBiomeKind {
 
 export function getMapFlavorText(mapId: string): string {
   return getCampaignMapTheme(mapId).flavorText;
+}
+
+export function getMapCombatHint(mapId: string): string {
+  return mapCombatHintLine(mapId);
 }
 
 export function resolveMapIdFromPhaseId(phaseId: string): CampaignMapThemeId {
@@ -696,8 +701,13 @@ export function renderMapFlavorHeader(
   options: { includeFlavor?: boolean } = {},
 ): string {
   const theme = getCampaignMapTheme(map.id);
+  const combatHint = mapCombatHintLine(map.id);
   const flavor = options.includeFlavor !== false
-    ? `<p class="campaign-map-flavor">${escapeHtml(theme.flavorText)}</p>`
+    ? `<p class="campaign-map-flavor">${escapeHtml(theme.flavorText)}</p>${
+        combatHint
+          ? `<p class="campaign-map-combat-hint">${escapeHtml(combatHint)}</p>`
+          : ''
+      }`
     : '';
 
   return `

@@ -15,7 +15,7 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 - [x] **Abrir todos** preenche inventário vazio, depois baú de itens (se desbloqueado); baús restantes ficam pendentes — nunca falha em silêncio por falta de espaço total
 - [x] Loot procedural por raridade/template (`LootService`, `GearTemplateCatalog`); stats elementais usam `air*` (não `chaos*`); itens `air_mantle` / `air_pendant`
 - [x] Combate nunca insere gear diretamente no inventário: drops comuns viram baús sorteados na abertura; lendários de boss ficam reservados como loot garantido dentro do baú
-- [x] Loot garantido de boss (Ignus Ix, Vorpal Lupnus e Soler Plégius) persiste no baú e é entregue sem novo sorteio ao abrir
+- [x] Loot garantido de boss (Ignus Ix, Vorpal Lupnus, Soler Plégius e Selo de Morthaven) persiste no baú e é entregue sem novo sorteio ao abrir
 - [x] Equipar valida slot, nível e classe (`GearRequirementChecker`)
 - [x] Otimizar equipe sugere upgrades por herói (`LoadoutOptimizer`)
 - [x] Comparação visual no picker/modal (setas ▲)

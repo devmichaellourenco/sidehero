@@ -98,6 +98,7 @@ Itens e skills podem ter **um efeito único** com comportamento de combate **rea
 | Vorpal Lupnus | Gonodor (2-50) | 0,5% | — |
 | Ignus Ix | Saci (1-50) | 0,5% | Lv. **30**, INT **28** |
 | Soler Plégius | Chefe 3-50 | 0,5% | — |
+| Selo de Morthaven | Duque (4-50) | 0,5% | Lv. **32**, INT **26** · pen. raio |
 
 - `playerOwnsGearTemplate` impede drop/forja duplicado (inventário + baú + equipado)
 - `resolveForgeNamedLegendaryTemplate` — pool cumulativo de chances por template ainda não possuído

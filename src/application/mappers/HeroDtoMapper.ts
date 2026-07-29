@@ -21,7 +21,11 @@ function mapAttributes(attrs: { str: number; dex: number; int: number }): Attrib
   return { str: attrs.str, dex: attrs.dex, int: attrs.int };
 }
 
-export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): HeroDto {
+export function mapHeroToDto(
+  hero: Hero,
+  upgradeLevels: UpgradeLevels = {},
+  mapId?: string,
+): HeroDto {
   const equipment: HeroDto['equipment'] = {};
   const slots = ['weapon', 'armor', 'accessory'] as const;
   const props = hero.toProps();
@@ -55,7 +59,7 @@ export function mapHeroToDto(hero: Hero, upgradeLevels: UpgradeLevels = {}): Her
     unspentAscensionPoints: props.unspentAscensionPoints,
     skillRanks: { ...props.skillRanks },
     equippedSkillIds: [...props.equippedSkillIds],
-    activeSkills: mapHeroActiveSkills(hero, getUnlockedBattleSkillSlotCount(upgradeLevels)),
+    activeSkills: mapHeroActiveSkills(hero, getUnlockedBattleSkillSlotCount(upgradeLevels), mapId),
     maxActiveSkills: MAX_ACTIVE_BATTLE_SKILLS,
     unlockedActiveSkillSlots: getUnlockedBattleSkillSlotCount(upgradeLevels),
     ascensionId: props.ascensionId,

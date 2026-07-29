@@ -1,3 +1,4 @@
+import { resolveMapCombatIdentity } from '../../domain/campaign/MapCombatIdentityCatalog';
 import {
   applyCooldownReduction,
   CombatProfileProvider,
@@ -178,9 +179,30 @@ function appendDamageThroughputStats(
   combat: CombatSkillDefinition,
   hero: Hero,
   powerCalculator: SkillPowerCalculator,
+  mapId?: string,
 ): void {
-  const estimate = estimateHeroSkillThroughput(hero, combat, powerCalculator, combatProfiles);
+  const mapIdentity = mapId ? resolveMapCombatIdentity(mapId) : null;
+  const estimate = estimateHeroSkillThroughput(hero, combat, powerCalculator, combatProfiles, {
+    targetResists: mapIdentity?.typicalTrashResists,
+    stageLevel: hero.level,
+  });
   if (!estimate) return;
+
+  if (estimate.efficacyLabel && estimate.efficacyRatio !== null) {
+    stats.push({
+      label: 'Eficácia vs mapa',
+      value: `${estimate.efficacyLabel} (${Math.round(estimate.efficacyRatio * 100)}%)`,
+      emphasize: true,
+      tooltipLines: tip(
+        {
+          text: mapIdentity
+            ? `Vs resists típicas de ${mapIdentity.threatLabel}. Favorável: ${mapIdentity.favoredLabel}.`
+            : 'Vs resists típicas da área atual.',
+        },
+        ...toTooltipLines(estimate.hitBreakdown.filter((line) => line.text.includes('Eficácia'))),
+      ),
+    });
+  }
 
   if (estimate.effectiveCooldownSeconds === null) {
     stats.push({
@@ -237,6 +259,7 @@ export function buildSkillBattleStats(
   skillId: string,
   scalingKey: string,
   powerCalculator = new SkillPowerCalculator(),
+  mapId?: string,
 ): HeroActiveSkillStatDto[] {
   const passiveStats = buildPassiveSkillBattleStats(hero, skillId);
   if (passiveStats.length > 0) return passiveStats;
@@ -244,9 +267,13 @@ export function buildSkillBattleStats(
   const combat = getHeroCombatSkill(skillId);
   if (!combat) return [];
 
+  const mapIdentity = mapId ? resolveMapCombatIdentity(mapId) : null;
   const estimate =
     combat.kind === 'damage'
-      ? estimateHeroSkillThroughput(hero, combat, powerCalculator, combatProfiles)
+      ? estimateHeroSkillThroughput(hero, combat, powerCalculator, combatProfiles, {
+          targetResists: mapIdentity?.typicalTrashResists,
+          stageLevel: hero.level,
+        })
       : null;
 
   const stats: HeroActiveSkillStatDto[] = [
@@ -311,7 +338,7 @@ export function buildSkillBattleStats(
     });
   }
 
-  appendDamageThroughputStats(stats, combat, hero, powerCalculator);
+  appendDamageThroughputStats(stats, combat, hero, powerCalculator, mapId);
 
   stats.push({
     label: 'Recarga',

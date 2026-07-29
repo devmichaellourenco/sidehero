@@ -55,6 +55,7 @@ Poder × crítico → split damageComponents[]
 - [x] Ouro de combate em fases normais limitado à renda de referência do tier (`PhaseGoldBudget`)
 - [x] Waves/boss: tempo médio para clear dentro de faixa alvo por tier (ver skill)
 - [x] Backlog de balanceamento revisado após cada entrega numérica relevante
+- [x] BAL-010 — identidade soft por mapa (pools + resists −15/+20) nos 4 mapas base
 
 ## Coordenação com outros agents
 
@@ -107,7 +108,9 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `CombatActionExecutor.test.ts` — resist gear, DOT apply, debuff defesa
 - [x] `DifficultyCombatScaling.test.ts` — scaling por tier
 - [x] `ResistanceProfileAggregator.test.ts` — soma de resist no equip
-- [x] `EnemyInnateResists.test.ts` — temas e fraquezas
+- [x] `EnemyInnateResists.test.ts` — temas e fraquezas (+ bias de mapa)
+- [x] `MapCombatIdentityCatalog.test.ts` — identidade soft dos 4 mapas base
+- [x] `DamageThroughputEstimate.test.ts` — eficácia vs resists da área
 - [x] `ShopService.test.ts` — cap de raridade por tier, preços
 - [x] `DotTickResolver.test.ts` — DOT mitigado; default sem elemento = `air`
 - [x] `BalanceAudit.test.ts` — curva por tier, economia loja/forja, tempo de clear
@@ -131,3 +134,4 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-007 | Média | Milestones (ex. 2-50) pagam ouro muito acima da renda de referência — épico na loja fica trivial nessas fases | Economia | ✅ Resolvido (`MilestoneGoldCap`) |
 | BAL-008 | Média | Ouro por fase normal escalava acima da renda de referência em fases multi-inimigo (épico trivial cedo) | Economia | ✅ Resolvido (`PhaseGoldBudget`) |
 | BAL-009 | Alta | Progressão de nível lenta no v1; loot fora da faixa do mapa; dano não escalava até ~20k DPS | Progressão/Loot | ✅ Resolvido (`ProgressionPowerScale`, `MapGearLevelPolicy`) |
+| BAL-010 | Alta | Mapas sem identidade de combate — meta colapsa em DPS genérico | Campanha/Elementos | ✅ Resolvido (`MapCombatIdentityCatalog`, bias soft, X-50) |

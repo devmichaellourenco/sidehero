@@ -450,7 +450,7 @@ export class CombatActionExecutor {
         context,
         target.stage,
         action.damageComponents,
-        resolveEnemyInnateResists(target.enemyType, target.stage),
+        resolveEnemyInnateResists(target.enemyType, target.stage, context?.mapId),
         defensiveMitigationForEnemy(target),
       );
 

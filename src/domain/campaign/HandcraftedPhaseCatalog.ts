@@ -4,12 +4,13 @@ import {
   buildPhaseId,
   difficultyTierForPhase,
   isMilestonePhase,
+  mapIdFromIndex,
 } from './CampaignIds';
 import { isMapReleased, isSeasonFinalePhase } from './CampaignReleaseScope';
 import {
-  pickCommonForGlobalTier,
+  pickCommonForMapPhase,
   pickLevelBossForGlobalTier,
-  pickSubbossForGlobalTier,
+  pickSubbossForMapPhase,
 } from '../enemies/EnemyTierProgression';
 import { applyMilestoneBlueprint, getMilestoneBlueprint } from './MilestonePhaseBlueprints';
 import { PhaseDefinition } from './PhaseDefinition';
@@ -51,11 +52,30 @@ function buildWaves(
   milestoneBoss: boolean,
   seasonFinale: boolean,
 ): WaveDefinition[] {
+  const mapId = mapIdFromIndex(mapIndex);
+
   if (seasonFinale) {
     return [
-      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 1), 1)]),
-      wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0)), trash(pickCommonForGlobalTier(globalTier, 2), 2)], 1.2),
-      wave('w3', [elite(pickLevelBossForGlobalTier(globalTier), 2), elite(pickSubbossForGlobalTier(globalTier, 1))], 1.3),
+      wave('w1', [
+        trash(pickCommonForMapPhase(mapId, globalTier, 0), 2),
+        trash(pickCommonForMapPhase(mapId, globalTier, 1), 1),
+      ]),
+      wave(
+        'w2',
+        [
+          elite(pickSubbossForMapPhase(mapId, globalTier, 0)),
+          trash(pickCommonForMapPhase(mapId, globalTier, 2), 2),
+        ],
+        1.2,
+      ),
+      wave(
+        'w3',
+        [
+          elite(pickLevelBossForGlobalTier(globalTier), 2),
+          elite(pickSubbossForMapPhase(mapId, globalTier, 1)),
+        ],
+        1.3,
+      ),
       wave('w4', [boss('vorax'), boss('demon_prince')], 2),
     ];
   }
@@ -63,10 +83,20 @@ function buildWaves(
   if (milestoneBoss) {
     const bossEnemy = pickLevelBossForGlobalTier(globalTier);
     return [
-      wave('w1', [trash(pickCommonForGlobalTier(globalTier, 0), 2), trash(pickCommonForGlobalTier(globalTier, 1), 1)]),
-      wave('w2', [elite(pickSubbossForGlobalTier(globalTier, 0)), trash(pickCommonForGlobalTier(globalTier, 3), 2)], 1.15),
-      wave('w3', [elite(bossEnemy), elite(pickCommonForGlobalTier(globalTier, 4))], 1.25),
-      wave('w4', [boss(bossEnemy), elite(pickSubbossForGlobalTier(globalTier, 1))], 1.6),
+      wave('w1', [
+        trash(pickCommonForMapPhase(mapId, globalTier, 0), 2),
+        trash(pickCommonForMapPhase(mapId, globalTier, 1), 1),
+      ]),
+      wave(
+        'w2',
+        [
+          elite(pickSubbossForMapPhase(mapId, globalTier, 0)),
+          trash(pickCommonForMapPhase(mapId, globalTier, 3), 2),
+        ],
+        1.15,
+      ),
+      wave('w3', [elite(bossEnemy), elite(pickCommonForMapPhase(mapId, globalTier, 4))], 1.25),
+      wave('w4', [boss(bossEnemy), elite(pickSubbossForMapPhase(mapId, globalTier, 1))], 1.6),
     ];
   }
 
@@ -81,8 +111,8 @@ function buildWaves(
     const enemyType = isBoss
       ? pickLevelBossForGlobalTier(globalTier)
       : index === waveCount - 2 && waveCount >= 3
-        ? pickSubbossForGlobalTier(globalTier, index)
-        : pickCommonForGlobalTier(globalTier, index);
+        ? pickSubbossForMapPhase(mapId, globalTier, index)
+        : pickCommonForMapPhase(mapId, globalTier, index);
     const count = isBoss ? 1 : 1 + (index % 2);
 
     if (isBoss) {

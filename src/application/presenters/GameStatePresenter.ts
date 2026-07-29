@@ -34,6 +34,7 @@ import { mapCombatResistSummary } from '../mappers/CombatResistMapper';
 import { resistanceProfileFromHeroEquipment } from '../../domain/combat/ResistanceProfileAggregator';
 import { resolveEnemyInnateResists } from '../../domain/enemies/EnemyInnateResists';
 import { StorageCapacityPolicy } from '../../domain/storage/StorageCapacityPolicy';
+import { mapCombatHintLine } from '../../domain/campaign/MapCombatIdentityCatalog';
 
 export class GameStatePresenter {
   constructor(
@@ -69,6 +70,7 @@ export class GameStatePresenter {
         state.upgradeLevels,
         combatBarContext,
         actionTimers,
+        campaignLabels.mapId,
       ),
     );
 
@@ -84,6 +86,7 @@ export class GameStatePresenter {
           state.upgradeLevels,
           combatBarContext,
           actionTimers,
+          campaignLabels.mapId,
         ),
       ),
       benchHeroes: state.benchHeroes().map((hero) =>
@@ -96,6 +99,7 @@ export class GameStatePresenter {
           state.upgradeLevels,
           combatBarContext,
           actionTimers,
+          campaignLabels.mapId,
         ),
       ),
       activePartyIds: [...state.activePartyIds],
@@ -111,6 +115,7 @@ export class GameStatePresenter {
       campaignName: campaignLabels.campaignName,
       mapId: campaignLabels.mapId,
       mapName: campaignLabels.mapName,
+      mapCombatHint: mapCombatHintLine(campaignLabels.mapId),
       phaseLabel: campaignLabels.phaseLabel,
       phaseRun,
       combatIntermission: state.combatIntermission
@@ -170,6 +175,7 @@ function mapHeroToDtoWithCombatIntent(
     activeTurn: { side: 'hero' | 'enemy'; id: string } | null;
   },
   actionTimers: Parameters<typeof mapCombatantActionTime>[2],
+  mapId?: string,
 ) {
   const isActiveTurn =
     combatBarContext.activeTurn?.side === 'hero' &&
@@ -177,7 +183,7 @@ function mapHeroToDtoWithCombatIntent(
   const actionTime = mapCombatantActionTime('hero', hero.id, actionTimers);
 
   return {
-    ...mapHeroBaseToDto(hero, upgradeLevels),
+    ...mapHeroBaseToDto(hero, upgradeLevels, mapId),
     combatIntent: mapHeroCombatIntent(hero, party, enemies, skillCooldowns, combatStatusEffects),
     combatSkills: mapHeroCombatSkills(hero, party, enemies, skillCooldowns, combatStatusEffects, {
       isActiveTurn,

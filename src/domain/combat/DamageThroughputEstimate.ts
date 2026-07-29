@@ -13,6 +13,11 @@ import {
 } from './ElementalDamageProfile';
 import { elementalDamageProfileFromHeroEquipment } from './ElementalDamageProfileAggregator';
 import { physicalDamagePercentFromHeroEquipment } from './GearStatAggregator';
+import { elementalPenetrationFromHeroEquipment } from './ElementalPenetrationProfileAggregator';
+import {
+  resolveMultiComponentDamage,
+} from './MitigationPipeline';
+import { ResistanceProfile, ZERO_RESISTANCES } from './ResistanceProfile';
 import {
   applyCooldownReduction,
   CombatProfileProvider,
@@ -71,11 +76,20 @@ export interface DamageThroughputEstimate {
   castSpeed: number;
   cooldownReduction: number;
   physicalDamagePercent: number;
+  /** Dano mitigado / dano sem resists do mapa (1 = neutro). */
+  efficacyRatio: number | null;
+  efficacyLabel: 'Bom' | 'Ok' | 'Fraco' | null;
   powerBreakdown: ThroughputBreakdownLine[];
   gearBreakdown: ThroughputBreakdownLine[];
   hitBreakdown: ThroughputBreakdownLine[];
   rateBreakdown: ThroughputBreakdownLine[];
   dpsBreakdown: ThroughputBreakdownLine[];
+}
+
+export interface ThroughputEstimateOptions {
+  targetResists?: ResistanceProfile;
+  targetArmor?: number;
+  stageLevel?: number;
 }
 
 export function expectedCritFactor(critChance: number, critDamage: number): number {
@@ -246,11 +260,44 @@ function buildGearBreakdown(
   return lines;
 }
 
+export function classifyBuildEfficacy(ratio: number): 'Bom' | 'Ok' | 'Fraco' {
+  if (ratio >= 0.95) return 'Bom';
+  if (ratio >= 0.8) return 'Ok';
+  return 'Fraco';
+}
+
+export function estimateMitigatedHitPower(
+  rawPower: number,
+  components: DamageComponent[],
+  elementalBonus: ElementalDamageProfile,
+  elementalFlat: ElementalDamageFlatProfile,
+  physicalPercent: number,
+  penetration: ReturnType<typeof elementalPenetrationFromHeroEquipment>,
+  targetResists: ResistanceProfile,
+  targetArmor: number,
+  stageLevel: number,
+): number {
+  return resolveMultiComponentDamage(
+    rawPower,
+    normalizeDamageComponents(components),
+    {
+      armor: targetArmor,
+      stageLevel,
+      resistances: targetResists,
+    },
+    elementalBonus,
+    elementalFlat,
+    physicalPercent,
+    penetration,
+  );
+}
+
 export function estimateHeroSkillThroughput(
   hero: Hero,
   combat: CombatSkillDefinition,
   powerCalculator = new SkillPowerCalculator(),
   profiles = new CombatProfileProvider(),
+  options: ThroughputEstimateOptions = {},
 ): DamageThroughputEstimate | null {
   if (combat.kind !== 'damage') return null;
 
@@ -263,6 +310,7 @@ export function estimateHeroSkillThroughput(
   const elementalBonus = elementalDamageProfileFromHeroEquipment(equipment);
   const elementalFlat = elementalDamageFlatFromHeroEquipment(equipment);
   const physicalPercent = physicalDamagePercentFromHeroEquipment(equipment);
+  const penetration = elementalPenetrationFromHeroEquipment(equipment);
 
   const outgoing = estimateAttackerOutgoingPower(
     rawPower,
@@ -273,7 +321,41 @@ export function estimateHeroSkillThroughput(
   );
 
   const critFactor = expectedCritFactor(profile.critChance, profile.critDamage);
-  const expectedDamagePerHit = outgoing * critFactor;
+  let expectedDamagePerHit = outgoing * critFactor;
+  let efficacyRatio: number | null = null;
+  let efficacyLabel: 'Bom' | 'Ok' | 'Fraco' | null = null;
+
+  const targetResists = options.targetResists;
+  if (targetResists) {
+    const stageLevel = options.stageLevel ?? hero.level;
+    const armor = options.targetArmor ?? Math.max(0, Math.floor(4 + stageLevel * 0.35));
+    const vsZero = estimateMitigatedHitPower(
+      rawPower,
+      components,
+      elementalBonus,
+      elementalFlat,
+      physicalPercent,
+      penetration,
+      ZERO_RESISTANCES,
+      armor,
+      stageLevel,
+    );
+    const vsMap = estimateMitigatedHitPower(
+      rawPower,
+      components,
+      elementalBonus,
+      elementalFlat,
+      physicalPercent,
+      penetration,
+      targetResists,
+      armor,
+      stageLevel,
+    );
+    efficacyRatio = vsZero > 0 ? vsMap / vsZero : 1;
+    efficacyLabel = classifyBuildEfficacy(efficacyRatio);
+    expectedDamagePerHit = vsMap * critFactor;
+  }
+
   const powerBreakdown = buildHeroSkillPowerBreakdown(combat, hero, rawPower);
   const gearBreakdown = buildGearBreakdown(
     components,
@@ -291,10 +373,26 @@ export function estimateHeroSkillThroughput(
     },
     {
       icon: 'attack',
-      text: `Dano/hit esperado = ${outgoing.toFixed(2)} × ${critFactor.toFixed(3)} = ${expectedDamagePerHit.toFixed(2)}`,
+      text: `Dano/hit esperado = ${expectedDamagePerHit.toFixed(2)}`,
     },
-    { text: 'Não inclui armadura, resistências nem esquiva/bloqueio do alvo.' },
   ];
+
+  if (efficacyRatio !== null && efficacyLabel) {
+    hitBreakdown.push({
+      icon: 'defense',
+      text: `Eficácia vs área: ${efficacyLabel} (${(efficacyRatio * 100).toFixed(0)}% do dano sem resists do mapa)`,
+    });
+  } else {
+    hitBreakdown.push({
+      text: 'Não inclui armadura, resistências nem esquiva/bloqueio do alvo.',
+    });
+  }
+
+  const withEfficacy = <T extends Record<string, unknown>>(base: T) => ({
+    ...base,
+    efficacyRatio,
+    efficacyLabel,
+  });
 
   if (combat.usesAttackStat || getCooldownSeconds(combat) <= 0) {
     const interval = Math.max(MIN_ACTION_INTERVAL_SECONDS, 1 / Math.max(profile.attackSpeed, 0.01));
@@ -316,7 +414,7 @@ export function estimateHeroSkillThroughput(
       },
     ];
 
-    return {
+    return withEfficacy({
       rawPower,
       outgoingPower: outgoing,
       expectedDamagePerHit,
@@ -337,7 +435,7 @@ export function estimateHeroSkillThroughput(
       hitBreakdown,
       rateBreakdown,
       dpsBreakdown,
-    };
+    });
   }
 
   const baseCooldown = getCooldownSeconds(combat);
@@ -367,7 +465,7 @@ export function estimateHeroSkillThroughput(
     },
   ];
 
-  return {
+  return withEfficacy({
     rawPower,
     outgoingPower: outgoing,
     expectedDamagePerHit,
@@ -388,5 +486,5 @@ export function estimateHeroSkillThroughput(
     hitBreakdown,
     rateBreakdown,
     dpsBreakdown,
-  };
+  });
 }

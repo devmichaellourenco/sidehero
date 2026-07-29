@@ -347,6 +347,8 @@ export interface GameStateDto {
   campaignName: string;
   mapId: string;
   mapName: string;
+  /** Pista leve de ameaça/build favorável do mapa atual. */
+  mapCombatHint: string;
   phaseLabel: string;
   phaseRun: PhaseRunDto | null;
   combatIntermission: CombatIntermissionDto | null;

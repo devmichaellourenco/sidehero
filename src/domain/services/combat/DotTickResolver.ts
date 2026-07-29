@@ -101,6 +101,7 @@ export function buildDotMitigationTargetForEnemy(
   enemy: Enemy,
   enemyKey: string,
   statusEffects: CombatStatusEffectTracker,
+  mapId?: string | null,
 ): MitigationTarget {
   const effectiveDefense = resolveEffectiveTargetDefense(
     enemy.stats.defense,
@@ -111,7 +112,7 @@ export function buildDotMitigationTargetForEnemy(
   return buildMitigationTarget(
     effectiveDefense,
     enemy.stage,
-    resolveEnemyInnateResists(enemy.enemyType, enemy.stage),
+    resolveEnemyInnateResists(enemy.enemyType, enemy.stage, mapId),
     defensiveMitigationForEnemy(enemy),
   );
 }

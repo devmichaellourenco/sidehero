@@ -2568,5 +2568,22 @@
     "salvageBlocked": true,
     "spriteId": "soler_plegius",
     "sprite": "gear/items/soler_plegius.png"
+  },
+  {
+    "id": "morthaven_seal",
+    "name": "Selo de Morthaven",
+    "slot": "accessory",
+    "rarity": "legendary",
+    "lightningDamageBonus": 28,
+    "lightningResistPenetrationBonus": 28,
+    "airDamageBonus": 8,
+    "requirements": {
+      "minLevel": 32,
+      "int": 26
+    },
+    "namedLegendary": true,
+    "salvageBlocked": true,
+    "spriteId": "morthaven_seal",
+    "sprite": "gear/items/ignus_ix.png"
   }
 ]

@@ -29,6 +29,11 @@ function renderCampaignTooltipContent(state: GameStateDto): string {
     <strong class="campaign-tooltip-title">${escapeHtml(state.mapName)}</strong>
     <span class="campaign-tooltip-line campaign-tooltip-biome">${escapeHtml(theme.biomeLabel)}</span>
     <span class="campaign-tooltip-line campaign-tooltip-flavor">${escapeHtml(getMapFlavorText(state.mapId))}</span>
+    ${
+      state.mapCombatHint
+        ? `<span class="campaign-tooltip-line campaign-tooltip-combat-hint">${escapeHtml(state.mapCombatHint)}</span>`
+        : ''
+    }
     <span class="campaign-tooltip-line">Campanha: ${escapeHtml(state.campaignName)}</span>
     <span class="campaign-tooltip-line">Fase: ${escapeHtml(state.phaseLabel)}</span>
     <span class="campaign-tooltip-line">${escapeHtml(waveLine)}</span>

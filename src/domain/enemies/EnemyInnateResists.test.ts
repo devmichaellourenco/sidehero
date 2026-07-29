@@ -27,4 +27,11 @@ describe('EnemyInnateResists', () => {
 
     expect(high.air).toBeGreaterThan(low.air);
   });
+
+  it('aplica bias de mapa quando mapId é informado', () => {
+    const base = resolveEnemyInnateResists('giant_rat', 5);
+    const onMap = resolveEnemyInnateResists('giant_rat', 5, 'gruftall');
+    expect(onMap.fire).toBe(base.fire + 20);
+    expect(onMap.cold).toBe(base.cold - 15);
+  });
 });

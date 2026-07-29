@@ -1,8 +1,8 @@
 import { EnemyType } from '../entities/EnemyType';
 import {
-  pickCommonForGlobalTier,
+  pickCommonForMapPhase,
   pickLevelBossForGlobalTier,
-  pickSubbossForGlobalTier,
+  pickSubbossForMapPhase,
 } from '../enemies/EnemyTierProgression';
 import {
   MapId,
@@ -32,7 +32,7 @@ export class ProceduralPhaseGenerator {
     const phaseId = buildPhaseId(config.mapIndex, phaseNumber);
     const globalTier = difficultyTierForPhase(config.mapIndex, phaseNumber);
     const waveCount = Math.min(5, 2 + Math.floor(phaseNumber / 12));
-    const waves = this.buildWaves(globalTier, waveCount);
+    const waves = this.buildWaves(mapId, globalTier, waveCount);
     const unlocks = this.resolveUnlocks(mapId, config.mapIndex, phaseNumber, config.maxPhases);
 
     return {
@@ -52,12 +52,12 @@ export class ProceduralPhaseGenerator {
     return this.generate(mapId, phaseNumber);
   }
 
-  private buildWaves(globalTier: number, waveCount: number): WaveDefinition[] {
+  private buildWaves(mapId: MapId, globalTier: number, waveCount: number): WaveDefinition[] {
     const waves: WaveDefinition[] = [];
 
     for (let index = 0; index < waveCount; index++) {
       const isBoss = index === waveCount - 1;
-      const enemyType = this.pickEnemyType(globalTier, index, isBoss);
+      const enemyType = this.pickEnemyType(mapId, globalTier, index, isBoss);
       const count = isBoss ? 1 : 1 + (index % 2);
 
       const role = isBoss ? 'boss' : index === waveCount - 2 && waveCount > 2 ? 'elite' : 'trash';
@@ -71,10 +71,15 @@ export class ProceduralPhaseGenerator {
     return waves;
   }
 
-  private pickEnemyType(globalTier: number, waveIndex: number, isBoss: boolean): EnemyType {
+  private pickEnemyType(
+    mapId: MapId,
+    globalTier: number,
+    waveIndex: number,
+    isBoss: boolean,
+  ): EnemyType {
     if (isBoss) return pickLevelBossForGlobalTier(globalTier);
-    if (waveIndex === 1) return pickSubbossForGlobalTier(globalTier, waveIndex);
-    return pickCommonForGlobalTier(globalTier, waveIndex);
+    if (waveIndex === 1) return pickSubbossForMapPhase(mapId, globalTier, waveIndex);
+    return pickCommonForMapPhase(mapId, globalTier, waveIndex);
   }
 
   private resolveUnlocks(

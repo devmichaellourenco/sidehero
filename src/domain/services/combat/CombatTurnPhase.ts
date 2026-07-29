@@ -1,3 +1,4 @@
+import { parsePhaseId, mapIdFromIndex } from '../../campaign/CampaignIds';
 import { GameState } from '../../entities/GameState';
 import { CombatState } from '../../entities/CombatState';
 import { Hero } from '../../entities/Hero';
@@ -38,6 +39,12 @@ import {
 } from './DotTickResolver';
 import { CombatantRef } from './TurnOrderService';
 
+function resolveCombatMapId(state: GameState): string {
+  const phaseId =
+    state.phaseRun?.phaseId ?? state.campaignProgress.selectedPhaseId ?? state.combat?.encounterMeta?.phaseId;
+  if (!phaseId) return 'stendra';
+  return mapIdFromIndex(parsePhaseId(phaseId).mapIndex);
+}
 export interface CombatTurnPhaseResult {
   state: GameState;
   events: string[];
@@ -249,6 +256,7 @@ export class CombatTurnPhase {
     let statusApplications: ReturnType<typeof this.actionExecutor.execute>['statusApplications'] = [];
     let mitigatedDamage = 0;
     const stageLevel = state.difficultyTier;
+    const mapId = resolveCombatMapId(state);
     let attackerProfile = this.profiles.forHero(heroes[0]);
 
     if (actor.side === 'hero') {
@@ -283,6 +291,7 @@ export class CombatTurnPhase {
         {
           attackerProfile,
           stageLevel,
+          mapId,
           attackerElementalBonus: elementalDamageProfileFromHeroEquipment(hero.toProps().equipment),
           attackerElementalFlat: elementalDamageFlatFromHeroEquipment(hero.toProps().equipment),
           attackerPhysicalDamagePercent: physicalDamagePercentFromHeroEquipment(hero.toProps().equipment),
@@ -319,7 +328,7 @@ export class CombatTurnPhase {
         heroes,
         enemies,
         statusEffects,
-        { attackerProfile, stageLevel },
+        { attackerProfile, stageLevel, mapId },
       );
       heroes = result.heroes;
       enemies = result.enemies;
@@ -399,7 +408,7 @@ export class CombatTurnPhase {
           const beforeHealth = enemy.stats.currentHealth;
           const dotBatch = applyMitigatedDotTicks(
             dotEntries,
-            buildDotMitigationTargetForEnemy(enemy, actorKey, statusEffects),
+            buildDotMitigationTargetForEnemy(enemy, actorKey, statusEffects, mapId),
             stageLevel,
           );
           if (dotBatch.totalDamage > 0 || dotBatch.dodgedAny) {

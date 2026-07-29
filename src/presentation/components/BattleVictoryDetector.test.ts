@@ -18,6 +18,7 @@ function baseState(partial: Partial<GameStateDto> = {}): GameStateDto {
     campaignName: 'Temporada I',
     mapId: 'stendra',
     mapName: 'Stendra',
+    mapCombatHint: '',
     phaseLabel: 'Fase 1-2',
     phaseRun: null,
     combatIntermission: null,

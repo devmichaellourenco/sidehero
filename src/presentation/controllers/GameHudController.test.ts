@@ -86,6 +86,7 @@ function mockState(overrides: Partial<GameStateDto> = {}): GameStateDto {
   return {
     mapId: 'stendra',
     mapName: 'Stendra',
+    mapCombatHint: 'Ameaça: Bestas e bandidos · Favorável: Físico / Raio',
     campaignName: 'Campanha',
     phaseLabel: '1-1',
     stage: 1,

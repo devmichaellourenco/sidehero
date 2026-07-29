@@ -1,5 +1,7 @@
 import { PartialResistanceProfile, ResistanceProfile, ZERO_RESISTANCES } from '../combat/ResistanceProfile';
 import { tierInnateResistBonus } from '../combat/DifficultyCombatScaling';
+import { applyMapResistBias } from '../campaign/MapCombatIdentityCatalog';
+import { MapId } from '../campaign/CampaignIds';
 import { getEnemyRosterEntry } from './EnemyRosterCatalog';
 
 function inferThemeWeaknesses(enemyType: string): PartialResistanceProfile {
@@ -76,6 +78,7 @@ function inferThemeResists(enemyType: string): PartialResistanceProfile {
 export function resolveEnemyInnateResists(
   enemyType: string,
   difficultyTier = 1,
+  mapId?: MapId | string | null,
 ): ResistanceProfile {
   const entry = getEnemyRosterEntry(enemyType);
   if (!entry) {
@@ -89,7 +92,7 @@ export function resolveEnemyInnateResists(
   const tierBonus = (entry.powerTier - 1) * 2;
   const globalTierBonus = tierInnateResistBonus(difficultyTier);
 
-  return {
+  const base: ResistanceProfile = {
     fire: (explicit.fire ?? theme.fire ?? weakness.fire ?? 0) + roleBonus + globalTierBonus,
     cold: (explicit.cold ?? theme.cold ?? weakness.cold ?? 0) + roleBonus + globalTierBonus,
     lightning:
@@ -97,4 +100,6 @@ export function resolveEnemyInnateResists(
     air: (explicit.air ?? theme.air ?? weakness.air ?? 0) + roleBonus + globalTierBonus,
     allElemental: (explicit.allElemental ?? 0) + tierBonus,
   };
+
+  return applyMapResistBias(base, mapId);
 }

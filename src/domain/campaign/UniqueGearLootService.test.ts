@@ -5,6 +5,7 @@ import { Gear } from '../entities/Gear';
 import { Chest } from '../entities/Chest';
 import {
   IGNUS_IX_TEMPLATE_ID,
+  MORTHAVEN_SEAL_TEMPLATE_ID,
   SOLER_PLEGIUS_TEMPLATE_ID,
   SWORD_VORPAL_LUPNUS_TEMPLATE_ID,
 } from '../gear/UniqueGearCatalog';
@@ -227,5 +228,14 @@ describe('UniqueGearLootService', () => {
     );
 
     expect(drop).toBeNull();
+  });
+
+  it('cria drop do Duque na fase 4-50 (Selo de Morthaven)', () => {
+    const drop = tryGrantMilestoneUniqueGearOnPhaseClear(
+      GameState.initial(),
+      buildPhaseId(4, 50),
+      loot,
+    );
+    expect(drop?.templateId).toBe(MORTHAVEN_SEAL_TEMPLATE_ID);
   });
 });

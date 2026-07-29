@@ -74,4 +74,24 @@ describe('DamageThroughputEstimate', () => {
       baseEstimate!.effectiveCooldownSeconds!,
     );
   });
+
+  it('estima eficácia vs resists típicas do mapa', () => {
+    const hero = Hero.createStarter('h3', 'sorcerer', 'Nix');
+    const withFire = Hero.restore({
+      ...hero.toProps(),
+      skillRanks: { ...hero.toProps().skillRanks, fireball: 2 },
+      equippedSkillIds: ['basic_attack', 'fireball'],
+    });
+    const fireball = getHeroCombatSkill('fireball')!;
+    const onGruftall = estimateHeroSkillThroughput(withFire, fireball, undefined, undefined, {
+      targetResists: { fire: 20, cold: -15, lightning: 0, air: 0, allElemental: 0 },
+    });
+    const onValdris = estimateHeroSkillThroughput(withFire, fireball, undefined, undefined, {
+      targetResists: { fire: -15, cold: 0, lightning: 0, air: 15, allElemental: 0 },
+    });
+
+    expect(onGruftall?.efficacyRatio).not.toBeNull();
+    expect(onValdris?.efficacyRatio).toBeGreaterThan(onGruftall!.efficacyRatio!);
+    expect(onValdris?.efficacyLabel).toBe('Bom');
+  });
 });

@@ -10,7 +10,7 @@ import {
   formatScopeLabel,
 } from './SkillBattleStatsMapper';
 
-function mapOne(hero: Hero, skillId: string): HeroActiveSkillDto {
+function mapOne(hero: Hero, skillId: string, mapId?: string): HeroActiveSkillDto {
   const props = hero.toProps();
   const definition = getSkillById(skillId);
   const currentRank = props.skillRanks[skillId] ?? (skillId === 'basic_attack' ? 1 : 0);
@@ -29,23 +29,24 @@ function mapOne(hero: Hero, skillId: string): HeroActiveSkillDto {
     scope,
     scopeLabel: formatScopeLabel(scope),
     scalingLabel: formatScalingLabel(scalingKey),
-    battleStats: buildSkillBattleStats(hero, skillId, scalingKey),
+    battleStats: buildSkillBattleStats(hero, skillId, scalingKey, undefined, mapId),
   };
 }
 
 export function mapHeroActiveSkills(
   hero: Hero,
   unlockedSlotCount: number,
+  mapId?: string,
 ): (HeroActiveSkillDto | null)[] {
   const layout = toSkillSlotLayout(hero.toProps().equippedSkillIds, unlockedSlotCount);
 
   return Array.from({ length: MAX_ACTIVE_BATTLE_SKILLS }, (_, index) => {
     if (index >= layout.length) return null;
     const skillId = layout[index];
-    return skillId ? mapOne(hero, skillId) : null;
+    return skillId ? mapOne(hero, skillId, mapId) : null;
   });
 }
 
-export function mapHeroActiveSkillById(hero: Hero, skillId: string): HeroActiveSkillDto {
-  return mapOne(hero, skillId);
+export function mapHeroActiveSkillById(hero: Hero, skillId: string, mapId?: string): HeroActiveSkillDto {
+  return mapOne(hero, skillId, mapId);
 }

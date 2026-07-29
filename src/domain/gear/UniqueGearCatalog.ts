@@ -8,6 +8,7 @@ import {
 export const SWORD_VORPAL_LUPNUS_TEMPLATE_ID = 'sword_vorpal_lupnus';
 export const IGNUS_IX_TEMPLATE_ID = 'ignus_ix';
 export const SOLER_PLEGIUS_TEMPLATE_ID = 'soler_plegius';
+export const MORTHAVEN_SEAL_TEMPLATE_ID = 'morthaven_seal';
 
 /** Chance de forjar Vorpal Lupnus ao fundir 9 épicos (secundário ao drop do Gonodor). */
 export const FORGE_VORPAL_LUPNUS_CHANCE = 0.005;
@@ -15,6 +16,8 @@ export const FORGE_VORPAL_LUPNUS_CHANCE = 0.005;
 export const FORGE_IGNUS_IX_CHANCE = 0.005;
 /** Chance de forjar Soler Plégius ao fundir 9 épicos (secundário ao drop da fase 3-50). */
 export const FORGE_SOLER_PLEGIUS_CHANCE = 0.005;
+/** Chance de forjar Selo de Morthaven ao fundir 9 épicos (secundário ao drop 4-50). */
+export const FORGE_MORTHAVEN_SEAL_CHANCE = 0.005;
 
 const UNIQUE_GEAR_TEMPLATE_IDS = [SWORD_VORPAL_LUPNUS_TEMPLATE_ID] as const;
 
@@ -94,6 +97,9 @@ export function resolveForgeNamedLegendaryTemplate(
   }
   if (!playerOwnsGearTemplate(state, SOLER_PLEGIUS_TEMPLATE_ID)) {
     entries.push({ templateId: SOLER_PLEGIUS_TEMPLATE_ID, chance: FORGE_SOLER_PLEGIUS_CHANCE });
+  }
+  if (!playerOwnsGearTemplate(state, MORTHAVEN_SEAL_TEMPLATE_ID)) {
+    entries.push({ templateId: MORTHAVEN_SEAL_TEMPLATE_ID, chance: FORGE_MORTHAVEN_SEAL_CHANCE });
   }
 
   for (const entry of entries) {
