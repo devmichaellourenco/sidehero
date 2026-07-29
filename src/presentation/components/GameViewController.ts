@@ -101,6 +101,7 @@ import { InlineEquipController, InlineEquipHandlers } from '../gear/InlineEquipC
 import { bindGearDragDrop } from '../gear/GearDragDropBinder';
 import { OnboardingController } from '../onboarding/OnboardingController';
 import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
+import { UiOverlayOrchestrator } from '../overlays/UiOverlayOrchestrator';
 import { bindBattleChromeLayout } from '../layout/BattleChromeLayout';
 import { detectPendingActSceneDto, detectSeasonFinaleEpilogueDto } from '../../application/mappers/ActScenePresentationMapper';
 import { ActSceneDto } from '../../application/dto/CampaignDto';
@@ -208,6 +209,7 @@ export class GameViewController {
   private readonly modalStackController: ModalStackController;
   private readonly inlineEquip = new InlineEquipController();
   private readonly onboarding = new OnboardingController();
+  private readonly overlayOrchestrator = new UiOverlayOrchestrator();
 
   private shownIntermissionKey: string | null = null;
   private intermissionResuming = false;
@@ -323,8 +325,17 @@ export class GameViewController {
       root.querySelector('#act-scene-backdrop') as HTMLElement,
     );
     this.rewards = new RewardPresentationController(this.wowCelebration);
+    this.wowCelebration.setOverlayOrchestrator(this.overlayOrchestrator);
     this.wowCelebration.onIdle(() => {
       this.tryShowSeasonFinaleEpilogue();
+    });
+    this.overlayOrchestrator.onIdle(() => {
+      this.tryShowSeasonFinaleEpilogue();
+      if (this.state) {
+        this.tryShowAutoActScene(null, this.state);
+        this.syncOnboarding(this.state);
+        this.syncAutoBattleTimer();
+      }
     });
     this.destroyGearConfirmDialog = new DestroyGearConfirmDialog(
       root.querySelector('#destroy-gear-confirm-root')!,
@@ -472,8 +483,7 @@ export class GameViewController {
 
     this.campaignFlow = new CampaignFlow(this.client, this.modal);
     this.campaignFlow.setActSceneReader((scene) => {
-      this.stopAutoBattle();
-      this.actSceneFlow.show(scene, { markViewedOnDismiss: false });
+      this.presentActScene(scene, { markViewedOnDismiss: false });
     });
     this.partyFlow = new PartyFlow(this.client);
 
@@ -776,6 +786,7 @@ export class GameViewController {
   }
 
   private isAdvanceBlocked(state: GameStateDto | null = this.state): boolean {
+    if (this.overlayOrchestrator.isBusy()) return true;
     if (this.onboarding.isActive()) return true;
     if (this.victoryFlow.isBlockingAdvance()) return true;
     if (this.wowCelebration.isBlockingAdvance()) return true;
@@ -1098,7 +1109,7 @@ export class GameViewController {
   }
 
   private tryShowSeasonFinaleEpilogueAfterCelebration(): void {
-    if (this.wowCelebration.isBlockingAdvance()) return;
+    if (this.overlayOrchestrator.isBusy() || this.wowCelebration.isBlockingAdvance()) return;
     this.tryShowSeasonFinaleEpilogue();
   }
 
@@ -1106,12 +1117,7 @@ export class GameViewController {
     const previous = this.deferredSeasonFinaleEpilogueBaseline;
     if (!previous || !this.state) return;
 
-    if (
-      this.onboarding.isActive() ||
-      this.actSceneFlow.isBlocking() ||
-      this.victoryFlow.isBlockingAdvance() ||
-      this.wowCelebration.isBlockingAdvance()
-    ) {
+    if (this.overlayOrchestrator.isBusy() || this.actSceneFlow.isBlocking()) {
       return;
     }
 
@@ -1125,12 +1131,28 @@ export class GameViewController {
     }
 
     this.deferredSeasonFinaleEpilogueBaseline = null;
-    this.stopAutoBattle();
-    this.actSceneFlow.show(scene, {
+    this.presentActScene(scene, {
       markViewedOnDismiss: true,
       onDismiss: () => {
         void this.markActSceneViewed(scene.id);
       },
+    });
+  }
+
+  private presentActScene(
+    scene: ActSceneDto,
+    options: { markViewedOnDismiss?: boolean; onDismiss?: () => void } = {},
+  ): void {
+    this.overlayOrchestrator.request('act_scene', scene.id, () => {
+      this.stopAutoBattle();
+      this.actSceneFlow.show(scene, {
+        markViewedOnDismiss: options.markViewedOnDismiss,
+        onDismiss: () => {
+          this.overlayOrchestrator.release('act_scene', scene.id);
+          options.onDismiss?.();
+          this.syncAutoBattleTimer();
+        },
+      });
     });
   }
 
@@ -1153,7 +1175,6 @@ export class GameViewController {
       return;
     }
 
-    this.shownIntermissionKey = key;
     const payload = buildBattleIntermissionPayload(state.combatIntermission, state, previous);
     if (
       payload.variant === 'phase-clear' &&
@@ -1165,9 +1186,18 @@ export class GameViewController {
     if (payload.seasonCompleted && previous) {
       this.deferredSeasonFinaleEpilogueBaseline = previous;
     }
-    this.stopAutoBattle();
-    this.victoryFlow.show(payload, () => {
-      void this.resumeCombatIntermission();
+
+    this.overlayOrchestrator.request('battle_result', key, () => {
+      if (this.victoryFlow.isActive() || this.shownIntermissionKey === key) {
+        this.overlayOrchestrator.release('battle_result', key);
+        return;
+      }
+      this.shownIntermissionKey = key;
+      this.stopAutoBattle();
+      this.victoryFlow.show(payload, () => {
+        this.overlayOrchestrator.release('battle_result', key);
+        void this.resumeCombatIntermission();
+      });
     });
   }
 
@@ -2587,21 +2617,14 @@ export class GameViewController {
     previous: GameStateDto | null | undefined,
     state: GameStateDto,
   ): void {
-    if (
-      this.onboarding.isActive() ||
-      this.actSceneFlow.isBlocking() ||
-      state.combatIntermission ||
-      this.victoryFlow.isBlockingAdvance() ||
-      this.wowCelebration.isBlockingAdvance()
-    ) {
+    if (this.actSceneFlow.isBlocking() || state.combatIntermission) {
       return;
     }
 
     const scene = detectPendingActSceneDto(previous?.campaignProgress, state.campaignProgress);
     if (!scene) return;
 
-    this.stopAutoBattle();
-    this.actSceneFlow.show(scene, {
+    this.presentActScene(scene, {
       markViewedOnDismiss: true,
       onDismiss: () => {
         void this.markActSceneViewed(scene.id);
@@ -2629,31 +2652,39 @@ export class GameViewController {
     const step = resolveOnboardingStep(state, this.onboarding.getDismissedSteps());
     if (!step) {
       this.onboarding.hide();
+      this.overlayOrchestrator.cancelKind('onboarding');
       this.syncAutoBattleTimer();
       return;
     }
 
-    this.onboarding.show(step, {
-      onDismissStep: (stepId) => {
-        this.dismissOnboardingStep(stepId);
-        if (this.state) {
-          this.syncOnboarding(this.state);
-          this.tryShowAutoActScene(null, this.state);
-        }
-        this.syncAutoBattleTimer();
-      },
-      onSkipAll: () => {
-        this.onboarding.skipAll();
-        this.onboarding.hide();
-        if (this.state) {
-          this.tryShowAutoActScene(null, this.state);
-        }
-        this.syncAutoBattleTimer();
-      },
-    });
+    this.overlayOrchestrator.request('onboarding', step.id, () => {
+      this.onboarding.show(step, {
+        onDismissStep: (stepId) => {
+          this.dismissOnboardingStep(stepId);
+          this.overlayOrchestrator.release('onboarding', step.id);
+          if (this.state) {
+            this.syncOnboarding(this.state);
+            this.tryShowAutoActScene(null, this.state);
+          }
+          this.syncAutoBattleTimer();
+        },
+        onSkipAll: () => {
+          this.onboarding.skipAll();
+          this.onboarding.hide();
+          this.overlayOrchestrator.cancelKind('onboarding');
+          if (this.state) {
+            this.tryShowAutoActScene(null, this.state);
+          }
+          this.syncAutoBattleTimer();
+        },
+      });
 
-    if (this.onboarding.isActive()) {
+      if (!this.onboarding.isActive()) {
+        this.overlayOrchestrator.release('onboarding', step.id);
+        return;
+      }
+
       this.stopAutoBattle();
-    }
+    });
   }
 }

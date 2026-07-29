@@ -1,4 +1,5 @@
 import { RewardMoment } from '../delight/types/RewardMoment';
+import type { UiOverlayOrchestrator } from '../overlays/UiOverlayOrchestrator';
 import { isCelebrationMoment } from './WowCelebrationPolicy';
 import { resolveWowBannerCta } from './WowBannerCtaPresentation';
 import { mapRewardMomentToWowBanner } from './WowMomentMapper';
@@ -21,6 +22,7 @@ export class WowCelebrationController {
   private inboxSnapshot: string | null = null;
   private lastCelebrationBannerId: string | null = null;
   private idleListeners: Array<() => void> = [];
+  private overlayOrchestrator: UiOverlayOrchestrator | null = null;
 
   constructor(
     private readonly celebrationRoot: HTMLElement,
@@ -47,6 +49,11 @@ export class WowCelebrationController {
       }
       this.closeInbox();
     });
+  }
+
+  /** Liga o gate global — celebrações centrais esperam outros overlays. */
+  setOverlayOrchestrator(orchestrator: UiOverlayOrchestrator | null): void {
+    this.overlayOrchestrator = orchestrator;
   }
 
   enqueueMoment(moment: RewardMoment): void {
@@ -138,8 +145,21 @@ export class WowCelebrationController {
   private pumpCelebrationQueue(): void {
     if (this.activeCelebration || this.displayQueue.length === 0) return;
 
-    const next = this.displayQueue.shift()!;
-    this.showCelebration(next);
+    const present = () => {
+      if (this.activeCelebration || this.displayQueue.length === 0) {
+        this.overlayOrchestrator?.release('wow', 'wow-display');
+        return;
+      }
+      const banner = this.displayQueue.shift()!;
+      this.showCelebration(banner);
+    };
+
+    if (this.overlayOrchestrator) {
+      this.overlayOrchestrator.request('wow', 'wow-display', present);
+      return;
+    }
+
+    present();
   }
 
   private showCelebration(banner: WowBanner): void {
@@ -159,6 +179,7 @@ export class WowCelebrationController {
     document.body.classList.remove('wow-celebration-open');
     this.celebrationStage.innerHTML = '';
     this.celebrationSnapshot = null;
+    this.overlayOrchestrator?.release('wow', 'wow-display');
     this.pumpCelebrationQueue();
     this.notifyIdleIfReady();
   }

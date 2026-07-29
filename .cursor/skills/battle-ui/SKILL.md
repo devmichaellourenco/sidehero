@@ -29,11 +29,13 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Apoio | `DonationPromptController`, `DonationCardPresentation`, `DonationConfig` |
 | Wow | `WowBannerBuilder`, `WowCelebrationController.syncPersistentBanners`, `WowStripRenderer` |
 | Onboarding | `OnboardingPolicy` |
+| Overlays exclusivos | `UiOverlayOrchestrator` — prioridade tutorial > cena > resultado de batalha > Wow; um ativo por vez, fila pelo restante |
 
 ## Coordenação
 
 Tema de cores do chrome: skill `medieval-theme` (`specs/medieval-theme.spec.md`).
 
+Overlays interruptivos (tutorial, cena narrativa, CLEAR/WARNING/DEFEAT, Wow central) passam pelo `UiOverlayOrchestrator` em `GameViewController` / `WowCelebrationController`. Pausa/Acampamento ficam fora (estado do jogador).
 ## Testes de apresentação
 
 Listados em `specs/battle-ui.spec.md` — criar ou atualizar ao mudar markup/CSS crítico (não executar `npm test` automaticamente).

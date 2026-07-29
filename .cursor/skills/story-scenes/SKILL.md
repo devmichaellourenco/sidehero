@@ -15,8 +15,8 @@ description: Cenas narrativas por ato da campanha Side Hero — catálogo, cards
 2. Regras de desbloqueio/detecção → `ActScenePolicy.ts`
 3. Persistência → `CampaignProgress.viewedActSceneIds` + `MarkActSceneViewedUseCase`
 4. Card na trilha → `ActSceneCardPresentation` + `CampaignMapPresentation`
-5. Overlay + pausa → `ActSceneFlow` + `GameViewController.isAdvanceBlocked`
-6. Wow/marco → garantir `WowCelebrationController.isBlockingAdvance()`
+5. Overlay + pausa → `ActSceneFlow` + `GameViewController.isAdvanceBlocked` / `UiOverlayOrchestrator`
+6. Wow/marco → garantir `WowCelebrationController.isBlockingAdvance()` e slot `wow` no orquestrador
 
 ## Workflow do agente
 

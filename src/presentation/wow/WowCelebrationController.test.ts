@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from 'vitest';
 import { RewardMoment } from '../delight/types/RewardMoment';
+import { UiOverlayOrchestrator } from '../overlays/UiOverlayOrchestrator';
 import { WowCelebrationController } from './WowCelebrationController';
 import { WowBanner } from './types/WowBanner';
 
@@ -71,6 +72,35 @@ describe('WowCelebrationController', () => {
 
     controller.syncPersistentBanners([]);
     expect(document.getElementById('inbox')!.classList.contains('hidden')).toBe(true);
+    controller.destroy();
+  });
+
+  it('com orquestrador ocupado, celebração espera liberar o slot', () => {
+    document.body.innerHTML = `
+      <button id="inbox"><span class="wow-inbox-btn-count"></span></button>
+      <div id="root" class="hidden"><div id="stage"></div></div>
+      <div id="inbox-root" class="hidden"><div id="panel"></div></div>
+    `;
+
+    const orch = new UiOverlayOrchestrator();
+    orch.request('onboarding', 'tip', () => undefined);
+
+    const controller = new WowCelebrationController(
+      document.getElementById('root')!,
+      document.getElementById('stage')!,
+      document.getElementById('inbox-root')!,
+      document.getElementById('panel')!,
+      document.getElementById('inbox') as HTMLButtonElement,
+    );
+    controller.setOverlayOrchestrator(orch);
+
+    controller.enqueueMoment(buildMoment());
+    expect(controller.isBlockingAdvance()).toBe(false);
+    expect(orch.getActiveKind()).toBe('onboarding');
+
+    orch.release('onboarding', 'tip');
+    expect(controller.isBlockingAdvance()).toBe(true);
+    expect(orch.getActiveKind()).toBe('wow');
     controller.destroy();
   });
 });

@@ -24,19 +24,43 @@ export function isSurfacePinnedValue(value: unknown): boolean {
   return value === true;
 }
 
+const DEFAULT_PINNED_MODAL_SURFACES: ReadonlySet<SystemsMenuId> = new Set([
+  'formation',
+  'campaign',
+  'shop',
+  'stash',
+  'forge',
+  'upgrades',
+  'achievements',
+  'settings',
+]);
+
+export function hasSurfacePinnedPreference(value: unknown): boolean {
+  return value === true || value === false;
+}
+
+export function defaultSurfacePinned(surfaceId: SystemsMenuId): boolean {
+  return DEFAULT_PINNED_MODAL_SURFACES.has(surfaceId);
+}
+
 export async function readSurfacePinned(surfaceId: SystemsMenuId): Promise<boolean> {
   try {
     const key = surfacePinnedStorageKey(surfaceId);
     const keys =
       surfaceId === 'stats' ? [key, LEGACY_BATTLE_STATS_PINNED_KEY] : [key];
     const result = await chrome.storage.local.get(keys);
-    if (isSurfacePinnedValue(result[key])) return true;
-    if (surfaceId === 'stats' && isSurfacePinnedValue(result[LEGACY_BATTLE_STATS_PINNED_KEY])) {
-      return true;
+    if (hasSurfacePinnedPreference(result[key])) {
+      return isSurfacePinnedValue(result[key]);
     }
-    return false;
+    if (
+      surfaceId === 'stats' &&
+      hasSurfacePinnedPreference(result[LEGACY_BATTLE_STATS_PINNED_KEY])
+    ) {
+      return isSurfacePinnedValue(result[LEGACY_BATTLE_STATS_PINNED_KEY]);
+    }
+    return defaultSurfacePinned(surfaceId);
   } catch {
-    return false;
+    return defaultSurfacePinned(surfaceId);
   }
 }
 

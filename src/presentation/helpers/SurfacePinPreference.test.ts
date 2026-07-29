@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  defaultSurfacePinned,
+  hasSurfacePinnedPreference,
   isSurfacePinnedValue,
   parseSurfaceDockRequest,
   readDetachedSurfaceFromLocation,
@@ -17,6 +19,22 @@ describe('SurfacePinPreference', () => {
   it('gera chave de storage por menu', () => {
     expect(surfacePinnedStorageKey('stats')).toBe('sidehero_surface_pinned_stats');
     expect(surfacePinnedStorageKey('shop')).toBe('sidehero_surface_pinned_shop');
+  });
+
+  it('distingue preferência gravada de valor ausente', () => {
+    expect(hasSurfacePinnedPreference(true)).toBe(true);
+    expect(hasSurfacePinnedPreference(false)).toBe(true);
+    expect(hasSurfacePinnedPreference(undefined)).toBe(false);
+  });
+
+  it('abre modais fixados por padrão e mantém overlays/drawers como hoje', () => {
+    expect(defaultSurfacePinned('campaign')).toBe(true);
+    expect(defaultSurfacePinned('shop')).toBe(true);
+    expect(defaultSurfacePinned('settings')).toBe(true);
+    expect(defaultSurfacePinned('heroes')).toBe(false);
+    expect(defaultSurfacePinned('inventory')).toBe(false);
+    expect(defaultSurfacePinned('log')).toBe(false);
+    expect(defaultSurfacePinned('stats')).toBe(false);
   });
 
   it('parseia pedido de dock genérico e legado de Stats', () => {

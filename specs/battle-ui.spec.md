@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 13/13 (100%) · auditoria 2026-07-28  
-**Testes obrigatórios:** 15/15 presentes na suite
+**Aceite:** 14/14 (100%) · auditoria 2026-07-28  
+**Testes obrigatórios:** 16/16 presentes na suite
 
 ## Objetivo
 
@@ -20,6 +20,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
 - [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos
 - [x] Todos os menus da barra de sistemas (`SystemsMenuId`) suportam **Fixar/Desafixar** com preferência por menu (padrão: janela popup `panel.html?detached=<id>`, 520×832 sem resize); modo detached não inicia auto-battle
+- [x] Overlays interruptivos (tutorial, cena, resultado de batalha, Wow) **não se sobrepõem**: `UiOverlayOrchestrator` com prioridade tutorial > cena > batalha > Wow; o restante espera na fila
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
@@ -36,6 +37,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 | Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy`, `DonationCardPresentation` |
 | Presentation | `ModalStackController`, `SystemsMenuNavigation`, `BattleChestAffordanceController` |
 | Presentation | `SurfacePinPreference`, `SurfacePinPresentation` |
+| Presentation | `UiOverlayOrchestrator` — exclusividade tutorial/cena/batalha/Wow |
 | Infra | `DetachedSurfaceWindowOpener`, `DetachedSurfaceWindowManager`; redirect legado `panel/stats.html` → `?detached=stats` |
 
 ## Invariantes
@@ -62,6 +64,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `ModalController.test.ts` — título + shell de pin
 - [x] `stats.html.test.ts` — redirect legado para `?detached=stats`
 - [x] `SystemsMenuNavigation.test.ts` — disponibilidade por camp/unlock + wrap prev/next
+- [x] `UiOverlayOrchestrator.test.ts` — prioridade e fila de overlays exclusivos
 
 ## Relacionado
 
