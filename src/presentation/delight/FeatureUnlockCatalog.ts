@@ -1,4 +1,6 @@
 import { FeatureFlagsDto } from '../../application/dto/FeatureFlagsDto';
+import { FeatureKey } from '../../domain/upgrades/FeatureKey';
+import { UpgradeDefinition } from '../../domain/upgrades/UpgradeDefinition';
 import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
 
 export interface FeatureUnlockMeta {
@@ -58,6 +60,18 @@ const FEATURE_UNLOCK_META: Partial<Record<FeatureFlagKey, FeatureUnlockMeta>> = 
   // },
 };
 
+/** FeatureKey da runa → flag detectada em `detectNewlyUnlockedFeatures`. */
+const UPGRADE_FEATURE_TO_FLAG: Partial<Record<FeatureKey, FeatureFlagKey>> = {
+  divine_forge: 'divineForge',
+  improvement_reset: 'improvementReset',
+  item_stash: 'itemStash',
+  open_all_chests: 'openAllChests',
+  auto_open_chests: 'autoOpenChests',
+  optimize_loadout: 'optimizeLoadout',
+  auto_equip_loot: 'autoEquipLoot',
+  shop_refresh: 'shopRefresh',
+};
+
 export function getFeatureUnlockMeta(flag: FeatureFlagKey): FeatureUnlockMeta | null {
   return FEATURE_UNLOCK_META[flag] ?? null;
 }
@@ -77,4 +91,17 @@ export function detectNewlyUnlockedFeatures(
   }
 
   return unlocked;
+}
+
+/**
+ * Compra de runa que já gera Wow via `detectStateChange` (herói novo ou
+ * primeiro unlock de feature com meta dedicada) — evita 2 strips no mesmo evento.
+ */
+export function isUpgradePurchaseCoveredByStateChange(upgrade: UpgradeDefinition): boolean {
+  if (upgrade.unlockHeroClass) return true;
+
+  if (upgrade.level !== 1) return false;
+  const flag = UPGRADE_FEATURE_TO_FLAG[upgrade.feature];
+  if (!flag) return false;
+  return getFeatureUnlockMeta(flag) !== null;
 }

@@ -19,6 +19,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
 - [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos; abas Dano / Sofrido / Mitigado com ranking por tipo de dano
+- [x] Compra de runa não gera Wow duplicado quando o mesmo evento já dispara unlock de herói/feature (`isUpgradePurchaseCoveredByStateChange`)
 - [x] Todos os menus da barra de sistemas (`SystemsMenuId`) suportam **Fixar/Desafixar** com preferência por menu (padrão: janela popup `panel.html?detached=<id>`, 520×832 sem resize); modo detached não inicia auto-battle
 - [x] Overlays interruptivos (tutorial, cena, resultado de batalha, Wow) **não se sobrepõem**: `UiOverlayOrchestrator` com prioridade tutorial > cena > batalha > Wow; o restante espera na fila
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar

@@ -11,6 +11,7 @@ import { PanelSnapshot } from '../components/PanelStateSnapshot';
 import {
   detectNewlyUnlockedFeatures,
   getFeatureUnlockMeta,
+  isUpgradePurchaseCoveredByStateChange,
 } from './FeatureUnlockCatalog';
 import { buildIdleProgress } from '../components/IdleProgressSummary';
 import {
@@ -365,6 +366,9 @@ export class RewardMomentDetector {
   buildUpgradePurchasedMoment(upgradeId: string): RewardMoment | null {
     const upgrade = getUpgradeById(upgradeId);
     if (!upgrade) return null;
+
+    // Herói novo / 1º unlock de feature já saem de detectStateChange — um Wow só.
+    if (isUpgradePurchaseCoveredByStateChange(upgrade)) return null;
 
     const heroPortrait = upgrade.unlockHeroClass
       ? rewardHeroPortraitFromClass(upgrade.unlockHeroClass)
