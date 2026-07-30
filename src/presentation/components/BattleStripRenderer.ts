@@ -1,6 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { bindBarTooltips } from './BarTooltipBinder';
+import { actNumberFromPhaseId } from '../assets/CampaignSceneCatalog';
 import { applyBattleScene } from './BattleScenePresentation';
 import { freezeActionTimeVisualOnCard } from './BattleActorHealthPresentation';
 import { patchBattleStripInPlace, syncBattleStripCrowdedLayout } from './BattleStripPatcher';
@@ -19,7 +20,7 @@ import { bindHeroTooltips } from './HeroTooltipBinder';
 
 export class BattleStripRenderer {
   private structureKey: string | null = null;
-  private sceneMapId: string | null = null;
+  private sceneKey: string | null = null;
   private lastPhaseId: string | null = null;
 
   constructor(
@@ -34,9 +35,12 @@ export class BattleStripRenderer {
     const freezeTimers = !shouldAnimateBattleStripTimers(state);
     this.battleStrip.classList.toggle('battle-strip--timers-frozen', freezeTimers);
 
-    if (state.mapId !== this.sceneMapId) {
-      applyBattleScene(this.stripBg, state.mapId, this.stripFloor);
-      this.sceneMapId = state.mapId;
+    const phaseId = resolveBattleStripPhaseId(state);
+    const actNumber = actNumberFromPhaseId(phaseId);
+    const nextSceneKey = `${state.mapId}:${actNumber ?? 0}`;
+    if (nextSceneKey !== this.sceneKey) {
+      applyBattleScene(this.stripBg, state.mapId, this.stripFloor, actNumber);
+      this.sceneKey = nextSceneKey;
     }
 
     syncBattleStripCrowdedLayout(
@@ -45,8 +49,7 @@ export class BattleStripRenderer {
       state.enemies.length,
     );
 
-    const currentPhaseId = resolveBattleStripPhaseId(state);
-    const forceResetActionTime = hasBattleStripPhaseChanged(this.lastPhaseId, currentPhaseId);
+    const forceResetActionTime = hasBattleStripPhaseChanged(this.lastPhaseId, phaseId);
 
     const nextStructureKey = buildBattleStripStructureKey(state);
     if (
@@ -56,13 +59,13 @@ export class BattleStripRenderer {
       patchBattleStripInPlace(state, this.heroesContainer, this.enemyContainer, {
         forceResetActionTime,
       });
-      this.lastPhaseId = currentPhaseId;
+      this.lastPhaseId = phaseId;
       return;
     }
 
     this.structureKey = nextStructureKey;
     this.renderFull(state);
-    this.lastPhaseId = currentPhaseId;
+    this.lastPhaseId = phaseId;
   }
 
   private renderFull(state: GameStateDto): void {

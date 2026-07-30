@@ -5,10 +5,14 @@ function clearSceneLayer(el: HTMLElement | null): void {
   el?.style.removeProperty('background-image');
 }
 
-function applyBattleFloor(stripFloor: HTMLElement | null | undefined, mapId: string): void {
+function applyBattleFloor(
+  stripFloor: HTMLElement | null | undefined,
+  mapId: string,
+  actNumber?: number | null,
+): void {
   if (!stripFloor) return;
 
-  const scene = hasCampaignScene(mapId) ? getCampaignScene(mapId) : null;
+  const scene = hasCampaignScene(mapId) ? getCampaignScene(mapId, actNumber) : null;
   if (scene?.floorTile) {
     stripFloor.classList.add('strip-floor--tiled');
     stripFloor.dataset.mapId = mapId;
@@ -44,6 +48,7 @@ export function applyBattleScene(
   stripBg: HTMLElement,
   mapId: string,
   stripFloor?: HTMLElement | null,
+  actNumber?: number | null,
 ): void {
   const skyEl = stripBg.querySelector<HTMLElement>('.strip-bg__sky');
   const centerEl = stripBg.querySelector<HTMLElement>('.strip-bg__center');
@@ -53,11 +58,11 @@ export function applyBattleScene(
 
   if (!hasCampaignScene(mapId)) {
     clearUnifiedScene(stripBg, skyEl, centerEl, leftEl, rightEl);
-    applyBattleFloor(stripFloor, mapId);
+    applyBattleFloor(stripFloor, mapId, actNumber);
     return;
   }
 
-  const scene = getCampaignScene(mapId)!;
+  const scene = getCampaignScene(mapId, actNumber)!;
 
   if (scene.battleBackground) {
     stripBg.classList.add('strip-bg--scenic', 'strip-bg--unified');
@@ -67,7 +72,7 @@ export function applyBattleScene(
     clearSceneLayer(leftEl);
     clearSceneLayer(rightEl);
     centerEl?.classList.remove('strip-bg__center--visible');
-    applyBattleFloor(stripFloor, mapId);
+    applyBattleFloor(stripFloor, mapId, actNumber);
     return;
   }
 
@@ -93,5 +98,5 @@ export function applyBattleScene(
     centerEl?.classList.remove('strip-bg__center--visible');
   }
 
-  applyBattleFloor(stripFloor, mapId);
+  applyBattleFloor(stripFloor, mapId, actNumber);
 }

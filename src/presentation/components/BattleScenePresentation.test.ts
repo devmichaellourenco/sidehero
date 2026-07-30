@@ -1,7 +1,12 @@
 // @vitest-environment happy-dom
 
 import { describe, expect, it } from 'vitest';
-import { getCampaignScene, hasCampaignBanner, hasCampaignScene } from '../assets/CampaignSceneCatalog';
+import {
+  actNumberFromPhaseId,
+  getCampaignScene,
+  hasCampaignBanner,
+  hasCampaignScene,
+} from '../assets/CampaignSceneCatalog';
 import { applyBattleScene } from './BattleScenePresentation';
 
 describe('CampaignSceneCatalog', () => {
@@ -11,6 +16,31 @@ describe('CampaignSceneCatalog', () => {
       battleBackground: 'campaign/stendra/cenario_stendra.jpeg',
       banner: 'campaign/stendra/campaign_stendra_banner.png',
     });
+  });
+
+  it('usa cenário por ato em Stendra (II–V)', () => {
+    expect(getCampaignScene('stendra', 1)?.battleBackground).toBe(
+      'campaign/stendra/cenario_stendra.jpeg',
+    );
+    expect(getCampaignScene('stendra', 2)?.battleBackground).toBe(
+      'campaign/stendra/cenario_stendra_2.png',
+    );
+    expect(getCampaignScene('stendra', 3)?.battleBackground).toBe(
+      'campaign/stendra/cenario_stendra_3.png',
+    );
+    expect(getCampaignScene('stendra', 4)?.battleBackground).toBe(
+      'campaign/stendra/cenario_stendra_4.png',
+    );
+    expect(getCampaignScene('stendra', 5)?.battleBackground).toBe(
+      'campaign/stendra/cenario_stendra_5.png',
+    );
+  });
+
+  it('deriva ato a partir do phaseId', () => {
+    expect(actNumberFromPhaseId('1-41')).toBe(5);
+    expect(actNumberFromPhaseId('1-50')).toBe(5);
+    expect(actNumberFromPhaseId('1-40')).toBe(4);
+    expect(actNumberFromPhaseId(null)).toBeNull();
   });
 
   it('retorna null para mapas sem arte', () => {
@@ -74,6 +104,17 @@ describe('applyBattleScene', () => {
     expect(sky.style.backgroundImage).toContain('cenario_stendra.jpeg');
     expect((stripBg.querySelector('.strip-bg__left') as HTMLElement).style.backgroundImage).toBe('');
     expect(stripFloor.classList.contains('strip-floor--tiled')).toBe(false);
+  });
+
+  it('aplica cenario_stendra_5 nas batalhas do Ato V', () => {
+    const stripBg = buildStripBg();
+    const stripFloor = document.createElement('div');
+    stripFloor.className = 'strip-floor';
+
+    applyBattleScene(stripBg, 'stendra', stripFloor, 5);
+
+    const sky = stripBg.querySelector('.strip-bg__sky') as HTMLElement;
+    expect(sky.style.backgroundImage).toContain('cenario_stendra_5.png');
   });
 
   it('aplica imagem única de fundo para Gruftall', () => {
