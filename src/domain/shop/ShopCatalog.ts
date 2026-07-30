@@ -1,6 +1,7 @@
 import { GEAR_RARITIES, GearRarity, GearSlot } from '../entities/Gear';
 import { isGalneonCatalogItem } from '../gear/GearItemDefinition';
 import { listLootCatalogItems } from '../gear/GearItemCatalog';
+import { isMythicGearUnlockedForTier } from '../gear/MythicGearAccessPolicy';
 import { ACTIVE_GEAR_SLOTS } from '../gear/GearSlotCatalog';
 
 export const SHOP_OFFER_COUNT = 8;
@@ -34,7 +35,8 @@ export function getShopMaxRarityIndex(tier: number): number {
   if (tier <= 3) return 1;
   if (tier <= 10) return 2;
   if (tier <= 25) return 3;
-  if (tier <= 60) return 4;
+  // Legendary até o Ato 3 de Valdris; mythic só a partir do tier de unlock.
+  if (!isMythicGearUnlockedForTier(tier)) return 4;
   return 5;
 }
 

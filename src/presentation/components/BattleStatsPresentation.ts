@@ -202,20 +202,55 @@ function heroMetricRows(
   return heroes.map((hero) => ({ name: hero.name, value: pick(hero) }));
 }
 
-function renderDamageTab(stats: BattleSessionStatsDto): string {
+function renderElementMetricTab(
+  stats: BattleSessionStatsDto,
+  totalPick: (hero: HeroStatRow) => number,
+  elementPick: (hero: HeroStatRow, element: DamageElement) => number,
+  emptyLabel: string,
+): string {
   if (stats.heroes.length === 0) {
-    return '<p class="battle-stats-empty">Ainda sem dano causado nesta tentativa.</p>';
+    return `<p class="battle-stats-empty">${escapeHtml(emptyLabel)}</p>`;
   }
 
-  const totalGroup = renderRankingGroup('Total', heroMetricRows(stats.heroes, (h) => h.damageDealt));
+  const totalGroup = renderRankingGroup('Total', heroMetricRows(stats.heroes, totalPick));
   const elementGroups = DAMAGE_ELEMENTS.map((element: DamageElement) =>
     renderRankingGroup(
       DAMAGE_ELEMENT_LABELS[element],
-      heroMetricRows(stats.heroes, (h) => h.damageByElement[element]),
+      heroMetricRows(stats.heroes, (hero) => elementPick(hero, element)),
     ),
   ).join('');
 
-  return `${totalGroup}${elementGroups}`;
+  const content = `${totalGroup}${elementGroups}`;
+  return content.trim()
+    ? content
+    : `<p class="battle-stats-empty">${escapeHtml(emptyLabel)}</p>`;
+}
+
+function renderDamageTab(stats: BattleSessionStatsDto): string {
+  return renderElementMetricTab(
+    stats,
+    (hero) => hero.damageDealt,
+    (hero, element) => hero.damageByElement[element],
+    'Ainda sem dano causado nesta tentativa.',
+  );
+}
+
+function renderTakenTab(stats: BattleSessionStatsDto): string {
+  return renderElementMetricTab(
+    stats,
+    (hero) => hero.damageTaken,
+    (hero, element) => hero.damageTakenByElement[element],
+    'Ainda sem dano sofrido nesta tentativa.',
+  );
+}
+
+function renderMitigatedTab(stats: BattleSessionStatsDto): string {
+  return renderElementMetricTab(
+    stats,
+    (hero) => hero.damageMitigated,
+    (hero, element) => hero.damageMitigatedByElement[element],
+    'Ainda sem dano mitigado nesta tentativa.',
+  );
 }
 
 function renderMetricTab(
@@ -296,26 +331,8 @@ export function renderBattleStatsPanel(
           'Ainda sem cura realizada nesta tentativa.',
         ),
       )}
-      ${renderTabPanel(
-        'taken',
-        activeTab,
-        renderMetricTab(
-          stats,
-          'Total',
-          (hero) => hero.damageTaken,
-          'Ainda sem dano sofrido nesta tentativa.',
-        ),
-      )}
-      ${renderTabPanel(
-        'mitigated',
-        activeTab,
-        renderMetricTab(
-          stats,
-          'Total',
-          (hero) => hero.damageMitigated,
-          'Ainda sem dano mitigado nesta tentativa.',
-        ),
-      )}
+      ${renderTabPanel('taken', activeTab, renderTakenTab(stats))}
+      ${renderTabPanel('mitigated', activeTab, renderMitigatedTab(stats))}
       ${renderTabPanel(
         'crits',
         activeTab,

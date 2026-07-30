@@ -19,6 +19,8 @@ export interface HeroBattleSessionStats {
   basicAttackUses: number;
   skillUses: number;
   damageByElement: ElementDamageMap;
+  damageTakenByElement: ElementDamageMap;
+  damageMitigatedByElement: ElementDamageMap;
 }
 
 export interface SkillBattleSessionStats {
@@ -36,6 +38,8 @@ export interface BattleSessionStatsProps {
   damageMitigated: number;
   critCount: number;
   damageByElement: ElementDamageMap;
+  damageTakenByElement: ElementDamageMap;
+  damageMitigatedByElement: ElementDamageMap;
   heroes: Record<string, HeroBattleSessionStats>;
   skills: Record<string, SkillBattleSessionStats>;
 }
@@ -49,6 +53,8 @@ export interface BattleStatsStrike {
   events: readonly CombatFloatingEvent[];
   /** Dano evitado em heróis (armadura/resist/bloqueio). */
   mitigatedDamage: number;
+  /** Elemento dominante do golpe (mitigação sem float de dano, ex. dodge total). */
+  primaryDamageElement?: DamageElement;
 }
 
 export function emptyElementDamageMap(): ElementDamageMap {
@@ -63,6 +69,8 @@ export function emptyBattleSessionStats(): BattleSessionStatsProps {
     damageMitigated: 0,
     critCount: 0,
     damageByElement: emptyElementDamageMap(),
+    damageTakenByElement: emptyElementDamageMap(),
+    damageMitigatedByElement: emptyElementDamageMap(),
     heroes: {},
     skills: {},
   };
@@ -79,6 +87,8 @@ function emptyHeroStats(heroId: string): HeroBattleSessionStats {
     basicAttackUses: 0,
     skillUses: 0,
     damageByElement: emptyElementDamageMap(),
+    damageTakenByElement: emptyElementDamageMap(),
+    damageMitigatedByElement: emptyElementDamageMap(),
   };
 }
 
@@ -108,6 +118,8 @@ function normalizeHero(
     basicAttackUses: Math.max(0, Math.floor(raw?.basicAttackUses ?? 0)),
     skillUses: Math.max(0, Math.floor(raw?.skillUses ?? 0)),
     damageByElement: normalizeElementMap(raw?.damageByElement),
+    damageTakenByElement: normalizeElementMap(raw?.damageTakenByElement),
+    damageMitigatedByElement: normalizeElementMap(raw?.damageMitigatedByElement),
   };
 }
 
@@ -147,6 +159,8 @@ export function normalizeBattleSessionStats(
     damageMitigated: Math.max(0, Math.floor(raw?.damageMitigated ?? 0)),
     critCount: Math.max(0, Math.floor(raw?.critCount ?? 0)),
     damageByElement: normalizeElementMap(raw?.damageByElement),
+    damageTakenByElement: normalizeElementMap(raw?.damageTakenByElement),
+    damageMitigatedByElement: normalizeElementMap(raw?.damageMitigatedByElement),
     heroes,
     skills,
   };
@@ -181,6 +195,13 @@ function addElement(
 ): void {
   if (!element || amount <= 0) return;
   map[element] += amount;
+}
+
+function resolveStrikeElement(
+  strike: BattleStatsStrike,
+  eventElement?: DamageElement,
+): DamageElement {
+  return eventElement ?? strike.primaryDamageElement ?? 'physical';
 }
 
 /** Acumula floats legados (sem atribuição de skill). */
@@ -226,8 +247,10 @@ export function accumulateBattleStatsStrikes(
           }
         } else if (event.target === 'hero') {
           next.damageTaken += event.amount;
+          addElement(next.damageTakenByElement, event.damageElement, event.amount);
           const hero = ensureHero(next.heroes, event.targetId);
           hero.damageTaken += event.amount;
+          addElement(hero.damageTakenByElement, event.damageElement, event.amount);
         }
       } else if (
         (event.kind === 'heal' || event.kind === 'crit-heal') &&
@@ -247,35 +270,37 @@ export function accumulateBattleStatsStrikes(
 
     if (strike.mitigatedDamage > 0) {
       next.damageMitigated += strike.mitigatedDamage;
-      if (strike.actorSide === 'enemy') {
-        // Mitigação ocorre nos heróis-alvo; se não soubermos o id, só o total geral sobe.
-        // Atribuição por herói é feita quando events de dano listam targetId.
-        for (const event of strike.events) {
-          if (
-            (event.kind === 'damage' || event.kind === 'crit') &&
-            event.target === 'hero'
-          ) {
-            // rateia proporcionalmente ao dano sofrido neste golpe
-          }
-        }
-      }
-    }
 
-    // Atribui mitigação ao herói que sofreu dano neste strike (proporcional)
-    if (strike.mitigatedDamage > 0) {
       const takenEvents = strike.events.filter(
         (event) =>
           (event.kind === 'damage' || event.kind === 'crit') && event.target === 'hero',
       );
       const takenTotal = takenEvents.reduce((sum, event) => sum + event.amount, 0);
+
       if (takenEvents.length === 1) {
-        ensureHero(next.heroes, takenEvents[0].targetId).damageMitigated +=
-          strike.mitigatedDamage;
+        const element = resolveStrikeElement(strike, takenEvents[0].damageElement);
+        const hero = ensureHero(next.heroes, takenEvents[0].targetId);
+        hero.damageMitigated += strike.mitigatedDamage;
+        addElement(hero.damageMitigatedByElement, element, strike.mitigatedDamage);
+        addElement(next.damageMitigatedByElement, element, strike.mitigatedDamage);
       } else if (takenTotal > 0) {
-        for (const event of takenEvents) {
-          const share = Math.floor((strike.mitigatedDamage * event.amount) / takenTotal);
-          ensureHero(next.heroes, event.targetId).damageMitigated += share;
+        let attributed = 0;
+        for (let index = 0; index < takenEvents.length; index += 1) {
+          const event = takenEvents[index];
+          const isLast = index === takenEvents.length - 1;
+          const share = isLast
+            ? strike.mitigatedDamage - attributed
+            : Math.floor((strike.mitigatedDamage * event.amount) / takenTotal);
+          attributed += share;
+          const element = resolveStrikeElement(strike, event.damageElement);
+          const hero = ensureHero(next.heroes, event.targetId);
+          hero.damageMitigated += share;
+          addElement(hero.damageMitigatedByElement, element, share);
+          addElement(next.damageMitigatedByElement, element, share);
         }
+      } else {
+        const element = resolveStrikeElement(strike);
+        addElement(next.damageMitigatedByElement, element, strike.mitigatedDamage);
       }
     }
 

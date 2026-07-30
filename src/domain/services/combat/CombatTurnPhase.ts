@@ -24,6 +24,7 @@ import { CombatActionExecutor } from './CombatActionExecutor';
 import { formatCombatDotNarrative } from './CombatLogNarrative';
 import { CombatFloatingEvent, createDamageEvent, createLevelUpEvent } from './CombatFloatingEvent';
 import { CombatSkillVfxEvent, createSkillVfxEvent } from './CombatSkillVfxEvent';
+import { dominantDamageElement } from '../../combat/DamageComponent';
 import {
   accumulateBattleStatsStrikes,
   BattleStatsStrike,
@@ -255,6 +256,7 @@ export class CombatTurnPhase {
     let skillList = [] as ReturnType<typeof listHeroCombatSkills>;
     let statusApplications: ReturnType<typeof this.actionExecutor.execute>['statusApplications'] = [];
     let mitigatedDamage = 0;
+    let primaryDamageElement: ReturnType<typeof dominantDamageElement> | undefined;
     const stageLevel = state.difficultyTier;
     const mapId = resolveCombatMapId(state);
     let attackerProfile = this.profiles.forHero(heroes[0]);
@@ -280,6 +282,7 @@ export class CombatTurnPhase {
       }
 
       usedSkillId = selected.skillId;
+      primaryDamageElement = dominantDamageElement(selected.action.damageComponents);
       const heroVfx = createSkillVfxEvent(usedSkillId, 'hero', actor.id, selected.action);
       if (heroVfx) skillVfxEvents.push(heroVfx);
       const result = this.actionExecutor.execute(
@@ -320,6 +323,7 @@ export class CombatTurnPhase {
       }
 
       usedSkillId = selected.skillId;
+      primaryDamageElement = dominantDamageElement(selected.action.damageComponents);
       const enemyVfx = createSkillVfxEvent(usedSkillId, 'enemy', actor.id, selected.action);
       if (enemyVfx) skillVfxEvents.push(enemyVfx);
       const result = this.actionExecutor.execute(
@@ -495,6 +499,7 @@ export class CombatTurnPhase {
             isBasicAttack: usedSkillId === BASIC_ATTACK_SKILL_ID,
             events: [...floatingEvents],
             mitigatedDamage,
+            primaryDamageElement,
           }
         : null;
 

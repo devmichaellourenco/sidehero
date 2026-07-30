@@ -17,6 +17,7 @@ description: Cenas narrativas por ato da campanha Side Hero — catálogo, cards
 4. Card na trilha → `ActSceneCardPresentation` + `CampaignMapPresentation`
 5. Overlay + pausa → `ActSceneFlow` + `GameViewController.isAdvanceBlocked` / `UiOverlayOrchestrator`
 6. Wow/marco → garantir `WowCelebrationController.isBlockingAdvance()` e slot `wow` no orquestrador
+7. Campanha unpin → "Ver cena" via `ActSceneViewRelay` (storage) no painel principal
 
 ## Workflow do agente
 

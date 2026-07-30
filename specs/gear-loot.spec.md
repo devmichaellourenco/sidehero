@@ -21,6 +21,7 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 - [x] Comparação visual no picker/modal (setas ▲)
 - [x] Inventário (global e embedded): filtro por categoria exclusivamente pelos ícones do loadout; toolbar de ordenação única; sem painel inline duplicado para escolha por slot
 - [x] Bordas de raridade consistentes em inventário, loadout, loja, forja, loot e tooltips: common cinza, uncommon verde, rare azul, epic lilás, legendary dourado, mythic vermelho com brilho
+- [x] Raridade **mythic** não aparece em loja nem em loot de área/baú antes do Ato 3 de Valdris (`MythicGearAccessPolicy`, tier ≥ 121)
 
 ## Camadas e arquivos-chave
 
@@ -57,6 +58,7 @@ Adicionar critérios `[ ]` aqui antes de codar:
 ## Testes obrigatórios
 
 - [x] `LootService.test.ts`
+- [x] `MythicGearAccessPolicy.test.ts` — unlock mythic no Ato 3 de Valdris
 - [x] `GearEquipService.test.ts`, `LoadoutOptimizer.test.ts`
 - [x] `GearDragDropPolicy.test.ts`, `InventoryGridPresentation.test.ts`
 - [x] `EquipGearRace.test.ts`

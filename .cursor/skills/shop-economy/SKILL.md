@@ -20,6 +20,7 @@ description: Loja, ofertas e economia de ouro no Side Hero. Use para shop, loja,
 - Ouro via VO `Gold` — `canAfford` / `spend`
 - Oferta ID embute tier para reabrir modal sem mismatch
 - Melhoria `shop_refresh` controla cota e desconto
+- Mythic na loja só a partir do Ato 3 de Valdris (`MythicGearAccessPolicy` / tier ≥ 121)
 
 ## Testes
 

@@ -299,6 +299,8 @@ export interface BattleSessionStatsDto {
     lightning: number;
     air: number;
   };
+  damageTakenByElement: BattleSessionStatsDto['damageByElement'];
+  damageMitigatedByElement: BattleSessionStatsDto['damageByElement'];
   heroes: Array<{
     heroId: string;
     name: string;
@@ -310,6 +312,8 @@ export interface BattleSessionStatsDto {
     basicAttackUses: number;
     skillUses: number;
     damageByElement: BattleSessionStatsDto['damageByElement'];
+    damageTakenByElement: BattleSessionStatsDto['damageByElement'];
+    damageMitigatedByElement: BattleSessionStatsDto['damageByElement'];
   }>;
   skills: Array<{
     heroId: string;

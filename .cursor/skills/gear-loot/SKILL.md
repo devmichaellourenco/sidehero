@@ -21,6 +21,7 @@ description: Gear, inventário, baús e equipamento no Side Hero. Use para loot,
 - Abrir todos: preenche inventário, depois baú de itens; restante fica pendente (`GearStorageService.resolveLootDestination`)
 - Badge ▲ = upgrade para party (`getGearUpgradeInfoForActiveParty`)
 - Inline equip no drawer sem modal empilhado quando possível
+- Mythic: loja/loot de área só a partir do Ato 3 de Valdris (`MythicGearAccessPolicy`)
 
 ## Testes
 

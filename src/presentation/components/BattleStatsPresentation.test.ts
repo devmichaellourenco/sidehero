@@ -14,6 +14,20 @@ const sampleStats = {
     lightning: 0,
     air: 0,
   },
+  damageTakenByElement: {
+    physical: 280,
+    fire: 150,
+    cold: 80,
+    lightning: 0,
+    air: 0,
+  },
+  damageMitigatedByElement: {
+    physical: 120,
+    fire: 60,
+    cold: 40,
+    lightning: 0,
+    air: 0,
+  },
   heroes: [
     {
       heroId: 'h1',
@@ -27,6 +41,20 @@ const sampleStats = {
       skillUses: 5,
       damageByElement: {
         physical: 650,
+        fire: 0,
+        cold: 0,
+        lightning: 0,
+        air: 0,
+      },
+      damageTakenByElement: {
+        physical: 200,
+        fire: 0,
+        cold: 0,
+        lightning: 0,
+        air: 0,
+      },
+      damageMitigatedByElement: {
+        physical: 100,
         fire: 0,
         cold: 0,
         lightning: 0,
@@ -50,6 +78,20 @@ const sampleStats = {
         lightning: 0,
         air: 0,
       },
+      damageTakenByElement: {
+        physical: 0,
+        fire: 80,
+        cold: 0,
+        lightning: 0,
+        air: 0,
+      },
+      damageMitigatedByElement: {
+        physical: 0,
+        fire: 40,
+        cold: 0,
+        lightning: 0,
+        air: 0,
+      },
     },
     {
       heroId: 'h3',
@@ -65,6 +107,20 @@ const sampleStats = {
         physical: 0,
         fire: 0,
         cold: 350,
+        lightning: 0,
+        air: 0,
+      },
+      damageTakenByElement: {
+        physical: 80,
+        fire: 70,
+        cold: 80,
+        lightning: 0,
+        air: 0,
+      },
+      damageMitigatedByElement: {
+        physical: 20,
+        fire: 20,
+        cold: 40,
         lightning: 0,
         air: 0,
       },
@@ -112,6 +168,30 @@ describe('BattleStatsPresentation', () => {
     expect(html).not.toContain('Raio');
     expect(html).toContain('650');
     expect(html).toContain('Elara');
+    expect(html).toContain('Nix');
+  });
+
+  it('aba de dano sofrido mostra ranking total e por elemento', () => {
+    const html = renderBattleStatsPanel(sampleStats, { activeTab: 'taken' });
+
+    expect(html).toContain('data-battle-stats-tab-panel="taken"');
+    expect(html).toContain('Total');
+    expect(html).toContain('Físico');
+    expect(html).toContain('Fogo');
+    expect(html).toContain('Gelo');
+    expect(html).toContain('Galneon');
+    expect(html).toContain('Elara');
+  });
+
+  it('aba de dano mitigado mostra ranking total e por elemento', () => {
+    const html = renderBattleStatsPanel(sampleStats, { activeTab: 'mitigated' });
+
+    expect(html).toContain('data-battle-stats-tab-panel="mitigated"');
+    expect(html).toContain('Total');
+    expect(html).toContain('Físico');
+    expect(html).toContain('Fogo');
+    expect(html).toContain('Gelo');
+    expect(html).toContain('Galneon');
     expect(html).toContain('Nix');
   });
 

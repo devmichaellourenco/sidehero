@@ -27,6 +27,7 @@ Cada **ato** de cada **região** (mapa) da campanha exibe uma **cena narrativa**
 - [x] Presentation não importa entidades de domínio — só DTOs
 - [ ] Cenas DLC (mapas 5–10) podem existir no catálogo mas ficam fora do escopo v1 de copy
 - [x] Releitura manual no modal de campanha (botão no card) sem exigir nova marcação
+- [x] "Ver cena" no modal unpin (janela destacada) retransmite o overlay para o painel principal
 - [x] Testes listados abaixo criados/atualizados
 
 ## Gatilhos
@@ -37,6 +38,7 @@ Cada **ato** de cada **região** (mapa) da campanha exibe uma **cena narrativa**
 | Primeira sessão com `1-1` desbloqueada e cena do Ato I não vista | Overlay do Ato I de Stendra |
 | Boss X-50 / finale | Overlay de vitória existente + Wow de marco (já pausam com esta feature) |
 | Card "Ver cena" no mapa | Overlay somente leitura; não re-marca se já vista |
+| Card "Ver cena" com campanha unpin | Relay via storage → overlay no painel principal |
 
 ## Camadas e arquivos-chave
 
@@ -65,3 +67,4 @@ Cada **ato** de cada **região** (mapa) da campanha exibe uma **cena narrativa**
 - [x] `ActScenePresentation.test.ts` — overlay com recap/preview
 - [x] `MarkActSceneViewedUseCase.test.ts` — persistência
 - [x] `WowCelebrationController.test.ts` — `isBlockingAdvance` durante celebração
+- [x] `ActSceneViewRelay.test.ts` — pedido de overlay da janela unpin para o painel principal

@@ -8,6 +8,7 @@ import {
   getGearCatalogItem,
   listLootCatalogItems,
 } from '../gear/GearItemCatalog';
+import { isMythicGearUnlockedForTier } from '../gear/MythicGearAccessPolicy';
 import { ILootService } from './ILootService';
 
 const CHEST_RARITY_WEIGHTS: Record<ChestType, Record<GearRarity, number>> = {
@@ -116,10 +117,16 @@ export class LootService implements ILootService {
     weights.mythic += stageBonus * 0.2;
     weights.common = Math.max(0.02, weights.common - stageBonus);
 
+    if (!isMythicGearUnlockedForTier(stage)) {
+      weights.legendary += weights.mythic;
+      weights.mythic = 0;
+    }
+
     const roll = Math.random();
     let cumulative = 0;
 
     for (const rarity of RARITY_ORDER) {
+      if (weights[rarity] <= 0) continue;
       cumulative += weights[rarity];
       if (roll <= cumulative) {
         return rarity;

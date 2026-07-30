@@ -73,6 +73,16 @@ describe('ShopCatalog balance', () => {
     expect(getShopMaxRarityForTier(8)).toBe('rare');
     expect(getShopMaxRarityForTier(20)).toBe('epic');
     expect(getShopMaxRarityForTier(50)).toBe('legendary');
+    expect(getShopMaxRarityForTier(120)).toBe('legendary');
+    expect(getShopMaxRarityForTier(121)).toBe('mythic');
+  });
+
+  it('não vende mythic antes do Ato 3 de Valdris', () => {
+    const shop = new ShopService(new LootService());
+    for (let seed = 0; seed < 20; seed += 1) {
+      const offers = shop.generateOffers(120, seed);
+      expect(offers.every((offer) => offer.gear.rarity !== 'mythic')).toBe(true);
+    }
   });
 
   it('rollShopRarity respeita cap do tier', () => {

@@ -101,4 +101,24 @@ describe('LootService', () => {
     expect(stendraPool.length).toBeGreaterThan(0);
     expect(stendraPool.every((item) => (item.requirements?.minLevel ?? 1) <= 12)).toBe(true);
   });
+
+  it('não rola mythic em baú antes do Ato 3 de Valdris', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    for (const stage of [1, 60, 100, 120]) {
+      const gear = lootService.generateGearForChest('act_boss', stage);
+      expect(gear.rarity).not.toBe('mythic');
+    }
+
+    vi.restoreAllMocks();
+  });
+
+  it('pode rolar mythic em baú a partir do Ato 3 de Valdris', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    const gear = lootService.generateGearForChest('act_boss', 121);
+    expect(gear.rarity).toBe('mythic');
+
+    vi.restoreAllMocks();
+  });
 });

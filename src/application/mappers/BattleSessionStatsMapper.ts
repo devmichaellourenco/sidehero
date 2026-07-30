@@ -28,6 +28,8 @@ export function mapBattleSessionStats(
       basicAttackUses: hero.basicAttackUses,
       skillUses: hero.skillUses,
       damageByElement: { ...hero.damageByElement },
+      damageTakenByElement: { ...hero.damageTakenByElement },
+      damageMitigatedByElement: { ...hero.damageMitigatedByElement },
     }))
     .sort((a, b) => b.damageDealt - a.damageDealt || b.healingDone - a.healingDone);
 
@@ -50,6 +52,8 @@ export function mapBattleSessionStats(
     damageMitigated: stats.damageMitigated,
     critCount: stats.critCount,
     damageByElement: { ...stats.damageByElement },
+    damageTakenByElement: { ...stats.damageTakenByElement },
+    damageMitigatedByElement: { ...stats.damageMitigatedByElement },
     heroes,
     skills,
   };

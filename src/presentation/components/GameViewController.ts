@@ -35,6 +35,11 @@ import {
   writeSurfacePinned,
 } from '../helpers/SurfacePinPreference';
 import {
+  ACT_SCENE_VIEW_REQUEST_KEY,
+  parseActSceneViewRequest,
+  requestActSceneViewOnMainPanel,
+} from '../helpers/ActSceneViewRelay';
+import {
   applySurfacePinButton,
   hideSurfacePinButton,
   systemsMenuLabel,
@@ -105,7 +110,7 @@ import { OnboardingController } from '../onboarding/OnboardingController';
 import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
 import { UiOverlayOrchestrator } from '../overlays/UiOverlayOrchestrator';
 import { bindBattleChromeLayout } from '../layout/BattleChromeLayout';
-import { detectPendingActSceneDto, detectSeasonFinaleEpilogueDto } from '../../application/mappers/ActScenePresentationMapper';
+import { detectPendingActSceneDto, detectSeasonFinaleEpilogueDto, actSceneDtoFromId } from '../../application/mappers/ActScenePresentationMapper';
 import { ActSceneDto } from '../../application/dto/CampaignDto';
 
 export class GameViewController {
@@ -494,6 +499,11 @@ export class GameViewController {
 
     this.campaignFlow = new CampaignFlow(this.client, this.modal);
     this.campaignFlow.setActSceneReader((scene) => {
+      if (this.detachedSurfaceId) {
+        // Overlay (#act-scene-root) fica oculto na janela unpin — retransmite ao painel principal.
+        void requestActSceneViewOnMainPanel(scene.id);
+        return;
+      }
       this.presentActScene(scene, { markViewedOnDismiss: false });
     });
     this.partyFlow = new PartyFlow(this.client);
@@ -2226,15 +2236,31 @@ export class GameViewController {
 
         const dockChange =
           changes[SURFACE_DOCK_REQUEST_KEY] ?? changes[LEGACY_BATTLE_STATS_DOCK_REQUEST_KEY];
-        if (!dockChange) return;
+        if (dockChange) {
+          const request = parseSurfaceDockRequest(dockChange.newValue);
+          if (request) {
+            void this.dockSurfaceInSidePanel(request.surfaceId);
+          }
+        }
 
-        const request = parseSurfaceDockRequest(dockChange.newValue);
-        if (!request) return;
-        void this.dockSurfaceInSidePanel(request.surfaceId);
+        const actSceneChange = changes[ACT_SCENE_VIEW_REQUEST_KEY];
+        if (actSceneChange) {
+          this.handleActSceneViewRequest(actSceneChange.newValue);
+        }
       });
     } catch {
       // chrome.storage indisponível
     }
+  }
+
+  private handleActSceneViewRequest(value: unknown): void {
+    const request = parseActSceneViewRequest(value);
+    if (!request || !this.state) return;
+
+    const scene = actSceneDtoFromId(request.sceneId, this.state.campaignProgress);
+    if (!scene) return;
+
+    this.presentActScene(scene, { markViewedOnDismiss: false });
   }
 
   private surfacePinMode(): SurfacePinMode {
