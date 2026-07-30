@@ -7,6 +7,7 @@ describe('HeroUnlockService', () => {
     const next = HeroUnlockService.applyUnlock(GameState.initial(), 'berserker');
     expect(next.roster).toHaveLength(4);
     expect(next.roster.some((hero) => hero.heroClass === 'berserker')).toBe(true);
+    expect(next.roster.find((hero) => hero.heroClass === 'berserker')?.name).toBe('Torius');
     expect(next.activePartyIds).toEqual(['hero-1', 'hero-2', 'hero-3']);
     expect(next.benchHeroes()).toHaveLength(1);
   });

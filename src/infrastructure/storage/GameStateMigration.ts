@@ -45,6 +45,7 @@ const LEGACY_CHAOS_GEAR_STAT_FIELDS = [
 const LEGACY_HERO_NAMES: Record<string, string> = {
   Arthos: 'Galneon',
   Lyra: 'Nix',
+  Ragnar: 'Torius',
 };
 
 function migrateHeroName(name: string): string {

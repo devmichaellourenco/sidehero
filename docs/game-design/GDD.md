@@ -119,7 +119,7 @@ O grupo inicial reúne:
 - **Nix, Sorcerer:** poder arcano e dano elemental; caminhos Arcano ou Inato.
 - **Elara, Priest:** sustentação e cura; caminhos Sagrado ou Vida.
 
-A party ativa comporta até três heróis e pode ser reorganizada no acampamento por clique ou drag-and-drop. A reserva recebe experiência parcial. Heróis adicionais — **Ragnar, Berserker** e **Valerius, Paladino** — entram pela árvore de melhorias e ampliam as opções de formação.
+A party ativa comporta até três heróis e pode ser reorganizada no acampamento por clique ou drag-and-drop. A reserva recebe experiência parcial. Heróis adicionais — **Torius, Berserker** e **Valerius, Paladino** — entram pela árvore de melhorias e ampliam as opções de formação.
 
 Cada herói evolui por:
 

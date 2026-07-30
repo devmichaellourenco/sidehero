@@ -6,12 +6,12 @@ describe('RewardHeroPortrait', () => {
     expect(rewardHeroPortraitFromDto({
       id: 'hero-berserker',
       heroClass: 'berserker',
-      name: 'Ragnar',
+      name: 'Torius',
       ascensionId: null,
     })).toEqual({
       id: 'hero-berserker',
       heroClass: 'berserker',
-      name: 'Ragnar',
+      name: 'Torius',
       ascensionId: null,
     });
   });

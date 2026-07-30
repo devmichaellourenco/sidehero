@@ -324,7 +324,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     level: 1,
     branch: 'heroes',
     name: 'Desbloquear Berserker',
-    description: 'Ragnar entra na reserva — alto dano corpo a corpo.',
+    description: 'Torius entra na reserva — alto dano corpo a corpo.',
     cost: 1000,
     parents: ['auto_battle_2'],
     requirements: [

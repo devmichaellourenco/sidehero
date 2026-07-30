@@ -270,6 +270,16 @@ describe('migrateEnemy', () => {
 });
 
 describe('migrateHero — progressão', () => {
+  it('renomeia Ragnar legado para Torius', () => {
+    const hero = migrateHero({
+      id: 'hero-berserker',
+      name: 'Ragnar',
+      heroClass: 'berserker',
+    });
+
+    expect(hero.name).toBe('Torius');
+  });
+
   it('funde unspentAscensionPoints antigos em unspentImprovementPoints', () => {
     const hero = migrateHero({
       id: 'h1',
