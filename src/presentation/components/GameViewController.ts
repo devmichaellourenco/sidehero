@@ -13,6 +13,7 @@ import { LootFlowController } from '../controllers/LootFlowController';
 import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
 import { ActSceneFlow } from '../flows/ActSceneFlow';
+import { SplashScreenController } from './SplashScreenController';
 import { ChestLootFlow } from '../flows/ChestLootFlow';
 import { GearEquipFlow } from '../flows/GearEquipFlow';
 import { GearStorageFlow, bindGearStorageActions } from '../flows/GearStorageFlow';
@@ -214,6 +215,7 @@ export class GameViewController {
   private readonly chestLootFlow: ChestLootFlow;
   private readonly campaignFlow: CampaignFlow;
   private readonly actSceneFlow: ActSceneFlow;
+  private readonly splashScreen: SplashScreenController;
   private readonly partyFlow: PartyFlow;
   private readonly modalStackController: ModalStackController;
   private readonly inlineEquip = new InlineEquipController();
@@ -231,6 +233,20 @@ export class GameViewController {
     if (this.detachedSurfaceId) {
       document.body.classList.add('detached-surface');
       document.title = `${systemsMenuLabel(this.detachedSurfaceId)} Side Hero`;
+    }
+
+    const splashRoot =
+      (root.querySelector('#splash-screen-root') as HTMLElement | null) ??
+      (document.querySelector('#splash-screen-root') as HTMLElement | null);
+    const splashImage =
+      (root.querySelector('#splash-screen-image') as HTMLImageElement | null) ??
+      (document.querySelector('#splash-screen-image') as HTMLImageElement | null);
+    this.splashScreen = new SplashScreenController(
+      splashRoot ?? document.createElement('div'),
+      splashImage ?? document.createElement('img'),
+    );
+    if (this.detachedSurfaceId) {
+      this.splashScreen.dismissImmediate();
     }
 
     this.campaignContextBtn = root.querySelector('#campaign-context-btn') as HTMLButtonElement;
@@ -730,16 +746,29 @@ export class GameViewController {
   }
 
   async init(): Promise<void> {
+    const splashDone = this.detachedSurfaceId
+      ? Promise.resolve()
+      : this.splashScreen.play();
+
     try {
       await this.refresh();
       // OFFLINE PROGRESS DESATIVADO (2026-07)
       // await this.refresh({ checkIdleSummary: !this.detachedSurfaceId });
     } catch {
       this.handleContextInvalidated();
+      await splashDone.catch(() => undefined);
+      this.splashScreen.dismissImmediate();
       return;
     }
 
-    if (this.contextInvalidated) return;
+    if (this.contextInvalidated) {
+      await splashDone.catch(() => undefined);
+      this.splashScreen.dismissImmediate();
+      return;
+    }
+
+    // Splash cobre o painel enquanto o estado carrega; só então inicia o loop.
+    await splashDone;
 
     if (this.detachedSurfaceId) {
       await this.openSystemsMenu(this.detachedSurfaceId);
@@ -816,6 +845,7 @@ export class GameViewController {
   }
 
   private isAdvanceBlocked(state: GameStateDto | null = this.state): boolean {
+    if (this.splashScreen.isActive()) return true;
     if (this.overlayOrchestrator.isBusy()) return true;
     if (this.onboarding.isActive()) return true;
     if (this.victoryFlow.isBlockingAdvance()) return true;

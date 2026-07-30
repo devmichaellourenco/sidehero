@@ -30,6 +30,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
 - [x] Heróis / Formação / Loja / Inventário / Baús / Otimizar equipe só aparecem no **acampamento** (`canEditParty`)
 - [x] Pista de combate do mapa (ameaça/favorável) no tooltip da campanha e header do mapa; eficácia vs área nas stats de skill
+- [x] Splash `splash_screen.png` na abertura do painel principal antes do loop de batalha (`SplashScreenController`)
 
 ## Camadas e arquivos-chave
 
@@ -67,6 +68,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `stats.html.test.ts` — redirect legado para `?detached=stats`
 - [x] `SystemsMenuNavigation.test.ts` — disponibilidade por camp/unlock + wrap prev/next
 - [x] `UiOverlayOrchestrator.test.ts` — prioridade e fila de overlays exclusivos
+- [x] `SplashScreenController.test.ts` — splash de abertura antes do loop
 
 ## Relacionado
 

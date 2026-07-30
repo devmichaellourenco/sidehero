@@ -303,6 +303,7 @@
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
   --z-act-scene: 13000;
+  --z-splash: 14000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -524,6 +525,7 @@ html[data-ui-theme='dark'] {
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
   --z-act-scene: 13000;
+  --z-splash: 14000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -738,6 +740,7 @@ html[data-ui-theme='dark'] .battle-stage {
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
   --z-act-scene: 13000;
+  --z-splash: 14000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -2036,7 +2039,8 @@ body.detached-surface {
 body.detached-surface #app,
 body.detached-surface #wow-celebration-root,
 body.detached-surface #act-scene-root,
-body.detached-surface #donation-prompt-root {
+body.detached-surface #donation-prompt-root,
+body.detached-surface #splash-screen-root {
   display: none !important;
 }
 
@@ -13958,6 +13962,46 @@ body.party-drag-active * {
 .onboarding-highlight {
   position: relative;
   z-index: 20040;
+  outline: 3px solid color-mix(in srgb, var(--seal-gold) 98%, transparent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--seal-gold) 28%, transparent);
+  border-radius: 10px;
+}
+
+/* Splash de abertura do painel principal (antes do loop de batalha) */
+.splash-screen-root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-splash, 14000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0806;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+  pointer-events: all;
+}
+
+.splash-screen-root.hidden {
+  display: none;
+}
+
+.splash-screen-root--fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-screen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+body.splash-screen-open {
+  overflow: hidden;
+}
   outline: 3px solid color-mix(in srgb, var(--seal-gold) 98%, transparent);
   outline-offset: 3px;
   box-shadow: 0 0 0 8px color-mix(in srgb, var(--seal-gold) 28%, transparent);

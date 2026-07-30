@@ -101,6 +101,7 @@ export const ASSETS = {
     bookOpen: 'ui/book-open.png',
     arrowPrev: 'ui/arrow-prev.png',
     arrowNext: 'ui/arrow-next.png',
+    splashScreen: 'ui/splash_screen.png',
   },
   skills: {
     attack: 'ui/attack.png',

@@ -20,6 +20,7 @@ Extensão MV3 com **side panel**, service worker, persistência local e messagin
 - [x] Tick alarm em background **desativado** (código comentado; alarm legado é limpo)
 - [x] Release automatizável via `npm run release` → zip sem `.map` (só quando o usuário pedir)
 - [x] Backup criptografado (AES-GCM) export/import em Configurações (`.sidehero`) — ofuscação local, não anti-cheat absoluto
+- [x] Asset `public/sprites/splash_screen.png` copiado para `panel/assets/ui/splash_screen.png` no build
 
 ## Camadas e arquivos-chave
 

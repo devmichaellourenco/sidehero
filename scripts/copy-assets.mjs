@@ -145,6 +145,7 @@ const PUBLIC_ASSET_MAP = [
   ['sprites/icons/pin.png', 'ui/pin.png'],
   ['sprites/icons/unpin.png', 'ui/unpin.png'],
   ['sprites/icons/xp.png', 'ui/xp.png'],
+  ['sprites/splash_screen.png', 'ui/splash_screen.png'],
 ];
 
 const ASSET_MAP = [

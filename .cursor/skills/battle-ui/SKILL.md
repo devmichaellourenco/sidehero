@@ -20,6 +20,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Área | Arquivos |
 |------|----------|
 | Strip | `BattleStripRenderer`, `BattleActorCardPresentation`, `BattleFloatingTextController` (`Lv UP`) |
+| Splash | `SplashScreenController` — `splash_screen.png` antes do auto-battle no painel principal |
 | Stage progress | Ver skill `stage-progress-bar` — timeline entre localização e a strip |
 | Pausa | Acampamento (`PauseForLoadout`) ≠ pausa de batalha (`PauseBattle` / `ResumeBattle`); Pausar/Continuar à **esquerda**, Acampamento/Batalhar à **direita** (mesma linha) |
 | Stats | Runa `battle_stats` → janela popup (padrão) ou sheet no side panel; botão Fixar/Desafixar |
