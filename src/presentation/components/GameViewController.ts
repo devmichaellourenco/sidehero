@@ -216,6 +216,8 @@ export class GameViewController {
   private readonly campaignFlow: CampaignFlow;
   private readonly actSceneFlow: ActSceneFlow;
   private readonly splashScreen: SplashScreenController;
+  /** Só true após a splash (ou imediatamente em janela detached). */
+  private bootReady = false;
   private readonly partyFlow: PartyFlow;
   private readonly modalStackController: ModalStackController;
   private readonly inlineEquip = new InlineEquipController();
@@ -247,6 +249,7 @@ export class GameViewController {
     );
     if (this.detachedSurfaceId) {
       this.splashScreen.dismissImmediate();
+      this.bootReady = true;
     }
 
     this.campaignContextBtn = root.querySelector('#campaign-context-btn') as HTMLButtonElement;
@@ -767,8 +770,9 @@ export class GameViewController {
       return;
     }
 
-    // Splash cobre o painel enquanto o estado carrega; só então inicia o loop.
+    // Splash cobre o painel enquanto o estado carrega; só então inicia o jogo.
     await splashDone;
+    this.beginPostSplashBoot();
 
     if (this.detachedSurfaceId) {
       await this.openSystemsMenu(this.detachedSurfaceId);
@@ -789,6 +793,19 @@ export class GameViewController {
     this.refreshTimer = window.setInterval(() => {
       void this.refresh();
     }, 5000);
+  }
+
+  /** Libera tutorial/Wow/cenas e o loop só depois da splash. */
+  private beginPostSplashBoot(): void {
+    if (this.bootReady) return;
+    this.bootReady = true;
+
+    if (!this.state || this.detachedSurfaceId) return;
+
+    this.syncPersistentWowInbox(this.state);
+    this.syncOnboarding(this.state);
+    // previous=null para detectar cena pendente da abertura (ex. Ato I).
+    this.tryShowAutoActScene(null, this.state);
   }
 
   private enforceUpgradeGates(): void {
@@ -2651,7 +2668,7 @@ export class GameViewController {
       this.shownIntermissionKey = null;
     }
 
-    if (previous && !options.skipChestToast) {
+    if (previous && !options.skipChestToast && this.bootReady) {
       this.rewards.detectStateChange(
         previous,
         mergedState,
@@ -2684,7 +2701,9 @@ export class GameViewController {
     this.battleStrip.render(mergedState);
     this.skillCooldownAnimator.setCombatActive(animateStripTimers);
     this.stageProgressBar.render(mergedState);
-    this.syncPersistentWowInbox(mergedState);
+    if (this.bootReady) {
+      this.syncPersistentWowInbox(mergedState);
+    }
 
     this.shopFlow.state.shopRefreshUnlocked = mergedState.featureFlags.shopRefresh;
     this.shopFlow.state.shopRefreshRemaining = Math.max(
@@ -2708,7 +2727,7 @@ export class GameViewController {
     }
 
     this.enforceUpgradeGates();
-    if (!this.onboarding.isActive()) {
+    if (this.bootReady && !this.onboarding.isActive()) {
       this.chestLootFlow.scheduleAutoOpenChests();
     }
     if (
@@ -2731,8 +2750,10 @@ export class GameViewController {
     ) {
       this.renderModalTop();
     }
-    this.syncOnboarding(mergedState);
-    this.tryShowAutoActScene(previous, mergedState);
+    if (this.bootReady) {
+      this.syncOnboarding(mergedState);
+      this.tryShowAutoActScene(previous, mergedState);
+    }
     this.syncSystemsNavChrome();
   }
 

@@ -1,7 +1,10 @@
 // @vitest-environment happy-dom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SplashScreenController } from './SplashScreenController';
+import {
+  SPLASH_SCREEN_MIN_VISIBLE_MS,
+  SplashScreenController,
+} from './SplashScreenController';
 
 function mountSplash(): { root: HTMLElement; image: HTMLImageElement } {
   const root = document.createElement('div');
@@ -56,5 +59,9 @@ describe('SplashScreenController', () => {
 
     expect(root.classList.contains('hidden')).toBe(true);
     expect(splash.isActive()).toBe(false);
+  });
+
+  it('usa pelo menos 5 segundos de exibição por padrão', () => {
+    expect(SPLASH_SCREEN_MIN_VISIBLE_MS).toBe(5000);
   });
 });

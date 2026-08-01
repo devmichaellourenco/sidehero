@@ -78,6 +78,7 @@ export class OnboardingController {
     this.root.classList.remove('hidden');
     this.root.innerHTML = `
       <div class="onboarding-backdrop" data-onboarding-dismiss></div>
+      <div class="onboarding-spotlight hidden" aria-hidden="true"></div>
       <div class="onboarding-card" role="dialog" aria-labelledby="onboarding-title">
         <p class="onboarding-kicker">Dica</p>
         <h3 id="onboarding-title" class="onboarding-title">${step.title}</h3>
@@ -169,13 +170,34 @@ export class OnboardingController {
 
   private setHighlight(anchor: HTMLElement | null): void {
     this.clearHighlight();
-    if (!anchor) return;
+    const spotlight = this.root.querySelector('.onboarding-spotlight') as HTMLElement | null;
+    const backdrop = this.root.querySelector('.onboarding-backdrop') as HTMLElement | null;
+
+    if (!anchor || !spotlight) {
+      spotlight?.classList.add('hidden');
+      backdrop?.classList.remove('onboarding-backdrop--cutout');
+      return;
+    }
+
     anchor.classList.add('onboarding-highlight');
     this.highlightedAnchor = anchor;
+
+    const pad = 8;
+    const rect = anchor.getBoundingClientRect();
+    spotlight.classList.remove('hidden');
+    backdrop?.classList.add('onboarding-backdrop--cutout');
+    spotlight.style.top = `${Math.max(0, rect.top - pad)}px`;
+    spotlight.style.left = `${Math.max(0, rect.left - pad)}px`;
+    spotlight.style.width = `${rect.width + pad * 2}px`;
+    spotlight.style.height = `${rect.height + pad * 2}px`;
   }
 
   private clearHighlight(): void {
     this.highlightedAnchor?.classList.remove('onboarding-highlight');
     this.highlightedAnchor = null;
+    const spotlight = this.root.querySelector('.onboarding-spotlight') as HTMLElement | null;
+    const backdrop = this.root.querySelector('.onboarding-backdrop') as HTMLElement | null;
+    spotlight?.classList.add('hidden');
+    backdrop?.classList.remove('onboarding-backdrop--cutout');
   }
 }

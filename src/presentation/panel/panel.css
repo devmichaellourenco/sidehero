@@ -303,7 +303,7 @@
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
   --z-act-scene: 13000;
-  --z-splash: 14000;
+  --z-splash: 30000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -525,7 +525,7 @@ html[data-ui-theme='dark'] {
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
   --z-act-scene: 13000;
-  --z-splash: 14000;
+  --z-splash: 30000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -740,7 +740,7 @@ html[data-ui-theme='dark'] .battle-stage {
   --font-heading: 'Josefin Sans', 'Alata', system-ui, sans-serif;
   --z-toast: 11000;
   --z-act-scene: 13000;
-  --z-splash: 14000;
+  --z-splash: 30000;
   --toast-info-bg: linear-gradient(135deg, var(--toast-info-start) 0%, var(--toast-info-end) 100%);
   --toast-chest-bg: linear-gradient(135deg, var(--seal-gold-dark) 0%, var(--toast-chest-mid) 55%, var(--toast-chest-deep) 100%);
   --toast-level-bg: linear-gradient(135deg, var(--toast-level-start) 0%, var(--toast-level-end) 100%);
@@ -13851,8 +13851,29 @@ body.party-drag-active * {
 .onboarding-backdrop {
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--ink) 42%, transparent);
+  /* Sempre escuro — não usar --ink (no tema escuro vira véu claro/branco). */
+  background: rgba(6, 4, 2, 0.58);
   pointer-events: auto;
+}
+
+/* Com spotlight: o escurecimento vem do box-shadow do recorte */
+.onboarding-backdrop--cutout {
+  background: transparent;
+}
+
+.onboarding-spotlight {
+  position: fixed;
+  z-index: 0;
+  border-radius: 12px;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 3px var(--seal-gold),
+    0 0 0 10px color-mix(in srgb, var(--seal-gold) 32%, transparent),
+    0 0 0 999vmax rgba(6, 4, 2, 0.62);
+}
+
+.onboarding-spotlight.hidden {
+  display: none;
 }
 
 .onboarding-card {
@@ -13961,18 +13982,18 @@ body.party-drag-active * {
 
 .onboarding-highlight {
   position: relative;
-  z-index: 20040;
-  outline: 3px solid color-mix(in srgb, var(--seal-gold) 98%, transparent);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 8px color-mix(in srgb, var(--seal-gold) 28%, transparent);
+  z-index: 1;
   border-radius: 10px;
+  /* Anel visual extra no alvo (o spotlight já abre o furo no véu) */
+  outline: 2px solid color-mix(in srgb, var(--seal-gold) 90%, transparent);
+  outline-offset: 2px;
 }
 
 /* Splash de abertura do painel principal (antes do loop de batalha) */
 .splash-screen-root {
   position: fixed;
   inset: 0;
-  z-index: var(--z-splash, 14000);
+  z-index: var(--z-splash, 30000);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14001,6 +14022,16 @@ body.party-drag-active * {
 
 body.splash-screen-open {
   overflow: hidden;
+}
+
+/* Nada de tutorial/Wow/cena por cima da splash enquanto o boot não termina */
+body.splash-screen-open #onboarding-root,
+body.splash-screen-open #wow-celebration-root,
+body.splash-screen-open #act-scene-root,
+body.splash-screen-open #donation-prompt-root,
+body.splash-screen-open #wow-inbox-root {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
   outline: 3px solid color-mix(in srgb, var(--seal-gold) 98%, transparent);
   outline-offset: 3px;

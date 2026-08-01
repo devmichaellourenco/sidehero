@@ -25,12 +25,12 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
-- [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`)
+- [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo)
 - [x] Barras de vida verdes; HP na strip
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
 - [x] Heróis / Formação / Loja / Inventário / Baús / Otimizar equipe só aparecem no **acampamento** (`canEditParty`)
 - [x] Pista de combate do mapa (ameaça/favorável) no tooltip da campanha e header do mapa; eficácia vs área nas stats de skill
-- [x] Splash `splash_screen.png` na abertura do painel principal antes do loop de batalha (`SplashScreenController`)
+- [x] Splash `splash_screen.png` na abertura do painel principal (≥5s) antes de tutorial/Wow/loop de batalha (`SplashScreenController`)
 
 ## Camadas e arquivos-chave
 

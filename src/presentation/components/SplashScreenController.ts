@@ -1,6 +1,6 @@
 import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
 
-export const SPLASH_SCREEN_MIN_VISIBLE_MS = 2200;
+export const SPLASH_SCREEN_MIN_VISIBLE_MS = 5000;
 export const SPLASH_SCREEN_FADE_MS = 450;
 
 export interface SplashScreenPlayOptions {
