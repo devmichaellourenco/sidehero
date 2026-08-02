@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 18/18 (100%) · escopo base v1  
-**Testes obrigatórios:** 9/9 grupos (inclui `CampaignReleaseScope` + `PhaseChallengeCatalog`)
+**Aceite:** 19/19 (100%) · escopo base v1  
+**Testes obrigatórios:** 10/10 grupos (inclui `CampaignReleaseScope` + `PhaseChallengeCatalog` + `WaveEnemyCap`)
 
 ## Objetivo
 
@@ -19,6 +19,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] Seleção de fase: apenas desbloqueadas ou já concluídas (replay)
 - [x] Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase
 - [x] Scaling de inimigos segue `StageScalingCatalog` por tier global
+- [x] No máximo **3 inimigos por wave** (`WaveEnemyCap` / `MAX_ENEMIES_PER_WAVE`)
 - [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos (`physical`/`fire`/`cold`/`lightning`/`air`) e status
 - [x] Persistência migra saves legados: gear/stats `chaos*` → `air*`, IDs `chaos_mantle`/`chaos_pendant` → `air_*`, `dotElement: chaos` → `air`
 - [x] Identidade de combate por mapa base (Stendra→Morthaven): bias soft de pool + resists (−15/+20); X-50 temáticos
@@ -99,6 +100,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
 - [x] `MapCombatIdentityCatalog.test.ts`, `EnemyTierProgression.mapBias.test.ts`, `MilestonePhaseBlueprints.theme.test.ts` — identidade por mapa
 - [x] `PhaseChallengeCatalog.test.ts` — micro-desafios BAL-011 multi-slot (4 mapas base)
+- [x] `WaveEnemyCap.test.ts` — teto de 3 inimigos por wave em todo o catálogo
 - [x] `UniqueGearLootService.test.ts` — inclui Selo de Morthaven (4-50)
 
 ## Relacionado

@@ -11,9 +11,9 @@ export const GRUFTALL_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Chaminés Apressadas',
     statMultiplier: 0.92,
     waves: [
-      wave('w1', [trash('goblin_bomber', 3), trash('kobold_digger', 2)]),
-      wave('w2', [trash('goblin_raider', 3), trash('goblin_bomber', 2)], 1.05),
-      wave('w3', [elite('goblin_shaman'), trash('goblin_bomber', 3), trash('road_bandit', 1)], 1.12),
+      wave('w1', [trash('goblin_bomber', 2), trash('kobold_digger', 1)]),
+      wave('w2', [trash('goblin_raider', 2), trash('goblin_bomber', 1)], 1.05),
+      wave('w3', [elite('goblin_shaman'), trash('goblin_bomber', 2)], 1.12),
     ],
   },
 
@@ -25,8 +25,8 @@ export const GRUFTALL_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Forja Abandonada',
     statMultiplier: 1.12,
     waves: [
-      wave('w1', [trash('minor_fire_elemental', 2), trash('goblin_bomber', 2)]),
-      wave('w2', [elite('minor_fire_elemental', 2), trash('kobold_digger', 2)], 1.12),
+      wave('w1', [trash('minor_fire_elemental', 2), trash('goblin_bomber', 1)]),
+      wave('w2', [elite('minor_fire_elemental', 2), trash('kobold_digger', 1)], 1.12),
       wave('w3', [elite('goblin_shaman'), elite('minor_fire_elemental')], 1.2),
       wave('w4', [boss('minor_fire_elemental', 1, 'Coração da Forja'), trash('goblin_bomber', 2)], 1.32),
     ],
@@ -41,7 +41,7 @@ export const GRUFTALL_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     statMultiplier: 1.14,
     waves: [
       wave('w1', [trash('goblin_bomber', 2), trash('minor_fire_elemental', 1)]),
-      wave('w2', [elite('goblin_bomber', 2), trash('kobold_digger', 2)], 1.15),
+      wave('w2', [elite('goblin_bomber', 2), trash('kobold_digger', 1)], 1.15),
       wave('w3', [elite('bandit_captain'), elite('minor_fire_elemental')], 1.22),
       wave('w4', [boss('goblin_shaman', 1, 'Xamã Incendiário'), trash('goblin_bomber', 2)], 1.35),
     ],
@@ -54,7 +54,7 @@ export const GRUFTALL_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Escória Endurecida',
     statMultiplier: 1.16,
     waves: [
-      wave('w1', [trash('orc_warrior', 2), trash('lizardman', 2)]),
+      wave('w1', [trash('orc_warrior', 2), trash('lizardman', 1)]),
       wave('w2', [elite('mountain_troll'), trash('orc_berserker', 2)], 1.15),
       wave('w3', [elite('hill_ogre'), elite('orc_warrior', 2)], 1.22),
       wave('w4', [boss('mountain_troll', 1, 'Troll de Escória'), trash('orc_warrior', 2)], 1.4),

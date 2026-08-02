@@ -11,9 +11,9 @@ export const MORTHAVEN_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Patrulha do Duque',
     statMultiplier: 0.94,
     waves: [
-      wave('w1', [trash('orc_warrior', 3), trash('orc_berserker', 2)]),
-      wave('w2', [trash('skeleton_warrior', 3), trash('rot_zombie', 2)], 1.08),
-      wave('w3', [elite('bloody_orc_chief'), trash('orc_warrior', 3)], 1.14),
+      wave('w1', [trash('orc_warrior', 2), trash('orc_berserker', 1)]),
+      wave('w2', [trash('skeleton_warrior', 2), trash('rot_zombie', 1)], 1.08),
+      wave('w3', [elite('bloody_orc_chief'), trash('orc_warrior', 2)], 1.14),
     ],
   },
 
@@ -57,7 +57,7 @@ export const MORTHAVEN_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Jardim de Almas',
     statMultiplier: 1.18,
     waves: [
-      wave('w1', [trash('shadow_arachnid', 2), trash('rot_zombie', 2)]),
+      wave('w1', [trash('shadow_arachnid', 2), trash('rot_zombie', 1)]),
       wave('w2', [elite('shadow_arachnid'), elite('renegade_necromancer')], 1.15),
       wave('w3', [elite('lesser_demon'), trash('shadow_arachnid', 2)], 1.25),
       wave(

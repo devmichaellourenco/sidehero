@@ -16,6 +16,7 @@ import { applyMilestoneBlueprint, getMilestoneBlueprint } from './MilestonePhase
 import { applyPhaseChallenge, getPhaseChallenge } from './PhaseChallengeCatalog';
 import { PhaseDefinition } from './PhaseDefinition';
 import { EnemySlot, WaveDefinition } from './WaveDefinition';
+import { capPhaseWavesToMaxEnemies } from './WaveEnemyCap';
 
 function wave(id: string, slots: EnemySlot[], goldMultiplier = 1): WaveDefinition {
   return { id, slots, goldMultiplier };
@@ -167,7 +168,7 @@ function buildPhase(mapIndex: number, phaseNumber: number): PhaseDefinition {
     phase = applyPhaseChallenge(phase, challenge);
   }
 
-  return phase;
+  return capPhaseWavesToMaxEnemies(phase);
 }
 
 function buildHandcraftedCatalog(): PhaseDefinition[] {

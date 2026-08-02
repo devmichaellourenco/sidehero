@@ -68,9 +68,13 @@ describe('PhaseChallengeCatalog — BAL-011 multi-slot', () => {
     )).toBe(true);
   });
 
-  it('race continua soft (mult < 1) e não é o único tipo de pressão', () => {
+  it('race continua soft (mult < 1) e no máximo 3 inimigos por wave', () => {
     const race = resolvePhase(buildPhaseId(1, 10));
     expect(race?.statMultiplier).toBeLessThan(1);
-    expect(race?.waves[0]?.slots.reduce((sum, slot) => sum + slot.count, 0)).toBeGreaterThanOrEqual(5);
+    for (const wave of race?.waves ?? []) {
+      const total = wave.slots.reduce((sum, slot) => sum + slot.count, 0);
+      expect(total).toBeLessThanOrEqual(3);
+    }
+    expect(race?.waves[0]?.slots.reduce((sum, slot) => sum + slot.count, 0)).toBe(3);
   });
 });

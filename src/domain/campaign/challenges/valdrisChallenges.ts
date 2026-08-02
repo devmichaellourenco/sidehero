@@ -11,9 +11,9 @@ export const VALDRIS_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Procissão Rápida',
     statMultiplier: 0.93,
     waves: [
-      wave('w1', [trash('skeleton_warrior', 3), trash('rot_zombie', 2)]),
-      wave('w2', [trash('skeleton_warrior', 3), trash('giant_spider', 2)], 1.08),
-      wave('w3', [elite('rot_zombie'), trash('skeleton_warrior', 3), trash('cave_bat', 1)], 1.12),
+      wave('w1', [trash('skeleton_warrior', 2), trash('rot_zombie', 1)]),
+      wave('w2', [trash('skeleton_warrior', 2), trash('giant_spider', 1)], 1.08),
+      wave('w3', [elite('rot_zombie'), trash('skeleton_warrior', 2)], 1.12),
     ],
   },
 
@@ -24,7 +24,7 @@ export const VALDRIS_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Cripta Putrefata',
     statMultiplier: 1.16,
     waves: [
-      wave('w1', [trash('rot_zombie', 2), trash('giant_spider', 2)]),
+      wave('w1', [trash('rot_zombie', 2), trash('giant_spider', 1)]),
       wave('w2', [elite('shadow_arachnid'), trash('rot_zombie', 2)], 1.12),
       wave('w3', [elite('renegade_necromancer'), trash('giant_spider', 2)], 1.2),
       wave('w4', [boss('renegade_necromancer', 1, 'Padre Putrefato'), elite('shadow_arachnid')], 1.35),

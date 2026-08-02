@@ -11,9 +11,9 @@ export const STENDRA_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Emboscada na Estrada',
     statMultiplier: 0.9,
     waves: [
-      wave('w1', [trash('goblin_raider', 3), trash('gray_wolf', 2)]),
-      wave('w2', [trash('goblin_archer', 3), trash('road_bandit', 2)], 1.05),
-      wave('w3', [elite('goblin_shaman'), trash('goblin_raider', 3), trash('cave_bat', 2)], 1.1),
+      wave('w1', [trash('goblin_raider', 2), trash('gray_wolf', 1)]),
+      wave('w2', [trash('goblin_archer', 2), trash('road_bandit', 1)], 1.05),
+      wave('w3', [elite('goblin_shaman'), trash('goblin_raider', 2)], 1.1),
     ],
   },
 
@@ -39,7 +39,7 @@ export const STENDRA_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Geada Fora de Época',
     statMultiplier: 1.12,
     waves: [
-      wave('w1', [trash('gray_wolf', 2), trash('cave_bat', 2)]),
+      wave('w1', [trash('gray_wolf', 2), trash('cave_bat', 1)]),
       wave('w2', [elite('frost_giant', 1, 'Arauto Gelado'), trash('goblin_raider', 2)], 1.15),
       wave('w3', [elite('goblin_shaman'), elite('frost_giant', 1, 'Arauto Gelado')], 1.2),
       wave('w4', [boss('frost_giant', 1, 'Senhor da Geada'), trash('gray_wolf', 2)], 1.35),
@@ -91,9 +91,9 @@ export const STENDRA_CHALLENGES: Record<PhaseId, PhaseChallengeBlueprint> = {
     displayName: 'Guardião Elemental',
     statMultiplier: 1.55,
     waves: [
-      wave('w1', [trash('goblin_raider', 2), trash('giant_spider', 2)]),
+      wave('w1', [trash('goblin_raider', 2), trash('giant_spider', 1)]),
       wave('w2', [elite('goblin_shaman', 2), elite('giant_spider')], 1.15),
-      wave('w3', [elite('bandit_captain'), trash('giant_spider', 2), trash('goblin_bomber', 1)], 1.25),
+      wave('w3', [elite('bandit_captain'), trash('giant_spider', 2)], 1.25),
       wave('w4', [boss('saci', 1, 'Saci'), elite('goblin_shaman'), elite('giant_spider')], 1.7),
     ],
   },
