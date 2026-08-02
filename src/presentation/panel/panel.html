@@ -60,13 +60,17 @@
           class="stage-progress-root hidden"
           aria-hidden="true"
         ></div>
-        <section class="battle-strip" aria-label="Campo de batalha">
-          <div class="strip-bg" data-strip-bg>
-            <div class="strip-bg__sky" aria-hidden="true"></div>
-            <div class="strip-bg__center" aria-hidden="true"></div>
-            <div class="strip-bg__left" aria-hidden="true"></div>
-            <div class="strip-bg__right" aria-hidden="true"></div>
-          </div>
+        <div class="battle-field">
+          <section class="battle-strip" aria-label="Campo de batalha">
+            <div class="strip-bg" data-strip-bg>
+              <div class="strip-bg__sky" aria-hidden="true"></div>
+              <div class="strip-bg__center" aria-hidden="true"></div>
+              <div class="strip-bg__left" aria-hidden="true"></div>
+              <div class="strip-bg__right" aria-hidden="true"></div>
+            </div>
+            <div class="strip-floor"></div>
+          </section>
+          <div class="battle-hud-deck" aria-hidden="true"></div>
           <div id="heroes-container" class="heroes-row"></div>
           <div id="enemy-container" class="enemy-slot"></div>
           <div id="battle-float-layer" class="battle-float-layer" aria-hidden="true"></div>
@@ -74,8 +78,7 @@
           <div id="battle-pause-overlay" class="battle-pause-overlay hidden" aria-live="polite">
             <span class="battle-pause-label">Acampamento</span>
           </div>
-          <div class="strip-floor"></div>
-        </section>
+        </div>
 
         <div class="battle-combat-bar">
           <div class="combat-bar-row combat-bar-row--primary">

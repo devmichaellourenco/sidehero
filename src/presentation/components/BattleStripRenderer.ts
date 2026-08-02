@@ -26,6 +26,7 @@ export class BattleStripRenderer {
   constructor(
     private readonly heroesContainer: HTMLElement,
     private readonly enemyContainer: HTMLElement,
+    private readonly battleField: HTMLElement,
     private readonly battleStrip: HTMLElement,
     private readonly stripBg: HTMLElement,
     private readonly stripFloor: HTMLElement,
@@ -33,7 +34,7 @@ export class BattleStripRenderer {
 
   render(state: GameStateDto): void {
     const freezeTimers = !shouldAnimateBattleStripTimers(state);
-    this.battleStrip.classList.toggle('battle-strip--timers-frozen', freezeTimers);
+    this.battleField.classList.toggle('battle-field--timers-frozen', freezeTimers);
 
     const phaseId = resolveBattleStripPhaseId(state);
     const actNumber = actNumberFromPhaseId(phaseId);
@@ -44,7 +45,7 @@ export class BattleStripRenderer {
     }
 
     syncBattleStripCrowdedLayout(
-      this.battleStrip,
+      this.battleField,
       state.activeParty.length,
       state.enemies.length,
     );
@@ -113,8 +114,8 @@ export class BattleStripRenderer {
 
   /** Congela timers visuais no frame atual (pausa imediata, sem reaplicar DTO). */
   freezeTimersVisual(): void {
-    this.battleStrip.classList.add('battle-strip--timers-frozen');
-    for (const card of this.battleStrip.querySelectorAll<HTMLElement>('.battle-actor-card')) {
+    this.battleField.classList.add('battle-field--timers-frozen');
+    for (const card of this.battleField.querySelectorAll<HTMLElement>('.battle-actor-card')) {
       freezeActionTimeVisualOnCard(card);
       freezeCombatSkillCooldownVisuals(card);
     }

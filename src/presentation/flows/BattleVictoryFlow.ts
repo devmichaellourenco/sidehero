@@ -37,8 +37,12 @@ export class BattleVictoryFlow {
     this.overlayVisible = true;
     this.renderer.render(this.overlayEl, payload);
     this.overlayEl.classList.remove('hidden');
+    const milestone = payload.milestoneVictory?.isMilestone === true;
     this.battleStripEl.classList.add(
-      payload.milestoneVictory?.isMilestone ? 'battle-strip--milestone-victory' : 'battle-strip--victory',
+      milestone ? 'battle-strip--milestone-victory' : 'battle-strip--victory',
+    );
+    this.battleFieldEl()?.classList.add(
+      milestone ? 'battle-field--milestone-victory' : 'battle-field--victory',
     );
     this.bindActions();
     this.scheduleDismissAfterAnimation(payload);
@@ -88,6 +92,16 @@ export class BattleVictoryFlow {
     this.overlayEl.classList.add('hidden');
     this.overlayEl.innerHTML = '';
     this.battleStripEl.classList.remove('battle-strip--victory', 'battle-strip--milestone-victory');
+    this.battleFieldEl()?.classList.remove(
+      'battle-field--victory',
+      'battle-field--milestone-victory',
+    );
+  }
+
+  private battleFieldEl(): HTMLElement | null {
+    const el = this.battleStripEl as HTMLElement & { closest?: (s: string) => Element | null };
+    if (typeof el.closest !== 'function') return null;
+    return el.closest('.battle-field');
   }
 
   private clearTimers(): void {

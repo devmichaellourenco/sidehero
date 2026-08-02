@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 14/14 (100%) · auditoria 2026-07-28  
-**Testes obrigatórios:** 16/16 presentes na suite
+**Aceite:** 15/15 (100%) · auditoria 2026-08-02  
+**Testes obrigatórios:** 17/17 presentes na suite
 
 ## Objetivo
 
@@ -26,7 +26,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo)
-- [x] Barras de vida verdes; HP na strip
+- [x] Barras de vida: heróis verdes, inimigos vermelhas; HP no deck da strip
+- [x] Battle field: cena **333×133** intacta (sprites na elevação legada); deck HUD opaco (~50px) abaixo com HP + TTA + skills alinhados coluna a coluna; overlays só na zona da cena
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
 - [x] Heróis / Formação / Loja / Inventário / Baús / Otimizar equipe só aparecem no **acampamento** (`canEditParty`)
 - [x] Pista de combate do mapa (ameaça/favorável) no tooltip da campanha e header do mapa; eficácia vs área nas stats de skill
@@ -69,6 +70,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `SystemsMenuNavigation.test.ts` — disponibilidade por camp/unlock + wrap prev/next
 - [x] `UiOverlayOrchestrator.test.ts` — prioridade e fila de overlays exclusivos
 - [x] `SplashScreenController.test.ts` — splash de abertura antes do loop
+- [x] `BattleHudDeckLayout.test.ts` — cena 133px + deck HUD separado no markup
 
 ## Relacionado
 

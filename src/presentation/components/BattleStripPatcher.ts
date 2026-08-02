@@ -140,12 +140,12 @@ export function shouldUseCrowdedBattleStrip(_heroCount: number, _enemyCount: num
 }
 
 export function syncBattleStripCrowdedLayout(
-  battleStrip: HTMLElement,
+  battleField: HTMLElement,
   heroCount: number,
   enemyCount: number,
 ): void {
-  battleStrip.classList.toggle(
-    'battle-strip--crowded',
+  battleField.classList.toggle(
+    'battle-field--crowded',
     shouldUseCrowdedBattleStrip(heroCount, enemyCount),
   );
 }

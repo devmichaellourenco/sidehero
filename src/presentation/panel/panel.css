@@ -126,6 +126,9 @@
   --hp-fill-start: #2d7a3e;
   --hp-fill-mid: #4caf6a;
   --hp-fill-end: #8be8a8;
+  --hp-enemy-fill-start: #8b2a2a;
+  --hp-enemy-fill-mid: #c94a4a;
+  --hp-enemy-fill-end: #f08080;
   --xp-fill-start: var(--seal-gold);
   --xp-fill-mid: #f5d76e;
   --xp-fill-end: #ffe9a8;
@@ -388,6 +391,9 @@ html[data-ui-theme='dark'] {
   --hp-fill-start: #2d7a3e;
   --hp-fill-mid: #4caf6a;
   --hp-fill-end: #8be8a8;
+  --hp-enemy-fill-start: #8b2a2a;
+  --hp-enemy-fill-mid: #c94a4a;
+  --hp-enemy-fill-end: #f08080;
   --xp-fill-start: var(--seal-gold);
   --xp-fill-mid: #f5d76e;
   --xp-fill-end: #ffe9a8;
@@ -606,6 +612,9 @@ html[data-ui-theme='dark'] .battle-stage {
   --hp-fill-start: #2d7a3e;
   --hp-fill-mid: #4caf6a;
   --hp-fill-end: #8be8a8;
+  --hp-enemy-fill-start: #8b2a2a;
+  --hp-enemy-fill-mid: #c94a4a;
+  --hp-enemy-fill-end: #f08080;
   --xp-fill-start: var(--seal-gold);
   --xp-fill-mid: #f5d76e;
   --xp-fill-end: #ffe9a8;
@@ -1285,7 +1294,8 @@ h2 {
   color: var(--muted);
 }
 
-.battle-strip {
+.battle-field {
+  --battle-strip-height: 133px;
   --strip-stack-gap: 1px;
   --strip-sprite-lift: 2px;
   --strip-health-outer: 9px;
@@ -1299,22 +1309,62 @@ h2 {
   --strip-skill-size: 16px;
   --strip-skill-wrap: 18px;
   --strip-skill-outer: var(--strip-skill-wrap);
-  --strip-floor-height: calc(
+  /* Altura do bloco HP+TTA+skills (densidade legada — sprites usam isto na cena). */
+  --strip-hud-stack-height: calc(
     var(--strip-stack-gap) + var(--strip-health-outer) + var(--strip-stack-gap) +
       var(--strip-action-outer) + var(--strip-stack-gap) + var(--strip-skill-outer)
   );
+  /* Reserva na cena 133px sob os pés — mesma elevação vertical de antes. */
+  --strip-scene-reserve: calc(var(--strip-hud-stack-height) + var(--strip-sprite-lift));
+  --strip-scenic-floor-height: var(--strip-hud-stack-height);
+  /* Deck opaco abaixo da cena. */
+  --battle-hud-deck-height: 50px;
+  /* HUD centralizado verticalmente no deck. */
+  --battle-hud-inset-bottom: calc((var(--battle-hud-deck-height) - var(--strip-hud-stack-height)) / 2);
+  --strip-floor-height: var(--strip-hud-stack-height);
   --strip-action-bottom: calc(var(--strip-skill-outer) + var(--strip-stack-gap));
-  --strip-actors-bottom: calc(var(--strip-floor-height) + var(--strip-sprite-lift));
+  --strip-actors-bottom: var(--strip-scene-reserve);
   position: relative;
   width: 100%;
-  height: 133px;
+  height: calc(var(--battle-strip-height) + var(--battle-hud-deck-height));
   flex-shrink: 0;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid var(--seal-gold);
-  background: var(--strip);
-  flex-shrink: 0;
   box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+}
+
+.battle-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--battle-strip-height);
+  z-index: 1;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: var(--strip);
+  box-shadow: none;
+}
+
+.battle-hud-deck {
+  position: absolute;
+  top: var(--battle-strip-height);
+  left: 0;
+  right: 0;
+  height: var(--battle-hud-deck-height);
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--parchment-2) 88%, #1a120c) 0%,
+    color-mix(in srgb, var(--parchment-1) 55%, #120c08) 100%
+  );
+  border-top: 1px solid color-mix(in srgb, var(--seal-gold) 42%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* Stage Progress Bar — colada no topo da strip (sem gap) */
@@ -1500,7 +1550,7 @@ h2 {
   }
 }
 
-.battle-strip--crowded {
+.battle-field--crowded {
   --strip-hero-slot: 40px;
   --strip-enemy-slot: 44px;
   --strip-enemy-boss-slot: 60px;
@@ -1510,17 +1560,29 @@ h2 {
   --strip-skill-wrap: 16px;
 }
 
-.battle-strip--crowded .combat-skill-bar[data-skill-count='4'] .combat-skill-slot {
+.battle-field--crowded .combat-skill-bar[data-skill-count='4'] .combat-skill-slot {
   margin-left: -3px;
 }
 
-.battle-strip--crowded .combat-skill-bar[data-skill-count='4'] .combat-skill-slot:first-child {
+.battle-field--crowded .combat-skill-bar[data-skill-count='4'] .combat-skill-slot:first-child {
   margin-left: 0;
 }
 
 .battle-strip--victory {
   overflow: hidden;
   z-index: 6;
+}
+
+.battle-field--victory .battle-strip,
+.battle-field--milestone-victory .battle-strip {
+  z-index: 6;
+}
+
+.battle-field--victory .heroes-row,
+.battle-field--victory .enemy-slot,
+.battle-field--milestone-victory .heroes-row,
+.battle-field--milestone-victory .enemy-slot {
+  z-index: 3;
 }
 
 .battle-strip--milestone-victory {
@@ -1622,7 +1684,10 @@ h2 {
 
 .battle-float-layer {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--battle-strip-height);
   z-index: 5;
   pointer-events: none;
   overflow: visible;
@@ -1886,7 +1951,10 @@ h2 {
 
 .battle-victory-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--battle-strip-height);
   z-index: 8;
   display: flex;
   align-items: stretch;
@@ -1896,7 +1964,10 @@ h2 {
 
 .battle-pause-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--battle-strip-height);
   z-index: 7;
   display: flex;
   align-items: center;
@@ -2704,7 +2775,7 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--strip-floor-height);
+  height: var(--strip-scenic-floor-height);
   z-index: 3;
   background: repeating-linear-gradient(
     90deg,
@@ -2726,7 +2797,7 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
 
 .heroes-row {
   position: absolute;
-  bottom: var(--strip-actors-bottom);
+  bottom: 0;
   left: 8px;
   display: flex;
   flex-direction: row-reverse;
@@ -2738,7 +2809,7 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
 
 .enemy-slot {
   position: absolute;
-  bottom: var(--strip-actors-bottom);
+  bottom: 0;
   right: 8px;
   z-index: 4;
   display: flex;
@@ -2763,7 +2834,8 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   cursor: default;
   overflow: visible;
   flex-shrink: 0;
-  padding-bottom: 0;
+  /* Deck (HUD) + reserva na cena — sprites na mesma altura vertical de antes. */
+  padding-bottom: calc(var(--battle-hud-deck-height) + var(--strip-scene-reserve));
 }
 
 .hero-battle-card {
@@ -2804,7 +2876,7 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
 .hero-battle-card .strip-actor-bars,
 .enemy-battle-card .strip-actor-bars {
   position: absolute;
-  bottom: calc(var(--strip-action-bottom) - var(--strip-actors-bottom));
+  bottom: calc(var(--battle-hud-inset-bottom) + var(--strip-action-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: calc(var(--strip-hero-slot) - 6px);
@@ -2853,6 +2925,8 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   transition: width 0.2s linear;
 }
 
+.battle-field--timers-frozen .action-time-fill,
+.battle-field--timers-frozen .combat-skill-cooldown-shade,
 .battle-strip--timers-frozen .action-time-fill,
 .battle-strip--timers-frozen .combat-skill-cooldown-shade {
   transition: none !important;
@@ -3112,7 +3186,7 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
 .combat-skill-floor-slot {
   position: absolute;
   top: auto;
-  bottom: calc(0px - var(--strip-actors-bottom));
+  bottom: var(--battle-hud-inset-bottom);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -3465,7 +3539,12 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
 }
 
 .health-fill.enemy {
-  background: linear-gradient(90deg, var(--hp-fill-start) 0%, var(--hp-fill-mid) 55%, var(--hp-fill-end) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--hp-enemy-fill-start) 0%,
+    var(--hp-enemy-fill-mid) 55%,
+    var(--hp-enemy-fill-end) 100%
+  );
 }
 
 .hero-bars {

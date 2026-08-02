@@ -288,10 +288,12 @@ export class GameViewController {
     this.heroesContainerEl = root.querySelector('#heroes-container') as HTMLElement;
 
     this.battleStripEl = root.querySelector('.battle-strip') as HTMLElement;
+    const battleFieldEl = root.querySelector('.battle-field') as HTMLElement;
 
     this.battleStrip = new BattleStripRenderer(
       this.heroesContainerEl,
       root.querySelector('#enemy-container')!,
+      battleFieldEl,
       this.battleStripEl,
       root.querySelector('[data-strip-bg]')!,
       this.battleStripEl.querySelector('.strip-floor')!,
@@ -301,15 +303,15 @@ export class GameViewController {
     );
     this.battleFloats = new BattleFloatingTextController(
       root.querySelector('#battle-float-layer')!,
-      this.battleStripEl,
+      battleFieldEl,
     );
     this.battleImpacts = new BattleImpactFeedbackController(
       root.querySelector('#battle-float-layer')!,
-      this.battleStripEl,
+      battleFieldEl,
     );
     this.battleSkillVfx = new BattleSkillVfxController(
       root.querySelector('#battle-float-layer')!,
-      this.battleStripEl,
+      battleFieldEl,
     );
     this.victoryFlow = new BattleVictoryFlow(
       root.querySelector('#battle-victory-overlay')!,
