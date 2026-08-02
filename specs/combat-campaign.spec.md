@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 17/17 (100%) · escopo base v1  
-**Testes obrigatórios:** 8/8 grupos (inclui `CampaignReleaseScope`)
+**Aceite:** 18/18 (100%) · escopo base v1  
+**Testes obrigatórios:** 9/9 grupos (inclui `CampaignReleaseScope` + `PhaseChallengeCatalog`)
 
 ## Objetivo
 
@@ -22,6 +22,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos (`physical`/`fire`/`cold`/`lightning`/`air`) e status
 - [x] Persistência migra saves legados: gear/stats `chaos*` → `air*`, IDs `chaos_mantle`/`chaos_pendant` → `air_*`, `dotElement: chaos` → `air`
 - [x] Identidade de combate por mapa base (Stendra→Morthaven): bias soft de pool + resists (−15/+20); X-50 temáticos
+- [x] Micro-desafios de fase (BAL-011): race / sustain / spike / warded (anti-mago) / armored (anti-físico) com hint na UI — âncoras Stendra→Morthaven
 - [x] Recompensas de gear comuns e únicas chegam em baús; Ignus Ix, Vorpal Lupnus, Soler Plégius e Selo de Morthaven só entram no storage quando o baú é aberto
 
 ## Escopo do jogo base (v1)
@@ -97,6 +98,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] `BattleVictoryFlow.test.ts`
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
 - [x] `MapCombatIdentityCatalog.test.ts`, `EnemyTierProgression.mapBias.test.ts`, `MilestonePhaseBlueprints.theme.test.ts` — identidade por mapa
+- [x] `PhaseChallengeCatalog.test.ts` — micro-desafios BAL-011 multi-slot (4 mapas base)
 - [x] `UniqueGearLootService.test.ts` — inclui Selo de Morthaven (4-50)
 
 ## Relacionado

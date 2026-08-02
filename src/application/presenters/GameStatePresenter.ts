@@ -116,6 +116,7 @@ export class GameStatePresenter {
       mapId: campaignLabels.mapId,
       mapName: campaignLabels.mapName,
       mapCombatHint: mapCombatHintLine(campaignLabels.mapId),
+      phaseChallengeHint: campaignLabels.phaseChallengeHint,
       phaseLabel: campaignLabels.phaseLabel,
       phaseRun,
       combatIntermission: state.combatIntermission
@@ -246,6 +247,7 @@ function mapCampaignLabels(state: GameState): {
   mapId: string;
   mapName: string;
   phaseLabel: string;
+  phaseChallengeHint: string;
 } {
   const campaign = getCampaignInfo();
   const phaseId =
@@ -261,6 +263,7 @@ function mapCampaignLabels(state: GameState): {
     mapId: map?.id ?? 'stendra',
     mapName: map?.name ?? 'Stendra',
     phaseLabel: phase?.displayName ?? phaseId,
+    phaseChallengeHint: phase?.challengeHint ?? '',
   };
 }
 

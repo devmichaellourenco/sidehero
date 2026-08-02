@@ -17,7 +17,9 @@ Extensão MV3 com **side panel**, service worker, persistência local e messagin
 - [x] Build esbuild → `dist/`; assets copiados para `dist/panel/assets/`
 - [x] Save em `side_hero_game_state`; migração de `taskbar_hero_game_state`
 - [x] Mensagens tipadas em `GameClientTypes`; handler em `service-worker.ts`
-- [x] Tick alarm em background **desativado** (código comentado; alarm legado é limpo)
+- [x] Tick alarm em background **desativado** (código comentado; alarm legado é limpo **uma vez** por vida do SW)
+- [x] Auto-batalha: sem TICK empilhado (`tickInFlight`); pausa com `document.hidden`
+- [x] Baús abertos podados do save (`totalChestsOpened` + só pendentes no array) — evita blob que cresce por horas
 - [x] Release automatizável via `npm run release` → zip sem `.map` (só quando o usuário pedir)
 - [x] Backup criptografado (AES-GCM) export/import em Configurações (`.sidehero`) — ofuscação local, não anti-cheat absoluto
 - [x] Asset `public/sprites/splash_screen.png` copiado para `panel/assets/ui/splash_screen.png` no build

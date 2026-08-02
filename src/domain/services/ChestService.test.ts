@@ -79,8 +79,8 @@ describe('ChestService.openAll', () => {
 
     expect(result.loots).toEqual([guaranteed]);
     expect(result.state.inventory).toEqual([guaranteed]);
-    expect(result.state.chests[0]?.opened).toBe(true);
-    expect(result.state.chests[0]?.guaranteedLoot).toBeNull();
+    expect(result.state.chests).toHaveLength(0);
+    expect(result.state.chestsOpenedCount()).toBe(1);
     expect(lootService.generateGearForChest).not.toHaveBeenCalled();
   });
 
@@ -93,7 +93,8 @@ describe('ChestService.openAll', () => {
 
     expect(loots).toHaveLength(2);
     expect(nextState.inventory.map((gear) => gear.id)).toEqual(['loot-1', 'loot-2']);
-    expect(nextState.chests.every((chest) => chest.opened)).toBe(true);
+    expect(nextState.chests).toHaveLength(0);
+    expect(nextState.chestsOpenedCount()).toBe(2);
   });
 
   it('abre parcialmente quando o inventário não comporta todos os loots', () => {
@@ -109,6 +110,7 @@ describe('ChestService.openAll', () => {
     expect(loots).toHaveLength(1);
     expect(nextState.inventory).toHaveLength(INVENTORY_CAPACITY);
     expect(nextState.chests.filter((chest) => !chest.opened)).toHaveLength(2);
+    expect(nextState.chestsOpenedCount()).toBe(1);
   });
 
   it('enche o inventário e depois distribui no baú de itens', () => {
@@ -125,7 +127,8 @@ describe('ChestService.openAll', () => {
     expect(loots).toHaveLength(3);
     expect(nextState.inventory).toHaveLength(INVENTORY_CAPACITY);
     expect(nextState.stash.map((gear) => gear.id)).toEqual(['loot-1', 'loot-2', 'loot-3']);
-    expect(nextState.chests.every((chest) => chest.opened)).toBe(true);
+    expect(nextState.chests).toHaveLength(0);
+    expect(nextState.chestsOpenedCount()).toBe(3);
   });
 
   it('usa inventário e baú até esgotar espaço e deixa o restante pendente', () => {
@@ -144,6 +147,7 @@ describe('ChestService.openAll', () => {
     expect(nextState.inventory).toHaveLength(INVENTORY_CAPACITY);
     expect(nextState.stash).toHaveLength(24);
     expect(nextState.chests.filter((chest) => !chest.opened)).toHaveLength(1);
+    expect(nextState.chestsOpenedCount()).toBe(3);
   });
 
   it('não abre nenhum baú quando inventário e baú estão cheios', () => {

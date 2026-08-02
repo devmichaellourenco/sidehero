@@ -114,7 +114,7 @@ const MILESTONE_BOSS_BY_MAP_INDEX: Record<
 > = {
   1: { enemyType: 'saci', displayName: 'Saci', bossLabel: 'Guardião Elemental' },
   2: { enemyType: 'gonodor', displayName: 'Gonodor', bossLabel: 'Centelha de Gonodor' },
-  3: { enemyType: 'bloody_orc_chief', displayName: 'Chefe Orc', bossLabel: 'Espectro de Valdris' },
+  3: { enemyType: 'renegade_necromancer', displayName: 'Espectro', bossLabel: 'Espectro de Valdris' },
   4: { enemyType: 'morthaven_duke', displayName: 'Duque', bossLabel: 'Duque de Morthaven' },
   5: { enemyType: 'three_head_hydra', displayName: 'Hidra', bossLabel: 'Colosso do Céu Quebrado' },
   6: { enemyType: 'young_green_dragon', displayName: 'Dragão', bossLabel: 'Senhor do Abismo' },
@@ -271,7 +271,9 @@ function renderPathPhaseNode(
     ? 'Final da temporada'
     : phase.milestoneBoss
       ? 'Boss do mapa'
-      : `Fase ${phaseNumber}`;
+      : phase.challengeLabel
+        ? phase.challengeLabel
+        : `Fase ${phaseNumber}`;
   const bossVisual = phase.milestoneBoss || phase.seasonFinale ? renderBossVisual(mapIndex, phase) : '';
   const compactBody =
     phase.milestoneBoss || phase.seasonFinale
@@ -283,6 +285,11 @@ function renderPathPhaseNode(
       : `
         <span class="campaign-path-node-number">${phaseNumber}</span>
         <span class="campaign-path-node-tier">T${phase.difficultyTier}</span>
+        ${
+          phase.challengeLabel
+            ? `<span class="campaign-path-node-challenge">${escapeHtml(phase.challengeLabel)}</span>`
+            : ''
+        }
       `;
 
   const markers = [
@@ -297,12 +304,20 @@ function renderPathPhaseNode(
       ? ' campaign-path-node--epic-pending'
       : '';
 
+  const challengeClass = phase.challengeKind
+    ? ` campaign-path-node--challenge-${phase.challengeKind}`
+    : '';
+
+  const titleHint = phase.challengeHint
+    ? ` · ${phase.challengeHint}`
+    : '';
+
   return `
     <button
       type="button"
-      class="campaign-path-node campaign-path-node--${side}${pendingClass}${currentClass}${milestoneClass}${finaleClass}${clearedClass}${lockedClass}${epicPendingClass}"
+      class="campaign-path-node campaign-path-node--${side}${pendingClass}${currentClass}${milestoneClass}${finaleClass}${clearedClass}${lockedClass}${epicPendingClass}${challengeClass}"
       data-phase-id="${escapeHtml(phase.id)}"
-      title="${escapeHtml(phase.displayName)} · ${roleLabel} · T${phase.difficultyTier}"
+      title="${escapeHtml(phase.displayName)} · ${roleLabel} · T${phase.difficultyTier}${escapeHtml(titleHint)}"
       ${disabled}
     >
       ${markers}
@@ -369,7 +384,9 @@ export function renderPhasePreviewFooter(
     ? 'Final da temporada'
     : phase.milestoneBoss
       ? 'Boss do mapa'
-      : `Fase ${resolvePhaseNumber(phase.id)}`;
+      : phase.challengeLabel
+        ? phase.challengeLabel
+        : `Fase ${resolvePhaseNumber(phase.id)}`;
   const canStart = phase.playable;
   const boss = phase.milestoneBoss || phase.seasonFinale ? renderBossVisual(mapIndex, phase) : '';
 
@@ -384,6 +401,11 @@ export function renderPhasePreviewFooter(
           <p class="campaign-phase-preview-eyebrow">${escapeHtml(roleLabel)}</p>
           <h4 class="campaign-phase-preview-title">${escapeHtml(phase.displayName)}</h4>
           <p class="campaign-phase-preview-meta">${phase.waveCount} waves · Tier ${phase.difficultyTier}</p>
+          ${
+            phase.challengeHint
+              ? `<p class="campaign-phase-preview-challenge">${escapeHtml(phase.challengeHint)}</p>`
+              : ''
+          }
           ${renderFeaturedEnemies(phase)}
         </div>
       </div>

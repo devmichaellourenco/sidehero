@@ -11535,6 +11535,48 @@ body.act-scene-open {
   font-weight: 700;
 }
 
+.campaign-path-node-challenge {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--seal-gold-dark, var(--ink-muted));
+  max-width: 72px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.campaign-path-node--challenge-race {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--seal-gold) 45%, transparent);
+}
+
+.campaign-path-node--challenge-sustain {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #2f6b4f 55%, transparent);
+}
+
+.campaign-path-node--challenge-spike {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #3a6ea5 55%, transparent);
+}
+
+.campaign-path-node--challenge-warded {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #7a3e8c 55%, transparent);
+}
+
+.campaign-path-node--challenge-armored {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #6b5a3e 55%, transparent);
+}
+
+.campaign-phase-preview-challenge {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--ink-muted);
+}
+
+.campaign-tooltip-challenge-hint {
+  color: var(--seal-gold-dark, var(--ink));
+  font-weight: 600;
+}
+
 .campaign-path-node-name {
   font-size: 12px;
   font-weight: 600;

@@ -90,7 +90,7 @@ export function tryCreatePhase3SolerDrop(
 ): Gear | null {
   if (
     params.mapIndex !== 3 ||
-    params.enemyType !== 'bloody_orc_chief' ||
+    params.enemyType !== 'renegade_necromancer' ||
     !isNamedChapterBossKill(params)
   ) {
     return null;

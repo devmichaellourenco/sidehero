@@ -34,6 +34,11 @@ function renderCampaignTooltipContent(state: GameStateDto): string {
         ? `<span class="campaign-tooltip-line campaign-tooltip-combat-hint">${escapeHtml(state.mapCombatHint)}</span>`
         : ''
     }
+    ${
+      state.phaseChallengeHint
+        ? `<span class="campaign-tooltip-line campaign-tooltip-challenge-hint">${escapeHtml(state.phaseChallengeHint)}</span>`
+        : ''
+    }
     <span class="campaign-tooltip-line">Campanha: ${escapeHtml(state.campaignName)}</span>
     <span class="campaign-tooltip-line">Fase: ${escapeHtml(state.phaseLabel)}</span>
     <span class="campaign-tooltip-line">${escapeHtml(waveLine)}</span>
@@ -59,7 +64,7 @@ function buildCampaignTooltipKey(state: GameStateDto): string {
     ? `${state.phaseRun.waveIndex}/${state.phaseRun.waveCount}/${state.phaseRun.isBossWave}`
     : 'none';
   const cleared = countClearedPhasesForMap(state.campaignProgress.clearedPhaseIds, state.mapId);
-  return `${state.mapId}|${state.campaignName}|${state.mapName}|${state.phaseLabel}|${waveKey}|${state.stage}|${cleared}`;
+  return `${state.mapId}|${state.campaignName}|${state.mapName}|${state.phaseLabel}|${state.phaseChallengeHint}|${waveKey}|${state.stage}|${cleared}`;
 }
 
 function createIcon(assetPath: string, alt: string, className: string): HTMLImageElement {

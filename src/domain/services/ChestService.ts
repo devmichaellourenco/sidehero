@@ -40,7 +40,8 @@ export class ChestService {
     const nextState = state
       .withChests(updatedChests)
       .withInventory([...state.inventory, loot])
-      .addLog(`Abriu baú: ${loot.name}`);
+      .addLog(`Abriu baú: ${loot.name}`)
+      .pruneOpenedChests(1);
 
     return { state: nextState, loot };
   }
@@ -101,7 +102,8 @@ export class ChestService {
       .withChests(updatedChests)
       .withInventory(inventory)
       .withStash(stash)
-      .addLog(logMessage);
+      .addLog(logMessage)
+      .pruneOpenedChests(loots.length);
 
     return { state: nextState, loots };
   }

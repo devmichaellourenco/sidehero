@@ -74,5 +74,6 @@ Ver lista em `specs/game-balance.spec.md`. Criar/atualizar arquivos; não execut
 ## Próximos itens sugeridos (backlog)
 
 1. ~~Auditoria curva ouro: recompensa por wave vs preço loja/forja~~ (`PhaseGoldBudget`)
-2. BAL-003 — dodge/block/DR por componente (opcional)
-3. Playtest documentado tier 1–25 / 26–60 / 61+
+2. ~~Expandir BAL-011 (race/sustain/spike) para Gruftall → Morthaven~~ (+ warded/armored multi-slot)
+3. BAL-003 — dodge/block/DR por componente (opcional)
+4. Playtest documentado tier 1–25 / 26–60 / 61+

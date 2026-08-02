@@ -1,4 +1,6 @@
 import { CampaignId, MapId, PhaseId } from './CampaignIds';
+import { DamageElement } from '../combat/DamageElement';
+import { PhaseChallengeKind } from './PhaseChallengeTypes';
 import { WaveDefinition } from './WaveDefinition';
 
 export interface PhaseDefinition {
@@ -16,4 +18,9 @@ export interface PhaseDefinition {
   seasonFinale?: boolean;
   /** Multiplicador extra de stats dos inimigos desta fase. */
   statMultiplier?: number;
+  /** Micro-desafio BAL-011 (race / sustain / spike). */
+  challengeKind?: PhaseChallengeKind;
+  challengeLabel?: string;
+  challengeHint?: string;
+  spikeElement?: DamageElement;
 }

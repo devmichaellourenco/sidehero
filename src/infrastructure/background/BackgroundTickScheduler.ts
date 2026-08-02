@@ -21,8 +21,12 @@ export async function syncBackgroundTickAlarm(levels: UpgradeLevels): Promise<vo
   const period = resolveBackgroundTickPeriodMinutes(levels);
 
   // Sempre limpa alarm legado (players que já tinham background_tick comprado).
+  // Só uma vez por vida do SW — chamar clear em todo TICK era custo gratuito.
   if (period === null) {
-    await chrome.alarms.clear(TICK_ALARM);
+    if (!legacyOfflineAlarmCleared) {
+      await chrome.alarms.clear(TICK_ALARM);
+      legacyOfflineAlarmCleared = true;
+    }
     return;
   }
 
@@ -32,3 +36,5 @@ export async function syncBackgroundTickAlarm(levels: UpgradeLevels): Promise<vo
   // await chrome.alarms.clear(TICK_ALARM);
   // await chrome.alarms.create(TICK_ALARM, { periodInMinutes: period });
 }
+
+let legacyOfflineAlarmCleared = false;

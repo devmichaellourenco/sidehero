@@ -13,6 +13,7 @@ import {
   pickSubbossForMapPhase,
 } from '../enemies/EnemyTierProgression';
 import { applyMilestoneBlueprint, getMilestoneBlueprint } from './MilestonePhaseBlueprints';
+import { applyPhaseChallenge, getPhaseChallenge } from './PhaseChallengeCatalog';
 import { PhaseDefinition } from './PhaseDefinition';
 import { EnemySlot, WaveDefinition } from './WaveDefinition';
 
@@ -159,6 +160,11 @@ function buildPhase(mapIndex: number, phaseNumber: number): PhaseDefinition {
     if (blueprint) {
       phase = applyMilestoneBlueprint(phase, blueprint);
     }
+  }
+
+  const challenge = getPhaseChallenge(phaseId);
+  if (challenge) {
+    phase = applyPhaseChallenge(phase, challenge);
   }
 
   return phase;

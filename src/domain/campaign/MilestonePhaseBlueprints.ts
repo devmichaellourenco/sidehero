@@ -67,7 +67,7 @@ const MILESTONE_BY_PHASE_ID: Record<PhaseId, MilestoneBlueprint> = {
       wave('w2', [elite('rot_zombie', 2), elite('giant_spider')], 1.2),
       wave('w3', [elite('renegade_necromancer'), trash('skeleton_warrior', 2)], 1.25),
       wave('w4', [
-        boss('bloody_orc_chief', 1, 'Chefe Orc do Clã Sangrento'),
+        boss('renegade_necromancer', 1, 'Espectro de Valdris'),
         elite('rot_zombie'),
       ], 1.65),
     ],

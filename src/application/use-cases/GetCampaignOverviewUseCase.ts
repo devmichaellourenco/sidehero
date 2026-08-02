@@ -66,6 +66,9 @@ export class GetCampaignOverviewUseCase {
           seasonFinale: definition.seasonFinale ?? false,
           actNumber: resolveActNumber(phase.id),
           featuredEnemyTypes: extractFeaturedEnemyTypes(definition),
+          challengeKind: definition.challengeKind,
+          challengeLabel: definition.challengeLabel,
+          challengeHint: definition.challengeHint,
         };
       });
 

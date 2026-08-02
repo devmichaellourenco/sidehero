@@ -131,6 +131,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       combatIntermission: props.combatIntermission,
       battlePaused: props.battlePaused === true,
       battleSessionStats: props.battleSessionStats ?? { damageDealt: 0, healingDone: 0, damageTaken: 0 },
+      totalChestsOpened: props.totalChestsOpened ?? 0,
     };
   }
 
@@ -165,6 +166,12 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       stage,
     );
 
+    const openedLegacy = migratedStorage.chests.filter((chest) => chest.opened).length;
+    const storedOpened =
+      typeof raw.totalChestsOpened === 'number' ? Math.max(0, Math.floor(raw.totalChestsOpened)) : 0;
+    const totalChestsOpened = Math.max(storedOpened, openedLegacy);
+    const pendingChests = migratedStorage.chests.filter((chest) => !chest.opened);
+
     return GameState.restore({
       roster: normalizedRoster,
       heroes: normalizedRoster,
@@ -180,13 +187,14 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
           : null,
       stage,
       gold: typeof raw.gold === 'number' ? raw.gold : 0,
-      chests: migratedStorage.chests,
+      chests: pendingChests,
       inventory: migratedStorage.inventory,
       stash: Array.isArray(raw.stash) ? raw.stash.map((g) => migrateGear(g)) : [],
       battleLog: Array.isArray(raw.battleLog)
         ? (raw.battleLog as { message: string; timestamp: number }[])
         : [],
       totalBattlesWon: typeof raw.totalBattlesWon === 'number' ? raw.totalBattlesWon : 0,
+      totalChestsOpened,
       lastTickAt: typeof raw.lastTickAt === 'number' ? raw.lastTickAt : Date.now(),
       shopRefreshSeed: typeof raw.shopRefreshSeed === 'number' ? raw.shopRefreshSeed : 0,
       upgradeLevels,

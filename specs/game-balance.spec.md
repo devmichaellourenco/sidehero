@@ -56,6 +56,7 @@ Poder × crítico → split damageComponents[]
 - [x] Waves/boss: tempo médio para clear dentro de faixa alvo por tier (ver skill)
 - [x] Backlog de balanceamento revisado após cada entrega numérica relevante
 - [x] BAL-010 — identidade soft por mapa (pools + resists −15/+20) nos 4 mapas base
+- [x] BAL-011 — micro-desafios multi-slot (race/sustain/spike/warded/armored) nos 4 mapas base
 
 ## Coordenação com outros agents
 
@@ -110,6 +111,7 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `ResistanceProfileAggregator.test.ts` — soma de resist no equip
 - [x] `EnemyInnateResists.test.ts` — temas e fraquezas (+ bias de mapa)
 - [x] `MapCombatIdentityCatalog.test.ts` — identidade soft dos 4 mapas base
+- [x] `PhaseChallengeCatalog.test.ts` — BAL-011 multi-slot (race/sustain/spike/warded/armored) 4 mapas
 - [x] `DamageThroughputEstimate.test.ts` — eficácia vs resists da área
 - [x] `ShopService.test.ts` — cap de raridade por tier, preços
 - [x] `DotTickResolver.test.ts` — DOT mitigado; default sem elemento = `air`
@@ -135,3 +137,4 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-008 | Média | Ouro por fase normal escalava acima da renda de referência em fases multi-inimigo (épico trivial cedo) | Economia | ✅ Resolvido (`PhaseGoldBudget`) |
 | BAL-009 | Alta | Progressão de nível lenta no v1; loot fora da faixa do mapa; dano não escalava até ~20k DPS | Progressão/Loot | ✅ Resolvido (`ProgressionPowerScale`, `MapGearLevelPolicy`) |
 | BAL-010 | Alta | Mapas sem identidade de combate — meta colapsa em DPS genérico | Campanha/Elementos | ✅ Resolvido (`MapCombatIdentityCatalog`, bias soft, X-50) |
+| BAL-011 | Alta | Builds monótonas; pressão só no priest; mago/físico sem trade-off | Campanha/Waves | ✅ Resolvido (`PhaseChallengeCatalog` race/sustain/spike/warded/armored · Stendra→Morthaven) |

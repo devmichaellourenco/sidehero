@@ -25,6 +25,10 @@ export interface CampaignPhaseDto {
   seasonFinale: boolean;
   actNumber: number;
   featuredEnemyTypes: string[];
+  /** Micro-desafio BAL-011. */
+  challengeKind?: 'race' | 'sustain' | 'spike' | 'warded' | 'armored';
+  challengeLabel?: string;
+  challengeHint?: string;
 }
 
 export interface CampaignMapDto {

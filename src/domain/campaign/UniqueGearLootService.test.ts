@@ -110,7 +110,7 @@ describe('UniqueGearLootService', () => {
       {
         phaseId: buildPhaseId(3, 50),
         mapIndex: 3,
-        enemyType: 'bloody_orc_chief',
+        enemyType: 'renegade_necromancer',
         role: 'boss',
         isPhaseBoss: true,
       },

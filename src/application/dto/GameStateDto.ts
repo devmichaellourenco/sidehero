@@ -353,6 +353,8 @@ export interface GameStateDto {
   mapName: string;
   /** Pista leve de ameaça/build favorável do mapa atual. */
   mapCombatHint: string;
+  /** Micro-desafio da fase atual (BAL-011), se houver. */
+  phaseChallengeHint: string;
   phaseLabel: string;
   phaseRun: PhaseRunDto | null;
   combatIntermission: CombatIntermissionDto | null;

@@ -41,6 +41,8 @@ export interface GameStateProps {
   stash: Gear[];
   battleLog: BattleLogEntry[];
   totalBattlesWon: number;
+  /** Contador persistente de baús abertos (não depende de stubs no array). */
+  totalChestsOpened?: number;
   lastTickAt: number;
   shopRefreshSeed: number;
   upgradeLevels: UpgradeLevels;
@@ -70,6 +72,7 @@ export class GameState {
   readonly stash: Gear[];
   readonly battleLog: BattleLogEntry[];
   readonly totalBattlesWon: number;
+  readonly totalChestsOpened: number;
   readonly lastTickAt: number;
   readonly shopRefreshSeed: number;
   readonly upgradeLevels: UpgradeLevels;
@@ -95,6 +98,7 @@ export class GameState {
     this.stash = props.stash ?? [];
     this.battleLog = props.battleLog.slice(-40);
     this.totalBattlesWon = props.totalBattlesWon;
+    this.totalChestsOpened = Math.max(0, Math.floor(props.totalChestsOpened ?? 0));
     this.lastTickAt = props.lastTickAt;
     this.shopRefreshSeed = Math.max(0, props.shopRefreshSeed ?? 0);
     this.upgradeLevels = props.upgradeLevels ?? {};
@@ -129,6 +133,7 @@ export class GameState {
       stash: [],
       battleLog: [{ message: 'A aventura começou no Side Hero!', timestamp: Date.now() }],
       totalBattlesWon: 0,
+      totalChestsOpened: 0,
       lastTickAt: Date.now(),
       shopRefreshSeed: 0,
       upgradeLevels: {},
@@ -275,11 +280,25 @@ export class GameState {
   }
 
   chestsOpenedCount(): number {
-    return this.chests.filter((chest) => chest.opened).length;
+    return this.totalChestsOpened;
   }
 
   withChests(chests: Chest[]): GameState {
     return this.clone({ chests });
+  }
+
+  withTotalChestsOpened(totalChestsOpened: number): GameState {
+    return this.clone({ totalChestsOpened: Math.max(0, Math.floor(totalChestsOpened)) });
+  }
+
+  /** Remove baús já abertos do save (loot já está no inventário/stash). */
+  pruneOpenedChests(openedDelta = 0): GameState {
+    const pending = this.chests.filter((chest) => !chest.opened);
+    const nextTotal = this.totalChestsOpened + Math.max(0, Math.floor(openedDelta));
+    if (pending.length === this.chests.length && openedDelta <= 0) {
+      return this;
+    }
+    return this.withChests(pending).withTotalChestsOpened(nextTotal);
   }
 
   withInventory(inventory: Gear[]): GameState {
@@ -322,6 +341,7 @@ export class GameState {
       stash: this.stash,
       battleLog: this.battleLog,
       totalBattlesWon: this.totalBattlesWon,
+      totalChestsOpened: this.totalChestsOpened,
       lastTickAt: this.lastTickAt,
       shopRefreshSeed: this.shopRefreshSeed,
       upgradeLevels: this.upgradeLevels,

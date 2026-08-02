@@ -134,6 +134,8 @@ export class GameViewController {
   // private idleSummaryShown = false;
   /** Bloqueia ticks em voo enquanto a pausa está sendo aplicada no servidor. */
   private pausingLoadout = false;
+  /** Evita enfileirar TICK enquanto o anterior ainda não voltou (save lento). */
+  private tickInFlight = false;
   private heroDrawerHeroId: string | null = null;
 
   private readonly campaignContextBtn: HTMLButtonElement;
@@ -733,19 +735,15 @@ export class GameViewController {
       void this.openSystemsSurface('stats');
     });
 
-    // OFFLINE PROGRESS DESATIVADO (2026-07): sem relatório de ganhos ao voltar ao painel.
-    // document.addEventListener('visibilitychange', () => {
-    //   if (this.detachedSurfaceId) return;
-    //   if (document.hidden && this.state) {
-    //     touchPanelSnapshot(this.state);
-    //     this.idleSummaryShown = false;
-    //     return;
-    //   }
-    //
-    //   if (!document.hidden && this.state) {
-    //     this.maybeShowIdleSummary(this.state);
-    //   }
-    // });
+    // Pausa auto-batalha com painel oculto (Chrome throttle + evita backlog de TICK).
+    document.addEventListener('visibilitychange', () => {
+      if (this.detachedSurfaceId || this.contextInvalidated) return;
+      if (document.hidden) {
+        this.stopAutoBattle();
+        return;
+      }
+      this.syncAutoBattleTimer();
+    });
   }
 
   async init(): Promise<void> {
@@ -1075,6 +1073,7 @@ export class GameViewController {
   private startAutoBattle(): void {
     if (this.detachedSurfaceId) return;
     if (this.contextInvalidated || this.isAdvanceBlocked()) return;
+    if (document.hidden) return;
     this.autoBattleController.restart(
       this.prefsController.getAutoBattleIntervalMs(this.state),
       () => {
@@ -1358,34 +1357,40 @@ export class GameViewController {
   ): Promise<void> {
     if (this.chestLootFlow.openingChests) return;
     if (!options.restartCurrentPhase && this.isAdvanceBlocked()) return;
+    if (this.tickInFlight) return;
 
-    const response = await this.client.send({
-      type: 'TICK',
-      ticks: 1,
-      restartCurrentPhase: options.restartCurrentPhase,
-    });
-    if (!response.ok) {
-      this.handleFailedResponse(response.error);
-      return;
-    }
+    this.tickInFlight = true;
+    try {
+      const response = await this.client.send({
+        type: 'TICK',
+        ticks: 1,
+        restartCurrentPhase: options.restartCurrentPhase,
+      });
+      if (!response.ok) {
+        this.handleFailedResponse(response.error);
+        return;
+      }
 
-    if (!options.restartCurrentPhase && this.isAdvanceBlocked(response.state)) {
-      return;
-    }
+      if (!options.restartCurrentPhase && this.isAdvanceBlocked(response.state)) {
+        return;
+      }
 
-    if (
-      !options.restartCurrentPhase &&
-      this.isManualLoadoutPause(this.state) &&
-      !this.isManualLoadoutPause(response.state)
-    ) {
-      return;
-    }
+      if (
+        !options.restartCurrentPhase &&
+        this.isManualLoadoutPause(this.state) &&
+        !this.isManualLoadoutPause(response.state)
+      ) {
+        return;
+      }
 
-    this.render(response.state, { previousState: this.state });
-    this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
+      this.render(response.state, { previousState: this.state });
+      this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
 
-    if (response.achievementUpdates?.length) {
-      this.rewards.celebrateAchievementUpdates(response.achievementUpdates);
+      if (response.achievementUpdates?.length) {
+        this.rewards.celebrateAchievementUpdates(response.achievementUpdates);
+      }
+    } finally {
+      this.tickInFlight = false;
     }
   }
 
