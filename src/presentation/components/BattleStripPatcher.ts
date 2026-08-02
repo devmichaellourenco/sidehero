@@ -4,12 +4,13 @@ import { renderCombatStatusEffects } from './CombatStatusEffectPresentation';
 import { patchCombatSkillBar } from './CombatSkillIntentPresentation';
 import { formatEnemyHealthLabel } from './EnemyBattlePresentation';
 import { formatHealthLabel } from './HeroBarsPresentation';
-import { clampHealthPercent, freezeActionTimeVisualOnCard, patchActionTimeBar } from './BattleActorHealthPresentation';
+import { clampHealthPercent, freezeActionTimeVisualOnCard, formatStripHealthCurrent, patchActionTimeBar } from './BattleActorHealthPresentation';
 
 function updateHealthBar(
   card: HTMLElement,
   selector: string,
   healthLabel: string,
+  healthCurrent: string,
   healthPercent: number,
 ): void {
   const bar = card.querySelector(selector);
@@ -21,6 +22,11 @@ function updateHealthBar(
   const fill = bar.querySelector('.health-fill') as HTMLElement | null;
   if (fill) {
     fill.style.width = `${healthPercent}%`;
+  }
+
+  const label = bar.querySelector('.strip-health-label');
+  if (label) {
+    label.textContent = healthCurrent;
   }
 }
 
@@ -48,6 +54,7 @@ function patchActorCard(
     isActiveTurn: boolean;
     activeTurnClass: string;
     healthLabel: string;
+    healthCurrent: string;
     healthPercent: number;
     actionTimeRatio: number;
     actionTimeRemaining: number;
@@ -60,7 +67,13 @@ function patchActorCard(
 ): void {
   card.classList.toggle(options.activeTurnClass, options.isActiveTurn);
 
-  updateHealthBar(card, '.health-bar', options.healthLabel, options.healthPercent);
+  updateHealthBar(
+    card,
+    '.health-bar',
+    options.healthLabel,
+    options.healthCurrent,
+    options.healthPercent,
+  );
   replaceOrRemoveStatusBadges(card, options.statusEffectsHtml);
 
   if (options.freezeTimers && !options.forceResetActionTime) {
@@ -99,6 +112,7 @@ export function patchBattleStripInPlace(
       isActiveTurn: activeTurn?.side === 'hero' && activeTurn.id === hero.id,
       activeTurnClass: 'hero-battle-card--active-turn',
       healthLabel: formatHealthLabel(hero),
+      healthCurrent: formatStripHealthCurrent(hero.health),
       healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
       actionTimeRatio: hero.actionTimeRatio,
       actionTimeRemaining: hero.actionTimeRemaining,
@@ -120,6 +134,7 @@ export function patchBattleStripInPlace(
       isActiveTurn: activeTurn?.side === 'enemy' && activeTurn.id === enemy.id,
       activeTurnClass: 'enemy-battle-card--active-turn',
       healthLabel: formatEnemyHealthLabel(enemy),
+      healthCurrent: formatStripHealthCurrent(enemy.health),
       healthPercent: clampHealthPercent(enemy.health, enemy.maxHealth),
       actionTimeRatio: enemy.actionTimeRatio,
       actionTimeRemaining: enemy.actionTimeRemaining,

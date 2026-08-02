@@ -5,7 +5,7 @@ import {
   formatHealthLabel,
 } from './HeroBarsPresentation';
 import { renderBattleActorCard } from './BattleActorCardPresentation';
-import { clampHealthPercent } from './BattleActorHealthPresentation';
+import { clampHealthPercent, formatStripHealthCurrent } from './BattleActorHealthPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -67,6 +67,7 @@ export function renderHeroBattleSprite(
     spriteInnerHtml: `${glowHtml}${spriteHtml}`,
     tooltipHtml: renderHeroTooltipContent(hero),
     healthLabel: formatHealthLabel(hero),
+    healthCurrent: formatStripHealthCurrent(hero.health),
     healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
     actionTimeRatio: hero.actionTimeRatio,
     statusEffects: hero.statusEffects,

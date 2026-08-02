@@ -16,6 +16,7 @@ export function renderHeroStripHealthBar(hero: HeroDto): string {
   return renderStripHealthBar({
     side: 'hero',
     healthLabel: formatHealthLabel(hero),
+    healthCurrent: String(Math.max(0, Math.round(hero.health))),
     healthPercent: clampHealthPercent(hero.health, hero.maxHealth),
   });
 }

@@ -1296,7 +1296,7 @@ h2 {
 
 .battle-field {
   --battle-strip-height: 133px;
-  --strip-stack-gap: 1px;
+  --strip-stack-gap: 4px;
   --strip-sprite-lift: 2px;
   --strip-health-outer: 9px;
   --strip-action-outer: 4px;
@@ -1309,19 +1309,19 @@ h2 {
   --strip-skill-size: 16px;
   --strip-skill-wrap: 18px;
   --strip-skill-outer: var(--strip-skill-wrap);
-  /* Altura do bloco HP+TTA+skills (densidade legada — sprites usam isto na cena). */
+  /* Bloco real HP+TTA+skills no deck (com gap visual maior). */
   --strip-hud-stack-height: calc(
     var(--strip-stack-gap) + var(--strip-health-outer) + var(--strip-stack-gap) +
       var(--strip-action-outer) + var(--strip-stack-gap) + var(--strip-skill-outer)
   );
-  /* Reserva na cena 133px sob os pés — mesma elevação vertical de antes. */
-  --strip-scene-reserve: calc(var(--strip-hud-stack-height) + var(--strip-sprite-lift));
-  --strip-scenic-floor-height: var(--strip-hud-stack-height);
+  /* Elevação legada dos sprites na cena 133px (não acompanha o gap do deck). */
+  --strip-scene-reserve: 36px;
+  --strip-scenic-floor-height: 34px;
   /* Deck opaco abaixo da cena. */
   --battle-hud-deck-height: 50px;
   /* HUD centralizado verticalmente no deck. */
   --battle-hud-inset-bottom: calc((var(--battle-hud-deck-height) - var(--strip-hud-stack-height)) / 2);
-  --strip-floor-height: var(--strip-hud-stack-height);
+  --strip-floor-height: var(--strip-scenic-floor-height);
   --strip-action-bottom: calc(var(--strip-skill-outer) + var(--strip-stack-gap));
   --strip-actors-bottom: var(--strip-scene-reserve);
   position: relative;
@@ -2884,6 +2884,7 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   display: flex;
   flex-direction: column;
   gap: var(--strip-stack-gap);
+  overflow: visible;
 }
 
 .enemy-battle-card .strip-actor-bars {
@@ -2902,6 +2903,29 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
   padding: 1px;
   border-radius: 3px;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  overflow: visible;
+}
+
+.strip-health-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #fffdf8;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 1px rgba(0, 0, 0, 0.9),
+    0 -1px 1px rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .action-time-bar.strip-bar {

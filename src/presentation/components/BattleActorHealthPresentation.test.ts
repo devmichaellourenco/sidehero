@@ -11,12 +11,17 @@ describe('renderStripActorBars', () => {
     const html = renderStripActorBars({
       side: 'hero',
       healthLabel: '80/100',
+      healthCurrent: '80',
       healthPercent: 80,
       actionTimeRatio: 0.4,
     });
 
     expect(html).toContain('strip-actor-bars');
     expect(html).toContain('data-action-time-bar');
+    expect(html).toContain('strip-health-label');
+    expect(html).toContain('>80<');
+    expect(html).not.toContain('>80/100<');
+    expect(html).toContain('data-bar-label="80/100"');
     expect(html).toContain('width: 40%');
   });
 });

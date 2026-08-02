@@ -17,6 +17,8 @@ export interface BattleActorCardViewModel {
   spriteInnerHtml: string;
   tooltipHtml: string;
   healthLabel: string;
+  /** Vida atual exibida sobre a barra (sem máximo). */
+  healthCurrent: string;
   healthPercent: number;
   actionTimeRatio: number;
   statusEffects: CombatStatusEffectDto[];
@@ -85,6 +87,7 @@ export function renderBattleActorCard(vm: BattleActorCardViewModel): string {
       ${renderStripActorBars({
         side: vm.side,
         healthLabel: vm.healthLabel,
+        healthCurrent: vm.healthCurrent,
         healthPercent: vm.healthPercent,
         actionTimeRatio: vm.actionTimeRatio,
       })}

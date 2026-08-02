@@ -1,7 +1,7 @@
 import { EnemyDto } from '../../application/dto/GameStateDto';
 import { renderCombatResistPips } from './ElementPipPresentation';
 import { renderBattleActorCard } from './BattleActorCardPresentation';
-import { clampHealthPercent } from './BattleActorHealthPresentation';
+import { clampHealthPercent, formatStripHealthCurrent } from './BattleActorHealthPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -57,6 +57,7 @@ export function renderEnemyBattleCard(
     spriteInnerHtml: spriteHtml,
     tooltipHtml: renderEnemyTooltipContent(enemy, stage),
     healthLabel: formatEnemyHealthLabel(enemy),
+    healthCurrent: formatStripHealthCurrent(enemy.health),
     healthPercent: clampHealthPercent(enemy.health, enemy.maxHealth),
     actionTimeRatio: enemy.actionTimeRatio,
     statusEffects: enemy.statusEffects,

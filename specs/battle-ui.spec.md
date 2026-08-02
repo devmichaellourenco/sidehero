@@ -26,7 +26,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo)
-- [x] Barras de vida: heróis verdes, inimigos vermelhas; HP no deck da strip
+- [x] Barras de vida: heróis verdes, inimigos vermelhas; texto só da vida atual (negrito) sobre barra fina; tooltip com atual/máx; HP no deck da strip
 - [x] Battle field: cena **333×133** intacta (sprites na elevação legada); deck HUD opaco (~50px) abaixo com HP + TTA + skills alinhados coluna a coluna; overlays só na zona da cena
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
 - [x] Heróis / Formação / Loja / Inventário / Baús / Otimizar equipe só aparecem no **acampamento** (`canEditParty`)
