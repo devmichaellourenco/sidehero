@@ -28,6 +28,7 @@ import {
 } from '../mappers/CombatSkillIntentMapper';
 import { mapEnemyCombatSkills, mapHeroCombatSkills } from '../mappers/CombatSkillBarMapper';
 import { mapCombatantActionTime } from '../mappers/ActionTimePresentationMapper';
+import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
 import { mapHeroSkillCooldowns } from '../mappers/HeroSkillCooldownMapper';
 import { mapCombatantStatusEffects } from '../mappers/CombatStatusEffectMapper';
 import { mapCombatResistSummary } from '../mappers/CombatResistMapper';
@@ -213,6 +214,7 @@ function mapEnemyToDto(
     combatBarContext.activeTurn?.side === 'enemy' &&
     combatBarContext.activeTurn.id === enemy.id;
   const actionTime = mapCombatantActionTime('enemy', enemy.id, actionTimers);
+  const combatProfile = new CombatProfileProvider().forEnemy(enemy, enemy.role === 'boss');
 
   return {
     id: enemy.id,
@@ -223,6 +225,8 @@ function mapEnemyToDto(
     maxHealth: enemy.stats.maxHealth,
     attack: enemy.stats.attack,
     defense: enemy.stats.defense,
+    attackSpeed: combatProfile.attackSpeed,
+    castSpeed: combatProfile.castSpeed,
     goldReward: enemy.goldReward,
     xpReward: enemy.xpReward,
     signatureSkills: listEnemyCombatSkillsByType(enemy.enemyType)

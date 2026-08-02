@@ -1,4 +1,5 @@
 import { formatSkillCooldownCountdown } from '../../domain/combat/SkillCooldownTiming';
+import { formatActionTimeBarTooltip, formatActionTimeCountdown } from './ActionTimeBarPresentation';
 
 const UPDATE_INTERVAL_MS = 100;
 
@@ -49,6 +50,20 @@ function updateActionTimeBar(bar: HTMLElement, remaining: number, total: number)
   const ready = remaining <= 0 || total <= 0;
   const ratio = ready ? 1 : Math.max(0, Math.min(1, 1 - remaining / total));
   fill.style.width = `${ratio * 100}%`;
+
+  const label = bar.querySelector<HTMLElement>('.strip-action-time-label');
+  if (label) {
+    label.textContent = formatActionTimeCountdown(remaining);
+  }
+
+  const attackSpeed = Number.parseFloat(bar.dataset.atAttackSpeed ?? '0');
+  if (attackSpeed > 0) {
+    bar.setAttribute('data-bar-label', formatActionTimeBarTooltip(attackSpeed, remaining, total));
+  }
+  bar.setAttribute(
+    'aria-label',
+    `Tempo até ação ${formatActionTimeCountdown(remaining) || 'pronto'}`,
+  );
 }
 
 /** Interpola cooldowns de skills entre ticks de simulação. */

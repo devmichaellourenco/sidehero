@@ -135,6 +135,9 @@ const sampleStats = {
       uses: 5,
       damageDealt: 400,
       healingDone: 0,
+      cooldownLabel: '10s',
+      cooldownTooltip:
+        'Base = 2 turns × 5s = 10.00s\nLevel 1: sem redução por level → 10.00s\nCDR do equipamento = 0.0%\nRecarga efetiva = 10.00 × (1 − 0.0%) = 10.00s',
     },
   ],
 };
@@ -152,8 +155,38 @@ describe('BattleStatsPresentation', () => {
     expect(html).toContain('Galneon');
     expect(html).toContain('Investida');
     expect(html).toContain('12 atk');
+    expect(html).toContain('CD 10s');
+    expect(html).toContain('Base = 2 turns × 5s = 10.00s');
     expect(html).toContain('battle-stats-hero-card');
     expect(html).not.toContain('battle-stats-hero-elements');
+  });
+
+  it('aba geral lista cadência ASPD/TTA da party e inimigos', () => {
+    const html = renderBattleStatsPanel(sampleStats, {
+      activeParty: [
+        {
+          id: 'h1',
+          name: 'Galneon',
+          attackSpeed: 0.54,
+          actionTimeRemaining: 0.8,
+          actionTimeTotal: 1.85,
+        } as never,
+      ],
+      enemies: [
+        {
+          id: 'e1',
+          name: 'Goblin',
+          attackSpeed: 0.5,
+          actionTimeRemaining: 1,
+          actionTimeTotal: 2,
+        } as never,
+      ],
+    });
+
+    expect(html).toContain('Cadência (ASPD · TTA)');
+    expect(html).toContain('0.54/s · 1.85s');
+    expect(html).toContain('Goblin');
+    expect(html).toContain('0.50/s · 2.00s');
   });
 
   it('aba de dano causado mostra ranking total e por elemento', () => {

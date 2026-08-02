@@ -1,5 +1,9 @@
-import { BattleSessionStatsDto, GameStateDto } from '../../application/dto/GameStateDto';
+import { BattleSessionStatsDto, EnemyDto, GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
 import { DAMAGE_ELEMENT_LABELS, DamageElement, DAMAGE_ELEMENTS } from '../../domain/combat/DamageElement';
+import {
+  formatActionTimeBarTooltip,
+  resolveActionIntervalFromSpeed,
+} from './ActionTimeBarPresentation';
 
 export type BattleStatsTabId =
   | 'general'
@@ -35,6 +39,45 @@ function escapeHtml(text: string): string {
 function barPercent(value: number, max: number): number {
   if (max <= 0 || value <= 0) return 0;
   return Math.max(4, Math.min(100, Math.round((value / max) * 100)));
+}
+
+function renderCadenceRows(
+  party: readonly HeroDto[] | undefined,
+  enemies: readonly EnemyDto[] | undefined,
+): string {
+  const heroRows = (party ?? [])
+    .map((hero) => {
+      const tta = resolveActionIntervalFromSpeed(hero.attackSpeed);
+      return `
+        <li class="battle-stats-row battle-stats-row--sub" title="${escapeHtml(formatActionTimeBarTooltip(hero.attackSpeed, hero.actionTimeRemaining, hero.actionTimeTotal))}">
+          <span class="battle-stats-label">${escapeHtml(hero.name)}</span>
+          <strong class="battle-stats-value">${hero.attackSpeed.toFixed(2)}/s · ${tta.toFixed(2)}s</strong>
+        </li>`;
+    })
+    .join('');
+
+  const enemyRows = (enemies ?? [])
+    .map((enemy) => {
+      const tta = resolveActionIntervalFromSpeed(enemy.attackSpeed);
+      return `
+        <li class="battle-stats-row battle-stats-row--sub" title="${escapeHtml(formatActionTimeBarTooltip(enemy.attackSpeed, enemy.actionTimeRemaining, enemy.actionTimeTotal))}">
+          <span class="battle-stats-label">${escapeHtml(enemy.name)}</span>
+          <strong class="battle-stats-value">${enemy.attackSpeed.toFixed(2)}/s · ${tta.toFixed(2)}s</strong>
+        </li>`;
+    })
+    .join('');
+
+  if (!heroRows && !enemyRows) {
+    return '';
+  }
+
+  return `
+    <h3 class="battle-stats-subtitle">Cadência (ASPD · TTA)</h3>
+    <ul class="battle-stats-list">
+      ${heroRows}
+      ${enemyRows}
+    </ul>
+  `;
 }
 
 function renderGeneralRows(stats: BattleSessionStatsDto): string {
@@ -136,14 +179,51 @@ function renderHeroSection(stats: BattleSessionStatsDto): string {
     .join('');
 }
 
-function renderSkillSection(stats: BattleSessionStatsDto): string {
-  if (stats.skills.length === 0) {
+function renderSkillSection(
+  stats: BattleSessionStatsDto,
+  party: readonly HeroDto[] | undefined,
+): string {
+  type SkillRow = BattleSessionStatsDto['skills'][number];
+  const rowsByKey = new Map<string, SkillRow>();
+
+  for (const skill of stats.skills) {
+    rowsByKey.set(`${skill.heroId}:${skill.skillId}`, skill);
+  }
+
+  for (const hero of party ?? []) {
+    for (const skill of hero.activeSkills ?? []) {
+      if (!skill || skill.id === 'basic_attack') continue;
+      const key = `${hero.id}:${skill.id}`;
+      if (rowsByKey.has(key)) continue;
+
+      const reload = skill.battleStats.find((entry) => entry.label === 'Recarga');
+      rowsByKey.set(key, {
+        heroId: hero.id,
+        heroName: hero.name,
+        skillId: skill.id,
+        skillName: skill.name,
+        uses: 0,
+        damageDealt: 0,
+        healingDone: 0,
+        cooldownLabel: reload?.value ?? '—',
+        cooldownTooltip:
+          reload?.tooltipLines?.map((line) => line.text).join('\n') ??
+          'Sem cálculo de recarga disponível.',
+      });
+    }
+  }
+
+  const rows = [...rowsByKey.values()].sort(
+    (a, b) => b.damageDealt - a.damageDealt || b.healingDone - a.healingDone || b.uses - a.uses,
+  );
+
+  if (rows.length === 0) {
     return '<p class="battle-stats-empty">Ainda sem usos de skill nesta tentativa.</p>';
   }
 
   return `
     <ul class="battle-stats-list">
-      ${stats.skills
+      ${rows
         .map(
           (skill) => `
         <li class="battle-stats-skill-row">
@@ -152,6 +232,12 @@ function renderSkillSection(stats: BattleSessionStatsDto): string {
             <span class="battle-stats-skill-meta">${escapeHtml(skill.heroName)} · ${formatStat(skill.uses)}x</span>
           </div>
           <div class="battle-stats-skill-nums">
+            <span
+              class="battle-stats-skill-cd"
+              data-bar-label="${escapeHtml(skill.cooldownTooltip).replace(/\n/g, '&#10;')}"
+              tabindex="0"
+              title="${escapeHtml(skill.cooldownTooltip)}"
+            >CD ${escapeHtml(skill.cooldownLabel)}</span>
             <span title="Dano">${formatStat(skill.damageDealt)} dmg</span>
             <span title="Cura">${formatStat(skill.healingDone)} cura</span>
           </div>
@@ -298,7 +384,13 @@ function renderTabPanel(id: BattleStatsTabId, activeTab: BattleStatsTabId, conte
 
 export function renderBattleStatsPanel(
   stats: BattleSessionStatsDto,
-  options: { live?: boolean; paused?: boolean; activeTab?: BattleStatsTabId } = {},
+  options: {
+    live?: boolean;
+    paused?: boolean;
+    activeTab?: BattleStatsTabId;
+    activeParty?: readonly HeroDto[];
+    enemies?: readonly EnemyDto[];
+  } = {},
 ): string {
   const activeTab = options.activeTab ?? 'general';
   const lead = options.live
@@ -309,10 +401,11 @@ export function renderBattleStatsPanel(
 
   const generalContent = `
     ${renderGeneralRows(stats)}
+    ${renderCadenceRows(options.activeParty, options.enemies)}
     <h3 class="battle-stats-subtitle">Por herói</h3>
     <div class="battle-stats-heroes">${renderHeroSection(stats)}</div>
     <h3 class="battle-stats-subtitle">Por skill</h3>
-    ${renderSkillSection(stats)}
+    ${renderSkillSection(stats, options.activeParty)}
   `;
 
   return `
@@ -355,6 +448,8 @@ export function renderBattleStatsBody(
     live: true,
     paused: state.battlePaused,
     activeTab,
+    activeParty: state.activeParty,
+    enemies: state.enemies,
   });
 }
 

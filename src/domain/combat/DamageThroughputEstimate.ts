@@ -22,10 +22,8 @@ import {
   applyCooldownReduction,
   CombatProfileProvider,
 } from './CombatProfileProvider';
-import {
-  MIN_ACTION_INTERVAL_SECONDS,
-  SKILL_ACTION_RECOVERY_SECONDS,
-} from './CombatTimingConstants';
+import { SKILL_ACTION_RECOVERY_SECONDS } from './CombatTimingConstants';
+import { resolveActionIntervalSeconds } from './CombatSpeedScaling';
 import { getCooldownSeconds } from './SkillCooldownTiming';
 import { Hero } from '../entities/Hero';
 import { getSkillById } from '../progression/SkillCatalog';
@@ -120,8 +118,7 @@ export function estimateAttackerOutgoingPower(
 }
 
 export function basicAttackActionsPerSecond(attackSpeed: number): number {
-  const interval = Math.max(MIN_ACTION_INTERVAL_SECONDS, 1 / Math.max(attackSpeed, 0.01));
-  return 1 / interval;
+  return 1 / resolveActionIntervalSeconds(attackSpeed);
 }
 
 export function skillCastsPerSecond(
@@ -130,11 +127,8 @@ export function skillCastsPerSecond(
   castSpeed: number,
 ): { rate: number; effectiveCooldownSeconds: number; recoverySeconds: number } {
   const effectiveCooldownSeconds = applyCooldownReduction(baseCooldownSeconds, cooldownReduction);
-  const recoverySeconds = Math.max(
-    MIN_ACTION_INTERVAL_SECONDS,
-    SKILL_ACTION_RECOVERY_SECONDS / Math.max(castSpeed, 0.01),
-  );
-  const period = Math.max(effectiveCooldownSeconds, recoverySeconds, MIN_ACTION_INTERVAL_SECONDS);
+  const recoverySeconds = SKILL_ACTION_RECOVERY_SECONDS / Math.max(castSpeed, 0.01);
+  const period = Math.max(effectiveCooldownSeconds, recoverySeconds);
   return {
     rate: 1 / period,
     effectiveCooldownSeconds,
@@ -303,6 +297,7 @@ export function estimateHeroSkillThroughput(
 
   const profile = profiles.forHero(hero);
   const equipment = hero.toProps().equipment;
+  const skillRank = hero.toProps().skillRanks[combat.skillId] ?? 1;
   const rawPower = powerCalculator.calculateForHero(combat, hero);
   const components = combat.damageComponents ?? [
     { element: 'physical' as const, delivery: 'melee' as const, weight: 1 },
@@ -394,14 +389,14 @@ export function estimateHeroSkillThroughput(
     efficacyLabel,
   });
 
-  if (combat.usesAttackStat || getCooldownSeconds(combat) <= 0) {
-    const interval = Math.max(MIN_ACTION_INTERVAL_SECONDS, 1 / Math.max(profile.attackSpeed, 0.01));
+  if (combat.usesAttackStat || getCooldownSeconds(combat, { rank: skillRank }) <= 0) {
+    const interval = resolveActionIntervalSeconds(profile.attackSpeed);
     const ratePerSecond = 1 / interval;
     const dps = expectedDamagePerHit * ratePerSecond;
     const rateBreakdown: ThroughputBreakdownLine[] = [
       { icon: 'attack', text: `Vel. de ataque (perfil) = ${profile.attackSpeed.toFixed(2)}/s` },
       {
-        text: `Intervalo = máx(${MIN_ACTION_INTERVAL_SECONDS}s, 1 ÷ ${profile.attackSpeed.toFixed(2)}) = ${interval.toFixed(3)}s`,
+        text: `TTA = 1 ÷ ${profile.attackSpeed.toFixed(2)} = ${interval.toFixed(3)}s`,
       },
       { icon: 'attack', text: `APS efetiva = 1 ÷ ${interval.toFixed(3)} = ${ratePerSecond.toFixed(3)}/s` },
     ];
@@ -438,7 +433,7 @@ export function estimateHeroSkillThroughput(
     });
   }
 
-  const baseCooldown = getCooldownSeconds(combat);
+  const baseCooldown = getCooldownSeconds(combat, { rank: skillRank });
   const casting = skillCastsPerSecond(baseCooldown, profile.cooldownReduction, profile.castSpeed);
   const dps = expectedDamagePerHit * casting.rate;
   const rateBreakdown: ThroughputBreakdownLine[] = [
@@ -449,7 +444,7 @@ export function estimateHeroSkillThroughput(
     },
     {
       icon: 'power_attack',
-      text: `Recovery pós-skill = máx(${MIN_ACTION_INTERVAL_SECONDS}s, ${SKILL_ACTION_RECOVERY_SECONDS} ÷ cast ${profile.castSpeed.toFixed(2)}) = ${casting.recoverySeconds.toFixed(3)}s`,
+      text: `Recovery pós-skill = ${SKILL_ACTION_RECOVERY_SECONDS} ÷ cast ${profile.castSpeed.toFixed(2)} = ${casting.recoverySeconds.toFixed(3)}s`,
     },
     {
       text: `Período entre casts = máx(recarga efetiva, recovery) = ${Math.max(casting.effectiveCooldownSeconds, casting.recoverySeconds).toFixed(3)}s`,

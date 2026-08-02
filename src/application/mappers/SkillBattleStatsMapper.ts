@@ -14,12 +14,19 @@ import {
   getCooldownSeconds,
   getInitialCooldownSeconds,
 } from '../../domain/combat/SkillCooldownTiming';
+import {
+  HERO_SKILL_COOLDOWN_TURN_SECONDS,
+  MIN_SKILL_COOLDOWN_SECONDS,
+  SKILL_COOLDOWN_SECONDS_PER_RANK,
+} from '../../domain/combat/CombatTimingConstants';
 import { Hero } from '../../domain/entities/Hero';
+import { BASIC_ATTACK_SKILL_ID } from '../../domain/progression/combat/BasicAttackSkill';
 import { getTargetPriorityPercent } from '../../domain/progression/combat/CombatSkillTargeting';
 import { CombatSkillDefinition } from '../../domain/progression/combat/CombatSkillDefinition';
 import { getHeroCombatSkill } from '../../domain/progression/combat/HeroCombatSkillCatalog';
 import { SkillCombatKind } from '../../domain/progression/combat/SkillCombatKind';
 import { SkillPowerCalculator } from '../../domain/progression/combat/SkillPowerCalculator';
+import { resolveActionIntervalSeconds } from '../../domain/combat/CombatSpeedScaling';
 import {
   HeroActiveSkillStatDto,
   HeroActiveSkillStatTooltipLineDto,
@@ -92,16 +99,8 @@ function formatTarget(combat: CombatSkillDefinition): string {
 }
 
 function formatEffectiveCooldown(combat: CombatSkillDefinition, hero: Hero): string {
-  const baseSeconds = getCooldownSeconds(combat);
-  if (baseSeconds <= 0) return 'Sem recarga';
-
-  const profile = combatProfiles.forHero(hero);
-  const effective = applyCooldownReduction(baseSeconds, profile.cooldownReduction);
-  if (Math.abs(effective - baseSeconds) < 0.05) {
-    return formatCooldownLabel(effective);
-  }
-
-  return `${formatCooldownLabel(effective)} (base ${formatCooldownLabel(baseSeconds)}, CDR ${(profile.cooldownReduction * 100).toFixed(0)}%)`;
+  const breakdown = describeHeroSkillCooldown(hero, combat.skillId, combat);
+  return breakdown.label;
 }
 
 function buildTypeTooltip(combat: CombatSkillDefinition): HeroActiveSkillStatTooltipLineDto[] {
@@ -146,31 +145,114 @@ function buildTargetTooltip(combat: CombatSkillDefinition): HeroActiveSkillStatT
 }
 
 function buildCooldownTooltip(combat: CombatSkillDefinition, hero: Hero): HeroActiveSkillStatTooltipLineDto[] {
-  const baseSeconds = getCooldownSeconds(combat);
+  return describeHeroSkillCooldown(hero, combat.skillId, combat).tooltipLines;
+}
+
+export interface HeroSkillCooldownBreakdown {
+  label: string;
+  effectiveSeconds: number;
+  tooltipLines: HeroActiveSkillStatTooltipLineDto[];
+  tooltipText: string;
+}
+
+/** Recarga efetiva + linhas do cálculo (level, turns, CDR) para UI de estatísticas. */
+export function describeHeroSkillCooldown(
+  hero: Hero,
+  skillId: string,
+  combatSkill?: CombatSkillDefinition | null,
+): HeroSkillCooldownBreakdown {
+  if (skillId === BASIC_ATTACK_SKILL_ID) {
+    const profile = combatProfiles.forHero(hero);
+    const interval = resolveActionIntervalSeconds(profile.attackSpeed);
+    const tooltipLines = tip(
+      { text: 'Ataque básico não usa recarga de skill.' },
+      {
+        icon: 'attack',
+        text: `TTA = 1 ÷ ASPD ${profile.attackSpeed.toFixed(2)} = ${interval.toFixed(2)}s`,
+      },
+    );
+    return {
+      label: `TTA ${interval.toFixed(2)}s`,
+      effectiveSeconds: interval,
+      tooltipLines,
+      tooltipText: tooltipLines.map((line) => line.text).join('\n'),
+    };
+  }
+
+  const combat = combatSkill ?? getHeroCombatSkill(skillId);
+  if (!combat) {
+    const tooltipLines = tip({ text: 'Skill sem definição de combate.' });
+    return {
+      label: '—',
+      effectiveSeconds: 0,
+      tooltipLines,
+      tooltipText: tooltipLines.map((line) => line.text).join('\n'),
+    };
+  }
+
+  const rank = Math.max(1, hero.toProps().skillRanks[combat.skillId] ?? 1);
+  const rawBase =
+    combat.cooldownSeconds !== undefined
+      ? Math.max(0, combat.cooldownSeconds)
+      : Math.max(0, combat.cooldownTurns) * HERO_SKILL_COOLDOWN_TURN_SECONDS;
+  const beforeFloor = rawBase - (rank - 1) * SKILL_COOLDOWN_SECONDS_PER_RANK;
+  const baseSeconds = getCooldownSeconds(combat, { rank });
+
   if (baseSeconds <= 0) {
-    return tip(
+    const tooltipLines = tip(
       { text: 'Esta ação não entra em recarga (ataque contínuo ou skill sem CD).' },
       { icon: 'attack', text: 'A taxa vem da velocidade de ataque do herói.' },
     );
+    return {
+      label: 'Sem recarga',
+      effectiveSeconds: 0,
+      tooltipLines,
+      tooltipText: tooltipLines.map((line) => line.text).join('\n'),
+    };
   }
 
   const profile = combatProfiles.forHero(hero);
   const effective = applyCooldownReduction(baseSeconds, profile.cooldownReduction);
+  const cdrPct = profile.cooldownReduction * 100;
 
-  return tip(
-    { icon: 'rune', text: `Recarga base do catálogo = ${baseSeconds.toFixed(2)}s` },
+  const tooltipLines = tip(
     {
-      icon: 'improvement',
-      text: `CDR do equipamento = ${(profile.cooldownReduction * 100).toFixed(1)}%`,
+      icon: 'rune',
+      text:
+        combat.cooldownSeconds !== undefined
+          ? `Base catálogo = ${rawBase.toFixed(2)}s`
+          : `Base = ${combat.cooldownTurns} turns × ${HERO_SKILL_COOLDOWN_TURN_SECONDS}s = ${rawBase.toFixed(2)}s`,
     },
     {
-      text: `Recarga efetiva = base × (1 − CDR) = ${effective.toFixed(2)}s`,
+      text:
+        rank <= 1
+          ? `Level ${rank}: sem redução por level → ${baseSeconds.toFixed(2)}s`
+          : `Level ${rank}: ${rawBase.toFixed(2)} − (${rank - 1} × ${SKILL_COOLDOWN_SECONDS_PER_RANK}s) = ${Math.max(beforeFloor, MIN_SKILL_COOLDOWN_SECONDS).toFixed(2)}s (piso ${MIN_SKILL_COOLDOWN_SECONDS}s)`,
+    },
+    {
+      icon: 'improvement',
+      text: `CDR do equipamento = ${cdrPct.toFixed(1)}%`,
+    },
+    {
+      text: `Recarga efetiva = ${baseSeconds.toFixed(2)} × (1 − ${cdrPct.toFixed(1)}%) = ${effective.toFixed(2)}s`,
     },
     {
       icon: 'power_attack',
-      text: `Cast speed ${profile.castSpeed.toFixed(2)} também afeta o recovery após o cast (ver DPS).`,
+      text: `Cast speed ${profile.castSpeed.toFixed(2)}× afeta só o recovery pós-cast (ver DPS).`,
     },
   );
+
+  const label =
+    Math.abs(effective - baseSeconds) < 0.05
+      ? formatCooldownLabel(effective)
+      : `${formatCooldownLabel(effective)} (base ${formatCooldownLabel(baseSeconds)}, CDR ${cdrPct.toFixed(0)}%)`;
+
+  return {
+    label,
+    effectiveSeconds: effective,
+    tooltipLines,
+    tooltipText: tooltipLines.map((line) => line.text).join('\n'),
+  };
 }
 
 /** DPS alinhado ao combate: poder + bônus de gear + crit esperado + taxa (ASPD ou CD/CDR + recovery). */
@@ -293,7 +375,7 @@ export function buildSkillBattleStats(
     const estimatedPower = powerCalculator.calculateForHero(combat, hero);
     stats.push({
       label: 'Poder',
-      value: `ATK do herói (${hero.attack})`,
+      value: `~${estimatedPower} (50% do ATK)`,
       tooltipLines: toTooltipLines(buildHeroSkillPowerBreakdown(combat, hero, estimatedPower)),
     });
   } else {

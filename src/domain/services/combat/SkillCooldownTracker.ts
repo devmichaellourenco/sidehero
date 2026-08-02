@@ -16,8 +16,11 @@ export class SkillCooldownTracker {
     for (const hero of heroes) {
       const key = combatantKey('hero', hero.id);
       cooldowns[key] = {};
+      const ranks = hero.toProps().skillRanks;
       for (const skill of listHeroCombatSkills(hero)) {
-        const initial = getInitialCooldownSeconds(skill);
+        const initial = getInitialCooldownSeconds(skill, {
+          rank: ranks[skill.skillId] ?? 1,
+        });
         if (initial > 0) {
           cooldowns[key][skill.skillId] = initial;
         }
@@ -28,7 +31,7 @@ export class SkillCooldownTracker {
       const key = combatantKey('enemy', enemy.id);
       cooldowns[key] = {};
       for (const skill of listEnemyCombatSkills(enemy)) {
-        const initial = getInitialCooldownSeconds(skill);
+        const initial = getInitialCooldownSeconds(skill, { forEnemy: true });
         if (initial > 0) {
           cooldowns[key][skill.skillId] = initial;
         }
@@ -82,6 +85,7 @@ export class SkillCooldownTracker {
     usedSkillId: string | null,
     skills: CombatSkillDefinition[],
     cooldownReduction = 0,
+    options: { rank?: number; forEnemy?: boolean } = {},
   ): SkillCooldownTracker {
     const next = structuredClone(this.cooldowns);
     next[key] ??= {};
@@ -95,7 +99,7 @@ export class SkillCooldownTracker {
       return new SkillCooldownTracker(next);
     }
 
-    const cooldownSeconds = getCooldownSeconds(usedSkill);
+    const cooldownSeconds = getCooldownSeconds(usedSkill, options);
     if (cooldownSeconds > 0) {
       next[key][usedSkillId] = Math.max(0, cooldownSeconds * (1 - cooldownReduction));
     }

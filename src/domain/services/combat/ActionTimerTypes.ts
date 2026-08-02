@@ -1,5 +1,3 @@
-import { MIN_ACTION_INTERVAL_SECONDS } from '../../combat/CombatTimingConstants';
-
 export interface ActionTimerEntry {
   remaining: number;
   total: number;
@@ -7,11 +5,13 @@ export interface ActionTimerEntry {
 
 export type ActionTimerMap = Record<string, ActionTimerEntry>;
 
+/** Total de exibição quando o ator está pronto (remaining ≤ 0) e não há ciclo anterior. */
+const READY_DISPLAY_TOTAL = 1;
+
 export function normalizeActionTimerEntry(value: unknown): ActionTimerEntry {
   if (typeof value === 'number') {
     const remaining = value;
-    const total = remaining > 0 ? remaining : MIN_ACTION_INTERVAL_SECONDS;
-    return { remaining, total };
+    return { remaining, total: remaining > 0 ? remaining : READY_DISPLAY_TOTAL };
   }
 
   if (
@@ -23,11 +23,11 @@ export function normalizeActionTimerEntry(value: unknown): ActionTimerEntry {
     const entry = value as ActionTimerEntry;
     return {
       remaining: entry.remaining,
-      total: Math.max(entry.total, MIN_ACTION_INTERVAL_SECONDS),
+      total: entry.total > 0 ? entry.total : READY_DISPLAY_TOTAL,
     };
   }
 
-  return { remaining: 0, total: MIN_ACTION_INTERVAL_SECONDS };
+  return { remaining: 0, total: READY_DISPLAY_TOTAL };
 }
 
 export function normalizeActionTimerMap(value: unknown): ActionTimerMap {

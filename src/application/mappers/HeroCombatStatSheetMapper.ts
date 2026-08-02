@@ -1,6 +1,11 @@
 import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
 import { estimateHeroSkillThroughput } from '../../domain/combat/DamageThroughputEstimate';
 import { getClassCombatBaseline } from '../../domain/combat/ClassCombatBaselines';
+import {
+  DEX_ATTACK_SPEED_SCALE,
+  resolveActionIntervalSeconds,
+  STR_ATTACK_SPEED_SCALE,
+} from '../../domain/combat/CombatSpeedScaling';
 import { DAMAGE_ELEMENT_LABELS, DamageElement } from '../../domain/combat/DamageElement';
 import { defensiveMitigationForHero } from '../../domain/combat/HeroDefensiveStatsProvider';
 import {
@@ -181,8 +186,12 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const basicThroughput = estimateHeroSkillThroughput(hero, BASIC_ATTACK_SKILL);
   const estimatedDps = basicThroughput?.dps ?? hero.attack * profile.attackSpeed * critMultiplier;
 
-  const dexAspdBonus = hero.totalAttributes.dex * 0.002;
+  const dexAspdBonus = hero.totalAttributes.dex * DEX_ATTACK_SPEED_SCALE;
+  const strAspdBonus = ['knight', 'berserker', 'paladin'].includes(hero.heroClass)
+    ? hero.totalAttributes.str * STR_ATTACK_SPEED_SCALE
+    : 0;
   const gearAspd = sumGear(equipment, (g) => g.attackSpeedBonus);
+  const ttaSeconds = resolveActionIntervalSeconds(profile.attackSpeed);
   const gearCast = sumGear(equipment, (g) => g.castSpeedBonus);
   const gearCdr = sumGear(equipment, (g) => g.cooldownReductionBonus);
 
@@ -226,10 +235,23 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       tooltipLines: [
         `Classe (${hero.heroClass}): ${fmtSpeed(baseline.attackSpeed)}`,
         `DEX (${hero.totalAttributes.dex}): +${dexAspdBonus.toFixed(3)}/s`,
+        ...(strAspdBonus > 0
+          ? [`STR (${hero.totalAttributes.str}): +${strAspdBonus.toFixed(3)}/s`]
+          : []),
         ...(gearAspd > 0
           ? [`Equipamento: +${gearAspd.toFixed(2)}/s`, ...gearContributionLines(equipment, (g) => g.attackSpeedBonus, (v) => `+${v.toFixed(2)}/s`)]
           : []),
         `Total: ${fmtSpeed(profile.attackSpeed)}`,
+      ],
+    },
+    {
+      id: 'time-to-action',
+      label: 'Tempo até ação',
+      value: `${ttaSeconds.toFixed(2)}s`,
+      tooltipLines: [
+        'Intervalo individual entre ações deste herói.',
+        `TTA = 1 ÷ ASPD = 1 ÷ ${profile.attackSpeed.toFixed(2)} = ${ttaSeconds.toFixed(2)}s`,
+        'Sobe com DEX (e STR em classes físicas) e gear de velocidade de ataque.',
       ],
     },
     {

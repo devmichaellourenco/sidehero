@@ -38,7 +38,9 @@ export class CombatSkillBarResolver {
       statusEffects,
     );
 
-    return this.mapSkills(key, skills, cooldowns, highlights);
+    return this.mapSkills(key, skills, cooldowns, highlights, {
+      ranks: hero.toProps().skillRanks,
+    });
   }
 
   resolveForEnemy(
@@ -61,7 +63,7 @@ export class CombatSkillBarResolver {
       options,
     );
 
-    return this.mapSkills(key, skills, cooldowns, highlights);
+    return this.mapSkills(key, skills, cooldowns, highlights, { forEnemy: true });
   }
 
   private resolveHighlights(
@@ -104,10 +106,14 @@ export class CombatSkillBarResolver {
     skills: CombatSkillDefinition[],
     cooldowns: SkillCooldownTracker,
     highlights: Map<string, CombatSkillHighlight>,
+    options: { ranks?: Record<string, number>; forEnemy?: boolean } = {},
   ): CombatSkillBarEntry[] {
     return skills.map((skill) => {
       const secondsRemaining = cooldowns.getRemaining(key, skill.skillId);
-      const baseCooldown = getCooldownSeconds(skill);
+      const baseCooldown = getCooldownSeconds(skill, {
+        rank: options.ranks?.[skill.skillId] ?? 1,
+        forEnemy: options.forEnemy,
+      });
       const cooldownTotal = Math.max(baseCooldown, secondsRemaining, 0);
       const ready = secondsRemaining <= 0 || baseCooldown <= 0;
 

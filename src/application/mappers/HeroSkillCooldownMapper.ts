@@ -20,7 +20,8 @@ export function mapHeroSkillCooldowns(
     .map((skillId) => {
     const definition = getHeroCombatSkill(skillId);
     const secondsRemaining = tracker.getRemaining(key, skillId);
-    const baseCooldown = definition ? getCooldownSeconds(definition) : 0;
+    const rank = hero.toProps().skillRanks[skillId] ?? 1;
+    const baseCooldown = definition ? getCooldownSeconds(definition, { rank }) : 0;
     const cooldownTotal = Math.max(baseCooldown, secondsRemaining, 0);
 
     const ready = secondsRemaining <= 0 || baseCooldown <= 0;

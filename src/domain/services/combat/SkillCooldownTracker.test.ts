@@ -4,17 +4,17 @@ import { SkillCooldownTracker } from './SkillCooldownTracker';
 
 const TEST_SKILL: CombatSkillDefinition = {
   skillId: 'test_bolt',
-  name: 'Raio de Teste',
-  cooldownSeconds: 10,
-  cooldownTurns: 0,
-  initialCooldown: 0,
-  initialCooldownSeconds: 0,
-  target: 'enemy',
   kind: 'damage',
-  delivery: 'spell',
-  element: 'lightning',
+  targetPool: 'enemies',
+  targetScope: 'single',
+  targetPriority: 'lowest_hp_percent',
+  usePriority: 80,
+  initialCooldown: 0,
+  cooldownTurns: 0,
+  cooldownSeconds: 10,
   basePower: 20,
-  scaling: { int: 1 },
+  powerPerRank: 1,
+  attributeFactor: 1,
 };
 
 describe('SkillCooldownTracker', () => {
@@ -32,5 +32,13 @@ describe('SkillCooldownTracker', () => {
     const applied = tracker.onSkillUsed(key, 'test_bolt', [TEST_SKILL], 0);
 
     expect(applied.getRemaining(key, 'test_bolt')).toBe(10);
+  });
+
+  it('reduz recarga conforme level da skill', () => {
+    const key = 'hero:h1';
+    const tracker = SkillCooldownTracker.fromMap({ [key]: {} });
+    const ranked = tracker.onSkillUsed(key, 'test_bolt', [TEST_SKILL], 0, { rank: 3 });
+
+    expect(ranked.getRemaining(key, 'test_bolt')).toBe(7);
   });
 });

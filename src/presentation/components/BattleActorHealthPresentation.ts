@@ -1,3 +1,8 @@
+import {
+  formatActionTimeBarTooltip,
+  formatActionTimeCountdown,
+} from './ActionTimeBarPresentation';
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -22,10 +27,21 @@ export function renderStripActorBars(options: {
   healthCurrent: string;
   healthPercent: number;
   actionTimeRatio: number;
+  actionTimeRemaining: number;
+  actionTimeTotal: number;
+  attackSpeed: number;
 }): string {
   const fillWidth = Math.max(0, Math.min(100, options.actionTimeRatio * 100));
   const safeLabel = escapeHtml(options.healthLabel);
   const safeCurrent = escapeHtml(options.healthCurrent);
+  const countdown = formatActionTimeCountdown(options.actionTimeRemaining);
+  const tooltip = formatActionTimeBarTooltip(
+    options.attackSpeed,
+    options.actionTimeRemaining,
+    options.actionTimeTotal,
+  );
+  const remaining = Math.max(0, options.actionTimeRemaining);
+  const total = Math.max(0, options.actionTimeTotal);
 
   return `
     <div class="strip-actor-bars">
@@ -40,8 +56,20 @@ export function renderStripActorBars(options: {
         </div>
         <span class="strip-health-label">${safeCurrent}</span>
       </div>
-      <div class="action-time-bar strip-bar" data-action-time-bar aria-hidden="true">
-        <div class="action-time-fill" style="width: ${fillWidth}%"></div>
+      <div
+        class="stat-bar action-time-bar strip-bar"
+        data-action-time-bar
+        data-bar-label="${escapeHtml(tooltip).replace(/\n/g, '&#10;')}"
+        data-at-remaining="${remaining}"
+        data-at-total="${total}"
+        data-at-attack-speed="${options.attackSpeed}"
+        tabindex="0"
+        aria-label="Tempo até ação ${countdown || 'pronto'}"
+      >
+        <div class="stat-bar-track action-time-track">
+          <div class="action-time-fill" style="width: ${fillWidth}%"></div>
+        </div>
+        <span class="strip-action-time-label">${escapeHtml(countdown)}</span>
       </div>
     </div>
   `;
@@ -60,6 +88,9 @@ export function renderStripHealthBar(options: {
       options.healthCurrent ??
       formatStripHealthCurrent(Number.parseFloat(options.healthLabel) || 0),
     actionTimeRatio: 1,
+    actionTimeRemaining: 0,
+    actionTimeTotal: 1,
+    attackSpeed: 1,
   });
 }
 
@@ -67,10 +98,14 @@ export function stampActionTimeBar(
   bar: HTMLElement,
   remaining: number,
   total: number,
+  attackSpeed?: number,
 ): void {
   bar.dataset.atRemaining = String(Math.max(0, remaining));
   bar.dataset.atTotal = String(Math.max(0, total));
   bar.dataset.atCapturedAt = String(performance.now());
+  if (typeof attackSpeed === 'number' && Number.isFinite(attackSpeed)) {
+    bar.dataset.atAttackSpeed = String(attackSpeed);
+  }
 }
 
 export function clearActionTimeAnimationStamp(bar: HTMLElement): void {
@@ -93,6 +128,7 @@ export function patchActionTimeBar(
   actionTimeTotal: number,
   freeze = false,
   applyWidth = !freeze,
+  attackSpeed?: number,
 ): void {
   const fill = card.querySelector<HTMLElement>('.action-time-fill');
   const bar = card.querySelector<HTMLElement>('[data-action-time-bar]');
@@ -102,11 +138,33 @@ export function patchActionTimeBar(
     clearActionTimeAnimationStamp(bar);
   }
 
+  const speed =
+    typeof attackSpeed === 'number' && Number.isFinite(attackSpeed)
+      ? attackSpeed
+      : Number.parseFloat(bar.dataset.atAttackSpeed ?? '0');
+
+  if (speed > 0) {
+    bar.dataset.atAttackSpeed = String(speed);
+    bar.setAttribute(
+      'data-bar-label',
+      formatActionTimeBarTooltip(speed, actionTimeRemaining, actionTimeTotal),
+    );
+  }
+
+  const label = bar.querySelector<HTMLElement>('.strip-action-time-label');
+  if (label) {
+    label.textContent = formatActionTimeCountdown(actionTimeRemaining);
+  }
+  bar.setAttribute(
+    'aria-label',
+    `Tempo até ação ${formatActionTimeCountdown(actionTimeRemaining) || 'pronto'}`,
+  );
+
   if (!applyWidth) return;
 
   const width = Math.max(0, Math.min(100, actionTimeRatio * 100));
   fill.style.width = `${width}%`;
   if (!freeze) {
-    stampActionTimeBar(bar, actionTimeRemaining, actionTimeTotal);
+    stampActionTimeBar(bar, actionTimeRemaining, actionTimeTotal, speed > 0 ? speed : undefined);
   }
 }

@@ -30,6 +30,9 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | Sistema | Entrada | Mitigação / escala | Arquivo |
 |---------|---------|-------------------|---------|
 | Hit instantâneo | `damageComponents[]` | Pipeline por elemento + DEF | `MitigationPipeline.ts` |
+| TTA / ASPD | perfil do combatente | `1/ASPD` (DEX/STR + baseline; sem piso global) | `CombatSpeedScaling.ts`, `ActionTimerService.ts` |
+| Recarga de skill (herói) | `cooldownTurns` / rank | turns×5s − 1,5s×(level−1), piso 4s | `SkillCooldownTiming.ts` |
+| Ataque básico | ATK | ×0,5 | `SkillPowerCalculator.ts` |
 | Crítico | `critChance`, `critDamage` | Multiplicador antes do split | `CombatDamageResolver.ts` |
 | DEF efetiva | base + debuff | Só componente `physical` | `CombatStatResolver.ts` |
 | Resist | gear + inato | `getEffectiveResistance` | `ResistanceProfile.ts` |

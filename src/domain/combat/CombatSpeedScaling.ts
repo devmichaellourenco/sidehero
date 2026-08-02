@@ -26,3 +26,8 @@ export function resolveHeroAttributeAttackSpeed(classBaselineAspd: number, hero:
 
   return classAspd + dexBonus + strBonus;
 }
+
+/** TTA em segundos a partir do ASPD do combatente (herói ou inimigo). Sem piso global. */
+export function resolveActionIntervalSeconds(attackSpeed: number): number {
+  return 1 / Math.max(attackSpeed, 0.01);
+}

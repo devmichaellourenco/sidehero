@@ -16,6 +16,9 @@ describe('renderBattleActorCard', () => {
       healthCurrent: '80',
       healthPercent: 80,
       actionTimeRatio: 1,
+      actionTimeRemaining: 0,
+      actionTimeTotal: 1.8,
+      attackSpeed: 0.55,
       statusEffects: [],
       combatSkills: [],
     });
@@ -24,6 +27,7 @@ describe('renderBattleActorCard', () => {
     expect(html).toContain('data-hero-battle-open="h1"');
     expect(html).toContain('data-action-time-bar');
     expect(html).toContain('strip-actor-bars');
+    expect(html).toContain('strip-action-time-label');
   });
 
   it('renderiza card de inimigo com classe de boss quando indicado', () => {
@@ -39,6 +43,9 @@ describe('renderBattleActorCard', () => {
       healthCurrent: '50',
       healthPercent: 100,
       actionTimeRatio: 1,
+      actionTimeRemaining: 0,
+      actionTimeTotal: 2,
+      attackSpeed: 0.5,
       statusEffects: [],
       combatSkills: [],
     });
@@ -58,6 +65,8 @@ describe('renderBattleActorCard', () => {
       maxHealth: 100,
       attack: 10,
       defense: 10,
+      attackSpeed: 0.48,
+      castSpeed: 1,
       goldReward: 10,
       xpReward: 10,
       signatureSkills: [],

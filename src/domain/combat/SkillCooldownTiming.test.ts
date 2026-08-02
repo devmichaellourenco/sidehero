@@ -1,19 +1,42 @@
 import { describe, expect, it } from 'vitest';
-import { formatSkillCooldownCountdown } from './SkillCooldownTiming';
+import {
+  HERO_SKILL_COOLDOWN_TURN_SECONDS,
+  MIN_SKILL_COOLDOWN_SECONDS,
+  SKILL_COOLDOWN_SECONDS_PER_RANK,
+} from './CombatTimingConstants';
+import { getCooldownSeconds, getInitialCooldownSeconds } from './SkillCooldownTiming';
+import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefinition';
 
-describe('formatSkillCooldownCountdown', () => {
-  it('exibe décimos abaixo de 10 s (arredondando para cima na casa decimal)', () => {
-    expect(formatSkillCooldownCountdown(0.75)).toBe('0.8');
-    expect(formatSkillCooldownCountdown(0.1)).toBe('0.1');
-    expect(formatSkillCooldownCountdown(1.2)).toBe('1.2');
+const EARLY_SKILL: CombatSkillDefinition = {
+  skillId: 'arcane_bolt',
+  kind: 'damage',
+  targetPool: 'enemies',
+  targetScope: 'single',
+  targetPriority: 'lowest_hp_percent',
+  usePriority: 80,
+  initialCooldown: 0,
+  cooldownTurns: 2,
+  basePower: 1,
+  powerPerRank: 4,
+  attributeFactor: 1,
+};
+
+describe('SkillCooldownTiming — cadência herói', () => {
+  it('skills iniciais (~2 turns) começam em ~10s', () => {
+    expect(getCooldownSeconds(EARLY_SKILL)).toBe(2 * HERO_SKILL_COOLDOWN_TURN_SECONDS);
+    expect(getCooldownSeconds(EARLY_SKILL)).toBe(10);
   });
 
-  it('exibe inteiros exatos', () => {
-    expect(formatSkillCooldownCountdown(3)).toBe('3');
-    expect(formatSkillCooldownCountdown(1)).toBe('1');
+  it('cada level reduz a recarga até o piso', () => {
+    expect(getCooldownSeconds(EARLY_SKILL, { rank: 2 })).toBe(10 - SKILL_COOLDOWN_SECONDS_PER_RANK);
+    expect(getCooldownSeconds(EARLY_SKILL, { rank: 3 })).toBe(10 - 2 * SKILL_COOLDOWN_SECONDS_PER_RANK);
+    expect(getCooldownSeconds(EARLY_SKILL, { rank: 99 })).toBe(MIN_SKILL_COOLDOWN_SECONDS);
   });
 
-  it('exibe 0 quando a recarga zerou', () => {
-    expect(formatSkillCooldownCountdown(0)).toBe('0');
+  it('inimigos mantêm escala legada de 1s por turno', () => {
+    expect(getCooldownSeconds(EARLY_SKILL, { forEnemy: true })).toBe(2);
+    expect(getInitialCooldownSeconds({ ...EARLY_SKILL, initialCooldown: 4 }, { forEnemy: true })).toBe(
+      4,
+    );
   });
 });

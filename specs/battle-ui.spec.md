@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 15/15 (100%) · auditoria 2026-08-02  
-**Testes obrigatórios:** 17/17 presentes na suite
+**Aceite:** 16/16 (100%) · auditoria 2026-08-02  
+**Testes obrigatórios:** 18/18 presentes na suite
 
 ## Objetivo
 
@@ -18,7 +18,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Baú flutuante na batalha quando pendente
 - [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
-- [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos; abas Dano / Sofrido / Mitigado com ranking por tipo de dano
+- [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos; abas Dano / Sofrido / Mitigado com ranking por tipo de dano; **Por skill** exibe CD com tooltip do cálculo (turns×s, level, CDR)
 - [x] Compra de runa não gera Wow duplicado quando o mesmo evento já dispara unlock de herói/feature (`isUpgradePurchaseCoveredByStateChange`)
 - [x] Todos os menus da barra de sistemas (`SystemsMenuId`) suportam **Fixar/Desafixar** com preferência por menu (padrão: janela popup `panel.html?detached=<id>`, 520×832 sem resize); modo detached não inicia auto-battle
 - [x] Overlays interruptivos (tutorial, cena, resultado de batalha, Wow) **não se sobrepõem**: `UiOverlayOrchestrator` com prioridade tutorial > cena > batalha > Wow; o restante espera na fila
@@ -27,6 +27,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo)
 - [x] Barras de vida: heróis verdes, inimigos vermelhas; texto só da vida atual (negrito) sobre barra fina; tooltip com atual/máx; HP no deck da strip
+- [x] Barras de TTA: countdown regressivo (herói/inimigo) sobre a barra; tooltip com ASPD e cálculo `1÷ASPD`; cadência no painel Estatísticas e na ficha Status
 - [x] Battle field: cena **333×133** intacta (sprites na elevação legada); deck HUD opaco (~50px) abaixo com HP + TTA + skills alinhados coluna a coluna; overlays só na zona da cena
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
 - [x] Heróis / Formação / Loja / Inventário / Baús / Otimizar equipe só aparecem no **acampamento** (`canEditParty`)
@@ -63,6 +64,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
 - [x] `GameHudController.test.ts` — botões de acampamento ocultos fora de `canEditParty`; Pausar/Continuar/Detalhes na pausa de batalha
 - [x] `BattleStatsPresentation.test.ts` — painel de estatísticas da batalha pausada
+- [x] `BattleSessionStatsMapper.test.ts` — CD e tooltip de cálculo por skill
 - [x] `DetachedSurfaceWindowManager.test.ts` — tamanho/reuso de janela popup destacável
 - [x] `SurfacePinPreference.test.ts`, `SurfacePinPresentation.test.ts` — preferência e markup de pin
 - [x] `ModalController.test.ts` — título + shell de pin
@@ -71,6 +73,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `UiOverlayOrchestrator.test.ts` — prioridade e fila de overlays exclusivos
 - [x] `SplashScreenController.test.ts` — splash de abertura antes do loop
 - [x] `BattleHudDeckLayout.test.ts` — cena 133px + deck HUD separado no markup
+- [x] `ActionTimeBarPresentation.test.ts` — countdown e tooltip de cálculo TTA
 
 ## Relacionado
 

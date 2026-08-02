@@ -10,9 +10,10 @@ import {
 } from './DamageThroughputEstimate';
 
 describe('DamageThroughputEstimate', () => {
-  it('calcula APS com piso mínimo de intervalo', () => {
+  it('calcula APS = ASPD do combatente (sem piso global)', () => {
     expect(basicAttackActionsPerSecond(1)).toBeCloseTo(1, 5);
-    expect(basicAttackActionsPerSecond(10)).toBeCloseTo(5, 5);
+    expect(basicAttackActionsPerSecond(0.5)).toBeCloseTo(0.5, 5);
+    expect(basicAttackActionsPerSecond(0.4)).toBeCloseTo(0.4, 5);
   });
 
   it('aplica CDR e recovery ao estimar casts/s', () => {

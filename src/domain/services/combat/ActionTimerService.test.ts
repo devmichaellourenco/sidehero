@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { resolveActionTimeRatio } from './ActionTimerTypes';
 import { ActionTimerService } from './ActionTimerService';
+import { Enemy } from '../../entities/Enemy';
 import { Hero } from '../../entities/Hero';
+import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
+import { resolveActionIntervalSeconds } from '../../combat/CombatSpeedScaling';
 
 describe('ActionTimerTypes', () => {
   it('retorna barra cheia quando o timer está pronto', () => {
@@ -17,22 +20,44 @@ describe('ActionTimerTypes', () => {
 
 describe('ActionTimerService', () => {
   const service = new ActionTimerService();
+  const profiles = new CombatProfileProvider();
 
-  it('armazena total da recarga ao agendar ação', () => {
+  it('agenda TTA individual = 1/ASPD do combatente', () => {
     const hero = Hero.createStarter('h1', 'knight', 'Gal');
     const timers = service.createInitial([hero], []);
     const key = 'hero:h1';
+    const attackSpeed = profiles.forHero(hero).attackSpeed;
+    const expected = resolveActionIntervalSeconds(attackSpeed);
 
     const updated = service.scheduleAfterAction(
       timers,
       { side: 'hero', id: 'h1' },
-      1,
+      attackSpeed,
       1,
       false,
     );
 
-    expect(updated[key]).toMatchObject({ remaining: 1, total: 1 });
+    expect(updated[key]).toMatchObject({ remaining: expected, total: expected });
+    expect(expected).toBeCloseTo(1 / attackSpeed, 5);
     expect(resolveActionTimeRatio(updated[key])).toBe(0);
+  });
+
+  it('TTA de archer é menor que knight (ASPD individual)', () => {
+    const knight = Hero.createStarter('k1', 'knight', 'Gal');
+    const archer = Hero.createStarter('a1', 'archer', 'Lyn');
+    const knightInterval = resolveActionIntervalSeconds(profiles.forHero(knight).attackSpeed);
+    const archerInterval = resolveActionIntervalSeconds(profiles.forHero(archer).attackSpeed);
+
+    expect(archerInterval).toBeLessThan(knightInterval);
+  });
+
+  it('TTA de inimigo segue ASPD próprio (não um piso global)', () => {
+    const early = Enemy.forStage(1);
+    const late = Enemy.forStage(40);
+    const earlyInterval = resolveActionIntervalSeconds(profiles.forEnemy(early).attackSpeed);
+    const lateInterval = resolveActionIntervalSeconds(profiles.forEnemy(late).attackSpeed);
+
+    expect(lateInterval).toBeLessThan(earlyInterval);
   });
 
   it('não carrega dívida negativa — uma ação por TTA mesmo após tick grande', () => {

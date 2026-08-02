@@ -36,6 +36,7 @@ export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): strin
     <span class="enemy-tooltip-line">Stage ${stage}</span>
     <span class="enemy-tooltip-line">${healthLabel}</span>
     <span class="enemy-tooltip-line">ATK ${enemy.attack} · DEF ${enemy.defense}</span>
+    <span class="enemy-tooltip-line">ASPD ${enemy.attackSpeed.toFixed(2)}/s · TTA ${(1 / Math.max(enemy.attackSpeed, 0.01)).toFixed(2)}s</span>
     <span class="enemy-tooltip-line">+${enemy.goldReward} ouro · +${enemy.xpReward} XP</span>
     ${elementalPips ? `<span class="enemy-tooltip-line enemy-tooltip-elements">${elementalPips}</span>` : ''}
     ${skillLines}
@@ -60,6 +61,9 @@ export function renderEnemyBattleCard(
     healthCurrent: formatStripHealthCurrent(enemy.health),
     healthPercent: clampHealthPercent(enemy.health, enemy.maxHealth),
     actionTimeRatio: enemy.actionTimeRatio,
+    actionTimeRemaining: enemy.actionTimeRemaining,
+    actionTimeTotal: enemy.actionTimeTotal,
+    attackSpeed: enemy.attackSpeed,
     statusEffects: enemy.statusEffects,
     combatSkills: enemy.combatSkills,
   });

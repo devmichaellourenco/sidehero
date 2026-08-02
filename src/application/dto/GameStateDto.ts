@@ -198,6 +198,8 @@ export interface EnemyDto {
   maxHealth: number;
   attack: number;
   defense: number;
+  attackSpeed: number;
+  castSpeed: number;
   goldReward: number;
   xpReward: number;
   signatureSkills: EnemySignatureSkillDto[];
@@ -323,6 +325,8 @@ export interface BattleSessionStatsDto {
     uses: number;
     damageDealt: number;
     healingDone: number;
+    cooldownLabel: string;
+    cooldownTooltip: string;
   }>;
 }
 

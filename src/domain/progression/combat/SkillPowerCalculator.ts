@@ -1,6 +1,7 @@
 import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { applyEnemyDamageSkillPower } from '../../combat/EnemyCombatBalance';
+import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
 import { getSkillById } from '../SkillCatalog';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
 import {
@@ -26,7 +27,7 @@ export class SkillPowerCalculator {
     const effectiveAttack = resolveEffectiveAttack(hero.attack, key, statusEffects);
 
     if (skill.usesAttackStat) {
-      return effectiveAttack;
+      return Math.max(1, Math.floor(effectiveAttack * BASIC_ATTACK_DAMAGE_RATIO));
     }
 
     const rank = hero.toProps().skillRanks[skill.skillId] ?? 1;

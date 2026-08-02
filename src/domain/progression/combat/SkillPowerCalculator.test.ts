@@ -78,8 +78,10 @@ describe('SkillPowerCalculator', () => {
 
     const profile = getHeroCombatSkill('power_attack')!;
     const power = calculator.calculateForHero(profile, knight);
+    const basic = calculator.calculateForHero(getHeroCombatSkill('basic_attack')!, knight);
 
-    expect(power).toBeGreaterThan(knight.attack);
+    expect(power).toBeGreaterThan(basic);
+    expect(basic).toBe(Math.max(1, Math.floor(knight.attack * 0.5)));
   });
 
   it('aplica multiplicador de dano nas skills ofensivas de inimigo', () => {

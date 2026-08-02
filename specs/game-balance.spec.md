@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 9/9 (100%) · auditoria 2026-07-07  
+**Aceite:** 10/10 (100%) · auditoria 2026-08-02  
 **Testes obrigatórios:** 9/9 + `BalanceAudit.test.ts`
 
 ## Objetivo
@@ -57,6 +57,7 @@ Poder × crítico → split damageComponents[]
 - [x] Backlog de balanceamento revisado após cada entrega numérica relevante
 - [x] BAL-010 — identidade soft por mapa (pools + resists −15/+20) nos 4 mapas base
 - [x] BAL-011 — micro-desafios multi-slot (race/sustain/spike/warded/armored) nos 4 mapas base
+- [x] BAL-012 — cadência early: TTA individual (1/ASPD, DEX); skills ~10s CD (−1,5s/level); básico = 50% ATK
 
 ## Coordenação com outros agents
 
@@ -112,6 +113,7 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `EnemyInnateResists.test.ts` — temas e fraquezas (+ bias de mapa)
 - [x] `MapCombatIdentityCatalog.test.ts` — identidade soft dos 4 mapas base
 - [x] `PhaseChallengeCatalog.test.ts` — BAL-011 multi-slot (race/sustain/spike/warded/armored) 4 mapas
+- [x] `SkillCooldownTiming.test.ts` — CD herói ~10s no level 1 e redução por level
 - [x] `DamageThroughputEstimate.test.ts` — eficácia vs resists da área
 - [x] `ShopService.test.ts` — cap de raridade por tier, preços
 - [x] `DotTickResolver.test.ts` — DOT mitigado; default sem elemento = `air`
@@ -138,3 +140,4 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-009 | Alta | Progressão de nível lenta no v1; loot fora da faixa do mapa; dano não escalava até ~20k DPS | Progressão/Loot | ✅ Resolvido (`ProgressionPowerScale`, `MapGearLevelPolicy`) |
 | BAL-010 | Alta | Mapas sem identidade de combate — meta colapsa em DPS genérico | Campanha/Elementos | ✅ Resolvido (`MapCombatIdentityCatalog`, bias soft, X-50) |
 | BAL-011 | Alta | Builds monótonas; pressão só no priest; mago/físico sem trade-off | Campanha/Waves | ✅ Resolvido (`PhaseChallengeCatalog` race/sustain/spike/warded/armored · Stendra→Morthaven) |
+| BAL-012 | Alta | Combate early acelerado demais (TTA curto, skills rápidas, básico = ATK cheio) | Combate/Skills | ✅ Resolvido (TTA = 1/ASPD por combatente + DEX; CD herói ×5; rank −1,5s; básico 50% ATK) |

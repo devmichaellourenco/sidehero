@@ -21,6 +21,9 @@ export interface BattleActorCardViewModel {
   healthCurrent: string;
   healthPercent: number;
   actionTimeRatio: number;
+  actionTimeRemaining: number;
+  actionTimeTotal: number;
+  attackSpeed: number;
   statusEffects: CombatStatusEffectDto[];
   combatSkills: CombatBattleSkillDto[] | null | undefined;
 }
@@ -90,6 +93,9 @@ export function renderBattleActorCard(vm: BattleActorCardViewModel): string {
         healthCurrent: vm.healthCurrent,
         healthPercent: vm.healthPercent,
         actionTimeRatio: vm.actionTimeRatio,
+        actionTimeRemaining: vm.actionTimeRemaining,
+        actionTimeTotal: vm.actionTimeTotal,
+        attackSpeed: vm.attackSpeed,
       })}
       ${renderCombatSkillBar(vm.combatSkills)}
     </div>

@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 13/13 (100%)  
-**Testes obrigatórios:** 12/12 presentes na suite
+**Aceite:** 14/14 (100%)  
+**Testes obrigatórios:** 13/13 presentes na suite
 
 ## Objetivo
 
@@ -17,6 +17,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 - [x] Ascensão: uma evolução por vez por caminho; skills de tiers anteriores acumulam; concede `pointsGranted` em **Aprimoramento** (não há pool separado de evolução)
 - [x] Skills de evolução (`pointType: 'ascension'`) gastam/refundam o mesmo `unspentImprovementPoints` e sobem até `maxRank` 3
 - [x] Combate usa `HeroCombatSkillCatalog` + `CombatSkillRegistry`
+- [x] Cadência early: TTA individual (1/ASPD, DEX/STR); skills iniciais ~10s de CD (reduz com level); ataque básico = 50% do ATK
 - [x] Ao clicar `+` rank (aba Skills ou ascensão), a lista mantém a posição de scroll no drawer/modal
 - [x] Aba Skills do herói **sem** textos de instrução (equipar, drag, hover); slots e cards comunicam a ação só por highlight visual no tap-to-assign
 - [x] Cards da lista de skills **sem** badges Ativa/Inativa nem Disponível; skill equipada usa fundo verde no card; rank disponível comunicado só pelo botão `[+]`
@@ -56,6 +57,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 
 ## Testes obrigatórios
 
+- [x] `SkillCooldownTiming.test.ts` — CD inicial ~10s e redução por level
 - [x] `SkillService.allocate.test.ts`, `SkillService.ascension.test.ts`
 - [x] `SkillBattleSlots.test.ts`, `Hero.activeSkills.test.ts`
 - [x] `CombatSkillSelector.test.ts`, `SkillCardPresentation.test.ts`

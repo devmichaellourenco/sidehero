@@ -57,6 +57,8 @@ describe('buildSkillBattleStats — throughput alinhado ao combate', () => {
 
     expect(dps?.value).toMatch(/^~\d+(\.\d+)? \(cast contínuo da skill\)$/);
     expect(reload?.value).toMatch(/CDR/);
+    expect(reload?.tooltipLines?.some((line) => line.text.includes('turns ×'))).toBe(true);
+    expect(reload?.tooltipLines?.some((line) => line.text.includes('Recarga efetiva'))).toBe(true);
     expect(poder?.tooltipLines?.some((line) => line.text.includes('Fórmula:'))).toBe(true);
     expect(poder?.tooltipLines?.some((line) => line.text.includes('Produto ='))).toBe(true);
     expect(poder?.tooltipLines?.some((line) => line.text.includes('powerPerRank'))).toBe(true);

@@ -2396,8 +2396,18 @@ html[data-ui-theme='dark'] .battle-stats-value {
   white-space: nowrap;
 }
 
+.battle-stats-skill-cd {
+  cursor: help;
+  text-decoration: underline dotted color-mix(in srgb, var(--gold) 55%, transparent);
+  text-underline-offset: 2px;
+}
+
 html[data-ui-theme='dark'] .battle-stats-skill-nums {
   color: var(--seal-gold);
+}
+
+html[data-ui-theme='dark'] .battle-stats-skill-cd {
+  text-decoration-color: color-mix(in srgb, var(--seal-gold) 55%, transparent);
 }
 
 .battle-victory-overlay.hidden {
@@ -2931,22 +2941,53 @@ html[data-ui-theme='dark'] .battle-stats-skill-nums {
 .action-time-bar.strip-bar {
   position: relative;
   width: 100%;
-  height: auto;
+  height: 7px;
+  margin-top: 0;
   padding: 1px;
   border-radius: 3px;
-  overflow: hidden;
+  overflow: visible;
   background: linear-gradient(180deg, rgba(22, 32, 56, 0.98), rgba(12, 18, 34, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
+.action-time-bar.strip-bar .action-time-track {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
 .action-time-fill {
   display: block;
-  height: 2px;
+  height: 100%;
+  min-height: 2px;
   border-radius: 1px;
   background: linear-gradient(90deg, var(--action-time-fill-start) 0%, var(--action-time-fill-mid) 55%, var(--action-time-fill-end) 100%);
   box-shadow: 0 0 6px rgba(220, 230, 245, 0.55);
   transition: width 0.2s linear;
+}
+
+.strip-action-time-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #fffdf8;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 1px rgba(0, 0, 0, 0.9),
+    0 -1px 1px rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .battle-field--timers-frozen .action-time-fill,
@@ -3996,7 +4037,9 @@ button.hero-skill-chip:hover {
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   pointer-events: none;
-  white-space: nowrap;
+  white-space: pre-line;
+  text-align: left;
+  max-width: min(240px, calc(100vw - 16px));
 }
 
 .bar-tooltip-icon {

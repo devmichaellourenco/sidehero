@@ -19,7 +19,8 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 
 | Área | Arquivos |
 |------|----------|
-| Strip | `BattleStripRenderer`, `BattleActorCardPresentation`, `BattleFloatingTextController` (`Lv UP`); cena `.battle-strip` + deck `.battle-hud-deck` em `.battle-field` |
+| Strip | `BattleStripRenderer`, `BattleActorCardPresentation`, `BattleFloatingTextController` (`Lv UP`); cena `.battle-strip` + deck `.battle-hud-deck` em `.battle-field`; TTA com countdown + tooltip (`ActionTimeBarPresentation`) |
+
 | Splash | `SplashScreenController` — ≥5s antes de tutorial/Wow/auto-battle no painel principal |
 | Stage progress | Ver skill `stage-progress-bar` — timeline entre localização e a strip |
 | Pausa | Acampamento (`PauseForLoadout`) ≠ pausa de batalha (`PauseBattle` / `ResumeBattle`); Pausar/Continuar à **esquerda**, Acampamento/Batalhar à **direita** (mesma linha) |

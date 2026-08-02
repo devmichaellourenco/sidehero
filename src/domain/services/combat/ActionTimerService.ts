@@ -1,10 +1,8 @@
 import { Enemy } from '../../entities/Enemy';
 import { Hero } from '../../entities/Hero';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
-import {
-  MIN_ACTION_INTERVAL_SECONDS,
-  SKILL_ACTION_RECOVERY_SECONDS,
-} from '../../combat/CombatTimingConstants';
+import { resolveActionIntervalSeconds } from '../../combat/CombatSpeedScaling';
+import { SKILL_ACTION_RECOVERY_SECONDS } from '../../combat/CombatTimingConstants';
 import { combatantKey } from './SkillCooldownTracker';
 import { CombatantRef } from './TurnOrderService';
 import {
@@ -25,6 +23,10 @@ interface LivingCombatant {
   tieBreaker: number;
 }
 
+function resolveSkillRecoverySeconds(castSpeed: number): number {
+  return SKILL_ACTION_RECOVERY_SECONDS / Math.max(castSpeed, 0.01);
+}
+
 export class ActionTimerService {
   constructor(private readonly profiles = new CombatProfileProvider()) {}
 
@@ -34,14 +36,16 @@ export class ActionTimerService {
 
     for (const hero of heroes.filter((entry) => entry.isAlive())) {
       const key = combatantKey('hero', hero.id);
-      timers[key] = { remaining: stagger, total: Math.max(stagger, MIN_ACTION_INTERVAL_SECONDS) };
-      stagger += 0.12 / this.profiles.forHero(hero).attackSpeed;
+      const interval = resolveActionIntervalSeconds(this.profiles.forHero(hero).attackSpeed);
+      timers[key] = { remaining: stagger, total: stagger > 0 ? stagger : interval };
+      stagger += 0.12 * interval;
     }
 
     for (const enemy of enemies.filter((entry) => entry.isAlive())) {
       const key = combatantKey('enemy', enemy.id);
-      timers[key] = { remaining: stagger, total: Math.max(stagger, MIN_ACTION_INTERVAL_SECONDS) };
-      stagger += 0.12 / this.profiles.forEnemy(enemy).attackSpeed;
+      const interval = resolveActionIntervalSeconds(this.profiles.forEnemy(enemy).attackSpeed);
+      timers[key] = { remaining: stagger, total: stagger > 0 ? stagger : interval };
+      stagger += 0.12 * interval;
     }
 
     return timers;
@@ -80,8 +84,8 @@ export class ActionTimerService {
   ): ActionTimerMap {
     const key = combatantKey(actor.side, actor.id);
     const interval = usedSkill
-      ? Math.max(MIN_ACTION_INTERVAL_SECONDS, SKILL_ACTION_RECOVERY_SECONDS / castSpeed)
-      : Math.max(MIN_ACTION_INTERVAL_SECONDS, 1 / attackSpeed);
+      ? resolveSkillRecoverySeconds(castSpeed)
+      : resolveActionIntervalSeconds(attackSpeed);
 
     // Sem carregar dívida negativa: um TTA cheio = uma ação.
     // Com COMBAT_DELTA_SECONDS ≈ 1s e recovery de skill < 1s, a dívida

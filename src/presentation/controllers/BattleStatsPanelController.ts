@@ -1,4 +1,5 @@
 import type { BattleStatsTabId } from '../components/BattleStatsPresentation';
+import { bindBarTooltips } from '../components/BarTooltipBinder';
 
 const VISIBLE_KEY = 'sidehero_battle_stats_visible';
 const TAB_KEY = 'sidehero_battle_stats_tab';
@@ -119,6 +120,7 @@ export class BattleStatsPanelController {
   setContent(html: string): void {
     this.bodyEl.innerHTML = html;
     this.applyActiveTab();
+    bindBarTooltips(this.bodyEl);
   }
 
   private applyActiveTab(): void {

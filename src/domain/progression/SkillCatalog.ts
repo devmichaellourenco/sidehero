@@ -10,7 +10,7 @@ export const SKILL_CATALOG: SkillDefinition[] = [
     scope: 'universal',
     branch: 'offense',
     name: 'Ataque Básico',
-    description: 'Golpe padrão usando o ATK do herói. Sempre ativo na batalha.',
+    description: 'Golpe padrão com metade do ATK. Sempre ativo; mais frequente que skills.',
     maxRank: 1,
     requirements: [],
     scaling: 'str',
