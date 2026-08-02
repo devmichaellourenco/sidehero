@@ -8,6 +8,7 @@ import {
 } from './DefensiveMitigation';
 import {
   evasionDodgeBonusAtRank,
+  ghostStepDodgeBonusAtRank,
   ironSkinDamageReductionAtRank,
   isPassiveSkillActive,
   manaShieldBlockAtRank,
@@ -38,6 +39,11 @@ function passiveDefensiveForHero(hero: Hero): DefensiveMitigation {
   const evasionRank = passiveSkillRank(hero, 'evasion');
   if (isPassiveSkillActive(hero, 'evasion')) {
     dodgeChance += evasionDodgeBonusAtRank(evasionRank);
+  }
+
+  const ghostStepRank = passiveSkillRank(hero, 'ghost_step');
+  if (isPassiveSkillActive(hero, 'ghost_step')) {
+    dodgeChance += ghostStepDodgeBonusAtRank(ghostStepRank);
   }
 
   const ironSkinRank = passiveSkillRank(hero, 'iron_skin');

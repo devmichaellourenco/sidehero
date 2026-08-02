@@ -10,6 +10,11 @@ const EXPLICIT_ICON_BY_ID: Record<string, SkillIconKey> = {
   power_attack: 'power_attack',
   shield_bash: 'attack',
   thrust: 'thrust',
+  precise_shot: 'power_attack',
+  piercing_arrow: 'thrust',
+  arrow_rain: 'power_attack',
+  marked_prey: 'debuff',
+  ghost_step: 'evasion',
   reaver_cleave: 'power_attack',
   reaver_fury: 'power_attack',
   guardian_strike: 'power_attack',
@@ -66,11 +71,11 @@ const ID_PATTERN_RULES: Array<{ pattern: RegExp; icon: SkillIconKey }> = [
   { pattern: /frost|ice|gelo|cold/i, icon: 'frost_shard' },
   { pattern: /blizz/i, icon: 'blizzard' },
   { pattern: /bolt|arc|mag_|surge|nova|rift|storm|ether|comet/i, icon: 'arcane_bolt' },
-  { pattern: /evasion|feint|zen|whisper|veil/i, icon: 'evasion' },
+  { pattern: /evasion|feint|zen|whisper|veil|ghost_step/i, icon: 'evasion' },
   { pattern: /vitality|mend/i, icon: 'vitality' },
-  { pattern: /cleave|slash|strike|smash|lance|hold|guer_|gen_|cam_|slash/i, icon: 'power_attack' },
+  { pattern: /cleave|slash|strike|smash|lance|hold|guer_|gen_|cam_|slash|shot|arrow|bolt_shot/i, icon: 'power_attack' },
   { pattern: /thrust|stab/i, icon: 'thrust' },
-  { pattern: /curse|drain|acid|poison|bleed|debuff/i, icon: 'debuff' },
+  { pattern: /curse|drain|acid|poison|bleed|debuff|marked/i, icon: 'debuff' },
 ];
 
 function inferFromCombat(combat: CombatSkillDefinition): SkillIconKey {

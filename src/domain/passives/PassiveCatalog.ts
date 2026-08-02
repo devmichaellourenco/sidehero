@@ -31,6 +31,14 @@ const PASSIVES: Record<PassiveId, PassiveDefinition> = {
     stacking: 'additive',
     effects: [{ kind: 'tree_damage_percent_per_str', percentPerPoint: 1 }],
   },
+  kontempler_sight: {
+    id: 'kontempler_sight',
+    name: 'Olhar de Kontempler',
+    description:
+      '+1% de dano em skills da árvore por ponto de destreza. A arqueira quase nunca vista lê o campo antes do disparo.',
+    stacking: 'additive',
+    effects: [{ kind: 'tree_damage_percent_per_dex', percentPerPoint: 1 }],
+  },
   sacred_aegis: {
     id: 'sacred_aegis',
     name: 'Égide Sagrada',
@@ -186,6 +194,7 @@ export const BASE_CLASS_PASSIVE_IDS: Record<HeroClass, PassiveId> = {
   sorcerer: 'magic_affinity',
   priest: 'life_bond',
   berserker: 'blood_thirst',
+  archer: 'kontempler_sight',
   paladin: 'sacred_aegis',
 };
 

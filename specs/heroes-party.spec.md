@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia classes (Berserker, Paladino) e edita formação apenas na pausa de loadout.
+O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia classes (Berserker, Arqueira Rain, Paladino) e edita formação apenas na pausa de loadout.
 
 ## Critérios de aceite
 
@@ -15,6 +15,8 @@ O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia cl
 - [x] Botões Heróis e Formação do footer só visíveis no acampamento (`canEditParty`)
 - [x] Drag-and-drop: reserva ↔ equipe, reordenar slots
 - [x] Unlock de herói via melhoria (`hero_unlock_*`) adiciona à reserva
+- [x] Cadeia da árvore: Berserker → Arqueira (Rain) → Paladino (`hero_unlock_archer`)
+- [x] Rain recebe **Arco de Kontempler** exclusivo ao desbloquear
 - [x] XP de batalha para party ativa; bench segue `BenchXpPolicy`
 - [x] Detalhe do herói: modal com abas Loadout / Status / Skills / Classe
 - [x] Aba Status lista skills de batalha equipadas (efeitos + DPS estimado) e bônus/únicos do equipamento

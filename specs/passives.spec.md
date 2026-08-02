@@ -37,6 +37,7 @@ Heróis e inimigos podem ter **passivas sempre ativas** (traits), **cumulativas*
 - [x] **Afinidade Mágica** (Nix / `sorcerer`): +1% dano skills da árvore por nível (exclui básico)
 - [x] **Elo com a Vida** (Elara / `priest`): +1% curas e buffs de aliado por INT
 - [x] **Sede de Sangue** (Berserker): +1% dano skills da árvore por FOR
+- [x] **Olhar de Kontempler** (Arqueira / Rain): +1% dano skills da árvore por DEX
 - [x] **Égide Sagrada** (Paladino): +1,5% vida máx. por nível
 
 ### Ascensão

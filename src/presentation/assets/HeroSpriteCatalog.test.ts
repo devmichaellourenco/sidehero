@@ -97,4 +97,19 @@ describe('HeroSpriteCatalog', () => {
       resolveHeroSpritePath({ id: 'hero-3', heroClass: 'priest', ascensionId: 'priest_inquisitor' }),
     ).toBe('characters/elara_cleriga_sagrada.png');
   });
+
+  it('usa Valerius como sprite do paladino', () => {
+    expect(
+      resolveHeroSpritePath({ id: 'hero-paladin', heroClass: 'paladin', ascensionId: null }),
+    ).toBe('characters/valerius.png');
+    expect(
+      resolveHeroSpritePath({ id: 'outro', heroClass: 'paladin', ascensionId: null }),
+    ).toBe('characters/valerius.png');
+  });
+
+  it('usa Rain como sprite da arqueira', () => {
+    expect(
+      resolveHeroSpritePath({ id: 'hero-archer', heroClass: 'archer', ascensionId: null }),
+    ).toBe('characters/rain.png');
+  });
 });

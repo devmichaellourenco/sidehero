@@ -24,7 +24,8 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   shop_refresh_2: { x: 260, y: 160 },
   shop_refresh_3: { x: 260, y: 40 },
 
-  hero_unlock_berserker: { x: 140, y: 520 },
+  hero_unlock_berserker: { x: 260, y: 520 },
+  hero_unlock_archer: { x: 140, y: 520 },
   hero_unlock_paladin: { x: 20, y: 520 },
 
   auto_open_chests_1: { x: 620, y: 400 },

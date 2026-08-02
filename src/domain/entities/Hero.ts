@@ -46,6 +46,7 @@ const BASE_STATS: Record<HeroClass, { attack: number; defense: number; health: n
   sorcerer: { attack: 22, defense: 3, health: 80 },
   priest: { attack: 14, defense: 5, health: 100 },
   berserker: { attack: 24, defense: 4, health: 110 },
+  archer: { attack: 23, defense: 5, health: 95 },
   paladin: { attack: 22, defense: 10, health: 115 },
 };
 
@@ -54,6 +55,7 @@ const HERO_EMOJI: Record<HeroClass, string> = {
   sorcerer: '🔮',
   priest: '✨',
   berserker: '🪓',
+  archer: '🏹',
   paladin: '⚔️',
 };
 

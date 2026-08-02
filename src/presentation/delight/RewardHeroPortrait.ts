@@ -13,6 +13,7 @@ const UNLOCKABLE_CLASS_SET = new Set<string>(UNLOCKABLE_HERO_CLASSES);
 
 const UNLOCK_HERO_IDS: Record<(typeof UNLOCKABLE_HERO_CLASSES)[number], string> = {
   berserker: 'hero-berserker',
+  archer: 'hero-archer',
   paladin: 'hero-paladin',
 };
 

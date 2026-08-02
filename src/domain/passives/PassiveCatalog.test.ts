@@ -8,11 +8,12 @@ import {
 import { CLASS_ASCENSION_CATALOG } from '../progression/ClassAscensionCatalog';
 
 describe('PassiveCatalog', () => {
-  it('define passivas base para as 5 classes', () => {
+  it('define passivas base para as 6 classes', () => {
     expect(BASE_CLASS_PASSIVE_IDS.knight).toBe('titan_health');
     expect(BASE_CLASS_PASSIVE_IDS.sorcerer).toBe('magic_affinity');
     expect(BASE_CLASS_PASSIVE_IDS.priest).toBe('life_bond');
     expect(BASE_CLASS_PASSIVE_IDS.berserker).toBe('blood_thirst');
+    expect(BASE_CLASS_PASSIVE_IDS.archer).toBe('kontempler_sight');
     expect(BASE_CLASS_PASSIVE_IDS.paladin).toBe('sacred_aegis');
   });
 

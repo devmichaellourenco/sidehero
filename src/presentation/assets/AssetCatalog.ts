@@ -4,7 +4,7 @@ import { GearSpriteInput, resolveGearSpritePath } from './GearSpriteCatalog';
 import { getEnemyRosterEntry } from '../../domain/enemies/EnemyRosterCatalog';
 import { HeroSpriteInput, resolveHeroSpritePath } from './HeroSpriteCatalog';
 
-export type HeroClassKey = 'knight' | 'sorcerer' | 'priest' | 'berserker' | 'paladin';
+export type HeroClassKey = 'knight' | 'sorcerer' | 'priest' | 'berserker' | 'archer' | 'paladin';
 export type GearSlotKey = 'weapon' | 'armor' | 'accessory';
 export type GearRarityKey = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
 
@@ -22,7 +22,8 @@ const HERO_SPRITES: Record<HeroClassKey, string> = {
   sorcerer: 'characters/nix_aprendiz.png',
   priest: 'characters/elara_aprendiz.png',
   berserker: 'characters/berserker.png',
-  paladin: 'characters/paladin.png',
+  archer: 'characters/rain.png',
+  paladin: 'characters/valerius.png',
 };
 
 const ENEMY_SPRITE_PATHS = {

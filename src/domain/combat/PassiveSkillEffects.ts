@@ -3,6 +3,7 @@ import { SkillId } from '../progression/SkillId';
 
 export const PASSIVE_EQUIPPED_SKILL_IDS = [
   'evasion',
+  'ghost_step',
   'vitality',
   'iron_skin',
   'mana_shield',
@@ -11,6 +12,7 @@ export const PASSIVE_EQUIPPED_SKILL_IDS = [
 export type PassiveEquippedSkillId = (typeof PASSIVE_EQUIPPED_SKILL_IDS)[number];
 
 export const EVASION_DODGE_PER_RANK = 0.025;
+export const GHOST_STEP_DODGE_PER_RANK = 0.02;
 export const VITALITY_HP_STR_FACTOR_PER_RANK = 2;
 export const IRON_SKIN_DAMAGE_REDUCTION_PER_RANK = 0.04;
 export const MANA_SHIELD_BLOCK_PER_RANK = 0.03;
@@ -34,6 +36,10 @@ export function isPassiveSkillActive(hero: Hero, skillId: string): boolean {
 
 export function evasionDodgeBonusAtRank(rank: number): number {
   return Math.max(0, rank) * EVASION_DODGE_PER_RANK;
+}
+
+export function ghostStepDodgeBonusAtRank(rank: number): number {
+  return Math.max(0, rank) * GHOST_STEP_DODGE_PER_RANK;
 }
 
 export function vitalityHealthBonusAtRank(rank: number, str: number): number {

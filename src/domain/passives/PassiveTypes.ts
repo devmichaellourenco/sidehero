@@ -6,6 +6,7 @@ export type PassiveId =
   | 'magic_affinity'
   | 'life_bond'
   | 'blood_thirst'
+  | 'kontempler_sight'
   | 'sacred_aegis'
   | 'discipline_steel'
   | 'rally_heart'

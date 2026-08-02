@@ -26,9 +26,12 @@ describe('PassiveResolver', () => {
     expect(ids).toEqual(['titan_health', 'discipline_steel', 'rally_heart']);
   });
 
-  it('berserker e paladino têm passiva base própria', () => {
+  it('berserker, arqueira e paladino têm passiva base própria', () => {
     expect(resolveHeroPassives(Hero.createStarter('b1', 'berserker', 'Rok')).map((p) => p.id)).toEqual([
       'blood_thirst',
+    ]);
+    expect(resolveHeroPassives(Hero.createStarter('a1', 'archer', 'Rain')).map((p) => p.id)).toEqual([
+      'kontempler_sight',
     ]);
     expect(resolveHeroPassives(Hero.createStarter('p1', 'paladin', 'Oath')).map((p) => p.id)).toEqual([
       'sacred_aegis',

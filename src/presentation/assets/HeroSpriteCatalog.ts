@@ -15,7 +15,8 @@ const HERO_BASE_SPRITES: Record<string, string> = {
   'hero-2': 'characters/nix_aprendiz.png',
   'hero-3': 'characters/elara_aprendiz.png',
   'hero-berserker': 'characters/berserker.png',
-  'hero-paladin': 'characters/paladin.png',
+  'hero-archer': 'characters/rain.png',
+  'hero-paladin': 'characters/valerius.png',
 };
 
 const CLASS_FALLBACK_SPRITES: Record<HeroClass, string> = {
@@ -23,7 +24,8 @@ const CLASS_FALLBACK_SPRITES: Record<HeroClass, string> = {
   sorcerer: 'characters/nix_aprendiz.png',
   priest: 'characters/elara_aprendiz.png',
   berserker: 'characters/berserker.png',
-  paladin: 'characters/paladin.png',
+  archer: 'characters/rain.png',
+  paladin: 'characters/valerius.png',
 };
 
 export function resolveHeroSpritePath(hero: HeroSpriteInput): string {

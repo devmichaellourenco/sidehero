@@ -49,14 +49,19 @@ describe('UpgradeCatalog', () => {
 
   it('heróis estão na ramificação com parents corretos', () => {
     const berserker = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_berserker');
+    const archer = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_archer');
     const paladin = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_paladin');
 
     expect(berserker?.branch).toBe('heroes');
     expect(berserker?.parents).toEqual(['auto_battle_2']);
     expect(berserker?.unlockHeroClass).toBe('berserker');
 
+    expect(archer?.branch).toBe('heroes');
+    expect(archer?.parents).toEqual(['hero_unlock_berserker']);
+    expect(archer?.unlockHeroClass).toBe('archer');
+
     expect(paladin?.branch).toBe('heroes');
-    expect(paladin?.parents).toEqual(['hero_unlock_berserker']);
+    expect(paladin?.parents).toEqual(['hero_unlock_archer']);
     expect(paladin?.unlockHeroClass).toBe('paladin');
   });
 

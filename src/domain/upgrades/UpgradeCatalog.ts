@@ -334,6 +334,23 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     unlockHeroClass: 'berserker',
   },
   {
+    id: 'hero_unlock_archer',
+    feature: 'hero_unlock_archer',
+    level: 1,
+    branch: 'heroes',
+    name: 'Desbloquear Arqueira',
+    description:
+      'Rain entra na reserva — arqueira lendária de Kontempler, quase nunca avistada.',
+    cost: 1800,
+    parents: ['hero_unlock_berserker'],
+    requirements: [
+      { type: 'min_stage', value: 3 },
+      { type: 'min_battles_won', value: 12 },
+      { type: 'min_hero_level', value: 4 },
+    ],
+    unlockHeroClass: 'archer',
+  },
+  {
     id: 'hero_unlock_paladin',
     feature: 'hero_unlock_paladin',
     level: 1,
@@ -341,7 +358,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Desbloquear Paladino',
     description: 'Valerius entra na reserva — tanque equilibrado.',
     cost: 2500,
-    parents: ['hero_unlock_berserker'],
+    parents: ['hero_unlock_archer'],
     requirements: [
       { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
       { type: 'min_stage', value: 4 },

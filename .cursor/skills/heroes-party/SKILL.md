@@ -1,6 +1,6 @@
 ---
 name: heroes-party
-description: Gerencia heróis, party ativa, reserva, unlock e formação no Side Hero. Use para party, reserva, bench, formação, hero unlock, berserker, paladino ou abas do herói.
+description: Gerencia heróis, party ativa, reserva, unlock e formação no Side Hero. Use para party, reserva, bench, formação, hero unlock, berserker, arqueira, Rain, paladino ou abas do herói.
 ---
 
 # Heróis e Party

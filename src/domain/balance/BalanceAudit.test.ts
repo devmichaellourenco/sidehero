@@ -78,7 +78,10 @@ describe('BalanceAudit — economia ouro vs loja/forja', () => {
     expect(maxShopRarityIndexForTier(10)).toBe(2);
     expect(maxShopRarityIndexForTier(25)).toBe(3);
     expect(maxShopRarityIndexForTier(60)).toBe(4);
-    expect(maxShopRarityIndexForTier(61)).toBe(5);
+    expect(maxShopRarityIndexForTier(61)).toBe(4);
+    // Mythic (índice 5) só a partir do Ato 3 de Valdris — tier ≥ 121
+    expect(maxShopRarityIndexForTier(120)).toBe(4);
+    expect(maxShopRarityIndexForTier(121)).toBe(5);
   });
 
   it('épico na loja custa múltiplas fases de renda de referência, sem starvation nos tiers âncora', () => {

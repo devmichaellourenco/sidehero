@@ -17,4 +17,13 @@ describe('HeroUnlockService', () => {
     const twice = HeroUnlockService.applyUnlock(once, 'paladin');
     expect(twice.roster.filter((hero) => hero.heroClass === 'paladin')).toHaveLength(1);
   });
+
+  it('adiciona Rain com Arco de Kontempler no inventário', () => {
+    const next = HeroUnlockService.applyUnlock(GameState.initial(), 'archer');
+    expect(next.roster.find((hero) => hero.heroClass === 'archer')?.name).toBe('Rain');
+    expect(next.inventory.some((gear) => gear.catalogItemId === 'rain_kontempler_bow')).toBe(true);
+    expect(next.inventory.find((gear) => gear.catalogItemId === 'rain_kontempler_bow')?.requirements.heroId).toBe(
+      'hero-archer',
+    );
+  });
 });

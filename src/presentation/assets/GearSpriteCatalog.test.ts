@@ -8,7 +8,7 @@ describe('GearSpriteCatalog', () => {
         templateId: 'field_axe',
         slot: 'weapon',
       }),
-    ).toBe('gear/items/field_axe.png');
+    ).toBe('gear/items/machado_de_campo.png');
   });
 
   it('resolve sprite do item Galneon pelo id único', () => {

@@ -36,5 +36,10 @@ describe('RewardHeroPortrait', () => {
       heroClass: 'paladin',
       name: 'Valerius',
     });
+    expect(rewardHeroPortraitFromClass('archer')).toEqual({
+      id: 'hero-archer',
+      heroClass: 'archer',
+      name: 'Rain',
+    });
   });
 });

@@ -6,10 +6,12 @@ import {
 } from '../../domain/combat/DefensiveMitigation';
 import {
   EVASION_DODGE_PER_RANK,
+  GHOST_STEP_DODGE_PER_RANK,
   IRON_SKIN_DAMAGE_REDUCTION_PER_RANK,
   MANA_SHIELD_BLOCK_PER_RANK,
   VITALITY_HP_STR_FACTOR_PER_RANK,
   evasionDodgeBonusAtRank,
+  ghostStepDodgeBonusAtRank,
   ironSkinDamageReductionAtRank,
   isPassiveEquippedSkill,
   isPassiveSkillActive,
@@ -81,6 +83,37 @@ export function buildPassiveSkillBattleStats(hero: Hero, skillId: string): HeroA
           tooltipLines: [
             { text: 'Esquiva bem-sucedida = 0 de dano naquele hit (skills e DOT por tick).' },
             { text: 'Não reduz parcialmente — evita o golpe por completo.' },
+          ],
+        },
+      ];
+    }
+    case 'ghost_step': {
+      const atPreview = ghostStepDodgeBonusAtRank(previewRank);
+      const atCurrent = ghostStepDodgeBonusAtRank(rank);
+      return [
+        {
+          label: 'Tipo',
+          value: 'Passiva · Esquiva',
+          tooltipLines: [
+            { text: 'Passo Fantasma da Rain — some entre as árvores de Kontempler.' },
+            { text: EQUIP_NOTE },
+          ],
+        },
+        {
+          label: 'Esquiva',
+          value:
+            rank >= 1
+              ? `+${fmtPct(atCurrent)} (level ${rank})`
+              : `+${fmtPct(GHOST_STEP_DODGE_PER_RANK)} por level`,
+          emphasize: true,
+          tooltipLines: [
+            {
+              icon: 'dodge',
+              text: `+${fmtPct(GHOST_STEP_DODGE_PER_RANK, 0)} esquiva por level.`,
+            },
+            { text: `Level ${previewRank} → +${fmtPct(atPreview)}.` },
+            { text: `Teto global: ${fmtPct(MAX_DODGE_CHANCE)}.` },
+            passiveStatusLine(active),
           ],
         },
       ];

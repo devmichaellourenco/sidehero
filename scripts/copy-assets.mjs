@@ -37,7 +37,8 @@ const HERO_SPRITE_MAP = [
   ['elara_guardia_da_vida.png', 'characters/elara_guardia_da_vida.png'],
   ['elara_filha_da_aurora.png', 'characters/elara_filha_da_aurora.png'],
   ['berserker.png', 'characters/berserker.png'],
-  ['paladin.png', 'characters/paladin.png'],
+  ['rain.png', 'characters/rain.png'],
+  ['valerius.png', 'characters/valerius.png'],
 ];
 
 /** Sprites de skills em public/sprites/skills (nome do arquivo = skillId). */
@@ -134,6 +135,7 @@ const ITEM_WEAPON_SPRITE_MAP = [
   ['weapons/sword_vorpal_lupnus.png', 'gear/items/sword_vorpal_lupnus.png'],
   ['weapons/soler_plegius.png', 'gear/items/soler_plegius.png'],
   ['accessory/ignus_ix.png', 'gear/items/ignus_ix.png'],
+  ['accessory/morthaven_seal.png', 'gear/items/morthaven_seal.png'],
 ];
 
 /** Logo e demais assets estáticos em public/. */

@@ -63,6 +63,7 @@ export class UpgradeRequirementEvaluator {
       shop_refresh: 'Renovar loja',
       battle_skill_slots: 'Slots de skill',
       hero_unlock_berserker: 'Berserker',
+      hero_unlock_archer: 'Arqueira',
       hero_unlock_paladin: 'Paladino',
       item_stash: 'Baú de itens',
       divine_forge: 'Forja Divina',

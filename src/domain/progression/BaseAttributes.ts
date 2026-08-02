@@ -7,6 +7,7 @@ export const BASE_ATTRIBUTES: Record<HeroClass, Attributes> = {
   sorcerer: { str: 5, dex: 8, int: 12 },
   priest: { str: 6, dex: 7, int: 11 },
   berserker: { str: 14, dex: 9, int: 4 },
+  archer: { str: 7, dex: 14, int: 5 },
   paladin: { str: 11, dex: 6, int: 8 },
 };
 

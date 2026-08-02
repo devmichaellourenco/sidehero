@@ -118,7 +118,9 @@ export function findFocusNodeId(nodes: UpgradeNodeDto[]): string | null {
 
 export function upgradeNodeShortLabel(node: UpgradeNodeDto): string {
   if (node.feature.startsWith('hero_unlock')) {
-    return node.name.includes('Berserker') ? '⚔' : '🛡';
+    if (node.name.includes('Berserker')) return '⚔';
+    if (node.name.includes('Arqueira') || node.name.includes('Rain')) return '🏹';
+    return '🛡';
   }
 
   if (node.feature === 'divine_forge') return '⚒';

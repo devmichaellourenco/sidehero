@@ -2584,6 +2584,30 @@
     "namedLegendary": true,
     "salvageBlocked": true,
     "spriteId": "morthaven_seal",
-    "sprite": "gear/items/ignus_ix.png"
+    "sprite": "gear/items/morthaven_seal.png"
+  },
+  {
+    "id": "rain_kontempler_bow",
+    "name": "Arco de Kontempler",
+    "slot": "weapon",
+    "rarity": "legendary",
+    "attackBonus": 28,
+    "defenseBonus": 0,
+    "healthBonus": 0,
+    "attackSpeedBonus": 0.08,
+    "critChanceBonus": 0.06,
+    "critDamageBonus": 0.25,
+    "physicalDamagePercentBonus": 12,
+    "airDamageBonus": 10,
+    "requirements": {
+      "minLevel": 1,
+      "dex": 12
+    },
+    "exclusiveHeroId": "hero-archer",
+    "namedLegendary": true,
+    "salvageBlocked": true,
+    "lootPool": false,
+    "spriteId": "rain_kontempler_bow",
+    "sprite": "gear/items/rain_kontempler_bow.png"
   }
 ]

@@ -41,8 +41,9 @@ describe('FeatureUnlockCatalog — dedupe de Wow', () => {
 describe('RewardMomentDetector — upgrade purchase dedupe', () => {
   const detector = new RewardMomentDetector();
 
-  it('não gera Wow de compra para unlock de herói (fica o do Torius)', () => {
+  it('não gera Wow de compra para unlock de herói (fica o do Torius/Rain/Valerius)', () => {
     expect(detector.buildUpgradePurchasedMoment('hero_unlock_berserker')).toBeNull();
+    expect(detector.buildUpgradePurchasedMoment('hero_unlock_archer')).toBeNull();
     expect(detector.buildUpgradePurchasedMoment('hero_unlock_paladin')).toBeNull();
   });
 
