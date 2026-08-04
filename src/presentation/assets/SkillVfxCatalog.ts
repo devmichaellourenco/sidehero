@@ -41,6 +41,11 @@ export interface SkillVfxDefinition {
   columnAspectRatio?: number;
   /** Enquadramento do SVG dentro do `<object>` (ex.: coluna de nevasca). */
   svgObjectPosition?: string;
+  /**
+   * Deslocamento vertical em px no ponto de ancoragem.
+   * Valores positivos empurram o VFX para baixo (em direção aos pés do alvo).
+   */
+  offsetY?: number;
   impact?: SkillVfxImpactDefinition;
 }
 
@@ -132,25 +137,16 @@ const SKILL_VFX_BY_ID: Record<string, SkillVfxDefinition> = {
     motion: 'rise',
     placement: 'target',
     durationMs: 520,
-    width: 118,
-    height: 130,
+    width: 132,
+    height: 132,
     glow: 'cold',
+    /** Folha de impacto é a animação completa (cristal sobe do chão); padding inferior do frame. */
+    offsetY: 12,
     spriteSheet: {
-      path: 'skills/vfx/frost_shard/frost_shard_sheet.png',
+      path: 'skills/vfx/frost_shard/frost_shard_impact_sheet.png',
       columns: 9,
       rows: 1,
       frameDurationMs: 520,
-    },
-    impact: {
-      durationMs: 480,
-      width: 132,
-      height: 132,
-      spriteSheet: {
-        path: 'skills/vfx/frost_shard/frost_shard_impact_sheet.png',
-        columns: 9,
-        rows: 1,
-        frameDurationMs: 480,
-      },
     },
   },
   power_attack: {

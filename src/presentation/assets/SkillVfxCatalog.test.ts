@@ -63,22 +63,18 @@ describe('SkillVfxCatalog', () => {
     );
   });
 
-  it('registra frost_shard como rise vertical com folhas de sprites', () => {
+  it('registra frost_shard como rise com folha de impacto no chão do alvo', () => {
     const definition = getSkillVfxDefinition('frost_shard');
     expect(definition?.motion).toBe('rise');
     expect(definition?.placement).toBe('target');
+    expect(definition?.offsetY).toBe(12);
     expect(definition?.spriteSheet).toEqual({
-      path: 'skills/vfx/frost_shard/frost_shard_sheet.png',
+      path: 'skills/vfx/frost_shard/frost_shard_impact_sheet.png',
       columns: 9,
       rows: 1,
       frameDurationMs: 520,
     });
-    expect(definition?.impact?.spriteSheet).toEqual({
-      path: 'skills/vfx/frost_shard/frost_shard_impact_sheet.png',
-      columns: 9,
-      rows: 1,
-      frameDurationMs: 480,
-    });
+    expect(definition?.impact).toBeUndefined();
   });
 
   it('registra minor_heal com heal.svg no alvo', () => {

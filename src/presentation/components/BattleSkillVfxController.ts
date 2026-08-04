@@ -59,8 +59,9 @@ export class BattleSkillVfxController {
 
     if (definition.motion === 'rise') {
       // Hitbox do ator (= sprite), não o card inteiro (barras/skills).
+      const offsetY = definition.offsetY ?? 0;
       const riseX = toRect.left - stripRect.left + toRect.width / 2 - definition.width / 2;
-      const riseY = toRect.bottom - stripRect.top - definition.height;
+      const riseY = toRect.bottom - stripRect.top - definition.height + offsetY;
       this.spawnRise(event, definition, { x: riseX, y: riseY });
       if (definition.impact) {
         const impactDelay = definition.impact.delayMs ?? definition.durationMs;
