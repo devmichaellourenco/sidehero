@@ -77,6 +77,33 @@ describe('SkillVfxCatalog', () => {
     expect(definition?.impact).toBeUndefined();
   });
 
+  it('registra inn_fei_spark como rise no chão (igual frost_shard)', () => {
+    const definition = getSkillVfxDefinition('inn_fei_spark');
+    expect(definition?.motion).toBe('rise');
+    expect(definition?.placement).toBe('target');
+    expect(definition?.offsetY).toBe(12);
+    expect(definition?.glow).toBe('fire');
+    expect(definition?.spriteSheet).toEqual({
+      path: 'skills/vfx/inn_fei_spark/inn_fei_spark_sheet.png',
+      columns: 3,
+      rows: 2,
+      frameDurationMs: 480,
+    });
+  });
+
+  it('registra power_attack com spritesheet no centro do alvo', () => {
+    const definition = getSkillVfxDefinition('power_attack');
+    expect(definition?.motion).toBe('melee');
+    expect(definition?.placement).toBe('target');
+    expect(definition?.anchorYRatio).toBe(0.5);
+    expect(definition?.spriteSheet).toEqual({
+      path: 'skills/vfx/power_attack/power_attack.png',
+      columns: 3,
+      rows: 2,
+      frameDurationMs: 420,
+    });
+  });
+
   it('registra minor_heal com heal.svg no alvo', () => {
     const definition = getSkillVfxDefinition('minor_heal');
     expect(definition?.svgFile).toBe('heal.svg');
@@ -115,6 +142,7 @@ describe('SkillVfxCatalog', () => {
 
     expect(getSkillVfxDefinition('frost_shard')?.motion).toBe('rise');
     expect(getSkillVfxDefinition('power_attack')?.motion).toBe('melee');
+    expect(getSkillVfxDefinition('power_attack')?.spriteSheet?.path).toContain('power_attack.png');
     expect(getSkillVfxDefinition('thrust')?.svgFile).toBe('thrust.svg');
     expect(getSkillVfxDefinition('blessing')?.placement).toBe('caster');
     expect(getSkillVfxDefinition('smite')?.glow).toBe('holy');

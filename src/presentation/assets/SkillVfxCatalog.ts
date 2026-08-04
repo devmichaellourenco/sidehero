@@ -46,6 +46,11 @@ export interface SkillVfxDefinition {
    * Valores positivos empurram o VFX para baixo (em direção aos pés do alvo).
    */
   offsetY?: number;
+  /**
+   * Fração da altura do alvo para ancorar o centro do VFX (0 = topo, 0.5 = meio, 1 = base).
+   * Padrão: `0.32` (peito) em melee/aoe/projétil; `rise` ancora pela base.
+   */
+  anchorYRatio?: number;
   impact?: SkillVfxImpactDefinition;
 }
 
@@ -149,15 +154,38 @@ const SKILL_VFX_BY_ID: Record<string, SkillVfxDefinition> = {
       frameDurationMs: 520,
     },
   },
+  inn_fei_spark: {
+    skillId: 'inn_fei_spark',
+    motion: 'rise',
+    placement: 'target',
+    durationMs: 480,
+    width: 132,
+    height: 132,
+    glow: 'fire',
+    offsetY: 12,
+    spriteSheet: {
+      path: 'skills/vfx/inn_fei_spark/inn_fei_spark_sheet.png',
+      columns: 3,
+      rows: 2,
+      frameDurationMs: 480,
+    },
+  },
   power_attack: {
     skillId: 'power_attack',
     motion: 'melee',
-    svgFile: 'power_attack.svg',
     placement: 'target',
     durationMs: 420,
-    width: 190,
-    height: 108,
+    width: 160,
+    height: 160,
     glow: 'slash',
+    /** Centro do hitbox do inimigo. */
+    anchorYRatio: 0.5,
+    spriteSheet: {
+      path: 'skills/vfx/power_attack/power_attack.png',
+      columns: 3,
+      rows: 2,
+      frameDurationMs: 420,
+    },
   },
   thrust: {
     skillId: 'thrust',
@@ -428,7 +456,6 @@ const SKILL_VFX_ALIASES: Record<string, string> = {
   mil_cap_phalanx: 'wraith_curse',
   inn_fil_ether: 'arc_arq_rift',
   inn_sob_lance: 'inn_sob_comet',
-  inn_fei_spark: 'pyro_ember',
   sag_alt_sanctuary: 'oracle_sanctuary',
   vid_clr_bloom: 'oracle_sanctuary',
   mil_guer_hold: 'vid_gua_aegis',

@@ -55,7 +55,9 @@ export class BattleSkillVfxController {
     }
 
     const impactCenterX = toRect.left - stripRect.left + toRect.width / 2;
-    const impactCenterY = toRect.top - stripRect.top + toRect.height * 0.32;
+    const impactYRatio = definition.anchorYRatio ?? 0.32;
+    const impactCenterY =
+      toRect.top - stripRect.top + toRect.height * impactYRatio + (definition.offsetY ?? 0);
 
     if (definition.motion === 'rise') {
       // Hitbox do ator (= sprite), não o card inteiro (barras/skills).
@@ -80,21 +82,24 @@ export class BattleSkillVfxController {
     if (needsAttacker && !attackerAnchor) return;
 
     const fromRect = attackerAnchor?.getBoundingClientRect();
+    const yRatio = definition.anchorYRatio ?? 0.32;
+    const offsetY = definition.offsetY ?? 0;
 
     const startX = fromRect
       ? fromRect.left - stripRect.left + fromRect.width / 2 - definition.width / 2
       : 0;
     const startY = fromRect
-      ? fromRect.top - stripRect.top + fromRect.height * 0.32 - definition.height / 2
+      ? fromRect.top - stripRect.top + fromRect.height * yRatio - definition.height / 2 + offsetY
       : 0;
     const endX = toRect.left - stripRect.left + toRect.width / 2 - definition.width / 2;
-    const endY = toRect.top - stripRect.top + toRect.height * 0.32 - definition.height / 2;
+    const endY =
+      toRect.top - stripRect.top + toRect.height * yRatio - definition.height / 2 + offsetY;
 
     const placementTarget = definition.placement === 'target';
     const anchorRect = placementTarget ? toRect : fromRect ?? toRect;
     const anchorX = anchorRect.left - stripRect.left + anchorRect.width / 2 - definition.width / 2;
     const anchorY =
-      anchorRect.top - stripRect.top + anchorRect.height * 0.32 - definition.height / 2;
+      anchorRect.top - stripRect.top + anchorRect.height * yRatio - definition.height / 2 + offsetY;
 
     if (definition.motion === 'self') {
       this.spawnSelfPulse(definition, anchorX, anchorY, event.skillId);
@@ -186,8 +191,8 @@ export class BattleSkillVfxController {
     anchorX: number,
     anchorY: number,
   ): void {
-    const svgUrl = getAssetUrl(getSkillVfxSvgPath(event.skillId, definition.svgFile));
-    if (!svgUrl) return;
+    const visual = this.createSkillVisual(event.skillId, definition, { loop: false });
+    if (!visual) return;
 
     const host = document.createElement('div');
     host.className = 'battle-skill-vfx battle-skill-vfx--melee';
@@ -201,7 +206,7 @@ export class BattleSkillVfxController {
     host.style.setProperty('--vfx-from-x', `${anchorX}px`);
     host.style.setProperty('--vfx-from-y', `${anchorY}px`);
     host.style.setProperty('--vfx-duration', `${definition.durationMs}ms`);
-    host.appendChild(this.createSvgFrame(svgUrl, definition.rotationDeg));
+    host.appendChild(visual);
     this.layer.appendChild(host);
 
     window.setTimeout(() => host.remove(), definition.durationMs + 80);
