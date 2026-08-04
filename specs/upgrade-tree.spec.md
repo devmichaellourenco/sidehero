@@ -14,7 +14,7 @@ Desbloquear automações e QoL comprando nós na **árvore única** com ouro, de
 - [x] Canvas único: pan, zoom, legenda por ramo
 - [x] Cada nó tem `parents[]` válidos; `UpgradeService.areParentsOwned` bloqueia compra
 - [x] Layout colinear (H/V/45°) em `UpgradeTreeLayout.ts`
-- [x] Ramos integrados à raiz `battle_stats_1`: combate, baús, slots, loja, heróis; log via `auto_battle_3` (otimizar equipe desativado)
+- [x] Ramos integrados à raiz `battle_stats_1`: combate, baús (abrir todos manual), slots, loja, heróis; log via `auto_battle_3` (otimizar equipe e auto-abrir baús desativados)
 - [x] Compra aplica `feature` level + `unlockHeroClass` quando aplicável
 - [x] Tooltip com requisitos; runas **não compradas** mostram o custo no canto inferior direito (sem botão Comprar)
 - [x] Clique no nó **disponível** (ouro suficiente) compra direto; hover continua só informativo

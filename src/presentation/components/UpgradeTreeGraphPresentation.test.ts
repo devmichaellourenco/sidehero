@@ -26,8 +26,10 @@ describe('UpgradeTreeGraphPresentation', () => {
     expect(resolveUpgradeParentIds('auto_battle_3')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('auto_battle_2')).toEqual(['battle_stats_1']);
     expect(resolveUpgradeParentIds('battle_stats_1')).toEqual([]);
-    expect(resolveUpgradeParentIds('open_all_chests_1')).toEqual(['auto_open_chests_1']);
-    expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual(['battle_stats_1']);
+    expect(resolveUpgradeParentIds('open_all_chests_1')).toEqual(['battle_stats_1']);
+    // AUTO-ABRIR BAÚS DESATIVADO (2026-08)
+    expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual([]);
+    expect(resolveUpgradeParentIds('open_all_chests_2')).toEqual([]);
     expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('hero_unlock_archer')).toEqual(['hero_unlock_berserker']);
     expect(resolveUpgradeParentIds('hero_unlock_paladin')).toEqual(['hero_unlock_archer']);

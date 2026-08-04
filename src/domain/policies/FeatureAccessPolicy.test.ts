@@ -22,6 +22,16 @@ describe('FeatureAccessPolicy', () => {
     expect(flags.optimizeInLootBatch).toBe(false);
   });
 
+  it('mantém auto-abrir baús desativado mesmo com nível legado', () => {
+    const flags = FeatureAccessPolicy.resolve({
+      auto_open_chests: 1,
+      open_all_chests: 2,
+    });
+    expect(flags.autoOpenChests).toBe(false);
+    expect(flags.autoOpenAllChests).toBe(false);
+    expect(flags.openAllChests).toBe(true);
+  });
+
   it('resolve improvement_reset por nível', () => {
     expect(FeatureAccessPolicy.resolve({}).improvementReset).toBe(0);
     expect(FeatureAccessPolicy.resolve({ improvement_reset: 1 }).improvementReset).toBe(1);

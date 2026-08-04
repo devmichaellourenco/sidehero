@@ -55,17 +55,18 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
   //     { type: 'min_stage', value: 5 },
   //   ],
   // },
-  {
-    id: 'auto_open_chests_1',
-    feature: 'auto_open_chests',
-    level: 1,
-    branch: 'chests',
-    name: 'Auto-abrir baús I',
-    description: 'Abre baús automaticamente quando disponíveis.',
-    cost: 300,
-    parents: ['battle_stats_1'],
-    requirements: [{ type: 'min_stage', value: 3 }],
-  },
+  // AUTO-ABRIR BAÚS DESATIVADO (2026-08): quebra o jogo em alguns fluxos; código preservado.
+  // {
+  //   id: 'auto_open_chests_1',
+  //   feature: 'auto_open_chests',
+  //   level: 1,
+  //   branch: 'chests',
+  //   name: 'Auto-abrir baús I',
+  //   description: 'Abre baús automaticamente quando disponíveis.',
+  //   cost: 300,
+  //   parents: ['battle_stats_1'],
+  //   requirements: [{ type: 'min_stage', value: 3 }],
+  // },
   {
     id: 'open_all_chests_1',
     feature: 'open_all_chests',
@@ -74,23 +75,24 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Abrir todos I',
     description: 'Desbloqueia o botão Abrir Todos no footer.',
     cost: 2500,
-    parents: ['auto_open_chests_1'],
-    requirements: [{ type: 'upgrade_level', feature: 'auto_open_chests', minLevel: 1 }],
+    parents: ['battle_stats_1'],
+    requirements: [{ type: 'min_stage', value: 3 }],
   },
-  {
-    id: 'open_all_chests_2',
-    feature: 'open_all_chests',
-    level: 2,
-    branch: 'chests',
-    name: 'Abrir todos II',
-    description: 'Auto-abrir prioriza abrir todos quando há 2+ baús.',
-    cost: 5000,
-    parents: ['open_all_chests_1'],
-    requirements: [
-      { type: 'upgrade_level', feature: 'open_all_chests', minLevel: 1 },
-      { type: 'min_chests_opened', value: 5 },
-    ],
-  },
+  // AUTO-ABRIR BAÚS DESATIVADO (2026-08): nível II = autoOpenAllChests.
+  // {
+  //   id: 'open_all_chests_2',
+  //   feature: 'open_all_chests',
+  //   level: 2,
+  //   branch: 'chests',
+  //   name: 'Abrir todos II',
+  //   description: 'Auto-abrir prioriza abrir todos quando há 2+ baús.',
+  //   cost: 5000,
+  //   parents: ['open_all_chests_1'],
+  //   requirements: [
+  //     { type: 'upgrade_level', feature: 'open_all_chests', minLevel: 1 },
+  //     { type: 'min_chests_opened', value: 5 },
+  //   ],
+  // },
   // OTIMIZAR EQUIPE DESATIVADO (2026-08): remove auto-otimização que dispensa avaliar itens.
   // {
   //   id: 'optimize_loadout_1',
@@ -139,11 +141,14 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-equipar II',
     description: 'Auto-equipar sem notificações (silencioso).',
     cost: 1500,
-    parents: ['auto_equip_loot_1', 'open_all_chests_1'],
-    requirements: [
-      { type: 'upgrade_level', feature: 'auto_equip_loot', minLevel: 1 },
-      { type: 'upgrade_level', feature: 'auto_open_chests', minLevel: 1 },
-    ],
+    parents: ['auto_equip_loot_1'],
+    requirements: [{ type: 'upgrade_level', feature: 'auto_equip_loot', minLevel: 1 }],
+    // --- original (AUTO-ABRIR BAÚS DESATIVADO 2026-08) ---
+    // parents: ['auto_equip_loot_1', 'open_all_chests_1'],
+    // requirements: [
+    //   { type: 'upgrade_level', feature: 'auto_equip_loot', minLevel: 1 },
+    //   { type: 'upgrade_level', feature: 'auto_open_chests', minLevel: 1 },
+    // ],
   },
   {
     id: 'item_stash_1',
@@ -153,11 +158,13 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Baú de itens I',
     description: 'Desbloqueia o baú para guardar itens extras (24 slots).',
     cost: 600,
-    parents: ['auto_open_chests_1'],
+    parents: ['battle_stats_1'],
     requirements: [
       { type: 'min_stage', value: 2 },
       { type: 'min_battles_won', value: 6 },
     ],
+    // --- original (AUTO-ABRIR BAÚS DESATIVADO 2026-08) ---
+    // parents: ['auto_open_chests_1'],
   },
   {
     id: 'item_stash_2',

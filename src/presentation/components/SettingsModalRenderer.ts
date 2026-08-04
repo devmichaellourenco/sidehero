@@ -30,13 +30,7 @@ export class SettingsModalRenderer {
           unlocked: state.featureFlags.autoBattle,
           checked: preferences.autoBattle,
         })}
-        ${this.renderToggle({
-          key: 'autoOpenChests',
-          title: 'Auto-abrir baús',
-          hint: 'Abre baús assim que estiverem disponíveis',
-          unlocked: state.featureFlags.autoOpenChests,
-          checked: preferences.autoOpenChests,
-        })}
+        <!-- AUTO-ABRIR BAÚS DESATIVADO (2026-08): toggle removido -->
         ${this.renderToggle({
           key: 'autoEquipLoot',
           title: 'Auto-equipar loot',

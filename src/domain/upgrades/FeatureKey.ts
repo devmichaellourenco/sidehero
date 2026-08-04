@@ -2,6 +2,7 @@ export const FEATURE_KEYS = [
   'auto_battle',
   /** OFFLINE PROGRESS DESATIVADO (2026-07) — chave mantida para saves legados; upgrades fora do catálogo. */
   'background_tick',
+  /** AUTO-ABRIR BAÚS DESATIVADO (2026-08) — chave mantida para saves legados; upgrades fora do catálogo. */
   'auto_open_chests',
   'open_all_chests',
   'optimize_loadout',

@@ -71,17 +71,19 @@ describe('UpgradeCatalog', () => {
     expect(UPGRADE_CATALOG.find((entry) => entry.id === 'optimize_loadout_1')).toBeUndefined();
   });
 
-  it('combate integra slots de skill a partir da raiz (tick idle e otimizar desativados)', () => {
+  it('combate integra slots de skill a partir da raiz (tick idle, otimizar e auto-abrir desativados)', () => {
     // OFFLINE PROGRESS DESATIVADO (2026-07)
     // const tick = UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1');
     const skillSlot = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_skill_slot_2');
     const autoBattle = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_battle_2');
-    const autoChests = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_open_chests_1');
+    const openAll = UPGRADE_CATALOG.find((entry) => entry.id === 'open_all_chests_1');
 
     expect(autoBattle?.parents).toEqual(['battle_stats_1']);
-    expect(autoChests?.parents).toEqual(['battle_stats_1']);
+    expect(openAll?.parents).toEqual(['battle_stats_1']);
     // expect(tick?.parents).toEqual(['auto_battle_2']);
     expect(UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1')).toBeUndefined();
+    expect(UPGRADE_CATALOG.find((entry) => entry.id === 'auto_open_chests_1')).toBeUndefined();
+    expect(UPGRADE_CATALOG.find((entry) => entry.id === 'open_all_chests_2')).toBeUndefined();
     expect(skillSlot?.parents).toEqual(['battle_stats_1']);
   });
 

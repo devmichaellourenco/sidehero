@@ -32,11 +32,12 @@ const FEATURE_UNLOCK_META: Partial<Record<FeatureFlagKey, FeatureUnlockMeta>> = 
     subtitle: 'Abra todos os baús de uma vez',
     iconUrl: getAssetUrl(ASSETS.ui.chestOpen),
   },
-  autoOpenChests: {
-    title: 'Auto-abrir Baús',
-    subtitle: 'Baús abertos automaticamente',
-    iconUrl: getAssetUrl(ASSETS.ui.chest),
-  },
+  // AUTO-ABRIR BAÚS DESATIVADO (2026-08)
+  // autoOpenChests: {
+  //   title: 'Auto-abrir Baús',
+  //   subtitle: 'Baús abertos automaticamente',
+  //   iconUrl: getAssetUrl(ASSETS.ui.chest),
+  // },
   optimizeLoadout: {
     title: 'Otimizar Loadout',
     subtitle: 'Equipe o melhor gear automaticamente',
@@ -66,7 +67,8 @@ const UPGRADE_FEATURE_TO_FLAG: Partial<Record<FeatureKey, FeatureFlagKey>> = {
   improvement_reset: 'improvementReset',
   item_stash: 'itemStash',
   open_all_chests: 'openAllChests',
-  auto_open_chests: 'autoOpenChests',
+  // AUTO-ABRIR BAÚS DESATIVADO (2026-08)
+  // auto_open_chests: 'autoOpenChests',
   optimize_loadout: 'optimizeLoadout',
   auto_equip_loot: 'autoEquipLoot',
   shop_refresh: 'shopRefresh',

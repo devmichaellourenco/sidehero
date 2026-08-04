@@ -28,7 +28,7 @@ describe('UpgradeService', () => {
     expect(roots.map((node) => node.definition.id)).toEqual(['battle_stats_1']);
     expect(nodeStatus(state, 'battle_stats_1')).toBe('available');
     expect(nodeStatus(state, 'auto_battle_2')).toBe('locked');
-    expect(nodeStatus(state, 'auto_open_chests_1')).toBe('locked');
+    expect(nodeStatus(state, 'open_all_chests_1')).toBe('locked');
   });
 
   it('permite auto_battle_2 com tier implícito 1x antes da primeira compra', () => {
@@ -49,7 +49,8 @@ describe('UpgradeService', () => {
       .withUpgradeLevels({ battle_stats: 1 });
 
     expect(state.roster[0].level).toBeGreaterThanOrEqual(3);
-    expect(nodeStatus(state, 'auto_open_chests_1')).toBe('available');
+    expect(nodeStatus(state, 'open_all_chests_1')).toBe('available');
+    expect(nodeStatus(state, 'auto_open_chests_1')).toBeUndefined();
     expect(nodeStatus(state, 'battle_skill_slot_2')).toBe('available');
   });
 

@@ -19,6 +19,7 @@ description: Gear, inventário, baús e equipamento no Side Hero. Use para loot,
 
 - Abrir baú: `ChestService` via use cases
 - Abrir todos: preenche inventário, depois baú de itens; restante fica pendente (`GearStorageService.resolveLootDestination`)
+- Auto-abrir baús / auto-abrir todos: **desativados** (2026-08) — flags sempre off; nós `auto_open_chests_1` / `open_all_chests_2` fora do catálogo
 - Badge no ícone da grid: ▲ / ▼ / ▲▼ conforme deltas por status (`resolveGridCompareBadge`); tooltip com números coloridos (`listGearStatDeltas`)
 - Inline equip no drawer sem modal empilhado quando possível
 - Mythic: loja/loot de área só a partir do Ato 3 de Valdris (`MythicGearAccessPolicy`)

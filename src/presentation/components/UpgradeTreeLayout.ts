@@ -29,9 +29,10 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   hero_unlock_archer: { x: 260, y: 520 },
   hero_unlock_paladin: { x: 140, y: 520 },
 
-  auto_open_chests_1: { x: 620, y: 400 },
-  open_all_chests_1: { x: 740, y: 400 },
-  open_all_chests_2: { x: 860, y: 400 },
+  // AUTO-ABRIR BAÚS DESATIVADO (2026-08)
+  // auto_open_chests_1: { x: 620, y: 400 },
+  open_all_chests_1: { x: 620, y: 400 },
+  // open_all_chests_2: { x: 860, y: 400 },
 
   item_stash_1: { x: 620, y: 280 },
   item_stash_2: { x: 740, y: 280 },

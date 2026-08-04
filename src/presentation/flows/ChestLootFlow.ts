@@ -76,40 +76,44 @@ export class ChestLootFlow {
   }
 
   scheduleAutoOpenChests(): void {
-    if (this.autoOpenChestPending) return;
+    // AUTO-ABRIR BAÚS DESATIVADO (2026-08): quebra o jogo em alguns fluxos.
+    return;
 
-    const state = this.getState();
-    if (!this.shouldAutoOpenChests() || !getFeatureFlags(state).autoOpenChests) return;
-    if (!state || this.openingChests || (state.loadoutEditOpen && state.phaseRestartOnResume)) {
-      return;
-    }
-    if (this.isModalOpen() || state.pendingChestCount === 0) return;
-
-    this.autoOpenChestPending = true;
-    window.setTimeout(() => {
-      this.autoOpenChestPending = false;
-
-      const current = this.getState();
-      if (!this.shouldAutoOpenChests() || this.openingChests || this.isModalOpen()) return;
-      if (
-        !current ||
-        current.pendingChestCount === 0 ||
-        (current.loadoutEditOpen && current.phaseRestartOnResume)
-      ) {
-        return;
-      }
-
-      if (
-        current.pendingChestCount >= 2 &&
-        getFeatureFlags(current).openAllChests &&
-        getFeatureFlags(current).autoOpenAllChests
-      ) {
-        void this.openAllChests();
-        return;
-      }
-
-      void this.openNextChest();
-    }, 450);
+    // --- original ---
+    // if (this.autoOpenChestPending) return;
+    //
+    // const state = this.getState();
+    // if (!this.shouldAutoOpenChests() || !getFeatureFlags(state).autoOpenChests) return;
+    // if (!state || this.openingChests || (state.loadoutEditOpen && state.phaseRestartOnResume)) {
+    //   return;
+    // }
+    // if (this.isModalOpen() || state.pendingChestCount === 0) return;
+    //
+    // this.autoOpenChestPending = true;
+    // window.setTimeout(() => {
+    //   this.autoOpenChestPending = false;
+    //
+    //   const current = this.getState();
+    //   if (!this.shouldAutoOpenChests() || this.openingChests || this.isModalOpen()) return;
+    //   if (
+    //     !current ||
+    //     current.pendingChestCount === 0 ||
+    //     (current.loadoutEditOpen && current.phaseRestartOnResume)
+    //   ) {
+    //     return;
+    //   }
+    //
+    //   if (
+    //     current.pendingChestCount >= 2 &&
+    //     getFeatureFlags(current).openAllChests &&
+    //     getFeatureFlags(current).autoOpenAllChests
+    //   ) {
+    //     void this.openAllChests();
+    //     return;
+    //   }
+    //
+    //   void this.openNextChest();
+    // }, 450);
   }
 
   enqueueLootModals(gearIds: string[]): void {
