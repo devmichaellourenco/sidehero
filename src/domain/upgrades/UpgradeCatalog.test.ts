@@ -65,12 +65,13 @@ describe('UpgradeCatalog', () => {
     expect(paladin?.unlockHeroClass).toBe('paladin');
   });
 
-  it('tem uma única raiz: Otimizar equipe I', () => {
+  it('tem uma única raiz: Estatísticas de batalha', () => {
     const roots = UPGRADE_CATALOG.filter((entry) => entry.parents.length === 0);
-    expect(roots.map((entry) => entry.id)).toEqual(['optimize_loadout_1']);
+    expect(roots.map((entry) => entry.id)).toEqual(['battle_stats_1']);
+    expect(UPGRADE_CATALOG.find((entry) => entry.id === 'optimize_loadout_1')).toBeUndefined();
   });
 
-  it('combate integra slots de skill a partir da raiz (tick idle desativado)', () => {
+  it('combate integra slots de skill a partir da raiz (tick idle e otimizar desativados)', () => {
     // OFFLINE PROGRESS DESATIVADO (2026-07)
     // const tick = UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1');
     const skillSlot = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_skill_slot_2');
@@ -78,10 +79,10 @@ describe('UpgradeCatalog', () => {
     const autoChests = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_open_chests_1');
 
     expect(autoBattle?.parents).toEqual(['battle_stats_1']);
-    expect(autoChests?.parents).toEqual(['optimize_loadout_1']);
+    expect(autoChests?.parents).toEqual(['battle_stats_1']);
     // expect(tick?.parents).toEqual(['auto_battle_2']);
     expect(UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1')).toBeUndefined();
-    expect(skillSlot?.parents).toEqual(['optimize_loadout_1']);
+    expect(skillSlot?.parents).toEqual(['battle_stats_1']);
   });
 
   it('economia integra renovar loja na árvore principal', () => {
@@ -91,11 +92,11 @@ describe('UpgradeCatalog', () => {
     expect(shop?.parents).toEqual(['auto_battle_2']);
   });
 
-  it('qol libera estatísticas cedo e log após auto-batalha III', () => {
+  it('qol libera estatísticas como raiz e log após auto-batalha III', () => {
     const battleStats = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_stats_1');
     expect(battleStats?.feature).toBe('battle_stats');
     expect(battleStats?.cost).toBe(200);
-    expect(battleStats?.parents).toEqual(['optimize_loadout_1']);
+    expect(battleStats?.parents).toEqual([]);
 
     const logFilter = UPGRADE_CATALOG.find((entry) => entry.id === 'log_filter_1');
     expect(logFilter?.branch).toBe('qol');

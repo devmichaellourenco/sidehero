@@ -319,7 +319,9 @@ export class GameHudController {
       this.openForgeBtn.classList.add('hidden');
     }
 
-    const canOptimize = atCamp && flags.optimizeLoadout;
+    // OTIMIZAR EQUIPE DESATIVADO (2026-08): botão da tela principal sempre oculto.
+    const canOptimize = false;
+    // const canOptimize = atCamp && flags.optimizeLoadout;
     this.optimizeLoadoutBtn.classList.toggle('hidden', !canOptimize);
     this.optimizeLoadoutBtn.disabled = !canOptimize || upgradeCount === 0;
     this.optimizeLoadoutBtn.title =

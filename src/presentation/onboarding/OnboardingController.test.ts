@@ -46,8 +46,66 @@ describe('OnboardingController spotlight', () => {
         expect(spotlight.classList.contains('hidden')).toBe(false);
         expect(backdrop.classList.contains('onboarding-backdrop--cutout')).toBe(true);
         expect(anchor.classList.contains('onboarding-highlight')).toBe(true);
+        expect(anchor.classList.contains('onboarding-anchor-source')).toBe(true);
         expect(spotlight.style.width).toBe('116px');
         expect(spotlight.style.height).toBe('56px');
+
+        const clone = document.querySelector('.onboarding-anchor-clone') as HTMLElement;
+        expect(clone).toBeTruthy();
+        expect(clone.textContent).toContain('Alvo');
+        expect(clone.id).toBe('');
+
+        controller.destroy();
+        resolve();
+      });
+    });
+  });
+
+  it('clona ícone e rótulo do botão de baú no overlay do tutorial', () => {
+    const anchor = document.createElement('button');
+    anchor.id = 'open-chest-btn';
+    anchor.className = 'quick-action-btn quick-action-btn--chest chest-available';
+    const icon = document.createElement('img');
+    icon.className = 'btn-icon';
+    icon.src = 'https://example.test/chest.png';
+    const label = document.createElement('span');
+    label.className = 'quick-action-label';
+    label.textContent = 'Abrir baú';
+    anchor.append(icon, label);
+    document.body.appendChild(anchor);
+    vi.spyOn(anchor, 'getBoundingClientRect').mockReturnValue({
+      top: 200,
+      left: 40,
+      bottom: 260,
+      right: 140,
+      width: 100,
+      height: 60,
+      x: 40,
+      y: 200,
+      toJSON: () => ({}),
+    });
+
+    const controller = new OnboardingController();
+    controller.show(
+      {
+        id: 'first-chest',
+        title: 'Seu primeiro baú',
+        message: 'Toque no baú',
+        anchorSelector: '#open-chest-btn',
+      },
+      { onDismissStep: vi.fn(), onSkipAll: vi.fn() },
+    );
+
+    return new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        const clone = document.querySelector('.onboarding-anchor-clone') as HTMLElement;
+        const cloneIcon = clone.querySelector('img.btn-icon') as HTMLImageElement;
+        const cloneLabel = clone.querySelector('.quick-action-label');
+
+        expect(clone).toBeTruthy();
+        expect(cloneLabel?.textContent).toBe('Abrir baú');
+        expect(cloneIcon.src).toContain('chest.png');
+        expect(anchor.classList.contains('onboarding-anchor-source')).toBe(true);
 
         controller.destroy();
         resolve();

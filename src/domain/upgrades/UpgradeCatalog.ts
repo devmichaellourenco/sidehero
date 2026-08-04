@@ -63,7 +63,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-abrir baús I',
     description: 'Abre baús automaticamente quando disponíveis.',
     cost: 300,
-    parents: ['optimize_loadout_1'],
+    parents: ['battle_stats_1'],
     requirements: [{ type: 'min_stage', value: 3 }],
   },
   {
@@ -91,34 +91,35 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
       { type: 'min_chests_opened', value: 5 },
     ],
   },
-  {
-    id: 'optimize_loadout_1',
-    feature: 'optimize_loadout',
-    level: 1,
-    branch: 'equipment',
-    name: 'Otimizar equipe I',
-    description: 'Desbloqueia o botão Otimizar equipe.',
-    cost: 90,
-    parents: [],
-    requirements: [
-      { type: 'min_stage', value: 3 },
-      { type: 'min_battles_won', value: 8 },
-    ],
-  },
-  {
-    id: 'optimize_loadout_2',
-    feature: 'optimize_loadout',
-    level: 2,
-    branch: 'equipment',
-    name: 'Otimizar equipe II',
-    description: 'Otimização disponível no loot em lote dos baús.',
-    cost: 1000,
-    parents: ['optimize_loadout_1'],
-    requirements: [
-      { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
-      { type: 'min_stage', value: 5 },
-    ],
-  },
+  // OTIMIZAR EQUIPE DESATIVADO (2026-08): remove auto-otimização que dispensa avaliar itens.
+  // {
+  //   id: 'optimize_loadout_1',
+  //   feature: 'optimize_loadout',
+  //   level: 1,
+  //   branch: 'equipment',
+  //   name: 'Otimizar equipe I',
+  //   description: 'Desbloqueia o botão Otimizar equipe.',
+  //   cost: 90,
+  //   parents: [],
+  //   requirements: [
+  //     { type: 'min_stage', value: 3 },
+  //     { type: 'min_battles_won', value: 8 },
+  //   ],
+  // },
+  // {
+  //   id: 'optimize_loadout_2',
+  //   feature: 'optimize_loadout',
+  //   level: 2,
+  //   branch: 'equipment',
+  //   name: 'Otimizar equipe II',
+  //   description: 'Otimização disponível no loot em lote dos baús.',
+  //   cost: 1000,
+  //   parents: ['optimize_loadout_1'],
+  //   requirements: [
+  //     { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
+  //     { type: 'min_stage', value: 5 },
+  //   ],
+  // },
   {
     id: 'auto_equip_loot_1',
     feature: 'auto_equip_loot',
@@ -127,8 +128,8 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Auto-equipar I',
     description: 'Equipa loot recomendado sem abrir modal.',
     cost: 300,
-    parents: ['optimize_loadout_1'],
-    requirements: [{ type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 }],
+    parents: ['battle_stats_1'],
+    requirements: [{ type: 'min_stage', value: 3 }],
   },
   {
     id: 'auto_equip_loot_2',
@@ -195,11 +196,8 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     description:
       'Desbloqueia a Forja Divina: fundir 9 itens da mesma raridade em um item superior, ou destruir itens por ouro.',
     cost: 600,
-    parents: ['optimize_loadout_1', 'item_stash_1'],
-    requirements: [
-      { type: 'min_stage', value: 4 },
-      { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
-    ],
+    parents: ['item_stash_1'],
+    requirements: [{ type: 'min_stage', value: 4 }],
   },
   {
     id: 'improvement_reset_1',
@@ -251,7 +249,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     description:
       'Desbloqueia o painel de estatísticas: totais, dano por herói/skill, elementos e mitigação em tempo real.',
     cost: 200,
-    parents: ['optimize_loadout_1'],
+    parents: [],
     requirements: [],
   },
   {
@@ -301,7 +299,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     name: 'Slot de skill II',
     description: 'Desbloqueia o 2º slot de skill ativa na batalha.',
     cost: 300,
-    parents: ['optimize_loadout_1'],
+    parents: ['battle_stats_1'],
     requirements: [{ type: 'min_hero_level', value: 3 }],
   },
   {
@@ -360,7 +358,6 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     cost: 2500,
     parents: ['hero_unlock_archer'],
     requirements: [
-      { type: 'upgrade_level', feature: 'optimize_loadout', minLevel: 1 },
       { type: 'min_stage', value: 4 },
       { type: 'min_hero_level', value: 5 },
     ],

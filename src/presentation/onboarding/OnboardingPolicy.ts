@@ -27,11 +27,14 @@ function runeInlineIcon(): string {
   return `<img class="onboarding-inline-icon" src="${getAssetUrl(ASSETS.ui.rune)}" alt="" aria-hidden="true" />`;
 }
 
+function chestInlineIcon(): string {
+  return `<img class="onboarding-inline-icon" src="${getAssetUrl(ASSETS.ui.chest)}" alt="" aria-hidden="true" />`;
+}
+
 const STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id'>> = {
   'first-chest': {
     title: 'Seu primeiro baú',
-    message:
-      'Derrotar inimigos enche a barra de baús. Toque no ícone do baú para abrir e ganhar equipamento.',
+    message: `Derrotar inimigos enche a barra de baús. Toque no ícone ${chestInlineIcon()} Abrir baú para abrir e ganhar equipamento.`,
     anchorSelector: '#open-chest-btn',
   },
   'pause-loadout': {

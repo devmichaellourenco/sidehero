@@ -17,8 +17,8 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 - [x] Combate nunca insere gear diretamente no inventário: drops comuns viram baús sorteados na abertura; lendários de boss ficam reservados como loot garantido dentro do baú
 - [x] Loot garantido de boss (Ignus Ix, Vorpal Lupnus, Soler Plégius e Selo de Morthaven) persiste no baú e é entregue sem novo sorteio ao abrir
 - [x] Equipar valida slot, nível e classe (`GearRequirementChecker`)
-- [x] Otimizar equipe sugere upgrades por herói (`LoadoutOptimizer`)
-- [x] Comparação visual no picker/modal (setas ▲)
+- [x] Otimizar equipe (`LoadoutOptimizer`) — **desativado na UI** (2026-08); código preservado
+- [x] Comparação visual: tooltip com deltas por status (cor + número); no ícone da grid ▲ (só melhorias), ▼ (só pioras), ▲▼ (misto) ou sem badge se igual
 - [x] Inventário (global e embedded): filtro por categoria exclusivamente pelos ícones do loadout; toolbar de ordenação única; sem painel inline duplicado para escolha por slot
 - [x] Bordas de raridade consistentes em inventário, loadout, loja, forja, loot e tooltips: common cinza, uncommon verde, rare azul, epic lilás, legendary dourado, mythic vermelho com brilho
 - [x] Raridade **mythic** não aparece em loja nem em loot de área/baú antes do Ato 3 de Valdris (`MythicGearAccessPolicy`, tier ≥ 121)

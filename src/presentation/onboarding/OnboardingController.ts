@@ -16,6 +16,7 @@ export class OnboardingController {
   private readonly root: HTMLElement;
   private activeStep: OnboardingStep | null = null;
   private highlightedAnchor: HTMLElement | null = null;
+  private anchorClone: HTMLElement | null = null;
   private dismissed = loadDismissedOnboardingSteps();
   private stepCooldownUntil = 0;
 
@@ -74,6 +75,7 @@ export class OnboardingController {
       return;
     }
 
+    this.clearHighlight();
     this.activeStep = step;
     this.root.classList.remove('hidden');
     this.root.innerHTML = `
@@ -179,7 +181,7 @@ export class OnboardingController {
       return;
     }
 
-    anchor.classList.add('onboarding-highlight');
+    anchor.classList.add('onboarding-highlight', 'onboarding-anchor-source');
     this.highlightedAnchor = anchor;
 
     const pad = 8;
@@ -190,11 +192,56 @@ export class OnboardingController {
     spotlight.style.left = `${Math.max(0, rect.left - pad)}px`;
     spotlight.style.width = `${rect.width + pad * 2}px`;
     spotlight.style.height = `${rect.height + pad * 2}px`;
+
+    this.mountAnchorClone(anchor, rect);
+  }
+
+  /** Cópia visual do alvo acima do véu — garante ícone/texto visíveis no spotlight. */
+  private mountAnchorClone(anchor: HTMLElement, rect: DOMRect): void {
+    const clone = anchor.cloneNode(true) as HTMLElement;
+    clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach((node) => node.removeAttribute('id'));
+    clone.classList.add('onboarding-anchor-clone');
+    clone.classList.remove('onboarding-highlight', 'onboarding-anchor-source');
+    clone.setAttribute('tabindex', '-1');
+    clone.setAttribute('aria-hidden', 'true');
+    if (clone instanceof HTMLButtonElement) {
+      clone.disabled = false;
+    }
+
+    const sourceImgs = anchor.querySelectorAll('img');
+    clone.querySelectorAll('img').forEach((img, index) => {
+      const source = sourceImgs[index];
+      if (!(source instanceof HTMLImageElement)) return;
+      img.src = source.currentSrc || source.src;
+    });
+
+    clone.style.position = 'fixed';
+    clone.style.top = `${rect.top}px`;
+    clone.style.left = `${rect.left}px`;
+    clone.style.width = `${Math.max(rect.width, 1)}px`;
+    clone.style.height = `${Math.max(rect.height, 1)}px`;
+    clone.style.margin = '0';
+    clone.style.zIndex = '2';
+    clone.style.pointerEvents = 'auto';
+    clone.style.boxSizing = 'border-box';
+
+    clone.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (anchor instanceof HTMLButtonElement && anchor.disabled) return;
+      anchor.click();
+    });
+
+    this.root.appendChild(clone);
+    this.anchorClone = clone;
   }
 
   private clearHighlight(): void {
-    this.highlightedAnchor?.classList.remove('onboarding-highlight');
+    this.highlightedAnchor?.classList.remove('onboarding-highlight', 'onboarding-anchor-source');
     this.highlightedAnchor = null;
+    this.anchorClone?.remove();
+    this.anchorClone = null;
     const spotlight = this.root.querySelector('.onboarding-spotlight') as HTMLElement | null;
     const backdrop = this.root.querySelector('.onboarding-backdrop') as HTMLElement | null;
     spotlight?.classList.add('hidden');

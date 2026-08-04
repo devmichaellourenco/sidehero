@@ -25,27 +25,25 @@ describe('UpgradeTreeGraphPresentation', () => {
   it('resolve pais via parents explícitos ou requisito upgrade_level', () => {
     expect(resolveUpgradeParentIds('auto_battle_3')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('auto_battle_2')).toEqual(['battle_stats_1']);
-    expect(resolveUpgradeParentIds('battle_stats_1')).toEqual(['optimize_loadout_1']);
+    expect(resolveUpgradeParentIds('battle_stats_1')).toEqual([]);
     expect(resolveUpgradeParentIds('open_all_chests_1')).toEqual(['auto_open_chests_1']);
-    expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual(['optimize_loadout_1']);
+    expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual(['battle_stats_1']);
     expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('hero_unlock_archer')).toEqual(['hero_unlock_berserker']);
     expect(resolveUpgradeParentIds('hero_unlock_paladin')).toEqual(['hero_unlock_archer']);
     // OFFLINE PROGRESS DESATIVADO (2026-07)
-    // expect(resolveUpgradeParentIds('background_tick_1')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('background_tick_1')).toEqual([]);
-    expect(resolveUpgradeParentIds('battle_skill_slot_2')).toEqual(['optimize_loadout_1']);
+    // OTIMIZAR EQUIPE DESATIVADO (2026-08)
+    expect(resolveUpgradeParentIds('optimize_loadout_1')).toEqual([]);
+    expect(resolveUpgradeParentIds('battle_skill_slot_2')).toEqual(['battle_stats_1']);
     expect(resolveUpgradeParentIds('shop_refresh_1')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('log_filter_1')).toEqual(['auto_battle_3']);
   });
 
   it('monta arestas entre nodos visíveis, inclusive entre ramos', () => {
     const nodes = [
-      node({ id: 'optimize_loadout_1', branch: 'equipment' }),
       node({ id: 'battle_stats_1', branch: 'qol' }),
       node({ id: 'auto_battle_2', branch: 'combat' }),
-      // OFFLINE PROGRESS DESATIVADO (2026-07)
-      // node({ id: 'background_tick_1', branch: 'combat' }),
       node({ id: 'battle_skill_slot_2', branch: 'combat' }),
       node({ id: 'hero_unlock_berserker', branch: 'heroes' }),
       node({ id: 'hero_unlock_archer', branch: 'heroes' }),
@@ -54,16 +52,14 @@ describe('UpgradeTreeGraphPresentation', () => {
 
     expect(buildUpgradeTreeEdges(nodes)).toEqual(
       expect.arrayContaining([
-        { fromId: 'optimize_loadout_1', toId: 'battle_stats_1' },
         { fromId: 'battle_stats_1', toId: 'auto_battle_2' },
-        { fromId: 'optimize_loadout_1', toId: 'battle_skill_slot_2' },
-        // { fromId: 'auto_battle_2', toId: 'background_tick_1' },
+        { fromId: 'battle_stats_1', toId: 'battle_skill_slot_2' },
         { fromId: 'auto_battle_2', toId: 'hero_unlock_berserker' },
         { fromId: 'hero_unlock_berserker', toId: 'hero_unlock_archer' },
         { fromId: 'hero_unlock_archer', toId: 'hero_unlock_paladin' },
       ]),
     );
-    expect(buildUpgradeTreeEdges(nodes)).toHaveLength(6);
+    expect(buildUpgradeTreeEdges(nodes)).toHaveLength(5);
   });
 
   it('posiciona nodos com layout unificado', () => {
@@ -79,14 +75,14 @@ describe('UpgradeTreeGraphPresentation', () => {
     );
   });
 
-  it('foca primeiro nodo disponível, depois pronto, depois bloqueado', () => {
+  it('foca primeiro nodo disponível, depois Ready, depois bloqueado', () => {
     const nodes = [
       node({ id: 'auto_battle_2', branch: 'combat', status: 'locked' }),
-      node({ id: 'optimize_loadout_1', branch: 'equipment', status: 'available' }),
+      node({ id: 'battle_stats_1', branch: 'qol', status: 'available' }),
       node({ id: 'shop_refresh_1', branch: 'economy', status: 'ready' }),
     ];
 
-    expect(findFocusNodeId(nodes)).toBe('optimize_loadout_1');
+    expect(findFocusNodeId(nodes)).toBe('battle_stats_1');
 
     const onlyReady = [
       node({ id: 'auto_battle_2', branch: 'combat', status: 'locked' }),

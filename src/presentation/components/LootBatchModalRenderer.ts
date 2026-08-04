@@ -30,14 +30,18 @@ export class LootBatchModalRenderer {
         ? `Equipar recomendados (${recommendedCount})`
         : 'Equipar recomendados';
 
-    const optimizeAction =
-      options.canOptimize === false
-        ? ''
-        : `
+    const batchActions =
+      options.canOptimize === true
+        ? `
       <div class="loot-reveal-actions">
         <button type="button" class="gear-equip-btn" data-loot-batch-equip ${recommendedCount === 0 ? 'disabled' : ''}>
           ${equipLabel}
         </button>
+        <button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button>
+      </div>
+    `
+        : `
+      <div class="loot-reveal-actions">
         <button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button>
       </div>
     `;
@@ -50,15 +54,12 @@ export class LootBatchModalRenderer {
             const upgrade = getGearUpgradeInfo(state, gear);
             return renderGearCard(gear, {
               showAction: false,
-              upgradeBadge: renderUpgradeBadge(upgrade.status),
+              upgradeBadge: renderUpgradeBadge(upgrade.status, upgrade.gain),
             });
           })
           .join('')}
       </div>
-      ${
-        optimizeAction ||
-        '<p class="loot-batch-locked">Otimizar loot em lote: desbloqueie em Runas.</p><div class="loot-reveal-actions"><button type="button" class="gear-unequip-btn" data-loot-batch-keep>Guardar tudo</button></div>'
-      }
+      ${batchActions}
     `;
 
     void handlers;

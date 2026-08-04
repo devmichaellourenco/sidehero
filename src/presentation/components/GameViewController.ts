@@ -1527,7 +1527,7 @@ export class GameViewController {
       heroId,
       this.buildInventoryHandlers(() => this.refreshHeroDrawerIfOpen()),
       {
-        showOptimize: this.state.featureFlags.optimizeLoadout,
+        showOptimize: false,
         inlineActiveSlot: this.inlineEquip.getActiveSlot(),
         canEditGear: this.canEditGear(),
       },

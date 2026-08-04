@@ -5220,6 +5220,13 @@ button.hero-skill-chip:hover {
   background: rgba(255, 107, 107, 0.9);
 }
 
+.inventory-grid-badge--mixed {
+  color: var(--seal-gold-dark);
+  background: color-mix(in srgb, var(--seal-gold) 35%, var(--surface));
+  letter-spacing: -0.06em;
+  padding: 0 2px;
+}
+
 .inventory-grid-badge--equal {
   color: var(--text);
   background: rgba(255, 255, 255, 0.16);
@@ -8178,6 +8185,11 @@ body.modal-open {
 
 .stat-worse {
   color: var(--stat-worse);
+  font-weight: 600;
+}
+
+.stat-equal {
+  color: var(--ink-muted);
   font-weight: 600;
 }
 
@@ -14066,7 +14078,7 @@ body.party-drag-active * {
 
 .onboarding-card {
   position: fixed;
-  z-index: 1;
+  z-index: 3;
   width: min(380px, calc(100vw - 20px));
   padding: 22px 22px 18px;
   border-radius: 16px;
@@ -14175,6 +14187,33 @@ body.party-drag-active * {
   /* Anel visual extra no alvo (o spotlight já abre o furo no véu) */
   outline: 2px solid color-mix(in srgb, var(--seal-gold) 90%, transparent);
   outline-offset: 2px;
+}
+
+/* Original fica invisível; o clone no overlay leva ícone/texto acima do véu. */
+.onboarding-anchor-source {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.onboarding-anchor-clone {
+  /* Herda classes do botão; força aparência legível no spotlight. */
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  animation: none !important;
+  visibility: visible !important;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--seal-gold) 90%, transparent),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.onboarding-anchor-clone .btn-icon,
+.onboarding-anchor-clone .quick-action-label,
+.onboarding-anchor-clone .action-icon-label {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: var(--ink);
 }
 
 /* Splash de abertura do painel principal (antes do loop de batalha) */

@@ -144,10 +144,10 @@ export class InventoryModalRenderer {
     const optimizeLabel =
       upgradeCount > 0 ? `Otimizar equipe (↑${upgradeCount})` : 'Otimizar equipe';
     const optimizeIcon = imgTag(getAssetUrl(ASSETS.ui.attack), 'Otimizar', 'inventory-optimize-icon');
+    // OTIMIZAR EQUIPE DESATIVADO (2026-08): botão oculto (não exibe estado "bloqueado").
     const optimizeButton =
-      options.showOptimize === false
-        ? `<span class="inventory-optimize-locked" title="Otimizar equipe: desbloqueie em Runas" aria-label="Otimizar equipe: desbloqueie em Runas">${optimizeIcon}</span>`
-        : `
+      options.showOptimize === true
+        ? `
       <button
         type="button"
         class="inventory-optimize-btn"
@@ -159,7 +159,8 @@ export class InventoryModalRenderer {
         ${optimizeIcon}
         ${upgradeCount > 0 ? `<span class="inventory-optimize-badge">${upgradeCount}</span>` : ''}
       </button>
-    `;
+    `
+        : '';
     const dockSlots = slotPicking
       ? ''
       : `
@@ -171,7 +172,7 @@ export class InventoryModalRenderer {
             used: state.storageCapacity.stashUsed,
             limit: state.storageCapacity.stashLimit,
           })}
-          <div class="inventory-footer-center">${optimizeButton}</div>
+          ${optimizeButton ? `<div class="inventory-footer-center">${optimizeButton}</div>` : ''}
           ${renderInventoryDestroySlot()}
         `;
 

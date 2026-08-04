@@ -2,16 +2,17 @@ import { GameStateDto, GearDto, HeroDto } from '../../application/dto/GameStateD
 import {
   getGearFrameSprite,
   getGearRaritySprite,
-  getGearSlotSprite,
   getGearSprite,
   getHeroSprite,
   imgTag,
 } from '../assets/AssetCatalog';
 import {
-  compareGearWithEquipped,
   GearUpgradeStatus,
   getGearUpgradeInfoForActiveParty,
   getGearUpgradeInfoForHero,
+  listGearStatDeltas,
+  renderGridCompareBadge,
+  renderStatDeltaHtml,
 } from './GearComparison';
 import {
   renderGearBonusLines,
@@ -35,12 +36,6 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
-
-const UPGRADE_BADGE_LABEL: Record<GearUpgradeStatus, string> = {
-  upgrade: '▲',
-  downgrade: '▼',
-  equal: '=',
-};
 
 export function resolveDefaultInventoryHeroId(state: GameStateDto): string {
   const partyHero = state.activeParty.find((hero) =>
@@ -105,8 +100,7 @@ export function renderInventoryGridSlot(
   const slotLabel = GEAR_SLOT_LABELS[gear.slot as GearSlotKey] ?? gear.slot;
   const rarityLabel = GEAR_RARITY_LABELS[gear.rarity] ?? gear.rarity;
   const equipped = getHeroEquipment(options.hero, gear.slot as GearSlotKey);
-  const comparison = compareGearWithEquipped(gear, equipped);
-  const badge = UPGRADE_BADGE_LABEL[options.upgradeStatus];
+  const deltas = listGearStatDeltas(gear, equipped);
   const canEquip = canHeroEquipGear(options.hero, gear);
   const requirementLines = renderGearRequirementLines(options.hero, gear);
   const equipMode = options.equipMode ?? 'inventory';
@@ -147,20 +141,22 @@ export function renderInventoryGridSlot(
         ${imgTag(getGearSprite(gear), slotLabel, 'inventory-grid-slot-icon')}
         ${imgTag(getGearRaritySprite(gear.rarity), rarityLabel, 'inventory-grid-slot-rarity')}
       </span>
-      <span class="inventory-grid-badge inventory-grid-badge--${options.upgradeStatus}" aria-hidden="true">${badge}</span>
+      ${renderGridCompareBadge(gear, equipped)}
       ${returnedBadge}
       <span class="inventory-gear-tooltip-content hidden">
         ${renderTooltipPreviewImage(getGearSprite(gear), gear.name)}
         <strong class="inventory-gear-tooltip-name">${escapeHtml(gear.name)}</strong>
         <span class="inventory-gear-tooltip-meta">${slotLabel} · ${rarityLabel} · Lv.${gear.requirements.minLevel}</span>
-        <span class="inventory-gear-tooltip-equipped">Equipado: ${equipped ? escapeHtml(equipped.name) : '—'}</span>
+        <span class="inventory-gear-tooltip-equipped">${
+          equipped
+            ? `Vs. equipado: ${escapeHtml(equipped.name)}`
+            : 'Slot vazio — bônus do item'
+        }</span>
         <span class="inventory-gear-tooltip-stats">${renderGearBonusLines(gear)}</span>
         ${requirementLines}
         <span class="inventory-gear-tooltip-hero">Comparado com ${escapeHtml(options.hero.name)}</span>
         <span class="inventory-gear-tooltip-delta">
-          <span>${comparison.attack}</span>
-          <span>${comparison.defense}</span>
-          <span>${comparison.health}</span>
+          ${deltas.map((delta) => `<span>${renderStatDeltaHtml(delta)}</span>`).join('')}
         </span>
       </span>
     </div>

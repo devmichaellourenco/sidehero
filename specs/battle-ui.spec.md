@@ -23,14 +23,14 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Todos os menus da barra de sistemas (`SystemsMenuId`) suportam **Fixar/Desafixar** com preferência por menu (padrão: janela popup `panel.html?detached=<id>`, 520×832 sem resize); modo detached não inicia auto-battle
 - [x] Overlays interruptivos (tutorial, cena, resultado de batalha, Wow) **não se sobrepõem**: `UiOverlayOrchestrator` com prioridade tutorial > cena > batalha > Wow; o restante espera na fila
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
-- [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú**, **Abrir todos** e **Otimizar equipe** na faixa de ações rápidas
+- [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú** e **Abrir todos** na faixa de ações rápidas (**Otimizar equipe** desativado)
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
-- [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo)
+- [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo); clone visual do âncora no overlay (`onboarding-anchor-clone`) para ícone/texto legíveis (ex.: Abrir baú)
 - [x] Barras de vida: heróis verdes, inimigos vermelhas; texto só da vida atual (negrito) sobre barra fina; tooltip com atual/máx; HP no deck da strip
 - [x] Barras de TTA: countdown regressivo (herói/inimigo) sobre a barra; tooltip com ASPD e cálculo `1÷ASPD`; cadência no painel Estatísticas e na ficha Status
 - [x] Battle field: cena **333×133** intacta (sprites na elevação legada); deck HUD opaco (~50px) abaixo com HP + TTA + skills alinhados coluna a coluna; overlays só na zona da cena
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
-- [x] Heróis / Formação / Loja / Inventário / Baús / Otimizar equipe só aparecem no **acampamento** (`canEditParty`)
+- [x] Heróis / Formação / Loja / Inventário / Baús só aparecem no **acampamento** (`canEditParty`)
 - [x] Pista de combate do mapa (ameaça/favorável) no tooltip da campanha e header do mapa; eficácia vs área nas stats de skill
 - [x] Splash `splash_screen.png` na abertura do painel principal (≥5s) antes de tutorial/Wow/loop de batalha (`SplashScreenController`)
 

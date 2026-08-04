@@ -181,7 +181,7 @@ export class ModalStackController {
             },
             onOpenStash: () => this.onOpenStash(),
           },
-          { showOptimize: state.featureFlags.optimizeLoadout,
+          { showOptimize: false,
             inlineActiveSlot: options.inlineActiveSlot ?? null,
             canEditGear: options.canEditGear,
           },
@@ -231,7 +231,7 @@ export class ModalStackController {
             onEquipRecommended: () => this.onEquipRecommendedLoot(view.gearIds),
             onKeepAll: () => this.chestLootFlow.closeLootBatchModal(),
           },
-          { canOptimize: state.featureFlags.optimizeInLootBatch },
+          { canOptimize: false },
         );
         break;
       case 'settings':

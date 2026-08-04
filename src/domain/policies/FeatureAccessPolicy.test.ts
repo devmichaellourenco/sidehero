@@ -16,6 +16,12 @@ describe('FeatureAccessPolicy', () => {
     expect(flags.autoBattleMaxSpeed).toBe(3);
   });
 
+  it('mantém otimizar equipe desativado mesmo com nível legado', () => {
+    const flags = FeatureAccessPolicy.resolve({ optimize_loadout: 2 });
+    expect(flags.optimizeLoadout).toBe(false);
+    expect(flags.optimizeInLootBatch).toBe(false);
+  });
+
   it('resolve improvement_reset por nível', () => {
     expect(FeatureAccessPolicy.resolve({}).improvementReset).toBe(0);
     expect(FeatureAccessPolicy.resolve({ improvement_reset: 1 }).improvementReset).toBe(1);

@@ -37,7 +37,8 @@ Padrão: `beginSession()` na abertura → capturar estado antes do re-render →
 
 ## Núcleo
 
-Ramo principal parte de `optimize_loadout_1`; integrar novos ramos com `parents` explícitos.
+Ramo principal parte de `battle_stats_1`; integrar novos ramos com `parents` explícitos.
+- **Otimizar equipe** desativado (2026-08): nós `optimize_loadout_*` fora do catálogo; flags sempre off em `FeatureAccessPolicy`
 
 ## Relacionado
 

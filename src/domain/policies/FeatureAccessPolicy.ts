@@ -28,10 +28,11 @@ export class FeatureAccessPolicy {
   static resolve(levels: UpgradeLevels): FeatureAccessSnapshot {
     const autoBattleLevel = getFeatureLevel(levels, 'auto_battle');
     const openAllLevel = getFeatureLevel(levels, 'open_all_chests');
-    const optimizeLevel = getFeatureLevel(levels, 'optimize_loadout');
     const autoEquipLevel = getFeatureLevel(levels, 'auto_equip_loot');
     // OFFLINE PROGRESS DESATIVADO (2026-07): flags sempre off.
     // const backgroundTickLevel = getFeatureLevel(levels, 'background_tick');
+    // OTIMIZAR EQUIPE DESATIVADO (2026-08):
+    // const optimizeLevel = getFeatureLevel(levels, 'optimize_loadout');
 
     return {
       autoBattle: true,
@@ -39,8 +40,12 @@ export class FeatureAccessPolicy {
       autoOpenChests: getFeatureLevel(levels, 'auto_open_chests') >= 1,
       openAllChests: openAllLevel >= 1,
       autoOpenAllChests: openAllLevel >= 2,
-      optimizeLoadout: optimizeLevel >= 1,
-      optimizeInLootBatch: optimizeLevel >= 2,
+      // OTIMIZAR EQUIPE DESATIVADO (2026-08): flags sempre off (saves legados ignorados).
+      optimizeLoadout: false,
+      optimizeInLootBatch: false,
+      // --- original (reativar otimizar equipe) ---
+      // optimizeLoadout: optimizeLevel >= 1,
+      // optimizeInLootBatch: optimizeLevel >= 2,
       autoEquipLoot: autoEquipLevel >= 1,
       autoEquipSilent: autoEquipLevel >= 2,
       logFilter: getFeatureLevel(levels, 'log_filter') >= 1,
