@@ -454,13 +454,14 @@ export class CombatTurnPhase {
     const castSpeed = attackerProfile.castSpeed;
     const cooldownReduction = attackerProfile.cooldownReduction;
     const skillRank =
-      actor.side === 'hero' && usedSkillId
-        ? (heroes.find((entry) => entry.id === actor.id)?.toProps().skillRanks[usedSkillId] ?? 1)
-        : 1;
+      usedSkillId == null
+        ? 1
+        : actor.side === 'hero'
+          ? (heroes.find((entry) => entry.id === actor.id)?.toProps().skillRanks[usedSkillId] ?? 1)
+          : (enemies.find((entry) => entry.id === actor.id)?.skillRanks[usedSkillId] ?? 1);
     const updatedCooldowns = cooldowns
       .onSkillUsed(actorKey, usedSkillId, skillList, cooldownReduction, {
         rank: skillRank,
-        forEnemy: actor.side === 'enemy',
       })
       .toMap();
 

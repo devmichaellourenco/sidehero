@@ -30,8 +30,11 @@ export class SkillCooldownTracker {
     for (const enemy of enemies) {
       const key = combatantKey('enemy', enemy.id);
       cooldowns[key] = {};
+      const ranks = enemy.skillRanks;
       for (const skill of listEnemyCombatSkills(enemy)) {
-        const initial = getInitialCooldownSeconds(skill, { forEnemy: true });
+        const initial = getInitialCooldownSeconds(skill, {
+          rank: ranks[skill.skillId] ?? 1,
+        });
         if (initial > 0) {
           cooldowns[key][skill.skillId] = initial;
         }

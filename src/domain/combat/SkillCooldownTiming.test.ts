@@ -33,10 +33,12 @@ describe('SkillCooldownTiming — cadência herói', () => {
     expect(getCooldownSeconds(EARLY_SKILL, { rank: 99 })).toBe(MIN_SKILL_COOLDOWN_SECONDS);
   });
 
-  it('inimigos mantêm escala legada de 1s por turno', () => {
-    expect(getCooldownSeconds(EARLY_SKILL, { forEnemy: true })).toBe(2);
+  it('inimigos usam a mesma cadência dos heróis (BAL-013)', () => {
+    expect(getCooldownSeconds(EARLY_SKILL, { forEnemy: true })).toBe(
+      2 * HERO_SKILL_COOLDOWN_TURN_SECONDS,
+    );
     expect(getInitialCooldownSeconds({ ...EARLY_SKILL, initialCooldown: 4 }, { forEnemy: true })).toBe(
-      4,
+      4 * HERO_SKILL_COOLDOWN_TURN_SECONDS,
     );
   });
 });

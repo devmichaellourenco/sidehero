@@ -8,6 +8,8 @@ export interface EnemySlot {
   count: number;
   /** Nome exibido no combate (ex.: boss único "Saci" sem prefixo "Boss"). */
   displayName?: string;
+  /** Level de combate; se omitido, usa difficultyTier da fase. */
+  level?: number;
 }
 
 export interface WaveDefinition {

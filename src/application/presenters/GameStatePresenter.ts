@@ -1,6 +1,5 @@
 import { GameState } from '../../domain/entities/GameState';
 import { Enemy } from '../../domain/entities/Enemy';
-import { Gear } from '../../domain/entities/Gear';
 import { Chest } from '../../domain/entities/Chest';
 import { UpgradeService } from '../../domain/upgrades/UpgradeService';
 import { mapChestProgress } from '../mappers/ChestProgressMapper';
@@ -36,6 +35,7 @@ import { resistanceProfileFromHeroEquipment } from '../../domain/combat/Resistan
 import { resolveEnemyInnateResists } from '../../domain/enemies/EnemyInnateResists';
 import { StorageCapacityPolicy } from '../../domain/storage/StorageCapacityPolicy';
 import { mapCombatHintLine } from '../../domain/campaign/MapCombatIdentityCatalog';
+import { mapEnemyCombatStatSheet } from '../mappers/EnemyCombatStatSheetMapper';
 
 export class GameStatePresenter {
   constructor(
@@ -221,6 +221,8 @@ function mapEnemyToDto(
     name: enemy.name,
     enemyType: enemy.enemyType,
     role: enemy.role,
+    level: enemy.level,
+    attributes: { ...enemy.totalAttributes },
     health: enemy.stats.currentHealth,
     maxHealth: enemy.stats.maxHealth,
     attack: enemy.stats.attack,
@@ -243,6 +245,8 @@ function mapEnemyToDto(
     combatResists: mapCombatResistSummary(
       resolveEnemyInnateResists(enemy.enemyType, enemy.stage),
     ),
+    passiveIds: [...enemy.passiveIds],
+    combatStatSheet: mapEnemyCombatStatSheet(enemy),
   };
 }
 

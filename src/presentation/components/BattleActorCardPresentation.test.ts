@@ -69,6 +69,8 @@ describe('renderBattleActorCard', () => {
       castSpeed: 1,
       goldReward: 10,
       xpReward: 10,
+      level: 200,
+      attributes: { str: 20, dex: 12, int: 10 },
       signatureSkills: [],
       combatIntent: null,
       combatSkills: [],
@@ -77,6 +79,8 @@ describe('renderBattleActorCard', () => {
       actionTimeTotal: 1,
       statusEffects: [],
       combatResists: { fire: 0, cold: 0, lightning: 0, air: 0 },
+      passiveIds: [],
+      combatStatSheet: [],
     } satisfies EnemyDto;
 
     const bossHtml = renderEnemyBattleCard(enemy, 200, '<span></span>');

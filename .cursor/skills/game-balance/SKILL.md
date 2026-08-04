@@ -31,14 +31,14 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 |---------|---------|-------------------|---------|
 | Hit instantâneo | `damageComponents[]` | Pipeline por elemento + DEF | `MitigationPipeline.ts` |
 | TTA / ASPD | perfil do combatente | `1/ASPD` (DEX/STR + baseline; sem piso global) | `CombatSpeedScaling.ts`, `ActionTimerService.ts` |
-| Recarga de skill (herói) | `cooldownTurns` / rank | turns×5s − 1,5s×(level−1), piso 4s | `SkillCooldownTiming.ts` |
-| Ataque básico | ATK | ×0,5 | `SkillPowerCalculator.ts` |
+| Inimigo stats | level, attrs, role, tier template | `buildEnemyCombatSheet` + derived | `EnemyProgressionCatalog.ts`, `WaveEnemyFactory.ts` |
+| Recarga de skill | `cooldownTurns` / rank | turns×5s − 1,5s×(level−1), piso 4s (herói e inimigo) | `SkillCooldownTiming.ts` |
+| Ataque básico | ATK | ×0,5 (herói e inimigo) | `SkillPowerCalculator.ts` |
 | Crítico | `critChance`, `critDamage` | Multiplicador antes do split | `CombatDamageResolver.ts` |
 | DEF efetiva | base + debuff | Só componente `physical` | `CombatStatResolver.ts` |
 | Resist | gear + inato | `getEffectiveResistance` | `ResistanceProfile.ts` |
 | Esquiva/block/DR | gear + passivas | Após soma de componentes | `DefensiveMitigation.ts` |
 | DOT tick | `onHitDot` | **Deve** usar pipeline (backlog BAL-001) | `CombatTurnPhase.ts` |
-| Inimigo stats | tier, role | `StageScalingCatalog` | `WaveEnemyFactory.ts` |
 | XP por kill | mapa, tier, replay | `CampaignXpScaling` | `WaveEnemyFactory.ts`, `PhaseLootPolicy.ts` |
 | Loot primário | itemLevel, raridade | `rolledGearPrimaryStat` | `DifficultyCombatScaling.ts`, `MapGearLevelPolicy.ts` |
 | Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → referência | `PhaseGoldBudget.ts`, `EconomyReference.ts` |

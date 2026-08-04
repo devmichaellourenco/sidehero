@@ -26,7 +26,7 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Combate e fórmulas** | Dano, cura, crítico, status, turnos/tick | `combat-campaign` | `MitigationPipeline`, `CombatDamageResolver`, `CombatActionExecutor`, `CombatTurnPhase` |
 | **Elementos** | Cada elemento (`physical`/`fire`/`cold`/`lightning`/`air`) usa mitigação do tipo; multi-componente; DOT | `combat-campaign`, `skills-progression` | `DamageElement`, `ResistanceProfile`, `HeroCombatSkillCatalog`, `EnemyMonsterCombatSkillCatalog` |
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
-| **Waves e fases** | HP/ATK/DEF inimigos por tier; boss vs trash; handcrafted | `combat-campaign` | `StageScalingCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
+| **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted | `combat-campaign` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
 | **Skills e progressão** | `Base × (powerPerRank × nível) × (attr × fator)`; cooldowns; ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `SkillDamageBalance`, `HeroLevelXpCatalog` |
 | **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
@@ -58,6 +58,7 @@ Poder × crítico → split damageComponents[]
 - [x] BAL-010 — identidade soft por mapa (pools + resists −15/+20) nos 4 mapas base
 - [x] BAL-011 — micro-desafios multi-slot (race/sustain/spike/warded/armored) nos 4 mapas base
 - [x] BAL-012 — cadência early: TTA individual (1/ASPD, DEX); skills ~10s CD (−1,5s/level); básico = 50% ATK
+- [x] BAL-013 — inimigos no mesmo modelo de combate dos heróis (level/attrs/ranks/passivas; CD e básico unificados; sem knobs ATK/HP/skill)
 
 ## Coordenação com outros agents
 
@@ -124,6 +125,11 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `ProgressionPowerScale.test.ts` — curva de XP e stats de gear por nível
 - [x] `CampaignXpScaling.test.ts` — XP por mapa, early boost e metas de progressão
 - [x] `GameStateMigration.test.ts` — migração legada `chaos*` → `air*` (gear, IDs, DOT)
+- [x] `EnemyProgressionCatalog.test.ts` — sheet por level/role (BAL-013)
+- [x] `WaveEnemyFactory.test.ts` — spawn por level; HP derivado sem knobs legados
+- [x] `EnemyCombatStatSheetMapper.test.ts` — ficha de combate do inimigo
+- [x] `SkillPowerCalculator.test.ts` — básico/skill inimigo alinhados ao herói
+- [x] `SkillCooldownTiming.test.ts` — CD unificado herói/inimigo
 
 ## Backlog conhecido (auditoria 2026-07-03)
 
@@ -141,3 +147,4 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-010 | Alta | Mapas sem identidade de combate — meta colapsa em DPS genérico | Campanha/Elementos | ✅ Resolvido (`MapCombatIdentityCatalog`, bias soft, X-50) |
 | BAL-011 | Alta | Builds monótonas; pressão só no priest; mago/físico sem trade-off | Campanha/Waves | ✅ Resolvido (`PhaseChallengeCatalog` race/sustain/spike/warded/armored · Stendra→Morthaven) |
 | BAL-012 | Alta | Combate early acelerado demais (TTA curto, skills rápidas, básico = ATK cheio) | Combate/Skills | ✅ Resolvido (TTA = 1/ASPD por combatente + DEX; CD herói ×5; rank −1,5s; básico 50% ATK) |
+| BAL-013 | Alta | Inimigos usavam knobs/fórmulas paralelas (HP factor, ASPD por stage, CD 1s/turn) | Combate/Campanha | ✅ Resolvido (`EnemyProgressionCatalog`, `CombatantDerivedStats`, CD/básico unificados) |

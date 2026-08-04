@@ -4,7 +4,6 @@ import { Gear } from '../entities/Gear';
 import {
   clampDefensiveMitigation,
   DefensiveMitigation,
-  ZERO_DEFENSIVE,
 } from './DefensiveMitigation';
 import {
   evasionDodgeBonusAtRank,
@@ -71,18 +70,15 @@ export function defensiveMitigationForHero(hero: Hero): DefensiveMitigation {
 }
 
 export function defensiveMitigationForEnemy(enemy: Enemy): DefensiveMitigation {
+  // Mesma base de esquiva por DEX que heróis; passivas de skill (evasion etc.) são de herói.
+  const dodgeChance = enemy.totalAttributes.dex * 0.0015;
   const entry = getEnemyRosterEntry(enemy.enemyType);
-  if (!entry) {
-    return ZERO_DEFENSIVE;
-  }
-
   const roleDodge =
-    entry.rosterRole === 'boss' ? 0.04 : entry.rosterRole === 'subboss' ? 0.02 : 0;
-  const roleBlock = roleDodge * 0.5;
+    entry?.rosterRole === 'boss' ? 0.04 : entry?.rosterRole === 'subboss' ? 0.02 : 0;
 
   return clampDefensiveMitigation({
-    dodgeChance: roleDodge,
-    blockChance: roleBlock,
+    dodgeChance: dodgeChance + roleDodge,
+    blockChance: roleDodge * 0.5,
     damageReduction: 0,
   });
 }

@@ -63,7 +63,9 @@ export class CombatSkillBarResolver {
       options,
     );
 
-    return this.mapSkills(key, skills, cooldowns, highlights, { forEnemy: true });
+    return this.mapSkills(key, skills, cooldowns, highlights, {
+      ranks: enemy.skillRanks,
+    });
   }
 
   private resolveHighlights(

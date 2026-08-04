@@ -1,56 +1,51 @@
 import { describe, expect, it } from 'vitest';
 import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
+import { Stats } from '../../value-objects/Stats';
 import { getClassCombatBaseline } from '../../combat/ClassCombatBaselines';
 import { resolveHeroAttributeAttackSpeed } from '../../combat/CombatSpeedScaling';
-import { getEnemyCombatBaseline } from '../../combat/EnemyCombatBaselines';
-import {
-  applyEnemyDamageSkillPower,
-  ENEMY_DAMAGE_SKILL_MULTIPLIER,
-  ENEMY_HP_BALANCE_FACTOR,
-  ENEMY_PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
-  resolveEnemyAttackSpeed,
-  resolveEnemyStageAttackSpeedBonus,
-} from '../../combat/EnemyCombatBalance';
+import { buildEnemyCombatSheet } from '../../enemies/EnemyProgressionCatalog';
+import { deriveCombatMaxHealth } from '../../combat/CombatantDerivedStats';
+import { resolveEnemySpawnMaxHealth } from '../../combat/EnemyCombatBalance';
+import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
+import { PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO } from './SkillDamageBalance';
 import { getHeroCombatSkill } from './HeroCombatSkillCatalog';
 import { listEnemyCombatSkillsByType } from './EnemyCombatSkillCatalog';
 import { SkillPowerCalculator } from './SkillPowerCalculator';
 
-describe('EnemyCombatBalance', () => {
-  it('aumenta HP base dos inimigos para compensar buff de skills dos heróis', () => {
-    expect(ENEMY_HP_BALANCE_FACTOR).toBeGreaterThan(1);
-  });
+function enemyFromSheet(
+  enemyType: string,
+  level: number,
+  role: 'trash' | 'elite' | 'boss' = 'trash',
+): Enemy {
+  const sheet = buildEnemyCombatSheet({ enemyType, level, role });
+  const maxHealth = resolveEnemySpawnMaxHealth(
+    deriveCombatMaxHealth({
+      baseMaxHealth: sheet.baseMaxHealth,
+      level: sheet.level,
+      attributes: sheet.attributes,
+    }),
+  );
 
-  it('ASPD inicial de inimigo é menor que o baseline de tier', () => {
-    const baseline = getEnemyCombatBaseline('goblin_raider').attackSpeed;
-    expect(resolveEnemyAttackSpeed(baseline, 1)).toBeLessThan(baseline);
+  return Enemy.restore({
+    id: `${enemyType}-l${level}`,
+    name: enemyType,
+    enemyType: enemyType as Enemy['enemyType'],
+    stage: level,
+    level: sheet.level,
+    attributes: sheet.attributes,
+    baseAttack: sheet.baseAttack,
+    baseDefense: sheet.baseDefense,
+    baseMaxHealth: sheet.baseMaxHealth,
+    skillRanks: sheet.skillRanks,
+    passiveIds: sheet.passiveIds,
+    physicalMeleeAspd: sheet.physicalMeleeAspd,
+    stats: Stats.fromBase(sheet.baseAttack, sheet.baseDefense, maxHealth),
+    goldReward: 1,
+    xpReward: 1,
+    role,
   });
-
-  it('ASPD de inimigo cresce com o tier da fase', () => {
-    const baseline = getEnemyCombatBaseline('orc_warrior').attackSpeed;
-    expect(resolveEnemyAttackSpeed(baseline, 40)).toBeGreaterThan(
-      resolveEnemyAttackSpeed(baseline, 5),
-    );
-    expect(resolveEnemyStageAttackSpeedBonus(200)).toBe(
-      resolveEnemyStageAttackSpeedBonus(500),
-    );
-  });
-
-  it('skills físicas de inimigo respeitam piso em relação ao ATK', () => {
-    const goblinStab = listEnemyCombatSkillsByType('goblin_raider').find(
-      (skill) => skill.skillId === 'goblin_stab',
-    )!;
-    const attack = 14;
-    const raw = goblinStab.basePower + 2;
-
-    expect(applyEnemyDamageSkillPower(goblinStab, raw, attack)).toBe(
-      Math.max(
-        Math.floor(raw * ENEMY_DAMAGE_SKILL_MULTIPLIER),
-        Math.floor(attack * ENEMY_PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO),
-      ),
-    );
-  });
-});
+}
 
 describe('SkillPowerCalculator', () => {
   const calculator = new SkillPowerCalculator();
@@ -81,18 +76,13 @@ describe('SkillPowerCalculator', () => {
     const basic = calculator.calculateForHero(getHeroCombatSkill('basic_attack')!, knight);
 
     expect(power).toBeGreaterThan(basic);
-    expect(basic).toBe(Math.max(1, Math.floor(knight.attack * 0.5)));
+    expect(basic).toBe(Math.max(1, Math.floor(knight.attack * BASIC_ATTACK_DAMAGE_RATIO)));
   });
 
-  it('aplica multiplicador de dano nas skills ofensivas de inimigo', () => {
-    const goblin = Enemy.restore({
-      ...Enemy.forStage(2).toProps(),
-      enemyType: 'goblin_raider',
-    });
-    const dragon = Enemy.restore({
-      ...Enemy.forStage(5).toProps(),
-      enemyType: 'young_green_dragon',
-    });
+  it('inimigo usa a mesma fórmula de skill/básico do herói (BAL-013)', () => {
+    const goblin = enemyFromSheet('goblin_raider', 2);
+    const dragon = enemyFromSheet('young_green_dragon', 5);
+    const rat = enemyFromSheet('giant_rat', 1);
 
     const goblinStab = listEnemyCombatSkillsByType('goblin_raider').find(
       (skill) => skill.skillId === 'goblin_stab',
@@ -103,10 +93,22 @@ describe('SkillPowerCalculator', () => {
     const wildBite = listEnemyCombatSkillsByType('giant_rat').find(
       (skill) => skill.skillId === 'wild_bite',
     )!;
+    const basic = listEnemyCombatSkillsByType('goblin_raider').find(
+      (skill) => skill.skillId === 'basic_attack',
+    )!;
 
-    expect(calculator.calculateForEnemy(goblinStab, goblin)).toBe(12);
-    expect(calculator.calculateForEnemy(dragonBreath, dragon)).toBe(19);
-    expect(calculator.calculateForEnemy(wildBite, Enemy.forStage(1))).toBe(11);
+    expect(calculator.calculateForEnemy(basic, goblin)).toBe(
+      Math.max(1, Math.floor(goblin.attack * BASIC_ATTACK_DAMAGE_RATIO)),
+    );
+    expect(calculator.calculateForEnemy(goblinStab, goblin)).toBe(
+      Math.max(1, Math.floor(goblin.attack * PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO)),
+    );
+    expect(calculator.calculateForEnemy(wildBite, rat)).toBe(
+      Math.max(1, Math.floor(rat.attack * PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO)),
+    );
+    expect(calculator.calculateForEnemy(dragonBreath, dragon)).toBeGreaterThan(
+      Math.floor(dragon.attack * BASIC_ATTACK_DAMAGE_RATIO),
+    );
   });
 });
 

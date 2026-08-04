@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { Enemy } from '../entities/Enemy';
 import { Hero } from '../entities/Hero';
 import { Gear } from '../entities/Gear';
-import { getEnemyCombatBaseline } from './EnemyCombatBaselines';
-import { resolveEnemyAttackSpeed } from './EnemyCombatBalance';
+import { getEnemyTierCombatBaseline } from '../enemies/EnemyProgressionCatalog';
+import { resolveAttributeAttackSpeed } from './CombatSpeedScaling';
 import {
   applyCooldownReduction,
   CombatProfileProvider,
@@ -115,16 +115,24 @@ describe('CombatProfileProvider', () => {
     expect(invested.attackSpeed).toBeGreaterThan(starter.attackSpeed);
   });
 
-  it('inimigo inicial ataca mais devagar que o baseline de tier', () => {
+  it('inimigo ASPD = baseline do tier + attrs (sem escala por stage)', () => {
     const goblin = Enemy.forStage(1);
     const profile = profiles.forEnemy(goblin);
-    const tierBaseline = getEnemyCombatBaseline(goblin.enemyType).attackSpeed;
+    const tierBaseline = getEnemyTierCombatBaseline(goblin.enemyType).attackSpeed;
+    const expected = Math.max(
+      0.35,
+      resolveAttributeAttackSpeed(
+        tierBaseline,
+        goblin.totalAttributes,
+        goblin.physicalMeleeAspd,
+      ),
+    );
 
+    expect(profile.attackSpeed).toBeCloseTo(expected, 4);
     expect(profile.attackSpeed).toBeLessThan(tierBaseline);
-    expect(profile.attackSpeed).toBeCloseTo(resolveEnemyAttackSpeed(tierBaseline, 1), 4);
   });
 
-  it('inimigo acelera com tier mais alto', () => {
+  it('inimigo acelera com level (mais attrs)', () => {
     const early = profiles.forEnemy(Enemy.forStage(3));
     const late = profiles.forEnemy(Enemy.forStage(40));
 

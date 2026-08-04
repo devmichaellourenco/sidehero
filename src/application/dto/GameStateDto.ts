@@ -194,6 +194,8 @@ export interface EnemyDto {
   name: string;
   enemyType: string;
   role: 'trash' | 'elite' | 'boss';
+  level: number;
+  attributes: AttributesDto;
   health: number;
   maxHealth: number;
   attack: number;
@@ -210,6 +212,9 @@ export interface EnemyDto {
   actionTimeTotal: number;
   statusEffects: CombatStatusEffectDto[];
   combatResists: CombatResistSummaryDto;
+  passiveIds: string[];
+  /** Ficha de combate (espelho do herói, sem gear) — tooltip/comparador. */
+  combatStatSheet: HeroCombatStatSectionDto[];
 }
 
 export interface GearDto {

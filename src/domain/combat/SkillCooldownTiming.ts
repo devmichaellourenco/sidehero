@@ -1,60 +1,51 @@
 import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefinition';
 import {
-  ENEMY_SKILL_COOLDOWN_TURN_SECONDS,
   HERO_SKILL_COOLDOWN_TURN_SECONDS,
   MIN_SKILL_COOLDOWN_SECONDS,
   SKILL_COOLDOWN_SECONDS_PER_RANK,
 } from './CombatTimingConstants';
 
 export interface SkillCooldownTimingOptions {
-  /** Level da skill (herói). Level 1 = cooldown base. */
+  /** Level da skill. Level 1 = cooldown base. */
   rank?: number;
-  /** Skills de inimigo não usam escala de herói nem redução por level. */
+  /**
+   * @deprecated Inimigos usam a mesma cadência dos heróis (BAL-013).
+   * Mantido só para não quebrar call sites; ignorado.
+   */
   forEnemy?: boolean;
 }
 
-function resolveBaseCooldownSeconds(
-  skill: CombatSkillDefinition,
-  forEnemy: boolean,
-): number {
+function resolveBaseCooldownSeconds(skill: CombatSkillDefinition): number {
   if (skill.cooldownSeconds !== undefined) {
     return Math.max(0, skill.cooldownSeconds);
   }
 
-  const turnSeconds = forEnemy
-    ? ENEMY_SKILL_COOLDOWN_TURN_SECONDS
-    : HERO_SKILL_COOLDOWN_TURN_SECONDS;
-  return Math.max(0, skill.cooldownTurns) * turnSeconds;
+  return Math.max(0, skill.cooldownTurns) * HERO_SKILL_COOLDOWN_TURN_SECONDS;
 }
 
-function resolveBaseInitialCooldownSeconds(
-  skill: CombatSkillDefinition,
-  forEnemy: boolean,
-): number {
+function resolveBaseInitialCooldownSeconds(skill: CombatSkillDefinition): number {
   if (skill.initialCooldownSeconds !== undefined) {
     return Math.max(0, skill.initialCooldownSeconds);
   }
 
-  const turnSeconds = forEnemy
-    ? ENEMY_SKILL_COOLDOWN_TURN_SECONDS
-    : HERO_SKILL_COOLDOWN_TURN_SECONDS;
-  return Math.max(0, skill.initialCooldown) * turnSeconds;
+  return Math.max(0, skill.initialCooldown) * HERO_SKILL_COOLDOWN_TURN_SECONDS;
 }
 
 export function getInitialCooldownSeconds(
   skill: CombatSkillDefinition,
   options: SkillCooldownTimingOptions = {},
 ): number {
-  return resolveBaseInitialCooldownSeconds(skill, options.forEnemy === true);
+  void options.forEnemy;
+  return resolveBaseInitialCooldownSeconds(skill);
 }
 
 export function getCooldownSeconds(
   skill: CombatSkillDefinition,
   options: SkillCooldownTimingOptions = {},
 ): number {
-  const base = resolveBaseCooldownSeconds(skill, options.forEnemy === true);
+  void options.forEnemy;
+  const base = resolveBaseCooldownSeconds(skill);
   if (base <= 0) return 0;
-  if (options.forEnemy) return base;
 
   const rank = Math.max(1, options.rank ?? 1);
   const reduced = base - (rank - 1) * SKILL_COOLDOWN_SECONDS_PER_RANK;

@@ -69,11 +69,11 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'road_bandit', name: 'Bandido de Estrada', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.bandit1 },
   { id: 'goblin_shaman', name: 'Xamã Goblin', powerTier: T1, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.shaman1 },
   { id: 'bandit_captain', name: 'Capitão dos Bandidos', powerTier: T1, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.captain1 },
-  { id: 'hill_ogre', name: 'Ogro das Colinas', powerTier: T1, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.ogre1 },
+  { id: 'hill_ogre', name: 'Ogro das Colinas', powerTier: T1, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.ogre1, passiveIds: ['titan_health'] },
 
   // Nível 2 — Efetivado
   { id: 'orc_warrior', name: 'Orc Guerreiro', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.orc1 },
-  { id: 'orc_berserker', name: 'Orc Berserker', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.orc1 },
+  { id: 'orc_berserker', name: 'Orc Berserker', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.orc1, passiveIds: ['blood_thirst'] },
   { id: 'gnoll_hunter', name: 'Gnoll Caçador', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.beast1 },
   { id: 'giant_spider', name: 'Aranha Gigante', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'poison_spit'] },
   { id: 'lizardman', name: 'Homem-Lagarto', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.orc1 },
@@ -95,7 +95,7 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'major_elemental', name: 'Elemental Maior', powerTier: T3, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'fireball', 'arcane_surge'], innateResists: { fire: 15, lightning: 10 } },
   { id: 'three_head_hydra', name: 'Hidra de Três Cabeças', powerTier: T3, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.hydra3 },
   { id: 'dead_general', name: 'General dos Mortos', powerTier: T3, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.general3 },
-  { id: 'young_green_dragon', name: 'Dragão Verde Jovem', powerTier: T3, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.dragon3 },
+  { id: 'young_green_dragon', name: 'Dragão Verde Jovem', powerTier: T3, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.dragon3, passiveIds: ['magic_affinity'] },
 
   // Nível 4 — Especialista
   { id: 'stone_giant', name: 'Gigante da Pedra', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'ground_slam'] },
@@ -105,9 +105,9 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'infernal_devil', name: 'Diabo Infernal', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'pyro_inferno', 'wraith_curse'] },
   { id: 'aberrant_abomination', name: 'Abominação Aberrante', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'wraith_drain', 'arcane_surge'] },
   { id: 'adult_black_dragon', name: 'Dragão Negro Adulto', powerTier: T4, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.dragon3 },
-  { id: 'lesser_lich', name: 'Lich Menor', powerTier: T4, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.lich4 },
+  { id: 'lesser_lich', name: 'Lich Menor', powerTier: T4, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.lich4, passiveIds: ['arcane_focus'] },
   { id: 'demonic_warlord', name: 'Senhor da Guerra Demoníaco', powerTier: T4, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.warlord4 },
-  { id: 'awakened_titan', name: 'Titã Desperto', powerTier: T4, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.titan4 },
+  { id: 'awakened_titan', name: 'Titã Desperto', powerTier: T4, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.titan4, passiveIds: ['titan_health', 'discipline_steel'] },
 
   // Nível 5 — Épico
   { id: 'ancient_dragon', name: 'Dragão Ancião', powerTier: T5, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.dragon3 },

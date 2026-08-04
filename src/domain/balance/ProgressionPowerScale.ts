@@ -19,5 +19,5 @@ export function lootPrimaryStatScaleForItemLevel(itemLevel: number): number {
   return 1 + Math.pow(level, 1.28) * 0.016;
 }
 
-/** Escala leve de stats de inimigo para acompanhar poder épico do jogador. */
+/** @deprecated BAL-013: poder de inimigo vem de level/attrs; não usar no spawn. */
 export const ENEMY_CAMPAIGN_STAT_SCALE = 1.12;

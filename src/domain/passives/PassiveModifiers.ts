@@ -1,8 +1,12 @@
+import { Enemy } from '../entities/Enemy';
 import { Hero } from '../entities/Hero';
+import { Attributes } from '../progression/Attributes';
 import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefinition';
 import { isDamageCombatKind } from '../progression/combat/SkillCombatKind';
-import { resolveHeroPassives } from './PassiveResolver';
+import { resolveEnemyPassives, resolveHeroPassives } from './PassiveResolver';
 import { ActivePassive, PassiveEffect } from './PassiveTypes';
+
+export { resolveEnemyPassives } from './PassiveResolver';
 
 function sumEffects(
   actives: readonly ActivePassive[],
@@ -54,10 +58,31 @@ export function heroPassiveMaxHealthPercent(hero: Hero): number {
 }
 
 export function heroPassiveTreeDamagePercent(hero: Hero, skill: CombatSkillDefinition): number {
+  return sumPassiveTreeDamagePercent(
+    resolveHeroPassives(hero),
+    skill,
+    hero.level,
+    hero.totalAttributes,
+  );
+}
+
+export function heroPassiveAllySupportPercent(hero: Hero, skill: CombatSkillDefinition): number {
+  return sumPassiveAllySupportPercent(
+    resolveHeroPassives(hero),
+    skill,
+    hero.totalAttributes.int,
+  );
+}
+
+/** Agrega bônus de dano de árvore a partir de passivas já resolvidas (herói ou inimigo). */
+export function sumPassiveTreeDamagePercent(
+  actives: readonly ActivePassive[],
+  skill: CombatSkillDefinition,
+  level: number,
+  attrs: Attributes,
+): number {
   if (!isTreeDamageSkill(skill)) return 0;
 
-  const actives = resolveHeroPassives(hero);
-  const attrs = hero.totalAttributes;
   const flat = sumEffects(actives, (effect) =>
     effect.kind === 'tree_damage_percent_flat' ? effect.percent : null,
   );
@@ -76,17 +101,20 @@ export function heroPassiveTreeDamagePercent(hero: Hero, skill: CombatSkillDefin
 
   return (
     flat +
-    perLevel * hero.level +
+    perLevel * level +
     perStr * attrs.str +
     perInt * attrs.int +
     perDex * attrs.dex
   );
 }
 
-export function heroPassiveAllySupportPercent(hero: Hero, skill: CombatSkillDefinition): number {
+export function sumPassiveAllySupportPercent(
+  actives: readonly ActivePassive[],
+  skill: CombatSkillDefinition,
+  intValue: number,
+): number {
   if (!isAllySupportSkill(skill)) return 0;
 
-  const actives = resolveHeroPassives(hero);
   const flat = sumEffects(actives, (effect) =>
     effect.kind === 'ally_support_percent_flat' ? effect.percent : null,
   );
@@ -94,7 +122,34 @@ export function heroPassiveAllySupportPercent(hero: Hero, skill: CombatSkillDefi
     effect.kind === 'ally_support_percent_per_int' ? effect.percentPerPoint : null,
   );
 
-  return flat + perInt * hero.totalAttributes.int;
+  return flat + perInt * intValue;
+}
+
+export function enemyPassiveAttackPercent(enemy: Enemy): number {
+  return sumEffects(resolveEnemyPassives(enemy), (effect) =>
+    effect.kind === 'attack_percent_flat' ? effect.percent : null,
+  );
+}
+
+export function enemyPassiveDefensePercent(enemy: Enemy): number {
+  return sumEffects(resolveEnemyPassives(enemy), (effect) =>
+    effect.kind === 'defense_percent_flat' ? effect.percent : null,
+  );
+}
+
+export function enemyPassiveMaxHealthPercent(enemy: Enemy): number {
+  const actives = resolveEnemyPassives(enemy);
+  const flat = sumEffects(actives, (effect) =>
+    effect.kind === 'max_health_percent_flat' ? effect.percent : null,
+  );
+  const perDefense = sumEffects(actives, (effect) =>
+    effect.kind === 'max_health_percent_per_defense' ? effect.percentPerPoint : null,
+  );
+  const perLevel = sumEffects(actives, (effect) =>
+    effect.kind === 'max_health_percent_per_level' ? effect.percentPerLevel : null,
+  );
+
+  return flat + perDefense * enemy.defense + perLevel * enemy.level;
 }
 
 export function applyPercentBonus(base: number, percentBonus: number): number {

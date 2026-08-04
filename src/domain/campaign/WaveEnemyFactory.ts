@@ -2,9 +2,11 @@ import { Enemy } from '../entities/Enemy';
 import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
 import { phaseGoldScaleForPhase } from '../balance/PhaseGoldBudget';
 import { resolveCampaignKillXp } from '../balance/CampaignXpScaling';
-import { ENEMY_CAMPAIGN_STAT_SCALE } from '../balance/ProgressionPowerScale';
-import { ENEMY_ATK_BALANCE_FACTOR, ENEMY_HP_BALANCE_FACTOR, resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
-import { stageScalingFactorsForTier } from '../progression/StageScalingCatalog';
+import {
+  deriveCombatMaxHealth,
+} from '../combat/CombatantDerivedStats';
+import { resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
+import { buildEnemyCombatSheet } from '../enemies/EnemyProgressionCatalog';
 import { Stats } from '../value-objects/Stats';
 import { PhaseId } from './CampaignIds';
 import { EnemyRole, EnemySlot, WaveDefinition } from './WaveDefinition';
@@ -20,10 +22,10 @@ export interface WaveSpawnContext {
   applyPhaseGoldBudget?: boolean;
 }
 
-const ROLE_SCALE: Record<EnemyRole, { stat: number; reward: number }> = {
-  trash: { stat: 1, reward: 1 },
-  elite: { stat: 1.35, reward: 1.25 },
-  boss: { stat: 1.75, reward: 1.6 },
+const ROLE_REWARD_SCALE: Record<EnemyRole, number> = {
+  trash: 1,
+  elite: 1.25,
+  boss: 1.6,
 };
 
 export function spawnEnemiesForWave(
@@ -49,41 +51,58 @@ export function spawnEnemiesForWave(
   return enemies;
 }
 
+/**
+ * Level de combate do inimigo: override do slot ou difficultyTier da fase.
+ * O mesmo template pode reaparecer em fases diferentes com levels distintos.
+ */
+export function resolveEnemySpawnLevel(
+  slot: EnemySlot,
+  difficultyTier: number,
+): number {
+  if (typeof slot.level === 'number' && slot.level > 0) {
+    return Math.floor(slot.level);
+  }
+  return Math.max(1, Math.floor(difficultyTier));
+}
+
 function createEnemyFromSlot(
   slot: EnemySlot,
   context: WaveSpawnContext & { slotIndex: number; goldMultiplier: number },
 ): Enemy {
-  const scaling = stageScalingFactorsForTier(
-    context.difficultyTier,
-    context.statMultiplier ?? 1,
-  );
-  const roleScale = ROLE_SCALE[slot.role];
-  const campaignScale = ENEMY_CAMPAIGN_STAT_SCALE;
-  const attack = Math.floor(
-    12 * scaling.atk * roleScale.stat * ENEMY_ATK_BALANCE_FACTOR * campaignScale,
-  );
-  const defense = Math.floor(4 * scaling.atk * roleScale.stat * campaignScale);
+  const level = resolveEnemySpawnLevel(slot, context.difficultyTier);
+  const roleScale = ROLE_REWARD_SCALE[slot.role];
+  const sheet = buildEnemyCombatSheet({
+    enemyType: slot.enemyType,
+    level,
+    role: slot.role,
+  });
+
   const maxHealth = resolveEnemySpawnMaxHealth(
-    Math.floor(72 * scaling.hp * roleScale.stat * ENEMY_HP_BALANCE_FACTOR * campaignScale),
+    deriveCombatMaxHealth({
+      baseMaxHealth: sheet.baseMaxHealth,
+      level: sheet.level,
+      attributes: sheet.attributes,
+    }),
   );
+
   const phaseGoldScale =
     context.applyPhaseGoldBudget === false ? 1 : phaseGoldScaleForPhase(context.phaseId);
   const goldReward = Math.floor(
     8 *
-      scaling.gold *
-      roleScale.reward *
+      (1 + (level - 1) * 0.12) *
+      roleScale *
       context.goldMultiplier *
       (context.milestoneGoldScale ?? 1) *
       phaseGoldScale,
   );
   const xpBase = slot.role === 'boss' ? 8 : slot.role === 'elite' ? 5 : 2;
-  const xpReward = resolveCampaignKillXp(xpBase, context.difficultyTier, roleScale.reward);
+  const xpReward = resolveCampaignKillXp(xpBase, context.difficultyTier, roleScale);
 
   const rosterEntry = getEnemyRosterEntry(slot.enemyType);
   const baseName = rosterEntry?.name ?? slot.enemyType;
   const prefix = slot.role === 'boss' ? 'Boss ' : slot.role === 'elite' ? 'Elite ' : '';
   const suffix = slot.count > 1 ? ` ${context.slotIndex + 1}` : '';
-  const defaultName = `${prefix}${baseName} Lv.${context.difficultyTier}${suffix}`;
+  const defaultName = `${prefix}${baseName} Lv.${level}${suffix}`;
   const name = slot.displayName
     ? slot.count > 1
       ? `${slot.displayName} ${context.slotIndex + 1}`
@@ -95,7 +114,15 @@ function createEnemyFromSlot(
     name,
     enemyType: slot.enemyType,
     stage: context.difficultyTier,
-    stats: Stats.fromBase(attack, defense, maxHealth),
+    level: sheet.level,
+    attributes: sheet.attributes,
+    baseAttack: sheet.baseAttack,
+    baseDefense: sheet.baseDefense,
+    baseMaxHealth: sheet.baseMaxHealth,
+    skillRanks: sheet.skillRanks,
+    passiveIds: sheet.passiveIds,
+    physicalMeleeAspd: sheet.physicalMeleeAspd,
+    stats: Stats.fromBase(sheet.baseAttack, sheet.baseDefense, maxHealth),
     goldReward,
     xpReward,
     role: slot.role,

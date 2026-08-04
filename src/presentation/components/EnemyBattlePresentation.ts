@@ -26,19 +26,45 @@ function renderEnemySkillLines(enemy: EnemyDto): string {
     .join('');
 }
 
+function renderEnemyStatSheetSummary(enemy: EnemyDto): string {
+  const sheet = enemy.combatStatSheet ?? [];
+  if (sheet.length === 0) return '';
+
+  return sheet
+    .map((section) => {
+      const lines = section.lines
+        .slice(0, 4)
+        .map(
+          (line) =>
+            `<span class="enemy-tooltip-line enemy-tooltip-stat" title="${escapeHtml(line.tooltipLines.join('\n'))}">${escapeHtml(line.label)}: ${escapeHtml(line.value)}</span>`,
+        )
+        .join('');
+      return `
+        <span class="enemy-tooltip-section">${escapeHtml(section.title)}</span>
+        ${lines}
+      `;
+    })
+    .join('');
+}
+
 export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): string {
   const healthLabel = formatEnemyHealthLabel(enemy);
   const skillLines = renderEnemySkillLines(enemy);
   const elementalPips = renderCombatResistPips(enemy.combatResists);
+  const attrs = enemy.attributes ?? { str: 0, dex: 0, int: 0 };
+  const level = enemy.level ?? stage;
+  const sheetSummary = renderEnemyStatSheetSummary(enemy);
 
   return `
     <strong class="enemy-tooltip-name">${escapeHtml(enemy.name)}</strong>
-    <span class="enemy-tooltip-line">Stage ${stage}</span>
+    <span class="enemy-tooltip-line">Nível ${level} · Fase tier ${stage}</span>
+    <span class="enemy-tooltip-line">STR ${attrs.str} · DEX ${attrs.dex} · INT ${attrs.int}</span>
     <span class="enemy-tooltip-line">${healthLabel}</span>
     <span class="enemy-tooltip-line">ATK ${enemy.attack} · DEF ${enemy.defense}</span>
     <span class="enemy-tooltip-line">ASPD ${enemy.attackSpeed.toFixed(2)}/s · TTA ${(1 / Math.max(enemy.attackSpeed, 0.01)).toFixed(2)}s</span>
     <span class="enemy-tooltip-line">+${enemy.goldReward} ouro · +${enemy.xpReward} XP</span>
     ${elementalPips ? `<span class="enemy-tooltip-line enemy-tooltip-elements">${elementalPips}</span>` : ''}
+    ${sheetSummary}
     ${skillLines}
   `;
 }

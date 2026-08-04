@@ -1,3 +1,4 @@
+import { Enemy } from '../entities/Enemy';
 import { Hero } from '../entities/Hero';
 import { getGearTemplate } from '../gear/GearTemplateCatalog';
 import { getAscensionById } from '../progression/ClassAscensionCatalog';
@@ -59,6 +60,18 @@ export function resolveHeroPassives(hero: Hero): ActivePassive[] {
     }
   }
 
+  return active;
+}
+
+/** Passivas do roster do inimigo (opcional; nem todo monstro tem). */
+export function resolveEnemyPassives(enemy: Enemy): ActivePassive[] {
+  const active: ActivePassive[] = [];
+  for (const passiveId of enemy.passiveIds) {
+    pushPassive(active, passiveId, {
+      type: 'enemy',
+      enemyType: enemy.enemyType,
+    });
+  }
   return active;
 }
 

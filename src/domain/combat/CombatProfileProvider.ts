@@ -1,11 +1,10 @@
 import { Enemy } from '../entities/Enemy';
 import { Gear } from '../entities/Gear';
 import { Hero } from '../entities/Hero';
-import { resolveHeroAttributeAttackSpeed } from './CombatSpeedScaling';
-import { resolveEnemyAttackSpeed } from './EnemyCombatBalance';
+import { resolveAttributeAttackSpeed, resolveHeroAttributeAttackSpeed } from './CombatSpeedScaling';
 import { getClassCombatBaseline } from './ClassCombatBaselines';
 import { CombatProfile, createCombatProfile } from './CombatProfile';
-import { getEnemyCombatBaseline } from './EnemyCombatBaselines';
+import { getEnemyTierCombatBaseline } from '../enemies/EnemyProgressionCatalog';
 
 const MIN_COMBAT_SPEED = 0.35;
 export const MAX_COOLDOWN_REDUCTION = 0.45;
@@ -59,12 +58,16 @@ export class CombatProfileProvider {
     });
   }
 
-  forEnemy(enemy: Enemy, isBoss = false): CombatProfile {
-    const baseline = getEnemyCombatBaseline(enemy.enemyType, isBoss);
-    const attributeAspd = resolveEnemyAttackSpeed(baseline.attackSpeed, enemy.stage);
+  forEnemy(enemy: Enemy, _isBoss = false): CombatProfile {
+    const baseline = getEnemyTierCombatBaseline(enemy.enemyType);
+    const attributeAspd = resolveAttributeAttackSpeed(
+      baseline.attackSpeed,
+      enemy.totalAttributes,
+      enemy.physicalMeleeAspd,
+    );
 
     return createCombatProfile({
-      attackSpeed: attributeAspd,
+      attackSpeed: resolveAttackSpeed(attributeAspd, 0),
       castSpeed: baseline.castSpeed,
       cooldownReduction: 0,
       critChance: baseline.critChance,

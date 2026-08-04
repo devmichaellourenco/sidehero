@@ -1,26 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { ENEMY_HP_BALANCE_FACTOR, resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
-import { ENEMY_CAMPAIGN_STAT_SCALE } from '../balance/ProgressionPowerScale';
-import { stageScalingFactorsForTier } from '../progression/StageScalingCatalog';
-import { spawnEnemiesForWave } from './WaveEnemyFactory';
+import { deriveCombatMaxHealth } from '../combat/CombatantDerivedStats';
+import { resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
+import { buildEnemyCombatSheet } from '../enemies/EnemyProgressionCatalog';
+import { resolveEnemySpawnLevel, spawnEnemiesForWave } from './WaveEnemyFactory';
 
-describe('stageScalingFactorsForTier', () => {
-  it('cresce de forma agressiva em tiers altos', () => {
-    const early = stageScalingFactorsForTier(5);
-    const mid = stageScalingFactorsForTier(50);
-    const late = stageScalingFactorsForTier(200);
-    const finale = stageScalingFactorsForTier(500, 1.85);
+describe('resolveEnemySpawnLevel', () => {
+  it('usa difficultyTier quando o slot não define level', () => {
+    expect(resolveEnemySpawnLevel({ enemyType: 'goblin_raider', role: 'trash', count: 1 }, 12)).toBe(
+      12,
+    );
+  });
 
-    expect(mid.atk).toBeGreaterThan(early.atk * 3);
-    expect(late.hp).toBeGreaterThan(mid.hp * 3);
-    expect(finale.atk).toBeGreaterThan(late.atk * 1.5);
+  it('respeita override de level no slot', () => {
+    expect(
+      resolveEnemySpawnLevel(
+        { enemyType: 'goblin_raider', role: 'trash', count: 1, level: 40 },
+        12,
+      ),
+    ).toBe(40);
   });
 });
 
 describe('spawnEnemiesForWave', () => {
-  it('aplica fator de HP de balanceamento nos inimigos da campanha', () => {
+  it('deriva HP pelo sheet de progressão (level + attrs), sem knobs legados', () => {
     const [enemy] = spawnEnemiesForWave(
-      { slots: [{ enemyType: 'goblin_raider', role: 'trash', count: 1 }] },
+      { id: 'w0', slots: [{ enemyType: 'goblin_raider', role: 'trash', count: 1 }] },
       {
         phaseId: '1-1',
         waveIndex: 0,
@@ -29,12 +33,61 @@ describe('spawnEnemiesForWave', () => {
       },
     );
 
-    const scaling = stageScalingFactorsForTier(1, 1);
-
-    expect(enemy.stats.maxHealth).toBe(
-      resolveEnemySpawnMaxHealth(
-        Math.floor(72 * scaling.hp * ENEMY_HP_BALANCE_FACTOR * ENEMY_CAMPAIGN_STAT_SCALE),
-      ),
+    const sheet = buildEnemyCombatSheet({
+      enemyType: 'goblin_raider',
+      level: 1,
+      role: 'trash',
+    });
+    const expected = resolveEnemySpawnMaxHealth(
+      deriveCombatMaxHealth({
+        baseMaxHealth: sheet.baseMaxHealth,
+        level: sheet.level,
+        attributes: sheet.attributes,
+      }),
     );
+
+    expect(enemy.level).toBe(1);
+    expect(enemy.stats.maxHealth).toBe(expected);
+    expect(enemy.stats.maxHealth).toBe(106);
+  });
+
+  it('mesmo template em phases diferentes sobe poder pelo level', () => {
+    const [early] = spawnEnemiesForWave(
+      { id: 'w0', slots: [{ enemyType: 'goblin_raider', role: 'trash', count: 1 }] },
+      {
+        phaseId: '1-1',
+        waveIndex: 0,
+        difficultyTier: 1,
+        isBossWave: false,
+      },
+    );
+    const [late] = spawnEnemiesForWave(
+      { id: 'w0', slots: [{ enemyType: 'goblin_raider', role: 'trash', count: 1 }] },
+      {
+        phaseId: '1-10',
+        waveIndex: 0,
+        difficultyTier: 25,
+        isBossWave: false,
+      },
+    );
+
+    expect(late.level).toBe(25);
+    expect(late.attack).toBeGreaterThan(early.attack);
+    expect(late.maxHealth).toBeGreaterThan(early.maxHealth);
+  });
+
+  it('slot.level sobrescreve difficultyTier', () => {
+    const [enemy] = spawnEnemiesForWave(
+      { id: 'w0', slots: [{ enemyType: 'goblin_raider', role: 'trash', count: 1, level: 8 }] },
+      {
+        phaseId: '1-1',
+        waveIndex: 0,
+        difficultyTier: 1,
+        isBossWave: false,
+      },
+    );
+
+    expect(enemy.level).toBe(8);
+    expect(enemy.name).toContain('Lv.8');
   });
 });

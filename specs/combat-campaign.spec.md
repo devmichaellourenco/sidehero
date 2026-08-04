@@ -18,7 +18,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] Wipe na fase: cura completa + reinicia wave 1 da mesma fase
 - [x] Seleção de fase: apenas desbloqueadas ou já concluídas (replay)
 - [x] Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase
-- [x] Scaling de inimigos segue `StageScalingCatalog` por tier global
+- [x] Scaling de inimigos segue level (difficultyTier ou `slot.level`) via `EnemyProgressionCatalog` (BAL-013)
 - [x] No máximo **3 inimigos por wave** (`WaveEnemyCap` / `MAX_ENEMIES_PER_WAVE`)
 - [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos (`physical`/`fire`/`cold`/`lightning`/`air`) e status
 - [x] Persistência migra saves legados: gear/stats `chaos*` → `air*`, IDs `chaos_mantle`/`chaos_pendant` → `air_*`, `dotElement: chaos` → `air`
@@ -94,7 +94,7 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] `CampaignReleaseScope.test.ts` — perfil base, finale, clamp de save
 - [x] `PhaseCombatHandlers.test.ts`, `EnemyKillRewardService.test.ts`, `EnemyLootTable.test.ts`
 - [x] `CombatTurnPhase.test.ts`, `CombatActionExecutor.test.ts`
-- [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`
+- [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`, `EnemyProgressionCatalog.test.ts`
 - [x] `PauseBattleUseCase.test.ts` — pausa/retoma preservando combate e phaseRun
 - [x] `BattleVictoryFlow.test.ts`
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
