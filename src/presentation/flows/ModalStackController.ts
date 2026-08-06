@@ -286,7 +286,6 @@ export class ModalStackController {
       case 'divine-forge':
         this.divineForgeModal.render(container, state, {
           onTabChange: () => this.renderTop(stack, state, options),
-          onSelectionChange: () => this.renderTop(stack, state),
           onFuse: (gearIds) => {
             const forgeGear = listForgeEligibleGear(state);
             const gears = forgeGear.filter((entry) => gearIds.includes(entry.id));

@@ -1,7 +1,7 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
 import {
   bindInventoryGearTooltips,
-  hideInventoryGearTooltip,
+  reanchorPinnedInventoryGearTooltip,
 } from './InventoryGearTooltipBinder';
 import { GEAR_SLOTS, GEAR_SLOT_LABELS, GearSlotKey } from './GearPresentation';
 import { compareGearRarityRank } from './GearRarityPresentation';
@@ -21,8 +21,6 @@ export class StashModalRenderer {
   private sortMode: InventorySortMode = 'rarity';
 
   render(container: HTMLElement, state: GameStateDto, handlers: StashModalHandlers): void {
-    hideInventoryGearTooltip();
-
     if (!state.storageCapacity.stashUnlocked) {
       container.innerHTML = `
         <div class="inventory-panel stash-panel">
@@ -66,6 +64,7 @@ export class StashModalRenderer {
     `;
 
     const countLabel = `<p class="inventory-count">${sorted.length} / ${state.storageCapacity.stashLimit} itens no baú</p>`;
+    const bodyScrollTop = container.scrollTop;
 
     container.innerHTML = `
       <div class="inventory-panel stash-panel">
@@ -87,9 +86,11 @@ export class StashModalRenderer {
         </footer>
       </div>
     `;
+    container.scrollTop = bodyScrollTop;
 
     this.bind(container, handlers);
     bindInventoryGearTooltips(container);
+    reanchorPinnedInventoryGearTooltip(container);
   }
 
   private sortGear(gears: GameStateDto['stash']): GameStateDto['stash'] {

@@ -22,7 +22,8 @@ description: Baú de itens e Forja Divina no Side Hero. Use para stash, baú de 
 - Forja: grid com inventário + baú (`listForgeEligibleGear`)
 - UI Forja: classes `forge-panel--game`, `forge-tab`, `forge-dock`, `forge-game-btn`; confirm com `forge-confirm-dialog`
 - Limpar seleção: ícone `forge-clear-btn` (`data-forge-clear-selection`) à direita do status no dock; texto só no `title`/aria; `DivineForgeModalRenderer.resetSelection()`
-- Scroll do grid: `ForgeGridScrollPresentation` captura/restaura `scrollTop` no re-render
+- Scroll do grid: `ForgeGridScrollPresentation` captura/restaura `scrollTop` no re-render completo
+- Seleção na forja: patch in-place (`DivineForgeModalRenderer.patchSelection`) — não recria a grade no clique
 - Confirm destroy fora da modal stack principal
 
 ## Workflow do agente

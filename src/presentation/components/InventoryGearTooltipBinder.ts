@@ -8,6 +8,7 @@ const SLOT_PINNED_CLASS = 'inventory-grid-slot--tooltip-pinned';
 type TooltipInteractionState = {
   pinned: boolean;
   pinnedSlot: HTMLElement | null;
+  pinnedGearId: string | null;
   slotHovered: boolean;
   portalHovered: boolean;
 };
@@ -15,6 +16,7 @@ type TooltipInteractionState = {
 const interaction: TooltipInteractionState = {
   pinned: false,
   pinnedSlot: null,
+  pinnedGearId: null,
   slotHovered: false,
   portalHovered: false,
 };
@@ -29,6 +31,14 @@ function getRarityClass(element: Element): string {
     if (element.classList.contains(rarity)) return rarity;
   }
   return '';
+}
+
+export function resolveInventorySlotGearId(slot: Element): string | null {
+  return (
+    slot.getAttribute('data-forge-gear-id') ??
+    slot.getAttribute('data-inventory-gear-id') ??
+    slot.getAttribute('data-stash-gear-id')
+  );
 }
 
 function cancelScheduledHide(): void {
@@ -48,12 +58,14 @@ function setSlotPinned(slot: HTMLElement): void {
   clearSlotPinVisual();
   slot.classList.add(SLOT_PINNED_CLASS);
   interaction.pinnedSlot = slot;
+  interaction.pinnedGearId = resolveInventorySlotGearId(slot);
   interaction.pinned = true;
 }
 
 function resetInteraction(): void {
   interaction.pinned = false;
   interaction.pinnedSlot = null;
+  interaction.pinnedGearId = null;
   interaction.slotHovered = false;
   interaction.portalHovered = false;
   clearSlotPinVisual();
@@ -131,6 +143,7 @@ function detachScrollListener(): void {
 function repositionActiveTooltip(): void {
   const portal = document.getElementById(PORTAL_ID);
   if (!portal || portal.classList.contains('hidden') || !activeSlot) return;
+  if (!activeSlot.isConnected) return;
   positionPortal(portal, activeSlot.getBoundingClientRect());
 }
 
@@ -211,6 +224,26 @@ export function hideInventoryGearTooltip(_force = false): void {
   portal.classList.add('hidden');
   portal.style.visibility = '';
   portal.innerHTML = '';
+}
+
+/**
+ * Após re-render da grade (innerHTML), reaplica o pin no slot do mesmo gearId.
+ * Se o item sumiu, esconde o tooltip.
+ */
+export function reanchorPinnedInventoryGearTooltip(root: ParentNode = document): void {
+  if (!interaction.pinned || !interaction.pinnedGearId) return;
+
+  const gearId = interaction.pinnedGearId;
+  const slot = root.querySelector(
+    `[data-forge-gear-id="${CSS.escape(gearId)}"], [data-inventory-gear-id="${CSS.escape(gearId)}"], [data-stash-gear-id="${CSS.escape(gearId)}"]`,
+  ) as HTMLElement | null;
+
+  if (!slot?.querySelector('.inventory-gear-tooltip-content')) {
+    hideInventoryGearTooltip();
+    return;
+  }
+
+  pinAndShow(slot);
 }
 
 function handlePointerOver(event: Event): void {

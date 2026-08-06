@@ -5,6 +5,7 @@ import {
   bindInventoryGearTooltips,
   hideInventoryGearTooltip,
   isInventoryGearTooltipPinned,
+  reanchorPinnedInventoryGearTooltip,
 } from './InventoryGearTooltipBinder';
 
 function mountGrid(): { container: HTMLElement; slot: HTMLElement } {
@@ -84,5 +85,41 @@ describe('InventoryGearTooltipBinder', () => {
     expect(isInventoryGearTooltipPinned()).toBe(false);
 
     vi.useRealTimers();
+  });
+
+  it('reancora pin após recriar o slot no DOM', () => {
+    const { container, slot } = mountGrid();
+
+    slot.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    slot.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(isInventoryGearTooltipPinned()).toBe(true);
+
+    container.innerHTML = `
+      <button type="button" class="inventory-grid-slot rare" data-inventory-gear-id="g1">
+        <span class="inventory-gear-tooltip-content hidden">
+          <strong class="inventory-gear-tooltip-name">Espada</strong>
+        </span>
+      </button>
+    `;
+
+    reanchorPinnedInventoryGearTooltip(container);
+
+    const nextSlot = container.querySelector('.inventory-grid-slot') as HTMLElement;
+    expect(isInventoryGearTooltipPinned()).toBe(true);
+    expect(nextSlot.classList.contains('inventory-grid-slot--tooltip-pinned')).toBe(true);
+    const portal = document.getElementById('inventory-gear-tooltip-portal') as HTMLElement;
+    expect(portal.classList.contains('hidden')).toBe(false);
+  });
+
+  it('esconde pin se o gear sumiu no re-render', () => {
+    const { container, slot } = mountGrid();
+
+    slot.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    slot.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    container.innerHTML = '<p class="empty-state">vazio</p>';
+    reanchorPinnedInventoryGearTooltip(container);
+
+    expect(isInventoryGearTooltipPinned()).toBe(false);
   });
 });

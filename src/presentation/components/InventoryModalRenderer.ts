@@ -11,7 +11,7 @@ import { compareGearRarityRank } from './GearRarityPresentation';
 import { bindEquipmentTooltips } from './EquipmentTooltipBinder';
 import {
   bindInventoryGearTooltips,
-  hideInventoryGearTooltip,
+  reanchorPinnedInventoryGearTooltip,
 } from './InventoryGearTooltipBinder';
 import { computeInventoryEquipFeedback } from './InventoryEquipFeedback';
 import {
@@ -79,8 +79,6 @@ export class InventoryModalRenderer {
       canEditGear?: boolean;
     } = {},
   ): void {
-    hideInventoryGearTooltip();
-
     const selectedHeroId = this.getSelectedHeroId(state);
     this.selectedHeroId = selectedHeroId;
     this.renderPanel(container, state, selectedHeroId, handlers, options);
@@ -217,6 +215,7 @@ export class InventoryModalRenderer {
       .join(' ');
 
     if (state.inventory.length === 0) {
+      const bodyScrollTop = container.scrollTop;
       container.innerHTML = `
         <div class="${panelClass}">
           ${heroSelector}
@@ -230,10 +229,12 @@ export class InventoryModalRenderer {
           <footer class="inventory-footer">${dockSlots || `<div class="inventory-footer-center">${optimizeButton}</div>`}</footer>
         </div>
       `;
+      container.scrollTop = bodyScrollTop;
       this.previousRenderState = state;
       this.heroChangePulse = false;
       this.bind(container, handlers, embedded);
       bindEquipmentTooltips(container);
+      reanchorPinnedInventoryGearTooltip(container);
       return;
     }
 
@@ -248,6 +249,7 @@ export class InventoryModalRenderer {
           ? `<p class="empty-state modal-empty">Nenhum ${slotLabel!.toLowerCase()} disponível no inventário.</p>`
           : '';
 
+    const bodyScrollTop = container.scrollTop;
     container.innerHTML = `
       <div class="${panelClass}">
         ${heroSelector}
@@ -260,12 +262,14 @@ export class InventoryModalRenderer {
         <footer class="inventory-footer">${dockSlots || `<div class="inventory-footer-center">${optimizeButton}</div>`}</footer>
       </div>
     `;
+    container.scrollTop = bodyScrollTop;
 
     this.previousRenderState = state;
     this.heroChangePulse = false;
     this.bind(container, handlers, embedded);
     bindInventoryGearTooltips(container);
     bindEquipmentTooltips(container);
+    reanchorPinnedInventoryGearTooltip(container);
   }
 
   private sortInventory(

@@ -1,7 +1,7 @@
-import { GameStateDto } from '../../application/dto/GameStateDto';
+import { GameStateDto, GearDto } from '../../application/dto/GameStateDto';
 import {
   bindInventoryGearTooltips,
-  hideInventoryGearTooltip,
+  reanchorPinnedInventoryGearTooltip,
 } from './InventoryGearTooltipBinder';
 import {
   captureForgeGridScroll,
@@ -20,15 +20,20 @@ import {
 
 export type DivineForgeModalHandlers = {
   onTabChange: (tab: DivineForgeTab) => void;
-  onSelectionChange: () => void;
   onFuse: (gearIds: string[]) => void;
   onSalvage: (gearId: string) => void;
 };
 
+/**
+ * Forja: seleção de itens atualiza classes + dock in-place (sem recriar a grade).
+ * Re-render completo só em troca de aba ou mudança de inventário/baú.
+ */
 export class DivineForgeModalRenderer {
   private activeTab: DivineForgeTab = 'create';
   private selectedIds = new Set<string>();
   private salvageGearId: string | null = null;
+  private lastState: GameStateDto | null = null;
+  private handlers: DivineForgeModalHandlers | null = null;
 
   resetSelection(): void {
     this.selectedIds.clear();
@@ -40,7 +45,8 @@ export class DivineForgeModalRenderer {
     state: GameStateDto,
     handlers: DivineForgeModalHandlers,
   ): void {
-    hideInventoryGearTooltip();
+    this.lastState = state;
+    this.handlers = handlers;
 
     if (!state.featureFlags.divineForge) {
       container.innerHTML = `
@@ -56,10 +62,7 @@ export class DivineForgeModalRenderer {
     const forgeGear = listForgeEligibleGear(state);
     const stashGearIds = new Set(state.stash.map((gear) => gear.id));
     const selectionStatus = evaluateForgeSelection(this.selectedIds, forgeGear);
-    const selectedSalvageGear =
-      this.salvageGearId !== null
-        ? forgeGear.find((gear) => gear.id === this.salvageGearId) ?? null
-        : null;
+    const selectedSalvageGear = this.resolveSelectedSalvageGear(forgeGear);
 
     const tabPanel =
       this.activeTab === 'create'
@@ -67,6 +70,7 @@ export class DivineForgeModalRenderer {
         : renderSalvageTabPanel(selectedSalvageGear, state.stage);
 
     const scrollTop = captureForgeGridScroll(container);
+    const bodyScrollTop = container.scrollTop;
 
     container.innerHTML = `
       <div class="forge-panel forge-panel--game inventory-panel">
@@ -93,25 +97,74 @@ export class DivineForgeModalRenderer {
       </div>
     `;
 
-    this.bind(container, handlers);
+    this.bind(container);
     bindInventoryGearTooltips(container);
     restoreForgeGridScroll(container, scrollTop);
+    container.scrollTop = bodyScrollTop;
+    reanchorPinnedInventoryGearTooltip(container);
   }
 
-  private bind(container: HTMLElement, handlers: DivineForgeModalHandlers): void {
-    container.querySelectorAll('[data-forge-tab]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const tab = (button as HTMLElement).getAttribute('data-forge-tab') as DivineForgeTab;
+  /** Atualiza seleção visual e dock sem recriar os slots da grade. */
+  patchSelection(container: HTMLElement = document.getElementById('modal-body')!): void {
+    if (!this.lastState || !container) return;
+
+    const forgeGear = listForgeEligibleGear(this.lastState);
+    const selectedIds = this.resolveSelectedIdSet();
+
+    container.querySelectorAll<HTMLElement>('[data-forge-gear-id]').forEach((button) => {
+      const gearId = button.getAttribute('data-forge-gear-id');
+      const selected = gearId !== null && selectedIds.has(gearId);
+      button.classList.toggle('forge-grid-slot--selected', selected);
+      button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+
+    const dock = container.querySelector('.forge-dock');
+    if (!dock) return;
+
+    const panelHtml =
+      this.activeTab === 'create'
+        ? renderCreateTabPanel(evaluateForgeSelection(this.selectedIds, forgeGear))
+        : renderSalvageTabPanel(this.resolveSelectedSalvageGear(forgeGear), this.lastState.stage);
+
+    const wrap = document.createElement('div');
+    wrap.innerHTML = panelHtml.trim();
+    const nextDock = wrap.firstElementChild;
+    if (nextDock) {
+      dock.replaceWith(nextDock);
+    }
+  }
+
+  private resolveSelectedIdSet(): Set<string> {
+    if (this.activeTab === 'create') return this.selectedIds;
+    return new Set(this.salvageGearId ? [this.salvageGearId] : []);
+  }
+
+  private resolveSelectedSalvageGear(forgeGear: GearDto[]): GearDto | null {
+    if (this.salvageGearId === null) return null;
+    return forgeGear.find((gear) => gear.id === this.salvageGearId) ?? null;
+  }
+
+  private bind(container: HTMLElement): void {
+    if (container.dataset.forgeBound === 'true') return;
+    container.dataset.forgeBound = 'true';
+
+    container.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      if (!target || !this.handlers) return;
+
+      const tabBtn = target.closest('[data-forge-tab]') as HTMLElement | null;
+      if (tabBtn) {
+        const tab = tabBtn.getAttribute('data-forge-tab') as DivineForgeTab | null;
         if (!tab || tab === this.activeTab) return;
         this.activeTab = tab;
         this.resetSelection();
-        handlers.onTabChange(tab);
-      });
-    });
+        this.handlers.onTabChange(tab);
+        return;
+      }
 
-    container.querySelectorAll('[data-forge-gear-id]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const gearId = (button as HTMLElement).getAttribute('data-forge-gear-id');
+      const gearBtn = target.closest('[data-forge-gear-id]') as HTMLElement | null;
+      if (gearBtn) {
+        const gearId = gearBtn.getAttribute('data-forge-gear-id');
         if (!gearId) return;
 
         if (this.activeTab === 'create') {
@@ -124,25 +177,25 @@ export class DivineForgeModalRenderer {
           this.salvageGearId = this.salvageGearId === gearId ? null : gearId;
         }
 
-        handlers.onSelectionChange();
-      });
-    });
+        this.patchSelection(container);
+        return;
+      }
 
-    const fuseBtn = container.querySelector('[data-forge-fuse]');
-    fuseBtn?.addEventListener('click', () => {
-      handlers.onFuse([...this.selectedIds]);
-    });
+      if (target.closest('[data-forge-fuse]')) {
+        this.handlers.onFuse([...this.selectedIds]);
+        return;
+      }
 
-    const salvageBtn = container.querySelector('[data-forge-salvage]');
-    salvageBtn?.addEventListener('click', () => {
-      if (!this.salvageGearId) return;
-      handlers.onSalvage(this.salvageGearId);
-    });
+      if (target.closest('[data-forge-salvage]')) {
+        if (!this.salvageGearId) return;
+        this.handlers.onSalvage(this.salvageGearId);
+        return;
+      }
 
-    const clearBtn = container.querySelector('[data-forge-clear-selection]');
-    clearBtn?.addEventListener('click', () => {
-      this.resetSelection();
-      handlers.onSelectionChange();
+      if (target.closest('[data-forge-clear-selection]')) {
+        this.resetSelection();
+        this.patchSelection(container);
+      }
     });
   }
 
