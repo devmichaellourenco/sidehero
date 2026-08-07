@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Hero } from '../../entities/Hero';
+import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
 import { getHeroCombatSkill } from './HeroCombatSkillCatalog';
 import {
   applyHeroDamageSkillPower,
@@ -27,6 +28,15 @@ describe('SkillDamageBalance — fórmula multiplicativa', () => {
     const raw = calculateHeroSkillRawPower(skill, 1, 10);
     expect(applyHeroDamageSkillPower(skill, raw, 10)).toBe(Math.max(1, Math.floor(raw)));
   });
+
+  it('skill de dano nunca fica abaixo do ataque básico', () => {
+    const skill = getHeroCombatSkill('thrust')!;
+    const attack = 200;
+    const basic = Math.max(1, Math.floor(attack * BASIC_ATTACK_DAMAGE_RATIO));
+    const raw = calculateHeroSkillRawPower(skill, 1, 12);
+    expect(raw).toBeLessThan(basic);
+    expect(applyHeroDamageSkillPower(skill, raw, attack)).toBe(basic);
+  });
 });
 
 describe('SkillPowerCalculator — power multiplicativo', () => {
@@ -47,5 +57,31 @@ describe('SkillPowerCalculator — power multiplicativo', () => {
     const p1 = calculator.calculateForHero(skill, r1);
     const p2 = calculator.calculateForHero(skill, r2);
     expect(p2).toBe(p1 * 2);
+  });
+
+  it('Investida Mortal sobe com rank quando acima do ataque básico', () => {
+    const skill = getHeroCombatSkill('thrust')!;
+    const base = Hero.createStarter('k1', 'knight', 'Galneon');
+    const r1 = Hero.restore({
+      ...base.toProps(),
+      skillRanks: { ...base.toProps().skillRanks, thrust: 1 },
+    });
+    const r2 = Hero.restore({
+      ...base.toProps(),
+      skillRanks: { ...base.toProps().skillRanks, thrust: 2 },
+    });
+    const r3 = Hero.restore({
+      ...base.toProps(),
+      skillRanks: { ...base.toProps().skillRanks, thrust: 3 },
+    });
+
+    const basic = calculator.calculateForHero(getHeroCombatSkill('basic_attack')!, r1);
+    const p1 = calculator.calculateForHero(skill, r1);
+    const p2 = calculator.calculateForHero(skill, r2);
+    const p3 = calculator.calculateForHero(skill, r3);
+
+    expect(p1).toBeGreaterThanOrEqual(basic);
+    expect(p2).toBeGreaterThan(p1);
+    expect(p3).toBeGreaterThan(p2);
   });
 });

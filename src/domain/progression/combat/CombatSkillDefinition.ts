@@ -47,6 +47,12 @@ export interface CombatSkillDefinition {
   basePower: number;
   powerPerRank: number;
   attributeFactor: number;
+  /**
+   * Piso de poder como fração do ATK efetivo.
+   * Default (skills de dano): ataque básico (`BASIC_ATTACK_DAMAGE_RATIO`).
+   * Skills flat de inimigo usam valor maior no catálogo.
+   */
+  minAttackRatio?: number;
   /** Usa o ATK do combatente como poder base. */
   usesAttackStat?: boolean;
   /** Cura só é elegível se algum herói aliado estiver abaixo deste % de HP. */

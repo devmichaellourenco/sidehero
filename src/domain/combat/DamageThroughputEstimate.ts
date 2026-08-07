@@ -22,7 +22,7 @@ import {
   applyCooldownReduction,
   CombatProfileProvider,
 } from './CombatProfileProvider';
-import { SKILL_ACTION_RECOVERY_SECONDS } from './CombatTimingConstants';
+import { BASIC_ATTACK_DAMAGE_RATIO, SKILL_ACTION_RECOVERY_SECONDS } from './CombatTimingConstants';
 import { resolveActionIntervalSeconds } from './CombatSpeedScaling';
 import { getCooldownSeconds } from './SkillCooldownTiming';
 import { Hero } from '../entities/Hero';
@@ -31,8 +31,7 @@ import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefiniti
 import {
   applyHeroDamageSkillPower,
   calculateHeroSkillRawPower,
-  isPhysicalDamageSkill,
-  PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
+  resolveDamageSkillAttackFloor,
   skillAttributeMultiplier,
   skillRankMultiplier,
 } from '../progression/combat/SkillDamageBalance';
@@ -179,15 +178,16 @@ export function buildHeroSkillPowerBreakdown(
     { text: `floor(${product.toFixed(2)}) = ${afterFloor}` },
   ];
 
-  if (isPhysicalDamageSkill(combat)) {
-    const floor = Math.floor(hero.attack * PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO);
+  const attackFloor = resolveDamageSkillAttackFloor(combat, hero.attack);
+  const floorRatio = combat.minAttackRatio ?? BASIC_ATTACK_DAMAGE_RATIO;
+  lines.push({
+    icon: 'attack',
+    text: `Piso vs ATK: ATK ${hero.attack} × ${floorRatio} = ${attackFloor} (mín. = ataque básico)`,
+  });
+  if (attackFloor > afterFloor) {
     lines.push({
-      icon: 'attack',
-      text: `Piso físico: ATK ${hero.attack} × ${PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO} = ${floor}`,
+      text: `Piso venceu o produto (${afterFloor} → ${Math.max(afterFloor, attackFloor)}).`,
     });
-    if (rawPower === floor && floor > afterFloor) {
-      lines.push({ text: `Piso físico venceu o produto (${afterFloor} → ${rawPower}).` });
-    }
   }
 
   const beforePassives = applyHeroDamageSkillPower(combat, product, hero.attack);

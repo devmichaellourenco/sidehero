@@ -1,5 +1,6 @@
 import { damageComponent, standardDamage } from '../../combat/DamageComponentPresets';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
+import { PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO } from './SkillDamageBalance';
 
 /** Skills exclusivas de monstros — cooldowns e prioridade de alvo calibrados para inimigos. */
 export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
@@ -17,6 +18,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 5,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
   },
   {
     skillId: 'goblin_stab',
@@ -32,6 +34,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 6,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
   },
   {
     skillId: 'orc_smash',
@@ -47,6 +50,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 8,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
   },
   {
     skillId: 'poison_spit',
@@ -62,6 +66,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 5,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: 1,
     onHitDot: { element: 'air', damagePerTurn: 3, durationTurns: 3, applyChance: 0.7 },
   },
   {
@@ -77,6 +82,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 7,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
   },
   {
     skillId: 'regenerate',
@@ -107,6 +113,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 4,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: 1,
     onHitDot: { element: 'air', damagePerTurn: 2, durationTurns: 4, applyChance: 0.85 },
   },
   {
@@ -123,6 +130,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 6,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: 1,
   },
   {
     skillId: 'wraith_curse',
@@ -154,6 +162,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 12,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
   },
   {
     skillId: 'dragon_bite',
@@ -169,6 +178,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 8,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO,
   },
   {
     skillId: 'saci_fire',
@@ -184,6 +194,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 11,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: 1,
   },
   {
     skillId: 'frost_breath',
@@ -198,6 +209,7 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 6,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: 1,
     onHitDot: { element: 'cold', damagePerTurn: 2, durationTurns: 3, applyChance: 0.65 },
   },
   {
@@ -213,5 +225,6 @@ export const ENEMY_MONSTER_COMBAT_SKILL_CATALOG: CombatSkillDefinition[] = [
     basePower: 7,
     powerPerRank: 0,
     attributeFactor: 0,
+    minAttackRatio: 1,
   },
 ];

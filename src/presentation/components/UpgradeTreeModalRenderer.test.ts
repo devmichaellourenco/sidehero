@@ -50,23 +50,23 @@ describe('UpgradeTreeModalRenderer', () => {
     const onPurchase = vi.fn();
     const nodes = [
       node({
-        id: 'auto_open_chests_1',
+        id: 'open_all_chests_1',
         branch: 'chests',
         status: 'available',
         canAfford: true,
         cost: 60,
-        name: 'Auto-abrir baús I',
+        name: 'Abrir todos os baús I',
       }),
     ];
 
     renderer.render(container, nodes, { onPurchase });
 
     const upgradeNode = container.querySelector(
-      '[data-upgrade-node="auto_open_chests_1"]',
+      '[data-upgrade-node="open_all_chests_1"]',
     ) as HTMLElement;
     upgradeNode.click();
 
-    expect(onPurchase).toHaveBeenCalledWith('auto_open_chests_1');
+    expect(onPurchase).toHaveBeenCalledWith('open_all_chests_1');
     expect(document.querySelector('[data-upgrade-buy]')).toBeNull();
   });
 
@@ -74,19 +74,19 @@ describe('UpgradeTreeModalRenderer', () => {
     const container = document.createElement('div');
     const nodes = [
       node({
-        id: 'auto_open_chests_1',
+        id: 'open_all_chests_1',
         branch: 'chests',
         status: 'ready',
         canAfford: false,
         cost: 60,
-        name: 'Auto-abrir baús I',
+        name: 'Abrir todos os baús I',
       }),
     ];
 
     renderer.render(container, nodes, { onPurchase: vi.fn() });
 
     const upgradeNode = container.querySelector(
-      '[data-upgrade-node="auto_open_chests_1"]',
+      '[data-upgrade-node="open_all_chests_1"]',
     ) as HTMLElement;
     upgradeNode.dispatchEvent(new Event('mouseenter'));
 

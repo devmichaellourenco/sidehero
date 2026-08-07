@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Side Hero: Balance Lab</title>
+    <link rel="stylesheet" href="./lab.css" />
+  </head>
+  <body>
+    <header class="lab-header">
+      <div>
+        <h1>Balance Lab</h1>
+        <p class="lab-sub">
+          Simulador local. fórmulas e constantes editáveis à direita; passivas do herói com
+          coeficientes ajustáveis. Não entra no release da extensão.
+        </p>
+      </div>
+      <div class="lab-header-actions">
+        <label class="lab-mode">
+          Modo
+          <select id="lab-mode">
+            <option value="single">1 combatente</option>
+            <option value="compare">Lado a lado</option>
+          </select>
+        </label>
+        <button type="button" id="btn-export-json">Export JSON</button>
+        <button type="button" id="btn-import-json">Import JSON</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+      </div>
+    </header>
+
+    <main id="lab-main" class="lab-main lab-main--single"></main>
+
+    <section class="lab-io">
+      <h2>Export / Import</h2>
+      <p class="lab-hint">
+        JSON completo do cenário (modo + combatentes). Snippet TS para colar no catálogo depois de
+        calibrar.
+      </p>
+      <div class="lab-io-grid">
+        <label class="lab-field lab-field--full">
+          JSON
+          <textarea id="io-json" rows="10" spellcheck="false"></textarea>
+        </label>
+        <label class="lab-field lab-field--full">
+          Snippet TS (combatente ativo / esquerda)
+          <textarea id="io-snippet" rows="10" spellcheck="false" readonly></textarea>
+        </label>
+      </div>
+      <div class="lab-io-actions">
+        <button type="button" id="btn-apply-json">Aplicar JSON da caixa</button>
+        <button type="button" id="btn-copy-json">Copiar JSON</button>
+        <button type="button" id="btn-copy-snippet">Copiar snippet</button>
+      </div>
+      <p id="lab-status" class="lab-status" role="status"></p>
+    </section>
+
+    <script type="module" src="./lab.js"></script>
+  </body>
+</html>

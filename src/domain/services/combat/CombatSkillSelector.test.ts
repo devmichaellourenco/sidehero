@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { Stats } from '../../value-objects/Stats';
+import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
+import { SkillPowerCalculator } from '../../progression/combat/SkillPowerCalculator';
+import { listEnemyCombatSkillsByType } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { SkillCooldownTracker } from './SkillCooldownTracker';
 import { CombatSkillSelector } from './CombatSkillSelector';
 import { SkillTargetResolver } from './SkillTargetResolver';
@@ -11,6 +14,7 @@ describe('CombatSkillSelector', () => {
     undefined,
     new SkillTargetResolver(() => 0),
   );
+  const power = new SkillPowerCalculator();
   const enemies = [Enemy.forStage(1)];
   const emptyCooldowns = SkillCooldownTracker.fromMap({});
 
@@ -21,7 +25,7 @@ describe('CombatSkillSelector', () => {
     expect(hero.toProps().equippedSkillIds).toContain('basic_attack');
     expect(selected?.skillId).toBe('basic_attack');
     expect(selected?.action.targeting).toBe('single_enemy');
-    expect(selected?.action.power).toBe(hero.attack);
+    expect(selected?.action.power).toBe(Math.max(1, Math.floor(hero.attack * BASIC_ATTACK_DAMAGE_RATIO)));
   });
 
   it('prioriza cura quando aliado está ferido e skill está pronta', () => {
@@ -97,7 +101,7 @@ describe('CombatSkillSelector', () => {
     expect(heroSelected?.action.targetEnemyId).toBe('tough-enemy');
   });
 
-  it('goblin prioriza Facada com poder fixo acima do ataque básico', () => {
+  it('goblin prioriza Facada com poder acima do ataque básico (BAL-013)', () => {
     const goblin = Enemy.restore({
       ...Enemy.forStage(2).toProps(),
       id: 'goblin-1',
@@ -105,12 +109,13 @@ describe('CombatSkillSelector', () => {
       name: 'Goblin Lv.2',
     });
     const hero = Hero.createStarter('h1', 'knight', 'Galneon');
+    const stab = listEnemyCombatSkillsByType('goblin_raider').find((s) => s.skillId === 'goblin_stab')!;
 
     const selected = selector.selectEnemyAction(goblin, [hero], [goblin], emptyCooldowns);
 
     expect(selected?.skillId).toBe('goblin_stab');
     expect(selected?.action.skillName).toBe('Facada');
-    expect(selected?.action.power).toBe(12);
+    expect(selected?.action.power).toBe(power.calculateForEnemy(stab, goblin));
     expect(selected?.action.targetHeroId).toBe('h1');
   });
 
@@ -128,7 +133,7 @@ describe('CombatSkillSelector', () => {
     expect(selected?.skillId).toBe('wild_bite');
   });
 
-  it('orc prioriza Pancada com poder fixo acima do ataque básico', () => {
+  it('orc prioriza Pancada com poder acima do ataque básico (BAL-013)', () => {
     const orc = Enemy.restore({
       ...Enemy.forStage(4).toProps(),
       id: 'orc-1',
@@ -136,15 +141,16 @@ describe('CombatSkillSelector', () => {
       name: 'Orc Lv.4',
     });
     const hero = Hero.createStarter('h1', 'knight', 'Galneon');
+    const smash = listEnemyCombatSkillsByType('orc_warrior').find((s) => s.skillId === 'orc_smash')!;
 
     const selected = selector.selectEnemyAction(orc, [hero], [orc], emptyCooldowns);
 
     expect(selected?.skillId).toBe('orc_smash');
     expect(selected?.action.skillName).toBe('Pancada');
-    expect(selected?.action.power).toBe(16);
+    expect(selected?.action.power).toBe(power.calculateForEnemy(smash, orc));
   });
 
-  it('wraith prioriza Drenar Vida com poder fixo', () => {
+  it('wraith prioriza Drenar Vida (BAL-013)', () => {
     const wraith = Enemy.restore({
       ...Enemy.forStage(6).toProps(),
       id: 'wraith-1',
@@ -152,12 +158,15 @@ describe('CombatSkillSelector', () => {
       name: 'Wraith Lv.6',
     });
     const hero = Hero.createStarter('h1', 'knight', 'Galneon');
+    const drain = listEnemyCombatSkillsByType('skeleton_warrior').find(
+      (s) => s.skillId === 'wraith_drain',
+    )!;
 
     const selected = selector.selectEnemyAction(wraith, [hero], [wraith], emptyCooldowns);
 
     expect(selected?.skillId).toBe('wraith_drain');
     expect(selected?.action.skillName).toBe('Drenar Vida');
-    expect(selected?.action.power).toBe(13);
+    expect(selected?.action.power).toBe(power.calculateForEnemy(drain, wraith));
   });
 
   it('dragão prioriza Baforada em área quando fora de cooldown inicial', () => {
@@ -172,12 +181,15 @@ describe('CombatSkillSelector', () => {
     const charging = SkillCooldownTracker.fromMap({
       'enemy:dragon-1': { dragon_breath: 2 },
     });
+    const breath = listEnemyCombatSkillsByType('young_green_dragon').find(
+      (s) => s.skillId === 'dragon_breath',
+    )!;
 
     const readyPick = selector.selectEnemyAction(dragon, [hero], [dragon], ready);
     expect(readyPick?.skillId).toBe('dragon_breath');
     expect(readyPick?.action.skillName).toBe('Baforada');
     expect(readyPick?.action.targeting).toBe('all_allies');
-    expect(readyPick?.action.power).toBe(19);
+    expect(readyPick?.action.power).toBe(power.calculateForEnemy(breath, dragon));
 
     const chargingPick = selector.selectEnemyAction(dragon, [hero], [dragon], charging);
     expect(chargingPick?.skillId).toBe('dragon_bite');

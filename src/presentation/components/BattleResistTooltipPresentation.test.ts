@@ -24,14 +24,19 @@ function minimalHero() {
 function minimalEnemy() {
   return {
     name: 'Goblin',
+    level: 1,
+    attributes: { str: 8, dex: 8, int: 5 },
     health: 40,
     maxHealth: 40,
     attack: 10,
     defense: 4,
+    attackSpeed: 0.5,
+    castSpeed: 1,
     goldReward: 5,
     xpReward: 0,
     signatureSkills: [],
     combatResists: { fire: 0, cold: 15, lightning: 0, air: 0 },
+    combatStatSheet: [],
   } as Parameters<typeof renderEnemyTooltipContent>[0];
 }
 

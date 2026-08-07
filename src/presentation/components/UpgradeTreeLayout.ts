@@ -46,8 +46,8 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   auto_equip_loot_1: { x: 500, y: 520 },
   auto_equip_loot_2: { x: 500, y: 640 },
 
-  battle_skill_slot_2: { x: 740, y: 520 },
-  battle_skill_slot_3: { x: 860, y: 520 },
+  battle_skill_slot_2: { x: 740, y: 400 },
+  battle_skill_slot_3: { x: 860, y: 400 },
 };
 
 export const UPGRADE_TREE_VIEWBOX = { width: 1180, height: 700 };

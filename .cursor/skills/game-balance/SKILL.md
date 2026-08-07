@@ -64,6 +64,17 @@ Sempre em **par** com o skill da feature:
 
 Exemplo: corrigir DOT → `game-balance` define critério + teste; `combat-campaign` implementa em `CombatTurnPhase`.
 
+## Laboratório local (Balance Lab)
+
+Simulador fora da extensão — mesmas fórmulas do domínio (`CombatantDerivedStats`, sheet inimigo, ASPD).
+
+```bash
+npm run balance-lab
+# http://127.0.0.1:5179/
+```
+
+Arquivos: `tools/balance-lab/` (+ `scripts/balance-lab.mjs`). Modos: 1 combatente | lado a lado. Painel direito: fórmulas com constantes editáveis + passivas do herói (classe/ascensão) com coeficientes editáveis. Export/import JSON v1 inclui fórmulas e passivas. Não entra no zip de release.
+
 ## Testes de fórmula
 
 Ver lista em `specs/game-balance.spec.md`. Criar/atualizar arquivos; não executar `npm test` automaticamente.

@@ -77,9 +77,14 @@ function createEnemyFromSlot(
     role: slot.role,
   });
 
+  const statMultiplier = context.statMultiplier ?? 1;
+  const baseAttack = Math.max(1, Math.floor(sheet.baseAttack * statMultiplier));
+  const baseDefense = Math.max(1, Math.floor(sheet.baseDefense * statMultiplier));
+  const baseMaxHealth = Math.max(1, Math.floor(sheet.baseMaxHealth * statMultiplier));
+
   const maxHealth = resolveEnemySpawnMaxHealth(
     deriveCombatMaxHealth({
-      baseMaxHealth: sheet.baseMaxHealth,
+      baseMaxHealth,
       level: sheet.level,
       attributes: sheet.attributes,
     }),
@@ -116,13 +121,13 @@ function createEnemyFromSlot(
     stage: context.difficultyTier,
     level: sheet.level,
     attributes: sheet.attributes,
-    baseAttack: sheet.baseAttack,
-    baseDefense: sheet.baseDefense,
-    baseMaxHealth: sheet.baseMaxHealth,
+    baseAttack,
+    baseDefense,
+    baseMaxHealth,
     skillRanks: sheet.skillRanks,
     passiveIds: sheet.passiveIds,
     physicalMeleeAspd: sheet.physicalMeleeAspd,
-    stats: Stats.fromBase(sheet.baseAttack, sheet.baseDefense, maxHealth),
+    stats: Stats.fromBase(baseAttack, baseDefense, maxHealth),
     goldReward,
     xpReward,
     role: slot.role,

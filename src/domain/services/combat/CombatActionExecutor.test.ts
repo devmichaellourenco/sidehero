@@ -312,7 +312,7 @@ describe('CombatActionExecutor', () => {
       [mage],
       [enemy],
       CombatStatusEffectTracker.fromMap({}),
-      { rng: () => 0 },
+      { rng: () => 0.99 },
     );
 
     expect(result.statusApplications).toHaveLength(1);
@@ -355,7 +355,7 @@ describe('CombatActionExecutor', () => {
         attackerProfile: { attackSpeed: 1, castSpeed: 1, cooldownReduction: 0, critChance: 0, critDamage: 1.4 },
         stageLevel: 1,
         attackerEquipment: knight.toProps().equipment,
-        rng: () => 0,
+        rng: () => 0.99,
       },
     );
 

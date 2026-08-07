@@ -54,8 +54,13 @@ describe('BalanceAudit — curva por tier', () => {
 
     for (let index = 1; index < goldMultipliers.length; index += 1) {
       expect(goldMultipliers[index]).toBeGreaterThanOrEqual(goldMultipliers[index - 1]);
-      if (!ENEMY_QUICK_PHASE_TEST_HP) {
-        expect(hpByTier[index]).toBeGreaterThan(hpByTier[index - 1]);
+    }
+
+    // HP total sobe na curva longa; fases vizinhas podem oscilar por densidade de wave (ex. 1-25→1-26).
+    expect(hpByTier[hpByTier.length - 1]).toBeGreaterThan(hpByTier[0]);
+    if (!ENEMY_QUICK_PHASE_TEST_HP) {
+      for (let index = 1; index < hpByTier.length; index += 1) {
+        expect(hpByTier[index]).toBeGreaterThanOrEqual(hpByTier[index - 1] * 0.7);
       }
     }
   });

@@ -1,7 +1,11 @@
+import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
 import { isDamageCombatKind } from './SkillCombatKind';
 
-/** Skills físicas não ficam abaixo desta fração do ATK efetivo do herói. */
+/**
+ * Ratio legado das skills físicas flat de inimigo (catálogo sem scaling).
+ * Heróis usam o piso do ataque básico; ver `resolveDamageSkillAttackFloor`.
+ */
 export const PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO = 1.35;
 
 export function isPhysicalDamageSkill(skill: CombatSkillDefinition): boolean {
@@ -12,8 +16,20 @@ export function isPhysicalDamageSkill(skill: CombatSkillDefinition): boolean {
 }
 
 /**
- * Poder da skill (herói): Base × (powerPerRank × nível) × (atributo × fator).
- * Sem multiplicador global — a força relativa fica nos valores do catálogo.
+ * Piso de poder vs ATK: skills de dano nunca ficam abaixo do ataque básico
+ * (ATK × BASIC_ATTACK_DAMAGE_RATIO), salvo `minAttackRatio` explícito no catálogo.
+ */
+export function resolveDamageSkillAttackFloor(
+  skill: CombatSkillDefinition,
+  effectiveAttack: number,
+): number {
+  const ratio = skill.minAttackRatio ?? BASIC_ATTACK_DAMAGE_RATIO;
+  return Math.max(1, Math.floor(effectiveAttack * Math.max(0, ratio)));
+}
+
+/**
+ * Poder da skill (herói): Base × (powerPerRank × nível) × (atributo × fator),
+ * com piso ≥ ataque básico (ou minAttackRatio do catálogo).
  */
 export function applyHeroDamageSkillPower(
   skill: CombatSkillDefinition,
@@ -24,14 +40,8 @@ export function applyHeroDamageSkillPower(
     return Math.max(1, Math.floor(rawPower));
   }
 
-  let power = Math.max(1, Math.floor(rawPower));
-
-  if (isPhysicalDamageSkill(skill)) {
-    const physicalFloor = Math.floor(effectiveAttack * PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO);
-    power = Math.max(power, physicalFloor);
-  }
-
-  return power;
+  const power = Math.max(1, Math.floor(rawPower));
+  return Math.max(power, resolveDamageSkillAttackFloor(skill, effectiveAttack));
 }
 
 /** Termo de rank: powerPerRank × nível da skill (nível 1 já conta). */
@@ -44,7 +54,7 @@ export function skillAttributeMultiplier(attributeValue: number, attributeFactor
   return Math.max(0, attributeValue) * Math.max(0, attributeFactor);
 }
 
-/** Poder bruto antes do floor/piso físico. */
+/** Poder bruto antes do floor/piso vs ataque básico. */
 export function calculateHeroSkillRawPower(
   skill: CombatSkillDefinition,
   rank: number,

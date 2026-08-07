@@ -106,8 +106,11 @@ describe('SkillPowerCalculator', () => {
     expect(calculator.calculateForEnemy(wildBite, rat)).toBe(
       Math.max(1, Math.floor(rat.attack * PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO)),
     );
-    expect(calculator.calculateForEnemy(dragonBreath, dragon)).toBeGreaterThan(
+    expect(calculator.calculateForEnemy(dragonBreath, dragon)).toBeGreaterThanOrEqual(
       Math.floor(dragon.attack * BASIC_ATTACK_DAMAGE_RATIO),
+    );
+    expect(calculator.calculateForEnemy(goblinStab, goblin)).toBeGreaterThan(
+      calculator.calculateForEnemy(basic, goblin),
     );
   });
 });

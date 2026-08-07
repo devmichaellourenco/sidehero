@@ -1,0 +1,723 @@
+:root {
+  --bg: #1a1814;
+  --surface: #242018;
+  --surface-2: #2e291f;
+  --border: #4a4030;
+  --text: #f0e6d4;
+  --muted: #a89880;
+  --accent: #c9a227;
+  --ok: #7cb87c;
+  --warn: #d4a574;
+  --font: 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'Cascadia Code', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.lab-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.lab-header h1 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 650;
+  color: var(--accent);
+}
+
+.lab-sub {
+  margin: 0;
+  max-width: 52rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.lab-sub code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  color: var(--warn);
+}
+
+.lab-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.lab-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+button,
+select,
+input,
+textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+button {
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+select,
+input[type='number'],
+input[type='text'] {
+  padding: 3px 4px;
+  min-width: 0;
+}
+
+.lab-main {
+  display: grid;
+  gap: 20px;
+  padding: 10px 14px;
+  align-items: start;
+  width: 100%;
+  max-width: none;
+}
+
+.lab-main--single {
+  grid-template-columns: minmax(380px, 520px) minmax(0, 1fr);
+  grid-template-areas:
+    'totals totals'
+    'combat formulas';
+}
+
+.lab-main--single > .lab-totals {
+  grid-area: totals;
+}
+
+.lab-main--single > #panel-left {
+  grid-area: combat;
+}
+
+.lab-main--single > .lab-panel--formulas {
+  grid-area: formulas;
+}
+
+.lab-main--compare {
+  grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr) minmax(420px, 1.15fr);
+  grid-template-areas:
+    'totals totals totals'
+    'combat-a combat-b formulas';
+}
+
+.lab-main--compare > .lab-totals {
+  grid-area: totals;
+}
+
+.lab-main--compare > #panel-left {
+  grid-area: combat-a;
+}
+
+.lab-main--compare > #panel-right {
+  grid-area: combat-b;
+}
+
+.lab-main--compare > .lab-panel--formulas {
+  grid-area: formulas;
+}
+
+@media (max-width: 1200px) {
+  .lab-main--compare {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'totals totals'
+      'combat-a combat-b'
+      'formulas formulas';
+  }
+}
+
+@media (max-width: 900px) {
+  .lab-main--single,
+  .lab-main--compare {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'totals'
+      'combat'
+      'formulas';
+  }
+
+  .lab-main--compare {
+    grid-template-areas:
+      'totals'
+      'combat-a'
+      'combat-b'
+      'formulas';
+  }
+}
+
+.lab-totals {
+  padding: 7px 9px;
+}
+
+.lab-totals-head {
+  margin-bottom: 10px;
+}
+
+.lab-totals-row {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .lab-totals-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.lab-stat--compact {
+  text-align: center;
+  padding: 5px 4px;
+}
+
+.lab-stat--compact strong {
+  font-size: 1.2rem;
+}
+
+.lab-form-section {
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lab-form-section-title {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.lab-skill-picker {
+  display: grid;
+  grid-template-columns: minmax(80px, 120px) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 14px;
+  margin: 4px 0 0;
+}
+
+.lab-skill-picker select,
+.lab-skill-picker input[type='number'] {
+  width: 100%;
+  max-width: none;
+  padding: 4px 5px;
+}
+
+.lab-formula-card--skills .lab-skill-picker + .lab-skill-picker {
+  margin-top: 8px;
+}
+
+.lab-formula-card--skills .lab-live-host {
+  border-top: none;
+  padding-top: 2px;
+}
+
+.lab-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lab-panel-title {
+  margin: 0;
+  font-size: 1.05rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.lab-panel-title span {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.lab-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lab-form-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lab-form-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lab-form-rows .lab-field {
+  display: grid;
+  grid-template-columns: minmax(120px, 40%) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.lab-form-rows .lab-field-name {
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.lab-form-rows .lab-field input[type='number'],
+.lab-form-rows .lab-field input[type='text'],
+.lab-form-rows .lab-field select {
+  width: 100%;
+  max-width: 220px;
+  justify-self: start;
+}
+
+.lab-form-rows .lab-field input[type='checkbox'] {
+  width: auto;
+  justify-self: start;
+}
+
+.lab-panel--formulas {
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  gap: 18px;
+  padding: 9px 10px;
+}
+
+.lab-side-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.lab-formula-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1400px) {
+  .lab-main--single .lab-formula-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lab-formula-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.lab-formula-card-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--accent);
+  font-weight: 650;
+  min-width: 0;
+}
+
+.lab-formula-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.lab-formula-card-final {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.lab-formula-card-final .lab-live-final {
+  justify-content: flex-end;
+}
+
+.lab-formula-meaning {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.lab-formula-eq {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--warn);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 4px 5px;
+  overflow-wrap: anywhere;
+}
+
+.lab-formula-eq--applied {
+  color: var(--ok);
+  border: 1px solid var(--border);
+}
+
+.lab-live-host {
+  border-top: 1px dashed var(--border);
+  padding-top: 5px;
+  margin-top: 2px;
+}
+
+.lab-live-host--passives {
+  border-top: none;
+  padding-top: 0;
+  margin-bottom: 4px;
+}
+
+.lab-live {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lab-live-head {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lab-live-final {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.lab-live-final strong {
+  font-size: 1.15rem;
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.lab-live-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lab-live-steps li {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 3px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lab-live-step-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.lab-live-step-label {
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.lab-live-step-detail {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.lab-live-step-note {
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.lab-const-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.lab-const {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.lab-const-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.lab-const input {
+  width: 100%;
+  padding: 3px 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lab-const-hint {
+  font-size: 0.65rem;
+  color: var(--muted);
+  opacity: 0.85;
+  line-height: 1.2;
+}
+
+.lab-passives {
+  border-top: 1px solid var(--border);
+  padding-top: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lab-passives-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.lab-passives-head h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.lab-hint--tight {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.lab-passive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.lab-passive-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lab-passive-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.lab-passive-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.lab-muted {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.lab-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.lab-field--full {
+  grid-column: 1 / -1;
+}
+
+.lab-field--2 {
+  grid-column: span 2;
+}
+
+.lab-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lab-results {
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+  display: grid;
+  gap: 10px;
+}
+
+.lab-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lab-stat {
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 5px;
+}
+
+.lab-stat strong {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--ok);
+  font-variant-numeric: tabular-nums;
+}
+
+.lab-stat span {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.lab-breakdown {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: pre-wrap;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 5px;
+  margin: 0;
+}
+
+.lab-compare-delta {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--warn);
+}
+
+.lab-io {
+  padding: 10px 14px 20px;
+  border-top: 1px solid var(--border);
+  max-width: none;
+}
+
+.lab-io h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.lab-hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.lab-io-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 960px) {
+  .lab-io-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 5px;
+  line-height: 1.45;
+}
+
+.lab-io-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lab-status {
+  min-height: 1.2em;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--ok);
+}
+
+.lab-status.is-error {
+  color: #e08080;
+}
+
+.lab-hero-only[hidden],
+.lab-enemy-only[hidden] {
+  display: none !important;
+}
