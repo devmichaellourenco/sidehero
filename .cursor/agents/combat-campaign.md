@@ -29,3 +29,4 @@ Especialista em loop de combate, campanha por fases/waves, scaling e intermissõ
 - [ ] Testes em `PhaseCombatHandlers`, `CombatTurnPhase`, `CombatActionExecutor`
 - [ ] Intermissão não inicia próxima wave até `RESUME_COMBAT_INTERMISSION`
 - [ ] UI campanha: testes em `CampaignMapPresentation`, `CampaignTooltipBinder`, `CampaignModalRenderer`
+- [ ] Não reintroduzir auto-avanço de fase — coordenar com `camp-missions`

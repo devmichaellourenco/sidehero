@@ -52,6 +52,38 @@ function buildOverview(): CampaignOverviewDto {
           }),
         ],
         actScenes: [],
+        missionBoard: {
+          mapId: 'stendra',
+          main: {
+            id: 'main:1-50',
+            kind: 'main',
+            name: 'Guardião das Esgotos',
+            mapId: 'stendra',
+            phaseTemplateId: '1-50',
+            stars: null,
+            waveCount: 4,
+            difficultyTier: 50,
+            featuredEnemyTypes: ['goblin_raider'],
+            rewards: null,
+            selected: true,
+          },
+          sides: [],
+          normals: [
+            {
+              id: 'normal:1-2',
+              kind: 'normal',
+              name: 'Patrulha',
+              mapId: 'stendra',
+              phaseTemplateId: '1-2',
+              stars: 1,
+              waveCount: 2,
+              difficultyTier: 2,
+              featuredEnemyTypes: [],
+              rewards: null,
+              selected: false,
+            },
+          ],
+        },
       },
       {
         id: 'gruftall',
@@ -76,25 +108,28 @@ describe('CampaignModalRenderer', () => {
     expect(resolveInitialPendingPhaseId(map)).toBe('1-50');
   });
 
-  it('renderiza trilha, preview e abas bloqueadas no modo região', () => {
+  it('renderiza board de missões, preview e abas bloqueadas no modo região', () => {
     const overview = buildOverview();
-    const pendingId = resolveInitialPendingPhaseId(overview.maps[0]);
-    const html = renderer.render(overview, 'stendra', pendingId, 'region');
+    const html = renderer.render(overview, 'stendra', null, 'region', {
+      pendingMissionId: 'main:1-50',
+    });
 
     expect(html).not.toContain('campaign-hero-banner');
     expect(html).not.toContain('campaign-region-banner');
     expect(html).not.toContain('campaign_stendra_banner.png');
     expect(html).not.toContain('campaign-view-toggle');
     expect(html).toContain('data-campaign-view="region"');
-    expect(html).toContain('campaign-path');
+    expect(html).toContain('campaign-mission-board');
     expect(html).toContain('campaign-phase-preview');
-    expect(html).toContain('data-campaign-start-phase="1-50"');
+    expect(html).toContain('data-campaign-start-mission="main:1-50"');
     expect(html).toContain('campaign-map-tabs');
     expect(html).toContain('data-campaign-map-tab="gruftall"');
     expect(html).toContain('aria-disabled="true"');
     expect(html).toContain('campaign-map-tab--locked');
     expect(html).toContain('Guardião das Esgotos');
-    expect(html).toContain('campaign-path-node--pending');
+    expect(html).toContain('campaign-mission-pin--pending');
+    expect(html).toContain('campaign-mission-pin--main');
+    expect(html).toContain('data-mission-map="stendra"');
     expect(html).toContain('campaign-map-progress');
     expect(html).toContain(getMapFlavorText('stendra'));
     expect(html).not.toContain('campaign-map-flavor');
@@ -116,7 +151,7 @@ describe('CampaignModalRenderer', () => {
     expect(html).toContain(getMapFlavorText('stendra'));
     expect(html).toContain('campaign-map-panel--world');
     expect(html).not.toContain('campaign-map-tabs');
-    expect(html).not.toContain('campaign-path');
+    expect(html).not.toContain('campaign-mission-board');
   });
 
   it('mostra banner de desbloqueio quando solicitado', () => {

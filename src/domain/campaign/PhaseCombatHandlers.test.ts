@@ -7,6 +7,7 @@ import { EncounterResolver } from './EncounterResolver';
 import { GameState } from '../entities/GameState';
 import { Hero } from '../entities/Hero';
 import { HeroUnlockService } from '../party/HeroUnlockService';
+import { mainMissionId, normalMissionId } from './missions/MissionId';
 
 describe('PhaseCombatHandlers', () => {
   const handlers = new PhaseCombatHandlers();
@@ -31,9 +32,7 @@ describe('PhaseCombatHandlers', () => {
     const wave1 = resolver.resolve(phaseId, 0);
     expect(wave1).not.toBeNull();
 
-    let state = GameState.initial()
-      .withPhaseRun(phaseRun)
-      .withCombat(null);
+    let state = GameState.initial().withPhaseRun(phaseRun).withCombat(null);
 
     const started = handlers.startPhaseRun(state, phaseRun);
     state = started.state;
@@ -58,13 +57,11 @@ describe('PhaseCombatHandlers', () => {
     expect(cleared.events.some((event) => event.includes('Wave limpa'))).toBe(true);
   });
 
-  it('restaura vida da party ao derrotar boss e avançar de fase', () => {
+  it('restaura vida da party ao derrotar boss e retorna ao fluxo de acampamento', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial()
-      .withCampaignProgress(
-        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
-      )
+      .withCampaignProgress(GameState.initial().campaignProgress.withSelectedPhase(phaseId))
       .withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
 
@@ -77,56 +74,48 @@ describe('PhaseCombatHandlers', () => {
     const boss = resolver.resolve(phaseId, 1);
     expect(boss).not.toBeNull();
 
-    const victory = handlers.onBossDefeated(
-      state,
-      boss!.enemies,
-      state.heroes,
-      boss!.meta,
-    );
+    const victory = handlers.onBossDefeated(state, boss!.enemies, state.heroes, boss!.meta);
 
-    expect(victory.state.heroes.every((hero) => hero.currentHealth === hero.maxHealth)).toBe(
-      true,
-    );
+    expect(victory.state.heroes.every((hero) => hero.currentHealth === hero.maxHealth)).toBe(true);
     expect(victory.state.battleLog.some((entry) => entry.message.includes('Party recuperada'))).toBe(
       true,
     );
+    expect(victory.state.combatIntermission?.variant).toBe('phase-clear');
+    expect(victory.state.combatIntermission?.nextPhaseId).toBeNull();
   });
 
-  it('avança selectedPhaseId para próxima fase ao derrotar boss', () => {
+  it('não auto-avança fase linear ao derrotar boss — marca cleared e prepara camp', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial()
-      .withCampaignProgress(
-        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
-      )
+      .withCampaignProgress(GameState.initial().campaignProgress.withSelectedPhase(phaseId))
       .withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
 
     const boss = resolver.resolve(phaseId, 1);
     expect(boss).not.toBeNull();
 
-    const victory = handlers.onBossDefeated(
-      state,
-      boss!.enemies,
-      state.heroes,
-      boss!.meta,
-    );
+    const victory = handlers.onBossDefeated(state, boss!.enemies, state.heroes, boss!.meta);
 
     expect(victory.state.campaignProgress.isCleared(phaseId)).toBe(true);
-    expect(victory.state.campaignProgress.isUnlocked(buildPhaseId(1, 3))).toBe(true);
-    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
+    expect(victory.state.campaignProgress.isUnlocked(buildPhaseId(1, 3))).toBe(false);
     expect(victory.state.phaseRun).toBeNull();
     expect(victory.state.combat).toBeNull();
-    expect(victory.state.loadoutEditOpen).toBe(false);
+    expect(victory.state.campaignProgress.missionProgress.normalOfferFor('stendra')).not.toContain(
+      normalMissionId(phaseId),
+    );
+
+    const camp = handlers.resumeIntermission(victory.state);
+    expect(camp.state.loadoutEditOpen).toBe(true);
+    expect(camp.state.phaseRun).toBeNull();
+    expect(camp.state.phaseRestartOnResume).toBe(true);
   });
 
-  it('marca temporada concluída ao derrotar boss final do jogo base', () => {
+  it('marca temporada concluída ao derrotar boss final do jogo base e vai ao camp', () => {
     const phaseId = '4-50';
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial()
-      .withCampaignProgress(
-        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
-      )
+      .withCampaignProgress(GameState.initial().campaignProgress.withSelectedPhase(phaseId))
       .withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
 
@@ -143,23 +132,23 @@ describe('PhaseCombatHandlers', () => {
 
     expect(victory.state.campaignProgress.seasonCompleted).toBe(true);
     expect(victory.events.some((event) => event.includes('Jornada concluída'))).toBe(true);
+    expect(victory.state.campaignProgress.missionProgress.isMainCompleted(mainMissionId('4-50'))).toBe(
+      true,
+    );
 
     const camp = handlers.resumeIntermission(victory.state);
 
     expect(camp.state.loadoutEditOpen).toBe(true);
     expect(camp.state.phaseRestartOnResume).toBe(true);
     expect(camp.state.combat).toBeNull();
-    expect(camp.state.phaseRun?.phaseId).toBe('4-50');
-    expect(camp.state.phaseRun?.waveIndex).toBe(0);
+    expect(camp.state.phaseRun).toBeNull();
   });
 
-  it('envia para acampamento na próxima fase após marco X-50', () => {
+  it('envia para acampamento após marco X-50 sem auto-start da próxima região', () => {
     const phaseId = buildPhaseId(1, 50);
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial()
-      .withCampaignProgress(
-        GameState.initial().campaignProgress.withSelectedPhase(phaseId),
-      )
+      .withCampaignProgress(GameState.initial().campaignProgress.withSelectedPhase(phaseId))
       .withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
 
@@ -174,45 +163,43 @@ describe('PhaseCombatHandlers', () => {
       resolved!.meta,
     );
 
-    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(2, 1));
-    expect(victory.state.combatIntermission?.nextPhaseId).toBe(buildPhaseId(2, 1));
+    expect(victory.state.campaignProgress.missionProgress.isMainCompleted(mainMissionId('1-50'))).toBe(
+      true,
+    );
+    expect(victory.state.combatIntermission?.nextPhaseId).toBeNull();
 
     const camp = handlers.resumeIntermission(victory.state);
 
     expect(camp.state.loadoutEditOpen).toBe(true);
     expect(camp.state.phaseRestartOnResume).toBe(true);
     expect(camp.state.combat).toBeNull();
-    expect(camp.state.phaseRun?.phaseId).toBe(buildPhaseId(2, 1));
-    expect(camp.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(2, 1));
+    expect(camp.state.phaseRun).toBeNull();
   });
 
-  it('reinicia na fase anterior com cura completa no wipe', () => {
+  it('wipe retorna ao acampamento com cura completa (sem fase anterior)', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial().withPhaseRun(phaseRun);
     state = handlers.startPhaseRun(state, phaseRun).state;
 
     const woundedHero = state.heroes[0];
-    state = state.withHeroes([
-      Hero.restore({ ...woundedHero.toProps(), currentHealth: 1 }),
-    ]);
+    state = state.withHeroes([Hero.restore({ ...woundedHero.toProps(), currentHealth: 1 })]);
 
     const wiped = handlers.onPhaseWipe(state, phaseRun);
 
-    expect(wiped.state.phaseRun?.phaseId).toBe(buildPhaseId(1, 1));
-    expect(wiped.state.phaseRun?.waveIndex).toBe(0);
-    expect(wiped.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 1));
+    expect(wiped.state.phaseRun).toBeNull();
     expect(wiped.state.heroes[0].currentHealth).toBe(wiped.state.heroes[0].maxHealth);
     expect(wiped.state.combatIntermission?.variant).toBe('defeat');
     expect(wiped.state.combat).toBeNull();
 
     const resumed = handlers.resumeIntermission(wiped.state);
-    expect(resumed.state.combat?.enemies.length).toBeGreaterThan(0);
-    expect(resumed.state.combatIntermission).toBeNull();
-    expect(wiped.events.some((event) => event.includes('fase anterior'))).toBe(true);
+    expect(resumed.state.loadoutEditOpen).toBe(true);
+    expect(resumed.state.combat).toBeNull();
+    expect(resumed.state.phaseRun).toBeNull();
+    expect(wiped.events.some((event) => event.includes('acampamento'))).toBe(true);
   });
 
-  it('permanece na fase 1-1 ao morrer na primeira fase', () => {
+  it('wipe em 1-1 também volta ao acampamento', () => {
     const phaseId = buildPhaseId(1, 1);
     const phaseRun = PhaseRun.start(phaseId);
     let state = GameState.initial().withPhaseRun(phaseRun);
@@ -220,8 +207,8 @@ describe('PhaseCombatHandlers', () => {
 
     const wiped = handlers.onPhaseWipe(state, phaseRun);
 
-    expect(wiped.state.phaseRun?.phaseId).toBe(buildPhaseId(1, 1));
-    expect(wiped.state.phaseRun?.waveIndex).toBe(0);
+    expect(wiped.state.phaseRun).toBeNull();
+    expect(wiped.state.combatIntermission?.variant).toBe('defeat');
   });
 
   it('não concede ouro em lote ao limpar wave (recompensa é por kill)', () => {
@@ -243,11 +230,11 @@ describe('PhaseCombatHandlers', () => {
       phaseRun,
     );
 
-    expect(replayWave.state.gold.amount).toBe(500);
+    expect(replayWave.state.gold.value()).toBe(500);
     expect(replayWave.state.chests).toHaveLength(0);
   });
 
-  it('não concede ouro/XP em lote ao repetir boss', () => {
+  it('não concede ouro/XP em lote ao repetir boss de fase já cleared', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
     const boss = resolver.resolve(phaseId, 1);
@@ -265,34 +252,9 @@ describe('PhaseCombatHandlers', () => {
 
     const victory = handlers.onBossDefeated(state, boss!.enemies, state.activeHeroes(), boss!.meta);
 
-    expect(victory.state.gold.amount).toBe(1000);
+    expect(victory.state.gold.value()).toBe(1000);
     expect(victory.state.chests).toHaveLength(0);
-    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 3));
-    expect(victory.state.activeHeroes()[0].experience.current).toBe(0);
-  });
-
-  it('avança para a próxima fase ao repetir fase antiga selecionada manualmente', () => {
-    const phaseId = buildPhaseId(1, 1);
-    const phaseRun = PhaseRun.start(phaseId);
-    const phase = resolvePhase(phaseId)!;
-    const bossWaveIndex = phase.waves.length - 1;
-    const boss = resolver.resolve(phaseId, bossWaveIndex);
-    expect(boss).not.toBeNull();
-
-    const clearedProgress = GameState.initial()
-      .campaignProgress.markCleared(phaseId, [buildPhaseId(1, 2)], 1)
-      .withSelectedPhase(phaseId);
-
-    let state = GameState.initial()
-      .withCampaignProgress(clearedProgress)
-      .withPhaseRun(phaseRun);
-    state = handlers.startPhaseRun(state, phaseRun).state;
-
-    const victory = handlers.onBossDefeated(state, boss!.enemies, state.activeHeroes(), boss!.meta);
-
-    expect(victory.state.campaignProgress.selectedPhaseId).toBe(buildPhaseId(1, 2));
-    expect(victory.state.phaseRun).toBeNull();
-    expect(victory.state.combat).toBeNull();
+    expect(victory.state.activeHeroes()[0].toProps().experience.current).toBe(0);
   });
 
   it('recupera vida da party ao derrotar boss sem XP em lote', () => {
@@ -315,7 +277,7 @@ describe('PhaseCombatHandlers', () => {
     const activeHero = victory.state.roster.find((hero) => hero.id === 'hero-1');
     expect(benchHero).toBeDefined();
     expect(activeHero).toBeDefined();
-    expect(benchHero!.experience.current).toBe(0);
-    expect(activeHero!.experience.current).toBe(0);
+    expect(benchHero!.toProps().experience.current).toBe(0);
+    expect(activeHero!.toProps().experience.current).toBe(0);
   });
 });

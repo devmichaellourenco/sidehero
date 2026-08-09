@@ -13,17 +13,17 @@ import {
   isMapUnlocked,
   resolveInitialMapId,
 } from '../components/CampaignModalRenderer';
+import { renderCampaignViewToggle } from '../components/CampaignMapPresentation';
 import {
-  resolveInitialPendingPhaseId,
-  renderCampaignViewToggle,
-} from '../components/CampaignMapPresentation';
+  resolveInitialPendingMissionId,
+} from '../components/CampaignMissionMapPresentation';
 import { bindCampaignTooltips, hideCampaignTooltip } from '../components/CampaignTooltipBinder';
 import { ModalController } from '../components/ModalController';
 
 export class CampaignFlow {
   private campaign: CampaignOverviewDto | null = null;
   private activeMapId = 'stendra';
-  private pendingPhaseId: string | null = null;
+  private pendingMissionId: string | null = null;
   private viewMode: CampaignViewMode = 'region';
   private actSceneReader: ((scene: ActSceneDto) => void) | null = null;
 
@@ -46,11 +46,11 @@ export class CampaignFlow {
 
     this.campaign = response.campaign;
     this.activeMapId = resolveInitialMapId(response.campaign);
-    this.pendingPhaseId = this.resolvePendingForActiveMap();
+    this.pendingMissionId = this.resolvePendingForActiveMap();
     this.viewMode = this.resolveInitialViewMode(response.campaign);
     this.renderModal(modalBody);
     this.bindInteractions(modalBody, onState);
-    this.scrollPendingPhaseIntoView(modalBody);
+    this.scrollPendingMissionIntoView(modalBody);
   }
 
   private resolveInitialViewMode(campaign: CampaignOverviewDto): CampaignViewMode {
@@ -65,7 +65,7 @@ export class CampaignFlow {
     if (!this.campaign) return null;
     const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
     if (!activeMap) return null;
-    return resolveInitialPendingPhaseId(activeMap);
+    return resolveInitialPendingMissionId(activeMap.missionBoard);
   }
 
   private shouldShowUnlockBanner(): boolean {
@@ -81,9 +81,12 @@ export class CampaignFlow {
     modalBody.innerHTML = this.renderer.render(
       this.campaign,
       this.activeMapId,
-      this.pendingPhaseId,
+      null,
       this.viewMode,
-      { showUnlockBanner: this.shouldShowUnlockBanner() },
+      {
+        showUnlockBanner: this.shouldShowUnlockBanner(),
+        pendingMissionId: this.pendingMissionId,
+      },
     );
 
     if (this.viewMode === 'region' && this.shouldShowUnlockBanner()) {
@@ -109,7 +112,7 @@ export class CampaignFlow {
     this.bindViewToggle(modalBody, onState);
     this.bindWorldMapNodes(modalBody, onState);
     this.bindMapTabs(modalBody, onState);
-    this.bindPhaseButtons(modalBody, onState);
+    this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
     this.bindActSceneButtons(modalBody);
   }
@@ -153,7 +156,7 @@ export class CampaignFlow {
         if (!map || !isMapUnlocked(map)) return;
 
         this.activeMapId = mapId;
-        this.pendingPhaseId = resolveInitialPendingPhaseId(map);
+        this.pendingMissionId = resolveInitialPendingMissionId(map.missionBoard);
         this.viewMode = 'region';
         setStoredCampaignViewMode('region');
         this.refreshViewMode(modalBody, onState);
@@ -173,36 +176,39 @@ export class CampaignFlow {
         if (!map || !isMapUnlocked(map)) return;
 
         this.activeMapId = mapId;
-        this.pendingPhaseId = resolveInitialPendingPhaseId(map);
+        this.pendingMissionId = resolveInitialPendingMissionId(map.missionBoard);
         this.refreshRegionView(modalBody, onState);
       });
     });
   }
 
-  private bindPhaseButtons(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-phase-id]').forEach((button) => {
+  private bindMissionButtons(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+    modalBody.querySelectorAll<HTMLButtonElement>('[data-mission-id]').forEach((button) => {
       button.addEventListener('click', () => {
-        const phaseId = button.dataset.phaseId;
-        if (!phaseId || button.disabled) return;
-        void this.confirmPhase(phaseId, button, onState);
+        const missionId = button.dataset.missionId;
+        if (!missionId || button.disabled) return;
+        this.pendingMissionId = missionId;
+        this.refreshRegionView(modalBody, onState);
       });
     });
   }
 
   private bindStartButton(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-start-phase]').forEach((button) => {
+    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-start-mission]').forEach((button) => {
       button.addEventListener('click', () => {
-        const phaseId = button.dataset.campaignStartPhase;
-        if (!phaseId || button.disabled) return;
-        void this.confirmPhase(phaseId, button, onState);
+        const missionId = button.dataset.campaignStartMission;
+        if (!missionId || button.disabled) return;
+        void this.confirmMission(missionId, button, onState);
       });
     });
   }
 
-  private scrollPendingPhaseIntoView(modalBody: HTMLElement): void {
+  private scrollPendingMissionIntoView(modalBody: HTMLElement): void {
     requestAnimationFrame(() => {
       modalBody
-        .querySelector('.campaign-path-node--pending, .campaign-path-node--current, .campaign-world-node--active')
+        .querySelector(
+          '.campaign-mission-pin--pending, .campaign-world-node--active',
+        )
         ?.scrollIntoView({
           block: 'nearest',
           behavior: 'smooth',
@@ -247,7 +253,7 @@ export class CampaignFlow {
         bindCampaignTooltips(panelHost);
       }
       this.bindWorldMapNodes(modalBody, onState);
-      this.scrollPendingPhaseIntoView(modalBody);
+      this.scrollPendingMissionIntoView(modalBody);
       return;
     }
 
@@ -261,14 +267,15 @@ export class CampaignFlow {
 
     if (tabsHost) {
       tabsHost.innerHTML = this.renderer.renderTabs(this.campaign, this.activeMapId);
-      bindCampaignTooltips(tabsHost);
+      bindCampaignTooltips(tabsHost as HTMLElement);
     }
 
     const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
     if (panelHost && activeMap) {
       panelHost.classList.remove('campaign-map-panel--world');
-      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, this.pendingPhaseId, {
+      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, null, {
         showUnlockBanner: this.shouldShowUnlockBanner(),
+        pendingMissionId: this.pendingMissionId,
       });
       panelHost.setAttribute('aria-label', activeMap.name);
       panelHost.setAttribute('data-campaign-theme', this.activeMapId);
@@ -280,9 +287,9 @@ export class CampaignFlow {
 
     this.syncCampaignTheme(modalBody);
     this.bindMapTabs(modalBody, onState);
-    this.bindPhaseButtons(modalBody, onState);
+    this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
-    this.scrollPendingPhaseIntoView(modalBody);
+    this.scrollPendingMissionIntoView(modalBody);
   }
 
   private refreshRegionView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
@@ -294,12 +301,13 @@ export class CampaignFlow {
 
     if (tabsHost) {
       tabsHost.innerHTML = this.renderer.renderTabs(this.campaign, this.activeMapId);
-      bindCampaignTooltips(tabsHost);
+      bindCampaignTooltips(tabsHost as HTMLElement);
     }
 
     if (panelHost && activeMap) {
-      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, this.pendingPhaseId, {
+      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, null, {
         showUnlockBanner: isMapNewToPlayer(activeMap.id, activeMap.unlocked),
+        pendingMissionId: this.pendingMissionId,
       });
       panelHost.setAttribute('aria-label', activeMap.name);
       if (isMapNewToPlayer(activeMap.id, activeMap.unlocked)) {
@@ -309,28 +317,25 @@ export class CampaignFlow {
 
     this.syncCampaignTheme(modalBody);
     this.bindMapTabs(modalBody, onState);
-    this.bindPhaseButtons(modalBody, onState);
+    this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
-    this.scrollPendingPhaseIntoView(modalBody);
+    this.scrollPendingMissionIntoView(modalBody);
   }
 
-  private async confirmPhase(
-    phaseId: string,
+  private async confirmMission(
+    missionId: string,
     button: HTMLButtonElement,
     onState: (state: GameStateDto) => void,
   ): Promise<void> {
-    const loadingClass = button.hasAttribute('data-phase-id')
-      ? 'campaign-path-node--selecting'
-      : 'campaign-phase-preview-start--loading';
-    if (button.classList.contains(loadingClass)) return;
+    if (button.classList.contains('campaign-phase-preview-start--loading')) return;
 
-    button.classList.add(loadingClass);
+    button.classList.add('campaign-phase-preview-start--loading');
     button.disabled = true;
     await new Promise((resolve) => window.setTimeout(resolve, 180));
 
-    const response = await this.client.send({ type: 'SELECT_PHASE', phaseId });
+    const response = await this.client.send({ type: 'START_MISSION', missionId });
     if (!response.ok) {
-      button.classList.remove(loadingClass);
+      button.classList.remove('campaign-phase-preview-start--loading');
       button.disabled = false;
       return;
     }

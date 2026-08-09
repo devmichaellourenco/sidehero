@@ -6,9 +6,12 @@ import { DeactivateSkillUseCase } from './use-cases/DeactivateSkillUseCase';
 import { EquipBestLoadoutUseCase } from './use-cases/EquipBestLoadoutUseCase';
 import { EquipGearUseCase } from './use-cases/EquipGearUseCase';
 import { GetCampaignOverviewUseCase } from './use-cases/GetCampaignOverviewUseCase';
+import { GetMissionBoardUseCase } from './use-cases/GetMissionBoardUseCase';
 import { NewGameUseCase } from './use-cases/NewGameUseCase';
 import { GetGameStateUseCase } from './use-cases/GetGameStateUseCase';
 import { SelectPhaseUseCase } from './use-cases/SelectPhaseUseCase';
+import { StartMissionUseCase } from './use-cases/StartMissionUseCase';
+import { ResolveMissionOutcomeUseCase } from './use-cases/ResolveMissionOutcomeUseCase';
 import { GetHeroAscensionTreeUseCase } from './use-cases/GetHeroAscensionTreeUseCase';
 import { GetHeroSkillTreeUseCase } from './use-cases/GetHeroSkillTreeUseCase';
 import { GetShopOffersUseCase } from './use-cases/GetShopOffersUseCase';
@@ -50,7 +53,10 @@ import { ISaveBackupStore } from './ports/ISaveBackupStore';
 export class GameApplication {
   readonly getState: GetGameStateUseCase;
   readonly getCampaignOverview: GetCampaignOverviewUseCase;
+  readonly getMissionBoard: GetMissionBoardUseCase;
   readonly selectPhase: SelectPhaseUseCase;
+  readonly startMission: StartMissionUseCase;
+  readonly resolveMissionOutcome: ResolveMissionOutcomeUseCase;
   readonly newGame: NewGameUseCase;
   readonly tick: TickGameUseCase;
   readonly resumeCombatIntermission: ResumeCombatIntermissionUseCase;
@@ -117,7 +123,10 @@ export class GameApplication {
 
     this.getState = new GetGameStateUseCase(repository, metaRepository, metaService, presenter);
     this.getCampaignOverview = new GetCampaignOverviewUseCase(repository, presenter);
+    this.getMissionBoard = new GetMissionBoardUseCase(repository, presenter);
     this.selectPhase = new SelectPhaseUseCase(repository, presenter);
+    this.startMission = new StartMissionUseCase(repository, presenter);
+    this.resolveMissionOutcome = new ResolveMissionOutcomeUseCase(repository, presenter);
     this.newGame = new NewGameUseCase(repository, metaRepository, metaService, presenter);
     this.tick = new TickGameUseCase(
       repository,

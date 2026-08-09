@@ -9,15 +9,22 @@
 
 O jogador avança em **fases** com **waves** de inimigos, com combate em tempo real na battle strip, intermissões visuais e progressão de stage/tier.
 
-## Critérios de aceite
+> **Transição (camp-missions):** o loop de produto passa a ser **acampamento → mapa → missão → batalha → resultado → acampamento**. Auto-avanço de fase e wipe→fase anterior serão substituídos — ver [`camp-missions.spec.md`](camp-missions.spec.md). O combate por waves **dentro** de uma missão ativa permanece nesta spec.
+
+## Critérios de aceite — legado linear (superseded por camp-missions)
+
+Os itens abaixo descrevem o v1 linear entregue; a feature [`camp-missions`](camp-missions.spec.md) **substitui** o fluxo de seleção/auto-avanço/wipe entre fases:
+
+- [x] ~~Wipe na fase: cura completa + reinicia wave 1 da mesma fase~~ → alvo: volta ao acampamento; ver camp-missions
+- [x] ~~Seleção de fase: apenas desbloqueadas ou já concluídas (replay)~~ → alvo: board de missões
+- [x] ~~Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase~~ → CLEAR/WARNING entre waves **da missão**; VITÓRIA de missão → resultado → camp
+
+## Critérios de aceite — combate (permanecem)
 
 - [x] Tick avança combate quando não pausado; respeita `combatIntermission`, pausa de loadout e **pausa de batalha** (`battlePaused`)
 - [x] Pausa de batalha: congela o combate no estado atual (sem reiniciar fase); Continuar retoma; sem edição de party/loadout; Detalhes exibe totais da tentativa (dano/cura/sofrido)
 - [x] Recompensas por kill: ouro, XP e loot ao derrotar cada inimigo (tabela por mundo/monstro)
 - [x] Boss: loot garantido na 1ª vitória da fase; replay com chance reduzida; progresso de fase no fim
-- [x] Wipe na fase: cura completa + reinicia wave 1 da mesma fase
-- [x] Seleção de fase: apenas desbloqueadas ou já concluídas (replay)
-- [x] Overlay CLEAR/WARNING/VITÓRIA antes da próxima wave/fase
 - [x] Scaling de inimigos segue level (difficultyTier ou `slot.level`) via `EnemyProgressionCatalog` (BAL-013)
 - [x] No máximo **3 inimigos por wave** (`WaveEnemyCap` / `MAX_ENEMIES_PER_WAVE`)
 - [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos (`physical`/`fire`/`cold`/`lightning`/`air`) e status
@@ -26,6 +33,11 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 - [x] Micro-desafios de fase (BAL-011): race / sustain / spike / warded (anti-mago) / armored (anti-físico) com hint na UI — âncoras Stendra→Morthaven
 - [x] Recompensas de gear comuns e únicas chegam em baús; Ignus Ix, Vorpal Lupnus, Soler Plégius e Selo de Morthaven só entram no storage quando o baú é aberto
 
+## Critérios de aceite — integração camp-missions (novos)
+
+- [ ] Fim de missão (boss clear ou wipe) não auto-inicia outra missão/fase
+- [ ] Handlers de outcome delegam ao fluxo de missões (vitória/derrota → camp)
+- [ ] Templates de wave/fase existentes reutilizados por `MissionDefinition` (marcos = main; intermediárias = pool normal)
 ## Escopo do jogo base (v1)
 
 **Objetivo:** A campanha jogável termina em **Morthaven** (`4-50`, tier 200). Regiões 5–10 permanecem no catálogo para DLC futuro até o Trono do Vazio (`10-50`).
@@ -105,5 +117,6 @@ O jogador avança em **fases** com **waves** de inimigos, com combate em tempo r
 
 ## Relacionado
 
+- [`camp-missions.spec.md`](camp-missions.spec.md) — hub acampamento, board de missões, fim de batalha → camp
 - [`stage-progress-bar.spec.md`](stage-progress-bar.spec.md) — timeline visual das waves da fase ativa
 - [`battle-ui.spec.md`](battle-ui.spec.md) — chrome / strip

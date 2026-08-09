@@ -11186,6 +11186,294 @@ body.skill-drag-active * {
   -webkit-overflow-scrolling: touch;
 }
 
+.campaign-mission-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 4px 16px;
+}
+
+.campaign-mission-board--stage {
+  padding: 4px 0 8px;
+}
+
+.campaign-mission-stage {
+  position: relative;
+  width: 100%;
+  max-height: min(52vh, 420px);
+  margin: 0 auto;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border-soft);
+  overflow: hidden;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--parchment-0) 70%, var(--seal-gold)) 0%,
+      var(--parchment-1) 45%,
+      var(--parchment-2) 100%
+    );
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.campaign-mission-stage-art {
+  position: absolute;
+  inset: 0;
+  background-image: var(--mission-map-bg, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.campaign-mission-stage--has-bg .campaign-mission-stage-art {
+  opacity: 0.72;
+}
+
+.campaign-mission-stage-markers {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.campaign-mission-board-track {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.campaign-mission-node {
+  display: grid;
+  gap: 2px;
+  width: min(78%, 280px);
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border-soft);
+  border-radius: 10px;
+  background: var(--panel-card);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.campaign-mission-node--map {
+  position: absolute;
+  width: min(42%, 168px);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  padding: 8px 10px;
+}
+
+.campaign-mission-board-track--pins {
+  position: relative;
+  min-height: 220px;
+}
+
+.campaign-mission-node--left {
+  align-self: flex-start;
+}
+
+.campaign-mission-node--right {
+  align-self: flex-end;
+}
+
+.campaign-mission-node:hover {
+  border-color: color-mix(in srgb, var(--seal-gold) 70%, transparent);
+}
+
+.campaign-mission-node--pending,
+.campaign-mission-node--current {
+  border-color: var(--seal-gold);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--seal-gold) 45%, transparent);
+}
+
+.campaign-mission-node--main {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--parchment-0) 92%, var(--seal-gold)) 0%,
+    var(--parchment-1) 55%,
+    var(--parchment-2) 100%
+  );
+}
+
+.campaign-mission-node--side {
+  border-style: dashed;
+}
+
+.campaign-mission-node-kind {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+.campaign-mission-node-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.campaign-mission-node--map .campaign-mission-node-name {
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.campaign-mission-node--map .campaign-mission-node-meta {
+  font-size: 0.68rem;
+}
+
+.campaign-mission-node-meta {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
+.campaign-mission-stars {
+  margin-left: 6px;
+  color: var(--seal-gold);
+}
+
+.campaign-mission-pin {
+  position: absolute;
+  z-index: 2;
+  width: 34px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  transform: translate(-50%, -100%);
+  cursor: pointer;
+  color: var(--seal-gold);
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--ink) 35%, transparent));
+}
+
+.campaign-mission-pin--main {
+  width: 40px;
+  height: 48px;
+  z-index: 3;
+}
+
+.campaign-mission-pin--side {
+  width: 36px;
+  height: 44px;
+}
+
+.campaign-mission-pin-glyph {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--seal-gold) 85%, var(--parchment-0)),
+    color-mix(in srgb, var(--seal-gold-dark) 70%, var(--parchment-2))
+  );
+  border: 1px solid color-mix(in srgb, var(--seal-gold) 55%, var(--ink));
+  font-size: 0;
+  line-height: 1;
+}
+
+.campaign-mission-pin--main .campaign-mission-pin-glyph {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--seal-gold) 55%, var(--parchment-0)),
+    color-mix(in srgb, var(--accent) 55%, var(--seal-gold-dark))
+  );
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--seal-gold));
+}
+
+.campaign-mission-pin--side .campaign-mission-pin-glyph {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--info) 75%, var(--parchment-0)),
+    color-mix(in srgb, var(--info) 40%, var(--parchment-2))
+  );
+  border-color: color-mix(in srgb, var(--info) 60%, var(--ink));
+}
+
+.campaign-mission-pin--normal .campaign-mission-pin-glyph {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--seal-gold) 85%, var(--parchment-0)),
+    color-mix(in srgb, var(--seal-gold-dark) 70%, var(--parchment-2))
+  );
+}
+
+.campaign-mission-pin-glyph::after {
+  content: '⚔';
+  transform: rotate(45deg);
+  font-size: 0.72rem;
+}
+
+.campaign-mission-pin--main .campaign-mission-pin-glyph::after {
+  content: '♛';
+  font-size: 0.85rem;
+}
+
+.campaign-mission-pin--side .campaign-mission-pin-glyph::after {
+  content: '◆';
+  font-size: 0.7rem;
+}
+
+.campaign-mission-pin-stars {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  letter-spacing: -0.05em;
+  color: var(--seal-gold);
+  white-space: nowrap;
+  text-shadow: 0 1px 1px color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.campaign-mission-pin:hover .campaign-mission-pin-glyph,
+.campaign-mission-pin--pending .campaign-mission-pin-glyph {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--seal-gold) 55%, transparent);
+}
+
+.campaign-mission-pin--main.campaign-mission-pin--pending .campaign-mission-pin-glyph,
+.campaign-mission-pin--main:hover .campaign-mission-pin-glyph {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 50%, var(--seal-gold));
+}
+
+.campaign-mission-pin--side.campaign-mission-pin--pending .campaign-mission-pin-glyph,
+.campaign-mission-pin--side:hover .campaign-mission-pin-glyph {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--info) 65%, transparent);
+}
+
+.campaign-mission-pin--pending {
+  z-index: 4;
+}
+
+.campaign-mission-enemies {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.campaign-mission-enemy-sprite {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.campaign-mission-rewards {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  opacity: 1;
+}
+
 .campaign-path {
   display: flex;
   flex-direction: column;

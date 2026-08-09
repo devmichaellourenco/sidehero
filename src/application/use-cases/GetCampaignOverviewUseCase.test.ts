@@ -33,5 +33,7 @@ describe('GetCampaignOverviewUseCase', () => {
       'valdris',
       'morthaven',
     ]);
+    expect(result.campaign.maps[0]?.missionBoard?.main?.id).toBe('main:1-1');
+    expect(result.campaign.maps[0]?.missionBoard?.normals.length).toBeGreaterThanOrEqual(2);
   });
 });

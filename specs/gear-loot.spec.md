@@ -24,6 +24,12 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 - [x] Bordas de raridade consistentes em inventário, loadout, loja, forja, loot e tooltips: common cinza, uncommon verde, rare azul, epic lilás, legendary dourado, mythic vermelho com brilho
 - [x] Raridade **mythic** não aparece em loja nem em loot de área/baú antes do Ato 3 de Valdris (`MythicGearAccessPolicy`, tier ≥ 121)
 
+## Critérios — camp-missions (novos)
+
+- [ ] Loot exclusivo de quest **secundária** (item e/ou ouro e/ou XP) só na primeira conclusão
+- [ ] Missão **normal**: loot/recursos sem progresso de história; derrota não concede recompensa de conclusão
+- [ ] Tabelas/templates de loot referenciáveis por `MissionDefinition`
+
 ## Camadas e arquivos-chave
 
 | Camada | Paths |
@@ -55,6 +61,10 @@ Adicionar critérios `[ ]` aqui antes de codar:
 - Vender/descartar lixo em lote
 - Compare side-by-side
 - Virtualização para 500+ itens
+
+## Relacionado
+
+- [`camp-missions.spec.md`](camp-missions.spec.md) — loot por tipo de missão
 
 ## Testes obrigatórios
 

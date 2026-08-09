@@ -1,4 +1,5 @@
 import type { StageProgressDto } from './StageProgressDto';
+import type { MissionBoardDto } from './MissionBoardDto';
 
 export interface ActSceneDto {
   id: string;
@@ -37,6 +38,8 @@ export interface CampaignMapDto {
   unlocked: boolean;
   phases: CampaignPhaseDto[];
   actScenes: ActSceneDto[];
+  /** Board de missões disponíveis nesta visita (Fase 3+). */
+  missionBoard?: MissionBoardDto;
 }
 
 export interface CampaignOverviewDto {

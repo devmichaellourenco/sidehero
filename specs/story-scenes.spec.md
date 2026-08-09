@@ -37,8 +37,14 @@ Cada **ato** de cada **região** (mapa) da campanha exibe uma **cena narrativa**
 | Primeira fase do ato desbloqueada | Overlay automático + pausa |
 | Primeira sessão com `1-1` desbloqueada e cena do Ato I não vista | Overlay do Ato I de Stendra |
 | Boss X-50 / finale | Overlay de vitória existente + Wow de marco (já pausam com esta feature) |
+| Conclusão de missão principal/secundária (`camp-missions`) | Pode disparar cena dedicada ou reutilizar ato — ver [`camp-missions.spec.md`](camp-missions.spec.md) |
 | Card "Ver cena" no mapa | Overlay somente leitura; não re-marca se já vista |
 | Card "Ver cena" com campanha unpin | Relay via storage → overlay no painel principal |
+
+## Critérios — camp-missions (novos)
+
+- [ ] Cena narrativa pode ser recompensa exclusiva de quest secundária (id estável no catálogo)
+- [ ] Cards/overlay de cena adaptados ao mapa de locais (não só trilha linear de fases)
 
 ## Camadas e arquivos-chave
 

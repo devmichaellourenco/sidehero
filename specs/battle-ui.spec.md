@@ -34,6 +34,13 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Pista de combate do mapa (ameaça/favorável) no tooltip da campanha e header do mapa; eficácia vs área nas stats de skill
 - [x] Splash `splash_screen.png` na abertura do painel principal (≥5s) antes de tutorial/Wow/loop de batalha (`SplashScreenController`)
 
+## Critérios — camp-missions (novos)
+
+- [ ] Modal de campanha: mapa-mundo + **mapa de locais** (missões disponíveis), sem trilha linear como UX principal
+- [ ] Detalhe de missão: tipo, estrelas, preview waves/monstros/stats, CTA iniciar
+- [ ] Tela/fluxo de resultado pós-batalha (vitória/derrota + recompensas) antes de voltar ao acampamento
+- [ ] Acampamento permanece hub de party/loja/inventário; combate só após iniciar missão
+
 ## Camadas e arquivos-chave
 
 | Camada | Paths |
@@ -77,6 +84,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 ## Relacionado
 
+- [`camp-missions.spec.md`](camp-missions.spec.md) — mapa de missões, resultado → acampamento
 - [`stage-progress-bar.spec.md`](stage-progress-bar.spec.md) — timeline entre localização e a battle strip
 - [`combat-campaign.spec.md`](combat-campaign.spec.md) — waves / fase ativa
 - [`medieval-theme.spec.md`](medieval-theme.spec.md) — paleta medieval do chrome (tutorial)

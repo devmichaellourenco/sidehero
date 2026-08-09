@@ -283,6 +283,8 @@ export interface CampaignProgressDto {
   highestTierReached: number;
   seasonCompleted: boolean;
   viewedActSceneIds: string[];
+  /** Cenas de missão (side) aguardando leitura. */
+  pendingMissionSceneIds?: string[];
 }
 
 export interface CombatIntermissionDto {

@@ -1,4 +1,5 @@
 import { CampaignOverviewDto } from '../dto/CampaignDto';
+import { MissionBoardDto } from '../dto/MissionBoardDto';
 import { CombatFloatingEventDto } from '../dto/CombatFloatingEventDto';
 import { CombatSkillVfxDto } from '../dto/CombatSkillVfxDto';
 import { GameStateDto, GearDto } from '../dto/GameStateDto';
@@ -18,7 +19,10 @@ export type GameMessage =
   | { type: 'GET_STATE' }
   | { type: 'MARK_ACT_SCENE_VIEWED'; sceneId: string }
   | { type: 'GET_CAMPAIGN_OVERVIEW' }
+  | { type: 'GET_MISSION_BOARD'; mapId: string }
   | { type: 'SELECT_PHASE'; phaseId: string }
+  | { type: 'START_MISSION'; missionId: string }
+  | { type: 'RESOLVE_MISSION_OUTCOME'; mode: 'victory' | 'defeat' | 'enter_camp'; phaseId?: string }
   | { type: 'NEW_GAME' }
   | { type: 'PAUSE_FOR_LOADOUT' }
   | { type: 'PAUSE_BATTLE' }
@@ -95,6 +99,7 @@ export type GameResponse =
       forgedGear?: GearDto;
       salvageGold?: number;
       campaign?: CampaignOverviewDto;
+      missionBoard?: MissionBoardDto;
       refundWarnings?: string[];
       pointsRefunded?: number;
       ascensionPointsRefunded?: number;

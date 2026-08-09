@@ -4,6 +4,8 @@ import {
   isPhaseReleased,
   maxReleasedTier,
 } from './CampaignReleaseScope';
+import { MissionProgress, MissionProgressProps } from './missions/MissionProgress';
+import { migrateLegacyCampaignToMissionProgress } from './missions/migrateLegacyCampaignToMissions';
 
 export interface CampaignProgressProps {
   unlockedPhaseIds: PhaseId[];
@@ -12,6 +14,8 @@ export interface CampaignProgressProps {
   highestTierReached: number;
   seasonCompleted: boolean;
   viewedActSceneIds?: string[];
+  /** Progresso do board de missões (camp-missions). */
+  missionProgress?: MissionProgressProps;
 }
 
 export class CampaignProgress {
@@ -21,6 +25,7 @@ export class CampaignProgress {
   readonly highestTierReached: number;
   readonly seasonCompleted: boolean;
   readonly viewedActSceneIds: string[];
+  readonly missionProgress: MissionProgress;
 
   private constructor(props: CampaignProgressProps) {
     this.unlockedPhaseIds = [...props.unlockedPhaseIds];
@@ -29,6 +34,7 @@ export class CampaignProgress {
     this.highestTierReached = Math.max(1, props.highestTierReached);
     this.seasonCompleted = props.seasonCompleted ?? false;
     this.viewedActSceneIds = [...(props.viewedActSceneIds ?? [])];
+    this.missionProgress = MissionProgress.restore(props.missionProgress);
   }
 
   static initial(): CampaignProgress {
@@ -39,6 +45,7 @@ export class CampaignProgress {
       highestTierReached: 1,
       seasonCompleted: false,
       viewedActSceneIds: [],
+      missionProgress: MissionProgress.initial().toProps(),
     });
   }
 
@@ -48,6 +55,19 @@ export class CampaignProgress {
     const selectedPhaseId = props.selectedPhaseId ?? buildPhaseId(1, 1);
     const maxTier = maxReleasedTier();
 
+    const missionProgress = migrateLegacyCampaignToMissionProgress(
+      {
+        unlockedPhaseIds,
+        clearedPhaseIds,
+        selectedPhaseId,
+        highestTierReached: props.highestTierReached ?? 1,
+        seasonCompleted: props.seasonCompleted ?? false,
+        viewedActSceneIds: props.viewedActSceneIds ?? [],
+        missionProgress: props.missionProgress,
+      },
+      1,
+    );
+
     return new CampaignProgress({
       unlockedPhaseIds,
       clearedPhaseIds,
@@ -55,6 +75,7 @@ export class CampaignProgress {
       highestTierReached: Math.min(Math.max(1, props.highestTierReached ?? 1), maxTier),
       seasonCompleted: props.seasonCompleted ?? false,
       viewedActSceneIds: props.viewedActSceneIds ?? [],
+      missionProgress,
     });
   }
 
@@ -74,6 +95,10 @@ export class CampaignProgress {
 
   withSelectedPhase(phaseId: PhaseId): CampaignProgress {
     return this.clone({ selectedPhaseId: phaseId });
+  }
+
+  withMissionProgress(progress: MissionProgress): CampaignProgress {
+    return this.clone({ missionProgress: progress.toProps() });
   }
 
   markCleared(phaseId: PhaseId, unlocks: PhaseId[], difficultyTier: number): CampaignProgress {
@@ -115,6 +140,7 @@ export class CampaignProgress {
       highestTierReached: this.highestTierReached,
       seasonCompleted: this.seasonCompleted,
       viewedActSceneIds: [...this.viewedActSceneIds],
+      missionProgress: this.missionProgress.toProps(),
     };
   }
 

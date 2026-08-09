@@ -1,10 +1,15 @@
 import { getCampaignInfo, listPhasesForMap, resolvePhase } from '../../domain/campaign/CampaignCatalog';
 import { MapId } from '../../domain/campaign/CampaignIds';
 import { PhaseDefinition } from '../../domain/campaign/PhaseDefinition';
+import {
+  buildCampMissionBoard,
+  ensureNormalOfferForBoard,
+} from '../../domain/campaign/missions/CampMissionBoard';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { CampaignOverviewDto } from '../dto/CampaignDto';
 import { mapActScenesForMap } from '../mappers/ActSceneDtoMapper';
 import { mapCampaignOverview } from '../mappers/CampaignDtoMapper';
+import { mapMissionBoard } from '../mappers/MissionBoardMapper';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
 
@@ -48,9 +53,35 @@ export class GetCampaignOverviewUseCase {
   ) {}
 
   async execute(): Promise<GetCampaignOverviewResult> {
-    const state = await this.repository.load();
+    let state = await this.repository.load();
+    let missionProgress = state.campaignProgress.missionProgress;
+    let offersChanged = false;
+
     const info = getCampaignInfo();
     const maps = info.maps.map((map) => {
+      const mapId = map.id as MapId;
+      const ensured = ensureNormalOfferForBoard({
+        mapId,
+        saveSeed: missionProgress.offerSeed,
+        offerEpoch: missionProgress.offerEpochFor(mapId),
+        currentOffer: missionProgress.normalOfferFor(mapId),
+      });
+      if (
+        ensured.offer.join('|') !== missionProgress.normalOfferFor(mapId).join('|') ||
+        ensured.offerEpoch !== missionProgress.offerEpochFor(mapId)
+      ) {
+        missionProgress = missionProgress.withNormalOffer(mapId, ensured.offer, ensured.offerEpoch);
+        offersChanged = true;
+      }
+
+      const board = buildCampMissionBoard({
+        mapId,
+        completedMainIds: missionProgress.completedMainIds,
+        completedSideIds: missionProgress.completedSideIds,
+        completedMissionIds: missionProgress.completedMissionIds(),
+        normalOfferIds: missionProgress.normalOfferFor(mapId),
+      });
+
       const phases = listPhasesForMap(map.id).map((phase) => {
         const definition = resolvePhase(phase.id)!;
         return {
@@ -79,9 +110,17 @@ export class GetCampaignOverviewUseCase {
         name: map.name,
         unlocked,
         phases,
-        actScenes: mapActScenesForMap(state.campaignProgress, map.id as MapId),
+        actScenes: mapActScenesForMap(state.campaignProgress, mapId),
+        missionBoard: mapMissionBoard(board, missionProgress.activeMissionId),
       };
     });
+
+    if (offersChanged) {
+      state = state.withCampaignProgress(
+        state.campaignProgress.withMissionProgress(missionProgress),
+      );
+      await this.repository.save(state);
+    }
 
     return {
       state: this.presenter.present(state),

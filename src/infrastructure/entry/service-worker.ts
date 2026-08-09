@@ -1,4 +1,5 @@
 import { GameMessage, GameResponse } from '../../application/ports/GameClientTypes';
+import { MapId } from '../../domain/campaign/CampaignIds';
 import { META_LEGACY_ENABLED } from '../../application/ProductGates';
 import { createGameApplication } from '../di/createGameApplication';
 import {
@@ -83,8 +84,20 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const result = await app.getCampaignOverview.execute();
       return { ok: true, state: result.state, campaign: result.campaign };
     }
+    case 'GET_MISSION_BOARD': {
+      const result = await app.getMissionBoard.execute(message.mapId as MapId);
+      return { ok: true, state: result.state, missionBoard: result.board };
+    }
     case 'SELECT_PHASE': {
       const state = await app.selectPhase.execute(message.phaseId);
+      return { ok: true, state };
+    }
+    case 'START_MISSION': {
+      const state = await app.startMission.execute(message.missionId);
+      return { ok: true, state };
+    }
+    case 'RESOLVE_MISSION_OUTCOME': {
+      const state = await app.resolveMissionOutcome.execute(message.mode, message.phaseId);
       return { ok: true, state };
     }
     case 'MARK_ACT_SCENE_VIEWED': {

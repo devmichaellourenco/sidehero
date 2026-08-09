@@ -26,7 +26,8 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Combate e fórmulas** | Dano, cura, crítico, status, turnos/tick | `combat-campaign` | `MitigationPipeline`, `CombatDamageResolver`, `CombatActionExecutor`, `CombatTurnPhase` |
 | **Elementos** | Cada elemento (`physical`/`fire`/`cold`/`lightning`/`air`) usa mitigação do tipo; multi-componente; DOT | `combat-campaign`, `skills-progression` | `DamageElement`, `ResistanceProfile`, `HeroCombatSkillCatalog`, `EnemyMonsterCombatSkillCatalog` |
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
-| **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted | `combat-campaign` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
+| **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted | `combat-campaign`, `camp-missions` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
+| **Missões / board** | Oferta normal 2–4; refresh por visitas; templates ★; unlock side | `camp-missions` | `NormalMissionOffer`, `MissionCatalog`, `CampMissionBoard` |
 | **Skills e progressão** | `Base × (powerPerRank × nível) × (attr × fator)`; cooldowns; ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `SkillDamageBalance`, `HeroLevelXpCatalog` |
 | **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
@@ -148,3 +149,4 @@ Criar ou atualizar; **não executar** automaticamente.
 | BAL-011 | Alta | Builds monótonas; pressão só no priest; mago/físico sem trade-off | Campanha/Waves | ✅ Resolvido (`PhaseChallengeCatalog` race/sustain/spike/warded/armored · Stendra→Morthaven) |
 | BAL-012 | Alta | Combate early acelerado demais (TTA curto, skills rápidas, básico = ATK cheio) | Combate/Skills | ✅ Resolvido (TTA = 1/ASPD por combatente + DEX; CD herói ×5; rank −1,5s; básico 50% ATK) |
 | BAL-013 | Alta | Inimigos usavam knobs/fórmulas paralelas (HP factor, ASPD por stage, CD 1s/turn) | Combate/Campanha | ✅ Resolvido (`EnemyProgressionCatalog`, `CombatantDerivedStats`, CD/básico unificados) |
+| BAL-014 | Alta | Loop camp-missions: oferta normal, refresh N visitas, curva ★1–5 por mapa | Missões | Calibrado — refresh=2; ver [`camp-missions.spec.md`](camp-missions.spec.md) |

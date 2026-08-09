@@ -6,7 +6,8 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 
 | Feature | Aceite | Testes spec | Pendências |
 |---------|--------|-------------|------------|
-| [combat-campaign](combat-campaign.spec.md) | 15/15 | 9/9 | — |
+| [camp-missions](camp-missions.spec.md) | 4/22 | 4/8 | Fase 1 domínio ok; fases 2–6 |
+| [combat-campaign](combat-campaign.spec.md) | 15/15 | 9/9 | Integração camp-missions pendente |
 | [heroes-party](heroes-party.spec.md) | 9/9 | 10/10 | — |
 | [skills-progression](skills-progression.spec.md) | 9/9 | 10/10 | — |
 | [gear-loot](gear-loot.spec.md) | 8/8 | 8/8 | — |
@@ -41,9 +42,9 @@ Campanha jogável até **Morthaven** (`4-50`, tier 200). Regiões 5–10 (DLC) p
 
 ## Próxima feature sugerida
 
-**Passivas** (classe / ascensão cumulativa / gear / inimigos) — [`passives.spec.md`](passives.spec.md). Resolver decisões abertas antes de codar.
+**Camp missions** (acampamento → mapa → missões) — [`camp-missions.spec.md`](camp-missions.spec.md). Fase 0 (specs/skill/agent/rule) entregue; implementação domínio/UI nas fases 1–6.
 
-Polish de arte (secundário): battle strip das 4 regiões — [`art-scenes.spec.md`](art-scenes.spec.md).
+Secundário: **Passivas** — [`passives.spec.md`](passives.spec.md). Polish de arte: battle strip das 4 regiões — [`art-scenes.spec.md`](art-scenes.spec.md).
 
 ## Regras de workflow do agente
 
@@ -65,6 +66,7 @@ Polish de arte (secundário): battle strip das 4 regiões — [`art-scenes.spec.
 
 | Spec | Domínio | Agent | Skill |
 |------|---------|-------|-------|
+| [camp-missions](camp-missions.spec.md) | Acampamento, board, missões main/side/normal | `.cursor/agents/camp-missions.md` | `.cursor/skills/camp-missions/` |
 | [combat-campaign](combat-campaign.spec.md) | Combate, waves, campanha, tick | `.cursor/agents/combat-campaign.md` | `.cursor/skills/combat-campaign/` |
 | [heroes-party](heroes-party.spec.md) | Heróis, party, reserva, unlock | `.cursor/agents/heroes-party.md` | `.cursor/skills/heroes-party/` |
 | [skills-progression](skills-progression.spec.md) | Skills, ascensão, pontos | `.cursor/agents/skills-progression.md` | `.cursor/skills/skills-progression/` |

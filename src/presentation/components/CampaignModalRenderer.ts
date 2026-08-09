@@ -6,7 +6,6 @@ import {
   getMapBiomeKind,
   mapProgress,
   parseMapIndex,
-  renderCampaignPath,
   renderCampaignWorldMap,
   renderLockedMapPanel,
   renderMapProgressBar,
@@ -14,9 +13,12 @@ import {
   renderMapTabBiomeIcon,
   renderMapTabRing,
   renderMapUnlockBanner,
-  renderPhasePreviewFooter,
-  tierRangeForMap,
 } from './CampaignMapPresentation';
+import {
+  renderMissionLocalesMap,
+  renderMissionPreviewFooter,
+  resolveInitialPendingMissionId,
+} from './CampaignMissionMapPresentation';
 
 export function isMapUnlocked(map: CampaignMapDto): boolean {
   return map.unlocked;
@@ -78,7 +80,7 @@ export class CampaignModalRenderer {
   renderMapPanel(
     map: CampaignMapDto,
     pendingPhaseId: string | null,
-    options: { showUnlockBanner?: boolean } = {},
+    options: { showUnlockBanner?: boolean; pendingMissionId?: string | null } = {},
   ): string {
     const biomeKind = getMapBiomeKind(map.id);
 
@@ -92,6 +94,15 @@ export class CampaignModalRenderer {
 
     const mapIndex = parseMapIndex(map);
     const unlockBanner = options.showUnlockBanner ? renderMapUnlockBanner(map) : '';
+    const pendingMissionId =
+      options.pendingMissionId ??
+      resolveInitialPendingMissionId(map.missionBoard) ??
+      pendingPhaseId;
+
+    const boardHtml = map.missionBoard
+      ? renderMissionLocalesMap(map.missionBoard, pendingMissionId)
+      : '<p class="empty-state">Board de missões indisponível.</p>';
+    const previewHtml = renderMissionPreviewFooter(map.missionBoard, pendingMissionId);
 
     return `
       <div class="campaign-map-body" data-campaign-biome="${biomeKind}">
@@ -100,9 +111,9 @@ export class CampaignModalRenderer {
           ${renderMapProgressBar(map, mapIndex)}
         </header>
         <div class="campaign-path-scroll game-scroll">
-          ${renderCampaignPath(map, mapIndex, pendingPhaseId)}
+          ${boardHtml}
         </div>
-        ${renderPhasePreviewFooter(map, mapIndex, pendingPhaseId)}
+        ${previewHtml}
       </div>
     `;
   }
@@ -120,7 +131,7 @@ export class CampaignModalRenderer {
     activeMapId: string,
     pendingPhaseId: string | null,
     viewMode: CampaignViewMode,
-    options: { showUnlockBanner?: boolean } = {},
+    options: { showUnlockBanner?: boolean; pendingMissionId?: string | null } = {},
   ): string {
     const activeMap = campaign.maps.find((map) => map.id === activeMapId) ?? campaign.maps[0];
     const regionPanel = activeMap

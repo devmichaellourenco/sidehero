@@ -2609,5 +2609,24 @@
     "lootPool": false,
     "spriteId": "rain_kontempler_bow",
     "sprite": "gear/items/rain_kontempler_bow.png"
+  },
+  {
+    "id": "side_stendra_cache_charm",
+    "name": "Talismã do Esconderijo",
+    "slot": "accessory",
+    "rarity": "rare",
+    "attackBonus": 4,
+    "defenseBonus": 2,
+    "healthBonus": 48,
+    "allElementalResistBonus": 4,
+    "requirements": {
+      "minLevel": 4,
+      "int": 0
+    },
+    "unique": true,
+    "lootPool": false,
+    "salvageBlocked": true,
+    "spriteId": "side_stendra_cache_charm",
+    "sprite": "gear/items/copper_ring.png"
   }
 ]

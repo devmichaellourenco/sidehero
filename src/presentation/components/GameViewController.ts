@@ -111,7 +111,7 @@ import { OnboardingController } from '../onboarding/OnboardingController';
 import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
 import { UiOverlayOrchestrator } from '../overlays/UiOverlayOrchestrator';
 import { bindBattleChromeLayout } from '../layout/BattleChromeLayout';
-import { detectPendingActSceneDto, detectSeasonFinaleEpilogueDto, actSceneDtoFromId } from '../../application/mappers/ActScenePresentationMapper';
+import { detectPendingActSceneDto, detectSeasonFinaleEpilogueDto, detectPendingMissionSceneDto, actSceneDtoFromId } from '../../application/mappers/ActScenePresentationMapper';
 import { ActSceneDto } from '../../application/dto/CampaignDto';
 
 export class GameViewController {
@@ -1247,6 +1247,7 @@ export class GameViewController {
       this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
       this.flushDeferredVictoryRewards();
       this.tryShowSeasonFinaleEpilogueAfterCelebration();
+      this.tryShowPendingMissionScene();
       this.syncAutoBattleTimer();
     } finally {
       this.intermissionResuming = false;
@@ -1264,6 +1265,22 @@ export class GameViewController {
   private tryShowSeasonFinaleEpilogueAfterCelebration(): void {
     if (this.overlayOrchestrator.isBusy() || this.wowCelebration.isBlockingAdvance()) return;
     this.tryShowSeasonFinaleEpilogue();
+  }
+
+  private tryShowPendingMissionScene(): void {
+    if (!this.state) return;
+    if (this.overlayOrchestrator.isBusy() || this.actSceneFlow.isBlocking()) return;
+    if (this.wowCelebration.isBlockingAdvance()) return;
+
+    const scene = detectPendingMissionSceneDto(this.state.campaignProgress);
+    if (!scene) return;
+
+    this.presentActScene(scene, {
+      markViewedOnDismiss: true,
+      onDismiss: () => {
+        void this.markActSceneViewed(scene.id);
+      },
+    });
   }
 
   private tryShowSeasonFinaleEpilogue(): void {

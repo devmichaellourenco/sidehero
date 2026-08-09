@@ -7,8 +7,9 @@
 
 ## Objetivo
 
-Exibir uma **timeline horizontal** (Stage Progress Bar) durante a fase ativa, para o jogador ver em que wave/evento está — padrão de Idle RPG / AFK (AFK Arena, MLA, Legend of Mushroom).
+Exibir uma **timeline horizontal** (Stage Progress Bar) durante a **missão/fase ativa**, para o jogador ver em que wave/evento está — padrão de Idle RPG / AFK (AFK Arena, MLA, Legend of Mushroom).
 
+> Com [`camp-missions`](camp-missions.spec.md), a barra só aparece **dentro** de uma missão em andamento (não no hub do mapa).
 Cada marcador é um evento da fase; a barra preenche conforme o avanço.
 
 ```

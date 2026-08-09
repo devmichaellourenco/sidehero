@@ -136,6 +136,9 @@ export class GameStatePresenter {
         highestTierReached: state.campaignProgress.highestTierReached,
         seasonCompleted: state.campaignProgress.seasonCompleted,
         viewedActSceneIds: [...state.campaignProgress.viewedActSceneIds],
+        pendingMissionSceneIds: [
+          ...state.campaignProgress.missionProgress.pendingNarrativeSceneIds,
+        ],
       },
       seasonCompleted: state.campaignProgress.seasonCompleted,
       stage: state.stage,

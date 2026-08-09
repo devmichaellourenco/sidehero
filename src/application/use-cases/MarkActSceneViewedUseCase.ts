@@ -1,4 +1,5 @@
 import { resolveActSceneById } from '../../domain/campaign/ActSceneCatalog';
+import { resolveMissionScene } from '../../domain/campaign/missions/MissionSceneCatalog';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
@@ -11,16 +12,24 @@ export class MarkActSceneViewedUseCase {
 
   async execute(sceneId: string): Promise<GameStateDto> {
     const state = await this.repository.load();
-    const scene = resolveActSceneById(sceneId);
+    const actScene = resolveActSceneById(sceneId);
+    const missionScene = resolveMissionScene(sceneId);
 
-    if (!scene) {
+    if (!actScene && !missionScene) {
       throw new Error('Cena não encontrada');
     }
 
-    const nextState = state.withCampaignProgress(
-      state.campaignProgress.markActSceneViewed(sceneId),
-    );
+    let progress = state.campaignProgress;
+    if (actScene) {
+      progress = progress.markActSceneViewed(sceneId);
+    }
+    if (missionScene) {
+      progress = progress.withMissionProgress(
+        progress.missionProgress.markNarrativeSceneViewed(sceneId),
+      );
+    }
 
+    const nextState = state.withCampaignProgress(progress);
     await this.repository.save(nextState);
     return this.presenter.present(nextState);
   }
