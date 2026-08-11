@@ -45,8 +45,10 @@ import type {
   LabPassiveSlot,
   LabSide,
 } from './types';
+import { mountMissionsTab } from './missionBattlesUi';
 
 type PanelId = 'left' | 'right';
+type LabTab = 'sim' | 'missions';
 
 const enemyOptions = listEnemyTypeOptions();
 const heroClasses = listHeroClassOptions();
@@ -55,6 +57,8 @@ let mode: 'single' | 'compare' = 'single';
 let left: LabCombatantInput = defaultHeroInput('knight', 10);
 let right: LabCombatantInput = defaultEnemyInput('goblin_raider', 10, 'trash');
 let formulas: LabFormulaConstants = defaultFormulaConstants();
+let activeTab: LabTab = 'sim';
+let missionsMounted = false;
 
 const mainEl = document.getElementById('lab-main')!;
 const modeSelect = document.getElementById('lab-mode') as HTMLSelectElement;
@@ -62,6 +66,8 @@ const ioJson = document.getElementById('io-json') as HTMLTextAreaElement;
 const ioSnippet = document.getElementById('io-snippet') as HTMLTextAreaElement;
 const statusEl = document.getElementById('lab-status')!;
 const importFile = document.getElementById('import-file') as HTMLInputElement;
+const panelSim = document.getElementById('lab-panel-sim');
+const panelMissions = document.getElementById('lab-panel-missions');
 
 function setStatus(message: string, isError = false): void {
   statusEl.textContent = message;
@@ -1142,6 +1148,33 @@ document.getElementById('btn-copy-snippet')?.addEventListener('click', () => {
   syncFromDom();
   refreshIo();
   void copyText(ioSnippet.value, 'Snippet TS copiado.');
+});
+
+async function switchLabTab(tab: LabTab): Promise<void> {
+  activeTab = tab;
+  document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.labTab === tab);
+  });
+  panelSim?.toggleAttribute('hidden', tab !== 'sim');
+  panelMissions?.toggleAttribute('hidden', tab !== 'missions');
+
+  if (tab === 'missions' && !missionsMounted) {
+    missionsMounted = true;
+    try {
+      await mountMissionsTab();
+      setStatus('Aba Missões: edite waves e salve em phase-battle-overrides.json');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar missões', true);
+    }
+  }
+}
+
+document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const tab = button.dataset.labTab as LabTab | undefined;
+    if (!tab || tab === activeTab) return;
+    void switchLabTab(tab);
+  });
 });
 
 modeSelect.value = mode;

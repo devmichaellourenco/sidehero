@@ -2,6 +2,7 @@ import { IGameStateRepository } from '../domain/repositories/IGameStateRepositor
 import { AssignSkillSlotUseCase } from './use-cases/AssignSkillSlotUseCase';
 import { AscendClassUseCase } from './use-cases/AscendClassUseCase';
 import { BuyShopOfferUseCase } from './use-cases/BuyShopOfferUseCase';
+import { BuyAndEquipShopOfferUseCase } from './use-cases/BuyAndEquipShopOfferUseCase';
 import { DeactivateSkillUseCase } from './use-cases/DeactivateSkillUseCase';
 import { EquipBestLoadoutUseCase } from './use-cases/EquipBestLoadoutUseCase';
 import { EquipGearUseCase } from './use-cases/EquipGearUseCase';
@@ -70,6 +71,7 @@ export class GameApplication {
   readonly unequipGear: UnequipGearUseCase;
   readonly getShopOffers: GetShopOffersUseCase;
   readonly buyShopOffer: BuyShopOfferUseCase;
+  readonly buyAndEquipShopOffer: BuyAndEquipShopOfferUseCase;
   readonly refreshShop: RefreshShopUseCase;
   readonly getUpgradeTree: GetUpgradeTreeUseCase;
   readonly purchaseUpgrade: PurchaseUpgradeUseCase;
@@ -148,6 +150,11 @@ export class GameApplication {
     this.unequipGear = new UnequipGearUseCase(repository, presenter);
     this.getShopOffers = new GetShopOffersUseCase(repository, shopService, presenter);
     this.buyShopOffer = new BuyShopOfferUseCase(repository, shopService, presenter);
+    this.buyAndEquipShopOffer = new BuyAndEquipShopOfferUseCase(
+      repository,
+      shopService,
+      presenter,
+    );
     this.refreshShop = new RefreshShopUseCase(repository, shopService, presenter);
     this.getUpgradeTree = new GetUpgradeTreeUseCase(repository, upgradeService, presenter);
     this.purchaseUpgrade = new PurchaseUpgradeUseCase(repository, upgradeService, presenter);

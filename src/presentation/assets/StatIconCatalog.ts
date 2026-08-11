@@ -60,6 +60,7 @@ export const STAT_LINE_ICON_BY_ID: Record<string, StatIconKey> = {
   'attack-speed': 'attackSpeed',
   'cast-speed': 'castSpeed',
   'cooldown-reduction': 'cooldown',
+  'time-to-action': 'cooldown',
   'crit-chance': 'critChance',
   'crit-damage': 'critDamage',
   defesa: 'defense',

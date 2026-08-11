@@ -8,7 +8,6 @@ import {
   findMissionOnBoard,
   kindLabel,
   renderMissionLocalesMap,
-  renderMissionPreviewFooter,
   resolveInitialPendingMissionId,
 } from './CampaignMissionMapPresentation';
 
@@ -25,6 +24,7 @@ function boardFixture(): MissionBoardDto {
       waveCount: 2,
       difficultyTier: 1,
       featuredEnemyTypes: ['goblin_raider'],
+      featuredEnemies: [],
       rewards: null,
       selected: false,
     },
@@ -39,6 +39,7 @@ function boardFixture(): MissionBoardDto {
         waveCount: 2,
         difficultyTier: 3,
         featuredEnemyTypes: [],
+        featuredEnemies: [],
         rewards: null,
         selected: false,
       },
@@ -54,6 +55,7 @@ function boardFixture(): MissionBoardDto {
         waveCount: 2,
         difficultyTier: 2,
         featuredEnemyTypes: [],
+        featuredEnemies: [],
         rewards: { gold: 10 },
         selected: false,
       },
@@ -67,6 +69,7 @@ function boardFixture(): MissionBoardDto {
         waveCount: 2,
         difficultyTier: 4,
         featuredEnemyTypes: [],
+        featuredEnemies: [],
         rewards: null,
         selected: false,
       },
@@ -124,13 +127,73 @@ describe('CampaignMissionMapPresentation', () => {
     expect(html).toContain('campaign-mission-pin--normal');
     expect(html).toContain(`left:${STENDRA_MISSION_MAP_LAYOUT.mainSlot.x}%`);
     expect(html).toContain('data-mission-id="normal:1-2"');
+    expect(html).toContain('campaign-mission-popover');
+    expect(html).toContain('data-campaign-start-mission="main:1-1"');
+    expect(html).toContain('campaign-mission-board--has-popover');
     expect(html).not.toContain('campaign-mission-node--map');
     expect(html).not.toContain('campaign-path-act-track');
   });
 
-  it('preview mostra tipo, estrelas e CTA de missão', () => {
+  it('sem seleção não renderiza popover de missão', () => {
     const board = boardFixture();
-    const html = renderMissionPreviewFooter(board, 'normal:1-2');
+    const html = renderMissionLocalesMap(board, null);
+    expect(html).toContain('campaign-mission-pin--main');
+    expect(html).not.toContain('campaign-mission-popover');
+    expect(html).not.toContain('data-campaign-start-mission');
+  });
+
+  it('preview no pin mostra tipo, estrelas, CTA e tooltip de stats do inimigo', () => {
+    const board = boardFixture();
+    board.main!.featuredEnemies = [
+      {
+        id: 'preview-goblin',
+        name: 'Goblin Saqueador',
+        enemyType: 'goblin_raider',
+        role: 'trash',
+        level: 1,
+        attributes: { str: 5, dex: 5, int: 1 },
+        health: 40,
+        maxHealth: 40,
+        attack: 8,
+        defense: 3,
+        attackSpeed: 1,
+        castSpeed: 1,
+        goldReward: 5,
+        xpReward: 2,
+        signatureSkills: [],
+        combatIntent: null,
+        combatSkills: [],
+        actionTimeRatio: 0,
+        actionTimeRemaining: 0,
+        actionTimeTotal: 1,
+        statusEffects: [],
+        combatResists: { fire: 0, cold: 0, lightning: 0, air: 0 },
+        passiveIds: [],
+        combatStatSheet: [
+          {
+            id: 'offense',
+            title: 'Ofensiva',
+            lines: [{ id: 'attack', label: 'Ataque', value: '8', tooltipLines: [] }],
+          },
+        ],
+      },
+    ];
+    board.main!.featuredEnemyTypes = ['goblin_raider'];
+
+    const html = renderMissionLocalesMap(board, 'main:1-1');
+    expect(html).toContain(kindLabel('main'));
+    expect(html).toContain('data-campaign-start-mission="main:1-1"');
+    expect(html).toContain('data-enemy-tooltip');
+    expect(html).toContain('enemy-tooltip-content');
+    expect(html).toContain('Goblin Saqueador');
+    expect(html).toContain('enemy-tooltip-chip');
+    expect(html).toContain('ui/stats/attack.png');
+    expect(html).not.toContain('Ofensiva');
+  });
+
+  it('preview no pin mostra tipo, estrelas e CTA de missão', () => {
+    const board = boardFixture();
+    const html = renderMissionLocalesMap(board, 'normal:1-2');
     expect(html).toContain(kindLabel('normal'));
     expect(html).toContain('1★');
     expect(html).toContain('data-campaign-start-mission="normal:1-2"');

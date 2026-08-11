@@ -105,6 +105,39 @@ export class ShopFlow {
     this.refreshModal();
   }
 
+  async buyAndEquipOffer(offerId: string, heroId: string): Promise<void> {
+    const response = await this.client.send({
+      type: 'BUY_AND_EQUIP_SHOP_OFFER',
+      offerId,
+      heroId,
+    });
+    if (!response.ok) {
+      this.toasts.show(response.error ?? 'Não foi possível comprar e equipar', 'info');
+      return;
+    }
+
+    this.state.offers = this.state.offers
+      .filter((offer) => offer.id !== offerId)
+      .map((offer) => ({
+        ...offer,
+        canAfford: response.state.gold >= offer.price,
+      }));
+    this.state.canAffordRefresh = response.state.gold >= this.state.refreshCost;
+    this.state.shopRefreshRemaining = Math.max(
+      0,
+      response.state.shopRefreshLimit - response.state.shopRefreshUses,
+    );
+
+    this.onStateUpdated(response.state);
+
+    if (response.purchasedGear) {
+      this.rewards.celebrateShopPurchase(response.purchasedGear);
+    }
+
+    this.toasts.show('Item comprado e equipado', 'info');
+    this.refreshModal();
+  }
+
   async ensureFreshOffers(state: GameStateDto): Promise<void> {
     const sampleOfferId = this.state.offers[0]?.id;
     if (!sampleOfferId) return;

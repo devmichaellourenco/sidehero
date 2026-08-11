@@ -80,6 +80,7 @@ describe('GearDragDropBinder', () => {
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
       onDestroyGear: vi.fn(),
+      onBuyAndEquipShopOffer: vi.fn(),
       onPartySlotDrop: vi.fn(),
       onPartyActiveToBench: vi.fn(),
       onPartyReorder: vi.fn(),
@@ -99,6 +100,49 @@ describe('GearDragDropBinder', () => {
 
     target.dispatchEvent(createDragEvent('drop', dt, { cancelable: true }));
     expect(onEquip).toHaveBeenCalledWith('h1', 'g1');
+  });
+
+  it('permite drop de oferta da loja no slot e chama onBuyAndEquipShopOffer', () => {
+    const root = document.createElement('div');
+    const payload = encodeURIComponent(
+      serializeGearDragSource({ kind: 'shop', offerId: 'shop-1-0-o0', slot: 'weapon' }),
+    );
+    root.innerHTML = `
+      <article draggable="true" data-drag-gear="${payload}" data-shop-offer="shop-1-0-o0">offer</article>
+      <div
+        role="button"
+        class="equipment-slot gear-drop-target"
+        data-drop-gear-hero="h1"
+        data-drop-gear-slot="weapon"
+      >weapon</div>
+    `;
+    document.body.append(root);
+
+    const onBuyAndEquipShopOffer = vi.fn();
+    bindGearDragDrop(root, {
+      canEditGear: () => true,
+      canEditParty: () => true,
+      onEquip: vi.fn(),
+      onUnequip: vi.fn(),
+      onMoveToStash: vi.fn(),
+      onMoveFromStash: vi.fn(),
+      onMoveFromStashThenEquip: vi.fn(),
+      onEquippedToStash: vi.fn(),
+      onMoveEquippedGear: vi.fn(),
+      onDestroyGear: vi.fn(),
+      onBuyAndEquipShopOffer,
+      onPartySlotDrop: vi.fn(),
+      onPartyActiveToBench: vi.fn(),
+      onPartyReorder: vi.fn(),
+    });
+
+    const source = root.querySelector('[data-drag-gear]') as HTMLElement;
+    const target = root.querySelector('[data-drop-gear-slot="weapon"]') as HTMLElement;
+    const dt = dragDataTransfer();
+
+    source.dispatchEvent(createDragEvent('dragstart', dt));
+    target.dispatchEvent(createDragEvent('drop', dt, { cancelable: true }));
+    expect(onBuyAndEquipShopOffer).toHaveBeenCalledWith('shop-1-0-o0', 'h1');
   });
 
   it('destaca o slot compatível no dragstart sem precisar passar o mouse', () => {
@@ -125,6 +169,7 @@ describe('GearDragDropBinder', () => {
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
       onDestroyGear: vi.fn(),
+      onBuyAndEquipShopOffer: vi.fn(),
       onPartySlotDrop: vi.fn(),
       onPartyActiveToBench: vi.fn(),
       onPartyReorder: vi.fn(),
@@ -172,6 +217,7 @@ describe('GearDragDropBinder', () => {
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
       onDestroyGear: vi.fn(),
+      onBuyAndEquipShopOffer: vi.fn(),
       onPartySlotDrop: vi.fn(),
       onPartyActiveToBench: vi.fn(),
       onPartyReorder: vi.fn(),
@@ -213,6 +259,7 @@ describe('GearDragDropBinder', () => {
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
       onDestroyGear: vi.fn(),
+      onBuyAndEquipShopOffer: vi.fn(),
       onPartySlotDrop: vi.fn(),
       onPartyActiveToBench: vi.fn(),
       onPartyReorder: vi.fn(),
@@ -256,6 +303,7 @@ describe('GearDragDropBinder', () => {
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
       onDestroyGear,
+      onBuyAndEquipShopOffer: vi.fn(),
       onPartySlotDrop: vi.fn(),
       onPartyActiveToBench: vi.fn(),
       onPartyReorder: vi.fn(),
@@ -300,6 +348,7 @@ describe('GearDragDropBinder', () => {
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
       onDestroyGear,
+      onBuyAndEquipShopOffer: vi.fn(),
       onPartySlotDrop: vi.fn(),
       onPartyActiveToBench: vi.fn(),
       onPartyReorder: vi.fn(),
@@ -342,6 +391,7 @@ describe('GearDragDropBinder', () => {
       onEquippedToStash: vi.fn(),
       onMoveEquippedGear: vi.fn(),
       onDestroyGear: vi.fn(),
+      onBuyAndEquipShopOffer: vi.fn(),
       onPartySlotDrop: vi.fn(),
       onPartyActiveToBench: vi.fn(),
       onPartyReorder: vi.fn(),

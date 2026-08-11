@@ -26,7 +26,7 @@ export interface MissionMapLayout {
 export const STENDRA_MISSION_MAP_LAYOUT: MissionMapLayout = {
   mapId: 'stendra',
   aspectRatio: 1.55,
-  backgroundAssetPath: 'campaign/stendra/mission_map.webp',
+  backgroundAssetPath: 'campaign/stendra/map_1.png',
   mainSlot: { x: 52, y: 42 },
   sideSlots: [
     { x: 24, y: 30 },

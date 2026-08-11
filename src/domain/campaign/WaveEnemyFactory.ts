@@ -65,7 +65,8 @@ export function resolveEnemySpawnLevel(
   return Math.max(1, Math.floor(difficultyTier));
 }
 
-function createEnemyFromSlot(
+/** Spawna um inimigo a partir do slot (também usado no preview de missão). */
+export function createEnemyFromSlot(
   slot: EnemySlot,
   context: WaveSpawnContext & { slotIndex: number; goldMultiplier: number },
 ): Enemy {

@@ -47,6 +47,7 @@ export function resolveDefaultInventoryHeroId(state: GameStateDto): string {
 export function renderInventoryHeroSelector(
   state: GameStateDto,
   selectedHeroId: string,
+  options: { label?: string } = {},
 ): string {
   const heroes = [...state.activeParty, ...state.benchHeroes].filter(
     (hero, index, list) => list.findIndex((entry) => entry.id === hero.id) === index,
@@ -56,6 +57,7 @@ export function renderInventoryHeroSelector(
     return '<p class="inventory-hero-empty">Nenhum herói disponível.</p>';
   }
 
+  const label = options.label ?? 'Equipar em';
   const chips = heroes
     .map((hero) => {
       const active = hero.id === selectedHeroId;
@@ -79,7 +81,7 @@ export function renderInventoryHeroSelector(
 
   return `
     <div class="inventory-hero-select">
-      <span class="inventory-hero-select-label">Equipar em</span>
+      <span class="inventory-hero-select-label">${escapeHtml(label)}</span>
       <div class="inventory-hero-chips">${chips}</div>
     </div>
   `;

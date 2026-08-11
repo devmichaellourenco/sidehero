@@ -206,6 +206,13 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       const result = await app.buyShopOffer.execute(message.offerId);
       return { ok: true, state: result.state, purchasedGear: result.purchasedGear };
     }
+    case 'BUY_AND_EQUIP_SHOP_OFFER': {
+      const result = await app.buyAndEquipShopOffer.execute(
+        message.offerId,
+        message.heroId,
+      );
+      return { ok: true, state: result.state, purchasedGear: result.purchasedGear };
+    }
     case 'REFRESH_SHOP': {
       const result = await app.refreshShop.execute();
       return {

@@ -24,9 +24,21 @@ function positionPortal(portal: HTMLElement, anchor: DOMRect): void {
   const maxLeft = window.innerWidth - portalRect.width - margin;
   left = Math.max(margin, Math.min(left, maxLeft));
 
-  if (top < margin) {
-    top = anchor.bottom + margin;
+  const modalHeader = document.querySelector(
+    '.modal-root:not(.hidden) .modal-header',
+  ) as HTMLElement | null;
+  const headerBottom = modalHeader?.getBoundingClientRect().bottom ?? 0;
+  const minTop = Math.max(margin, headerBottom + margin);
+  const maxTop = window.innerHeight - portalRect.height - margin;
+
+  if (top < minTop) {
+    const below = anchor.bottom + margin;
+    const spaceAbove = anchor.top - minTop;
+    const spaceBelow = window.innerHeight - anchor.bottom - margin;
+    top = spaceBelow >= spaceAbove ? below : minTop;
   }
+
+  top = Math.max(minTop, Math.min(top, Math.max(minTop, maxTop)));
 
   portal.style.top = `${top}px`;
   portal.style.left = `${left}px`;

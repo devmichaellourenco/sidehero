@@ -131,6 +131,7 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `EnemyCombatStatSheetMapper.test.ts` — ficha de combate do inimigo
 - [x] `SkillPowerCalculator.test.ts` — básico/skill inimigo alinhados ao herói
 - [x] `SkillCooldownTiming.test.ts` — CD unificado herói/inimigo
+- [x] `PhaseBattleOverrides.test.ts` — merge de waves do Balance Lab sobre fase handcrafted
 
 ## Backlog conhecido (auditoria 2026-07-03)
 

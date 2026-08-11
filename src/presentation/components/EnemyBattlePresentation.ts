@@ -1,4 +1,6 @@
 import { EnemyDto } from '../../application/dto/GameStateDto';
+import { ASSETS, getAssetUrl, imgTag } from '../assets/AssetCatalog';
+import { STAT_LINE_ICON_BY_ID, StatIconKey, statIconImg } from '../assets/StatIconCatalog';
 import { renderCombatResistPips } from './ElementPipPresentation';
 import { renderBattleActorCard } from './BattleActorCardPresentation';
 import { clampHealthPercent, formatStripHealthCurrent } from './BattleActorHealthPresentation';
@@ -15,6 +17,27 @@ export function formatEnemyHealthLabel(enemy: Pick<EnemyDto, 'health' | 'maxHeal
   return `${enemy.health}/${enemy.maxHealth}`;
 }
 
+function renderTooltipChip(
+  iconHtml: string,
+  value: string,
+  title: string,
+): string {
+  return `
+    <span class="enemy-tooltip-chip" title="${escapeHtml(title)}">
+      ${iconHtml}
+      <span class="enemy-tooltip-chip-value">${escapeHtml(value)}</span>
+    </span>
+  `;
+}
+
+function renderStatIconChip(
+  key: StatIconKey | undefined,
+  value: string,
+  title: string,
+): string {
+  return renderTooltipChip(statIconImg(key, 'enemy-tooltip-stat-icon'), value, title);
+}
+
 function renderEnemySkillLines(enemy: EnemyDto): string {
   if (enemy.signatureSkills.length === 0) return '';
 
@@ -26,45 +49,57 @@ function renderEnemySkillLines(enemy: EnemyDto): string {
     .join('');
 }
 
-function renderEnemyStatSheetSummary(enemy: EnemyDto): string {
-  const sheet = enemy.combatStatSheet ?? [];
-  if (sheet.length === 0) return '';
+/** Todas as linhas da ficha em grade 3 colunas: ícone + valor (label só no title). */
+function renderEnemyStatSheetGrid(enemy: EnemyDto): string {
+  const lines = (enemy.combatStatSheet ?? []).flatMap((section) => section.lines);
+  if (lines.length === 0) return '';
 
-  return sheet
-    .map((section) => {
-      const lines = section.lines
-        .slice(0, 4)
-        .map(
-          (line) =>
-            `<span class="enemy-tooltip-line enemy-tooltip-stat" title="${escapeHtml(line.tooltipLines.join('\n'))}">${escapeHtml(line.label)}: ${escapeHtml(line.value)}</span>`,
-        )
-        .join('');
-      return `
-        <span class="enemy-tooltip-section">${escapeHtml(section.title)}</span>
-        ${lines}
-      `;
+  const chips = lines
+    .map((line) => {
+      const title = [line.label, ...line.tooltipLines].filter(Boolean).join('\n');
+      return renderStatIconChip(STAT_LINE_ICON_BY_ID[line.id], line.value, title);
     })
     .join('');
+
+  return `<div class="enemy-tooltip-grid" aria-label="Ficha de combate">${chips}</div>`;
+}
+
+function renderFallbackCombatGrid(enemy: EnemyDto): string {
+  const tta = (1 / Math.max(enemy.attackSpeed, 0.01)).toFixed(2);
+  return `
+    <div class="enemy-tooltip-grid">
+      ${renderStatIconChip('health', formatEnemyHealthLabel(enemy), 'Vida')}
+      ${renderStatIconChip('attack', String(enemy.attack), 'Ataque')}
+      ${renderStatIconChip('defense', String(enemy.defense), 'Defesa')}
+      ${renderStatIconChip('attackSpeed', `${enemy.attackSpeed.toFixed(2)}/s`, 'Vel. de ataque')}
+      ${renderStatIconChip('cooldown', `${tta}s`, 'Tempo até ação')}
+    </div>
+  `;
 }
 
 export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): string {
-  const healthLabel = formatEnemyHealthLabel(enemy);
   const skillLines = renderEnemySkillLines(enemy);
   const elementalPips = renderCombatResistPips(enemy.combatResists);
   const attrs = enemy.attributes ?? { str: 0, dex: 0, int: 0 };
   const level = enemy.level ?? stage;
-  const sheetSummary = renderEnemyStatSheetSummary(enemy);
+  const sheetGrid = renderEnemyStatSheetGrid(enemy);
+  const goldIcon = imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'enemy-tooltip-stat-icon');
+  const xpIcon = imgTag(getAssetUrl(ASSETS.ui.xp), 'XP', 'enemy-tooltip-stat-icon');
 
   return `
     <strong class="enemy-tooltip-name">${escapeHtml(enemy.name)}</strong>
-    <span class="enemy-tooltip-line">Nível ${level} · Fase tier ${stage}</span>
-    <span class="enemy-tooltip-line">STR ${attrs.str} · DEX ${attrs.dex} · INT ${attrs.int}</span>
-    <span class="enemy-tooltip-line">${healthLabel}</span>
-    <span class="enemy-tooltip-line">ATK ${enemy.attack} · DEF ${enemy.defense}</span>
-    <span class="enemy-tooltip-line">ASPD ${enemy.attackSpeed.toFixed(2)}/s · TTA ${(1 / Math.max(enemy.attackSpeed, 0.01)).toFixed(2)}s</span>
-    <span class="enemy-tooltip-line">+${enemy.goldReward} ouro · +${enemy.xpReward} XP</span>
+    <span class="enemy-tooltip-line">Nível ${level} · Tier ${stage}</span>
+    <div class="enemy-tooltip-grid" aria-label="Atributos">
+      ${renderStatIconChip('str', String(attrs.str), 'Força')}
+      ${renderStatIconChip('dex', String(attrs.dex), 'Destreza')}
+      ${renderStatIconChip('int', String(attrs.int), 'Inteligência')}
+    </div>
+    ${sheetGrid || renderFallbackCombatGrid(enemy)}
+    <div class="enemy-tooltip-grid" aria-label="Recompensas">
+      ${renderTooltipChip(goldIcon, `+${enemy.goldReward}`, 'Ouro')}
+      ${renderTooltipChip(xpIcon, `+${enemy.xpReward} XP`, 'Experiência')}
+    </div>
     ${elementalPips ? `<span class="enemy-tooltip-line enemy-tooltip-elements">${elementalPips}</span>` : ''}
-    ${sheetSummary}
     ${skillLines}
   `;
 }

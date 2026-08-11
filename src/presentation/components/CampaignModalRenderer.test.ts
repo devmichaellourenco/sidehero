@@ -108,7 +108,7 @@ describe('CampaignModalRenderer', () => {
     expect(resolveInitialPendingPhaseId(map)).toBe('1-50');
   });
 
-  it('renderiza board de missões, preview e abas bloqueadas no modo região', () => {
+  it('renderiza board de missões, preview no pin e abas bloqueadas no modo região', () => {
     const overview = buildOverview();
     const html = renderer.render(overview, 'stendra', null, 'region', {
       pendingMissionId: 'main:1-50',
@@ -120,8 +120,9 @@ describe('CampaignModalRenderer', () => {
     expect(html).not.toContain('campaign-view-toggle');
     expect(html).toContain('data-campaign-view="region"');
     expect(html).toContain('campaign-mission-board');
-    expect(html).toContain('campaign-phase-preview');
+    expect(html).toContain('campaign-mission-popover');
     expect(html).toContain('data-campaign-start-mission="main:1-50"');
+    expect(html).not.toContain('campaign-mission-select-hint');
     expect(html).toContain('campaign-map-tabs');
     expect(html).toContain('data-campaign-map-tab="gruftall"');
     expect(html).toContain('aria-disabled="true"');
@@ -134,6 +135,17 @@ describe('CampaignModalRenderer', () => {
     expect(html).toContain(getMapFlavorText('stendra'));
     expect(html).not.toContain('campaign-map-flavor');
     expect(html).not.toContain('data-phase-id="2-1"');
+  });
+
+  it('sem missão selecionada mostra hint e não abre popover', () => {
+    const overview = buildOverview();
+    const html = renderer.render(overview, 'stendra', null, 'region', {
+      pendingMissionId: null,
+    });
+
+    expect(html).toContain('campaign-mission-select-hint');
+    expect(html).not.toContain('campaign-mission-popover');
+    expect(html).not.toContain('data-campaign-start-mission');
   });
 
   it('renderiza mapa-mundo com nós de região e tooltips', () => {

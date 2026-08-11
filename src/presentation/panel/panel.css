@@ -3539,11 +3539,15 @@ html[data-ui-theme='dark'] .battle-stats-skill-cd {
 
 .enemy-tooltip-portal {
   position: fixed;
-  z-index: 1300;
+  z-index: 1550;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-width: 120px;
+  gap: 4px;
+  min-width: 148px;
+  max-width: min(280px, calc(100vw - 16px));
+  max-height: min(70vh, 380px);
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 8px 10px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--parchment-1) 96%, transparent);
@@ -3566,6 +3570,38 @@ html[data-ui-theme='dark'] .battle-stats-skill-cd {
   font-size: 10px;
   color: var(--ink);
   line-height: 1.35;
+}
+
+.enemy-tooltip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px 6px;
+  align-items: center;
+}
+
+.enemy-tooltip-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.enemy-tooltip-chip-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.enemy-tooltip-stat-icon {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: var(--stat-icon-filter);
 }
 
 .enemy-tooltip-resist {
@@ -5878,6 +5914,12 @@ button.hero-skill-chip:hover {
   color: var(--muted);
 }
 
+.shop-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .shop-balance {
   margin: 0;
   font-size: 12px;
@@ -5892,9 +5934,8 @@ button.hero-skill-chip:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px;
-  margin-bottom: 12px;
 }
 
 .shop-refresh-btn {
@@ -5917,16 +5958,21 @@ button.hero-skill-chip:hover {
 
 .shop-offers-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
 .shop-offer-tile {
+  --shop-offer-icon-size: 64px;
   position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
   min-height: 0;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
   padding: 8px;
   border-radius: 10px;
   border: 1px solid var(--panel-border);
@@ -5935,22 +5981,31 @@ button.hero-skill-chip:hover {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
 }
 
-.shop-offer-tile:hover .shop-offer-tooltip,
-.shop-offer-tile:focus-within .shop-offer-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
 .shop-offer-icon-wrap {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: var(--shop-offer-icon-size);
+  height: var(--shop-offer-icon-size);
   margin: 0 auto;
   background-image: var(--gear-frame);
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+.shop-offer-icon-wrap .inventory-grid-badge {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  z-index: 2;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  font-size: 9px;
+  line-height: 14px;
+}
+
+.shop-offer-tile--locked {
+  opacity: 0.78;
 }
 
 .shop-offer-icon {
@@ -6005,54 +6060,75 @@ button.hero-skill-chip:hover {
 .shop-offer-actions {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 4px;
+  width: var(--shop-offer-icon-size);
   margin-top: auto;
 }
 
 .shop-offer-tooltip {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: calc(100% + 4px);
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: var(--panel-card);
-  font-size: 10px;
-  line-height: 1.35;
-  color: var(--ink);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(4px);
-  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
-  pointer-events: none;
-  box-shadow: 0 8px 18px rgba(31, 23, 16, 0.16);
+  display: none;
 }
 
-.shop-offer-tooltip-meta {
+.shop-offer-tooltip-name,
+.gear-tooltip-portal .shop-offer-tooltip-name {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--gold);
+  word-break: break-word;
+}
+
+.shop-offer-tooltip-meta,
+.shop-offer-tooltip-equipped,
+.shop-offer-tooltip-hero,
+.gear-tooltip-portal .shop-offer-tooltip-meta,
+.gear-tooltip-portal .shop-offer-tooltip-equipped,
+.gear-tooltip-portal .shop-offer-tooltip-hero {
   display: block;
   font-size: 9px;
+  color: var(--muted);
+}
+
+.shop-offer-tooltip-meta,
+.gear-tooltip-portal .shop-offer-tooltip-meta {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--seal-gold-dark);
 }
 
-.shop-offer-tooltip .gear-stat-lines {
+.shop-offer-tooltip-stats,
+.gear-tooltip-portal .shop-offer-tooltip-stats {
+  display: block;
+  margin-top: 2px;
+}
+
+.gear-tooltip-portal .shop-offer-tooltip-stats .gear-stat-lines {
   gap: 2px;
 }
 
-.shop-offer-tooltip .gear-stat-line {
-  color: var(--ink);
+.shop-offer-tooltip-delta,
+.gear-tooltip-portal .shop-offer-tooltip-delta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 4px;
 }
 
-.shop-offer-tooltip .gear-stat-line--empty {
-  color: var(--ink-muted);
+.shop-offer-tooltip-delta > span,
+.gear-tooltip-portal .shop-offer-tooltip-delta > span {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.gear-tooltip-portal .gear-stat-line {
+  color: var(--text);
+}
+
+.gear-tooltip-portal .gear-stat-line--empty {
+  color: var(--muted);
 }
 
 .destroy-confirm-gear-stats .gear-stat-lines {
@@ -6083,16 +6159,18 @@ button.hero-skill-chip:hover {
 
 .shop-buy-btn {
   flex-shrink: 0;
+  box-sizing: border-box;
   width: 100%;
+  max-width: var(--shop-offer-icon-size);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 32px;
-  font-size: 12px;
+  gap: 4px;
+  min-height: 28px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 6px 10px;
-  align-self: stretch;
+  padding: 4px 2px;
+  align-self: center;
   border: 1px solid rgba(47, 107, 56, 0.45);
   background: linear-gradient(180deg, var(--forest-hi) 0%, var(--forest) 100%);
   color: var(--forest-cta-label);
@@ -11178,12 +11256,20 @@ body.skill-drag-active * {
   overflow: hidden;
 }
 
+.campaign-map-body:has(.campaign-mission-board--has-popover) {
+  overflow: visible;
+}
+
 .campaign-path-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding-right: 2px;
   -webkit-overflow-scrolling: touch;
+}
+
+.campaign-map-body:has(.campaign-mission-board--has-popover) .campaign-path-scroll {
+  overflow: visible;
 }
 
 .campaign-mission-board {
@@ -11200,7 +11286,7 @@ body.skill-drag-active * {
 .campaign-mission-stage {
   position: relative;
   width: 100%;
-  max-height: min(52vh, 420px);
+  max-height: min(68vh, 520px);
   margin: 0 auto;
   border-radius: 12px;
   border: 1px solid var(--panel-border-soft);
@@ -11213,6 +11299,10 @@ body.skill-drag-active * {
       var(--parchment-2) 100%
     );
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.campaign-mission-board--has-popover .campaign-mission-stage {
+  overflow: visible;
 }
 
 .campaign-mission-stage-art {
@@ -11453,18 +11543,94 @@ body.skill-drag-active * {
   z-index: 4;
 }
 
+.campaign-mission-popover {
+  position: absolute;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(220px, 78%);
+  padding: 10px 10px 8px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--seal-gold) 45%, var(--panel-border-soft));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--parchment-0) 98%, transparent),
+    color-mix(in srgb, var(--parchment-2) 98%, transparent)
+  );
+  box-shadow:
+    0 8px 20px color-mix(in srgb, var(--ink) 28%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent);
+  --popover-shift-x: 0px;
+  transform: translate(calc(-50% + var(--popover-shift-x)), calc(-100% - 8px));
+  pointer-events: auto;
+}
+
+.campaign-mission-popover[data-placement='below'] {
+  transform: translate(calc(-50% + var(--popover-shift-x)), 10px);
+}
+
+.campaign-mission-popover-copy {
+  min-width: 0;
+}
+
+.campaign-mission-popover .campaign-phase-preview-title {
+  font-size: 12px;
+}
+
+.campaign-mission-popover .campaign-phase-preview-start {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.campaign-mission-popover .campaign-mission-enemies {
+  margin-top: 6px;
+}
+
+.campaign-mission-select-hint {
+  margin: 0;
+  padding: 4px 8px 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+
 .campaign-mission-enemies {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   list-style: none;
   margin: 8px 0 0;
   padding: 0;
 }
 
+.campaign-mission-enemy {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 70%, transparent);
+  background: color-mix(in srgb, var(--panel-card) 88%, transparent);
+  cursor: help;
+}
+
+.campaign-mission-enemy:hover,
+.campaign-mission-enemy:focus-visible {
+  border-color: var(--seal-gold);
+  outline: none;
+}
+
 .campaign-mission-enemy-sprite {
   width: 28px;
   height: 28px;
   object-fit: contain;
+  pointer-events: none;
 }
 
 .campaign-mission-rewards {

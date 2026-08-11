@@ -4,32 +4,17 @@ import { CampMissionBoard } from '../../domain/campaign/missions/CampMissionBoar
 import { MissionDefinition } from '../../domain/campaign/missions/MissionDefinition';
 import { MissionId } from '../../domain/campaign/missions/MissionId';
 import { MissionBoardDto, MissionPreviewDto } from '../dto/MissionBoardDto';
-
-function featuredEnemyTypes(phaseTemplateId: string): string[] {
-  const definition = resolvePhase(phaseTemplateId);
-  if (!definition) return [];
-
-  const featured: string[] = [];
-  const seen = new Set<string>();
-  for (const wave of definition.waves) {
-    for (const slot of wave.slots) {
-      if (seen.has(slot.enemyType)) continue;
-      seen.add(slot.enemyType);
-      if (slot.role === 'boss' || slot.role === 'elite') {
-        featured.unshift(slot.enemyType);
-      } else {
-        featured.push(slot.enemyType);
-      }
-    }
-  }
-  return featured.slice(0, 3);
-}
+import { mapFeaturedEnemyPreviews } from './MissionEnemyPreviewMapper';
 
 export function mapMissionPreview(
   mission: MissionDefinition,
   selectedMissionId: MissionId | null,
 ): MissionPreviewDto {
   const phase = resolvePhase(mission.phaseTemplateId);
+  const featuredEnemies = phase
+    ? mapFeaturedEnemyPreviews(phase, { mapId: mission.mapId })
+    : [];
+
   return {
     id: mission.id,
     kind: mission.kind,
@@ -39,7 +24,8 @@ export function mapMissionPreview(
     stars: mission.stars ?? null,
     waveCount: phase?.waves.length ?? 1,
     difficultyTier: phase?.difficultyTier ?? 1,
-    featuredEnemyTypes: featuredEnemyTypes(mission.phaseTemplateId),
+    featuredEnemyTypes: featuredEnemies.map((enemy) => enemy.enemyType),
+    featuredEnemies,
     challengeLabel: phase?.challengeLabel,
     challengeHint: phase?.challengeHint,
     rewards: mission.rewards

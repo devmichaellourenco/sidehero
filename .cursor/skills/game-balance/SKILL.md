@@ -73,7 +73,12 @@ npm run balance-lab
 # http://127.0.0.1:5179/
 ```
 
-Arquivos: `tools/balance-lab/` (+ `scripts/balance-lab.mjs`). Modos: 1 combatente | lado a lado. Painel direito: fórmulas com constantes editáveis + passivas do herói (classe/ascensão) com coeficientes editáveis. Export/import JSON v1 inclui fórmulas e passivas. Não entra no zip de release.
+Arquivos: `tools/balance-lab/` (+ `scripts/balance-lab.mjs`).
+
+- **Simulador:** 1 combatente | lado a lado; fórmulas e passivas editáveis; export/import JSON.
+- **Missões:** aba no lab para editar batalhas (main/side/normal) via formulário + JSON. Grava em `src/domain/campaign/data/phase-battle-overrides.json` (merge em `CampaignCatalog.resolvePhase`). Cada save/delete gera backup em `src/domain/campaign/data/backups/phase-battle-overrides/`. Após salvar, rebuild da extensão para o jogo embutir o JSON.
+
+Não entra no zip de release.
 
 ## Testes de fórmula
 

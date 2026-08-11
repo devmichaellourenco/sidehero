@@ -30,6 +30,7 @@ describe('StatIconCatalog', () => {
       'attack-speed',
       'cast-speed',
       'cooldown-reduction',
+      'time-to-action',
       'crit-chance',
       'crit-damage',
       'defesa',

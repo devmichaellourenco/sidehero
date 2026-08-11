@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Side Hero: Balance Lab</title>
+    <title>Side Hero · Balance Lab</title>
     <link rel="stylesheet" href="./lab.css" />
   </head>
   <body>
@@ -11,11 +11,18 @@
       <div>
         <h1>Balance Lab</h1>
         <p class="lab-sub">
-          Simulador local. fórmulas e constantes editáveis à direita; passivas do herói com
-          coeficientes ajustáveis. Não entra no release da extensão.
+          Simulador local e editor de batalhas de missões. Overrides gravam em
+          <code>phase-battle-overrides.json</code> com backup automático. Não entra no release.
         </p>
       </div>
-      <div class="lab-header-actions">
+      <nav class="lab-tabs" aria-label="Seções do lab">
+        <button type="button" class="lab-tab is-active" data-lab-tab="sim">Simulador</button>
+        <button type="button" class="lab-tab" data-lab-tab="missions">Missões</button>
+      </nav>
+    </header>
+
+    <div id="lab-panel-sim" class="lab-panel">
+      <div class="lab-header-actions lab-sim-toolbar">
         <label class="lab-mode">
           Modo
           <select id="lab-mode">
@@ -27,33 +34,37 @@
         <button type="button" id="btn-import-json">Import JSON</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden />
       </div>
-    </header>
 
-    <main id="lab-main" class="lab-main lab-main--single"></main>
+      <main id="lab-main" class="lab-main lab-main--single"></main>
 
-    <section class="lab-io">
-      <h2>Export / Import</h2>
-      <p class="lab-hint">
-        JSON completo do cenário (modo + combatentes). Snippet TS para colar no catálogo depois de
-        calibrar.
-      </p>
-      <div class="lab-io-grid">
-        <label class="lab-field lab-field--full">
-          JSON
-          <textarea id="io-json" rows="10" spellcheck="false"></textarea>
-        </label>
-        <label class="lab-field lab-field--full">
-          Snippet TS (combatente ativo / esquerda)
-          <textarea id="io-snippet" rows="10" spellcheck="false" readonly></textarea>
-        </label>
-      </div>
-      <div class="lab-io-actions">
-        <button type="button" id="btn-apply-json">Aplicar JSON da caixa</button>
-        <button type="button" id="btn-copy-json">Copiar JSON</button>
-        <button type="button" id="btn-copy-snippet">Copiar snippet</button>
-      </div>
-      <p id="lab-status" class="lab-status" role="status"></p>
-    </section>
+      <section class="lab-io">
+        <h2>Export / Import</h2>
+        <p class="lab-hint">
+          JSON completo do cenário (modo + combatentes). Snippet TS para colar no catálogo depois de
+          calibrar.
+        </p>
+        <div class="lab-io-grid">
+          <label class="lab-field lab-field--full">
+            JSON
+            <textarea id="io-json" rows="10" spellcheck="false"></textarea>
+          </label>
+          <label class="lab-field lab-field--full">
+            Snippet TS (combatente ativo / esquerda)
+            <textarea id="io-snippet" rows="10" spellcheck="false" readonly></textarea>
+          </label>
+        </div>
+        <div class="lab-io-actions">
+          <button type="button" id="btn-apply-json">Aplicar JSON da caixa</button>
+          <button type="button" id="btn-copy-json">Copiar JSON</button>
+          <button type="button" id="btn-copy-snippet">Copiar snippet</button>
+        </div>
+        <p id="lab-status" class="lab-status" role="status"></p>
+      </section>
+    </div>
+
+    <div id="lab-panel-missions" class="lab-panel" hidden>
+      <section id="lab-missions" class="lab-missions" aria-label="Editor de batalhas"></section>
+    </div>
 
     <script type="module" src="./lab.js"></script>
   </body>

@@ -22,7 +22,7 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 2. Progresso/save → `CampaignProgress` (+ migração)
 3. Fim de combate → `ResolveMissionOutcome` / handlers (sem auto-fase)
 4. Use cases + SW messaging
-5. UI → `CampaignFlow` / mapa de locais + preview
+5. UI → `CampaignFlow` / mapa de locais + preview no pin (popover; tooltip de stats nos inimigos)
 6. Testes listados na spec — criar/atualizar; **não** executar `npm test`
 
 ## Workflow do agente
@@ -37,6 +37,9 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 - Secundária = cadeias + paralelas; não repetível; loot exclusivo
 - Normal = 2–4, mapa×estrela; some na derrota; refresh a cada N visitas ao camp
 - Vitória/derrota → sempre acampamento após resultado
+- Preview/CTA só ao clicar no pin (popover sobre o pin; sem footer permanente)
+- Clique fora do popover fecha a seleção; popover clampa nas bordas do mapa
+- Tooltip de inimigo: grade compacta com ícones de stats (~3 por linha)
 
 ## Coordenação
 
@@ -51,4 +54,4 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 
 - `MissionCatalog.ts`, `MissionSceneCatalog.ts`, `MissionUnlockGraph.ts`, `NormalMissionOffer.ts`, `CampMissionBoard.ts`
 - `GetMissionBoardUseCase`, `StartMissionUseCase`, `ResolveMissionOutcomeUseCase`
-- `MissionMapLayoutCatalog` (slots % Stendra), `CampaignMissionMapPresentation`, `CampaignModalRenderer`, `CampaignFlow`
+- `MissionMapLayoutCatalog` (slots % Stendra), `CampaignMissionMapPresentation` (popover no pin), `CampaignModalRenderer`, `CampaignFlow`

@@ -1,4 +1,5 @@
 import type { MissionKind } from '../../domain/campaign/missions/MissionKind';
+import type { EnemyDto } from './GameStateDto';
 
 export interface MissionRewardDto {
   gold?: number;
@@ -16,7 +17,10 @@ export interface MissionPreviewDto {
   stars: number | null;
   waveCount: number;
   difficultyTier: number;
+  /** @deprecated Preferir featuredEnemies para tooltips com stats. */
   featuredEnemyTypes: string[];
+  /** Inimigos em destaque com ficha de combate para preview/tooltip. */
+  featuredEnemies: EnemyDto[];
   challengeLabel?: string;
   challengeHint?: string;
   rewards: MissionRewardDto | null;

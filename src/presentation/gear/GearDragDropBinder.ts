@@ -46,6 +46,7 @@ export type GearDragDropHandlers = {
     target: { heroId: string; slot: GearSlotKey },
   ) => void;
   onDestroyGear: (source: GearDragSource) => void;
+  onBuyAndEquipShopOffer: (offerId: string, heroId: string) => void;
   onPartySlotDrop: (heroId: string, targetIndex: number) => void;
   onPartyActiveToBench: (heroId: string) => void;
   onPartyReorder: (fromIndex: number, toIndex: number) => void;
@@ -119,6 +120,11 @@ function handleGearDrop(source: GearDragSource, target: HTMLElement, handlers: G
   }
 
   if (!canDropGearOnSlot(source.slot, slotTarget.slot)) return;
+
+  if (source.kind === 'shop') {
+    handlers.onBuyAndEquipShopOffer(source.offerId, slotTarget.heroId);
+    return;
+  }
 
   if (source.kind === 'inventory') {
     handlers.onEquip(slotTarget.heroId, source.gearId);

@@ -16,7 +16,7 @@ import {
 } from './CampaignMapPresentation';
 import {
   renderMissionLocalesMap,
-  renderMissionPreviewFooter,
+  renderMissionSelectHint,
   resolveInitialPendingMissionId,
 } from './CampaignMissionMapPresentation';
 
@@ -94,15 +94,16 @@ export class CampaignModalRenderer {
 
     const mapIndex = parseMapIndex(map);
     const unlockBanner = options.showUnlockBanner ? renderMapUnlockBanner(map) : '';
+    // `null` explícito = sem seleção (popover só após clique no pin).
     const pendingMissionId =
-      options.pendingMissionId ??
-      resolveInitialPendingMissionId(map.missionBoard) ??
-      pendingPhaseId;
+      options.pendingMissionId !== undefined
+        ? options.pendingMissionId
+        : (resolveInitialPendingMissionId(map.missionBoard) ?? pendingPhaseId);
 
     const boardHtml = map.missionBoard
       ? renderMissionLocalesMap(map.missionBoard, pendingMissionId)
       : '<p class="empty-state">Board de missões indisponível.</p>';
-    const previewHtml = renderMissionPreviewFooter(map.missionBoard, pendingMissionId);
+    const hintHtml = pendingMissionId ? '' : renderMissionSelectHint();
 
     return `
       <div class="campaign-map-body" data-campaign-biome="${biomeKind}">
@@ -113,7 +114,7 @@ export class CampaignModalRenderer {
         <div class="campaign-path-scroll game-scroll">
           ${boardHtml}
         </div>
-        ${previewHtml}
+        ${hintHtml}
       </div>
     `;
   }

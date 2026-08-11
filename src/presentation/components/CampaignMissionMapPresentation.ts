@@ -1,10 +1,12 @@
 import { MissionBoardDto, MissionPreviewDto } from '../../application/dto/MissionBoardDto';
+import { EnemyDto } from '../../application/dto/GameStateDto';
 import { ASSETS, getAssetUrl, getEnemySpriteUrl, imgTag } from '../assets/AssetCatalog';
 import {
   placeMissionsOnLayout,
   resolveMissionMapLayout,
   type MapPercentPoint,
 } from '../campaign/MissionMapLayoutCatalog';
+import { renderEnemyTooltipContent } from './EnemyBattlePresentation';
 
 export function escapeMissionHtml(value: string): string {
   return value
@@ -101,16 +103,24 @@ function renderLegacyListBoard(
     `;
   }
 
+  let pendingPoint: MapPercentPoint | null = null;
   const nodes = missions
     .map((mission, index) => {
       const point = { x: index % 2 === 0 ? 28 : 72, y: 20 + index * 18 };
+      if (mission.id === pendingMissionId) pendingPoint = point;
       return renderMissionPin(mission, pendingMissionId, point);
     })
     .join('');
 
+  const pendingMission = findMissionOnBoard(board, pendingMissionId);
+  const popover =
+    pendingMission && pendingPoint
+      ? renderMissionPinPopover(pendingMission, pendingPoint)
+      : '';
+
   return `
     <div class="campaign-mission-board campaign-mission-board--list" data-campaign-mission-board>
-      <div class="campaign-mission-board-track campaign-mission-board-track--pins">${nodes}</div>
+      <div class="campaign-mission-board-track campaign-mission-board-track--pins">${nodes}${popover}</div>
     </div>
   `;
 }
@@ -153,6 +163,13 @@ export function renderMissionLocalesMap(
     })
     .join('');
 
+  const pendingEntry = placed.find((entry) => entry.missionId === pendingMissionId);
+  const pendingMission = pendingEntry ? byId.get(pendingEntry.missionId) : null;
+  const popover =
+    pendingMission && pendingEntry
+      ? renderMissionPinPopover(pendingMission, pendingEntry.point)
+      : '';
+
   const bgUrl = layout.backgroundAssetPath ? getAssetUrl(layout.backgroundAssetPath) : '';
   const stageStyle = [
     `aspect-ratio:${layout.aspectRatio}`,
@@ -160,10 +177,13 @@ export function renderMissionLocalesMap(
   ]
     .filter(Boolean)
     .join(';');
+  const hasPopover = Boolean(popover);
 
   return `
     <div
-      class="campaign-mission-board campaign-mission-board--stage"
+      class="campaign-mission-board campaign-mission-board--stage${
+        hasPopover ? ' campaign-mission-board--has-popover' : ''
+      }"
       data-campaign-mission-board
       data-mission-map="${escapeMissionHtml(layout.mapId)}"
       data-mission-map-aspect="${layout.aspectRatio}"
@@ -173,27 +193,142 @@ export function renderMissionLocalesMap(
         style="${stageStyle}"
       >
         <div class="campaign-mission-stage-art" aria-hidden="true"></div>
-        <div class="campaign-mission-stage-markers">${markers}</div>
+        <div class="campaign-mission-stage-markers">${markers}${popover}</div>
       </div>
     </div>
   `;
 }
 
 function renderFeaturedEnemies(mission: MissionPreviewDto): string {
-  if (mission.featuredEnemyTypes.length === 0) return '';
-  const items = mission.featuredEnemyTypes
-    .map((enemyType) => {
-      const url = getEnemySpriteUrl(enemyType, enemyType);
+  const enemies =
+    mission.featuredEnemies?.length > 0
+      ? mission.featuredEnemies
+      : (mission.featuredEnemyTypes ?? []).map(
+          (enemyType) =>
+            ({
+              enemyType,
+              name: enemyType,
+            }) as EnemyDto,
+        );
+
+  if (enemies.length === 0) return '';
+
+  const items = enemies
+    .map((enemy) => {
+      const url = getEnemySpriteUrl(enemy.enemyType, enemy.name);
+      const hasStats = typeof enemy.attack === 'number' && typeof enemy.maxHealth === 'number';
+      const tooltip = hasStats
+        ? renderEnemyTooltipContent(enemy, mission.difficultyTier)
+        : `<strong class="enemy-tooltip-name">${escapeMissionHtml(enemy.name)}</strong>`;
+
       return `
-        <li class="campaign-mission-enemy">
-          ${imgTag(url, enemyType, 'campaign-mission-enemy-sprite')}
+        <li
+          class="campaign-mission-enemy"
+          data-enemy-tooltip
+          tabindex="0"
+          aria-label="${escapeMissionHtml(enemy.name)}"
+        >
+          ${imgTag(url, enemy.name, 'campaign-mission-enemy-sprite')}
+          <span class="enemy-tooltip-content hidden">${tooltip}</span>
         </li>
       `;
     })
     .join('');
+
   return `<ul class="campaign-mission-enemies" aria-label="Inimigos em destaque">${items}</ul>`;
 }
 
+function renderMissionPreviewBody(mission: MissionPreviewDto): string {
+  const rewardBits: string[] = [];
+  if (mission.rewards?.gold) rewardBits.push(`${mission.rewards.gold} ouro`);
+  if (mission.rewards?.xp) rewardBits.push(`${mission.rewards.xp} XP`);
+  if (mission.rewards?.itemId) rewardBits.push('item exclusivo');
+  if (mission.rewards?.sceneId) rewardBits.push('cena');
+
+  return `
+    <div class="campaign-mission-popover-copy">
+      <p class="campaign-phase-preview-eyebrow">${escapeMissionHtml(kindLabel(mission.kind))}${
+        mission.stars ? ` · ${mission.stars}★` : ''
+      }</p>
+      <h4 class="campaign-phase-preview-title">${escapeMissionHtml(mission.name)}</h4>
+      <p class="campaign-phase-preview-meta">${mission.waveCount} waves · Tier ${mission.difficultyTier}</p>
+      ${
+        mission.challengeHint
+          ? `<p class="campaign-phase-preview-challenge">${escapeMissionHtml(mission.challengeHint)}</p>`
+          : ''
+      }
+      ${
+        rewardBits.length > 0
+          ? `<p class="campaign-mission-rewards">${escapeMissionHtml(rewardBits.join(' · '))}</p>`
+          : ''
+      }
+      ${renderFeaturedEnemies(mission)}
+    </div>
+  `;
+}
+
+export function renderMissionPinPopover(
+  mission: MissionPreviewDto,
+  point: MapPercentPoint,
+): string {
+  return `
+    <div
+      class="campaign-mission-popover"
+      data-campaign-mission-preview
+      data-placement="above"
+      style="${styleForPoint(point)}"
+      role="dialog"
+      aria-label="${escapeMissionHtml(mission.name)}"
+    >
+      ${renderMissionPreviewBody(mission)}
+      <button
+        type="button"
+        class="campaign-phase-preview-start"
+        data-campaign-start-mission="${escapeMissionHtml(mission.id)}"
+      >
+        Iniciar missão
+      </button>
+    </div>
+  `;
+}
+
+/** Posiciona o popover acima do pin; flipa verticalmente e clampa nas bordas do stage. */
+export function syncMissionPopoverPlacement(root: ParentNode): void {
+  const popover = root.querySelector('.campaign-mission-popover') as HTMLElement | null;
+  if (!popover) return;
+
+  const container =
+    (root.querySelector('.campaign-mission-stage') as HTMLElement | null) ??
+    (root.querySelector('.campaign-mission-board-track--pins') as HTMLElement | null);
+  if (!container) return;
+
+  const margin = 6;
+  popover.style.setProperty('--popover-shift-x', '0px');
+  popover.dataset.placement = 'above';
+
+  const containerRect = container.getBoundingClientRect();
+  let popRect = popover.getBoundingClientRect();
+  if (popRect.top < containerRect.top + margin) {
+    popover.dataset.placement = 'below';
+    popRect = popover.getBoundingClientRect();
+  }
+
+  let shiftX = 0;
+  if (popRect.left < containerRect.left + margin) {
+    shiftX = containerRect.left + margin - popRect.left;
+  } else if (popRect.right > containerRect.right - margin) {
+    shiftX = containerRect.right - margin - popRect.right;
+  }
+  popover.style.setProperty('--popover-shift-x', `${Math.round(shiftX)}px`);
+}
+
+export function renderMissionSelectHint(): string {
+  return `
+    <p class="campaign-mission-select-hint">Toque em um local no mapa para ver a missão.</p>
+  `;
+}
+
+/** @deprecated Prefer popover no pin via renderMissionLocalesMap. Mantido para testes legados. */
 export function renderMissionPreviewFooter(
   board: MissionBoardDto | null | undefined,
   pendingMissionId: string | null,
@@ -207,29 +342,10 @@ export function renderMissionPreviewFooter(
     `;
   }
 
-  const rewardBits: string[] = [];
-  if (mission.rewards?.gold) rewardBits.push(`${mission.rewards.gold} ouro`);
-  if (mission.rewards?.xp) rewardBits.push(`${mission.rewards.xp} XP`);
-  if (mission.rewards?.itemId) rewardBits.push('item exclusivo');
-  if (mission.rewards?.sceneId) rewardBits.push('cena');
-
   return `
     <footer class="campaign-phase-preview" data-campaign-mission-preview>
       <div class="campaign-phase-preview-main">
-        <div class="campaign-phase-preview-copy">
-          <p class="campaign-phase-preview-eyebrow">${escapeMissionHtml(kindLabel(mission.kind))}${
-            mission.stars ? ` · ${mission.stars}★` : ''
-          }</p>
-          <h4 class="campaign-phase-preview-title">${escapeMissionHtml(mission.name)}</h4>
-          <p class="campaign-phase-preview-meta">${mission.waveCount} waves · Tier ${mission.difficultyTier}</p>
-          ${
-            mission.challengeHint
-              ? `<p class="campaign-phase-preview-challenge">${escapeMissionHtml(mission.challengeHint)}</p>`
-              : ''
-          }
-          ${rewardBits.length > 0 ? `<p class="campaign-mission-rewards">${escapeMissionHtml(rewardBits.join(' · '))}</p>` : ''}
-          ${renderFeaturedEnemies(mission)}
-        </div>
+        ${renderMissionPreviewBody(mission)}
       </div>
       <button
         type="button"

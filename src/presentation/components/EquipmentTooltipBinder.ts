@@ -34,7 +34,13 @@ function positionPortal(portal: HTMLElement, anchor: DOMRect): void {
   const maxLeft = window.innerWidth - portalRect.width - margin;
   left = Math.max(margin, Math.min(left, maxLeft));
 
-  if (top < margin) {
+  const modalHeader = document.querySelector(
+    '.modal-root:not(.hidden) .modal-header',
+  ) as HTMLElement | null;
+  const headerBottom = modalHeader?.getBoundingClientRect().bottom ?? 0;
+  const minTop = Math.max(margin, headerBottom + margin);
+
+  if (top < minTop) {
     top = anchor.bottom + margin;
   }
 
@@ -62,20 +68,36 @@ function showPortal(slot: HTMLElement, tooltip: HTMLElement): void {
   positionPortal(portal, slot.getBoundingClientRect());
 }
 
-export function bindEquipmentTooltips(container: HTMLElement): void {
-  container.querySelectorAll('.equipment-slot .equipment-slot-tooltip').forEach((tooltipElement) => {
-    const tooltip = tooltipElement as HTMLElement;
-    const slot = tooltip.closest('.equipment-slot') as HTMLElement | null;
-    if (!slot) return;
+function bindPortalTooltipSlots(
+  container: HTMLElement,
+  slotSelector: string,
+  tooltipSelector: string,
+): void {
+  container.querySelectorAll(slotSelector).forEach((slotElement) => {
+    const slot = slotElement as HTMLElement;
+    const tooltip = slot.querySelector(tooltipSelector) as HTMLElement | null;
+    if (!tooltip) return;
 
-    const onShow = () => showPortal(slot, tooltip as HTMLElement);
+    const onShow = () => showPortal(slot, tooltip);
     const onHide = () => hidePortal();
 
     slot.addEventListener('mouseenter', onShow);
     slot.addEventListener('mouseleave', onHide);
-    slot.addEventListener('focus', onShow);
-    slot.addEventListener('blur', onHide);
+    slot.addEventListener('focusin', onShow);
+    slot.addEventListener('focusout', (event) => {
+      const next = event.relatedTarget as Node | null;
+      if (next && slot.contains(next)) return;
+      onHide();
+    });
   });
+}
+
+export function bindEquipmentTooltips(container: HTMLElement): void {
+  bindPortalTooltipSlots(container, '.equipment-slot', '.equipment-slot-tooltip');
+}
+
+export function bindShopOfferTooltips(container: HTMLElement): void {
+  bindPortalTooltipSlots(container, '.shop-offer-tile', '.shop-offer-tooltip');
 }
 
 export function hideEquipmentTooltip(): void {

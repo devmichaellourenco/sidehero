@@ -19,7 +19,7 @@ import { gearRaritySurfaceClass } from './GearRarityPresentation';
 import { InventoryEquipFeedback } from './InventoryEquipFeedback';
 import { gearDragAttr, gearDropTargetAttr } from '../gear/GearDragDropBinder';
 
-export type HeroLoadoutContext = 'inventory' | 'equip-picker';
+export type HeroLoadoutContext = 'inventory' | 'equip-picker' | 'shop';
 
 function escapeHtml(text: string): string {
   return text
@@ -66,7 +66,7 @@ function renderInventoryLoadoutSlot(
   const dropClass = dragDrop ? ' gear-drop-target' : '';
   const dropAttrs = dragDrop ? gearDropTargetAttr(hero.id, slot) : '';
   const dragAttrs =
-    dragDrop && gear
+    dragDrop && gear && options.context !== 'shop'
       ? gearDragAttr({
           kind: 'equipped',
           gearId: gear.id,
@@ -75,7 +75,9 @@ function renderInventoryLoadoutSlot(
         })
       : '';
 
-  if (options.context === 'inventory') {
+  if (options.context === 'shop') {
+    // Drop de ofertas da loja; sem unequip/drag do loadout.
+  } else if (options.context === 'inventory') {
     if (dragDrop) {
       slotAttrs = `data-hero="${escapeHtml(hero.id)}" data-slot="${slot}"`;
       extraClasses = ' equipment-slot-clickable';

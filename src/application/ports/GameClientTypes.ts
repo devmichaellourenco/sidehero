@@ -41,6 +41,7 @@ export type GameMessage =
   | { type: 'FORGE_SALVAGE_GEAR'; gearId: string }
   | { type: 'GET_SHOP_OFFERS' }
   | { type: 'BUY_SHOP_OFFER'; offerId: string }
+  | { type: 'BUY_AND_EQUIP_SHOP_OFFER'; offerId: string; heroId: string }
   | { type: 'REFRESH_SHOP' }
   | { type: 'GET_UPGRADE_TREE' }
   | { type: 'PURCHASE_UPGRADE'; upgradeId: string }

@@ -68,7 +68,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 
 1. **Mapa-mundo** (regiões) — mantém o padrão atual.
 2. **Mapa de locais do mapa ativo** — substitui a trilha linear de fases: locais clicáveis (visual semelhante à árvore de skills **sem** edges/nós de pré-requisito), mostrando as missões **disponíveis nesta visita**.
-3. Detalhe da missão: tipo, estrelas, waves/monstros/stats, CTA iniciar.
+3. Detalhe da missão: ao clicar no pin, popover ancorado **sobre o próprio pin** (tipo, estrelas, waves/monstros/stats, CTA iniciar). Sem footer fixo de preview — libera altura no painel pinado. Clique fora fecha. Popover clampa nas bordas. Tooltip de inimigo em grade compacta com ícones de estatística.
 
 ## Critérios de aceite
 
@@ -135,7 +135,9 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] `ResolveMissionOutcomeUseCase.test.ts` — vitória/derrota por tipo → camp
 - [x] `StartMissionUseCase.test.ts` — inicia tentativa / rejeita inválida
 - [x] `GetMissionBoardUseCase.test.ts` — DTO / escopo base
-- [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos
+- [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / tooltip de stats no preview
+- [x] `EnemyBattlePresentation.test.ts` — tooltip compacto com ícones (~3 por linha)
+- [x] `MissionEnemyPreviewMapper.test.ts` — ficha de combate dos inimigos em destaque
 - [x] Migração de save: progresso linear → marcos concluídos + board
 
 ## Relacionado

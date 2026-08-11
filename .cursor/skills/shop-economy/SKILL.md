@@ -21,10 +21,11 @@ description: Loja, ofertas e economia de ouro no Side Hero. Use para shop, loja,
 - Oferta ID embute tier para reabrir modal sem mismatch
 - Melhoria `shop_refresh` controla cota e desconto
 - Mythic na loja só a partir do Ato 3 de Valdris (`MythicGearAccessPolicy` / tier ≥ 121)
+- UI da loja: seletor + loadout do herói (contexto `shop`); tooltip com preview e deltas; drag da oferta paga → slot (`BuyAndEquipShopOfferUseCase`)
 
 ## Testes
 
-`ShopService.test.ts` — criar ou atualizar; não executar automaticamente.
+`ShopService.test.ts`, `ShopModalRenderer.test.ts`, `BuyAndEquipShopOfferUseCase.test.ts` — criar ou atualizar; não executar automaticamente.
 
 ## Workflow do agente
 

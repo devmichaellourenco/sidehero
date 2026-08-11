@@ -639,6 +639,9 @@ export class GameViewController {
             : this.state.inventory.find((entry) => entry.id === source.gearId);
         void this.gearStorageFlow.destroy(source.gearId, source.kind, gear);
       },
+      onBuyAndEquipShopOffer: (offerId, heroId) => {
+        void this.shopFlow.buyAndEquipOffer(offerId, heroId);
+      },
       onPartySlotDrop: (heroId, targetIndex) => {
         void this.handlePartySlotDrop(heroId, targetIndex);
       },
