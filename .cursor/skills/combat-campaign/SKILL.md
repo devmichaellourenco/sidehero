@@ -31,7 +31,8 @@ description: Implementa combate em tempo real, campanha por fases/waves, tick e 
 - Stats da tentativa: `battleSessionStats` (geral/herói/skill/elementos/mitigação); reset ao iniciar/reiniciar fase; UI via runa `battle_stats`
 - Timeline visual da fase: skill `stage-progress-bar` (roles trash/elite/boss → marcadores)
 - Identidade de mapa: `MapCombatIdentityCatalog` + `pickCommonForMapPhase` (bias soft) + resists via `resolveEnemyInnateResists(..., mapId)`
-- **Loop de produto (novo):** skill `camp-missions` — fim de missão → camp; sem auto-próxima fase
+- **Loop de produto (novo):** skill `camp-missions` — fim de missão → CLEAR/DEFEAT → detalhes de recompensa → Continuar → camp; sem auto-próxima fase
+- Overlay terminal (`phase-clear` / `defeat`): `BattleVictoryFlow` revela detalhes após a animação e aguarda CTA Continuar; waves intermediárias ainda auto-dismiss
 
 ## Arquivos frequentes
 

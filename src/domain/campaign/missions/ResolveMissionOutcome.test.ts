@@ -59,7 +59,7 @@ describe('ResolveMissionOutcome', () => {
     expect(result.state.campaignProgress.missionProgress.completedMainIds).toHaveLength(0);
   });
 
-  it('derrota normal remove da oferta; main permanece incompleta', () => {
+  it('derrota normal remove da oferta e concede fração de ouro/XP; main sem recompensa', () => {
     const phaseId = '1-2';
     const missionId = normalMissionId(phaseId);
     const progress = MissionProgress.initial()
@@ -68,6 +68,8 @@ describe('ResolveMissionOutcome', () => {
     const state = GameState.initial()
       .withPhaseRun(PhaseRun.start(phaseId))
       .withCampaignProgress(GameState.initial().campaignProgress.withMissionProgress(progress));
+    const goldBefore = state.gold.value();
+    const xpBefore = state.heroes[0]!.toProps().experience.current;
 
     const defeat = applyMissionDefeat({
       state,
@@ -79,13 +81,20 @@ describe('ResolveMissionOutcome', () => {
       missionId,
     );
     expect(defeat.state.combatIntermission?.variant).toBe('defeat');
+    expect(defeat.state.gold.value()).toBeGreaterThan(goldBefore);
+    expect(defeat.state.heroes[0]!.toProps().experience.current).toBeGreaterThan(xpBefore);
+    // 25% de 14 ouro / 10 XP (normal 1★) → 3 / 2
+    expect(defeat.state.gold.value() - goldBefore).toBe(3);
+    expect(defeat.state.heroes[0]!.toProps().experience.current - xpBefore).toBe(2);
 
-    const mainDefeat = applyMissionDefeat({
-      state: GameState.initial().withCampaignProgress(
-        GameState.initial().campaignProgress.withMissionProgress(
-          MissionProgress.initial().withActiveMission(mainMissionId('1-1')),
-        ),
+    const mainState = GameState.initial().withCampaignProgress(
+      GameState.initial().campaignProgress.withMissionProgress(
+        MissionProgress.initial().withActiveMission(mainMissionId('1-1')),
       ),
+    );
+    const mainGold = mainState.gold.value();
+    const mainDefeat = applyMissionDefeat({
+      state: mainState,
       phaseId: '1-1',
       phaseDisplayName: 'Fase 1-1',
     });
@@ -94,6 +103,30 @@ describe('ResolveMissionOutcome', () => {
       mainDefeat.state.campaignProgress.missionProgress.isMainCompleted(mainMissionId('1-1')),
     ).toBe(false);
     expect(mainDefeat.state.campaignProgress.missionProgress.activeMissionId).toBeNull();
+    expect(mainDefeat.state.gold.value()).toBe(mainGold);
+  });
+
+  it('derrota de secundária não concede ouro/XP/cena de conclusão', () => {
+    const ashId = sideMissionId('stendra_ash_trail');
+    const ashState = GameState.initial().withCampaignProgress(
+      GameState.initial().campaignProgress.withMissionProgress(
+        MissionProgress.initial()
+          .markMainCompleted(mainMissionId('1-5'))
+          .withActiveMission(ashId),
+      ),
+    );
+    const goldBefore = ashState.gold.value();
+    const defeat = applyMissionDefeat({
+      state: ashState,
+      phaseId: '1-6',
+      phaseDisplayName: 'Trilha',
+    });
+
+    expect(defeat.state.gold.value()).toBe(goldBefore);
+    expect(defeat.state.campaignProgress.missionProgress.isSideCompleted(ashId)).toBe(false);
+    expect(defeat.state.campaignProgress.missionProgress.pendingNarrativeSceneIds).not.toContain(
+      'side:stendra_ash_trail',
+    );
   });
 
   it('enterCampHub bloqueia combate e conta visita (refresh a cada 2)', () => {

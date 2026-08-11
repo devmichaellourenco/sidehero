@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 19/19 (100%) · escopo base v1  
-**Testes obrigatórios:** 10/10 grupos (inclui `CampaignReleaseScope` + `PhaseChallengeCatalog` + `WaveEnemyCap`)
+**Aceite:** 20/20 (100%) · escopo base v1 + integração camp-missions  
+**Testes obrigatórios:** 12/12 grupos (inclui `CampaignReleaseScope` + `PhaseChallengeCatalog` + `WaveEnemyCap` + outcome)
 
 ## Objetivo
 
@@ -35,9 +35,10 @@ Os itens abaixo descrevem o v1 linear entregue; a feature [`camp-missions`](camp
 
 ## Critérios de aceite — integração camp-missions (novos)
 
-- [ ] Fim de missão (boss clear ou wipe) não auto-inicia outra missão/fase
-- [ ] Handlers de outcome delegam ao fluxo de missões (vitória/derrota → camp)
-- [ ] Templates de wave/fase existentes reutilizados por `MissionDefinition` (marcos = main; intermediárias = pool normal)
+- [x] Fim de missão (boss clear ou wipe) não auto-inicia outra missão/fase
+- [x] Handlers de outcome delegam ao fluxo de missões (vitória/derrota → camp) via `ResolveMissionOutcome` / `PhaseCombatHandlers`
+- [x] Templates de wave/fase existentes reutilizados por `MissionDefinition` (marcos = main; intermediárias = pool normal)
+
 ## Escopo do jogo base (v1)
 
 **Objetivo:** A campanha jogável termina em **Morthaven** (`4-50`, tier 200). Regiões 5–10 permanecem no catálogo para DLC futuro até o Trono do Vazio (`10-50`).
@@ -108,8 +109,9 @@ Os itens abaixo descrevem o v1 linear entregue; a feature [`camp-missions`](camp
 - [x] `CombatTurnPhase.test.ts`, `CombatActionExecutor.test.ts`
 - [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`, `EnemyProgressionCatalog.test.ts`
 - [x] `PauseBattleUseCase.test.ts` — pausa/retoma preservando combate e phaseRun
-- [x] `BattleVictoryFlow.test.ts`
+- [x] `BattleVictoryFlow.test.ts` — terminal clear/defeat aguarda Continuar; intermissões de wave auto-dismiss
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
+- [x] `ResolveMissionOutcome.test.ts` — vitória/derrota por tipo; fração de recompensa em derrota normal (ver também `camp-missions`)
 - [x] `MapCombatIdentityCatalog.test.ts`, `EnemyTierProgression.mapBias.test.ts`, `MilestonePhaseBlueprints.theme.test.ts` — identidade por mapa
 - [x] `PhaseChallengeCatalog.test.ts` — micro-desafios BAL-011 multi-slot (4 mapas base)
 - [x] `WaveEnemyCap.test.ts` — teto de 3 inimigos por wave em todo o catálogo

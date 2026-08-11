@@ -7,11 +7,16 @@ export const OVERLAY_ANIMATION_MS = 2200;
 /** Marcos X-50 — animação mais longa para reforçar conquista. */
 export const MILESTONE_OVERLAY_ANIMATION_MS = 3400;
 
-/** Overlay de resultado — bloqueia ticks até a animação terminar. */
+function isTerminalBattleResult(payload: BattleVictoryPayload): boolean {
+  return payload.variant === 'phase-clear' || payload.variant === 'defeat';
+}
+
+/** Overlay de resultado — bloqueia ticks até dismiss (manual no clear/defeat final). */
 export class BattleVictoryFlow {
   private overlayVisible = false;
   private autoDismissTimer: number | null = null;
   private pendingDismissHandler: (() => void) | null = null;
+  private detailsRevealed = false;
 
   constructor(
     private readonly overlayEl: HTMLElement,
@@ -33,6 +38,7 @@ export class BattleVictoryFlow {
 
   show(payload: BattleVictoryPayload, onDismiss?: () => void): void {
     this.clearTimers();
+    this.detailsRevealed = false;
     this.pendingDismissHandler = onDismiss ?? null;
     this.overlayVisible = true;
     this.renderer.render(this.overlayEl, payload);
@@ -45,7 +51,11 @@ export class BattleVictoryFlow {
       milestone ? 'battle-field--milestone-victory' : 'battle-field--victory',
     );
     this.bindActions();
-    this.scheduleDismissAfterAnimation(payload);
+    if (isTerminalBattleResult(payload)) {
+      this.scheduleRevealDetailsAfterAnimation(payload);
+    } else {
+      this.scheduleDismissAfterAnimation(payload);
+    }
   }
 
   dismiss(): void {
@@ -53,6 +63,7 @@ export class BattleVictoryFlow {
 
     this.clearTimers();
     this.overlayVisible = false;
+    this.detailsRevealed = false;
     this.hideOverlay();
 
     const handler = this.pendingDismissHandler;
@@ -65,6 +76,7 @@ export class BattleVictoryFlow {
   private bindActions(): void {
     const detailsToggle = this.overlayEl.querySelector('[data-victory-details-toggle]');
     const detailsPanel = this.overlayEl.querySelector('[data-victory-details-panel]');
+    const continueBtn = this.overlayEl.querySelector('[data-victory-continue]');
 
     detailsToggle?.addEventListener('click', () => {
       if (!detailsPanel || !(detailsToggle instanceof HTMLButtonElement)) return;
@@ -72,6 +84,46 @@ export class BattleVictoryFlow {
       detailsToggle.textContent = expanded ? 'Ocultar' : 'Detalhes';
       detailsToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     });
+
+    continueBtn?.addEventListener('click', () => this.dismiss());
+  }
+
+  private scheduleRevealDetailsAfterAnimation(payload: BattleVictoryPayload): void {
+    const isMilestone = payload.milestoneVictory?.isMilestone === true;
+    const animationMs = isMilestone ? MILESTONE_OVERLAY_ANIMATION_MS : OVERLAY_ANIMATION_MS;
+    const label = this.overlayEl.querySelector('.battle-victory-compact-label');
+    if (label) {
+      label.addEventListener(
+        'animationend',
+        () => this.revealDetailsAndAwaitContinue(),
+        { once: true },
+      );
+    }
+
+    this.autoDismissTimer = globalThis.setTimeout(
+      () => this.revealDetailsAndAwaitContinue(),
+      animationMs + 300,
+    );
+  }
+
+  private revealDetailsAndAwaitContinue(): void {
+    if (!this.overlayVisible || this.detailsRevealed) return;
+    this.detailsRevealed = true;
+    this.clearTimers();
+
+    const detailsPanel = this.overlayEl.querySelector('[data-victory-details-panel]');
+    const detailsToggle = this.overlayEl.querySelector('[data-victory-details-toggle]');
+    const continueBtn = this.overlayEl.querySelector('[data-victory-continue]');
+
+    detailsPanel?.classList.remove('hidden');
+    continueBtn?.classList.remove('hidden');
+
+    if (detailsToggle instanceof HTMLButtonElement) {
+      detailsToggle.textContent = 'Ocultar';
+      detailsToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    this.overlayEl.classList.add('battle-victory-overlay--await-continue');
   }
 
   private scheduleDismissAfterAnimation(payload: BattleVictoryPayload): void {
@@ -90,6 +142,7 @@ export class BattleVictoryFlow {
 
   private hideOverlay(): void {
     this.overlayEl.classList.add('hidden');
+    this.overlayEl.classList.remove('battle-victory-overlay--await-continue');
     this.overlayEl.innerHTML = '';
     this.battleStripEl.classList.remove('battle-strip--victory', 'battle-strip--milestone-victory');
     this.battleFieldEl()?.classList.remove(

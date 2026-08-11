@@ -7,6 +7,7 @@ export class BattleVictoryOverlayRenderer {
     const isWarning = payload.variant === 'boss-approach';
     const isMilestone = payload.milestoneVictory?.isMilestone === true;
     const isMajorMilestone = payload.milestoneVictory?.isMajorMilestone === true;
+    const isTerminal = payload.variant === 'phase-clear' || payload.variant === 'defeat';
     const toneClass = isDefeat
       ? 'battle-victory-compact--defeat'
       : isWarning
@@ -39,23 +40,30 @@ export class BattleVictoryOverlayRenderer {
         : isDefeat
           ? `<p class="battle-victory-defeat-hint">No Acampamento: ajuste formação, skills ou resistências e tente de novo.</p>`
           : '';
-    const detailsSection = isDefeat
-      ? defeatHint
-      : `
-        <div class="battle-victory-details hidden" data-victory-details-panel>
-          <p class="battle-victory-detail-line">${payload.clearedPhaseName}</p>
-          <ul class="battle-victory-rewards" aria-label="Recompensas">
-            ${rewardRows}
-          </ul>
-          ${levelUpRows}
-          ${nextPhaseLine}
-        </div>
-        <div class="battle-victory-compact-actions">
-          <button type="button" class="battle-victory-details-btn" data-victory-details-toggle>
-            Detalhes
-          </button>
-        </div>
-      `;
+
+    const detailsSection = `
+      <div class="battle-victory-details hidden" data-victory-details-panel>
+        <p class="battle-victory-detail-line">${payload.clearedPhaseName}</p>
+        ${defeatHint}
+        <ul class="battle-victory-rewards" aria-label="Recompensas">
+          ${rewardRows}
+        </ul>
+        ${levelUpRows}
+        ${nextPhaseLine}
+      </div>
+      <div class="battle-victory-compact-actions">
+        <button type="button" class="battle-victory-details-btn" data-victory-details-toggle aria-expanded="false">
+          Detalhes
+        </button>
+        ${
+          isTerminal
+            ? `<button type="button" class="battle-victory-continue-btn hidden" data-victory-continue>
+                Continuar
+              </button>`
+            : ''
+        }
+      </div>
+    `;
 
     container.innerHTML = `
       <div class="battle-victory-compact ${toneClass}${isMilestone ? ' battle-victory-compact--celebration' : ''}">
@@ -116,7 +124,11 @@ export class BattleVictoryOverlayRenderer {
     }
 
     if (rows.length === 0) {
-      rows.push(`<li class="battle-victory-reward battle-victory-reward--empty">Sem recompensas extras</li>`);
+      rows.push(
+        `<li class="battle-victory-reward battle-victory-reward--empty">${
+          payload.variant === 'defeat' ? 'Sem recompensas de conclusão' : 'Sem recompensas extras'
+        }</li>`,
+      );
     }
 
     return rows.join('');

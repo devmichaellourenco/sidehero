@@ -2,24 +2,24 @@
 
 Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho novo começa pela spec; implementação e testes devem rastrear critérios de aceite aqui.
 
-## Painel de status (auditoria 2026-07-06)
+## Painel de status (auditoria 2026-08-11)
 
 | Feature | Aceite | Testes spec | Pendências |
 |---------|--------|-------------|------------|
-| [camp-missions](camp-missions.spec.md) | 4/22 | 4/8 | Fase 1 domínio ok; fases 2–6 |
-| [combat-campaign](combat-campaign.spec.md) | 15/15 | 9/9 | Integração camp-missions pendente |
+| [camp-missions](camp-missions.spec.md) | 22/22 | 11/11 | — |
+| [combat-campaign](combat-campaign.spec.md) | 20/20 | 12/12 | — |
 | [heroes-party](heroes-party.spec.md) | 9/9 | 10/10 | — |
 | [skills-progression](skills-progression.spec.md) | 9/9 | 10/10 | — |
 | [gear-loot](gear-loot.spec.md) | 8/8 | 8/8 | — |
 | [unique-effects](unique-effects.spec.md) | 8/8 | 5/5 | — |
 | [stash-forge](stash-forge.spec.md) | 8/8 | 7/7 | — |
-| [shop-economy](shop-economy.spec.md) | 4/4 | 1/1 | — |
+| [shop-economy](shop-economy.spec.md) | 10/10 | 3/3 | — |
 | [upgrade-tree](upgrade-tree.spec.md) | 9/9 | 8/8 | — |
 | [meta-legacy](meta-legacy.spec.md) | 6/6 | 1/1 | — |
-| [battle-ui](battle-ui.spec.md) | 10/10 | 9/9 | — |
-| [art-scenes](art-scenes.spec.md) | 4/9 | 2/2 | strip das 4 regiões base |
+| [battle-ui](battle-ui.spec.md) | 26/26 | 19/19 | — |
+| [art-scenes](art-scenes.spec.md) | 5/10 | 2/2 | strip layout / fallback / DLC |
 | [chrome-infra](chrome-infra.spec.md) | 6/6 | 3/3 | — |
-| [game-balance](game-balance.spec.md) | 9/9 | 11/11 | — |
+| [game-balance](game-balance.spec.md) | 11/11 | 12/12 | — |
 | [story-scenes](story-scenes.spec.md) | 9/10 | 5/5 | copy DLC placeholder |
 | [achievements](achievements.spec.md) | 7/7 | 4/4 | — |
 | [improvement-reset](improvement-reset.spec.md) | 16/16 | 12/12 | Unitário + massa entregues |
@@ -28,9 +28,9 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [ui-theme](ui-theme.spec.md) | 7/7 | 2/2 | Claro/escuro (batalha isolada) |
 | [passives](passives.spec.md) | 10/14 | 4/8 | Fase A–B; gear/inimigo pendentes |
 
-**Total aceite (features):** 138/160 (86%) · *passives em planejamento*  
-**Balanceamento transversal:** 9/9  
-**Total testes listados nas specs:** 101/109 (passives a criar)
+**Total aceite (features):** ~226/241 · *passives / art-scenes / story-scenes com pendências*  
+**Balanceamento transversal:** 11/11  
+**Total testes listados nas specs:** ver specs individuais
 
 ## Documentação de produto
 
@@ -40,11 +40,11 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 
 Campanha jogável até **Morthaven** (`4-50`, tier 200). Regiões 5–10 (DLC) permanecem no código mas ocultas — ver [`combat-campaign.spec.md`](combat-campaign.spec.md) (seção Escopo do jogo base).
 
-## Próxima feature sugerida
+**Próxima feature sugerida**
 
-**Camp missions** (acampamento → mapa → missões) — [`camp-missions.spec.md`](camp-missions.spec.md). Fase 0 (specs/skill/agent/rule) entregue; implementação domínio/UI nas fases 1–6.
+**Passivas** — [`passives.spec.md`](passives.spec.md). Polish de arte: layout strip / fallback — [`art-scenes.spec.md`](art-scenes.spec.md).
 
-Secundário: **Passivas** — [`passives.spec.md`](passives.spec.md). Polish de arte: battle strip das 4 regiões — [`art-scenes.spec.md`](art-scenes.spec.md).
+Secundário: calibração Balance Lab (aba Missões) — [`game-balance.spec.md`](game-balance.spec.md).
 
 ## Regras de workflow do agente
 

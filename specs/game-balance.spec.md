@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 10/10 (100%) · auditoria 2026-08-02  
-**Testes obrigatórios:** 9/9 + `BalanceAudit.test.ts`
+**Aceite:** 11/11 (100%) · auditoria 2026-08-11  
+**Testes obrigatórios:** 9/9 + `BalanceAudit.test.ts` + `PhaseBattleOverrides`
 
 ## Objetivo
 
@@ -26,8 +26,8 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Combate e fórmulas** | Dano, cura, crítico, status, turnos/tick | `combat-campaign` | `MitigationPipeline`, `CombatDamageResolver`, `CombatActionExecutor`, `CombatTurnPhase` |
 | **Elementos** | Cada elemento (`physical`/`fire`/`cold`/`lightning`/`air`) usa mitigação do tipo; multi-componente; DOT | `combat-campaign`, `skills-progression` | `DamageElement`, `ResistanceProfile`, `HeroCombatSkillCatalog`, `EnemyMonsterCombatSkillCatalog` |
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
-| **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted | `combat-campaign`, `camp-missions` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `EnemyRosterCatalog` |
-| **Missões / board** | Oferta normal 2–4; refresh por visitas; templates ★; unlock side | `camp-missions` | `NormalMissionOffer`, `MissionCatalog`, `CampMissionBoard` |
+| **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted; overrides do Balance Lab | `combat-campaign`, `camp-missions` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `PhaseBattleOverrides` |
+| **Missões / board** | Oferta normal 2–4; refresh por visitas; templates ★; unlock side; fração na derrota normal | `camp-missions` | `NormalMissionOffer`, `MissionCatalog`, `CampMissionBoard`, `ResolveMissionOutcome` |
 | **Skills e progressão** | `Base × (powerPerRank × nível) × (attr × fator)`; cooldowns; ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `SkillDamageBalance`, `HeroLevelXpCatalog` |
 | **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
@@ -60,6 +60,7 @@ Poder × crítico → split damageComponents[]
 - [x] BAL-011 — micro-desafios multi-slot (race/sustain/spike/warded/armored) nos 4 mapas base
 - [x] BAL-012 — cadência early: TTA individual (1/ASPD, DEX); skills ~10s CD (−1,5s/level); básico = 50% ATK
 - [x] BAL-013 — inimigos no mesmo modelo de combate dos heróis (level/attrs/ranks/passivas; CD e básico unificados; sem knobs ATK/HP/skill)
+- [x] Balance Lab: aba **Missões** edita waves/inimigos por fase; overrides em `phase-battle-overrides.json` mesclados via `PhaseBattleOverrides` / `CampaignCatalog.resolvePhase`; backups em `data/backups/phase-battle-overrides/`
 
 ## Coordenação com outros agents
 
@@ -132,6 +133,20 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `SkillPowerCalculator.test.ts` — básico/skill inimigo alinhados ao herói
 - [x] `SkillCooldownTiming.test.ts` — CD unificado herói/inimigo
 - [x] `PhaseBattleOverrides.test.ts` — merge de waves do Balance Lab sobre fase handcrafted
+
+## Balance Lab (ferramenta de calibração)
+
+Ferramenta **fora do produto jogável** (`npm run balance-lab` → http://127.0.0.1:5179/):
+
+| Peça | Função |
+|------|--------|
+| Aba Missões | Editar composição de batalhas (waves/inimigos) por `phaseTemplateId` |
+| `src/domain/campaign/data/phase-battle-overrides.json` | Overrides persistidos; merge sobre handcrafted |
+| `PhaseBattleOverrides.ts` | Merge determinístico usado por `CampaignCatalog.resolvePhase` |
+| `tools/balance-lab/missionBattlesUi.ts` | UI da aba |
+| `src/domain/campaign/data/backups/phase-battle-overrides/` | Snapshots ao salvar |
+
+Não substitui catálogos canônicos: overrides são camada de calibração até promoção ao handcrafted.
 
 ## Backlog conhecido (auditoria 2026-07-03)
 

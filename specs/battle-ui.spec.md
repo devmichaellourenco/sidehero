@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 16/16 (100%) · auditoria 2026-08-02  
-**Testes obrigatórios:** 18/18 presentes na suite
+**Aceite:** 26/26 (100%) · auditoria 2026-08-11  
+**Testes obrigatórios:** 19/19 presentes na suite
 
 ## Objetivo
 
@@ -36,10 +36,10 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 ## Critérios — camp-missions (novos)
 
-- [ ] Modal de campanha: mapa-mundo + **mapa de locais** (missões disponíveis), sem trilha linear como UX principal
-- [ ] Detalhe de missão: tipo, estrelas, preview waves/monstros/stats, CTA iniciar
-- [ ] Tela/fluxo de resultado pós-batalha (vitória/derrota + recompensas) antes de voltar ao acampamento
-- [ ] Acampamento permanece hub de party/loja/inventário; combate só após iniciar missão
+- [x] Modal de campanha: mapa-mundo + **mapa de locais** (missões disponíveis), sem trilha linear como UX principal
+- [x] Detalhe de missão: tipo, estrelas, preview waves/monstros/stats, CTA iniciar (popover no pin; ver `camp-missions`)
+- [x] Tela/fluxo de resultado pós-batalha (vitória/derrota + recompensas) antes de voltar ao acampamento — após CLEAR/DEFEAT, detalhes abrem automaticamente; Continuar → camp
+- [x] Acampamento permanece hub de party/loja/inventário; combate só após iniciar missão
 
 ## Camadas e arquivos-chave
 
@@ -81,6 +81,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `SplashScreenController.test.ts` — splash de abertura antes do loop
 - [x] `BattleHudDeckLayout.test.ts` — cena 133px + deck HUD separado no markup
 - [x] `ActionTimeBarPresentation.test.ts` — countdown e tooltip de cálculo TTA
+- [x] `BattleVictoryFlow.test.ts` — clear/defeat revelam detalhes e aguardam Continuar; wave-clear auto-dismiss
 
 ## Relacionado
 

@@ -3,7 +3,7 @@
 ## Status
 
 **Aceite:** 22/22 (100%) · Fases 0–6  
-**Testes obrigatórios:** 8/8
+**Testes obrigatórios:** 11/11
 
 ## Objetivo
 
@@ -26,7 +26,7 @@ Acampamento → abrir mapa → escolher missão → batalha (waves)
 |------|--------|------------|---------|
 | **Principal** (`main`) | Avança a história do mapa (marcos) | Não, após concluir | Sempre a **próxima** incompleta |
 | **Secundária** (`side`) | História paralela + loot exclusivo | Não, após concluir | Desbloqueadas e incompletas (várias ok) |
-| **Normal** (`normal`) | Loot/recursos; não avança história | Oferta some na derrota ou ao concluir; pool renova | 2–4 por oferta |
+| **Normal** (`normal`) | Loot/recursos; não avança história | Oferta some na derrota ou ao concluir; na derrota concede fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`); pool renova | 2–4 por oferta |
 
 ### Principais (marcos)
 
@@ -72,7 +72,8 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 
 ## Critérios de aceite
 
-- [x] Fim de batalha (vitória ou derrota) sempre retorna ao acampamento após resultado/recompensas
+- [x] Fim de batalha (vitória ou derrota) mostra CLEAR/DEFEAT, depois detalhes de recompensas; Continuar → acampamento
+- [x] Derrota em missão normal concede fração de ouro/XP; main/side na derrota sem recompensa de conclusão
 - [x] Sem auto-seleção / auto-start da próxima fase ao limpar boss de missão
 - [x] Board do mapa lista próxima principal + secundárias elegíveis + oferta normal (2–4)
 - [x] Principais = marcos `x-1`…`x-50` apenas; concluídas fora do board
@@ -102,6 +103,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 | `NORMAL_MISSION_OFFER_MIN` | 2 | Inclusivo — **somente** missões normais |
 | `NORMAL_MISSION_OFFER_MAX` | 4 | Inclusivo — principal/secundária não entram na contagem |
 | `NORMAL_MISSION_REFRESH_EVERY_N_CAMP_VISITS` | 2 | Renova a cada 2 retornos ao camp (calibração Fase 6) |
+| `NORMAL_MISSION_DEFEAT_REWARD_FRACTION` | 0.25 | Fração de ouro/XP de conclusão na derrota de normal (main/side = 0) |
 
 ## Camadas e arquivos-chave (alvo)
 
@@ -133,11 +135,13 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] `NormalMissionOffer.test.ts` — 2–4, refresh por visitas, seed
 - [x] `CampMissionBoard.test.ts` — próxima main, sides elegíveis, normais
 - [x] `ResolveMissionOutcomeUseCase.test.ts` — vitória/derrota por tipo → camp
+- [x] `ResolveMissionOutcome.test.ts` — domínio: fração de ouro/XP na derrota normal; main/side sem recompensa
 - [x] `StartMissionUseCase.test.ts` — inicia tentativa / rejeita inválida
 - [x] `GetMissionBoardUseCase.test.ts` — DTO / escopo base
-- [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / tooltip de stats no preview
+- [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / popover no pin / tooltip de stats
 - [x] `EnemyBattlePresentation.test.ts` — tooltip compacto com ícones (~3 por linha)
 - [x] `MissionEnemyPreviewMapper.test.ts` — ficha de combate dos inimigos em destaque
+- [x] `BattleVictoryFlow.test.ts` — CLEAR/DEFEAT revelam detalhes e aguardam Continuar (ver também `battle-ui` / `combat-campaign`)
 - [x] Migração de save: progresso linear → marcos concluídos + board
 
 ## Relacionado

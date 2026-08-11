@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 4/9 (44%) · v1 foca nas 4 regiões base  
+**Aceite:** 5/10 (50%) · v1 foca nas 4 regiões base (+ mapa de locais Stendra)  
 **Testes obrigatórios:** 2/2 (Stendra)
 
 ## Objetivo
@@ -12,6 +12,7 @@ Cada região da campanha tem **cenário de batalha** (painéis L/R + céu elást
 ## Critérios de aceite
 
 - [x] `stendra`: battle strip com fundo único `cenario_stendra.jpeg` (333×133) + banner
+- [x] `stendra`: mapa de locais com arte de fundo `map_1.png` (pins de missão; ver `camp-missions`)
 - [x] `gruftall`: battle strip com fundo único `cenario_grutfall.png` + banner
 - [x] `valdris`: battle strip com fundo único `cenario_valdris.png` + banner
 - [x] `morthaven`: battle strip com fundo único `cenario_morthaven.png` + banner
@@ -35,6 +36,7 @@ Mapas `broken_sky` … `void_throne` seguem o mesmo padrão de assets quando cad
 | `battle_{mapId}_center.png` | *(opcional)* Faixa central (horizonte entre os painéis) |
 | `battle_{mapId}_backdrop.png` | *(opcional)* Céu/horizonte em largura total (camada atrás) |
 | `campaign_{mapId}_banner.png` | Banner ilustrado no card da região no **mapa-mundo** |
+| `map_1.png` (Stendra+) | Arte de fundo do **mapa de locais** (pins de missão); path via `MissionMapLayoutCatalog` |
 | `floor_{mapId}_tile.png` | Textura de chão com `repeat-x` na battle strip (28px de altura) |
 
 ## Camadas e arquivos-chave

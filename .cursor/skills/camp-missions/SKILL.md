@@ -36,7 +36,8 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 - Principal = marcos `x-1, x-5, …, x-50`; próxima incompleta no board; não repetível
 - Secundária = cadeias + paralelas; não repetível; loot exclusivo
 - Normal = 2–4, mapa×estrela; some na derrota; refresh a cada N visitas ao camp
-- Vitória/derrota → sempre acampamento após resultado
+- Vitória/derrota → resultado com detalhes de recompensa → Continuar → acampamento
+- Derrota em missão **normal**: fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`); main/side: zero
 - Preview/CTA só ao clicar no pin (popover sobre o pin; sem footer permanente)
 - Clique fora do popover fecha a seleção; popover clampa nas bordas do mapa
 - Tooltip de inimigo: grade compacta com ícones de stats (~3 por linha)

@@ -27,7 +27,7 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 ## Critérios — camp-missions (novos)
 
 - [ ] Loot exclusivo de quest **secundária** (item e/ou ouro e/ou XP) só na primeira conclusão
-- [ ] Missão **normal**: loot/recursos sem progresso de história; derrota não concede recompensa de conclusão
+- [x] Missão **normal**: loot/recursos sem progresso de história; derrota concede fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`); main/side na derrota sem recompensa de conclusão
 - [ ] Tabelas/templates de loot referenciáveis por `MissionDefinition`
 
 ## Camadas e arquivos-chave
