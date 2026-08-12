@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { GEAR_RARITIES } from '../entities/Gear';
+import { mainMissionId } from '../campaign/missions/MissionId';
 import { LootService } from './LootService';
 import {
-  getShopMaxRarityForTier,
+  getShopMaxRarityForProgress,
   getShopMaxRarityIndex,
   rollShopRarity,
   SHOP_OFFER_COUNT,
@@ -46,12 +47,12 @@ describe('ShopService', () => {
     );
   });
 
-  it('tier baixo não vende lendário', () => {
+  it('sem mains concluídas não vende acima de uncommon', () => {
     for (let seed = 0; seed < 5; seed += 1) {
-      const offers = shopService.generateOffers(1, seed);
+      const offers = shopService.generateOffers(1, seed, []);
       for (const offer of offers) {
         expect(GEAR_RARITIES.indexOf(offer.gear.rarity)).toBeLessThanOrEqual(
-          getShopMaxRarityIndex(1),
+          getShopMaxRarityIndex([]),
         );
       }
     }
@@ -67,28 +68,33 @@ describe('ShopService', () => {
   });
 });
 
-describe('ShopCatalog balance', () => {
-  it('cap de raridade evolui com tier', () => {
-    expect(getShopMaxRarityForTier(1)).toBe('uncommon');
-    expect(getShopMaxRarityForTier(8)).toBe('rare');
-    expect(getShopMaxRarityForTier(20)).toBe('epic');
-    expect(getShopMaxRarityForTier(50)).toBe('legendary');
-    expect(getShopMaxRarityForTier(120)).toBe('legendary');
-    expect(getShopMaxRarityForTier(121)).toBe('mythic');
+describe('ShopCatalog balance — caps por main', () => {
+  it('cap de raridade evolui com mains concluídas', () => {
+    expect(getShopMaxRarityForProgress([])).toBe('uncommon');
+    expect(getShopMaxRarityForProgress([mainMissionId('1-1')])).toBe('uncommon');
+    expect(getShopMaxRarityForProgress([mainMissionId('1-5')])).toBe('rare');
+    expect(getShopMaxRarityForProgress([mainMissionId('1-50')])).toBe('epic');
+    expect(getShopMaxRarityForProgress([mainMissionId('2-1')])).toBe('epic');
+    expect(getShopMaxRarityForProgress([mainMissionId('2-50')])).toBe('legendary');
+    expect(getShopMaxRarityForProgress([mainMissionId('3-1')])).toBe('legendary');
+    expect(getShopMaxRarityForProgress([mainMissionId('3-21')])).toBe('mythic');
+    expect(getShopMaxRarityForProgress([], 121)).toBe('mythic');
   });
 
   it('não vende mythic antes do Ato 3 de Valdris', () => {
     const shop = new ShopService(new LootService());
+    const mains = [mainMissionId('3-1')];
     for (let seed = 0; seed < 20; seed += 1) {
-      const offers = shop.generateOffers(120, seed);
+      const offers = shop.generateOffers(120, seed, mains);
       expect(offers.every((offer) => offer.gear.rarity !== 'mythic')).toBe(true);
     }
   });
 
-  it('rollShopRarity respeita cap do tier', () => {
+  it('rollShopRarity respeita cap das mains', () => {
+    const mains = [mainMissionId('1-5')];
     for (let index = 0; index < SHOP_OFFER_COUNT; index += 1) {
-      const rarity = rollShopRarity(5, 0, index);
-      expect(GEAR_RARITIES.indexOf(rarity)).toBeLessThanOrEqual(getShopMaxRarityIndex(5));
+      const rarity = rollShopRarity(5, 0, index, mains);
+      expect(GEAR_RARITIES.indexOf(rarity)).toBeLessThanOrEqual(getShopMaxRarityIndex(mains));
     }
   });
 });

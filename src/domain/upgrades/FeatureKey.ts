@@ -11,6 +11,8 @@ export const FEATURE_KEYS = [
   'battle_stats',
   'shop_refresh',
   'battle_skill_slots',
+  'hero_unlock_knight',
+  'hero_unlock_priest',
   'hero_unlock_berserker',
   'hero_unlock_archer',
   'hero_unlock_paladin',

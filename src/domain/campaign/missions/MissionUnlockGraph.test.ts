@@ -9,6 +9,7 @@ import {
 describe('MissionUnlockGraph', () => {
   const main1 = mainMissionId('1-1');
   const main5 = mainMissionId('1-5');
+  const main10 = mainMissionId('1-10');
   const ash = sideMissionId('stendra_ash_trail');
   const cache = sideMissionId('stendra_hidden_cache');
   const patrol = sideMissionId('stendra_wayward_patrol');
@@ -20,13 +21,19 @@ describe('MissionUnlockGraph', () => {
     expect(isSideMissionUnlocked(cache, [main5, ash])).toBe(true);
   });
 
-  it('paralela: Patrulha libera com 1-1 independente da cadeia de cinzas', () => {
+  it('paralela: Patrulha libera com 1-1 e expira ao concluir 1-5', () => {
     expect(isSideMissionUnlocked(patrol, [main1])).toBe(true);
-    expect(isSideMissionUnlocked(patrol, [main5])).toBe(false);
+    expect(isSideMissionUnlocked(patrol, [main1, main5])).toBe(false);
     const eligible = listEligibleSideMissionIds('stendra', [main1, main5]);
-    expect(eligible).toContain(patrol);
+    expect(eligible).not.toContain(patrol);
     expect(eligible).toContain(ash);
     expect(eligible).not.toContain(cache);
+  });
+
+  it('sides liberadas por 1-5 expiram ao concluir 1-10', () => {
+    expect(isSideMissionUnlocked(ash, [main1, main5])).toBe(true);
+    expect(isSideMissionUnlocked(ash, [main1, main5, main10])).toBe(false);
+    expect(isSideMissionUnlocked(cache, [main1, main5, ash, main10])).toBe(false);
   });
 
   it('não lista side já concluída', () => {

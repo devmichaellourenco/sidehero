@@ -30,7 +30,11 @@ export class GetShopOffersUseCase {
   async execute(): Promise<GetShopOffersResult> {
     const state = await this.repository.load();
     const offers = this.shopService
-      .generateOffers(state.currentDifficultyTier(), state.shopRefreshSeed)
+      .generateOffers(
+        state.currentDifficultyTier(),
+        state.shopRefreshSeed,
+        state.campaignProgress.missionProgress.completedMainIds,
+      )
       .map((offer) => ({
         id: offer.id,
         price: offer.price,

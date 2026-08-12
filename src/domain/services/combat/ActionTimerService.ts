@@ -2,7 +2,6 @@ import { Enemy } from '../../entities/Enemy';
 import { Hero } from '../../entities/Hero';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
 import { resolveActionIntervalSeconds } from '../../combat/CombatSpeedScaling';
-import { SKILL_ACTION_RECOVERY_SECONDS } from '../../combat/CombatTimingConstants';
 import { combatantKey } from './SkillCooldownTracker';
 import { CombatantRef } from './TurnOrderService';
 import {
@@ -23,8 +22,8 @@ interface LivingCombatant {
   tieBreaker: number;
 }
 
-function resolveSkillRecoverySeconds(castSpeed: number): number {
-  return SKILL_ACTION_RECOVERY_SECONDS / Math.max(castSpeed, 0.01);
+function resolveSkillRecoverySeconds(actionRecoverySeconds: number, castSpeed: number): number {
+  return Math.max(0, actionRecoverySeconds) / Math.max(castSpeed, 0.01);
 }
 
 export class ActionTimerService {
@@ -80,12 +79,13 @@ export class ActionTimerService {
     actor: CombatantRef,
     attackSpeed: number,
     castSpeed: number,
-    usedSkill: boolean,
+    skillRecoverySeconds: number | null,
   ): ActionTimerMap {
     const key = combatantKey(actor.side, actor.id);
-    const interval = usedSkill
-      ? resolveSkillRecoverySeconds(castSpeed)
-      : resolveActionIntervalSeconds(attackSpeed);
+    const interval =
+      skillRecoverySeconds !== null
+        ? resolveSkillRecoverySeconds(skillRecoverySeconds, castSpeed)
+        : resolveActionIntervalSeconds(attackSpeed);
 
     // Sem carregar dívida negativa: um TTA cheio = uma ação.
     // Com COMBAT_DELTA_SECONDS ≈ 1s e recovery de skill < 1s, a dívida

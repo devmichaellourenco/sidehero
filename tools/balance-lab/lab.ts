@@ -22,7 +22,7 @@ import {
   zeroPenetration,
   zeroResists,
 } from './elemental';
-import { BASIC_ATTACK_DAMAGE_RATIO } from '../../src/domain/combat/CombatTimingConstants';
+import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
 import {
   defaultFormulaConstants,
   FORMULA_FIELDS,
@@ -452,7 +452,7 @@ function skillDetailHtml(sample: LabCombatantResult['skillSamples'][number]): st
       </ul>
       ${
         sample.cappedByAttackFloor
-          ? `<p class="lab-hint lab-hint--tight">Toda skill de dano tem piso ≥ ataque básico (ATK×${BASIC_ATTACK_DAMAGE_RATIO}). Subir Rank só muda o final quando o raw do catálogo passa esse piso.</p>`
+          ? `<p class="lab-hint lab-hint--tight">Toda skill de dano tem piso ≥ ataque básico (ATK×${getHeroCombatIdentity('knight').basicAttackDamageRatio}). Subir Rank só muda o final quando o raw do catálogo passa esse piso.</p>`
           : ''
       }
     </div>

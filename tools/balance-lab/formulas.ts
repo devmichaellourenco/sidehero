@@ -1,31 +1,26 @@
 import {
-  HERO_ATTACK_PER_LEVEL,
-  HERO_DEFENSE_PER_LEVEL,
-  HERO_HEALTH_PER_LEVEL,
-} from '../../src/domain/balance/ProgressionPowerScale';
-import {
-  BASE_ATTACK_SPEED_FACTOR,
   DEX_ATTACK_SPEED_SCALE,
   STR_ATTACK_SPEED_SCALE,
 } from '../../src/domain/combat/CombatSpeedScaling';
-import { BASIC_ATTACK_DAMAGE_RATIO } from '../../src/domain/combat/CombatTimingConstants';
+import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
 import { LabFormulaConstants } from './types';
 
 export function defaultFormulaConstants(): LabFormulaConstants {
+  const knight = getHeroCombatIdentity('knight');
   return {
-    attackPerLevel: HERO_ATTACK_PER_LEVEL,
-    defensePerLevel: HERO_DEFENSE_PER_LEVEL,
-    healthPerLevel: HERO_HEALTH_PER_LEVEL,
+    attackPerLevel: knight.attackPerLevel,
+    defensePerLevel: knight.defensePerLevel,
+    healthPerLevel: knight.healthPerLevel,
     attrAtkStr: 0.5,
     attrAtkDex: 0.3,
     attrDefDex: 0.5,
     attrDefStr: 0.2,
     attrHpStr: 2,
-    baseAspdFactor: BASE_ATTACK_SPEED_FACTOR,
+    baseAspdFactor: knight.attackSpeedFactor,
     dexAspdScale: DEX_ATTACK_SPEED_SCALE,
     strAspdScale: STR_ATTACK_SPEED_SCALE,
-    basicAttackRatio: BASIC_ATTACK_DAMAGE_RATIO,
-    aspdFloor: 0.35,
+    basicAttackRatio: knight.basicAttackDamageRatio,
+    aspdFloor: 0.175,
   };
 }
 

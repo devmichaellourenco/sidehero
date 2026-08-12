@@ -25,9 +25,11 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   shop_refresh_2: { x: 380, y: 160 },
   shop_refresh_3: { x: 380, y: 40 },
 
-  hero_unlock_berserker: { x: 380, y: 520 },
-  hero_unlock_archer: { x: 260, y: 520 },
-  hero_unlock_paladin: { x: 140, y: 520 },
+  hero_unlock_knight: { x: 500, y: 600 },
+  hero_unlock_priest: { x: 380, y: 600 },
+  hero_unlock_berserker: { x: 260, y: 600 },
+  hero_unlock_archer: { x: 140, y: 600 },
+  hero_unlock_paladin: { x: 20, y: 600 },
 
   // AUTO-ABRIR BAÚS DESATIVADO (2026-08)
   // auto_open_chests_1: { x: 620, y: 400 },
@@ -50,7 +52,7 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   battle_skill_slot_3: { x: 860, y: 400 },
 };
 
-export const UPGRADE_TREE_VIEWBOX = { width: 1180, height: 700 };
+export const UPGRADE_TREE_VIEWBOX = { width: 1180, height: 760 };
 
 /** Distância mínima entre centros de nodos (nodo = 52px). */
 export const UPGRADE_TREE_MIN_NODE_DISTANCE = 76;

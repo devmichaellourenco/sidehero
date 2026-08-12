@@ -58,8 +58,9 @@ Poder × crítico → split damageComponents[]
 - [x] Backlog de balanceamento revisado após cada entrega numérica relevante
 - [x] BAL-010 — identidade soft por mapa (pools + resists −15/+20) nos 4 mapas base
 - [x] BAL-011 — micro-desafios multi-slot (race/sustain/spike/warded/armored) nos 4 mapas base
-- [x] BAL-012 — cadência early: TTA individual (1/ASPD, DEX); skills ~10s CD (−1,5s/level); básico = 50% ATK
+- [x] BAL-012 — cadência early: TTA = 1/ASPD por combatente; CD/básico/ASPD/crescimento na identidade do herói ou tipo de monstro; recovery/CDR/rank na skill
 - [x] BAL-013 — inimigos no mesmo modelo de combate dos heróis (level/attrs/ranks/passivas; CD e básico unificados; sem knobs ATK/HP/skill)
+- [x] BAL-015 — rebalance camp-missions: ASPD efetiva ~½ (TTA ~2×, fator por combatente); recovery/CDR por skill; `powerPerRank` das skills de herói com CD ×3 no catálogo; raridade da loja por mains; party Nix solo + unlocks por main
 - [x] Balance Lab: aba **Missões** edita waves/inimigos por fase; overrides em `phase-battle-overrides.json` mesclados via `PhaseBattleOverrides` / `CampaignCatalog.resolvePhase`; backups em `data/backups/phase-battle-overrides/`
 
 ## Coordenação com outros agents
@@ -69,7 +70,7 @@ Poder × crítico → split damageComponents[]
 | Nova skill ou rebalance de poder | `skills-progression` | Alterar `basePower`, cooldown, elemento ou DOT |
 | Novo inimigo ou fase | `combat-campaign` | Stats, skills, resist inata, wave count |
 | Loot, affixes, raridade | `gear-loot` | Multiplicadores, caps, distribuição por baú |
-| Preços loja / refresh | `shop-economy` | Tier caps, quantidade de ofertas, preços |
+| Preços loja / refresh | `shop-economy` | Caps por main, quantidade de ofertas, preços |
 | Custo de melhoria | `upgrade-tree` | Impacto cumulativo na curva de poder |
 | Selos / meta | `meta-legacy` | Bônus % que afetam combate ou economia |
 | UI de combate (só números) | `battle-ui` | Nunca alterar fórmula na presentation |
@@ -84,6 +85,8 @@ Poder × crítico → split damageComponents[]
 - Elemento canônico de DOT sem `dotElement` explícito = `air` (ex-caos)
 - Scaling de inimigo usa `difficultyTier` global da fase, não stage local arbitrário
 - Determinismo: IDs de oferta/seed não podem mudar item ao recomprar no mesmo tier+seed
+- Básico, s/turno de CD, ASPD e crescimento ATK/DEF/HP vivem na identidade do herói ou tipo de monstro (`HeroCombatIdentityCatalog`, `EnemyCombatIdentityCatalog`)
+- Recovery, redução por rank e teto/piso de CDR vivem na skill (`CatalogCombatSkillDefinition`); sem piso global de recarga
 
 ## Escopo v1 (jogo base até Morthaven)
 
@@ -116,9 +119,12 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `EnemyInnateResists.test.ts` — temas e fraquezas (+ bias de mapa)
 - [x] `MapCombatIdentityCatalog.test.ts` — identidade soft dos 4 mapas base
 - [x] `PhaseChallengeCatalog.test.ts` — BAL-011 multi-slot (race/sustain/spike/warded/armored) 4 mapas
-- [x] `SkillCooldownTiming.test.ts` — CD herói ~10s no level 1 e redução por level
+- [x] `SkillCooldownTiming.test.ts` — CD = turns × s/turno do combatente − per-rank da skill
+- [x] `HeroCombatIdentityCatalog.test.ts` / `EnemyCombatIdentityCatalog.test.ts` — knobs por herói/tipo de monstro
 - [x] `DamageThroughputEstimate.test.ts` — eficácia vs resists da área
-- [x] `ShopService.test.ts` — cap de raridade por tier, preços
+- [x] `ShopService.test.ts` — cap de raridade por mains concluídas, preços
+- [x] `CombatSpeedScaling.test.ts` / `CombatProfileProvider.test.ts` — ASPD efetiva ~½ (BAL-015)
+- [x] `SkillDamageBalance.test.ts` / `HeroCombatSkillCatalog.test.ts` / `EnemyMonsterCombatSkillCatalog.test.ts` — poder ×3; timing (recovery/CDR/rank) por skill
 - [x] `DotTickResolver.test.ts` — DOT mitigado; default sem elemento = `air`
 - [x] `BalanceAudit.test.ts` — curva por tier, economia loja/forja, tempo de clear
 - [x] `PhaseGoldBudget.test.ts` — teto de ouro por fase normal alinhado à referência
@@ -163,6 +169,7 @@ Não substitui catálogos canônicos: overrides são camada de calibração até
 | BAL-009 | Alta | Progressão de nível lenta no v1; loot fora da faixa do mapa; dano não escalava até ~20k DPS | Progressão/Loot | ✅ Resolvido (`ProgressionPowerScale`, `MapGearLevelPolicy`) |
 | BAL-010 | Alta | Mapas sem identidade de combate — meta colapsa em DPS genérico | Campanha/Elementos | ✅ Resolvido (`MapCombatIdentityCatalog`, bias soft, X-50) |
 | BAL-011 | Alta | Builds monótonas; pressão só no priest; mago/físico sem trade-off | Campanha/Waves | ✅ Resolvido (`PhaseChallengeCatalog` race/sustain/spike/warded/armored · Stendra→Morthaven) |
-| BAL-012 | Alta | Combate early acelerado demais (TTA curto, skills rápidas, básico = ATK cheio) | Combate/Skills | ✅ Resolvido (TTA = 1/ASPD por combatente + DEX; CD herói ×5; rank −1,5s; básico 50% ATK) |
+| BAL-012 | Alta | Combate early acelerado demais (TTA curto, skills rápidas, básico = ATK cheio) | Combate/Skills | ✅ Resolvido (TTA = 1/ASPD; CD/básico/ASPD/crescimento por herói ou tipo de monstro; recovery/CDR/rank por skill) |
 | BAL-013 | Alta | Inimigos usavam knobs/fórmulas paralelas (HP factor, ASPD por stage, CD 1s/turn) | Combate/Campanha | ✅ Resolvido (`EnemyProgressionCatalog`, `CombatantDerivedStats`, CD/básico unificados) |
 | BAL-014 | Alta | Loop camp-missions: oferta normal, refresh N visitas, curva ★1–5 por mapa | Missões | Calibrado — refresh=2; ver [`camp-missions.spec.md`](camp-missions.spec.md) |
+| BAL-015 | Alta | Loop camp lento demais cedo / party 3 starters trivializa; loja por tier antecipa raridade | Camp/Missões/Combate/Loja | ✅ Resolvido (Nix solo + unlocks por main; sides expiram; ASPD½; `powerPerRank` CD ×3 no catálogo; loja por main; knobs globais de combate extraídos para identidade por herói/monstro/skill) |

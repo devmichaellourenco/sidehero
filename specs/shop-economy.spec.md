@@ -15,7 +15,8 @@ Gastar **ouro** em ofertas da loja (gear consumível/equipável) com renovação
 - [x] Comprar desconta ouro e entrega item ao inventário
 - [x] Renovar loja consome cota por stage (`shop_refresh` melhorias)
 - [x] Ofertas indisponíveis quando ouro insuficiente ou já compradas
-- [x] Raridade **mythic** só entra no estoque a partir do Ato 3 de Valdris (tier ≥ 121 / fase `3-21`)
+- [x] Cap de raridade por **mains concluídas** (uncommon → rare pós `1-5` → epic pós `1-50` → legendary mapa 3+ → mythic `3-21` / tier ≥ 121)
+- [x] Raridade **mythic** só entra no estoque a partir do Ato 3 de Valdris (`main:3-21` ou tier ≥ 121)
 - [x] Modal da loja: tooltip com preview grande + comparação vs herói selecionável (sem fechar a loja)
 - [x] Arrastar oferta (só se puder pagar) para o slot do herói: compra + equipa; troca exige espaço no inventário/baú
 - [x] Grade de ofertas em **4 colunas**; card compacto = ícone + botão de preço (detalhes só no tooltip)
@@ -42,6 +43,6 @@ Gastar **ouro** em ofertas da loja (gear consumível/equipável) com renovação
 
 ## Testes obrigatórios
 
-- [x] `ShopService.test.ts`
+- [x] `ShopService.test.ts` — caps por mains concluídas + preços
 - [x] `ShopModalRenderer.test.ts` — preview no tooltip + seletor de herói / comparação / drag / grade
 - [x] `BuyAndEquipShopOfferUseCase.test.ts` — compra+equipa, troca com espaço, erro sem espaço

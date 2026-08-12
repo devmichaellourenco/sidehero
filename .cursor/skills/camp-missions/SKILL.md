@@ -34,8 +34,9 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 ## Regras de produto (resumo)
 
 - Principal = marcos `x-1, x-5, …, x-50`; próxima incompleta no board; não repetível
-- Secundária = cadeias + paralelas; não repetível; loot exclusivo
+- Secundária = cadeias + paralelas; não repetível; loot exclusivo; **expira** incompleta ao concluir main posterior no mapa
 - Normal = 2–4, mapa×estrela; some na derrota; refresh a cada N visitas ao camp
+- New game: party **Nix solo**; unlocks Galneon→Elara→… na árvore com gates de main
 - Vitória/derrota → resultado com detalhes de recompensa → Continuar → acampamento
 - Derrota em missão **normal**: fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`); main/side: zero
 - Preview/CTA só ao clicar no pin (popover sobre o pin; sem footer permanente)

@@ -1,4 +1,5 @@
 import { Gear, GearRarity } from '../entities/Gear';
+import { MissionId } from '../campaign/missions/MissionId';
 import {
   buildShopOfferId,
   pickUniqueShopCatalogItemId,
@@ -32,13 +33,17 @@ export function parseShopOfferCatalogKey(
 export class ShopService {
   constructor(private readonly lootService: LootService) {}
 
-  generateOffers(tier: number, refreshSeed = 0): ShopOffer[] {
+  generateOffers(
+    tier: number,
+    refreshSeed = 0,
+    completedMainIds: readonly MissionId[] = [],
+  ): ShopOffer[] {
     const usedCatalogKeys = new Set<string>();
     const offers: ShopOffer[] = [];
 
     for (let offerIndex = 0; offerIndex < SHOP_OFFER_COUNT; offerIndex += 1) {
       const slot = SHOP_SLOT_BY_INDEX[offerIndex];
-      const rarity = rollShopRarity(tier, refreshSeed, offerIndex);
+      const rarity = rollShopRarity(tier, refreshSeed, offerIndex, completedMainIds);
       const catalogItemId = pickUniqueShopCatalogItemId(
         slot,
         tier,
@@ -62,14 +67,20 @@ export class ShopService {
     return offers;
   }
 
-  findOffer(tier: number, refreshSeed: number, offerId: string): ShopOffer | null {
+  findOffer(
+    tier: number,
+    refreshSeed: number,
+    offerId: string,
+    completedMainIds: readonly MissionId[] = [],
+  ): ShopOffer | null {
     const catalog = parseShopOfferCatalogKey(offerId);
     const resolvedTier = catalog?.stage ?? tier;
     const resolvedSeed = catalog?.seed ?? refreshSeed;
 
     return (
-      this.generateOffers(resolvedTier, resolvedSeed).find((offer) => offer.id === offerId) ??
-      null
+      this.generateOffers(resolvedTier, resolvedSeed, completedMainIds).find(
+        (offer) => offer.id === offerId,
+      ) ?? null
     );
   }
 

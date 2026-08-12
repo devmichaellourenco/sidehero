@@ -44,12 +44,20 @@ export interface CombatSkillDefinition {
   initialCooldownSeconds?: number;
   /** Segundos de espera após usar a skill (prioridade sobre cooldownTurns). */
   cooldownSeconds?: number;
+  /** Recuperação após usar esta skill (segundos, escala com Cast Speed). Catálogo: obrigatório. */
+  actionRecoverySeconds?: number;
+  /** Redução de recarga em segundos por rank acima de 1. Catálogo: obrigatório. */
+  cooldownSecondsPerRank?: number;
+  /** Teto de CDR do gear aplicado a esta skill (fração, ex. 0.45). Catálogo: obrigatório. */
+  maxCooldownReduction?: number;
+  /** Piso de CDR do gear aplicado a esta skill (fração, pode ser negativa). Catálogo: obrigatório. */
+  minCooldownReduction?: number;
   basePower: number;
   powerPerRank: number;
   attributeFactor: number;
   /**
    * Piso de poder como fração do ATK efetivo.
-   * Default (skills de dano): ataque básico (`BASIC_ATTACK_DAMAGE_RATIO`).
+   * Default (skills de dano): ratio de básico do combatente.
    * Skills flat de inimigo usam valor maior no catálogo.
    */
   minAttackRatio?: number;
@@ -64,6 +72,16 @@ export interface CombatSkillDefinition {
   /** Reservado — efeito único programado (ver unique-effects.spec.md). */
   uniqueEffectId?: UniqueEffectId;
 }
+
+/** Timing de combate — obrigatório em catálogos (sem constantes globais). */
+export interface SkillCombatTiming {
+  actionRecoverySeconds: number;
+  cooldownSecondsPerRank: number;
+  maxCooldownReduction: number;
+  minCooldownReduction: number;
+}
+
+export type CatalogCombatSkillDefinition = CombatSkillDefinition & SkillCombatTiming;
 
 export function toSkillTargeting(definition: CombatSkillDefinition): SkillTargeting {
   if (definition.kind === 'heal_ally' || definition.kind === 'buff_attack') {

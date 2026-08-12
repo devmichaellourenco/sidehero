@@ -1,6 +1,7 @@
 import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
 import { estimateHeroSkillThroughput } from '../../domain/combat/DamageThroughputEstimate';
 import { getClassCombatBaseline } from '../../domain/combat/ClassCombatBaselines';
+import { getHeroCombatIdentity } from '../../domain/combat/HeroCombatIdentityCatalog';
 import {
   DEX_ATTACK_SPEED_SCALE,
   resolveActionIntervalSeconds,
@@ -157,7 +158,9 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const props = hero.toProps();
   const equipment = props.equipment ?? {};
   const level = hero.level;
-  const levelBonus = (level - 1) * 2;
+  const identity = getHeroCombatIdentity(hero.heroClass);
+  const attackLevelBonus = (level - 1) * identity.attackPerLevel;
+  const defenseLevelBonus = (level - 1) * identity.defensePerLevel;
   const profile = combatProfiles.forHero(hero);
   const baseline = getClassCombatBaseline(hero.heroClass);
   const resistProfile = resistanceProfileFromHeroEquipment(equipment);
@@ -175,7 +178,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const healthGearFlat = sumGear(equipment, (g) => g.healthBonus);
   const healthPercent = sumGear(equipment, (g) => g.healthPercentBonus);
   const healthPassivePercent = heroPassiveMaxHealthPercent(hero);
-  const healthLevelBonus = (level - 1) * 10;
+  const healthLevelBonus = (level - 1) * identity.healthPerLevel;
   const vitalityBonus = isPassiveSkillActive(hero, 'vitality')
     ? passiveVitalityHealthBonus(hero)
     : 0;
@@ -204,7 +207,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
     buildScaledStatLines(
       'Ataque',
       hero.baseAttack,
-      levelBonus,
+      attackLevelBonus,
       attackAttrBonus,
       'Atributos (STR×0,5 + DEX×0,3)',
       attackGearFlat,
@@ -282,7 +285,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
               ),
             ]
           : ['Sem bônus de equipamento.']),
-        `Total (máx. 45%): ${fmtPct(profile.cooldownReduction, 0)}`,
+        `Total do herói: ${fmtPct(profile.cooldownReduction, 0)} (teto/piso por skill)`,
       ],
     },
     {
@@ -311,7 +314,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
     buildScaledStatLines(
       'Defesa',
       hero.baseDefense,
-      levelBonus,
+      defenseLevelBonus,
       defenseAttrBonus,
       'Atributos (DEX×0,5 + STR×0,2)',
       defenseGearFlat,

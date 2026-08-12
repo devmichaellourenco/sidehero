@@ -1,3 +1,5 @@
+import { getHeroCombatIdentity } from '../../combat/HeroCombatIdentityCatalog';
+import { getEnemyCombatIdentity } from '../../enemies/EnemyCombatIdentityCatalog';
 import { getCooldownSeconds } from '../../combat/SkillCooldownTiming';
 import { resolveCombatSkillName } from '../../progression/combat/CombatSkillNaming';
 import { CombatSkillDefinition } from '../../progression/combat/CombatSkillDefinition';
@@ -40,6 +42,7 @@ export class CombatSkillBarResolver {
 
     return this.mapSkills(key, skills, cooldowns, highlights, {
       ranks: hero.toProps().skillRanks,
+      turnSeconds: getHeroCombatIdentity(hero.heroClass).skillCooldownTurnSeconds,
     });
   }
 
@@ -65,6 +68,7 @@ export class CombatSkillBarResolver {
 
     return this.mapSkills(key, skills, cooldowns, highlights, {
       ranks: enemy.skillRanks,
+      turnSeconds: getEnemyCombatIdentity(enemy.enemyType).skillCooldownTurnSeconds,
     });
   }
 
@@ -108,13 +112,13 @@ export class CombatSkillBarResolver {
     skills: CombatSkillDefinition[],
     cooldowns: SkillCooldownTracker,
     highlights: Map<string, CombatSkillHighlight>,
-    options: { ranks?: Record<string, number>; forEnemy?: boolean } = {},
+    options: { ranks?: Record<string, number>; turnSeconds?: number } = {},
   ): CombatSkillBarEntry[] {
     return skills.map((skill) => {
       const secondsRemaining = cooldowns.getRemaining(key, skill.skillId);
       const baseCooldown = getCooldownSeconds(skill, {
         rank: options.ranks?.[skill.skillId] ?? 1,
-        forEnemy: options.forEnemy,
+        turnSeconds: options.turnSeconds,
       });
       const cooldownTotal = Math.max(baseCooldown, secondsRemaining, 0);
       const ready = secondsRemaining <= 0 || baseCooldown <= 0;

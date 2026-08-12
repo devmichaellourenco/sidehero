@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildPhaseId } from '../campaign/CampaignIds';
+import { mainMissionId } from '../campaign/missions/MissionId';
 import { ENEMY_QUICK_PHASE_TEST_HP } from '../combat/EnemyCombatBalance';
 import {
   auditTierBand,
@@ -7,6 +8,7 @@ import {
   BALANCE_TARGETS,
   isClearSecondsInBand,
   isEpicAffordBandInRange,
+  maxShopRarityIndexForMainProgress,
   maxShopRarityIndexForTier,
   phaseIdForTier,
   referenceGoldPerPhaseForTier,
@@ -78,14 +80,15 @@ describe('BalanceAudit — curva por tier', () => {
 });
 
 describe('BalanceAudit — economia ouro vs loja/forja', () => {
-  it('cap de raridade da loja evolui nos marcos da spec', () => {
-    expect(maxShopRarityIndexForTier(3)).toBe(1);
-    expect(maxShopRarityIndexForTier(10)).toBe(2);
-    expect(maxShopRarityIndexForTier(25)).toBe(3);
-    expect(maxShopRarityIndexForTier(60)).toBe(4);
-    expect(maxShopRarityIndexForTier(61)).toBe(4);
-    // Mythic (índice 5) só a partir do Ato 3 de Valdris — tier ≥ 121
-    expect(maxShopRarityIndexForTier(120)).toBe(4);
+  it('cap de raridade da loja evolui nos marcos de main (BAL-015)', () => {
+    expect(maxShopRarityIndexForMainProgress([])).toBe(1);
+    expect(maxShopRarityIndexForMainProgress([mainMissionId('1-5')])).toBe(2);
+    expect(maxShopRarityIndexForMainProgress([mainMissionId('1-50')])).toBe(3);
+    expect(maxShopRarityIndexForMainProgress([mainMissionId('2-50')])).toBe(4);
+    expect(maxShopRarityIndexForMainProgress([mainMissionId('3-1')])).toBe(4);
+    expect(maxShopRarityIndexForMainProgress([mainMissionId('3-21')])).toBe(5);
+    // Mythic também por tier ≥ 121 (gate legado Valdris Ato 3)
+    expect(maxShopRarityIndexForTier(120)).toBe(1);
     expect(maxShopRarityIndexForTier(121)).toBe(5);
   });
 

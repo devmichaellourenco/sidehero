@@ -113,16 +113,12 @@ export class GameState {
   }
 
   static initial(): GameState {
-    const heroes = [
-      Hero.createStarter('hero-1', 'knight', 'Galneon'),
-      Hero.createStarter('hero-2', 'sorcerer', 'Nix'),
-      Hero.createStarter('hero-3', 'priest', 'Elara'),
-    ];
+    const nix = Hero.createStarter('hero-2', 'sorcerer', 'Nix');
     const progress = CampaignProgress.initial();
 
     return new GameState({
-      roster: heroes,
-      activePartyIds: heroes.map((hero) => hero.id),
+      roster: [nix],
+      activePartyIds: [nix.id],
       combat: null,
       campaignProgress: progress.toProps(),
       phaseRun: null,

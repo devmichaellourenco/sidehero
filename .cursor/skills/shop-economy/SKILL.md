@@ -11,7 +11,7 @@ description: Loja, ofertas e economia de ouro no Side Hero. Use para shop, loja,
 
 ## Fluxo
 
-1. Ofertas → `ShopService.generateOffers(state)`
+1. Ofertas → `ShopService.generateOffers(tier, seed, completedMainIds)`
 2. Compra → `BuyShopOfferUseCase` valida ouro + estoque
 3. Refresh → `RefreshShopUseCase` + limite por stage
 
@@ -20,7 +20,7 @@ description: Loja, ofertas e economia de ouro no Side Hero. Use para shop, loja,
 - Ouro via VO `Gold` — `canAfford` / `spend`
 - Oferta ID embute tier para reabrir modal sem mismatch
 - Melhoria `shop_refresh` controla cota e desconto
-- Mythic na loja só a partir do Ato 3 de Valdris (`MythicGearAccessPolicy` / tier ≥ 121)
+- Cap de raridade por **mains** (`getShopMaxRarityIndex`); mythic só Ato 3 Valdris (`main:3-21` / tier ≥ 121)
 - UI da loja: grade **4 colunas**; card = ícone + preço; detalhes no tooltip; badge ▲/▼; seletor + loadout (`shop`); drag da oferta paga → slot (`BuyAndEquipShopOfferUseCase`)
 
 ## Testes

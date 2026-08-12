@@ -1,8 +1,4 @@
-import {
-  HERO_LEVEL_UP_ATTACK_GAIN,
-  HERO_LEVEL_UP_DEFENSE_GAIN,
-  HERO_LEVEL_UP_HEALTH_GAIN,
-} from '../../src/domain/balance/ProgressionPowerScale';
+import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
 import { getClassCombatBaseline } from '../../src/domain/combat/ClassCombatBaselines';
 import { resolveActionIntervalSeconds } from '../../src/domain/combat/CombatSpeedScaling';
 import { ENEMY_ROSTER } from '../../src/domain/enemies/EnemyRosterCatalog';
@@ -66,9 +62,9 @@ export function defaultHeroInput(heroClass: LabHeroClass = 'knight', level = 1):
     str: attrs.str,
     dex: attrs.dex,
     int: attrs.int,
-    baseAttack: base.attack + levelsGained * HERO_LEVEL_UP_ATTACK_GAIN,
-    baseDefense: base.defense + levelsGained * HERO_LEVEL_UP_DEFENSE_GAIN,
-    baseMaxHealth: base.health + levelsGained * HERO_LEVEL_UP_HEALTH_GAIN,
+    baseAttack: base.attack + levelsGained * getHeroCombatIdentity(heroClass).levelUpAttackGain,
+    baseDefense: base.defense + levelsGained * getHeroCombatIdentity(heroClass).levelUpDefenseGain,
+    baseMaxHealth: base.health + levelsGained * getHeroCombatIdentity(heroClass).levelUpHealthGain,
     gearAttack: 0,
     gearDefense: 0,
     gearHealth: 0,

@@ -1,14 +1,14 @@
 import { Enemy } from '../entities/Enemy';
 import { Gear } from '../entities/Gear';
 import { Hero } from '../entities/Hero';
+import { getEnemyCombatIdentity } from '../enemies/EnemyCombatIdentityCatalog';
+import { CombatSkillDefinition } from '../progression/combat/CombatSkillDefinition';
 import { resolveAttributeAttackSpeed, resolveHeroAttributeAttackSpeed } from './CombatSpeedScaling';
 import { getClassCombatBaseline } from './ClassCombatBaselines';
 import { CombatProfile, createCombatProfile } from './CombatProfile';
 import { getEnemyTierCombatBaseline } from '../enemies/EnemyProgressionCatalog';
 
-const MIN_COMBAT_SPEED = 0.35;
-export const MAX_COOLDOWN_REDUCTION = 0.45;
-export const MIN_COOLDOWN_REDUCTION = -0.25;
+const MIN_COMBAT_SPEED = 0.175;
 
 function sumGearBonus(gear: Partial<Record<string, Gear | null>>, selector: (g: Gear) => number): number {
   return Object.values(gear ?? {}).reduce((sum, item) => {
@@ -21,19 +21,29 @@ export function resolveCastSpeed(baseCastSpeed: number, castSpeedBonus: number):
   return Math.max(MIN_COMBAT_SPEED, baseCastSpeed + castSpeedBonus);
 }
 
+/** Converte % de CDR do gear em fração — o teto/piso fica na skill. */
 export function resolveCooldownReduction(cooldownReductionPercent: number): number {
-  return Math.min(
-    MAX_COOLDOWN_REDUCTION,
-    Math.max(MIN_COOLDOWN_REDUCTION, cooldownReductionPercent / 100),
-  );
+  return cooldownReductionPercent / 100;
 }
 
-export function applyCooldownReduction(baseCooldownSeconds: number, cooldownReduction: number): number {
+export function applyCooldownReduction(
+  baseCooldownSeconds: number,
+  cooldownReduction: number,
+  skill?: Pick<CombatSkillDefinition, 'maxCooldownReduction' | 'minCooldownReduction'>,
+): number {
   if (baseCooldownSeconds <= 0) {
     return 0;
   }
 
-  return Math.max(0, baseCooldownSeconds * (1 - cooldownReduction));
+  let cdr = cooldownReduction;
+  if (skill?.maxCooldownReduction !== undefined) {
+    cdr = Math.min(skill.maxCooldownReduction, cdr);
+  }
+  if (skill?.minCooldownReduction !== undefined) {
+    cdr = Math.max(skill.minCooldownReduction, cdr);
+  }
+
+  return Math.max(0, baseCooldownSeconds * (1 - cdr));
 }
 
 function resolveAttackSpeed(baseAttackSpeed: number, attackSpeedBonus: number): number {
@@ -60,10 +70,12 @@ export class CombatProfileProvider {
 
   forEnemy(enemy: Enemy, _isBoss = false): CombatProfile {
     const baseline = getEnemyTierCombatBaseline(enemy.enemyType);
+    const identity = getEnemyCombatIdentity(enemy.enemyType);
     const attributeAspd = resolveAttributeAttackSpeed(
       baseline.attackSpeed,
       enemy.totalAttributes,
       enemy.physicalMeleeAspd,
+      identity.attackSpeedFactor,
     );
 
     return createCombatProfile({

@@ -17,8 +17,9 @@ describe('DamageThroughputEstimate', () => {
   });
 
   it('aplica CDR e recovery ao estimar casts/s', () => {
-    const withoutCdr = skillCastsPerSecond(4, 0, 1);
-    const withCdr = skillCastsPerSecond(4, 0.25, 1);
+    const skill = getHeroCombatSkill('frost_shard')!;
+    const withoutCdr = skillCastsPerSecond(4, 0, 1, skill);
+    const withCdr = skillCastsPerSecond(4, 0.25, 1, skill);
 
     expect(withCdr.effectiveCooldownSeconds).toBeCloseTo(3, 5);
     expect(withCdr.rate).toBeGreaterThan(withoutCdr.rate);

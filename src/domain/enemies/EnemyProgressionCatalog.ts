@@ -1,9 +1,5 @@
 import { EnemyRole } from '../campaign/WaveDefinition';
-import {
-  HERO_LEVEL_UP_ATTACK_GAIN,
-  HERO_LEVEL_UP_DEFENSE_GAIN,
-  HERO_LEVEL_UP_HEALTH_GAIN,
-} from '../balance/ProgressionPowerScale';
+import { getEnemyCombatIdentity } from './EnemyCombatIdentityCatalog';
 import { Attributes, createAttributes } from '../progression/Attributes';
 import { CombatProfile, createCombatProfile } from '../combat/CombatProfile';
 import { PassiveId } from '../passives/PassiveTypes';
@@ -39,7 +35,7 @@ const TIER_PROGRESSION: Record<EnemyPowerTier, EnemyTierProgression> = {
     baseMaxHealth: 90,
     attributes: createAttributes(8, 8, 5),
     combatBaseline: createCombatProfile({
-      attackSpeed: 0.55,
+      attackSpeed: 0.275,
       castSpeed: 1,
       critChance: 0.02,
       critDamage: 1.35,
@@ -52,7 +48,7 @@ const TIER_PROGRESSION: Record<EnemyPowerTier, EnemyTierProgression> = {
     baseMaxHealth: 110,
     attributes: createAttributes(11, 9, 6),
     combatBaseline: createCombatProfile({
-      attackSpeed: 0.52,
+      attackSpeed: 0.26,
       castSpeed: 1,
       critChance: 0.025,
       critDamage: 1.4,
@@ -65,7 +61,7 @@ const TIER_PROGRESSION: Record<EnemyPowerTier, EnemyTierProgression> = {
     baseMaxHealth: 130,
     attributes: createAttributes(12, 10, 10),
     combatBaseline: createCombatProfile({
-      attackSpeed: 0.48,
+      attackSpeed: 0.24,
       castSpeed: 1,
       critChance: 0.03,
       critDamage: 1.45,
@@ -78,7 +74,7 @@ const TIER_PROGRESSION: Record<EnemyPowerTier, EnemyTierProgression> = {
     baseMaxHealth: 150,
     attributes: createAttributes(14, 11, 12),
     combatBaseline: createCombatProfile({
-      attackSpeed: 0.45,
+      attackSpeed: 0.225,
       castSpeed: 1,
       critChance: 0.035,
       critDamage: 1.5,
@@ -91,7 +87,7 @@ const TIER_PROGRESSION: Record<EnemyPowerTier, EnemyTierProgression> = {
     baseMaxHealth: 175,
     attributes: createAttributes(16, 12, 14),
     combatBaseline: createCombatProfile({
-      attackSpeed: 0.42,
+      attackSpeed: 0.21,
       castSpeed: 1,
       critChance: 0.04,
       critDamage: 1.55,
@@ -164,16 +160,17 @@ export function buildEnemyCombatSheet(params: {
 
   const physicalMeleeAspd =
     prog.primaryAttr === 'str' || params.role === 'boss' || tier <= 2;
+  const identity = getEnemyCombatIdentity(params.enemyType);
 
   return {
     level,
     attributes,
     baseAttack:
-      scaleInt(prog.baseAttack, roleScale) + levelsGained * HERO_LEVEL_UP_ATTACK_GAIN,
+      scaleInt(prog.baseAttack, roleScale) + levelsGained * identity.levelUpAttackGain,
     baseDefense:
-      scaleInt(prog.baseDefense, roleScale) + levelsGained * HERO_LEVEL_UP_DEFENSE_GAIN,
+      scaleInt(prog.baseDefense, roleScale) + levelsGained * identity.levelUpDefenseGain,
     baseMaxHealth:
-      scaleInt(prog.baseMaxHealth, roleScale) + levelsGained * HERO_LEVEL_UP_HEALTH_GAIN,
+      scaleInt(prog.baseMaxHealth, roleScale) + levelsGained * identity.levelUpHealthGain,
     skillRanks,
     passiveIds: [...(entry?.passiveIds ?? [])],
     combatBaseline: { ...prog.combatBaseline },

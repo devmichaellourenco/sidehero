@@ -44,6 +44,7 @@ Por mapa (`stendra` … `morthaven` no v1), ids alinhados às fases-marco:
 - Cadeias de unlock (ex.: concluir `x-5` → oferece `side_xyz` → concluir → `side_hyj` final).
 - Cadeias independentes podem coexistir no mapa.
 - Concluídas **não** repetíveis.
+- **Expiram** se incompletas quando o jogador conclui uma main **posterior** no mesmo mapa (janela entre o maior pré-requisito main e a próxima main; ex.: unlock em `1-1` some ao zerar `1-5`).
 - Derrota: permanece no mapa; tentativa zera.
 - Recompensa exclusiva: item e/ou ouro e/ou XP e/ou cena narrativa (`story-scenes` / catálogo próprio).
 
@@ -77,7 +78,8 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] Sem auto-seleção / auto-start da próxima fase ao limpar boss de missão
 - [x] Board do mapa lista próxima principal + secundárias elegíveis + oferta normal (2–4)
 - [x] Principais = marcos `x-1`…`x-50` apenas; concluídas fora do board
-- [x] Secundárias respeitam grafo de unlock; múltiplas ativas permitidas
+- [x] Secundárias respeitam grafo de unlock; múltiplas ativas permitidas; incompletas expiram ao concluir main posterior no mapa
+- [x] New game / party inicial: só Nix até unlocks na árvore (gates de main)
 - [x] Normais sorteadas de templates por mapa×estrela; pool parametrizado por visitas ao camp
 - [x] Derrota: normal some; main/side permanecem com tentativa zerada
 - [x] Vitória main: marca concluída, libera próxima principal (e unlocks side se houver)
@@ -118,6 +120,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 
 - Acampamento é o hub; combate só após `StartMission`
 - Principais/secundárias concluídas nunca reaparecem no board
+- Sides incompletas saem do board ao expirar a janela de main
 - Oferta normal é determinística por seed de save + epoch de refresh
 - Domínio não conhece Chrome nem DOM
 - Escopo `base` não oferece missões de mapas DLC
@@ -131,7 +134,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 
 ## Testes obrigatórios
 
-- [x] `MissionUnlockGraph.test.ts` — cadeias e paralelas
+- [x] `MissionUnlockGraph.test.ts` — cadeias, paralelas e expiry ao completar main posterior
 - [x] `NormalMissionOffer.test.ts` — 2–4, refresh por visitas, seed
 - [x] `CampMissionBoard.test.ts` — próxima main, sides elegíveis, normais
 - [x] `ResolveMissionOutcomeUseCase.test.ts` — vitória/derrota por tipo → camp

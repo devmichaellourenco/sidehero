@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  HERO_LEVEL_UP_ATTACK_GAIN,
-  HERO_LEVEL_UP_DEFENSE_GAIN,
-  HERO_LEVEL_UP_HEALTH_GAIN,
-} from '../balance/ProgressionPowerScale';
+import { getEnemyCombatIdentity } from './EnemyCombatIdentityCatalog';
 import { buildEnemyCombatSheet } from './EnemyProgressionCatalog';
 
 describe('buildEnemyCombatSheet', () => {
@@ -19,16 +15,11 @@ describe('buildEnemyCombatSheet', () => {
       role: 'trash',
     });
 
+    const growth = getEnemyCombatIdentity('goblin_raider');
     expect(late.attributes.str).toBeGreaterThan(early.attributes.str);
-    expect(late.baseAttack).toBe(
-      early.baseAttack + 8 * HERO_LEVEL_UP_ATTACK_GAIN,
-    );
-    expect(late.baseDefense).toBe(
-      early.baseDefense + 8 * HERO_LEVEL_UP_DEFENSE_GAIN,
-    );
-    expect(late.baseMaxHealth).toBe(
-      early.baseMaxHealth + 8 * HERO_LEVEL_UP_HEALTH_GAIN,
-    );
+    expect(late.baseAttack).toBe(early.baseAttack + 8 * growth.levelUpAttackGain);
+    expect(late.baseDefense).toBe(early.baseDefense + 8 * growth.levelUpDefenseGain);
+    expect(late.baseMaxHealth).toBe(early.baseMaxHealth + 8 * growth.levelUpHealthGain);
   });
 
   it('role boss aumenta bases em relação a trash no mesmo level', () => {

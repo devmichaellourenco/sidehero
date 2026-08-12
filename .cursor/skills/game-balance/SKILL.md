@@ -30,10 +30,14 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | Sistema | Entrada | Mitigação / escala | Arquivo |
 |---------|---------|-------------------|---------|
 | Hit instantâneo | `damageComponents[]` | Pipeline por elemento + DEF | `MitigationPipeline.ts` |
-| TTA / ASPD | perfil do combatente | `1/ASPD` (DEX/STR + baseline; sem piso global) | `CombatSpeedScaling.ts`, `ActionTimerService.ts` |
-| Inimigo stats | level, attrs, role, tier template | `buildEnemyCombatSheet` + derived | `EnemyProgressionCatalog.ts`, `WaveEnemyFactory.ts` |
-| Recarga de skill | `cooldownTurns` / rank | turns×5s − 1,5s×(level−1), piso 4s (herói e inimigo) | `SkillCooldownTiming.ts` |
-| Ataque básico | ATK | ×0,5 (herói e inimigo) | `SkillPowerCalculator.ts` |
+| TTA / ASPD | perfil do combatente | `1/ASPD`; fator ASPD por herói/monstro | `HeroCombatIdentityCatalog.ts`, `EnemyCombatIdentityCatalog.ts`, `CombatSpeedScaling.ts` |
+| Inimigo stats | level, attrs, role, tier template | `buildEnemyCombatSheet` + derived (crescimento por tipo) | `EnemyProgressionCatalog.ts`, `WaveEnemyFactory.ts` |
+| Recarga de skill | `cooldownTurns` × s/turno do combatente − `cooldownSecondsPerRank` da skill | sem piso global | `SkillCooldownTiming.ts` |
+| Recovery pós-skill | `actionRecoverySeconds` da skill / castSpeed | por skill | `CombatSkillDefinition` |
+| Ataque básico | ATK × `basicAttackDamageRatio` do combatente | por herói/tipo de monstro | `HeroCombatIdentityCatalog.ts`, `EnemyCombatIdentityCatalog.ts` |
+| CDR | % do gear, teto/piso na skill | `maxCooldownReduction` / `minCooldownReduction` | `CombatProfileProvider.ts` |
+| Crescimento ATK/DEF/HP | tabela por herói / tipo de monstro | `attackPerLevel` + `levelUp*Gain` | `HeroCombatIdentityCatalog.ts` |
+| Skill herói com CD | powerPerRank no catálogo | valores 3× o legado (sem constante global) | `HeroCombatSkillCatalog.ts` |
 | Crítico | `critChance`, `critDamage` | Multiplicador antes do split | `CombatDamageResolver.ts` |
 | DEF efetiva | base + debuff | Só componente `physical` | `CombatStatResolver.ts` |
 | Resist | gear + inato | `getEffectiveResistance` | `ResistanceProfile.ts` |
@@ -42,7 +46,7 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | XP por kill | mapa, tier, replay | `CampaignXpScaling` | `WaveEnemyFactory.ts`, `PhaseLootPolicy.ts` |
 | Loot primário | itemLevel, raridade | `rolledGearPrimaryStat` | `DifficultyCombatScaling.ts`, `MapGearLevelPolicy.ts` |
 | Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → referência | `PhaseGoldBudget.ts`, `EconomyReference.ts` |
-| Loja | tier, seed | cap raridade + pesos | `ShopCatalog.ts` |
+| Loja | mains + tier | cap raridade por main; mythic `3-21`/tier≥121 | `ShopCatalog.ts` |
 | Identidade de mapa | mapId | bias pool + resists soft (−15/+20) | `MapCombatIdentityCatalog.ts`, `EnemyTierProgression.ts` |
 
 ## Faixas alvo (orientação — calibrar com playtest)

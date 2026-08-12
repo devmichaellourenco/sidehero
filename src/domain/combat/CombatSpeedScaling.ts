@@ -1,15 +1,13 @@
 import { Hero } from '../entities/Hero';
 import { HeroClass } from '../entities/HeroClass';
 import { Attributes } from '../progression/Attributes';
-
-/** Fração da ASPD de classe no nível 1; o restante vem de atributos. */
-export const BASE_ATTACK_SPEED_FACTOR = 0.58;
+import { getHeroCombatIdentity } from './HeroCombatIdentityCatalog';
 
 /** ASPD adicional por ponto de DEX. */
-export const DEX_ATTACK_SPEED_SCALE = 0.016;
+export const DEX_ATTACK_SPEED_SCALE = 0.008;
 
 /** ASPD adicional por ponto de STR em classes físicas. */
-export const STR_ATTACK_SPEED_SCALE = 0.006;
+export const STR_ATTACK_SPEED_SCALE = 0.003;
 
 const PHYSICAL_MELEE_CLASSES: ReadonlySet<HeroClass> = new Set([
   'knight',
@@ -17,13 +15,14 @@ const PHYSICAL_MELEE_CLASSES: ReadonlySet<HeroClass> = new Set([
   'paladin',
 ]);
 
-/** ASPD a partir de baseline de “classe” + STR/DEX — heróis e inimigos. */
+/** ASPD a partir de baseline + fator do combatente + STR/DEX. */
 export function resolveAttributeAttackSpeed(
   classBaselineAspd: number,
   attributes: Attributes,
   physicalMelee: boolean,
+  attackSpeedFactor: number,
 ): number {
-  const classAspd = classBaselineAspd * BASE_ATTACK_SPEED_FACTOR;
+  const classAspd = classBaselineAspd * attackSpeedFactor;
   const dexBonus = attributes.dex * DEX_ATTACK_SPEED_SCALE;
   const strBonus = physicalMelee ? attributes.str * STR_ATTACK_SPEED_SCALE : 0;
   return classAspd + dexBonus + strBonus;
@@ -34,6 +33,7 @@ export function resolveHeroAttributeAttackSpeed(classBaselineAspd: number, hero:
     classBaselineAspd,
     hero.totalAttributes,
     PHYSICAL_MELEE_CLASSES.has(hero.heroClass),
+    getHeroCombatIdentity(hero.heroClass).attackSpeedFactor,
   );
 }
 

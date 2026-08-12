@@ -9,6 +9,14 @@ export const HERO_CLASSES: readonly HeroClass[] = [
   'paladin',
 ];
 
-export const STARTER_HERO_CLASSES: readonly HeroClass[] = ['knight', 'sorcerer', 'priest'];
+/** Único herói no new game (camp-missions). */
+export const STARTER_HERO_CLASSES: readonly HeroClass[] = ['sorcerer'];
 
-export const UNLOCKABLE_HERO_CLASSES: readonly HeroClass[] = ['berserker', 'archer', 'paladin'];
+/** Heróis concedidos via árvore de melhorias. */
+export const UNLOCKABLE_HERO_CLASSES: readonly HeroClass[] = [
+  'knight',
+  'priest',
+  'berserker',
+  'archer',
+  'paladin',
+];

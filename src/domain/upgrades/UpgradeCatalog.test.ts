@@ -47,22 +47,33 @@ describe('UpgradeCatalog', () => {
     }
   });
 
-  it('heróis estão na ramificação com parents corretos', () => {
+  it('heróis estão na ramificação com parents e gates de main', () => {
+    const knight = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_knight');
+    const priest = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_priest');
     const berserker = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_berserker');
     const archer = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_archer');
     const paladin = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_paladin');
 
-    expect(berserker?.branch).toBe('heroes');
-    expect(berserker?.parents).toEqual(['auto_battle_2']);
-    expect(berserker?.unlockHeroClass).toBe('berserker');
+    expect(knight?.branch).toBe('heroes');
+    expect(knight?.parents).toEqual(['battle_stats_1']);
+    expect(knight?.unlockHeroClass).toBe('knight');
+    expect(knight?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-1' }]);
 
-    expect(archer?.branch).toBe('heroes');
+    expect(priest?.parents).toEqual(['hero_unlock_knight']);
+    expect(priest?.unlockHeroClass).toBe('priest');
+    expect(priest?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-5' }]);
+
+    expect(berserker?.parents).toEqual(['hero_unlock_priest']);
+    expect(berserker?.unlockHeroClass).toBe('berserker');
+    expect(berserker?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-15' }]);
+
     expect(archer?.parents).toEqual(['hero_unlock_berserker']);
     expect(archer?.unlockHeroClass).toBe('archer');
+    expect(archer?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-25' }]);
 
-    expect(paladin?.branch).toBe('heroes');
     expect(paladin?.parents).toEqual(['hero_unlock_archer']);
     expect(paladin?.unlockHeroClass).toBe('paladin');
+    expect(paladin?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-40' }]);
   });
 
   it('tem uma única raiz: Estatísticas de batalha', () => {

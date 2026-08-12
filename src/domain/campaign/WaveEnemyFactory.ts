@@ -6,6 +6,8 @@ import {
   deriveCombatMaxHealth,
 } from '../combat/CombatantDerivedStats';
 import { resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
+import { combatantStatGrowth } from '../combat/CombatantIdentity';
+import { getEnemyCombatIdentity } from '../enemies/EnemyCombatIdentityCatalog';
 import { buildEnemyCombatSheet } from '../enemies/EnemyProgressionCatalog';
 import { Stats } from '../value-objects/Stats';
 import { PhaseId } from './CampaignIds';
@@ -88,6 +90,7 @@ export function createEnemyFromSlot(
       baseMaxHealth,
       level: sheet.level,
       attributes: sheet.attributes,
+      ...combatantStatGrowth(getEnemyCombatIdentity(slot.enemyType)),
     }),
   );
 

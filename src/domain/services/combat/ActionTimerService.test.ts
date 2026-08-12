@@ -34,7 +34,7 @@ describe('ActionTimerService', () => {
       { side: 'hero', id: 'h1' },
       attackSpeed,
       1,
-      false,
+      null,
     );
 
     expect(updated[key]).toMatchObject({ remaining: expected, total: expected });
@@ -70,7 +70,7 @@ describe('ActionTimerService', () => {
       { side: 'hero', id: 'h1' },
       1,
       1,
-      true,
+      0.7,
     );
 
     expect(afterSkill[key]?.remaining).toBeGreaterThan(0);

@@ -5,6 +5,8 @@ import {
   deriveCombatMaxHealth,
 } from '../combat/CombatantDerivedStats';
 import { resolveEnemySpawnMaxHealth } from '../combat/EnemyCombatBalance';
+import { combatantStatGrowth } from '../combat/CombatantIdentity';
+import { getEnemyCombatIdentity } from '../enemies/EnemyCombatIdentityCatalog';
 import { buildEnemyCombatSheet } from '../enemies/EnemyProgressionCatalog';
 import { getPassiveDefinition } from '../passives/PassiveCatalog';
 import { PassiveId } from '../passives/PassiveTypes';
@@ -108,29 +110,41 @@ export class Enemy {
   }
 
   get attack(): number {
+    const identity = getEnemyCombatIdentity(this.enemyType);
     return deriveCombatAttack({
       baseAttack: this.baseAttack,
       level: this.level,
       attributes: this.attributes,
+      attackPerLevel: identity.attackPerLevel,
+      defensePerLevel: identity.defensePerLevel,
+      healthPerLevel: identity.healthPerLevel,
       attackPercent: sumEnemyPassiveFlat(this.passiveIds, 'attack_percent_flat'),
     });
   }
 
   get defense(): number {
+    const identity = getEnemyCombatIdentity(this.enemyType);
     return deriveCombatDefense({
       baseDefense: this.baseDefense,
       level: this.level,
       attributes: this.attributes,
+      attackPerLevel: identity.attackPerLevel,
+      defensePerLevel: identity.defensePerLevel,
+      healthPerLevel: identity.healthPerLevel,
       defensePercent: sumEnemyPassiveFlat(this.passiveIds, 'defense_percent_flat'),
     });
   }
 
   get maxHealth(): number {
+    const identity = getEnemyCombatIdentity(this.enemyType);
     return resolveEnemySpawnMaxHealth(
       deriveCombatMaxHealth({
         baseMaxHealth: this.baseMaxHealth,
         level: this.level,
         attributes: this.attributes,
+        attackPerLevel: identity.attackPerLevel,
+        defensePerLevel: identity.defensePerLevel,
+        healthPerLevel: identity.healthPerLevel,
         healthPercent: sumEnemyPassiveMaxHealthPercent(
           this.passiveIds,
           this.level,
@@ -167,6 +181,7 @@ export class Enemy {
         baseMaxHealth: sheet.baseMaxHealth,
         level: sheet.level,
         attributes: sheet.attributes,
+        ...combatantStatGrowth(getEnemyCombatIdentity(enemyTypeForStage(stage))),
       }),
     );
 
@@ -291,6 +306,7 @@ function normalizeEnemyProps(props: EnemyProps | LegacyEnemyProps): EnemyProps {
       baseMaxHealth: sheet.baseMaxHealth,
       level: sheet.level,
       attributes: sheet.attributes,
+      ...combatantStatGrowth(getEnemyCombatIdentity(props.enemyType)),
     }),
   );
   const currentHealth = Math.min(statsProps.currentHealth, maxHealth);

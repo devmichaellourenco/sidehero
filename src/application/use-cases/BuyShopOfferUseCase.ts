@@ -25,6 +25,7 @@ export class BuyShopOfferUseCase {
       state.currentDifficultyTier(),
       state.shopRefreshSeed,
       offerId,
+      state.campaignProgress.missionProgress.completedMainIds,
     );
 
     if (!offer) {

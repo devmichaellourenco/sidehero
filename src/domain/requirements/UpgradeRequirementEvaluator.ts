@@ -28,6 +28,8 @@ export class UpgradeRequirementEvaluator {
         return state.chestsOpenedCount() >= requirement.value;
       case 'min_hero_level':
         return state.heroes.reduce((max, hero) => Math.max(max, hero.level), 0) >= requirement.value;
+      case 'main_mission_completed':
+        return state.campaignProgress.missionProgress.isMainCompleted(requirement.missionId);
       default:
         return false;
     }
@@ -45,6 +47,8 @@ export class UpgradeRequirementEvaluator {
         return `${requirement.value} baús abertos`;
       case 'min_hero_level':
         return `Herói nível ${requirement.value}+`;
+      case 'main_mission_completed':
+        return `Missão principal ${requirement.missionId.replace(/^main:/, '')}`;
       default:
         return 'Requisito';
     }
@@ -62,6 +66,8 @@ export class UpgradeRequirementEvaluator {
       battle_stats: 'Estatísticas de batalha',
       shop_refresh: 'Renovar loja',
       battle_skill_slots: 'Slots de skill',
+      hero_unlock_knight: 'Galneon',
+      hero_unlock_priest: 'Elara',
       hero_unlock_berserker: 'Berserker',
       hero_unlock_archer: 'Arqueira',
       hero_unlock_paladin: 'Paladino',

@@ -1,12 +1,3 @@
-/** Bônus de ATK/DEF/HP por nível de herói (getters e level-up). */
-export const HERO_ATTACK_PER_LEVEL = 4;
-export const HERO_DEFENSE_PER_LEVEL = 3;
-export const HERO_HEALTH_PER_LEVEL = 15;
-
-export const HERO_LEVEL_UP_ATTACK_GAIN = 3;
-export const HERO_LEVEL_UP_DEFENSE_GAIN = 3;
-export const HERO_LEVEL_UP_HEALTH_GAIN = 15;
-
 /** Stat primário base de loot rolado pelo nível do item. */
 export function gearPrimaryStatBase(itemLevel: number): number {
   const level = Math.max(1, Math.floor(itemLevel));

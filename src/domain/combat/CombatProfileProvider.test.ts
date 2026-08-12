@@ -3,6 +3,9 @@ import { Enemy } from '../entities/Enemy';
 import { Hero } from '../entities/Hero';
 import { Gear } from '../entities/Gear';
 import { getEnemyTierCombatBaseline } from '../enemies/EnemyProgressionCatalog';
+import { getClassCombatBaseline } from './ClassCombatBaselines';
+import { getHeroCombatIdentity } from './HeroCombatIdentityCatalog';
+import { getEnemyCombatIdentity } from '../enemies/EnemyCombatIdentityCatalog';
 import { resolveAttributeAttackSpeed } from './CombatSpeedScaling';
 import {
   applyCooldownReduction,
@@ -75,6 +78,12 @@ describe('CombatProfileProvider', () => {
     expect(applyCooldownReduction(10, resolveCooldownReduction(0))).toBe(10);
   });
 
+  it('teto e piso de CDR vêm da skill, sem constante global', () => {
+    const skill = { maxCooldownReduction: 0.45, minCooldownReduction: -0.25 };
+    expect(applyCooldownReduction(10, 0.9, skill)).toBeCloseTo(5.5);
+    expect(applyCooldownReduction(10, -0.5, skill)).toBeCloseTo(12.5);
+  });
+
   it('limita penalidade de velocidade de ataque negativa', () => {
     const hero = Hero.createStarter('h1', 'knight', 'Tank').equip(
       Gear.create({
@@ -91,16 +100,20 @@ describe('CombatProfileProvider', () => {
     );
 
     const profile = profiles.forHero(hero);
-    expect(profile.attackSpeed).toBeGreaterThanOrEqual(0.35);
+    expect(profile.attackSpeed).toBeGreaterThanOrEqual(0.175);
   });
 
   it('herói inicial ataca mais devagar que o baseline de classe', () => {
     const hero = Hero.createStarter('h1', 'knight', 'Galneon');
     const baseline = profiles.forHero(hero);
-    const classBaselineAspd = 0.58;
+    const classBaselineAspd = getClassCombatBaseline(hero.heroClass).attackSpeed;
+    const factor = getHeroCombatIdentity(hero.heroClass).attackSpeedFactor;
 
     expect(baseline.attackSpeed).toBeLessThan(classBaselineAspd);
-    expect(baseline.attackSpeed).toBeCloseTo(0.536, 2);
+    expect(baseline.attackSpeed).toBeCloseTo(
+      resolveAttributeAttackSpeed(classBaselineAspd, hero.totalAttributes, true, factor),
+      2,
+    );
   });
 
   it('aumenta ASPD com pontos em DEX', () => {
@@ -120,11 +133,12 @@ describe('CombatProfileProvider', () => {
     const profile = profiles.forEnemy(goblin);
     const tierBaseline = getEnemyTierCombatBaseline(goblin.enemyType).attackSpeed;
     const expected = Math.max(
-      0.35,
+      0.175,
       resolveAttributeAttackSpeed(
         tierBaseline,
         goblin.totalAttributes,
         goblin.physicalMeleeAspd,
+        getEnemyCombatIdentity(goblin.enemyType).attackSpeedFactor,
       ),
     );
 
@@ -140,6 +154,6 @@ describe('CombatProfileProvider', () => {
   });
 
   it('resolveCastSpeed respeita piso mínimo', () => {
-    expect(resolveCastSpeed(1, -2)).toBe(0.35);
+    expect(resolveCastSpeed(1, -2)).toBe(0.175);
   });
 });

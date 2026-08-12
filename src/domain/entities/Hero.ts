@@ -1,14 +1,7 @@
 import { Experience } from '../value-objects/Experience';
 import { Attributes, AttributeKey } from '../progression/Attributes';
 import { getBaseAttributes } from '../progression/BaseAttributes';
-import {
-  HERO_ATTACK_PER_LEVEL,
-  HERO_DEFENSE_PER_LEVEL,
-  HERO_HEALTH_PER_LEVEL,
-  HERO_LEVEL_UP_ATTACK_GAIN,
-  HERO_LEVEL_UP_DEFENSE_GAIN,
-  HERO_LEVEL_UP_HEALTH_GAIN,
-} from '../balance/ProgressionPowerScale';
+import { getHeroCombatIdentity } from '../combat/HeroCombatIdentityCatalog';
 import { passiveVitalityHealthBonus } from '../combat/PassiveSkillEffects';
 import {
   heroPassiveAttackPercent,
@@ -140,8 +133,9 @@ export class Hero {
   }
 
   get attack(): number {
+    const identity = getHeroCombatIdentity(this.heroClass);
     const gearBonus = this.sumGear((g) => g.attackBonus);
-    const levelBonus = (this.level - 1) * HERO_ATTACK_PER_LEVEL;
+    const levelBonus = (this.level - 1) * identity.attackPerLevel;
     const attrBonus = Math.floor(this.totalAttributes.str * 0.5 + this.totalAttributes.dex * 0.3);
     const raw = this.baseAttack + gearBonus + levelBonus + attrBonus;
     const percent = this.sumGear((g) => g.attackPercentBonus) + heroPassiveAttackPercent(this);
@@ -149,8 +143,9 @@ export class Hero {
   }
 
   get defense(): number {
+    const identity = getHeroCombatIdentity(this.heroClass);
     const gearBonus = this.sumGear((g) => g.defenseBonus);
-    const levelBonus = (this.level - 1) * HERO_DEFENSE_PER_LEVEL;
+    const levelBonus = (this.level - 1) * identity.defensePerLevel;
     const attrBonus = Math.floor(this.totalAttributes.dex * 0.5 + this.totalAttributes.str * 0.2);
     const raw = this.baseDefense + gearBonus + levelBonus + attrBonus;
     const percent = this.sumGear((g) => g.defensePercentBonus) + heroPassiveDefensePercent(this);
@@ -158,8 +153,9 @@ export class Hero {
   }
 
   get maxHealth(): number {
+    const identity = getHeroCombatIdentity(this.heroClass);
     const gearBonus = this.sumGear((g) => g.healthBonus);
-    const levelBonus = (this.level - 1) * HERO_HEALTH_PER_LEVEL;
+    const levelBonus = (this.level - 1) * identity.healthPerLevel;
     const attrBonus = this.totalAttributes.str * 2;
     const vitalityBonus = passiveVitalityHealthBonus(this);
     const raw = this.baseMaxHealth + gearBonus + levelBonus + attrBonus + vitalityBonus;
@@ -176,11 +172,12 @@ export class Hero {
     let hero = new Hero({ ...this.toProps(), experience });
 
     if (leveledUp) {
+      const growth = getHeroCombatIdentity(hero.heroClass);
       hero = new Hero({
         ...hero.toProps(),
-        baseAttack: hero.baseAttack + HERO_LEVEL_UP_ATTACK_GAIN,
-        baseDefense: hero.baseDefense + HERO_LEVEL_UP_DEFENSE_GAIN,
-        baseMaxHealth: hero.baseMaxHealth + HERO_LEVEL_UP_HEALTH_GAIN,
+        baseAttack: hero.baseAttack + growth.levelUpAttackGain,
+        baseDefense: hero.baseDefense + growth.levelUpDefenseGain,
+        baseMaxHealth: hero.baseMaxHealth + growth.levelUpHealthGain,
         currentHealth: hero.maxHealth,
         ...hero.progression.withImprovementPointGranted().toProps(),
       });

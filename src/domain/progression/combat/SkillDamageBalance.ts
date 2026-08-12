@@ -1,4 +1,3 @@
-import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
 import { CombatSkillDefinition } from './CombatSkillDefinition';
 import { isDamageCombatKind } from './SkillCombatKind';
 
@@ -17,13 +16,14 @@ export function isPhysicalDamageSkill(skill: CombatSkillDefinition): boolean {
 
 /**
  * Piso de poder vs ATK: skills de dano nunca ficam abaixo do ataque básico
- * (ATK × BASIC_ATTACK_DAMAGE_RATIO), salvo `minAttackRatio` explícito no catálogo.
+ * do combatente, salvo `minAttackRatio` explícito no catálogo.
  */
 export function resolveDamageSkillAttackFloor(
   skill: CombatSkillDefinition,
   effectiveAttack: number,
+  basicAttackDamageRatio: number,
 ): number {
-  const ratio = skill.minAttackRatio ?? BASIC_ATTACK_DAMAGE_RATIO;
+  const ratio = skill.minAttackRatio ?? basicAttackDamageRatio;
   return Math.max(1, Math.floor(effectiveAttack * Math.max(0, ratio)));
 }
 
@@ -35,13 +35,17 @@ export function applyHeroDamageSkillPower(
   skill: CombatSkillDefinition,
   rawPower: number,
   effectiveAttack: number,
+  basicAttackDamageRatio: number,
 ): number {
   if (!isDamageCombatKind(skill.kind) || skill.usesAttackStat) {
     return Math.max(1, Math.floor(rawPower));
   }
 
   const power = Math.max(1, Math.floor(rawPower));
-  return Math.max(power, resolveDamageSkillAttackFloor(skill, effectiveAttack));
+  return Math.max(
+    power,
+    resolveDamageSkillAttackFloor(skill, effectiveAttack, basicAttackDamageRatio),
+  );
 }
 
 /** Termo de rank: powerPerRank × nível da skill (nível 1 já conta). */

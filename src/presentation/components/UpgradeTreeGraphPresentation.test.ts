@@ -30,7 +30,9 @@ describe('UpgradeTreeGraphPresentation', () => {
     // AUTO-ABRIR BAÚS DESATIVADO (2026-08)
     expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual([]);
     expect(resolveUpgradeParentIds('open_all_chests_2')).toEqual([]);
-    expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['auto_battle_2']);
+    expect(resolveUpgradeParentIds('hero_unlock_knight')).toEqual(['battle_stats_1']);
+    expect(resolveUpgradeParentIds('hero_unlock_priest')).toEqual(['hero_unlock_knight']);
+    expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['hero_unlock_priest']);
     expect(resolveUpgradeParentIds('hero_unlock_archer')).toEqual(['hero_unlock_berserker']);
     expect(resolveUpgradeParentIds('hero_unlock_paladin')).toEqual(['hero_unlock_archer']);
     // OFFLINE PROGRESS DESATIVADO (2026-07)
@@ -47,18 +49,18 @@ describe('UpgradeTreeGraphPresentation', () => {
       node({ id: 'battle_stats_1', branch: 'qol' }),
       node({ id: 'auto_battle_2', branch: 'combat' }),
       node({ id: 'battle_skill_slot_2', branch: 'combat' }),
+      node({ id: 'hero_unlock_knight', branch: 'heroes' }),
+      node({ id: 'hero_unlock_priest', branch: 'heroes' }),
       node({ id: 'hero_unlock_berserker', branch: 'heroes' }),
-      node({ id: 'hero_unlock_archer', branch: 'heroes' }),
-      node({ id: 'hero_unlock_paladin', branch: 'heroes' }),
     ];
 
     expect(buildUpgradeTreeEdges(nodes)).toEqual(
       expect.arrayContaining([
         { fromId: 'battle_stats_1', toId: 'auto_battle_2' },
         { fromId: 'battle_stats_1', toId: 'battle_skill_slot_2' },
-        { fromId: 'auto_battle_2', toId: 'hero_unlock_berserker' },
-        { fromId: 'hero_unlock_berserker', toId: 'hero_unlock_archer' },
-        { fromId: 'hero_unlock_archer', toId: 'hero_unlock_paladin' },
+        { fromId: 'battle_stats_1', toId: 'hero_unlock_knight' },
+        { fromId: 'hero_unlock_knight', toId: 'hero_unlock_priest' },
+        { fromId: 'hero_unlock_priest', toId: 'hero_unlock_berserker' },
       ]),
     );
     expect(buildUpgradeTreeEdges(nodes)).toHaveLength(5);

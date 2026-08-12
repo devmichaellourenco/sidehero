@@ -1,8 +1,4 @@
-import {
-  HERO_ATTACK_PER_LEVEL,
-  HERO_DEFENSE_PER_LEVEL,
-  HERO_HEALTH_PER_LEVEL,
-} from '../../domain/balance/ProgressionPowerScale';
+import { getEnemyCombatIdentity } from '../../domain/enemies/EnemyCombatIdentityCatalog';
 import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
 import {
   DEX_ATTACK_SPEED_SCALE,
@@ -125,9 +121,10 @@ function buildResistanceLine(
 /** Ficha de combate do inimigo — mesmas seções do herói, sem gear. */
 export function mapEnemyCombatStatSheet(enemy: Enemy): HeroCombatStatSectionDto[] {
   const level = enemy.level;
-  const attackLevelBonus = (level - 1) * HERO_ATTACK_PER_LEVEL;
-  const defenseLevelBonus = (level - 1) * HERO_DEFENSE_PER_LEVEL;
-  const healthLevelBonus = (level - 1) * HERO_HEALTH_PER_LEVEL;
+  const identity = getEnemyCombatIdentity(enemy.enemyType);
+  const attackLevelBonus = (level - 1) * identity.attackPerLevel;
+  const defenseLevelBonus = (level - 1) * identity.defensePerLevel;
+  const healthLevelBonus = (level - 1) * identity.healthPerLevel;
   const profile = combatProfiles.forEnemy(enemy);
   const baseline = getEnemyTierCombatBaseline(enemy.enemyType);
   const resistProfile = resolveEnemyInnateResists(enemy.enemyType, enemy.stage);

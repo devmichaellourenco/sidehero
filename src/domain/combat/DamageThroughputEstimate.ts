@@ -22,7 +22,7 @@ import {
   applyCooldownReduction,
   CombatProfileProvider,
 } from './CombatProfileProvider';
-import { BASIC_ATTACK_DAMAGE_RATIO, SKILL_ACTION_RECOVERY_SECONDS } from './CombatTimingConstants';
+import { getHeroCombatIdentity } from './HeroCombatIdentityCatalog';
 import { resolveActionIntervalSeconds } from './CombatSpeedScaling';
 import { getCooldownSeconds } from './SkillCooldownTiming';
 import { Hero } from '../entities/Hero';
@@ -124,12 +124,18 @@ export function skillCastsPerSecond(
   baseCooldownSeconds: number,
   cooldownReduction: number,
   castSpeed: number,
+  skill: CombatSkillDefinition,
 ): { rate: number; effectiveCooldownSeconds: number; recoverySeconds: number } {
-  const effectiveCooldownSeconds = applyCooldownReduction(baseCooldownSeconds, cooldownReduction);
-  const recoverySeconds = SKILL_ACTION_RECOVERY_SECONDS / Math.max(castSpeed, 0.01);
+  const effectiveCooldownSeconds = applyCooldownReduction(
+    baseCooldownSeconds,
+    cooldownReduction,
+    skill,
+  );
+  const recoverySeconds =
+    (skill.actionRecoverySeconds ?? 0) / Math.max(castSpeed, 0.01);
   const period = Math.max(effectiveCooldownSeconds, recoverySeconds);
   return {
-    rate: 1 / period,
+    rate: 1 / Math.max(period, 0.01),
     effectiveCooldownSeconds,
     recoverySeconds,
   };
@@ -178,8 +184,9 @@ export function buildHeroSkillPowerBreakdown(
     { text: `floor(${product.toFixed(2)}) = ${afterFloor}` },
   ];
 
-  const attackFloor = resolveDamageSkillAttackFloor(combat, hero.attack);
-  const floorRatio = combat.minAttackRatio ?? BASIC_ATTACK_DAMAGE_RATIO;
+  const basicRatio = getHeroCombatIdentity(hero.heroClass).basicAttackDamageRatio;
+  const attackFloor = resolveDamageSkillAttackFloor(combat, hero.attack, basicRatio);
+  const floorRatio = combat.minAttackRatio ?? basicRatio;
   lines.push({
     icon: 'attack',
     text: `Piso vs ATK: ATK ${hero.attack} × ${floorRatio} = ${attackFloor} (mín. = ataque básico)`,
@@ -190,7 +197,7 @@ export function buildHeroSkillPowerBreakdown(
     });
   }
 
-  const beforePassives = applyHeroDamageSkillPower(combat, product, hero.attack);
+  const beforePassives = applyHeroDamageSkillPower(combat, product, hero.attack, basicRatio);
   const treePercent = heroPassiveTreeDamagePercent(hero, combat);
   const allyPercent = heroPassiveAllySupportPercent(hero, combat);
   const passiveLines = heroPassiveSkillPowerContributionLines(hero, combat);
@@ -296,6 +303,7 @@ export function estimateHeroSkillThroughput(
   if (combat.kind !== 'damage') return null;
 
   const profile = profiles.forHero(hero);
+  const turnSeconds = getHeroCombatIdentity(hero.heroClass).skillCooldownTurnSeconds;
   const equipment = hero.toProps().equipment;
   const skillRank = hero.toProps().skillRanks[combat.skillId] ?? 1;
   const rawPower = powerCalculator.calculateForHero(combat, hero);
@@ -389,7 +397,10 @@ export function estimateHeroSkillThroughput(
     efficacyLabel,
   });
 
-  if (combat.usesAttackStat || getCooldownSeconds(combat, { rank: skillRank }) <= 0) {
+  if (
+    combat.usesAttackStat ||
+    getCooldownSeconds(combat, { rank: skillRank, turnSeconds }) <= 0
+  ) {
     const interval = resolveActionIntervalSeconds(profile.attackSpeed);
     const ratePerSecond = 1 / interval;
     const dps = expectedDamagePerHit * ratePerSecond;
@@ -433,9 +444,15 @@ export function estimateHeroSkillThroughput(
     });
   }
 
-  const baseCooldown = getCooldownSeconds(combat, { rank: skillRank });
-  const casting = skillCastsPerSecond(baseCooldown, profile.cooldownReduction, profile.castSpeed);
+  const baseCooldown = getCooldownSeconds(combat, { rank: skillRank, turnSeconds });
+  const casting = skillCastsPerSecond(
+    baseCooldown,
+    profile.cooldownReduction,
+    profile.castSpeed,
+    combat,
+  );
   const dps = expectedDamagePerHit * casting.rate;
+  const recoveryBase = combat.actionRecoverySeconds ?? 0;
   const rateBreakdown: ThroughputBreakdownLine[] = [
     { icon: 'rune', text: `Recarga base = ${baseCooldown.toFixed(2)}s` },
     {
@@ -444,7 +461,7 @@ export function estimateHeroSkillThroughput(
     },
     {
       icon: 'power_attack',
-      text: `Recovery pós-skill = ${SKILL_ACTION_RECOVERY_SECONDS} ÷ cast ${profile.castSpeed.toFixed(2)} = ${casting.recoverySeconds.toFixed(3)}s`,
+      text: `Recovery pós-skill = ${recoveryBase} ÷ cast ${profile.castSpeed.toFixed(2)} = ${casting.recoverySeconds.toFixed(3)}s`,
     },
     {
       text: `Período entre casts = máx(recarga efetiva, recovery) = ${Math.max(casting.effectiveCooldownSeconds, casting.recoverySeconds).toFixed(3)}s`,

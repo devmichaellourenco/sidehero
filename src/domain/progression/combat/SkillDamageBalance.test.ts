@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Hero } from '../../entities/Hero';
-import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
+import { getHeroCombatIdentity } from '../../combat/HeroCombatIdentityCatalog';
 import { getHeroCombatSkill } from './HeroCombatSkillCatalog';
 import {
   applyHeroDamageSkillPower,
@@ -19,23 +19,25 @@ describe('SkillDamageBalance — fórmula multiplicativa', () => {
   it('frost_shard = Base × (powerPerRank × rank) × (INT × fator)', () => {
     const skill = getHeroCombatSkill('frost_shard')!;
     const raw = calculateHeroSkillRawPower(skill, 2, 16);
-    expect(raw).toBeCloseTo(1 * 5 * 2 * 16 * 0.8, 5);
-    expect(applyHeroDamageSkillPower(skill, raw, 20)).toBe(Math.floor(raw));
+    expect(skill.powerPerRank).toBe(15);
+    expect(raw).toBeCloseTo(1 * 15 * 2 * 16 * 0.8, 5);
+    expect(applyHeroDamageSkillPower(skill, raw, 20, 0.5)).toBe(Math.floor(raw));
   });
 
-  it('não aplica multiplicador global 1.9', () => {
+  it('não aplica multiplicador global de poder', () => {
     const skill = getHeroCombatSkill('fireball')!;
     const raw = calculateHeroSkillRawPower(skill, 1, 10);
-    expect(applyHeroDamageSkillPower(skill, raw, 10)).toBe(Math.max(1, Math.floor(raw)));
+    expect(applyHeroDamageSkillPower(skill, raw, 10, 0.5)).toBe(Math.max(1, Math.floor(raw)));
   });
 
   it('skill de dano nunca fica abaixo do ataque básico', () => {
     const skill = getHeroCombatSkill('thrust')!;
-    const attack = 200;
-    const basic = Math.max(1, Math.floor(attack * BASIC_ATTACK_DAMAGE_RATIO));
+    const attack = 400;
+    const ratio = getHeroCombatIdentity('knight').basicAttackDamageRatio;
+    const basic = Math.max(1, Math.floor(attack * ratio));
     const raw = calculateHeroSkillRawPower(skill, 1, 12);
     expect(raw).toBeLessThan(basic);
-    expect(applyHeroDamageSkillPower(skill, raw, attack)).toBe(basic);
+    expect(applyHeroDamageSkillPower(skill, raw, attack, ratio)).toBe(basic);
   });
 });
 
@@ -57,6 +59,13 @@ describe('SkillPowerCalculator — power multiplicativo', () => {
     const p1 = calculator.calculateForHero(skill, r1);
     const p2 = calculator.calculateForHero(skill, r2);
     expect(p2).toBe(p1 * 2);
+  });
+
+  it('básico permanece ATK × ratio sem powerPerRank de skill', () => {
+    const hero = Hero.createStarter('s1', 'sorcerer', 'Nix');
+    const basic = calculator.calculateForHero(getHeroCombatSkill('basic_attack')!, hero);
+    const ratio = getHeroCombatIdentity(hero.heroClass).basicAttackDamageRatio;
+    expect(basic).toBe(Math.max(1, Math.floor(hero.attack * ratio)));
   });
 
   it('Investida Mortal sobe com rank quando acima do ataque básico', () => {

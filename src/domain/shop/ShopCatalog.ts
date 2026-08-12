@@ -1,3 +1,9 @@
+import { parsePhaseId } from '../campaign/CampaignIds';
+import {
+  mainMissionId,
+  MissionId,
+  phaseIdFromMainMissionId,
+} from '../campaign/missions/MissionId';
 import { GEAR_RARITIES, GearRarity, GearSlot } from '../entities/Gear';
 import { isGalneonCatalogItem } from '../gear/GearItemDefinition';
 import { listLootCatalogItems } from '../gear/GearItemCatalog';
@@ -31,17 +37,68 @@ export function shopDeterministicRoll(tier: number, refreshSeed: number, offerIn
   return Math.abs((tier * 997 + refreshSeed * 991 + offerIndex * 983 + 17) | 0);
 }
 
-export function getShopMaxRarityIndex(tier: number): number {
-  if (tier <= 3) return 1;
-  if (tier <= 10) return 2;
-  if (tier <= 25) return 3;
-  // Legendary até o Ato 3 de Valdris; mythic só a partir do tier de unlock.
-  if (!isMythicGearUnlockedForTier(tier)) return 4;
-  return 5;
+function hasCompletedMain(completed: ReadonlySet<MissionId>, phaseId: string): boolean {
+  return completed.has(mainMissionId(phaseId));
 }
 
-export function rollShopRarity(tier: number, refreshSeed: number, offerIndex: number): GearRarity {
-  const maxIndex = getShopMaxRarityIndex(tier);
+function highestCompletedMainMapIndex(completedMainIds: readonly MissionId[]): number {
+  let highest = 0;
+  for (const id of completedMainIds) {
+    const phaseId = phaseIdFromMainMissionId(id);
+    if (!phaseId) continue;
+    highest = Math.max(highest, parsePhaseId(phaseId).mapIndex);
+  }
+  return highest;
+}
+
+/**
+ * BAL-015 — teto de raridade da loja por marcos de main (não por difficulty tier).
+ * Mythic mantém o gate de Valdris Ato 3 (`main:3-21` ou tier ≥ 121).
+ */
+export function getShopMaxRarityIndex(
+  completedMainIds: readonly MissionId[] = [],
+  difficultyTier = 1,
+): number {
+  const completed = new Set(completedMainIds);
+  const mapReach = highestCompletedMainMapIndex(completedMainIds);
+
+  if (
+    hasCompletedMain(completed, '3-21') ||
+    isMythicGearUnlockedForTier(difficultyTier)
+  ) {
+    return 5;
+  }
+
+  if (
+    hasCompletedMain(completed, '3-1') ||
+    hasCompletedMain(completed, '2-50') ||
+    mapReach >= 3
+  ) {
+    return 4;
+  }
+
+  if (
+    hasCompletedMain(completed, '1-50') ||
+    hasCompletedMain(completed, '2-1') ||
+    mapReach >= 2
+  ) {
+    return 3;
+  }
+
+  if (hasCompletedMain(completed, '1-5')) {
+    return 2;
+  }
+
+  return 1;
+}
+
+export function rollShopRarity(
+  tier: number,
+  refreshSeed: number,
+  offerIndex: number,
+  completedMainIds: readonly MissionId[] = [],
+): GearRarity {
+  const maxIndex = getShopMaxRarityIndex(completedMainIds, tier);
   const allowed = GEAR_RARITIES.slice(0, maxIndex + 1);
 
   const weights = allowed.map((rarity, index) => {
@@ -113,6 +170,14 @@ export function listShopSlots(): GearSlot[] {
   return [...ACTIVE_GEAR_SLOTS];
 }
 
+export function getShopMaxRarityForProgress(
+  completedMainIds: readonly MissionId[] = [],
+  difficultyTier = 1,
+): GearRarity {
+  return GEAR_RARITIES[getShopMaxRarityIndex(completedMainIds, difficultyTier)];
+}
+
+/** @deprecated Preferir getShopMaxRarityForProgress — alias com mains vazias + tier só para mythic. */
 export function getShopMaxRarityForTier(tier: number): GearRarity {
-  return GEAR_RARITIES[getShopMaxRarityIndex(tier)];
+  return getShopMaxRarityForProgress([], tier);
 }

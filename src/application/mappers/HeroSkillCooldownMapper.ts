@@ -1,3 +1,4 @@
+import { getHeroCombatIdentity } from '../../domain/combat/HeroCombatIdentityCatalog';
 import { getCooldownSeconds } from '../../domain/combat/SkillCooldownTiming';
 import { Hero } from '../../domain/entities/Hero';
 import { getHeroCombatSkill } from '../../domain/progression/combat/HeroCombatSkillCatalog';
@@ -21,7 +22,12 @@ export function mapHeroSkillCooldowns(
     const definition = getHeroCombatSkill(skillId);
     const secondsRemaining = tracker.getRemaining(key, skillId);
     const rank = hero.toProps().skillRanks[skillId] ?? 1;
-    const baseCooldown = definition ? getCooldownSeconds(definition, { rank }) : 0;
+    const baseCooldown = definition
+      ? getCooldownSeconds(definition, {
+          rank,
+          turnSeconds: getHeroCombatIdentity(hero.heroClass).skillCooldownTurnSeconds,
+        })
+      : 0;
     const cooldownTotal = Math.max(baseCooldown, secondsRemaining, 0);
 
     const ready = secondsRemaining <= 0 || baseCooldown <= 0;

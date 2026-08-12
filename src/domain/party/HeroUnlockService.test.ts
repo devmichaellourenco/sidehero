@@ -3,12 +3,17 @@ import { GameState } from '../entities/GameState';
 import { HeroUnlockService } from './HeroUnlockService';
 
 describe('HeroUnlockService', () => {
-  it('adiciona berserker ao roster na primeira vez', () => {
-    const next = HeroUnlockService.applyUnlock(GameState.initial(), 'berserker');
-    expect(next.roster).toHaveLength(4);
-    expect(next.roster.some((hero) => hero.heroClass === 'berserker')).toBe(true);
-    expect(next.roster.find((hero) => hero.heroClass === 'berserker')?.name).toBe('Torius');
-    expect(next.activePartyIds).toEqual(['hero-1', 'hero-2', 'hero-3']);
+  it('new game começa só com Nix; unlock adiciona Galneon à reserva', () => {
+    const initial = GameState.initial();
+    expect(initial.roster).toHaveLength(1);
+    expect(initial.roster[0]?.heroClass).toBe('sorcerer');
+    expect(initial.activePartyIds).toEqual(['hero-2']);
+
+    const next = HeroUnlockService.applyUnlock(initial, 'knight');
+    expect(next.roster).toHaveLength(2);
+    expect(next.roster.some((hero) => hero.heroClass === 'knight')).toBe(true);
+    expect(next.roster.find((hero) => hero.heroClass === 'knight')?.name).toBe('Galneon');
+    expect(next.activePartyIds).toEqual(['hero-2']);
     expect(next.benchHeroes()).toHaveLength(1);
   });
 

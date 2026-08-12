@@ -9,16 +9,12 @@ import {
   ThroughputBreakdownLine,
 } from '../../domain/combat/DamageThroughputEstimate';
 import { DAMAGE_ELEMENT_LABELS } from '../../domain/combat/DamageElement';
+import { getHeroCombatIdentity } from '../../domain/combat/HeroCombatIdentityCatalog';
 import {
   formatCooldownLabel,
   getCooldownSeconds,
   getInitialCooldownSeconds,
 } from '../../domain/combat/SkillCooldownTiming';
-import {
-  HERO_SKILL_COOLDOWN_TURN_SECONDS,
-  MIN_SKILL_COOLDOWN_SECONDS,
-  SKILL_COOLDOWN_SECONDS_PER_RANK,
-} from '../../domain/combat/CombatTimingConstants';
 import { Hero } from '../../domain/entities/Hero';
 import { BASIC_ATTACK_SKILL_ID } from '../../domain/progression/combat/BasicAttackSkill';
 import { getTargetPriorityPercent } from '../../domain/progression/combat/CombatSkillTargeting';
@@ -191,12 +187,14 @@ export function describeHeroSkillCooldown(
   }
 
   const rank = Math.max(1, hero.toProps().skillRanks[combat.skillId] ?? 1);
+  const turnSeconds = getHeroCombatIdentity(hero.heroClass).skillCooldownTurnSeconds;
+  const perRank = combat.cooldownSecondsPerRank ?? 0;
   const rawBase =
     combat.cooldownSeconds !== undefined
       ? Math.max(0, combat.cooldownSeconds)
-      : Math.max(0, combat.cooldownTurns) * HERO_SKILL_COOLDOWN_TURN_SECONDS;
-  const beforeFloor = rawBase - (rank - 1) * SKILL_COOLDOWN_SECONDS_PER_RANK;
-  const baseSeconds = getCooldownSeconds(combat, { rank });
+      : Math.max(0, combat.cooldownTurns) * turnSeconds;
+  const afterRank = rawBase - (rank - 1) * perRank;
+  const baseSeconds = getCooldownSeconds(combat, { rank, turnSeconds });
 
   if (baseSeconds <= 0) {
     const tooltipLines = tip(
@@ -212,8 +210,11 @@ export function describeHeroSkillCooldown(
   }
 
   const profile = combatProfiles.forHero(hero);
-  const effective = applyCooldownReduction(baseSeconds, profile.cooldownReduction);
+  const effective = applyCooldownReduction(baseSeconds, profile.cooldownReduction, combat);
   const cdrPct = profile.cooldownReduction * 100;
+  const cdrCap = combat.maxCooldownReduction !== undefined
+    ? ` (teto da skill ${(combat.maxCooldownReduction * 100).toFixed(0)}%)`
+    : '';
 
   const tooltipLines = tip(
     {
@@ -221,17 +222,17 @@ export function describeHeroSkillCooldown(
       text:
         combat.cooldownSeconds !== undefined
           ? `Base catálogo = ${rawBase.toFixed(2)}s`
-          : `Base = ${combat.cooldownTurns} turns × ${HERO_SKILL_COOLDOWN_TURN_SECONDS}s = ${rawBase.toFixed(2)}s`,
+          : `Base = ${combat.cooldownTurns} turns × ${turnSeconds}s (${hero.heroClass}) = ${rawBase.toFixed(2)}s`,
     },
     {
       text:
         rank <= 1
           ? `Level ${rank}: sem redução por level → ${baseSeconds.toFixed(2)}s`
-          : `Level ${rank}: ${rawBase.toFixed(2)} − (${rank - 1} × ${SKILL_COOLDOWN_SECONDS_PER_RANK}s) = ${Math.max(beforeFloor, MIN_SKILL_COOLDOWN_SECONDS).toFixed(2)}s (piso ${MIN_SKILL_COOLDOWN_SECONDS}s)`,
+          : `Level ${rank}: ${rawBase.toFixed(2)} − (${rank - 1} × ${perRank}s) = ${Math.max(0, afterRank).toFixed(2)}s`,
     },
     {
       icon: 'improvement',
-      text: `CDR do equipamento = ${cdrPct.toFixed(1)}%`,
+      text: `CDR do equipamento = ${cdrPct.toFixed(1)}%${cdrCap}`,
     },
     {
       text: `Recarga efetiva = ${baseSeconds.toFixed(2)} × (1 − ${cdrPct.toFixed(1)}%) = ${effective.toFixed(2)}s`,
@@ -428,7 +429,9 @@ export function buildSkillBattleStats(
     tooltipLines: buildCooldownTooltip(combat, hero),
   });
 
-  const initialSeconds = getInitialCooldownSeconds(combat);
+  const initialSeconds = getInitialCooldownSeconds(combat, {
+    turnSeconds: getHeroCombatIdentity(hero.heroClass).skillCooldownTurnSeconds,
+  });
   if (initialSeconds > 0) {
     stats.push({
       label: 'Início',

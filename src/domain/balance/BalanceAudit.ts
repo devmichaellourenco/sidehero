@@ -230,12 +230,20 @@ export function scalingEntryMonotone(leftTier: number, rightTier: number): boole
   );
 }
 
+export function maxShopRarityIndexForMainProgress(
+  completedMainIds: readonly string[],
+  difficultyTier = 1,
+): number {
+  return getShopMaxRarityIndex(completedMainIds, difficultyTier);
+}
+
+/** Compat: só o gate mythic por tier; demais caps exigem mains. */
 export function maxShopRarityIndexForTier(tier: number): number {
-  return getShopMaxRarityIndex(tier);
+  return getShopMaxRarityIndex([], tier);
 }
 
 export function shopCapRarityAtTier(tier: number): GearRarity {
-  const index = getShopMaxRarityIndex(tier);
+  const index = getShopMaxRarityIndex([], tier);
   const rarities: GearRarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
   return rarities[index] ?? 'mythic';
 }

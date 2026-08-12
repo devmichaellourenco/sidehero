@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Hero } from '../../entities/Hero';
 import { Enemy } from '../../entities/Enemy';
 import { Stats } from '../../value-objects/Stats';
-import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
+import { getHeroCombatIdentity } from '../../combat/HeroCombatIdentityCatalog';
 import { SkillPowerCalculator } from '../../progression/combat/SkillPowerCalculator';
 import { listEnemyCombatSkillsByType } from '../../progression/combat/EnemyCombatSkillCatalog';
 import { SkillCooldownTracker } from './SkillCooldownTracker';
@@ -25,7 +25,12 @@ describe('CombatSkillSelector', () => {
     expect(hero.toProps().equippedSkillIds).toContain('basic_attack');
     expect(selected?.skillId).toBe('basic_attack');
     expect(selected?.action.targeting).toBe('single_enemy');
-    expect(selected?.action.power).toBe(Math.max(1, Math.floor(hero.attack * BASIC_ATTACK_DAMAGE_RATIO)));
+    expect(selected?.action.power).toBe(
+      Math.max(
+        1,
+        Math.floor(hero.attack * getHeroCombatIdentity(hero.heroClass).basicAttackDamageRatio),
+      ),
+    );
   });
 
   it('prioriza cura quando aliado está ferido e skill está pronta', () => {

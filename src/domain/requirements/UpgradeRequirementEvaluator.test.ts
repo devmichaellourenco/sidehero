@@ -42,4 +42,20 @@ describe('UpgradeRequirementEvaluator', () => {
     expect(results[0]?.met).toBe(true);
     expect(results[0]?.label).toBe('10 vitórias');
   });
+
+  it('valida requisito de missão principal concluída', () => {
+    const base = GameState.initial();
+    const withMain = base.withCampaignProgress(
+      base.campaignProgress.withMissionProgress(
+        base.campaignProgress.missionProgress.markMainCompleted('main:1-1'),
+      ),
+    );
+
+    expect(
+      evaluator.allMet(base, [{ type: 'main_mission_completed', missionId: 'main:1-1' }]),
+    ).toBe(false);
+    expect(
+      evaluator.allMet(withMain, [{ type: 'main_mission_completed', missionId: 'main:1-1' }]),
+    ).toBe(true);
+  });
 });

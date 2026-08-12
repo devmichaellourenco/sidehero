@@ -18,9 +18,10 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 
 ## Padrões
 
-- Poder de combate (herói): `Base × (powerPerRank × nível) × (atributo × fator)` — sem multiplicador global; níveis começam com `powerPerRank` no rank 1
-- Recarga (herói): `cooldownTurns × 5s` no level 1 (−1,5s por level extra, piso 4s) — `SkillCooldownTiming.ts` / BAL-012
-- Ataque básico: `ATK × 0,5` (`BASIC_ATTACK_DAMAGE_RATIO`); TTA = `1/ASPD` por combatente (DEX)
+- Poder de combate (herói): `Base × (powerPerRank × nível) × (atributo × fator)` — sem multiplicador global; níveis começam com `powerPerRank` no rank 1; skills com CD têm `powerPerRank` 3× o legado no catálogo (BAL-015)
+- Recarga: `cooldownTurns × skillCooldownTurnSeconds` do herói − `cooldownSecondsPerRank` da skill — `SkillCooldownTiming.ts`
+- Recovery: `actionRecoverySeconds` por skill; CDR teto/piso por skill
+- Ataque básico: `ATK × basicAttackDamageRatio` da identidade do herói; TTA = `1/ASPD` por combatente (DEX)
 - Slot 0 = Ataque Básico (fixo)
 - Slots extras = `getUnlockedBattleSkillSlotCount(upgradeLevels)`
 - Scroll ao `+1 rank`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`

@@ -53,7 +53,11 @@ export class RefreshShopUseCase {
     await this.repository.save(nextState);
 
     const offers = this.shopService
-      .generateOffers(nextState.currentDifficultyTier(), nextState.shopRefreshSeed)
+      .generateOffers(
+        nextState.currentDifficultyTier(),
+        nextState.shopRefreshSeed,
+        nextState.campaignProgress.missionProgress.completedMainIds,
+      )
       .map((offer) => ({
         id: offer.id,
         price: offer.price,

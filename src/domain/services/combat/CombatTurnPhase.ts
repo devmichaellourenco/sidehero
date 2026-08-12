@@ -8,6 +8,8 @@ import { PhaseRun } from '../../campaign/PhaseRun';
 import { PhaseCombatHandlers } from '../../campaign/PhaseCombatHandlers';
 import { EnemyKillRewardService } from '../../campaign/EnemyKillRewardService';
 import { CombatProfileProvider } from '../../combat/CombatProfileProvider';
+import { getHeroCombatIdentity } from '../../combat/HeroCombatIdentityCatalog';
+import { getEnemyCombatIdentity } from '../../enemies/EnemyCombatIdentityCatalog';
 import { elementalDamageProfileFromHeroEquipment } from '../../combat/ElementalDamageProfileAggregator';
 import { elementalDamageFlatFromHeroEquipment } from '../../combat/ElementalDamageFlatProfileAggregator';
 import { elementalPenetrationFromHeroEquipment } from '../../combat/ElementalPenetrationProfileAggregator';
@@ -459,19 +461,34 @@ export class CombatTurnPhase {
         : actor.side === 'hero'
           ? (heroes.find((entry) => entry.id === actor.id)?.toProps().skillRanks[usedSkillId] ?? 1)
           : (enemies.find((entry) => entry.id === actor.id)?.skillRanks[usedSkillId] ?? 1);
+    const turnSeconds =
+      actor.side === 'hero'
+        ? getHeroCombatIdentity(
+            heroes.find((entry) => entry.id === actor.id)?.heroClass ?? 'sorcerer',
+          ).skillCooldownTurnSeconds
+        : getEnemyCombatIdentity(
+            enemies.find((entry) => entry.id === actor.id)?.enemyType ?? 'giant_rat',
+          ).skillCooldownTurnSeconds;
+    const usedCombatSkill = usedSkillId
+      ? skillList.find((skill) => skill.skillId === usedSkillId)
+      : undefined;
     const updatedCooldowns = cooldowns
       .onSkillUsed(actorKey, usedSkillId, skillList, cooldownReduction, {
         rank: skillRank,
+        turnSeconds,
       })
       .toMap();
 
-    const usedSkill = usedSkillId !== null && usedSkillId !== BASIC_ATTACK_SKILL_ID;
+    const skillRecoverySeconds =
+      usedSkillId !== null && usedSkillId !== BASIC_ATTACK_SKILL_ID
+        ? (usedCombatSkill?.actionRecoverySeconds ?? 0)
+        : null;
     const updatedTimers = this.actionTimers.scheduleAfterAction(
       combat.actionTimers,
       actor,
       attackerProfile.attackSpeed,
       castSpeed,
-      usedSkill,
+      skillRecoverySeconds,
     );
 
     let nextState = state.withHeroes(heroes);
@@ -541,7 +558,7 @@ export class CombatTurnPhase {
       actor,
       profile.attackSpeed,
       profile.castSpeed,
-      false,
+      null,
     );
 
     return {

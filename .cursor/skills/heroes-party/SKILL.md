@@ -12,11 +12,12 @@ description: Gerencia heróis, party ativa, reserva, unlock e formação no Side
 ## Fluxo
 
 1. Regra de roster → `PartyService` + `PartyValidator`
-2. Unlock → `HeroUnlockService` + entrada em `UpgradeCatalog`
+2. Unlock → `HeroUnlockService` + entrada em `UpgradeCatalog` (gates `main_mission_completed`)
 3. UI → `hero-detail/*`, `PartyDragDropBinder`
 
 ## Padrões
 
+- New game: **só Nix** ativa; cadeia Galneon → Elara → Torius → Rain → Valerius
 - Edição só com pausa loadout (`PauseForLoadoutUseCase`)
 - Herói imutável: `Hero` com `toProps()` / métodos que retornam novo `Hero`
 - Modal de herói via pilha de modais (`GameViewController`)

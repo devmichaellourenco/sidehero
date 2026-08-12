@@ -13,6 +13,9 @@ function enemyFromType(enemyType: string, level: number): Enemy {
       baseMaxHealth: sheet.baseMaxHealth,
       level: sheet.level,
       attributes: sheet.attributes,
+      attackPerLevel: 4,
+      defensePerLevel: 3,
+      healthPerLevel: 15,
     }),
   );
 

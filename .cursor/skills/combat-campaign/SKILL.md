@@ -38,4 +38,5 @@ description: Implementa combate em tempo real, campanha por fases/waves, tick e 
 
 - `PhaseCombatHandlers.ts`, `CombatTurnPhase.ts`, `CombatActionExecutor.ts`
 - `HandcraftedPhaseCatalog.ts`, `EnemyProgressionCatalog.ts`, `WaveEnemyFactory.ts`
+- `HeroCombatIdentityCatalog.ts`, `EnemyCombatIdentityCatalog.ts` — básico, CD/turno, ASPD, crescimento por combatente
 - `CampaignMapPresentation.ts`, `CampaignModalRenderer.ts`, `CampaignTooltipBinder.ts`

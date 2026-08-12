@@ -1,4 +1,5 @@
-import { BASIC_ATTACK_DAMAGE_RATIO } from '../../src/domain/combat/CombatTimingConstants';
+import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
+import { getEnemyCombatIdentity } from '../../src/domain/enemies/EnemyCombatIdentityCatalog';
 import {
   DAMAGE_ELEMENT_LABELS,
   DamageElement,
@@ -129,6 +130,13 @@ function dominantElement(skill: CombatSkillDefinition): DamageElement {
   return components.reduce((best, cur) => (cur.weight > best.weight ? cur : best)).element;
 }
 
+function labBasicRatio(input: LabCombatantInput): number {
+  if (input.kind === 'hero') {
+    return getHeroCombatIdentity(input.heroClass ?? 'knight').basicAttackDamageRatio;
+  }
+  return getEnemyCombatIdentity(input.enemyType ?? 'giant_rat').basicAttackDamageRatio;
+}
+
 function resolveSkillRawPower(
   input: LabCombatantInput,
   skill: CombatSkillDefinition,
@@ -137,13 +145,13 @@ function resolveSkillRawPower(
   treeDamagePercent: number,
 ): number {
   if (skill.usesAttackStat) {
-    return Math.max(1, Math.floor(attack * BASIC_ATTACK_DAMAGE_RATIO));
+    return Math.max(1, Math.floor(attack * labBasicRatio(input)));
   }
 
   const definition = getSkillById(skill.skillId);
   const scalingKey = (definition?.scaling ?? 'int') as AttributeKey;
   const raw = calculateHeroSkillRawPower(skill, rank, attrValue(input, scalingKey));
-  let power = applyHeroDamageSkillPower(skill, raw, attack);
+  let power = applyHeroDamageSkillPower(skill, raw, attack, labBasicRatio(input));
   if (isTreeDamageSkill(skill)) {
     power = applyPercentBonus(power, treeDamagePercent);
   }
@@ -226,7 +234,7 @@ function buildSkillAppliedEquation(args: {
 
   let rawEq: string;
   if (skill.usesAttackStat) {
-    rawEq = `floor(${n(attack)}×${n(BASIC_ATTACK_DAMAGE_RATIO)}) = ${n(rawPower)}`;
+    rawEq = `floor(${n(attack)}×${n(labBasicRatio(input))}) = ${n(rawPower)}`;
   } else {
     const definition = getSkillById(skill.skillId);
     const scalingKey = (definition?.scaling ?? 'int') as AttributeKey;
@@ -242,8 +250,8 @@ function buildSkillAppliedEquation(args: {
     if (isTreeDamageSkill(skill) && treeDamagePercent !== 0) {
       rawEq += ` · floor(${n(afterFloor)}×(1+${n(treeDamagePercent)}/100))`;
     }
-    const atkFloor = resolveDamageSkillAttackFloor(skill, attack);
-    const floorRatio = skill.minAttackRatio ?? BASIC_ATTACK_DAMAGE_RATIO;
+    const atkFloor = resolveDamageSkillAttackFloor(skill, attack, labBasicRatio(input));
+    const floorRatio = skill.minAttackRatio ?? labBasicRatio(input);
     rawEq += ` · max(..., floor(${n(attack)}×${n(floorRatio)}=${n(atkFloor)}))`;
     rawEq += ` = ${n(rawPower)}`;
   }
@@ -328,14 +336,14 @@ export function sampleElementalHits(
     const scalingAttr = (definition?.scaling ?? 'int') as AttributeKey;
     const attr = attrValue(input, scalingAttr);
     const catalogProduct = skill.usesAttackStat
-      ? Math.max(1, Math.floor(attack * BASIC_ATTACK_DAMAGE_RATIO))
+      ? Math.max(1, Math.floor(attack * labBasicRatio(input)))
       : Math.max(1, Math.floor(calculateHeroSkillRawPower(skill, effectiveRank, attr)));
     const attackFloor = skill.usesAttackStat
       ? catalogProduct
-      : resolveDamageSkillAttackFloor(skill, attack);
+      : resolveDamageSkillAttackFloor(skill, attack, labBasicRatio(input));
     const attackFloorRatio = skill.usesAttackStat
-      ? BASIC_ATTACK_DAMAGE_RATIO
-      : (skill.minAttackRatio ?? BASIC_ATTACK_DAMAGE_RATIO);
+      ? labBasicRatio(input)
+      : (skill.minAttackRatio ?? labBasicRatio(input));
     const rawPower = resolveSkillRawPower(
       input,
       skill,

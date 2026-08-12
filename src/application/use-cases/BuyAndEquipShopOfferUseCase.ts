@@ -32,6 +32,7 @@ export class BuyAndEquipShopOfferUseCase {
       state.currentDifficultyTier(),
       state.shopRefreshSeed,
       offerId,
+      state.campaignProgress.missionProgress.completedMainIds,
     );
     if (!offer) {
       throw new Error('Oferta não encontrada');

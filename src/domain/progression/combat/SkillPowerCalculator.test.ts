@@ -7,7 +7,8 @@ import { resolveHeroAttributeAttackSpeed } from '../../combat/CombatSpeedScaling
 import { buildEnemyCombatSheet } from '../../enemies/EnemyProgressionCatalog';
 import { deriveCombatMaxHealth } from '../../combat/CombatantDerivedStats';
 import { resolveEnemySpawnMaxHealth } from '../../combat/EnemyCombatBalance';
-import { BASIC_ATTACK_DAMAGE_RATIO } from '../../combat/CombatTimingConstants';
+import { getHeroCombatIdentity } from '../../combat/HeroCombatIdentityCatalog';
+import { getEnemyCombatIdentity } from '../../enemies/EnemyCombatIdentityCatalog';
 import { PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO } from './SkillDamageBalance';
 import { getHeroCombatSkill } from './HeroCombatSkillCatalog';
 import { listEnemyCombatSkillsByType } from './EnemyCombatSkillCatalog';
@@ -24,6 +25,9 @@ function enemyFromSheet(
       baseMaxHealth: sheet.baseMaxHealth,
       level: sheet.level,
       attributes: sheet.attributes,
+      attackPerLevel: 4,
+      defensePerLevel: 3,
+      healthPerLevel: 15,
     }),
   );
 
@@ -76,7 +80,12 @@ describe('SkillPowerCalculator', () => {
     const basic = calculator.calculateForHero(getHeroCombatSkill('basic_attack')!, knight);
 
     expect(power).toBeGreaterThan(basic);
-    expect(basic).toBe(Math.max(1, Math.floor(knight.attack * BASIC_ATTACK_DAMAGE_RATIO)));
+    expect(basic).toBe(
+      Math.max(
+        1,
+        Math.floor(knight.attack * getHeroCombatIdentity('knight').basicAttackDamageRatio),
+      ),
+    );
   });
 
   it('inimigo usa a mesma fórmula de skill/básico do herói (BAL-013)', () => {
@@ -98,7 +107,10 @@ describe('SkillPowerCalculator', () => {
     )!;
 
     expect(calculator.calculateForEnemy(basic, goblin)).toBe(
-      Math.max(1, Math.floor(goblin.attack * BASIC_ATTACK_DAMAGE_RATIO)),
+      Math.max(
+        1,
+        Math.floor(goblin.attack * getEnemyCombatIdentity(goblin.enemyType).basicAttackDamageRatio),
+      ),
     );
     expect(calculator.calculateForEnemy(goblinStab, goblin)).toBe(
       Math.max(1, Math.floor(goblin.attack * PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO)),
@@ -107,7 +119,7 @@ describe('SkillPowerCalculator', () => {
       Math.max(1, Math.floor(rat.attack * PHYSICAL_DAMAGE_SKILL_MIN_ATK_RATIO)),
     );
     expect(calculator.calculateForEnemy(dragonBreath, dragon)).toBeGreaterThanOrEqual(
-      Math.floor(dragon.attack * BASIC_ATTACK_DAMAGE_RATIO),
+      Math.floor(dragon.attack * getEnemyCombatIdentity(dragon.enemyType).basicAttackDamageRatio),
     );
     expect(calculator.calculateForEnemy(goblinStab, goblin)).toBeGreaterThan(
       calculator.calculateForEnemy(basic, goblin),
