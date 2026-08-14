@@ -1,0 +1,33 @@
+[
+  {
+    "id": "camp-quartermaster",
+    "name": "Intendente do Acampamento",
+    "unlockAfterMainId": "main:1-1",
+    "catalogItemIds": [
+      "worn_sword",
+      "recruit_blade",
+      "patrol_sword",
+      "valiant_blade",
+      "champion_sword",
+      "legion_fulgor",
+      "field_axe",
+      "lumber_axe",
+      "scout_axe",
+      "headsman_axe",
+      "lost_king_axe",
+      "fallen_titan_axe",
+      "leather_jerkin",
+      "chain_mail",
+      "plate_armor",
+      "commander_cuirass",
+      "paladin_plates",
+      "war_avatar_armor",
+      "copper_ring",
+      "bronze_ring",
+      "merchant_ring",
+      "noble_ring"
+    ],
+    "priceMultiplier": 1,
+    "flatPriceAdjustment": 0
+  }
+]

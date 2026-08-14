@@ -71,6 +71,12 @@ describe('ShopModalRenderer', () => {
       container,
       state,
       {
+        activeShop: {
+          id: 'camp-quartermaster',
+          name: 'Intendente do Acampamento',
+          stockSeed: 0,
+          difficultyTier: 1,
+        },
         offers: [
           {
             id: 'offer-1',
@@ -86,6 +92,8 @@ describe('ShopModalRenderer', () => {
       },
       { onBuyOffer: vi.fn(), onRefreshShop: vi.fn() },
     );
+
+    expect(container.textContent).toContain('Intendente do Acampamento');
 
     expect(container.querySelector('.inventory-hero-select-label')?.textContent).toBe(
       'Comparar com',

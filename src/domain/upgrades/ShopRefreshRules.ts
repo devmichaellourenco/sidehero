@@ -21,15 +21,26 @@ export function calculateShopRefreshCost(stage: number, levels: UpgradeLevels): 
   return Math.floor(base * getShopRefreshDiscount(levels));
 }
 
-export function canRefreshShop(state: {
-  upgradeLevels: UpgradeLevels;
-  shopRefreshUses: number;
-  gold: { canAfford: (cost: number) => boolean };
-  stage: number;
-}): boolean {
-  const limit = getShopRefreshLimit(state.upgradeLevels);
-  if (getFeatureLevel(state.upgradeLevels, 'shop_refresh') < 1) return false;
-  if (state.shopRefreshUses >= limit) return false;
-  const cost = calculateShopRefreshCost(state.stage, state.upgradeLevels);
-  return state.gold.canAfford(cost);
+export interface ShopRefreshContext {
+  readonly upgradeLevels: UpgradeLevels;
+  /** Renovações já usadas na loja avaliada (`ShopStock.refreshUses`). */
+  readonly refreshUses: number;
+  /** Mesmo tier usado para exibir o custo (`currentDifficultyTier`). */
+  readonly tier: number;
+  readonly gold: { canAfford: (cost: number) => boolean };
+}
+
+export function isShopRefreshUnlocked(levels: UpgradeLevels): boolean {
+  return getFeatureLevel(levels, 'shop_refresh') >= 1;
+}
+
+export function shopRefreshRemaining(levels: UpgradeLevels, refreshUses: number): number {
+  return Math.max(0, getShopRefreshLimit(levels) - Math.max(0, refreshUses));
+}
+
+export function canRefreshShop(context: ShopRefreshContext): boolean {
+  if (!isShopRefreshUnlocked(context.upgradeLevels)) return false;
+  if (shopRefreshRemaining(context.upgradeLevels, context.refreshUses) <= 0) return false;
+  const cost = calculateShopRefreshCost(context.tier, context.upgradeLevels);
+  return context.gold.canAfford(cost);
 }

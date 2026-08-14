@@ -2,6 +2,8 @@
  * UI da curva editável de XP por nível dos heróis no Balance Lab.
  */
 import { withPreservedScroll } from './scrollPreserve';
+import { confirmChangeReview } from './changeReview';
+import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
 
 interface LevelRow {
   level: number;
@@ -127,6 +129,7 @@ function updateDirtyChrome(): void {
     counter.textContent =
       dirtyLevels.size > 0 ? `${dirtyLevels.size} alteração(ões)` : '';
   }
+  setWorkspaceDirty('levels', dirtyLevels.size);
 }
 
 function markDirtyFromInput(level: number, tr: HTMLElement): void {
@@ -172,6 +175,14 @@ async function saveDirty(): Promise<void> {
 
   if (Object.keys(levels).length === 0 && clear.length === 0) {
     setStatus('Nada para salvar.');
+    return;
+  }
+  if (
+    !(await confirmChangeReview('Salvar curva de XP por nível', dirtyLevels.size, {
+      levels,
+      clear,
+    }))
+  ) {
     return;
   }
 
@@ -228,11 +239,13 @@ function renderRows(rows: LevelRow[], maxXp: number): string {
             data-baseline-xp="${Math.round(row.baselineXp)}"
             data-loaded-xp="${row.xp}"
             data-has-override="${row.hasOverride ? '1' : '0'}">
-          <td><strong>Lv ${row.level}</strong> → ${row.level + 1} ${badge}</td>
+          <td><strong class="xp-num--level">Lv ${row.level}</strong> → ${
+            row.level + 1
+          } ${badge}</td>
           <td class="xp-num xp-muted">${segment}</td>
           <td class="xp-num xp-muted">${fmt(row.baselineXp)}</td>
           <td>
-            <input type="number" min="0" step="1" data-field="xp" value="${draft}" />
+            <input class="xp-input--xp" type="number" min="0" step="1" data-field="xp" value="${draft}" />
           </td>
           <td class="xp-bar-cell">
             <div class="xp-bar" title="${fmt(draft)} XP (escala log)">
@@ -243,10 +256,10 @@ function renderRows(rows: LevelRow[], maxXp: number): string {
           <td class="xp-num">${
             row.baselineXp > 0 ? ratio(draft / row.baselineXp) : '—'
           }</td>
-          <td class="xp-num">${fmt(cumulative)}</td>
+          <td class="xp-num xp-num--xp">${fmt(cumulative)}</td>
           <td class="xp-actions">
-            <button type="button" data-action="baseline" title="Rascunho = baseline">↺</button>
-            <button type="button" class="mb-btn-danger" data-action="clear" title="Apagar override" ${
+            <button type="button" class="lab-btn--warn lab-btn--icon" data-action="baseline" title="Rascunho = baseline">↺</button>
+            <button type="button" class="mb-btn-danger lab-btn--icon" data-action="clear" title="Apagar override" ${
               row.hasOverride ? '' : 'disabled'
             }>×</button>
           </td>
@@ -259,6 +272,7 @@ function renderRows(rows: LevelRow[], maxXp: number): string {
 export function renderHeroLevelXp(): void {
   const host = document.getElementById('lab-level-xp');
   if (!host) return;
+  setWorkspaceDirty('levels', dirtyLevels.size);
 
   const rows = payload?.rows ?? [];
   const bands = payload?.bands ?? [];
@@ -290,7 +304,9 @@ export function renderHeroLevelXp(): void {
           </label>
         </div>
         <div class="xp-toolbar">
-          <button type="button" id="level-xp-save" ${dirtyLevels.size === 0 ? 'disabled' : ''}>
+          <button type="button" class="lab-btn--primary" id="level-xp-save" ${
+            dirtyLevels.size === 0 ? 'disabled' : ''
+          }>
             ${dirtyLevels.size > 1 ? `Salvar tudo (${dirtyLevels.size})` : 'Salvar no sistema'}
           </button>
           <span id="level-xp-dirty-count" class="xp-dirty-count">${
@@ -302,7 +318,7 @@ export function renderHeroLevelXp(): void {
         <p class="lab-hint">${payload?.knobs.note ?? ''}</p>
         <p class="lab-hint">
           XP total 1 → ${payload?.knobs.maxLevel ?? '—'}:
-          <strong>${fmt(payload?.totals.totalXp ?? 0)}</strong>
+          <strong class="res res--xp">${fmt(payload?.totals.totalXp ?? 0)}</strong>
           ${
             payload && payload.totals.totalXp !== payload.totals.baselineTotalXp
               ? `<br/>baseline: <code>${fmt(payload.totals.baselineTotalXp)}</code>`
@@ -321,7 +337,7 @@ export function renderHeroLevelXp(): void {
                   .map(
                     (backup) => `
                   <li>
-                    <button type="button" data-restore-backup="${backup.id}">${backup.id}</button>
+                    <button type="button" class="lab-btn--info" data-restore-backup="${backup.id}">${backup.id}</button>
                   </li>`,
                   )
                   .join('')}</ul>`
@@ -412,6 +428,7 @@ export function renderHeroLevelXp(): void {
 }
 
 export async function mountHeroLevelXpTab(): Promise<void> {
+  registerWorkspaceSave('levels', saveDirty);
   await loadHeroLevelXp();
   renderHeroLevelXp();
   setStatus('Curva carregada — edite a XP por nível e salve no sistema.');

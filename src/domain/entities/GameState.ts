@@ -17,6 +17,12 @@ import { Gear } from './Gear';
 import { Hero } from './Hero';
 import { TurnOrderService } from '../services/combat/TurnOrderService';
 import { normalizePartyFromProps } from '../party/PartyNormalizer';
+import {
+  cloneShopStock,
+  normalizeShopStock,
+  type ShopStock,
+  type ShopStockProps,
+} from '../shop/ShopStock';
 
 export interface BattleLogEntry {
   message: string;
@@ -45,7 +51,10 @@ export interface GameStateProps {
   totalChestsOpened?: number;
   lastTickAt: number;
   shopRefreshSeed: number;
+  /** Estoque persistido e histórico de compras limitadas, indexados por loja. */
+  shopStocks?: Readonly<Record<string, ShopStockProps>>;
   upgradeLevels: UpgradeLevels;
+  /** Espelho legado do contador da loja ativa (cota real vive no `ShopStock`). */
   shopRefreshUses: number;
   /** Janela de edição de loadout (pausa manual ou entre fases). */
   loadoutEditOpen?: boolean;
@@ -75,6 +84,7 @@ export class GameState {
   readonly totalChestsOpened: number;
   readonly lastTickAt: number;
   readonly shopRefreshSeed: number;
+  readonly shopStocks: Readonly<Record<string, ShopStock>>;
   readonly upgradeLevels: UpgradeLevels;
   readonly shopRefreshUses: number;
   readonly loadoutEditOpen: boolean;
@@ -101,8 +111,15 @@ export class GameState {
     this.totalChestsOpened = Math.max(0, Math.floor(props.totalChestsOpened ?? 0));
     this.lastTickAt = props.lastTickAt;
     this.shopRefreshSeed = Math.max(0, props.shopRefreshSeed ?? 0);
+    const legacyRefreshUses = Math.max(0, props.shopRefreshUses ?? 0);
+    this.shopStocks = Object.fromEntries(
+      Object.entries(props.shopStocks ?? {}).map(([shopId, stock]) => [
+        shopId,
+        normalizeShopStock(stock, legacyRefreshUses),
+      ]),
+    );
     this.upgradeLevels = props.upgradeLevels ?? {};
-    this.shopRefreshUses = Math.max(0, props.shopRefreshUses ?? 0);
+    this.shopRefreshUses = legacyRefreshUses;
     this.loadoutEditOpen = props.loadoutEditOpen === true;
     this.phaseRestartOnResume = props.phaseRestartOnResume === true;
     this.combatIntermission = props.combatIntermission
@@ -132,6 +149,7 @@ export class GameState {
       totalChestsOpened: 0,
       lastTickAt: Date.now(),
       shopRefreshSeed: 0,
+      shopStocks: {},
       upgradeLevels: {},
       shopRefreshUses: 0,
       loadoutEditOpen: true,
@@ -259,16 +277,29 @@ export class GameState {
     return this.clone({ battleSessionStats: emptyBattleSessionStats() });
   }
 
+  /** A cota de renovação é por loja (`ShopStock.refreshUses`) e não zera com o stage. */
   withStage(stage: number): GameState {
-    return this.clone({ stage, shopRefreshSeed: 0, shopRefreshUses: 0 });
+    return this.clone({ stage, shopRefreshSeed: 0 });
   }
 
   withShopRefreshSeed(shopRefreshSeed: number): GameState {
     return this.clone({ shopRefreshSeed: Math.max(0, shopRefreshSeed) });
   }
 
-  withShopRefreshUses(shopRefreshUses: number): GameState {
-    return this.clone({ shopRefreshUses: Math.max(0, shopRefreshUses) });
+  shopStock(shopId: string): ShopStock | null {
+    return this.shopStocks[shopId] ?? null;
+  }
+
+  withShopStock(shopId: string, stock: ShopStock): GameState {
+    const normalized = cloneShopStock(stock);
+    return this.clone({
+      shopStocks: {
+        ...this.shopStocks,
+        [shopId]: normalized,
+      },
+      shopRefreshSeed: normalized.seed,
+      shopRefreshUses: normalized.refreshUses,
+    });
   }
 
   withUpgradeLevels(upgradeLevels: UpgradeLevels): GameState {
@@ -340,6 +371,12 @@ export class GameState {
       totalChestsOpened: this.totalChestsOpened,
       lastTickAt: this.lastTickAt,
       shopRefreshSeed: this.shopRefreshSeed,
+      shopStocks: Object.fromEntries(
+        Object.entries(this.shopStocks).map(([shopId, stock]) => [
+          shopId,
+          cloneShopStock(stock),
+        ]),
+      ),
       upgradeLevels: this.upgradeLevels,
       shopRefreshUses: this.shopRefreshUses,
       loadoutEditOpen: this.loadoutEditOpen,

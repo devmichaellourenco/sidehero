@@ -1,6 +1,8 @@
 /**
  * UI da distribuição editável de XP/ouro por fase no Balance Lab.
  */
+import { confirmChangeReview } from './changeReview';
+import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
 
 interface PhaseRewardOverride {
   displayName?: string;
@@ -190,6 +192,7 @@ function markDirtyFromInput(phaseId: string, row: HTMLElement): void {
   if (saveBtn) saveBtn.disabled = dirtyIds.size === 0;
   const el = document.getElementById('xp-dirty-count');
   if (el) el.textContent = dirtyIds.size > 0 ? `${dirtyIds.size} alteração(ões)` : '';
+  setWorkspaceDirty('xp', dirtyIds.size);
 }
 
 async function saveDirty(): Promise<void> {
@@ -228,6 +231,14 @@ async function saveDirty(): Promise<void> {
 
   if (Object.keys(overrides).length === 0 && clear.length === 0) {
     setStatus('Nada para salvar.');
+    return;
+  }
+  if (
+    !(await confirmChangeReview('Salvar distribuição de XP e ouro', dirtyIds.size, {
+      overrides,
+      clear,
+    }))
+  ) {
     return;
   }
 
@@ -309,7 +320,9 @@ function renderTable(map: PhaseRewardsMapSummary, maxXp: number): string {
           <td class="xp-num">${phase.enemyCount}</td>
           <td class="xp-num xp-muted">${fmt(phase.baselineXp)}</td>
           <td>
-            <input type="number" min="0" step="1" data-field="targetXp" value="${draft.targetXp}" />
+            <input class="xp-input--xp" type="number" min="0" step="1" data-field="targetXp" value="${
+              draft.targetXp
+            }" />
           </td>
           <td class="xp-bar-cell">
             <div class="xp-bar" title="${fmt(draft.targetXp)} XP">
@@ -318,13 +331,15 @@ function renderTable(map: PhaseRewardsMapSummary, maxXp: number): string {
           </td>
           <td class="xp-num xp-muted">${fmt(phase.baselineGold)}</td>
           <td>
-            <input type="number" min="0" step="1" data-field="targetGold" value="${draft.targetGold}" />
+            <input class="xp-input--gold" type="number" min="0" step="1" data-field="targetGold" value="${
+              draft.targetGold
+            }" />
           </td>
-          <td class="xp-num">${fmt(phase.xpCumulative)}</td>
-          <td class="xp-num">Lv ${phase.heroLevelAfter}</td>
+          <td class="xp-num xp-num--xp">${fmt(phase.xpCumulative)}</td>
+          <td class="xp-num xp-num--level">Lv ${phase.heroLevelAfter}</td>
           <td class="xp-actions">
-            <button type="button" data-action="baseline" title="Rascunho = baseline">↺</button>
-            <button type="button" class="mb-btn-danger" data-action="clear" title="Apagar override" ${
+            <button type="button" class="lab-btn--warn lab-btn--icon" data-action="baseline" title="Rascunho = baseline">↺</button>
+            <button type="button" class="mb-btn-danger lab-btn--icon" data-action="clear" title="Apagar override" ${
               phase.hasOverride ? '' : 'disabled'
             }>×</button>
           </td>
@@ -338,9 +353,9 @@ function renderTable(map: PhaseRewardsMapSummary, maxXp: number): string {
       <header class="xp-map-head">
         <h2>${map.mapName} <span class="xp-muted">(${map.mapId})</span></h2>
         <p>
-          Total XP efetivo <strong>${fmt(map.xpTotal)}</strong>
-          · Ouro <strong>${fmt(map.goldTotal)}</strong>
-          · Nível ao limpar filtro <strong>Lv ${map.heroLevelAtEnd}</strong>
+          Total XP efetivo <strong class="res res--xp">${fmt(map.xpTotal)}</strong>
+          · Ouro <strong class="res res--gold">${fmt(map.goldTotal)}</strong>
+          · Nível ao limpar filtro <strong class="xp-num--level">Lv ${map.heroLevelAtEnd}</strong>
         </p>
       </header>
       <div class="xp-table-wrap">
@@ -371,6 +386,7 @@ function renderTable(map: PhaseRewardsMapSummary, maxXp: number): string {
 export function renderPhaseRewards(): void {
   const host = document.getElementById('lab-xp-rewards');
   if (!host) return;
+  setWorkspaceDirty('xp', dirtyIds.size);
 
   const maps = payload?.maps ?? [];
   const chapters = payload?.chapters ?? [];
@@ -416,7 +432,9 @@ export function renderPhaseRewards(): void {
           </label>
         </div>
         <div class="xp-toolbar">
-          <button type="button" id="xp-save" ${dirtyIds.size === 0 ? 'disabled' : ''}>
+          <button type="button" class="lab-btn--primary" id="xp-save" ${
+            dirtyIds.size === 0 ? 'disabled' : ''
+          }>
             ${
               dirtyIds.size > 1
                 ? `Salvar tudo (${dirtyIds.size})`
@@ -447,7 +465,7 @@ export function renderPhaseRewards(): void {
                   .map(
                     (backup) => `
                   <li>
-                    <button type="button" data-restore-backup="${backup.id}">${backup.id}</button>
+                    <button type="button" class="lab-btn--info" data-restore-backup="${backup.id}">${backup.id}</button>
                   </li>`,
                   )
                   .join('')}</ul>`
@@ -523,6 +541,7 @@ export function renderPhaseRewards(): void {
 }
 
 export async function mountPhaseRewardsTab(): Promise<void> {
+  registerWorkspaceSave('xp', saveDirty);
   await loadPhaseRewards();
   renderPhaseRewards();
   setStatus('Distribuição carregada — edite alvos e salve no sistema.');

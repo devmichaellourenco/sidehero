@@ -23,6 +23,7 @@ import {
   zeroResists,
 } from './elemental';
 import { catalogIdentityFor, resolveLabIdentity } from './identity';
+import { OPEN_HERO_IN_SIMULATOR_EVENT } from './navigation';
 import {
   defaultFormulaConstants,
   FORMULA_FIELDS,
@@ -49,15 +50,28 @@ import type {
 import { mountMissionsTab } from './missionBattlesUi';
 import { mountPhaseRewardsTab } from './phaseRewardsUi';
 import { mountHeroLevelXpTab } from './heroLevelXpUi';
+import { mountGearItemsTab } from './gearItemsUi';
+import { mountShopsTab } from './shopUi';
 import { mountHeroCombatTab } from './heroCombatUi';
+import { mountEnemyCombatTab } from './enemyCombatUi';
+import { mountUpgradeTreeTab } from './upgradeTreeUi';
+import { mountEconomyAuditTab } from './economyAuditUi';
 import {
   bindSpriteFallback,
   enemyTriggerHtml,
   openEnemyPicker,
 } from './enemyPicker';
+import {
+  bindWorkspaceGuards,
+  setWorkspaceActiveTab,
+  type BalanceLabTab,
+} from './workspaceState';
 
 type PanelId = 'left' | 'right';
-type LabTab = 'sim' | 'missions' | 'xp' | 'levels' | 'heroes';
+type LabTab = Extract<
+  BalanceLabTab,
+  'sim' | 'missions' | 'xp' | 'levels' | 'gear' | 'shops' | 'heroes' | 'enemies' | 'upgrades' | 'economy'
+>;
 
 const enemyOptions = listEnemyTypeOptions();
 const heroClasses = listHeroClassOptions();
@@ -70,7 +84,12 @@ let activeTab: LabTab = 'sim';
 let missionsMounted = false;
 let xpRewardsMounted = false;
 let heroLevelXpMounted = false;
+let gearItemsMounted = false;
+let shopsMounted = false;
 let heroCombatMounted = false;
+let enemyCombatMounted = false;
+let upgradeMounted = false;
+let economyMounted = false;
 
 const mainEl = document.getElementById('lab-main')!;
 const modeSelect = document.getElementById('lab-mode') as HTMLSelectElement;
@@ -82,7 +101,12 @@ const panelSim = document.getElementById('lab-panel-sim');
 const panelMissions = document.getElementById('lab-panel-missions');
 const panelXp = document.getElementById('lab-panel-xp');
 const panelLevels = document.getElementById('lab-panel-levels');
+const panelGear = document.getElementById('lab-panel-gear');
+const panelShops = document.getElementById('lab-panel-shops');
 const panelHeroes = document.getElementById('lab-panel-heroes');
+const panelEnemies = document.getElementById('lab-panel-enemies');
+const panelUpgrades = document.getElementById('lab-panel-upgrades');
+const panelEconomy = document.getElementById('lab-panel-economy');
 
 function setStatus(message: string, isError = false): void {
   statusEl.textContent = message;
@@ -280,15 +304,15 @@ function renderResults(id: PanelId, _input: LabCombatantInput): void {
 function renderTotalsBar(result: LabCombatantResult): void {
   const bar = document.getElementById('lab-totals');
   if (!bar) return;
-  const cells: Array<[string, string]> = [
-    ['ATK', fmt(result.attack)],
-    ['DEF', fmt(result.defense)],
-    ['HP', fmt(result.maxHealth)],
-    ['ASPD /s', fmt(result.attackSpeed, 3)],
-    ['Hit básico', fmt(result.basicHit)],
-    ['DPS est.', fmt(result.estimatedBasicDps, 1)],
-    ['TTA', `${fmt(result.timeToAction, 2)}s`],
-    ['Skills %', `${fmt(result.treeDamagePercent, 1)}%`],
+  const cells: Array<[string, string, string]> = [
+    ['ATK', fmt(result.attack), 'atk'],
+    ['DEF', fmt(result.defense), 'def'],
+    ['HP', fmt(result.maxHealth), 'hp'],
+    ['ASPD /s', fmt(result.attackSpeed, 3), 'speed'],
+    ['Hit básico', fmt(result.basicHit), 'atk'],
+    ['DPS est.', fmt(result.estimatedBasicDps, 1), 'atk'],
+    ['TTA', `${fmt(result.timeToAction, 2)}s`, 'speed'],
+    ['Skills %', `${fmt(result.treeDamagePercent, 1)}%`, 'xp'],
   ];
   bar.innerHTML = `
     <div class="lab-totals-head">
@@ -297,8 +321,8 @@ function renderTotalsBar(result: LabCombatantResult): void {
     <div class="lab-totals-row">
       ${cells
         .map(
-          ([label, value]) => `
-        <div class="lab-stat lab-stat--compact">
+          ([label, value, tone]) => `
+        <div class="lab-stat lab-stat--compact lab-stat--${tone}">
           <strong>${value}</strong>
           <span>${label}</span>
         </div>`,
@@ -890,8 +914,8 @@ function panelHtml(id: PanelId, input: LabCombatantInput, title: string): string
       ${elementalFieldsHtml(input)}
 
       <div class="lab-actions-row">
-        <button type="button" data-action="preset">Aplicar preset</button>
-        <button type="button" data-action="recalc">Recalcular</button>
+        <button type="button" class="lab-btn--info" data-action="preset">Aplicar preset</button>
+        <button type="button" class="lab-btn--primary" data-action="recalc">Recalcular</button>
       </div>
       <div class="lab-results" id="results-${id}"></div>
       ${id === 'left' && mode === 'compare' ? '<div class="lab-compare-delta" id="compare-delta"></div>' : ''}
@@ -960,7 +984,7 @@ function formulasPanelHtml(): string {
     <aside class="lab-panel lab-panel--formulas" id="panel-formulas">
       <div class="lab-side-head">
         <h2 class="lab-panel-title">Fórmulas e constantes<span>pesos globais + breakdown</span></h2>
-        <button type="button" id="btn-reset-formulas">Reset domínio</button>
+        <button type="button" class="lab-btn--warn" id="btn-reset-formulas">Reset domínio</button>
       </div>
 
       <div class="lab-formula-grid">${groupsHtml}</div>
@@ -975,7 +999,9 @@ function formulasPanelHtml(): string {
                 : `<p class="lab-hint lab-hint--tight">Selecione um herói no painel esquerdo para editar passivas.</p>`
             }
           </div>
-          <button type="button" id="btn-reset-passives" ${!passiveOwner ? 'disabled' : ''}>Reset catálogo</button>
+          <button type="button" class="lab-btn--warn" id="btn-reset-passives" ${
+            !passiveOwner ? 'disabled' : ''
+          }>Reset catálogo</button>
         </div>
         <div class="lab-live-host lab-live-host--passives" data-live-section="passives"></div>
         ${passiveOwner && ownerId ? `<div data-passives-root>${passivesHtml(passiveOwner)}</div>` : ''}
@@ -1267,6 +1293,10 @@ document.getElementById('btn-copy-snippet')?.addEventListener('click', () => {
 
 async function switchLabTab(tab: LabTab): Promise<void> {
   activeTab = tab;
+  setWorkspaceActiveTab(tab);
+  if (window.location.hash !== `#${tab}`) {
+    history.replaceState(null, '', `#${tab}`);
+  }
   document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) => {
     button.classList.toggle('is-active', button.dataset.labTab === tab);
   });
@@ -1274,7 +1304,12 @@ async function switchLabTab(tab: LabTab): Promise<void> {
   panelMissions?.toggleAttribute('hidden', tab !== 'missions');
   panelXp?.toggleAttribute('hidden', tab !== 'xp');
   panelLevels?.toggleAttribute('hidden', tab !== 'levels');
+  panelGear?.toggleAttribute('hidden', tab !== 'gear');
+  panelShops?.toggleAttribute('hidden', tab !== 'shops');
   panelHeroes?.toggleAttribute('hidden', tab !== 'heroes');
+  panelEnemies?.toggleAttribute('hidden', tab !== 'enemies');
+  panelUpgrades?.toggleAttribute('hidden', tab !== 'upgrades');
+  panelEconomy?.toggleAttribute('hidden', tab !== 'economy');
 
   if (tab === 'missions' && !missionsMounted) {
     missionsMounted = true;
@@ -1308,6 +1343,28 @@ async function switchLabTab(tab: LabTab): Promise<void> {
     }
   }
 
+  if (tab === 'gear' && !gearItemsMounted) {
+    gearItemsMounted = true;
+    try {
+      await mountGearItemsTab();
+      setStatus('Aba Itens: edite nome, raridade, requisitos e stats do catálogo');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar itens', true);
+      gearItemsMounted = false;
+    }
+  }
+
+  if (tab === 'shops' && !shopsMounted) {
+    shopsMounted = true;
+    try {
+      await mountShopsTab();
+      setStatus('Aba Lojas: crie, duplique, edite e exclua lojas');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar lojas', true);
+      shopsMounted = false;
+    }
+  }
+
   if (tab === 'heroes' && !heroCombatMounted) {
     heroCombatMounted = true;
     try {
@@ -1316,6 +1373,39 @@ async function switchLabTab(tab: LabTab): Promise<void> {
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Falha ao carregar personagens', true);
       heroCombatMounted = false;
+    }
+  }
+
+  if (tab === 'enemies' && !enemyCombatMounted) {
+    enemyCombatMounted = true;
+    try {
+      await mountEnemyCombatTab();
+      setStatus('Aba Inimigos: edite identidade e skills de monstro e salve');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar inimigos', true);
+      enemyCombatMounted = false;
+    }
+  }
+
+  if (tab === 'upgrades' && !upgradeMounted) {
+    upgradeMounted = true;
+    try {
+      await mountUpgradeTreeTab();
+      setStatus('Aba Melhorias: edite custo, nome e descrição e salve');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar melhorias', true);
+      upgradeMounted = false;
+    }
+  }
+
+  if (tab === 'economy' && !economyMounted) {
+    economyMounted = true;
+    try {
+      await mountEconomyAuditTab();
+      setStatus('Aba Economia: ouro por fase + lojas');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar economia', true);
+      economyMounted = false;
     }
   }
 }
@@ -1328,6 +1418,29 @@ document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) 
   });
 });
 
+window.addEventListener('hashchange', () => {
+  const tab = window.location.hash.slice(1) as LabTab;
+  const exists = document.querySelector(`[data-lab-tab="${tab}"]`);
+  if (exists && tab !== activeTab) void switchLabTab(tab);
+});
+
+window.addEventListener(OPEN_HERO_IN_SIMULATOR_EVENT, (event) => {
+  const heroClass = (event as CustomEvent<{ heroClass: string }>).detail.heroClass;
+  if (!heroClasses.includes(heroClass as LabHeroClass)) return;
+  left = defaultHeroInput(heroClass as LabHeroClass, 10);
+  mode = 'single';
+  modeSelect.value = mode;
+  render();
+  void switchLabTab('sim');
+  setStatus(`${heroClass} carregado no Simulador no nível 10.`);
+});
+
+bindWorkspaceGuards();
 modeSelect.value = mode;
 render();
 setStatus('Lab pronto: identidade no combatente; pesos globais e passivas à direita.');
+
+const initialTab = window.location.hash.slice(1) as LabTab;
+if (document.querySelector(`[data-lab-tab="${initialTab}"]`) && initialTab !== 'sim') {
+  void switchLabTab(initialTab);
+}

@@ -6,3 +6,10 @@ export interface ShopOfferDto {
   gear: GearDto;
   canAfford: boolean;
 }
+
+export interface ShopDto {
+  id: string;
+  name: string;
+  stockSeed: number;
+  difficultyTier: number;
+}

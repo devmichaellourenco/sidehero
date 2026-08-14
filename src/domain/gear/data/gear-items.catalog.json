@@ -12,7 +12,8 @@
       "str": 0
     },
     "spriteId": "worn_sword",
-    "sprite": "gear/items/worn_sword.png"
+    "sprite": "gear/items/worn_sword.png",
+    "basePrice": 6
   },
   {
     "id": "recruit_blade",
@@ -27,7 +28,8 @@
       "str": 0
     },
     "spriteId": "recruit_blade",
-    "sprite": "gear/items/recruit_blade.png"
+    "sprite": "gear/items/recruit_blade.png",
+    "basePrice": 21
   },
   {
     "id": "patrol_sword",
@@ -42,7 +44,8 @@
       "str": 3
     },
     "spriteId": "patrol_sword",
-    "sprite": "gear/items/patrol_sword.png"
+    "sprite": "gear/items/patrol_sword.png",
+    "basePrice": 60
   },
   {
     "id": "valiant_blade",
@@ -59,7 +62,8 @@
       "str": 6
     },
     "spriteId": "valiant_blade",
-    "sprite": "gear/items/valiant_blade.png"
+    "sprite": "gear/items/valiant_blade.png",
+    "basePrice": 278
   },
   {
     "id": "champion_sword",
@@ -77,7 +81,8 @@
       "str": 10
     },
     "spriteId": "champion_sword",
-    "sprite": "gear/items/champion_sword.png"
+    "sprite": "gear/items/champion_sword.png",
+    "basePrice": 603
   },
   {
     "id": "legion_fulgor",
@@ -95,7 +100,8 @@
       "str": 15
     },
     "spriteId": "legion_fulgor",
-    "sprite": "gear/items/legion_fulgor.png"
+    "sprite": "gear/items/legion_fulgor.png",
+    "basePrice": 996
   },
   {
     "id": "field_axe",
@@ -110,7 +116,8 @@
       "str": 0
     },
     "spriteId": "field_axe",
-    "sprite": "gear/items/machado_de_campo.png"
+    "sprite": "gear/items/machado_de_campo.png",
+    "basePrice": 6
   },
   {
     "id": "lumber_axe",
@@ -125,7 +132,8 @@
       "str": 0
     },
     "spriteId": "lumber_axe",
-    "sprite": "gear/items/lumber_axe.png"
+    "sprite": "gear/items/lumber_axe.png",
+    "basePrice": 21
   },
   {
     "id": "scout_axe",
@@ -140,7 +148,8 @@
       "str": 3
     },
     "spriteId": "scout_axe",
-    "sprite": "gear/items/scout_axe.png"
+    "sprite": "gear/items/scout_axe.png",
+    "basePrice": 60
   },
   {
     "id": "headsman_axe",
@@ -157,7 +166,8 @@
       "str": 6
     },
     "spriteId": "headsman_axe",
-    "sprite": "gear/items/headsman_axe.png"
+    "sprite": "gear/items/headsman_axe.png",
+    "basePrice": 278
   },
   {
     "id": "lost_king_axe",
@@ -175,7 +185,8 @@
       "str": 10
     },
     "spriteId": "lost_king_axe",
-    "sprite": "gear/items/lost_king_axe.png"
+    "sprite": "gear/items/lost_king_axe.png",
+    "basePrice": 603
   },
   {
     "id": "fallen_titan_axe",
@@ -193,7 +204,8 @@
       "str": 15
     },
     "spriteId": "fallen_titan_axe",
-    "sprite": "gear/items/fallen_titan_axe.png"
+    "sprite": "gear/items/fallen_titan_axe.png",
+    "basePrice": 996
   },
   {
     "id": "birch_staff",
@@ -210,7 +222,8 @@
       "minLevel": 1
     },
     "spriteId": "birch_staff",
-    "sprite": "gear/items/birch_staff.png"
+    "sprite": "gear/items/birch_staff.png",
+    "basePrice": 6
   },
   {
     "id": "apprentice_staff",
@@ -228,7 +241,8 @@
       "int": 1
     },
     "spriteId": "apprentice_staff",
-    "sprite": "gear/items/apprentice_staff.png"
+    "sprite": "gear/items/apprentice_staff.png",
+    "basePrice": 21
   },
   {
     "id": "arcanist_staff",
@@ -245,7 +259,8 @@
       "int": 3
     },
     "spriteId": "arcanist_staff",
-    "sprite": "gear/items/arcanist_staff.png"
+    "sprite": "gear/items/arcanist_staff.png",
+    "basePrice": 60
   },
   {
     "id": "watchtower_staff",
@@ -264,7 +279,8 @@
       "int": 5
     },
     "spriteId": "watchtower_staff",
-    "sprite": "gear/items/watchtower_staff.png"
+    "sprite": "gear/items/watchtower_staff.png",
+    "basePrice": 278
   },
   {
     "id": "oracle_staff",
@@ -283,7 +299,8 @@
       "int": 8
     },
     "spriteId": "oracle_staff",
-    "sprite": "gear/items/oracle_staff.png"
+    "sprite": "gear/items/oracle_staff.png",
+    "basePrice": 603
   },
   {
     "id": "archmage_staff",
@@ -302,7 +319,8 @@
       "int": 16
     },
     "spriteId": "archmage_staff",
-    "sprite": "gear/items/archmage_staff.png"
+    "sprite": "gear/items/archmage_staff.png",
+    "basePrice": 996
   },
   {
     "id": "iron_dagger",
@@ -317,7 +335,8 @@
       "str": 0
     },
     "spriteId": "iron_dagger",
-    "sprite": "gear/items/iron_dagger.png"
+    "sprite": "gear/items/iron_dagger.png",
+    "basePrice": 6
   },
   {
     "id": "scout_dagger",
@@ -332,7 +351,8 @@
       "str": 0
     },
     "spriteId": "scout_dagger",
-    "sprite": "gear/items/scout_dagger.png"
+    "sprite": "gear/items/scout_dagger.png",
+    "basePrice": 21
   },
   {
     "id": "assassin_dagger",
@@ -347,7 +367,8 @@
       "str": 3
     },
     "spriteId": "assassin_dagger",
-    "sprite": "gear/items/assassin_dagger.png"
+    "sprite": "gear/items/assassin_dagger.png",
+    "basePrice": 60
   },
   {
     "id": "shadow_dagger",
@@ -364,7 +385,8 @@
       "str": 6
     },
     "spriteId": "shadow_dagger",
-    "sprite": "gear/items/shadow_dagger.png"
+    "sprite": "gear/items/shadow_dagger.png",
+    "basePrice": 278
   },
   {
     "id": "thief_king_dagger",
@@ -382,7 +404,8 @@
       "str": 10
     },
     "spriteId": "thief_king_dagger",
-    "sprite": "gear/items/thief_king_dagger.png"
+    "sprite": "gear/items/thief_king_dagger.png",
+    "basePrice": 603
   },
   {
     "id": "veil_dagger",
@@ -400,7 +423,8 @@
       "str": 15
     },
     "spriteId": "veil_dagger",
-    "sprite": "gear/items/veil_dagger.png"
+    "sprite": "gear/items/veil_dagger.png",
+    "basePrice": 996
   },
   {
     "id": "scorched_sword",
@@ -415,7 +439,8 @@
       "str": 0
     },
     "spriteId": "scorched_sword",
-    "sprite": "gear/items/espada_calcinada.png"
+    "sprite": "gear/items/espada_calcinada.png",
+    "basePrice": 6
   },
   {
     "id": "ember_blade",
@@ -430,7 +455,8 @@
       "str": 0
     },
     "spriteId": "ember_blade",
-    "sprite": "gear/items/ember_blade.png"
+    "sprite": "gear/items/ember_blade.png",
+    "basePrice": 21
   },
   {
     "id": "igneous_sword",
@@ -447,7 +473,8 @@
       "str": 3
     },
     "spriteId": "igneous_sword",
-    "sprite": "gear/items/igneous_sword.png"
+    "sprite": "gear/items/igneous_sword.png",
+    "basePrice": 60
   },
   {
     "id": "dragonet_brand",
@@ -466,7 +493,8 @@
       "str": 6
     },
     "spriteId": "dragonet_brand",
-    "sprite": "gear/items/dragonet_brand.png"
+    "sprite": "gear/items/dragonet_brand.png",
+    "basePrice": 278
   },
   {
     "id": "eternal_pyre_sword",
@@ -486,7 +514,8 @@
       "str": 10
     },
     "spriteId": "eternal_pyre_sword",
-    "sprite": "gear/items/eternal_pyre_sword.png"
+    "sprite": "gear/items/eternal_pyre_sword.png",
+    "basePrice": 603
   },
   {
     "id": "ignivar_fulgor",
@@ -506,7 +535,8 @@
       "str": 15
     },
     "spriteId": "ignivar_fulgor",
-    "sprite": "gear/items/ignivar_fulgor.png"
+    "sprite": "gear/items/ignivar_fulgor.png",
+    "basePrice": 996
   },
   {
     "id": "chill_blade",
@@ -521,7 +551,8 @@
       "str": 0
     },
     "spriteId": "chill_blade",
-    "sprite": "gear/items/chill_blade.png"
+    "sprite": "gear/items/chill_blade.png",
+    "basePrice": 6
   },
   {
     "id": "frost_sword",
@@ -536,7 +567,8 @@
       "str": 0
     },
     "spriteId": "frost_sword",
-    "sprite": "gear/items/frost_sword.png"
+    "sprite": "gear/items/frost_sword.png",
+    "basePrice": 21
   },
   {
     "id": "winter_blade",
@@ -553,7 +585,8 @@
       "str": 3
     },
     "spriteId": "winter_blade",
-    "sprite": "gear/items/winter_blade.png"
+    "sprite": "gear/items/winter_blade.png",
+    "basePrice": 60
   },
   {
     "id": "north_cleave",
@@ -572,7 +605,8 @@
       "str": 6
     },
     "spriteId": "north_cleave",
-    "sprite": "gear/items/north_cleave.png"
+    "sprite": "gear/items/north_cleave.png",
+    "basePrice": 278
   },
   {
     "id": "aurora_blade",
@@ -592,7 +626,8 @@
       "str": 10
     },
     "spriteId": "aurora_blade",
-    "sprite": "gear/items/aurora_blade.png"
+    "sprite": "gear/items/aurora_blade.png",
+    "basePrice": 603
   },
   {
     "id": "glaciem_lament",
@@ -612,7 +647,8 @@
       "str": 15
     },
     "spriteId": "glaciem_lament",
-    "sprite": "gear/items/glaciem_lament.png"
+    "sprite": "gear/items/glaciem_lament.png",
+    "basePrice": 996
   },
   {
     "id": "rain_rod",
@@ -629,7 +665,8 @@
       "minLevel": 1
     },
     "spriteId": "rain_rod",
-    "sprite": "gear/items/rain_rod.png"
+    "sprite": "gear/items/rain_rod.png",
+    "basePrice": 6
   },
   {
     "id": "wind_rod",
@@ -646,7 +683,8 @@
       "int": 1
     },
     "spriteId": "wind_rod",
-    "sprite": "gear/items/vara_do_vento.png"
+    "sprite": "gear/items/vara_do_vento.png",
+    "basePrice": 21
   },
   {
     "id": "thunder_rod",
@@ -664,7 +702,8 @@
       "int": 4
     },
     "spriteId": "thunder_rod",
-    "sprite": "gear/items/thunder_rod.png"
+    "sprite": "gear/items/thunder_rod.png",
+    "basePrice": 60
   },
   {
     "id": "tempest_staff",
@@ -683,7 +722,8 @@
       "int": 7
     },
     "spriteId": "tempest_staff",
-    "sprite": "gear/items/tempest_staff.png"
+    "sprite": "gear/items/tempest_staff.png",
+    "basePrice": 278
   },
   {
     "id": "wandering_orb",
@@ -703,7 +743,8 @@
       "int": 12
     },
     "spriteId": "wandering_orb",
-    "sprite": "gear/items/wandering_orb.png"
+    "sprite": "gear/items/wandering_orb.png",
+    "basePrice": 603
   },
   {
     "id": "sky_king_staff",
@@ -723,7 +764,8 @@
       "int": 14
     },
     "spriteId": "sky_king_staff",
-    "sprite": "gear/items/sky_king_staff.png"
+    "sprite": "gear/items/sky_king_staff.png",
+    "basePrice": 996
   },
   {
     "id": "venom_dagger",
@@ -738,7 +780,8 @@
       "str": 0
     },
     "spriteId": "venom_dagger",
-    "sprite": "gear/items/adaga_envenenada.png"
+    "sprite": "gear/items/adaga_envenenada.png",
+    "basePrice": 6
   },
   {
     "id": "viper_fang",
@@ -753,7 +796,8 @@
       "str": 0
     },
     "spriteId": "viper_fang",
-    "sprite": "gear/items/presa_de_vibora.png"
+    "sprite": "gear/items/presa_de_vibora.png",
+    "basePrice": 21
   },
   {
     "id": "toxic_fang",
@@ -770,7 +814,8 @@
       "str": 3
     },
     "spriteId": "toxic_fang",
-    "sprite": "gear/items/toxic_fang.png"
+    "sprite": "gear/items/toxic_fang.png",
+    "basePrice": 60
   },
   {
     "id": "black_bile_blade",
@@ -789,7 +834,8 @@
       "str": 6
     },
     "spriteId": "black_bile_blade",
-    "sprite": "gear/items/black_bile_blade.png"
+    "sprite": "gear/items/black_bile_blade.png",
+    "basePrice": 278
   },
   {
     "id": "ancient_serpent_fang",
@@ -809,7 +855,8 @@
       "str": 10
     },
     "spriteId": "ancient_serpent_fang",
-    "sprite": "gear/items/ancient_serpent_fang.png"
+    "sprite": "gear/items/ancient_serpent_fang.png",
+    "basePrice": 603
   },
   {
     "id": "devourer_tooth",
@@ -829,7 +876,8 @@
       "str": 15
     },
     "spriteId": "devourer_tooth",
-    "sprite": "gear/items/devourer_tooth.png"
+    "sprite": "gear/items/devourer_tooth.png",
+    "basePrice": 996
   },
   {
     "id": "wooden_shield",
@@ -844,7 +892,8 @@
       "dex": 0
     },
     "spriteId": "wooden_shield",
-    "sprite": "gear/items/wooden_shield.png"
+    "sprite": "gear/items/wooden_shield.png",
+    "basePrice": 6
   },
   {
     "id": "reinforced_buckler",
@@ -859,7 +908,8 @@
       "dex": 0
     },
     "spriteId": "reinforced_buckler",
-    "sprite": "gear/items/reinforced_buckler.png"
+    "sprite": "gear/items/reinforced_buckler.png",
+    "basePrice": 21
   },
   {
     "id": "guard_shield",
@@ -874,7 +924,8 @@
       "dex": 3
     },
     "spriteId": "guard_shield",
-    "sprite": "gear/items/guard_shield.png"
+    "sprite": "gear/items/guard_shield.png",
+    "basePrice": 60
   },
   {
     "id": "captain_shield",
@@ -890,7 +941,8 @@
       "dex": 6
     },
     "spriteId": "captain_shield",
-    "sprite": "gear/items/captain_shield.png"
+    "sprite": "gear/items/captain_shield.png",
+    "basePrice": 278
   },
   {
     "id": "bastion_aegis",
@@ -906,7 +958,8 @@
       "dex": 10
     },
     "spriteId": "bastion_aegis",
-    "sprite": "gear/items/bastion_aegis.png"
+    "sprite": "gear/items/bastion_aegis.png",
+    "basePrice": 603
   },
   {
     "id": "unbreakable_bulwark",
@@ -922,7 +975,8 @@
       "dex": 15
     },
     "spriteId": "unbreakable_bulwark",
-    "sprite": "gear/items/unbreakable_bulwark.png"
+    "sprite": "gear/items/unbreakable_bulwark.png",
+    "basePrice": 996
   },
   {
     "id": "leather_jerkin",
@@ -937,7 +991,8 @@
       "dex": 0
     },
     "spriteId": "leather_jerkin",
-    "sprite": "gear/items/leather_jerkin.png"
+    "sprite": "gear/items/leather_jerkin.png",
+    "basePrice": 6
   },
   {
     "id": "chain_mail",
@@ -952,7 +1007,8 @@
       "dex": 0
     },
     "spriteId": "chain_mail",
-    "sprite": "gear/items/chain_mail.png"
+    "sprite": "gear/items/chain_mail.png",
+    "basePrice": 21
   },
   {
     "id": "plate_armor",
@@ -967,7 +1023,8 @@
       "dex": 3
     },
     "spriteId": "plate_armor",
-    "sprite": "gear/items/plate_armor.png"
+    "sprite": "gear/items/plate_armor.png",
+    "basePrice": 60
   },
   {
     "id": "commander_cuirass",
@@ -983,7 +1040,8 @@
       "dex": 6
     },
     "spriteId": "commander_cuirass",
-    "sprite": "gear/items/commander_cuirass.png"
+    "sprite": "gear/items/commander_cuirass.png",
+    "basePrice": 278
   },
   {
     "id": "paladin_plates",
@@ -999,7 +1057,8 @@
       "dex": 10
     },
     "spriteId": "paladin_plates",
-    "sprite": "gear/items/paladin_plates.png"
+    "sprite": "gear/items/paladin_plates.png",
+    "basePrice": 603
   },
   {
     "id": "war_avatar_armor",
@@ -1015,7 +1074,8 @@
       "dex": 15
     },
     "spriteId": "war_avatar_armor",
-    "sprite": "gear/items/war_avatar_armor.png"
+    "sprite": "gear/items/war_avatar_armor.png",
+    "basePrice": 996
   },
   {
     "id": "wool_cloak",
@@ -1030,7 +1090,8 @@
       "dex": 0
     },
     "spriteId": "wool_cloak",
-    "sprite": "gear/items/wool_cloak.png"
+    "sprite": "gear/items/wool_cloak.png",
+    "basePrice": 6
   },
   {
     "id": "traveler_mantle",
@@ -1045,7 +1106,8 @@
       "dex": 0
     },
     "spriteId": "traveler_mantle",
-    "sprite": "gear/items/traveler_mantle.png"
+    "sprite": "gear/items/traveler_mantle.png",
+    "basePrice": 21
   },
   {
     "id": "veteran_mantle",
@@ -1060,7 +1122,8 @@
       "dex": 3
     },
     "spriteId": "veteran_mantle",
-    "sprite": "gear/items/veteran_mantle.png"
+    "sprite": "gear/items/veteran_mantle.png",
+    "basePrice": 60
   },
   {
     "id": "champion_mantle",
@@ -1076,7 +1139,8 @@
       "dex": 6
     },
     "spriteId": "champion_mantle",
-    "sprite": "gear/items/champion_mantle.png"
+    "sprite": "gear/items/champion_mantle.png",
+    "basePrice": 278
   },
   {
     "id": "protector_mantle",
@@ -1092,7 +1156,8 @@
       "dex": 10
     },
     "spriteId": "protector_mantle",
-    "sprite": "gear/items/protector_mantle.png"
+    "sprite": "gear/items/protector_mantle.png",
+    "basePrice": 603
   },
   {
     "id": "eternal_sanctuary_mantle",
@@ -1108,7 +1173,8 @@
       "dex": 15
     },
     "spriteId": "eternal_sanctuary_mantle",
-    "sprite": "gear/items/eternal_sanctuary_mantle.png"
+    "sprite": "gear/items/eternal_sanctuary_mantle.png",
+    "basePrice": 996
   },
   {
     "id": "iron_vest",
@@ -1123,7 +1189,8 @@
       "dex": 0
     },
     "spriteId": "iron_vest",
-    "sprite": "gear/items/iron_vest.png"
+    "sprite": "gear/items/iron_vest.png",
+    "basePrice": 6
   },
   {
     "id": "riveted_armor",
@@ -1138,7 +1205,8 @@
       "dex": 0
     },
     "spriteId": "riveted_armor",
-    "sprite": "gear/items/riveted_armor.png"
+    "sprite": "gear/items/riveted_armor.png",
+    "basePrice": 21
   },
   {
     "id": "sentinel_plate",
@@ -1153,7 +1221,8 @@
       "dex": 3
     },
     "spriteId": "sentinel_plate",
-    "sprite": "gear/items/sentinel_plate.png"
+    "sprite": "gear/items/sentinel_plate.png",
+    "basePrice": 60
   },
   {
     "id": "fortress_cuirass",
@@ -1169,7 +1238,8 @@
       "dex": 6
     },
     "spriteId": "fortress_cuirass",
-    "sprite": "gear/items/fortress_cuirass.png"
+    "sprite": "gear/items/fortress_cuirass.png",
+    "basePrice": 278
   },
   {
     "id": "royal_guard_plate",
@@ -1185,7 +1255,8 @@
       "dex": 10
     },
     "spriteId": "royal_guard_plate",
-    "sprite": "gear/items/royal_guard_plate.png"
+    "sprite": "gear/items/royal_guard_plate.png",
+    "basePrice": 603
   },
   {
     "id": "immortal_dawn_cuirass",
@@ -1201,7 +1272,8 @@
       "dex": 15
     },
     "spriteId": "immortal_dawn_cuirass",
-    "sprite": "gear/items/immortal_dawn_cuirass.png"
+    "sprite": "gear/items/immortal_dawn_cuirass.png",
+    "basePrice": 996
   },
   {
     "id": "charred_cuirass",
@@ -1216,7 +1288,8 @@
       "dex": 0
     },
     "spriteId": "charred_cuirass",
-    "sprite": "gear/items/charred_cuirass.png"
+    "sprite": "gear/items/charred_cuirass.png",
+    "basePrice": 6
   },
   {
     "id": "ember_plate",
@@ -1231,7 +1304,8 @@
       "dex": 0
     },
     "spriteId": "ember_plate",
-    "sprite": "gear/items/ember_plate.png"
+    "sprite": "gear/items/ember_plate.png",
+    "basePrice": 21
   },
   {
     "id": "igneous_cuirass",
@@ -1248,7 +1322,8 @@
       "dex": 3
     },
     "spriteId": "igneous_cuirass",
-    "sprite": "gear/items/igneous_cuirass.png"
+    "sprite": "gear/items/igneous_cuirass.png",
+    "basePrice": 60
   },
   {
     "id": "living_forge_armor",
@@ -1266,7 +1341,8 @@
       "dex": 6
     },
     "spriteId": "living_forge_armor",
-    "sprite": "gear/items/living_forge_armor.png"
+    "sprite": "gear/items/living_forge_armor.png",
+    "basePrice": 278
   },
   {
     "id": "ash_dragon_cuirass",
@@ -1284,7 +1360,8 @@
       "dex": 10
     },
     "spriteId": "ash_dragon_cuirass",
-    "sprite": "gear/items/ash_dragon_cuirass.png"
+    "sprite": "gear/items/ash_dragon_cuirass.png",
+    "basePrice": 603
   },
   {
     "id": "immortal_flame_aegis",
@@ -1302,7 +1379,8 @@
       "dex": 15
     },
     "spriteId": "immortal_flame_aegis",
-    "sprite": "gear/items/immortal_flame_aegis.png"
+    "sprite": "gear/items/immortal_flame_aegis.png",
+    "basePrice": 996
   },
   {
     "id": "cold_jerkin",
@@ -1317,7 +1395,8 @@
       "dex": 0
     },
     "spriteId": "cold_jerkin",
-    "sprite": "gear/items/cold_jerkin.png"
+    "sprite": "gear/items/cold_jerkin.png",
+    "basePrice": 6
   },
   {
     "id": "glacial_mail",
@@ -1332,7 +1411,8 @@
       "dex": 0
     },
     "spriteId": "glacial_mail",
-    "sprite": "gear/items/glacial_mail.png"
+    "sprite": "gear/items/glacial_mail.png",
+    "basePrice": 21
   },
   {
     "id": "ice_mail",
@@ -1349,7 +1429,8 @@
       "dex": 3
     },
     "spriteId": "ice_mail",
-    "sprite": "gear/items/ice_mail.png"
+    "sprite": "gear/items/ice_mail.png",
+    "basePrice": 60
   },
   {
     "id": "frozen_gale_armor",
@@ -1367,7 +1448,8 @@
       "dex": 6
     },
     "spriteId": "frozen_gale_armor",
-    "sprite": "gear/items/frozen_gale_armor.png"
+    "sprite": "gear/items/frozen_gale_armor.png",
+    "basePrice": 278
   },
   {
     "id": "glacial_aurora_plates",
@@ -1385,7 +1467,8 @@
       "dex": 10
     },
     "spriteId": "glacial_aurora_plates",
-    "sprite": "gear/items/glacial_aurora_plates.png"
+    "sprite": "gear/items/glacial_aurora_plates.png",
+    "basePrice": 603
   },
   {
     "id": "winter_titan_cuirass",
@@ -1403,7 +1486,8 @@
       "dex": 15
     },
     "spriteId": "winter_titan_cuirass",
-    "sprite": "gear/items/winter_titan_cuirass.png"
+    "sprite": "gear/items/winter_titan_cuirass.png",
+    "basePrice": 996
   },
   {
     "id": "rain_shield",
@@ -1418,7 +1502,8 @@
       "dex": 0
     },
     "spriteId": "rain_shield",
-    "sprite": "gear/items/escudo_da_chuva.png"
+    "sprite": "gear/items/escudo_da_chuva.png",
+    "basePrice": 6
   },
   {
     "id": "gale_buckler",
@@ -1433,7 +1518,8 @@
       "dex": 0
     },
     "spriteId": "gale_buckler",
-    "sprite": "gear/items/gale_buckler.png"
+    "sprite": "gear/items/gale_buckler.png",
+    "basePrice": 21
   },
   {
     "id": "thunder_shield",
@@ -1450,7 +1536,8 @@
       "dex": 3
     },
     "spriteId": "thunder_shield",
-    "sprite": "gear/items/thunder_shield.png"
+    "sprite": "gear/items/thunder_shield.png",
+    "basePrice": 60
   },
   {
     "id": "tempest_aegis",
@@ -1468,7 +1555,8 @@
       "dex": 6
     },
     "spriteId": "tempest_aegis",
-    "sprite": "gear/items/tempest_aegis.png"
+    "sprite": "gear/items/tempest_aegis.png",
+    "basePrice": 278
   },
   {
     "id": "sky_king_shield",
@@ -1486,7 +1574,8 @@
       "dex": 10
     },
     "spriteId": "sky_king_shield",
-    "sprite": "gear/items/sky_king_shield.png"
+    "sprite": "gear/items/sky_king_shield.png",
+    "basePrice": 603
   },
   {
     "id": "divine_lightning_bulwark",
@@ -1504,7 +1593,8 @@
       "dex": 15
     },
     "spriteId": "divine_lightning_bulwark",
-    "sprite": "gear/items/divine_lightning_bulwark.png"
+    "sprite": "gear/items/divine_lightning_bulwark.png",
+    "basePrice": 996
   },
   {
     "id": "shadow_mantle",
@@ -1519,7 +1609,8 @@
       "dex": 0
     },
     "spriteId": "shadow_mantle",
-    "sprite": "gear/items/shadow_mantle.png"
+    "sprite": "gear/items/shadow_mantle.png",
+    "basePrice": 6
   },
   {
     "id": "abyss_cloak",
@@ -1534,7 +1625,8 @@
       "dex": 0
     },
     "spriteId": "abyss_cloak",
-    "sprite": "gear/items/abyss_cloak.png"
+    "sprite": "gear/items/abyss_cloak.png",
+    "basePrice": 21
   },
   {
     "id": "air_mantle",
@@ -1551,7 +1643,8 @@
       "dex": 3
     },
     "spriteId": "air_mantle",
-    "sprite": "gear/items/air_mantle.png"
+    "sprite": "gear/items/air_mantle.png",
+    "basePrice": 60
   },
   {
     "id": "deep_night_veil",
@@ -1569,7 +1662,8 @@
       "dex": 6
     },
     "spriteId": "deep_night_veil",
-    "sprite": "gear/items/deep_night_veil.png"
+    "sprite": "gear/items/deep_night_veil.png",
+    "basePrice": 278
   },
   {
     "id": "ancient_void_mantle",
@@ -1587,7 +1681,8 @@
       "dex": 10
     },
     "spriteId": "ancient_void_mantle",
-    "sprite": "gear/items/ancient_void_mantle.png"
+    "sprite": "gear/items/ancient_void_mantle.png",
+    "basePrice": 603
   },
   {
     "id": "world_devourer_shroud",
@@ -1605,7 +1700,8 @@
       "dex": 15
     },
     "spriteId": "world_devourer_shroud",
-    "sprite": "gear/items/world_devourer_shroud.png"
+    "sprite": "gear/items/world_devourer_shroud.png",
+    "basePrice": 996
   },
   {
     "id": "copper_ring",
@@ -1620,7 +1716,8 @@
       "int": 0
     },
     "spriteId": "copper_ring",
-    "sprite": "gear/items/copper_ring.png"
+    "sprite": "gear/items/copper_ring.png",
+    "basePrice": 6
   },
   {
     "id": "bronze_ring",
@@ -1635,7 +1732,8 @@
       "int": 0
     },
     "spriteId": "bronze_ring",
-    "sprite": "gear/items/bronze_ring.png"
+    "sprite": "gear/items/bronze_ring.png",
+    "basePrice": 21
   },
   {
     "id": "merchant_ring",
@@ -1650,7 +1748,8 @@
       "int": 3
     },
     "spriteId": "merchant_ring",
-    "sprite": "gear/items/merchant_ring.png"
+    "sprite": "gear/items/merchant_ring.png",
+    "basePrice": 60
   },
   {
     "id": "noble_ring",
@@ -1665,7 +1764,8 @@
       "int": 6
     },
     "spriteId": "noble_ring",
-    "sprite": "gear/items/noble_ring.png"
+    "sprite": "gear/items/noble_ring.png",
+    "basePrice": 278
   },
   {
     "id": "regent_ring",
@@ -1681,7 +1781,8 @@
       "int": 10
     },
     "spriteId": "regent_ring",
-    "sprite": "gear/items/regent_ring.png"
+    "sprite": "gear/items/regent_ring.png",
+    "basePrice": 603
   },
   {
     "id": "ancient_pact_ring",
@@ -1698,7 +1799,8 @@
       "int": 15
     },
     "spriteId": "ancient_pact_ring",
-    "sprite": "gear/items/ancient_pact_ring.png"
+    "sprite": "gear/items/ancient_pact_ring.png",
+    "basePrice": 996
   },
   {
     "id": "wood_talisman",
@@ -1713,7 +1815,8 @@
       "int": 0
     },
     "spriteId": "wood_talisman",
-    "sprite": "gear/items/wood_talisman.png"
+    "sprite": "gear/items/wood_talisman.png",
+    "basePrice": 6
   },
   {
     "id": "novice_amulet",
@@ -1728,7 +1831,8 @@
       "int": 0
     },
     "spriteId": "novice_amulet",
-    "sprite": "gear/items/novice_amulet.png"
+    "sprite": "gear/items/novice_amulet.png",
+    "basePrice": 21
   },
   {
     "id": "faith_amulet",
@@ -1743,7 +1847,8 @@
       "int": 3
     },
     "spriteId": "faith_amulet",
-    "sprite": "gear/items/faith_amulet.png"
+    "sprite": "gear/items/faith_amulet.png",
+    "basePrice": 60
   },
   {
     "id": "cleric_amulet",
@@ -1758,7 +1863,8 @@
       "int": 6
     },
     "spriteId": "cleric_amulet",
-    "sprite": "gear/items/cleric_amulet.png"
+    "sprite": "gear/items/cleric_amulet.png",
+    "basePrice": 278
   },
   {
     "id": "saint_amulet",
@@ -1774,7 +1880,8 @@
       "int": 10
     },
     "spriteId": "saint_amulet",
-    "sprite": "gear/items/saint_amulet.png"
+    "sprite": "gear/items/saint_amulet.png",
+    "basePrice": 603
   },
   {
     "id": "primordial_relic",
@@ -1791,7 +1898,8 @@
       "int": 15
     },
     "spriteId": "primordial_relic",
-    "sprite": "gear/items/primordial_relic.png"
+    "sprite": "gear/items/primordial_relic.png",
+    "basePrice": 996
   },
   {
     "id": "bone_pendant",
@@ -1806,7 +1914,8 @@
       "int": 0
     },
     "spriteId": "bone_pendant",
-    "sprite": "gear/items/bone_pendant.png"
+    "sprite": "gear/items/bone_pendant.png",
+    "basePrice": 6
   },
   {
     "id": "silver_medallion",
@@ -1821,7 +1930,8 @@
       "int": 0
     },
     "spriteId": "silver_medallion",
-    "sprite": "gear/items/silver_medallion.png"
+    "sprite": "gear/items/silver_medallion.png",
+    "basePrice": 21
   },
   {
     "id": "pilgrim_pendant",
@@ -1836,7 +1946,8 @@
       "int": 3
     },
     "spriteId": "pilgrim_pendant",
-    "sprite": "gear/items/pilgrim_pendant.png"
+    "sprite": "gear/items/pilgrim_pendant.png",
+    "basePrice": 60
   },
   {
     "id": "crusader_medallion",
@@ -1851,7 +1962,8 @@
       "int": 6
     },
     "spriteId": "crusader_medallion",
-    "sprite": "gear/items/crusader_medallion.png"
+    "sprite": "gear/items/crusader_medallion.png",
+    "basePrice": 278
   },
   {
     "id": "dynasty_pendant",
@@ -1867,7 +1979,8 @@
       "int": 10
     },
     "spriteId": "dynasty_pendant",
-    "sprite": "gear/items/dynasty_pendant.png"
+    "sprite": "gear/items/dynasty_pendant.png",
+    "basePrice": 603
   },
   {
     "id": "eternal_oath_medallion",
@@ -1884,7 +1997,8 @@
       "int": 15
     },
     "spriteId": "eternal_oath_medallion",
-    "sprite": "gear/items/eternal_oath_medallion.png"
+    "sprite": "gear/items/eternal_oath_medallion.png",
+    "basePrice": 996
   },
   {
     "id": "tin_brooch",
@@ -1899,7 +2013,8 @@
       "int": 0
     },
     "spriteId": "tin_brooch",
-    "sprite": "gear/items/tin_brooch.png"
+    "sprite": "gear/items/tin_brooch.png",
+    "basePrice": 6
   },
   {
     "id": "squire_brooch",
@@ -1914,7 +2029,8 @@
       "int": 0
     },
     "spriteId": "squire_brooch",
-    "sprite": "gear/items/squire_brooch.png"
+    "sprite": "gear/items/squire_brooch.png",
+    "basePrice": 21
   },
   {
     "id": "order_brooch",
@@ -1929,7 +2045,8 @@
       "int": 3
     },
     "spriteId": "order_brooch",
-    "sprite": "gear/items/order_brooch.png"
+    "sprite": "gear/items/order_brooch.png",
+    "basePrice": 60
   },
   {
     "id": "knight_insignia",
@@ -1944,7 +2061,8 @@
       "int": 6
     },
     "spriteId": "knight_insignia",
-    "sprite": "gear/items/knight_insignia.png"
+    "sprite": "gear/items/knight_insignia.png",
+    "basePrice": 278
   },
   {
     "id": "marshal_brooch",
@@ -1960,7 +2078,8 @@
       "int": 10
     },
     "spriteId": "marshal_brooch",
-    "sprite": "gear/items/marshal_brooch.png"
+    "sprite": "gear/items/marshal_brooch.png",
+    "basePrice": 603
   },
   {
     "id": "war_god_insignia",
@@ -1977,7 +2096,8 @@
       "int": 15
     },
     "spriteId": "war_god_insignia",
-    "sprite": "gear/items/war_god_insignia.png"
+    "sprite": "gear/items/war_god_insignia.png",
+    "basePrice": 996
   },
   {
     "id": "flawless_ruby_ring",
@@ -1992,7 +2112,8 @@
       "int": 0
     },
     "spriteId": "flawless_ruby_ring",
-    "sprite": "gear/items/flawless_ruby_ring.png"
+    "sprite": "gear/items/flawless_ruby_ring.png",
+    "basePrice": 6
   },
   {
     "id": "ruby_ring",
@@ -2007,7 +2128,8 @@
       "int": 0
     },
     "spriteId": "ruby_ring",
-    "sprite": "gear/items/ruby_ring.png"
+    "sprite": "gear/items/ruby_ring.png",
+    "basePrice": 21
   },
   {
     "id": "crimson_signet",
@@ -2026,7 +2148,8 @@
       "int": 3
     },
     "spriteId": "crimson_signet",
-    "sprite": "gear/items/crimson_signet.png"
+    "sprite": "gear/items/crimson_signet.png",
+    "basePrice": 60
   },
   {
     "id": "ruby_flame_ring",
@@ -2045,7 +2168,8 @@
       "int": 6
     },
     "spriteId": "ruby_flame_ring",
-    "sprite": "gear/items/ruby_flame_ring.png"
+    "sprite": "gear/items/ruby_flame_ring.png",
+    "basePrice": 278
   },
   {
     "id": "ember_king_signet",
@@ -2065,7 +2189,8 @@
       "int": 10
     },
     "spriteId": "ember_king_signet",
-    "sprite": "gear/items/ember_king_signet.png"
+    "sprite": "gear/items/ember_king_signet.png",
+    "basePrice": 603
   },
   {
     "id": "draconic_ruby_pact",
@@ -2086,7 +2211,8 @@
       "int": 15
     },
     "spriteId": "draconic_ruby_pact",
-    "sprite": "gear/items/draconic_ruby_pact.png"
+    "sprite": "gear/items/draconic_ruby_pact.png",
+    "basePrice": 996
   },
   {
     "id": "sapphire_ring",
@@ -2101,7 +2227,8 @@
       "int": 0
     },
     "spriteId": "sapphire_ring",
-    "sprite": "gear/items/sapphire_ring.png"
+    "sprite": "gear/items/sapphire_ring.png",
+    "basePrice": 6
   },
   {
     "id": "sapphire_amulet",
@@ -2116,7 +2243,8 @@
       "int": 0
     },
     "spriteId": "sapphire_amulet",
-    "sprite": "gear/items/sapphire_amulet.png"
+    "sprite": "gear/items/sapphire_amulet.png",
+    "basePrice": 21
   },
   {
     "id": "frost_charm",
@@ -2135,7 +2263,8 @@
       "int": 3
     },
     "spriteId": "frost_charm",
-    "sprite": "gear/items/frost_charm.png"
+    "sprite": "gear/items/frost_charm.png",
+    "basePrice": 60
   },
   {
     "id": "frozen_lake_amulet",
@@ -2154,7 +2283,8 @@
       "int": 6
     },
     "spriteId": "frozen_lake_amulet",
-    "sprite": "gear/items/frozen_lake_amulet.png"
+    "sprite": "gear/items/frozen_lake_amulet.png",
+    "basePrice": 278
   },
   {
     "id": "eternal_aurora_sapphire",
@@ -2174,7 +2304,8 @@
       "int": 10
     },
     "spriteId": "eternal_aurora_sapphire",
-    "sprite": "gear/items/eternal_aurora_sapphire.png"
+    "sprite": "gear/items/eternal_aurora_sapphire.png",
+    "basePrice": 603
   },
   {
     "id": "glaciem_tear",
@@ -2195,7 +2326,8 @@
       "int": 15
     },
     "spriteId": "glaciem_tear",
-    "sprite": "gear/items/glaciem_tear.png"
+    "sprite": "gear/items/glaciem_tear.png",
+    "basePrice": 996
   },
   {
     "id": "copper_bracelet",
@@ -2210,7 +2342,8 @@
       "int": 0
     },
     "spriteId": "copper_bracelet",
-    "sprite": "gear/items/bracelete_de_cobre.png"
+    "sprite": "gear/items/bracelete_de_cobre.png",
+    "basePrice": 6
   },
   {
     "id": "voltaic_bracelet",
@@ -2225,7 +2358,8 @@
       "int": 0
     },
     "spriteId": "voltaic_bracelet",
-    "sprite": "gear/items/voltaic_bracelet.png"
+    "sprite": "gear/items/voltaic_bracelet.png",
+    "basePrice": 21
   },
   {
     "id": "thunder_circuit",
@@ -2244,7 +2378,8 @@
       "int": 3
     },
     "spriteId": "thunder_circuit",
-    "sprite": "gear/items/thunder_circuit.png"
+    "sprite": "gear/items/thunder_circuit.png",
+    "basePrice": 60
   },
   {
     "id": "tempest_bracelet",
@@ -2263,7 +2398,8 @@
       "int": 6
     },
     "spriteId": "tempest_bracelet",
-    "sprite": "gear/items/tempest_bracelet.png"
+    "sprite": "gear/items/tempest_bracelet.png",
+    "basePrice": 278
   },
   {
     "id": "lightning_king_torque",
@@ -2283,7 +2419,8 @@
       "int": 10
     },
     "spriteId": "lightning_king_torque",
-    "sprite": "gear/items/lightning_king_torque.png"
+    "sprite": "gear/items/lightning_king_torque.png",
+    "basePrice": 603
   },
   {
     "id": "divine_thunder_ring",
@@ -2304,7 +2441,8 @@
       "int": 15
     },
     "spriteId": "divine_thunder_ring",
-    "sprite": "gear/items/divine_thunder_ring.png"
+    "sprite": "gear/items/divine_thunder_ring.png",
+    "basePrice": 996
   },
   {
     "id": "obsidian_pendant",
@@ -2319,7 +2457,8 @@
       "int": 0
     },
     "spriteId": "obsidian_pendant",
-    "sprite": "gear/items/obsidian_pendant.png"
+    "sprite": "gear/items/obsidian_pendant.png",
+    "basePrice": 6
   },
   {
     "id": "air_pendant",
@@ -2334,7 +2473,8 @@
       "int": 0
     },
     "spriteId": "air_pendant",
-    "sprite": "gear/items/air_pendant.png"
+    "sprite": "gear/items/air_pendant.png",
+    "basePrice": 21
   },
   {
     "id": "entropy_pendant",
@@ -2353,7 +2493,8 @@
       "int": 3
     },
     "spriteId": "entropy_pendant",
-    "sprite": "gear/items/entropy_pendant.png"
+    "sprite": "gear/items/entropy_pendant.png",
+    "basePrice": 60
   },
   {
     "id": "void_medallion",
@@ -2372,7 +2513,8 @@
       "int": 6
     },
     "spriteId": "void_medallion",
-    "sprite": "gear/items/void_medallion.png"
+    "sprite": "gear/items/void_medallion.png",
+    "basePrice": 278
   },
   {
     "id": "ancient_abyss_pendant",
@@ -2392,7 +2534,8 @@
       "int": 10
     },
     "spriteId": "ancient_abyss_pendant",
-    "sprite": "gear/items/ancient_abyss_pendant.png"
+    "sprite": "gear/items/ancient_abyss_pendant.png",
+    "basePrice": 603
   },
   {
     "id": "forgotten_god_seal",
@@ -2413,7 +2556,8 @@
       "int": 15
     },
     "spriteId": "forgotten_god_seal",
-    "sprite": "gear/items/forgotten_god_seal.png"
+    "sprite": "gear/items/forgotten_god_seal.png",
+    "basePrice": 996
   },
   {
     "id": "galneon_recruit_sword",
@@ -2429,7 +2573,8 @@
       "heroId": "hero-1"
     },
     "spriteId": "galneon_recruit_sword",
-    "sprite": "gear/items/galneon_recruit_sword.png"
+    "sprite": "gear/items/galneon_recruit_sword.png",
+    "basePrice": 6
   },
   {
     "id": "galneon_squire_blade",
@@ -2445,7 +2590,8 @@
       "heroId": "hero-1"
     },
     "spriteId": "galneon_squire_blade",
-    "sprite": "gear/items/galneon_squire_blade.png"
+    "sprite": "gear/items/galneon_squire_blade.png",
+    "basePrice": 21
   },
   {
     "id": "galneon_knight_sword",
@@ -2461,7 +2607,8 @@
       "heroId": "hero-1"
     },
     "spriteId": "galneon_knight_sword",
-    "sprite": "gear/items/galneon_knight_sword.png"
+    "sprite": "gear/items/galneon_knight_sword.png",
+    "basePrice": 60
   },
   {
     "id": "galneon_commander_blade",
@@ -2479,7 +2626,8 @@
       "heroId": "hero-1"
     },
     "spriteId": "galneon_commander_blade",
-    "sprite": "gear/items/galneon_commander_blade.png"
+    "sprite": "gear/items/galneon_commander_blade.png",
+    "basePrice": 278
   },
   {
     "id": "galneon_champion_sword",
@@ -2498,7 +2646,8 @@
       "heroId": "hero-1"
     },
     "spriteId": "galneon_champion_sword",
-    "sprite": "gear/items/galneon_champion_sword.png"
+    "sprite": "gear/items/galneon_champion_sword.png",
+    "basePrice": 603
   },
   {
     "id": "galneon_oath_blade",
@@ -2517,7 +2666,8 @@
       "heroId": "hero-1"
     },
     "spriteId": "galneon_oath_blade",
-    "sprite": "gear/items/galneon_oath_blade.png"
+    "sprite": "gear/items/galneon_oath_blade.png",
+    "basePrice": 996
   },
   {
     "id": "ignus_ix",
@@ -2533,7 +2683,8 @@
     "namedLegendary": true,
     "salvageBlocked": true,
     "spriteId": "ignus_ix",
-    "sprite": "gear/items/ignus_ix.png"
+    "sprite": "gear/items/ignus_ix.png",
+    "basePrice": 1150
   },
   {
     "id": "sword_vorpal_lupnus",
@@ -2550,7 +2701,8 @@
     "unique": true,
     "salvageBlocked": true,
     "spriteId": "sword_vorpal_lupnus",
-    "sprite": "gear/items/sword_vorpal_lupnus.png"
+    "sprite": "gear/items/sword_vorpal_lupnus.png",
+    "basePrice": 666
   },
   {
     "id": "soler_plegius",
@@ -2567,7 +2719,8 @@
     "namedLegendary": true,
     "salvageBlocked": true,
     "spriteId": "soler_plegius",
-    "sprite": "gear/items/soler_plegius.png"
+    "sprite": "gear/items/soler_plegius.png",
+    "basePrice": 702
   },
   {
     "id": "morthaven_seal",
@@ -2584,7 +2737,8 @@
     "namedLegendary": true,
     "salvageBlocked": true,
     "spriteId": "morthaven_seal",
-    "sprite": "gear/items/morthaven_seal.png"
+    "sprite": "gear/items/morthaven_seal.png",
+    "basePrice": 1230
   },
   {
     "id": "rain_kontempler_bow",
@@ -2608,7 +2762,8 @@
     "salvageBlocked": true,
     "lootPool": false,
     "spriteId": "rain_kontempler_bow",
-    "sprite": "gear/items/rain_kontempler_bow.png"
+    "sprite": "gear/items/rain_kontempler_bow.png",
+    "basePrice": 135
   },
   {
     "id": "side_stendra_cache_charm",
@@ -2627,6 +2782,7 @@
     "lootPool": false,
     "salvageBlocked": true,
     "spriteId": "side_stendra_cache_charm",
-    "sprite": "gear/items/copper_ring.png"
+    "sprite": "gear/items/copper_ring.png",
+    "basePrice": 48
   }
 ]

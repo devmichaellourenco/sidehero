@@ -1,13 +1,13 @@
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
+import { ShopDto, ShopOfferDto } from '../../application/dto/ShopOfferDto';
 import { IGameClient } from '../../application/ports/IGameClient';
-import { parseShopOfferCatalogKey } from '../../domain/services/ShopService';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import { ToastController } from '../components/ToastController';
 import { RewardCelebrationPort } from '../delight/RewardCelebrationPort';
 
 export interface ShopFlowState {
   offers: ShopOfferDto[];
+  activeShop: ShopDto | null;
   refreshCost: number;
   canAffordRefresh: boolean;
   shopRefreshUnlocked: boolean;
@@ -18,6 +18,7 @@ export interface ShopFlowState {
 export class ShopFlow {
   readonly state: ShopFlowState = {
     offers: [],
+    activeShop: null,
     refreshCost: 0,
     canAffordRefresh: false,
     shopRefreshUnlocked: false,
@@ -65,7 +66,9 @@ export class ShopFlow {
   }
 
   async refreshShop(): Promise<void> {
-    const response = await this.client.send({ type: 'REFRESH_SHOP' });
+    const shopId = this.state.activeShop?.id;
+    if (!shopId) return;
+    const response = await this.client.send({ type: 'REFRESH_SHOP', shopId });
     if (!response.ok) {
       this.toasts.show(response.error ?? 'Falha ao renovar loja', 'info');
       return;
@@ -78,24 +81,15 @@ export class ShopFlow {
   }
 
   async buyOffer(offerId: string): Promise<void> {
-    const response = await this.client.send({ type: 'BUY_SHOP_OFFER', offerId });
+    const shopId = this.state.activeShop?.id;
+    if (!shopId) return;
+    const response = await this.client.send({ type: 'BUY_SHOP_OFFER', shopId, offerId });
     if (!response.ok) {
       this.toasts.show(response.error ?? 'Falha na compra', 'info');
       return;
     }
 
-    this.state.offers = this.state.offers
-      .filter((offer) => offer.id !== offerId)
-      .map((offer) => ({
-        ...offer,
-        canAfford: response.state.gold >= offer.price,
-      }));
-    this.state.canAffordRefresh = response.state.gold >= this.state.refreshCost;
-    this.state.shopRefreshRemaining = Math.max(
-      0,
-      response.state.shopRefreshLimit - response.state.shopRefreshUses,
-    );
-
+    this.applyPurchasedOffer(offerId, response.state.gold);
     this.onStateUpdated(response.state);
 
     if (response.purchasedGear) {
@@ -106,8 +100,11 @@ export class ShopFlow {
   }
 
   async buyAndEquipOffer(offerId: string, heroId: string): Promise<void> {
+    const shopId = this.state.activeShop?.id;
+    if (!shopId) return;
     const response = await this.client.send({
       type: 'BUY_AND_EQUIP_SHOP_OFFER',
+      shopId,
       offerId,
       heroId,
     });
@@ -116,18 +113,7 @@ export class ShopFlow {
       return;
     }
 
-    this.state.offers = this.state.offers
-      .filter((offer) => offer.id !== offerId)
-      .map((offer) => ({
-        ...offer,
-        canAfford: response.state.gold >= offer.price,
-      }));
-    this.state.canAffordRefresh = response.state.gold >= this.state.refreshCost;
-    this.state.shopRefreshRemaining = Math.max(
-      0,
-      response.state.shopRefreshLimit - response.state.shopRefreshUses,
-    );
-
+    this.applyPurchasedOffer(offerId, response.state.gold);
     this.onStateUpdated(response.state);
 
     if (response.purchasedGear) {
@@ -139,18 +125,30 @@ export class ShopFlow {
   }
 
   async ensureFreshOffers(state: GameStateDto): Promise<void> {
-    const sampleOfferId = this.state.offers[0]?.id;
-    if (!sampleOfferId) return;
-
-    const catalog = parseShopOfferCatalogKey(sampleOfferId);
-    if (!catalog || catalog.stage === state.difficultyTier) return;
+    if (
+      !this.state.activeShop ||
+      this.state.activeShop.difficultyTier === state.difficultyTier
+    ) return;
 
     await this.loadShop();
     this.refreshModal();
   }
 
+  /** Compra não consome cota de renovação: só o ouro disponível muda. */
+  private applyPurchasedOffer(offerId: string, gold: number): void {
+    this.state.offers = this.state.offers
+      .filter((offer) => offer.id !== offerId)
+      .map((offer) => ({
+        ...offer,
+        canAfford: gold >= offer.price,
+      }));
+    this.state.canAffordRefresh =
+      this.state.shopRefreshRemaining > 0 && gold >= this.state.refreshCost;
+  }
+
   private applyShopPayload(response: {
     shopOffers?: ShopOfferDto[];
+    activeShop?: ShopDto | null;
     shopRefreshCost?: number;
     canAffordShopRefresh?: boolean;
     shopRefreshUnlocked?: boolean;
@@ -158,6 +156,9 @@ export class ShopFlow {
   }): void {
     if (response.shopOffers) {
       this.state.offers = response.shopOffers;
+    }
+    if (response.activeShop !== undefined) {
+      this.state.activeShop = response.activeShop;
     }
     if (typeof response.shopRefreshCost === 'number') {
       this.state.refreshCost = response.shopRefreshCost;

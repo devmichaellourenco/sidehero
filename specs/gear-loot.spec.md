@@ -23,6 +23,7 @@ Todo loot de combate chega como **baú**; ao abrir, o gear é enviado ao invent�
 - [x] Inventário (global e embedded): filtro por categoria exclusivamente pelos ícones do loadout; toolbar de ordenação única; sem painel inline duplicado para escolha por slot
 - [x] Bordas de raridade consistentes em inventário, loadout, loja, forja, loot e tooltips: common cinza, uncommon verde, rare azul, epic lilás, legendary dourado, mythic vermelho com brilho
 - [x] Raridade **mythic** não aparece em loja nem em loot de área/baú antes do Ato 3 de Valdris (`MythicGearAccessPolicy`, tier ≥ 121)
+- [x] Todo item do catálogo possui `basePrice` fixo e editável pelo Balance Lab; preço não é derivado da raridade/tier em runtime
 
 ## Critérios — camp-missions (novos)
 

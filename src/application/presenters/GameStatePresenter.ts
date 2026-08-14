@@ -17,6 +17,7 @@ import { ChestDto, EnemyDto, GameStateDto } from '../dto/GameStateDto';
 import { mapStageProgress } from '../mappers/StageProgressMapper';
 import { markerTrackRatio } from '../../domain/campaign/StageProgress';
 import { getShopRefreshLimit } from '../../domain/upgrades/ShopRefreshRules';
+import { activeShopRefreshUses } from '../services/ShopStateResolver';
 import { PartyEditPolicy } from '../../domain/party/PartyEditPolicy';
 import { CHEST_TYPE_LABELS } from '../../domain/combat/ChestType';
 import { listEnemyCombatSkillsByType } from '../../domain/progression/combat/EnemyCombatSkillCatalog';
@@ -158,7 +159,7 @@ export class GameStatePresenter {
       totalBattlesWon: state.totalBattlesWon,
       pendingChestCount: state.pendingChests().length,
       upgradeLevels,
-      shopRefreshUses: state.shopRefreshUses,
+      shopRefreshUses: activeShopRefreshUses(state),
       shopRefreshLimit: getShopRefreshLimit(state.upgradeLevels),
       purchasableUpgradeCount: this.upgradeService.countAvailable(state),
       featureFlags: mapFeatureFlags(state.upgradeLevels),

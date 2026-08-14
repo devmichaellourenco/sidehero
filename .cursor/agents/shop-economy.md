@@ -24,4 +24,5 @@ Ofertas, compra e renovação da loja.
 
 - [ ] ID de oferta estável no tier (seed determinístico por tier)
 - [ ] `ShopService.test.ts` atualizado
-- [ ] Cota refresh via `shop_refresh` feature level
+- [ ] Cota refresh via `shop_refresh` feature level **por loja**
+- [ ] Lojas configuráveis vinculadas a `main:{phaseId}`

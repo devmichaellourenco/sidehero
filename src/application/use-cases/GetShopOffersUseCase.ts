@@ -3,13 +3,14 @@ import { IGameStateRepository } from '../../domain/repositories/IGameStateReposi
 import {
   calculateShopRefreshCost,
   canRefreshShop,
-  getShopRefreshLimit,
+  shopRefreshRemaining,
 } from '../../domain/upgrades/ShopRefreshRules';
 import { ShopService } from '../../domain/services/ShopService';
-import { ShopOfferDto } from '../dto/ShopOfferDto';
+import { ShopDto, ShopOfferDto } from '../dto/ShopOfferDto';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
+import { resolveActiveShopState } from '../services/ShopStateResolver';
 
 export interface GetShopOffersResult {
   state: GameStateDto;
@@ -18,6 +19,7 @@ export interface GetShopOffersResult {
   canAffordRefresh: boolean;
   shopRefreshUnlocked: boolean;
   shopRefreshRemaining: number;
+  shop: ShopDto | null;
 }
 
 export class GetShopOffersUseCase {
@@ -28,13 +30,14 @@ export class GetShopOffersUseCase {
   ) {}
 
   async execute(): Promise<GetShopOffersResult> {
-    const state = await this.repository.load();
-    const offers = this.shopService
-      .generateOffers(
-        state.currentDifficultyTier(),
-        state.shopRefreshSeed,
-        state.campaignProgress.missionProgress.completedMainIds,
-      )
+    const loadedState = await this.repository.load();
+    const active = resolveActiveShopState(loadedState, this.shopService);
+    const state = active?.state ?? loadedState;
+    if (state !== loadedState) await this.repository.save(state);
+    const tier = state.currentDifficultyTier();
+    const offers = (active
+      ? this.shopService.offersFromStock(active.shop, tier, active.stock)
+      : [])
       .map((offer) => ({
         id: offer.id,
         price: offer.price,
@@ -42,17 +45,32 @@ export class GetShopOffersUseCase {
         canAfford: state.gold.canAfford(offer.price),
       }));
 
-    const refreshCost = calculateShopRefreshCost(state.currentDifficultyTier(), state.upgradeLevels);
-    const limit = getShopRefreshLimit(state.upgradeLevels);
+    const refreshCost = calculateShopRefreshCost(tier, state.upgradeLevels);
+    const refreshUses = active?.stock.refreshUses ?? 0;
     const shopRefreshUnlocked = FeatureAccessPolicy.resolve(state.upgradeLevels).shopRefresh;
 
     return {
       state: this.presenter.present(state),
       offers,
       refreshCost,
-      canAffordRefresh: canRefreshShop(state),
+      canAffordRefresh:
+        active !== null &&
+        canRefreshShop({
+          upgradeLevels: state.upgradeLevels,
+          refreshUses,
+          tier,
+          gold: state.gold,
+        }),
       shopRefreshUnlocked,
-      shopRefreshRemaining: Math.max(0, limit - state.shopRefreshUses),
+      shopRefreshRemaining: shopRefreshRemaining(state.upgradeLevels, refreshUses),
+      shop: active
+        ? {
+            id: active.shop.id,
+            name: active.shop.name,
+            stockSeed: active.stock.seed,
+            difficultyTier: tier,
+          }
+        : null,
     };
   }
 }

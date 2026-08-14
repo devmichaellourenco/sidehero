@@ -241,6 +241,23 @@ export {
   normalizePhaseRewardOverride,
 } from './phaseRewardsCatalog';
 export {
+  buildGearItemsLabPayload,
+  getGearItemLabDetail,
+  buildGearItemOverrideFromDraft,
+  applyLabGearItemOverrides,
+  normalizeGearItemOverride,
+} from './gearItemsCatalog';
+export {
+  applyLabShopOverrides,
+  buildShopLabPayload,
+  buildShopOverrideFromDraft,
+  getShopLabDetail,
+} from './shopCatalog';
+export {
+  isCanonicalShopId,
+  normalizeShopOverridesFile,
+} from '../../src/domain/shop/ConfigurableShopCatalog';
+export {
   buildHeroLevelXpLabPayload,
   applyLabHeroLevelXpOverrides,
   normalizeHeroLevelXpOverrides,
@@ -254,3 +271,24 @@ export {
   normalizePassiveOverride,
   normalizeAscensionOverride,
 } from './heroCombatCatalog';
+export {
+  buildEnemyCombatLabPayload,
+  normalizeEnemyCombatOverridesFile,
+  normalizeEnemyIdentityOverride,
+  normalizeEnemyMonsterSkillOverride,
+} from './enemyCombatCatalog';
+export {
+  buildUpgradeTreeLabPayload,
+  normalizeUpgradeOverride,
+  normalizeUpgradeOverridesFile,
+} from './upgradeTreeCatalog';
+export {
+  buildEconomyAuditPayload,
+} from './economyAuditCatalog';
+export {
+  previewShopStock,
+} from './shopCatalog';
+export {
+  estimatePhasePower,
+  DEFAULT_REFERENCE_PARTY,
+} from '../../src/domain/balance/WavePartyPowerEstimate';

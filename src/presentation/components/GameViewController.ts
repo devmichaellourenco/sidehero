@@ -1029,6 +1029,7 @@ export class GameViewController {
       return;
     }
     this.shopFlow.state.offers = response.shopOffers ?? [];
+    this.shopFlow.state.activeShop = response.activeShop ?? null;
     if (typeof response.shopRefreshCost === 'number') {
       this.shopFlow.state.refreshCost = response.shopRefreshCost;
     }

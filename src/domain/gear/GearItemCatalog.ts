@@ -7,6 +7,10 @@ import {
   isGalneonCatalogItem,
   isLootPoolItem,
 } from './GearItemDefinition';
+import {
+  applyGearItemOverride,
+  getGearItemOverride,
+} from './GearItemOverrides';
 import catalogData from './data/gear-items.catalog.json';
 import legacyTemplateMap from './data/gear-legacy-template-map.json';
 
@@ -36,12 +40,26 @@ const LEGACY_NAME_TO_CATALOG_ID: Record<string, string> = {
   'Pingente Entropia': 'entropy_pendant',
 };
 
-export function listGearCatalogItems(): readonly GearItemDefinition[] {
+/** Definição canônica (JSON), sem override do Balance Lab. */
+export function getCatalogGearItem(catalogItemId: string): GearItemDefinition | undefined {
+  return BY_ID.get(catalogItemId);
+}
+
+export function listCatalogGearItems(): readonly GearItemDefinition[] {
   return CATALOG_ITEMS;
 }
 
+/** Itens efetivos (catálogo + override do Balance Lab). */
+export function listGearCatalogItems(): readonly GearItemDefinition[] {
+  return CATALOG_ITEMS.map((entry) =>
+    applyGearItemOverride(entry, getGearItemOverride(entry.id)),
+  );
+}
+
 export function getGearCatalogItem(catalogItemId: string): GearItemDefinition | undefined {
-  return BY_ID.get(catalogItemId);
+  const baseline = BY_ID.get(catalogItemId);
+  if (!baseline) return undefined;
+  return applyGearItemOverride(baseline, getGearItemOverride(catalogItemId));
 }
 
 export function getGearCatalogSprite(catalogItemId: string): string | undefined {
@@ -49,7 +67,7 @@ export function getGearCatalogSprite(catalogItemId: string): string | undefined 
 }
 
 export function listLootCatalogItemsForSlot(slot: GearSlot): GearItemDefinition[] {
-  return CATALOG_ITEMS.filter((entry) => entry.slot === slot && isLootPoolItem(entry));
+  return listGearCatalogItems().filter((entry) => entry.slot === slot && isLootPoolItem(entry));
 }
 
 export function listLootCatalogItems(
@@ -58,7 +76,8 @@ export function listLootCatalogItems(
   difficultyTier: number,
 ): GearItemDefinition[] {
   const range = gearLevelRangeForTier(difficultyTier);
-  const matches = CATALOG_ITEMS.filter((entry) =>
+  const catalog = listGearCatalogItems();
+  const matches = catalog.filter((entry) =>
     gearItemMatchesLoot(entry, slot, rarity, range.min, range.max),
   );
 
@@ -66,13 +85,15 @@ export function listLootCatalogItems(
     return matches;
   }
 
-  return CATALOG_ITEMS.filter(
+  return catalog.filter(
     (entry) => isLootPoolItem(entry) && entry.slot === slot && entry.rarity === rarity,
   );
 }
 
 export function listGalneonCatalogItemsForRarity(rarity: GearRarity): GearItemDefinition[] {
-  return CATALOG_ITEMS.filter((entry) => isGalneonCatalogItem(entry) && entry.rarity === rarity);
+  return listGearCatalogItems().filter(
+    (entry) => isGalneonCatalogItem(entry) && entry.rarity === rarity,
+  );
 }
 
 export function resolveLegacyCatalogItemId(
@@ -116,7 +137,7 @@ export function findCatalogItemBySpriteId(
     return (inRange.length > 0 ? inRange : galneonItems)[0];
   }
 
-  let candidates = CATALOG_ITEMS.filter(
+  let candidates = listGearCatalogItems().filter(
     (entry) => entry.spriteId === spriteId && entry.rarity === rarity,
   );
 
@@ -156,7 +177,7 @@ export function resolveCatalogItemId(
 ): string | undefined {
   const normalized = stripGearRaritySuffix(name);
 
-  const byExactName = CATALOG_ITEMS.find(
+  const byExactName = listGearCatalogItems().find(
     (entry) => entry.slot === slot && stripGearRaritySuffix(entry.name) === normalized,
   );
   if (byExactName) {
@@ -202,6 +223,7 @@ export function createGearFromCatalogItem(catalogItemId: string, instanceId?: st
     id: catalogId,
     spriteId,
     sprite: _sprite,
+    basePrice: _basePrice,
     lootPool: _lootPool,
     exclusiveHeroId,
     unique: _unique,

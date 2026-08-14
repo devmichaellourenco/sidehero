@@ -23,10 +23,11 @@ description: Gear, inventário, baús e equipamento no Side Hero. Use para loot,
 - Badge no ícone da grid: ▲ / ▼ / ▲▼ conforme deltas por status (`resolveGridCompareBadge`); tooltip com números coloridos (`listGearStatDeltas`)
 - Inline equip no drawer sem modal empilhado quando possível
 - Mythic: loja/loot de área só a partir do Ato 3 de Valdris (`MythicGearAccessPolicy`)
+- Balance Lab (aba **Itens**): overrides de nome, `basePrice`, stats e requisitos em `gear-item-overrides.json`, mesclados por `getGearCatalogItem` — não editar o JSON canônico pelo lab
 
 ## Testes
 
-`GearEquipService.test.ts`, `GearDragDropPolicy.test.ts`, `EquipGearRace.test.ts`, `ChestService.test.ts` — criar ou atualizar; não executar automaticamente.
+`GearEquipService.test.ts`, `GearDragDropPolicy.test.ts`, `EquipGearRace.test.ts`, `ChestService.test.ts`, `GearItemOverrides.test.ts` — criar ou atualizar; não executar automaticamente.
 
 ## Workflow do agente
 

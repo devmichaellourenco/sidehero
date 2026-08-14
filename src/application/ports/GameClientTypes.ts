@@ -3,7 +3,7 @@ import { MissionBoardDto } from '../dto/MissionBoardDto';
 import { CombatFloatingEventDto } from '../dto/CombatFloatingEventDto';
 import { CombatSkillVfxDto } from '../dto/CombatSkillVfxDto';
 import { GameStateDto, GearDto } from '../dto/GameStateDto';
-import { ShopOfferDto } from '../dto/ShopOfferDto';
+import { ShopDto, ShopOfferDto } from '../dto/ShopOfferDto';
 import { AscensionOptionDto } from '../dto/AscensionOptionDto';
 import { SkillNodeDto } from '../dto/SkillNodeDto';
 import { UpgradeNodeDto } from '../dto/UpgradeNodeDto';
@@ -40,9 +40,9 @@ export type GameMessage =
   | { type: 'FORGE_FUSE_GEAR'; gearIds: string[] }
   | { type: 'FORGE_SALVAGE_GEAR'; gearId: string }
   | { type: 'GET_SHOP_OFFERS' }
-  | { type: 'BUY_SHOP_OFFER'; offerId: string }
-  | { type: 'BUY_AND_EQUIP_SHOP_OFFER'; offerId: string; heroId: string }
-  | { type: 'REFRESH_SHOP' }
+  | { type: 'BUY_SHOP_OFFER'; shopId: string; offerId: string }
+  | { type: 'BUY_AND_EQUIP_SHOP_OFFER'; shopId: string; offerId: string; heroId: string }
+  | { type: 'REFRESH_SHOP'; shopId: string }
   | { type: 'GET_UPGRADE_TREE' }
   | { type: 'PURCHASE_UPGRADE'; upgradeId: string }
   | { type: 'GET_META_TREE' }
@@ -77,6 +77,7 @@ export type GameResponse =
       openedGears?: GearDto[];
       equippedCount?: number;
       shopOffers?: ShopOfferDto[];
+      activeShop?: ShopDto | null;
       purchasedGear?: GearDto;
       shopRefreshCost?: number;
       canAffordShopRefresh?: boolean;

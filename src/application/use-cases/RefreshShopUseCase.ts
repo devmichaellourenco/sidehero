@@ -3,13 +3,14 @@ import { IGameStateRepository } from '../../domain/repositories/IGameStateReposi
 import {
   calculateShopRefreshCost,
   canRefreshShop,
-  getShopRefreshLimit,
+  shopRefreshRemaining,
 } from '../../domain/upgrades/ShopRefreshRules';
 import { ShopService } from '../../domain/services/ShopService';
-import { ShopOfferDto } from '../dto/ShopOfferDto';
+import { ShopDto, ShopOfferDto } from '../dto/ShopOfferDto';
 import { mapGearToDto } from '../mappers/GearDtoMapper';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
+import { resolveActiveShopState } from '../services/ShopStateResolver';
 
 export interface RefreshShopResult {
   state: GameStateDto;
@@ -17,6 +18,7 @@ export interface RefreshShopResult {
   refreshCost: number;
   canAffordRefresh: boolean;
   shopRefreshRemaining: number;
+  shop: ShopDto;
 }
 
 export class RefreshShopUseCase {
@@ -26,38 +28,50 @@ export class RefreshShopUseCase {
     private readonly presenter: GameStatePresenter,
   ) {}
 
-  async execute(): Promise<RefreshShopResult> {
-    const state = await this.repository.load();
+  async execute(shopId?: string): Promise<RefreshShopResult> {
+    const loadedState = await this.repository.load();
+    const active = resolveActiveShopState(loadedState, this.shopService);
+    if (!active) {
+      throw new Error('Nenhuma loja desbloqueada');
+    }
+    if (shopId && active.shop.id !== shopId) {
+      throw new Error('Loja não está mais ativa');
+    }
+    const state = active.state;
 
     if (!FeatureAccessPolicy.resolve(state.upgradeLevels).shopRefresh) {
       throw new Error('Renovar loja não desbloqueado');
     }
 
-    const limit = getShopRefreshLimit(state.upgradeLevels);
-    if (state.shopRefreshUses >= limit) {
-      throw new Error('Limite de renovações deste stage atingido');
+    const tier = state.currentDifficultyTier();
+    if (shopRefreshRemaining(state.upgradeLevels, active.stock.refreshUses) <= 0) {
+      throw new Error('Limite de renovações desta loja atingido');
     }
 
-    const refreshCost = calculateShopRefreshCost(state.currentDifficultyTier(), state.upgradeLevels);
+    const refreshCost = calculateShopRefreshCost(tier, state.upgradeLevels);
 
     if (!state.gold.canAfford(refreshCost)) {
       throw new Error('Ouro insuficiente para renovar a loja');
     }
 
+    const nextStock = this.shopService.generateConfiguredStock(
+      active.shop,
+      tier,
+      active.stock.seed + 1,
+      state.campaignProgress.missionProgress.completedMainIds,
+      active.stock.purchasedLimitedItemIds,
+      active.stock.refreshUses + 1,
+    );
     const nextState = state
       .withGold(state.gold.spend(refreshCost))
-      .withShopRefreshSeed(state.shopRefreshSeed + 1)
-      .withShopRefreshUses(state.shopRefreshUses + 1)
+      .withShopStock(active.shop.id, nextStock)
       .addLog(`Renovou a loja por ${refreshCost} ouro`);
 
     await this.repository.save(nextState);
 
+    const nextTier = nextState.currentDifficultyTier();
     const offers = this.shopService
-      .generateOffers(
-        nextState.currentDifficultyTier(),
-        nextState.shopRefreshSeed,
-        nextState.campaignProgress.missionProgress.completedMainIds,
-      )
+      .offersFromStock(active.shop, nextTier, nextStock)
       .map((offer) => ({
         id: offer.id,
         price: offer.price,
@@ -65,17 +79,26 @@ export class RefreshShopUseCase {
         canAfford: nextState.gold.canAfford(offer.price),
       }));
 
-    const nextRefreshCost = calculateShopRefreshCost(
-      nextState.currentDifficultyTier(),
-      nextState.upgradeLevels,
-    );
-
     return {
       state: this.presenter.present(nextState),
       offers,
-      refreshCost: nextRefreshCost,
-      canAffordRefresh: canRefreshShop(nextState),
-      shopRefreshRemaining: Math.max(0, limit - nextState.shopRefreshUses),
+      refreshCost: calculateShopRefreshCost(nextTier, nextState.upgradeLevels),
+      canAffordRefresh: canRefreshShop({
+        upgradeLevels: nextState.upgradeLevels,
+        refreshUses: nextStock.refreshUses,
+        tier: nextTier,
+        gold: nextState.gold,
+      }),
+      shopRefreshRemaining: shopRefreshRemaining(
+        nextState.upgradeLevels,
+        nextStock.refreshUses,
+      ),
+      shop: {
+        id: active.shop.id,
+        name: active.shop.name,
+        stockSeed: nextStock.seed,
+        difficultyTier: nextTier,
+      },
     };
   }
 }

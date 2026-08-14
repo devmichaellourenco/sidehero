@@ -1,4 +1,8 @@
 import { CombatantIdentity } from '../combat/CombatantIdentity';
+import {
+  applyEnemyIdentityOverride,
+  getEnemyIdentityOverride,
+} from './EnemyCombatOverrides';
 import { EnemyType, isKnownEnemyType } from './EnemyRosterCatalog';
 
 export type EnemyCombatIdentity = CombatantIdentity;
@@ -78,11 +82,19 @@ export const ENEMY_COMBAT_IDENTITY: Record<EnemyType, EnemyCombatIdentity> = {
   vorax: row(SEED),
 };
 
-export function getEnemyCombatIdentity(enemyType: string): EnemyCombatIdentity {
+export function getCatalogEnemyCombatIdentity(enemyType: string): EnemyCombatIdentity {
   if (isKnownEnemyType(enemyType)) {
-    return ENEMY_COMBAT_IDENTITY[enemyType];
+    return row(ENEMY_COMBAT_IDENTITY[enemyType]);
   }
   return row(SEED);
+}
+
+/** Identidade efetiva (catálogo + override do Balance Lab). */
+export function getEnemyCombatIdentity(enemyType: string): EnemyCombatIdentity {
+  return applyEnemyIdentityOverride(
+    getCatalogEnemyCombatIdentity(enemyType),
+    getEnemyIdentityOverride(enemyType),
+  );
 }
 
 export function listEnemyCombatIdentities(): ReadonlyArray<{

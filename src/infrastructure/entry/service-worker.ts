@@ -196,6 +196,7 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
         ok: true,
         state: result.state,
         shopOffers: result.offers,
+        activeShop: result.shop,
         shopRefreshCost: result.refreshCost,
         canAffordShopRefresh: result.canAffordRefresh,
         shopRefreshUnlocked: result.shopRefreshUnlocked,
@@ -203,22 +204,24 @@ async function handleMessage(message: GameMessage): Promise<GameResponse> {
       };
     }
     case 'BUY_SHOP_OFFER': {
-      const result = await app.buyShopOffer.execute(message.offerId);
+      const result = await app.buyShopOffer.execute(message.offerId, message.shopId);
       return { ok: true, state: result.state, purchasedGear: result.purchasedGear };
     }
     case 'BUY_AND_EQUIP_SHOP_OFFER': {
       const result = await app.buyAndEquipShopOffer.execute(
         message.offerId,
         message.heroId,
+        message.shopId,
       );
       return { ok: true, state: result.state, purchasedGear: result.purchasedGear };
     }
     case 'REFRESH_SHOP': {
-      const result = await app.refreshShop.execute();
+      const result = await app.refreshShop.execute(message.shopId);
       return {
         ok: true,
         state: result.state,
         shopOffers: result.offers,
+        activeShop: result.shop,
         shopRefreshCost: result.refreshCost,
         canAffordShopRefresh: result.canAffordRefresh,
         shopRefreshRemaining: result.shopRefreshRemaining,

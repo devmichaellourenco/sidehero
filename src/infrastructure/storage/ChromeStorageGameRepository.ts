@@ -8,6 +8,7 @@ import {
   getUnlockedBattleSkillSlotCount,
   trimEquippedSkillIds,
 } from '../../domain/progression/SkillBattleSlots';
+import type { ShopStockProps } from '../../domain/shop/ShopStock';
 import { UpgradeLevels } from '../../domain/upgrades/FeatureKey';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { StorageCapacityPolicy } from '../../domain/storage/StorageCapacityPolicy';
@@ -136,6 +137,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       totalBattlesWon: props.totalBattlesWon,
       lastTickAt: props.lastTickAt,
       shopRefreshSeed: props.shopRefreshSeed,
+      shopStocks: props.shopStocks,
       upgradeLevels: props.upgradeLevels,
       shopRefreshUses: props.shopRefreshUses,
       loadoutEditOpen: props.loadoutEditOpen === true,
@@ -209,6 +211,10 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       totalChestsOpened,
       lastTickAt: typeof raw.lastTickAt === 'number' ? raw.lastTickAt : Date.now(),
       shopRefreshSeed: typeof raw.shopRefreshSeed === 'number' ? raw.shopRefreshSeed : 0,
+      shopStocks:
+        raw.shopStocks && typeof raw.shopStocks === 'object'
+          ? (raw.shopStocks as Record<string, ShopStockProps>)
+          : {},
       upgradeLevels,
       shopRefreshUses: typeof raw.shopRefreshUses === 'number' ? raw.shopRefreshUses : 0,
       phaseRestartOnResume: raw.phaseRestartOnResume === true,

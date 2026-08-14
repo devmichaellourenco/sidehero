@@ -3,7 +3,10 @@ import { EncounterResolver } from '../campaign/EncounterResolver';
 import { calculateForgeSalvageGold } from '../forge/ForgeSalvageGoldCatalog';
 import { referenceGoldPerPhaseForTier } from './EconomyReference';
 import { stageScalingEntryForTier } from '../progression/StageScalingCatalog';
-import { calculateShopItemPrice, calculateShopRefreshCost } from '../shop/ShopPricing';
+import {
+  calculateReferenceShopPrice,
+  calculateShopRefreshCost,
+} from '../shop/ShopPricing';
 import { getShopMaxRarityIndex } from '../shop/ShopCatalog';
 import { GearRarity } from '../entities/Gear';
 
@@ -153,8 +156,8 @@ export function summarizeEconomyRatios(tier: number): EconomyRatioSnapshot {
   const economy = summarizePhaseEconomy(phaseId);
   const goldPerPhase = economy?.totalGold ?? referenceGoldPerPhaseForTier(tier);
   const referenceGold = referenceGoldPerPhaseForTier(tier);
-  const epicShopPrice = calculateShopItemPrice(tier, 'epic');
-  const rareShopPrice = calculateShopItemPrice(tier, 'rare');
+  const epicShopPrice = calculateReferenceShopPrice(tier, 'epic');
+  const rareShopPrice = calculateReferenceShopPrice(tier, 'rare');
   const epicSalvageGold = calculateForgeSalvageGold('epic', tier);
 
   return {

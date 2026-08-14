@@ -7,6 +7,7 @@ import { mapGearToDto } from '../mappers/GearDtoMapper';
 import { assertLoadoutEditable } from '../policies/assertLoadoutEditable';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto, GearDto } from '../dto/GameStateDto';
+import { resolveActiveShopState } from '../services/ShopStateResolver';
 
 export interface BuyAndEquipShopOfferResult {
   state: GameStateDto;
@@ -24,16 +25,26 @@ export class BuyAndEquipShopOfferUseCase {
     private readonly gearStorageService: GearStorageService = new GearStorageService(),
   ) {}
 
-  async execute(offerId: string, heroId: string): Promise<BuyAndEquipShopOfferResult> {
+  async execute(
+    offerId: string,
+    heroId: string,
+    shopId?: string,
+  ): Promise<BuyAndEquipShopOfferResult> {
     const state = await this.repository.load();
     assertLoadoutEditable(state);
 
-    const offer = this.shopService.findOffer(
-      state.currentDifficultyTier(),
-      state.shopRefreshSeed,
-      offerId,
-      state.campaignProgress.missionProgress.completedMainIds,
-    );
+    const active = resolveActiveShopState(state, this.shopService);
+    if (shopId && active?.shop.id !== shopId) {
+      throw new Error('Loja não está mais ativa');
+    }
+    const offer = active
+      ? this.shopService.findConfiguredOffer(
+          active.shop,
+          state.currentDifficultyTier(),
+          active.stock,
+          offerId,
+        )
+      : null;
     if (!offer) {
       throw new Error('Oferta não encontrada');
     }
@@ -88,11 +99,13 @@ export class BuyAndEquipShopOfferUseCase {
       }
     }
 
-    const nextState = state
+    const nextStock = this.shopService.consumeOffer(active!.stock, offer);
+    const nextState = active!.state
       .withGold(state.gold.spend(offer.price))
       .withHeroes(heroes)
       .withInventory(inventory)
       .withStash(stash)
+      .withShopStock(active!.shop.id, nextStock)
       .addLog(
         `Comprou e equipou ${purchasedGear.name} por ${offer.price} ouro${storageLog}`,
       );

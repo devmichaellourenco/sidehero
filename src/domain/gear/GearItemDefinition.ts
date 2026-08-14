@@ -4,6 +4,8 @@ import { GearRequirements, GearRarity, GearSlot } from '../entities/Gear';
 export type GearItemDefinition = {
   readonly id: string;
   readonly name: string;
+  /** Valor canônico do item antes de modificadores da loja. */
+  readonly basePrice: number;
   /** ID único do sprite — igual ao `id` do item. */
   readonly spriteId: string;
   /** Caminho relativo em `panel/assets/` (único por item; imagem pode ser placeholder copiado). */

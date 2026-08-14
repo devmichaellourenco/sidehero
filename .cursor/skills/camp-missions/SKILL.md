@@ -55,7 +55,7 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 - Timeline na missão: `stage-progress-bar`
 - Cenas: `story-scenes`
 - Loot: `gear-loot`
-- Coordenação de números: skill `game-balance` + Balance Lab (aba Missões, filtro por capítulo)
+- Coordenação de números: skill `game-balance` + Balance Lab (abas Missões e Lojas)
 
 ## Arquivos frequentes (alvo)
 

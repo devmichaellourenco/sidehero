@@ -4,6 +4,7 @@ import { ENEMY_MONSTER_COMBAT_SKILL_CATALOG } from './EnemyMonsterCombatSkillCat
 import { BASIC_ATTACK_SKILL, ENEMY_BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 import { HERO_COMBAT_SKILL_CATALOG } from './HeroCombatSkillCatalog';
 import { applySkillCombatOverride } from '../HeroCombatOverrides';
+import { applyEnemyMonsterSkillOverride } from '../../enemies/EnemyCombatOverrides';
 
 const REGISTRY = new Map<string, CombatSkillDefinition>();
 
@@ -51,7 +52,8 @@ export function resolveCombatSkill(
     return base;
   }
 
-  const enemySkill = applyEnemyBorrowedCombatSkillOverrides(base);
+  const borrowed = applyEnemyBorrowedCombatSkillOverrides(base);
+  const enemySkill = applyEnemyMonsterSkillOverride(borrowed);
 
   if (enemySkill.targetPool === 'enemies') {
     return { ...enemySkill, targetPool: 'heroes' };

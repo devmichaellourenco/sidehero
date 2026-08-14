@@ -9,6 +9,8 @@ import {
   SHOP_OFFER_COUNT,
 } from '../shop/ShopCatalog';
 import { parseShopOfferCatalogKey, ShopService } from './ShopService';
+import { getGearCatalogItem } from '../gear/GearItemCatalog';
+import { resolveActiveShop } from '../shop/ConfigurableShopCatalog';
 
 describe('ShopService', () => {
   const shopService = new ShopService(new LootService());
@@ -47,6 +49,49 @@ describe('ShopService', () => {
     );
   });
 
+  it('gera estoque da loja ativa apenas com o pool explícito e preço configurado', () => {
+    const completed = [mainMissionId('1-1')];
+    const shop = resolveActiveShop(completed)!;
+    const stock = shopService.generateConfiguredStock(shop, 1, 0, completed);
+    const offers = shopService.offersFromStock(shop, 1, stock);
+
+    expect(offers.length).toBeGreaterThan(0);
+    expect(offers.every((offer) => shop.catalogItemIds.includes(offer.catalogItemId))).toBe(true);
+    expect(offers.every((offer) => offer.price >= 1)).toBe(true);
+  });
+
+  it('não repõe item épico ou superior já comprado na mesma loja', () => {
+    const completed = [mainMissionId('1-50')];
+    const shop = resolveActiveShop(completed)!;
+    const blocked = 'valiant_blade';
+    const stock = shopService.generateConfiguredStock(shop, 50, 3, completed, [blocked]);
+
+    expect(stock.catalogItemIds).not.toContain(blocked);
+    expect(stock.purchasedLimitedItemIds).toContain(blocked);
+  });
+
+  it('consome oferta e bloqueia épico+ sem alterar a cota de renovação', () => {
+    const completed = [mainMissionId('1-50')];
+    const shop = resolveActiveShop(completed)!;
+    const stock = {
+      seed: 0,
+      catalogItemIds: ['worn_sword', 'valiant_blade'],
+      consumedOfferIds: [] as string[],
+      purchasedLimitedItemIds: [] as string[],
+      refreshUses: 2,
+    };
+    const [commonOffer, epicOffer] = shopService.offersFromStock(shop, 50, stock);
+
+    const afterCommon = shopService.consumeOffer(stock, commonOffer);
+    expect(afterCommon.consumedOfferIds).toContain(commonOffer.id);
+    expect(afterCommon.purchasedLimitedItemIds).toEqual([]);
+    expect(afterCommon.refreshUses).toBe(2);
+
+    const afterEpic = shopService.consumeOffer(afterCommon, epicOffer);
+    expect(afterEpic.purchasedLimitedItemIds).toContain('valiant_blade');
+    expect(afterEpic.refreshUses).toBe(2);
+  });
+
   it('sem mains concluídas não vende acima de uncommon', () => {
     for (let seed = 0; seed < 5; seed += 1) {
       const offers = shopService.generateOffers(1, seed, []);
@@ -58,13 +103,32 @@ describe('ShopService', () => {
     }
   });
 
-  it('preço escala com tier e raridade', () => {
-    const common = shopService.calculateItemPrice(1, 'common');
-    const epic = shopService.calculateItemPrice(1, 'epic');
-    const epicLate = shopService.calculateItemPrice(30, 'epic');
+  it('usa o preço base fixo do item, sem tier/raridade na precificação', () => {
+    const item = getGearCatalogItem('worn_sword')!;
+    const context = { tier: 1, refreshSeed: 0, offerIndex: 0 };
 
-    expect(epic).toBeGreaterThan(common);
-    expect(epicLate).toBeGreaterThan(epic);
+    expect(shopService.calculateItemPrice(item, context)).toBe(item.basePrice);
+    expect(
+      shopService.calculateItemPrice(item, { ...context, tier: 200 }),
+    ).toBe(item.basePrice);
+  });
+
+  it('aplica modificadores próprios da loja sobre o preço base', () => {
+    const discountedShop = new ShopService(new LootService(), {
+      modifiersFor: () => [
+        { multiplier: 0.8 },
+        { flatAdjustment: -2 },
+      ],
+    });
+    const item = getGearCatalogItem('worn_sword')!;
+
+    expect(
+      discountedShop.calculateItemPrice(item, {
+        tier: 1,
+        refreshSeed: 0,
+        offerIndex: 0,
+      }),
+    ).toBe(Math.max(1, Math.floor(item.basePrice * 0.8 - 2)));
   });
 });
 

@@ -268,6 +268,7 @@ export class ModalStackController {
           state,
           {
             offers: this.shopFlow.state.offers,
+            activeShop: this.shopFlow.state.activeShop,
             refreshCost: this.shopFlow.state.refreshCost,
             canAffordRefresh: this.shopFlow.state.canAffordRefresh,
             shopRefreshUnlocked: this.shopFlow.state.shopRefreshUnlocked,

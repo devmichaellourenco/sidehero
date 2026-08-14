@@ -1,7 +1,7 @@
 import { PhaseDefinition } from '../campaign/PhaseDefinition';
 import { PhaseId } from '../campaign/CampaignIds';
 import { spawnEnemiesForWave } from '../campaign/WaveEnemyFactory';
-import { calculateShopItemPrice } from '../shop/ShopPricing';
+import { calculateReferenceShopPrice } from '../shop/ShopPricing';
 import { referenceGoldPerPhaseForTier } from './EconomyReference';
 
 /** Épico na loja deve custar pelo menos N clears de milestone (BAL-007). */
@@ -13,7 +13,7 @@ export const MILESTONE_GOLD_FLOOR_RATIO = 1.5;
 const scaleCache = new Map<PhaseId, number>();
 
 export function milestoneGoldCapForTier(tier: number): number {
-  const epicPrice = calculateShopItemPrice(tier, 'epic');
+  const epicPrice = calculateReferenceShopPrice(tier, 'epic');
   return Math.floor(epicPrice / MIN_EPIC_PHASES_ON_MILESTONE_GOLD);
 }
 

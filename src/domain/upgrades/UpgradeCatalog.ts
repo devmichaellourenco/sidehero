@@ -1,4 +1,5 @@
 import { UpgradeDefinition } from './UpgradeDefinition';
+import { applyUpgradeOverride } from './UpgradeOverrides';
 
 export const UPGRADE_CATALOG: UpgradeDefinition[] = [
   {
@@ -386,6 +387,15 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
   },
 ];
 
-export function getUpgradeById(id: string): UpgradeDefinition | undefined {
+export function getCatalogUpgradeById(id: string): UpgradeDefinition | undefined {
   return UPGRADE_CATALOG.find((entry) => entry.id === id);
+}
+
+export function getUpgradeById(id: string): UpgradeDefinition | undefined {
+  const baseline = getCatalogUpgradeById(id);
+  return baseline ? applyUpgradeOverride(baseline) : undefined;
+}
+
+export function listEffectiveUpgrades(): UpgradeDefinition[] {
+  return UPGRADE_CATALOG.map((entry) => applyUpgradeOverride(entry));
 }

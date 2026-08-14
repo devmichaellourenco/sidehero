@@ -11,10 +11,9 @@
       <div>
         <h1>Balance Lab</h1>
         <p class="lab-sub">
-          Simulador local, editor de batalhas, XP por fase, XP por nível e
-          recursos dos heróis.
-          Overrides gravam em <code>phase-battle-overrides.json</code> com backup
-          automático. Não entra no release.
+          Simulador local, editor de batalhas, XP por fase, XP por nível, itens,
+          lojas e recursos dos heróis.
+          Overrides gravam em JSON com backup automático. Não entra no release.
         </p>
       </div>
       <nav class="lab-tabs" aria-label="Seções do lab">
@@ -22,7 +21,12 @@
         <button type="button" class="lab-tab" data-lab-tab="missions">Missões</button>
         <button type="button" class="lab-tab" data-lab-tab="xp">XP por fase</button>
         <button type="button" class="lab-tab" data-lab-tab="levels">XP por nível</button>
+        <button type="button" class="lab-tab" data-lab-tab="gear">Itens</button>
+        <button type="button" class="lab-tab" data-lab-tab="shops">Lojas</button>
         <button type="button" class="lab-tab" data-lab-tab="heroes">Personagens</button>
+        <button type="button" class="lab-tab" data-lab-tab="enemies">Inimigos</button>
+        <button type="button" class="lab-tab" data-lab-tab="upgrades">Melhorias</button>
+        <button type="button" class="lab-tab" data-lab-tab="economy">Economia</button>
       </nav>
     </header>
 
@@ -35,8 +39,8 @@
             <option value="compare">Lado a lado</option>
           </select>
         </label>
-        <button type="button" id="btn-export-json">Export JSON</button>
-        <button type="button" id="btn-import-json">Import JSON</button>
+        <button type="button" class="lab-btn--info" id="btn-export-json">Export JSON</button>
+        <button type="button" class="lab-btn--create" id="btn-import-json">Import JSON</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden />
       </div>
 
@@ -60,9 +64,9 @@
           </label>
         </div>
         <div class="lab-io-actions">
-          <button type="button" id="btn-apply-json">Aplicar JSON da caixa</button>
-          <button type="button" id="btn-copy-json">Copiar JSON</button>
-          <button type="button" id="btn-copy-snippet">Copiar snippet</button>
+          <button type="button" class="lab-btn--primary" id="btn-apply-json">Aplicar JSON da caixa</button>
+          <button type="button" class="lab-btn--info" id="btn-copy-json">Copiar JSON</button>
+          <button type="button" class="lab-btn--info" id="btn-copy-snippet">Copiar snippet</button>
         </div>
         <p id="lab-status" class="lab-status" role="status"></p>
       </section>
@@ -80,8 +84,28 @@
       <section id="lab-level-xp" class="lab-xp-rewards" aria-label="Progressão de XP por nível"></section>
     </div>
 
+    <div id="lab-panel-gear" class="lab-panel" hidden>
+      <section id="lab-gear-items" class="lab-gear-items" aria-label="Editor de itens"></section>
+    </div>
+
+    <div id="lab-panel-shops" class="lab-panel" hidden>
+      <section id="lab-shops" class="lab-shops" aria-label="Editor de lojas"></section>
+    </div>
+
     <div id="lab-panel-heroes" class="lab-panel" hidden>
       <section id="lab-hero-combat" class="lab-hero-combat" aria-label="Editor de recursos dos heróis"></section>
+    </div>
+
+    <div id="lab-panel-enemies" class="lab-panel" hidden>
+      <section id="lab-enemy-combat" class="lab-enemy-combat" aria-label="Editor de inimigos"></section>
+    </div>
+
+    <div id="lab-panel-upgrades" class="lab-panel" hidden>
+      <section id="lab-upgrades" class="lab-upgrades" aria-label="Editor de melhorias"></section>
+    </div>
+
+    <div id="lab-panel-economy" class="lab-panel" hidden>
+      <section id="lab-economy-audit" class="lab-economy-audit" aria-label="Auditoria de economia"></section>
     </div>
 
     <script type="module" src="./lab.js"></script>

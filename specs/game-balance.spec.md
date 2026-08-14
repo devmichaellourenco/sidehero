@@ -2,7 +2,7 @@
 
 ## Status
 
-**Aceite:** 11/11 (100%) · auditoria 2026-08-11  
+**Aceite:** 12/12 (100%) · auditoria 2026-08-14  
 **Testes obrigatórios:** 9/9 + `BalanceAudit.test.ts` + `PhaseBattleOverrides`
 
 ## Objetivo
@@ -29,7 +29,7 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted; overrides do Balance Lab | `combat-campaign`, `camp-missions` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `PhaseBattleOverrides`, `PhaseRewardOverrides` |
 | Missões / board | Oferta normal 2–4 no capítulo da main (ex.: 1-1 → 1–5); refresh por visitas; templates ★; unlock side; fração na derrota normal | `camp-missions` | `NormalMissionOffer`, `NormalMissionMainBand`, `MissionCatalog`, `CampMissionBoard`, `ResolveMissionOutcome` |
 | **Skills e progressão** | `Base × (powerPerRank × nível) × (attr × fator)`; cooldowns; ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `SkillDamageBalance`, `HeroLevelXpCatalog` |
-| **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
+| **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ConfigurableShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
 | **Integração** | Mudança num domínio não quebra curva global | todas | esta spec + checklist abaixo |
 
@@ -64,7 +64,14 @@ Poder × crítico → split damageComponents[]
 - [x] Balance Lab: aba **Missões** edita waves/inimigos por fase; filtros por capítulo da main / tipo / mapa / busca; aviso de template compartilhado (main↔normal); overrides em `phase-battle-overrides.json` mesclados via `PhaseBattleOverrides` / `CampaignCatalog.resolvePhase`; backups em `data/backups/phase-battle-overrides/`
 - [x] Balance Lab: aba **XP por fase** lista XP/ouro por fase (soma de kills), acumulado, nível projetado e filtros mapa/capítulo; edição de alvos com save em `phase-reward-overrides.json` + backups (`GET|PUT|DELETE /api/phase-rewards`)
 - [x] Balance Lab: aba **XP por nível** lista a curva de level-up 1→100 (XP base, XP efetiva, crescimento vs nível anterior, XP acumulada) com filtro por faixa de 10 níveis; edição por nível com save em `hero-level-xp-overrides.json` + backups (`GET|PUT|DELETE /api/hero-level-xp`); merge em `expRequiredToAdvanceFromLevel`
+- [x] Balance Lab: aba **Itens** lista o catálogo (`gear-items.catalog.json`) com filtros slot/raridade/busca; edita nome, preço base fixo, raridade, flags, requisitos e stats; save em `gear-item-overrides.json` + backups (`GET|PUT|DELETE /api/gear-items`); merge em `getGearCatalogItem` / loot lists
+- [x] Balance Lab: aba **Lojas** cria/edita/duplica/exclui lojas vinculadas a marcos `main:X-Y`, com pool explícito e modificadores globais; save em `shop-overrides.json` + backups (`GET|PUT|DELETE /api/shops`); merge em `listConfiguredShops` / `resolveActiveShop`
 - [x] Balance Lab: aba **Personagens** edita stats base (ATK/DEF/HP), identidade, skills de combate, passivas e evoluções (ascensão); save em `hero-combat-overrides.json` + backups (`GET|PUT /api/hero-combat`); merge em `getHeroCombatSkill` / `getHeroCombatIdentity` / `getHeroBaseStats` / `getPassiveDefinition` / `getAscensionById`
+- [x] Balance Lab: aba **Inimigos** edita identidade e skills de monstro por tipo de inimigo; roster completo com tier/role/sprite; save em `enemy-combat-overrides.json` + backups (`GET|PUT /api/enemy-combat`); merge em `EnemyCombatOverrides` / `EnemyCombatIdentityCatalog` / `CombatSkillRegistry`
+- [x] Balance Lab: aba **Melhorias** edita custo, nome e descrição dos upgrades da árvore; save em `upgrade-overrides.json` + backups (`GET|PUT /api/upgrades`); merge em `UpgradeOverrides` / `UpgradeCatalog`
+- [x] Balance Lab: aba **Economia** auditoria read-only de ouro por fase (por mapa/capítulo) + pool de lojas com preços efetivos e custo de renovação (`GET /api/economy-audit`)
+- [x] Balance Lab: **Wave Power** em Missões — botão no editor de batalha carrega poder da fase via `GET /api/wave-power?phaseId=` usando `estimatePhasePower` + `DEFAULT_REFERENCE_PARTY`; mostra HP total, DPS da party, tempo de clear e pressão por wave
+- [x] Balance Lab: **Stock Preview** de loja — painel seed/tier na aba Lojas gera prévia determinística do estoque via `GET /api/shops/:id/stock-preview?seed=&tier=`
 
 ## Coordenação com outros agents
 
@@ -131,6 +138,9 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `DotTickResolver.test.ts` — DOT mitigado; default sem elemento = `air`
 - [x] `BalanceAudit.test.ts` — curva por tier, economia loja/forja, tempo de clear
 - [x] `PhaseGoldBudget.test.ts` — teto de ouro por fase normal alinhado à referência
+- [x] `EnemyCombatOverrides.test.ts` — normalize/apply de identidade e monster skills
+- [x] `UpgradeOverrides.test.ts` — normalize/apply de custo/nome/desc; runtime override
+- [x] `WavePartyPowerEstimate.test.ts` — estimativa de poder por wave/fase; DPS cresce com nível
 - [x] `MilestoneGoldCap.test.ts` — teto de ouro em milestones (BAL-007)
 - [x] `MapGearLevelPolicy.test.ts` — faixa de nível de item por mapa
 - [x] `ProgressionPowerScale.test.ts` — curva de XP e stats de gear por nível
@@ -145,6 +155,8 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `PhaseRewardOverrides.test.ts` — alvos XP do lab escalam kills da fase
 - [x] `HeroCombatOverrides.test.ts` — knobs de skill/identidade/passiva/evolução do lab no lookup do domínio
 - [x] `HeroLevelXpOverrides.test.ts` — XP por nível do lab na curva efetiva e no level-up de `Experience`
+- [x] `GearItemOverrides.test.ts` — nome/stats/requisitos do lab no lookup do catálogo de itens
+- [x] `ConfigurableShopCatalog.test.ts` — criar/editar/excluir lojas e resolver a ativa por marco
 
 ## Balance Lab (ferramenta de calibração)
 
@@ -157,6 +169,8 @@ Ferramenta **fora do produto jogável** (`npm run balance-lab` → http://127.0.
 | Aba Missões | Editar composição de batalhas por `phaseTemplateId`; filtrar por capítulo da main (faixa do board), tipo, mapa e busca; alertar missões que compartilham o mesmo template; seletor de inimigos com miniatura |
 | Aba XP por fase | Distribuição de XP/ouro por fase; editar alvos e salvar overrides; XP acumulado e nível projetado; filtros mapa/capítulo |
 | Aba XP por nível | Curva de XP para subir de nível (1→100); XP base vs efetiva, crescimento, acumulado; filtro por faixa; salvar overrides; backups |
+| Aba Itens | Catálogo de gear (156+); editar nome/preço base/raridade/flags/requisitos/stats; filtros slot/raridade/busca; salvar overrides; backups |
+| Aba Lojas | CRUD de lojas; marco `main:X-Y`; pool explícito; multiplicador/ajuste globais; backups |
 | Aba Personagens | Editar stats base, identidade, skills, passivas e evoluções por herói; impacto (pts/skills/passiva); salvar overrides; backups |
 | `src/domain/campaign/data/phase-battle-overrides.json` | Overrides persistidos; merge sobre handcrafted |
 | `src/domain/campaign/data/phase-reward-overrides.json` | Alvos XP/ouro por fase; escala em `WaveEnemyFactory` |
@@ -169,6 +183,12 @@ Ferramenta **fora do produto jogável** (`npm run balance-lab` → http://127.0.
 | `src/domain/progression/data/hero-level-xp-overrides.json` | XP por nível (N→N+1); merge em `expRequiredToAdvanceFromLevel` |
 | `HeroLevelXpOverrides.ts` / `HeroLevelXpCatalog.ts` | Curva canônica (`catalogExpRequiredToAdvanceFromLevel`) + override do lab |
 | `tools/balance-lab/heroLevelXpCatalog.ts` / `heroLevelXpUi.ts` | Snapshot e UI editável da aba XP por nível |
+| `src/domain/gear/data/gear-item-overrides.json` | Nome/preço base/raridade/stats/requisitos/flags por item; merge em `getGearCatalogItem` |
+| `GearItemOverrides.ts` / `GearItemCatalog.ts` | Override esparso + catálogo canônico (`getCatalogGearItem`) |
+| `tools/balance-lab/gearItemsCatalog.ts` / `gearItemsUi.ts` | Snapshot e UI editável da aba Itens |
+| `src/domain/shop/data/shop-overrides.json` | Lojas criadas/editadas no lab; tombstones de canônicas |
+| `ConfigurableShopCatalog.ts` / `ShopStock.ts` | Catálogo + overrides + estoque persistido por loja |
+| `tools/balance-lab/shopCatalog.ts` / `shopUi.ts` | Snapshot e CRUD da aba Lojas |
 | `src/domain/progression/data/hero-combat-overrides.json` | Knobs de skill/identidade/stats base/passiva/ascensão; merge nos lookups |
 | `HeroCombatOverrides.ts` / `HeroBaseStatsCatalog.ts` | Normalize + apply de recursos de herói (incl. ATK/DEF/HP base) |
 | `tools/balance-lab/heroCombatCatalog.ts` | Snapshot por herói para o lab |

@@ -45,6 +45,38 @@ const HERO_LEVEL_XP_BACKUPS_DIR = join(
   root,
   'src/domain/progression/data/backups/hero-level-xp-overrides',
 );
+const GEAR_ITEM_OVERRIDES_PATH = join(
+  root,
+  'src/domain/gear/data/gear-item-overrides.json',
+);
+const GEAR_ITEM_BACKUPS_DIR = join(
+  root,
+  'src/domain/gear/data/backups/gear-item-overrides',
+);
+const SHOP_OVERRIDES_PATH = join(
+  root,
+  'src/domain/shop/data/shop-overrides.json',
+);
+const SHOP_BACKUPS_DIR = join(
+  root,
+  'src/domain/shop/data/backups/shop-overrides',
+);
+const ENEMY_COMBAT_PATH = join(
+  root,
+  'src/domain/enemies/data/enemy-combat-overrides.json',
+);
+const ENEMY_COMBAT_BACKUPS_DIR = join(
+  root,
+  'src/domain/enemies/data/backups/enemy-combat-overrides',
+);
+const UPGRADE_OVERRIDES_PATH = join(
+  root,
+  'src/domain/upgrades/data/upgrade-overrides.json',
+);
+const UPGRADE_BACKUPS_DIR = join(
+  root,
+  'src/domain/upgrades/data/backups/upgrade-overrides',
+);
 const PANEL_ASSETS_DIR = join(root, 'dist/panel/assets');
 const PUBLIC_ENEMY_SPRITES_DIR = join(root, 'public/sprites/enemies');
 
@@ -57,6 +89,10 @@ async function build() {
   await mkdir(REWARD_BACKUPS_DIR, { recursive: true });
   await mkdir(HERO_COMBAT_BACKUPS_DIR, { recursive: true });
   await mkdir(HERO_LEVEL_XP_BACKUPS_DIR, { recursive: true });
+  await mkdir(GEAR_ITEM_BACKUPS_DIR, { recursive: true });
+  await mkdir(SHOP_BACKUPS_DIR, { recursive: true });
+  await mkdir(ENEMY_COMBAT_BACKUPS_DIR, { recursive: true });
+  await mkdir(UPGRADE_BACKUPS_DIR, { recursive: true });
 
   await esbuild.build({
     entryPoints: [join(root, 'tools/balance-lab/lab.ts')],
@@ -82,6 +118,7 @@ async function build() {
 
   await copyFile(join(root, 'tools/balance-lab/index.html'), join(outDir, 'index.html'));
   await copyFile(join(root, 'tools/balance-lab/lab.css'), join(outDir, 'lab.css'));
+  await copyFile(join(root, 'tools/balance-lab/lab.tokens.css'), join(outDir, 'lab.tokens.css'));
 
   catalogApi = await import(pathToFileURL(join(outDir, 'missionBattlesCatalog.mjs')).href);
 }
@@ -341,9 +378,164 @@ async function listHeroLevelXpBackups() {
     .map((name) => ({ id: name, path: `backups/${name}` }));
 }
 
+async function readGearItemOverridesFile() {
+  try {
+    const raw = await readFile(GEAR_ITEM_OVERRIDES_PATH, 'utf8');
+    const parsed = JSON.parse(raw);
+    return {
+      version: parsed.version ?? 1,
+      updatedAt: parsed.updatedAt ?? null,
+      items: parsed.items ?? {},
+    };
+  } catch {
+    return { version: 1, updatedAt: null, items: {} };
+  }
+}
+
+async function writeGearItemOverridesFile(file) {
+  await mkdir(dirname(GEAR_ITEM_OVERRIDES_PATH), { recursive: true });
+  await writeFile(GEAR_ITEM_OVERRIDES_PATH, `${JSON.stringify(file, null, 2)}\n`, 'utf8');
+}
+
+async function backupCurrentGearItemOverrides() {
+  await mkdir(GEAR_ITEM_BACKUPS_DIR, { recursive: true });
+  try {
+    await readFile(GEAR_ITEM_OVERRIDES_PATH);
+  } catch {
+    return null;
+  }
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const dest = join(GEAR_ITEM_BACKUPS_DIR, `gear-item-overrides-${stamp}.json`);
+  await copyFile(GEAR_ITEM_OVERRIDES_PATH, dest);
+  return dest;
+}
+
+async function listGearItemBackups() {
+  await mkdir(GEAR_ITEM_BACKUPS_DIR, { recursive: true });
+  const names = await readdir(GEAR_ITEM_BACKUPS_DIR);
+  return names
+    .filter((name) => name.endsWith('.json'))
+    .sort()
+    .reverse()
+    .map((name) => ({ id: name, path: `backups/${name}` }));
+}
+
+async function readShopOverridesFile() {
+  try {
+    const parsed = JSON.parse(await readFile(SHOP_OVERRIDES_PATH, 'utf8'));
+    return catalogApi.normalizeShopOverridesFile(parsed);
+  } catch {
+    return { version: 1, updatedAt: null, shops: {}, deletedShopIds: [] };
+  }
+}
+
+async function writeShopOverridesFile(file) {
+  const normalized = catalogApi.normalizeShopOverridesFile(file);
+  await mkdir(dirname(SHOP_OVERRIDES_PATH), { recursive: true });
+  await writeFile(SHOP_OVERRIDES_PATH, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
+}
+
+async function backupCurrentShopOverrides() {
+  await mkdir(SHOP_BACKUPS_DIR, { recursive: true });
+  try {
+    await readFile(SHOP_OVERRIDES_PATH);
+  } catch {
+    return null;
+  }
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const dest = join(SHOP_BACKUPS_DIR, `shop-overrides-${stamp}.json`);
+  await copyFile(SHOP_OVERRIDES_PATH, dest);
+  return dest;
+}
+
+async function listShopBackups() {
+  await mkdir(SHOP_BACKUPS_DIR, { recursive: true });
+  const names = await readdir(SHOP_BACKUPS_DIR);
+  return names
+    .filter((name) => name.endsWith('.json'))
+    .sort()
+    .reverse()
+    .map((name) => ({ id: name, path: `backups/${name}` }));
+}
+
 async function listBackups() {
   await mkdir(BACKUPS_DIR, { recursive: true });
   const names = await readdir(BACKUPS_DIR);
+  return names
+    .filter((name) => name.endsWith('.json'))
+    .sort()
+    .reverse()
+    .map((name) => ({ id: name, path: `backups/${name}` }));
+}
+
+async function readEnemyCombatFile() {
+  try {
+    const parsed = JSON.parse(await readFile(ENEMY_COMBAT_PATH, 'utf8'));
+    return {
+      version: parsed.version ?? 1,
+      updatedAt: parsed.updatedAt ?? null,
+      identities: parsed.identities ?? {},
+      monsterSkills: parsed.monsterSkills ?? {},
+    };
+  } catch {
+    return { version: 1, updatedAt: null, identities: {}, monsterSkills: {} };
+  }
+}
+
+async function writeEnemyCombatFile(file) {
+  await mkdir(dirname(ENEMY_COMBAT_PATH), { recursive: true });
+  await writeFile(ENEMY_COMBAT_PATH, `${JSON.stringify(file, null, 2)}\n`, 'utf8');
+}
+
+async function backupCurrentEnemyCombat() {
+  await mkdir(ENEMY_COMBAT_BACKUPS_DIR, { recursive: true });
+  try { await readFile(ENEMY_COMBAT_PATH); } catch { return null; }
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const dest = join(ENEMY_COMBAT_BACKUPS_DIR, `enemy-combat-overrides-${stamp}.json`);
+  await copyFile(ENEMY_COMBAT_PATH, dest);
+  return dest;
+}
+
+async function listEnemyCombatBackups() {
+  await mkdir(ENEMY_COMBAT_BACKUPS_DIR, { recursive: true });
+  const names = await readdir(ENEMY_COMBAT_BACKUPS_DIR);
+  return names
+    .filter((name) => name.endsWith('.json'))
+    .sort()
+    .reverse()
+    .map((name) => ({ id: name, path: `backups/${name}` }));
+}
+
+async function readUpgradeOverridesFile() {
+  try {
+    const parsed = JSON.parse(await readFile(UPGRADE_OVERRIDES_PATH, 'utf8'));
+    return {
+      version: parsed.version ?? 1,
+      updatedAt: parsed.updatedAt ?? null,
+      upgrades: parsed.upgrades ?? {},
+    };
+  } catch {
+    return { version: 1, updatedAt: null, upgrades: {} };
+  }
+}
+
+async function writeUpgradeOverridesFile(file) {
+  await mkdir(dirname(UPGRADE_OVERRIDES_PATH), { recursive: true });
+  await writeFile(UPGRADE_OVERRIDES_PATH, `${JSON.stringify(file, null, 2)}\n`, 'utf8');
+}
+
+async function backupCurrentUpgradeOverrides() {
+  await mkdir(UPGRADE_BACKUPS_DIR, { recursive: true });
+  try { await readFile(UPGRADE_OVERRIDES_PATH); } catch { return null; }
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const dest = join(UPGRADE_BACKUPS_DIR, `upgrade-overrides-${stamp}.json`);
+  await copyFile(UPGRADE_OVERRIDES_PATH, dest);
+  return dest;
+}
+
+async function listUpgradeBackups() {
+  await mkdir(UPGRADE_BACKUPS_DIR, { recursive: true });
+  const names = await readdir(UPGRADE_BACKUPS_DIR);
   return names
     .filter((name) => name.endsWith('.json'))
     .sort()
@@ -390,9 +582,111 @@ async function handleApi(req, res, url) {
 
   const rewardFile = await readRewardOverridesFile();
 
-  // Curva de XP por nível do disco vale para todas as rotas (ex.: nível projetado).
+  // Curva de XP por nível + itens do disco valem para todas as rotas.
   const levelXpFile = await readHeroLevelXpFile();
   catalogApi.applyLabHeroLevelXpOverrides(levelXpFile.levels);
+  const gearFile = await readGearItemOverridesFile();
+  catalogApi.applyLabGearItemOverrides(gearFile);
+
+  if (req.method === 'GET' && url.pathname === '/api/shops') {
+    const shopFile = await readShopOverridesFile();
+    const mapRaw = url.searchParams.get('mapIndex');
+    const mapIndex = mapRaw ? Number(mapRaw) : undefined;
+    const payload = catalogApi.buildShopLabPayload({
+      diskOverrides: shopFile,
+      q: url.searchParams.get('q') || undefined,
+      mapIndex: Number.isFinite(mapIndex) ? mapIndex : undefined,
+    });
+    sendJson(res, 200, {
+      ok: true,
+      ...payload,
+      backups: await listShopBackups(),
+    });
+    return;
+  }
+
+  const shopDetailMatch = url.pathname.match(/^\/api\/shops\/([^/]+)$/);
+  if (req.method === 'GET' && shopDetailMatch) {
+    const shopFile = await readShopOverridesFile();
+    const shopId = decodeURIComponent(shopDetailMatch[1]);
+    const detail = catalogApi.getShopLabDetail(shopId, shopFile);
+    if (!detail) {
+      sendJson(res, 404, { ok: false, error: 'Loja não encontrada' });
+      return;
+    }
+    sendJson(res, 200, { ok: true, ...detail });
+    return;
+  }
+
+  if (req.method === 'PUT' && shopDetailMatch) {
+    const shopFile = await readShopOverridesFile();
+    const shopId = decodeURIComponent(shopDetailMatch[1]);
+    const body = await readBody(req);
+    if (body?.id !== shopId) {
+      sendJson(res, 400, { ok: false, error: 'O ID do body deve corresponder à URL' });
+      return;
+    }
+    const override = catalogApi.buildShopOverrideFromDraft(shopId, body);
+    const backupPath = await backupCurrentShopOverrides();
+    if (Object.keys(override).length === 0) delete shopFile.shops[shopId];
+    else shopFile.shops[shopId] = override;
+    shopFile.deletedShopIds = shopFile.deletedShopIds.filter((id) => id !== shopId);
+    shopFile.updatedAt = new Date().toISOString();
+    shopFile.version = 1;
+    await writeShopOverridesFile(shopFile);
+    sendJson(res, 200, {
+      ok: true,
+      backupPath,
+      updatedAt: shopFile.updatedAt,
+      shop: catalogApi.getShopLabDetail(shopId, shopFile),
+    });
+    return;
+  }
+
+  if (req.method === 'DELETE' && shopDetailMatch) {
+    const shopFile = await readShopOverridesFile();
+    const shopId = decodeURIComponent(shopDetailMatch[1]);
+    const exists =
+      catalogApi.isCanonicalShopId(shopId) ||
+      Object.prototype.hasOwnProperty.call(shopFile.shops, shopId);
+    if (!exists) {
+      sendJson(res, 404, { ok: false, error: 'Loja não encontrada' });
+      return;
+    }
+    const backupPath = await backupCurrentShopOverrides();
+    delete shopFile.shops[shopId];
+    if (catalogApi.isCanonicalShopId(shopId)) {
+      shopFile.deletedShopIds = [...new Set([...shopFile.deletedShopIds, shopId])];
+    } else {
+      shopFile.deletedShopIds = shopFile.deletedShopIds.filter((id) => id !== shopId);
+    }
+    shopFile.updatedAt = new Date().toISOString();
+    await writeShopOverridesFile(shopFile);
+    sendJson(res, 200, { ok: true, backupPath, updatedAt: shopFile.updatedAt });
+    return;
+  }
+
+  const shopRestoreMatch = url.pathname.match(
+    /^\/api\/shops-backups\/([^/]+)\/restore$/,
+  );
+  if (req.method === 'POST' && shopRestoreMatch) {
+    const backupId = decodeURIComponent(shopRestoreMatch[1]);
+    const src = join(SHOP_BACKUPS_DIR, backupId);
+    if (!src.startsWith(SHOP_BACKUPS_DIR) || !backupId.endsWith('.json')) {
+      sendJson(res, 400, { ok: false, error: 'Backup inválido' });
+      return;
+    }
+    const previousBackupPath = await backupCurrentShopOverrides();
+    await copyFile(src, SHOP_OVERRIDES_PATH);
+    const restored = await readShopOverridesFile();
+    sendJson(res, 200, {
+      ok: true,
+      restoredFrom: backupId,
+      previousBackupPath,
+      updatedAt: restored.updatedAt,
+    });
+    return;
+  }
 
   if (req.method === 'GET' && url.pathname === '/api/hero-level-xp') {
     const bandRaw = url.searchParams.get('bandMin');
@@ -463,6 +757,117 @@ async function handleApi(req, res, url) {
     const backupPath = await backupCurrentHeroLevelXp();
     await copyFile(src, HERO_LEVEL_XP_PATH);
     const restored = await readHeroLevelXpFile();
+    sendJson(res, 200, {
+      ok: true,
+      restoredFrom: backupId,
+      previousBackupPath: backupPath,
+      updatedAt: restored.updatedAt,
+    });
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/gear-items') {
+    const slot = url.searchParams.get('slot') || '';
+    const rarity = url.searchParams.get('rarity') || '';
+    const q = url.searchParams.get('q') || '';
+    const payload = catalogApi.buildGearItemsLabPayload({
+      diskOverrides: gearFile,
+      updatedAt: gearFile.updatedAt,
+      slot: slot || undefined,
+      rarity: rarity || undefined,
+      q: q || undefined,
+    });
+    sendJson(res, 200, {
+      ok: true,
+      ...payload,
+      backups: await listGearItemBackups(),
+    });
+    return;
+  }
+
+  if (req.method === 'PUT' && url.pathname === '/api/gear-items') {
+    const body = await readBody(req);
+    const drafts = body?.drafts && typeof body.drafts === 'object' ? body.drafts : {};
+    const incoming =
+      body?.items && typeof body.items === 'object' ? body.items : {};
+    const clearList = Array.isArray(body?.clear) ? body.clear : [];
+    const backupPath = await backupCurrentGearItemOverrides();
+
+    for (const itemId of clearList) {
+      if (typeof itemId === 'string' && itemId.trim()) {
+        delete gearFile.items[itemId.trim()];
+      }
+    }
+
+    for (const [itemId, raw] of Object.entries(incoming)) {
+      if (typeof itemId !== 'string' || !itemId.trim()) continue;
+      const normalized = catalogApi.normalizeGearItemOverride(raw);
+      if (!normalized) {
+        delete gearFile.items[itemId];
+        continue;
+      }
+      gearFile.items[itemId] = normalized;
+    }
+
+    for (const [itemId, draft] of Object.entries(drafts)) {
+      if (typeof itemId !== 'string' || !itemId.trim()) continue;
+      const detail = catalogApi.getGearItemLabDetail(itemId, gearFile);
+      if (!detail) throw new Error(`Item não encontrado: ${itemId}`);
+      const override = catalogApi.buildGearItemOverrideFromDraft(detail.baseline, draft);
+      if (!override) {
+        delete gearFile.items[itemId];
+      } else {
+        gearFile.items[itemId] = override;
+      }
+    }
+
+    gearFile.updatedAt = new Date().toISOString();
+    gearFile.version = 1;
+    await writeGearItemOverridesFile(gearFile);
+    sendJson(res, 200, {
+      ok: true,
+      backupPath,
+      updatedAt: gearFile.updatedAt,
+      overrideCount: Object.keys(gearFile.items).length,
+    });
+    return;
+  }
+
+  const gearDetailMatch = url.pathname.match(/^\/api\/gear-items\/([^/]+)$/);
+  if (req.method === 'GET' && gearDetailMatch) {
+    const itemId = decodeURIComponent(gearDetailMatch[1]);
+    const detail = catalogApi.getGearItemLabDetail(itemId, gearFile);
+    if (!detail) {
+      sendJson(res, 404, { ok: false, error: 'Item não encontrado' });
+      return;
+    }
+    sendJson(res, 200, { ok: true, ...detail });
+    return;
+  }
+
+  if (req.method === 'DELETE' && gearDetailMatch) {
+    const itemId = decodeURIComponent(gearDetailMatch[1]);
+    const backupPath = await backupCurrentGearItemOverrides();
+    delete gearFile.items[itemId];
+    gearFile.updatedAt = new Date().toISOString();
+    await writeGearItemOverridesFile(gearFile);
+    sendJson(res, 200, { ok: true, backupPath, updatedAt: gearFile.updatedAt });
+    return;
+  }
+
+  const gearRestoreMatch = url.pathname.match(
+    /^\/api\/gear-items-backups\/([^/]+)\/restore$/,
+  );
+  if (req.method === 'POST' && gearRestoreMatch) {
+    const backupId = decodeURIComponent(gearRestoreMatch[1]);
+    const src = join(GEAR_ITEM_BACKUPS_DIR, backupId);
+    if (!src.startsWith(GEAR_ITEM_BACKUPS_DIR) || !backupId.endsWith('.json')) {
+      sendJson(res, 400, { ok: false, error: 'Backup inválido' });
+      return;
+    }
+    const backupPath = await backupCurrentGearItemOverrides();
+    await copyFile(src, GEAR_ITEM_OVERRIDES_PATH);
+    const restored = await readGearItemOverridesFile();
     sendJson(res, 200, {
       ok: true,
       restoredFrom: backupId,
@@ -789,6 +1194,152 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  // ──── Inimigos ────
+  if (req.method === 'GET' && url.pathname === '/api/enemy-combat') {
+    const enemyFile = await readEnemyCombatFile();
+    const payload = catalogApi.buildEnemyCombatLabPayload({
+      diskOverrides: enemyFile,
+      updatedAt: enemyFile.updatedAt,
+    });
+    sendJson(res, 200, { ok: true, ...payload, backups: await listEnemyCombatBackups() });
+    return;
+  }
+
+  if (req.method === 'PUT' && url.pathname === '/api/enemy-combat') {
+    const enemyFile = await readEnemyCombatFile();
+    const body = await readBody(req);
+    const backupPath = await backupCurrentEnemyCombat();
+
+    for (const id of Array.isArray(body?.clearIdentities) ? body.clearIdentities : []) {
+      if (typeof id === 'string') delete enemyFile.identities[id];
+    }
+    for (const id of Array.isArray(body?.clearMonsterSkills) ? body.clearMonsterSkills : []) {
+      if (typeof id === 'string') delete enemyFile.monsterSkills[id];
+    }
+    for (const [enemyType, raw] of Object.entries(body?.identities ?? {})) {
+      const normalized = catalogApi.normalizeEnemyIdentityOverride(raw);
+      if (!normalized) throw new Error(`Identidade ${enemyType}: informe ao menos um knob`);
+      enemyFile.identities[enemyType] = normalized;
+    }
+    for (const [skillId, raw] of Object.entries(body?.monsterSkills ?? {})) {
+      const normalized = catalogApi.normalizeEnemyMonsterSkillOverride(raw);
+      if (!normalized) throw new Error(`Skill monstro ${skillId}: informe ao menos um knob`);
+      enemyFile.monsterSkills[skillId] = normalized;
+    }
+
+    enemyFile.updatedAt = new Date().toISOString();
+    enemyFile.version = 1;
+    await writeEnemyCombatFile(enemyFile);
+    sendJson(res, 200, { ok: true, backupPath, updatedAt: enemyFile.updatedAt });
+    return;
+  }
+
+  const enemyRestoreMatch = url.pathname.match(/^\/api\/enemy-combat-backups\/([^/]+)\/restore$/);
+  if (req.method === 'POST' && enemyRestoreMatch) {
+    const backupId = decodeURIComponent(enemyRestoreMatch[1]);
+    const src = join(ENEMY_COMBAT_BACKUPS_DIR, backupId);
+    if (!src.startsWith(ENEMY_COMBAT_BACKUPS_DIR) || !backupId.endsWith('.json')) {
+      sendJson(res, 400, { ok: false, error: 'Backup inválido' });
+      return;
+    }
+    const backupPath = await backupCurrentEnemyCombat();
+    await copyFile(src, ENEMY_COMBAT_PATH);
+    sendJson(res, 200, { ok: true, restoredFrom: backupId, previousBackupPath: backupPath });
+    return;
+  }
+
+  // ──── Melhorias ────
+  if (req.method === 'GET' && url.pathname === '/api/upgrades') {
+    const upgradeFile = await readUpgradeOverridesFile();
+    const payload = catalogApi.buildUpgradeTreeLabPayload({
+      diskOverrides: upgradeFile,
+      updatedAt: upgradeFile.updatedAt,
+    });
+    sendJson(res, 200, { ok: true, ...payload, backups: await listUpgradeBackups() });
+    return;
+  }
+
+  if (req.method === 'PUT' && url.pathname === '/api/upgrades') {
+    const upgradeFile = await readUpgradeOverridesFile();
+    const body = await readBody(req);
+    const backupPath = await backupCurrentUpgradeOverrides();
+
+    for (const id of Array.isArray(body?.clearIds) ? body.clearIds : []) {
+      if (typeof id === 'string') delete upgradeFile.upgrades[id];
+    }
+    for (const [upgradeId, raw] of Object.entries(body?.upgrades ?? {})) {
+      const normalized = catalogApi.normalizeUpgradeOverride(raw);
+      if (!normalized) { delete upgradeFile.upgrades[upgradeId]; continue; }
+      upgradeFile.upgrades[upgradeId] = normalized;
+    }
+
+    upgradeFile.updatedAt = new Date().toISOString();
+    upgradeFile.version = 1;
+    await writeUpgradeOverridesFile(upgradeFile);
+    sendJson(res, 200, { ok: true, backupPath, updatedAt: upgradeFile.updatedAt });
+    return;
+  }
+
+  const upgradeRestoreMatch = url.pathname.match(/^\/api\/upgrades-backups\/([^/]+)\/restore$/);
+  if (req.method === 'POST' && upgradeRestoreMatch) {
+    const backupId = decodeURIComponent(upgradeRestoreMatch[1]);
+    const src = join(UPGRADE_BACKUPS_DIR, backupId);
+    if (!src.startsWith(UPGRADE_BACKUPS_DIR) || !backupId.endsWith('.json')) {
+      sendJson(res, 400, { ok: false, error: 'Backup inválido' });
+      return;
+    }
+    const backupPath = await backupCurrentUpgradeOverrides();
+    await copyFile(src, UPGRADE_OVERRIDES_PATH);
+    sendJson(res, 200, { ok: true, restoredFrom: backupId, previousBackupPath: backupPath });
+    return;
+  }
+
+  // ──── Auditoria de Economia ────
+  if (req.method === 'GET' && url.pathname === '/api/economy-audit') {
+    const mapRaw = url.searchParams.get('mapIndex');
+    const mapIndex = mapRaw !== null && mapRaw !== '' ? Number(mapRaw) : undefined;
+    const chapterRaw = url.searchParams.get('chapterMain');
+    const chapterMain = chapterRaw !== null && chapterRaw !== '' ? Number(chapterRaw) : undefined;
+    const payload = catalogApi.buildEconomyAuditPayload({
+      mapIndex: Number.isFinite(mapIndex) ? mapIndex : undefined,
+      chapterMain: Number.isFinite(chapterMain) ? chapterMain : undefined,
+    });
+    sendJson(res, 200, { ok: true, ...payload });
+    return;
+  }
+
+  // ──── Wave Power ────
+  if (req.method === 'GET' && url.pathname === '/api/wave-power') {
+    const phaseId = url.searchParams.get('phaseId');
+    if (!phaseId) {
+      sendJson(res, 400, { ok: false, error: 'phaseId obrigatório' });
+      return;
+    }
+    const snapshot = catalogApi.estimatePhasePower(phaseId, catalogApi.DEFAULT_REFERENCE_PARTY);
+    sendJson(res, 200, { ok: true, ...snapshot });
+    return;
+  }
+
+  // ──── Stock Preview de loja ────
+  const stockPreviewMatch = url.pathname.match(/^\/api\/shops\/([^/]+)\/stock-preview$/);
+  if (req.method === 'GET' && stockPreviewMatch) {
+    const shopFile = await readShopOverridesFile();
+    const shopId = decodeURIComponent(stockPreviewMatch[1]);
+    const seedRaw = url.searchParams.get('seed');
+    const tierRaw = url.searchParams.get('tier');
+    const preview = catalogApi.previewShopStock(shopId, {
+      seed: seedRaw !== null ? Number(seedRaw) : undefined,
+      tier: tierRaw !== null ? Number(tierRaw) : undefined,
+      diskOverrides: shopFile,
+    });
+    if (!preview) {
+      sendJson(res, 404, { ok: false, error: 'Loja não encontrada' });
+      return;
+    }
+    sendJson(res, 200, { ok: true, ...preview });
+    return;
+  }
+
   sendJson(res, 404, { ok: false, error: 'Rota não encontrada' });
 }
 
@@ -835,7 +1386,12 @@ async function main() {
     console.log('Aba Missões: editor de batalhas → phase-battle-overrides.json');
     console.log('Aba XP por fase: alvos XP/ouro → phase-reward-overrides.json');
     console.log('Aba XP por nível: curva de level-up → hero-level-xp-overrides.json');
+    console.log('Aba Itens: nome/stats/requisitos → gear-item-overrides.json');
+    console.log('Aba Lojas: CRUD + pool/preços → shop-overrides.json');
     console.log('Aba Personagens: skills/identidade/passivas/evoluções → hero-combat-overrides.json');
+    console.log('Aba Inimigos: identidade e skills de monstro → enemy-combat-overrides.json');
+    console.log('Aba Melhorias: custo/nome/desc → upgrade-overrides.json');
+    console.log('Aba Economia: auditoria de ouro por fase + lojas (read-only)');
     console.log('Ctrl+C para encerrar.\n');
   });
 }

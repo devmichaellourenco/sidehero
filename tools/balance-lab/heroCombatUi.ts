@@ -1,6 +1,9 @@
 /**
  * UI do editor de skills / identidade / passivas / evoluções no Balance Lab.
  */
+import { openHeroInSimulator } from './navigation';
+import { confirmChangeReview } from './changeReview';
+import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
 
 type FieldDef = { key: string; label: string; step: number };
 
@@ -363,6 +366,7 @@ function updateDirtyChrome(): void {
   }
   const el = document.getElementById('hc-dirty-count');
   if (el) el.textContent = count > 0 ? `${count} alteração(ões)` : '';
+  setWorkspaceDirty('heroes', count);
 }
 
 function markSkillDirty(skillId: string): void {
@@ -571,20 +575,25 @@ async function saveDirty(): Promise<void> {
     return;
   }
 
+  const changes = {
+    skills,
+    identities,
+    baseStats,
+    passives,
+    ascensions,
+    clearSkills,
+    clearIdentities,
+    clearBaseStats,
+    clearPassives,
+    clearAscensions,
+  };
+  if (!(await confirmChangeReview('Salvar recursos dos personagens', dirtyCount(), changes))) {
+    return;
+  }
+
   await api('/api/hero-combat', {
     method: 'PUT',
-    body: JSON.stringify({
-      skills,
-      identities,
-      baseStats,
-      passives,
-      ascensions,
-      clearSkills,
-      clearIdentities,
-      clearBaseStats,
-      clearPassives,
-      clearAscensions,
-    }),
+    body: JSON.stringify(changes),
   });
   await loadHeroCombat();
   setStatus('Salvo em hero-combat-overrides.json. Rebuild da extensão para o jogo.');
@@ -650,7 +659,7 @@ function renderSkillCard(skill: SkillRow, fields: FieldDef[]): string {
           'skill-field',
         )}
       </div>
-      <button type="button" data-reset-skill="${skill.skillId}">↺ baseline (timing)</button>
+      <button type="button" class="lab-btn--warn" data-reset-skill="${skill.skillId}">↺ baseline (timing)</button>
     </article>`;
   }
 
@@ -663,7 +672,7 @@ function renderSkillCard(skill: SkillRow, fields: FieldDef[]): string {
       <div class="hc-fields">
         ${numberInputs([...fields, ...extraSkillFields(skill.baseline)], draft, 'skill-field')}
       </div>
-      <button type="button" data-reset-skill="${skill.skillId}">↺ baseline</button>
+      <button type="button" class="lab-btn--warn" data-reset-skill="${skill.skillId}">↺ baseline</button>
     </article>`;
 }
 
@@ -727,13 +736,14 @@ function renderAscensionCard(row: AscensionRow): string {
           row.impact.pathSkillCount
         } skills no caminho</p>
       </div>
-      <button type="button" data-reset-ascension="${row.id}">↺ baseline</button>
+      <button type="button" class="lab-btn--warn" data-reset-ascension="${row.id}">↺ baseline</button>
     </article>`;
 }
 
 export function renderHeroCombat(): void {
   const host = document.getElementById('lab-hero-combat');
   if (!host || !payload) return;
+  setWorkspaceDirty('heroes', dirtyCount());
   const hero = selectedHero();
   const skills = selected === 'universal' ? payload.universalSkills : (hero?.skills ?? []);
   const identity = hero?.identity;
@@ -759,7 +769,7 @@ export function renderHeroCombat(): void {
               const active = selected === entry.heroClass ? ' is-active' : '';
               const pending = heroHasPendingDraft(entry.heroClass);
               const mark = pending
-                ? '<span class="xp-badge">rascunho</span>'
+                ? '<span class="mb-badge mb-badge--dirty">rascunho</span>'
                 : entry.identity.hasOverride ||
                     entry.baseStats.hasOverride ||
                     entry.skills.some((s) => s.hasOverride) ||
@@ -777,12 +787,16 @@ export function renderHeroCombat(): void {
             universalHasPendingDraft() ? ' is-dirty' : ''
           }" data-select-hero="universal">
             <strong>Universais</strong><span>todas as classes</span>${
-              universalHasPendingDraft() ? '<span class="xp-badge">rascunho</span>' : ''
+              universalHasPendingDraft()
+                ? '<span class="mb-badge mb-badge--dirty">rascunho</span>'
+                : ''
             }
           </button></li>
         </ul>
         <div class="xp-toolbar">
-          <button type="button" id="hc-save" ${dirtyCount() === 0 ? 'disabled' : ''}>${
+          <button type="button" class="lab-btn--primary" id="hc-save" ${
+            dirtyCount() === 0 ? 'disabled' : ''
+          }>${
             dirtyCount() > 1 ? `Salvar tudo (${dirtyCount()})` : 'Salvar no sistema'
           }</button>
           <span id="hc-dirty-count" class="xp-dirty-count"></span>
@@ -796,7 +810,7 @@ export function renderHeroCombat(): void {
                   .slice(0, 12)
                   .map(
                     (backup) =>
-                      `<li><button type="button" data-restore-backup="${backup.id}">${backup.id}</button></li>`,
+                      `<li><button type="button" class="lab-btn--info" data-restore-backup="${backup.id}">${backup.id}</button></li>`,
                   )
                   .join('')}</ul>`
           }
@@ -814,13 +828,16 @@ export function renderHeroCombat(): void {
                   hero.identity.hasOverride || hero.baseStats.hasOverride
                     ? '<span class="xp-badge">override</span>'
                     : ''
-                }</header>
+                }
+                <button type="button" class="lab-btn--info" data-open-hero-simulator="${
+                  hero.heroClass
+                }">Abrir no Simulador</button></header>
                 <p class="lab-hint">ATK/DEF/HP base (nível 1) + crescimento. Ataque básico = ATK × <strong>básico ATK ×</strong>.</p>
                 <h4 class="hc-subsection">Stats base</h4>
                 <div class="hc-fields">${numberInputs(payload.baseStatsFields, baseStatsValues, 'base-stats-field')}</div>
                 <h4 class="hc-subsection">Identidade de combate</h4>
                 <div class="hc-fields">${numberInputs(payload.identityFields, identityValues, 'identity-field')}</div>
-                <button type="button" data-reset-identity="${hero.heroClass}">↺ baseline</button>
+                <button type="button" class="lab-btn--warn" data-reset-identity="${hero.heroClass}">↺ baseline</button>
               </section>
               <h3 class="hc-section">Evoluções</h3>
               ${
@@ -865,7 +882,7 @@ export function renderHeroCombat(): void {
                     <span class="xp-muted">${passive.source}</span></header>
                     <p class="lab-hint">${passive.description}</p>
                     <div class="hc-fields">${fields}</div>
-                    <button type="button" data-reset-passive="${passive.id}">↺ baseline</button>
+                    <button type="button" class="lab-btn--warn" data-reset-passive="${passive.id}">↺ baseline</button>
                   </article>`;
                 })
                 .join('')}`
@@ -884,6 +901,14 @@ export function renderHeroCombat(): void {
 }
 
 function bindHeroCombat(host: HTMLElement): void {
+  host.querySelector<HTMLButtonElement>('[data-open-hero-simulator]')?.addEventListener(
+    'click',
+    (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      openHeroInSimulator(button.dataset.openHeroSimulator!);
+    },
+  );
+
   host.querySelectorAll<HTMLButtonElement>('[data-select-hero]').forEach((button) => {
     button.addEventListener('click', () => {
       flushVisibleHeroDrafts(host);
@@ -1097,6 +1122,7 @@ function bindHeroCombat(host: HTMLElement): void {
 }
 
 export async function mountHeroCombatTab(): Promise<void> {
+  registerWorkspaceSave('heroes', saveDirty);
   await loadHeroCombat();
   renderHeroCombat();
   setStatus('Personagens carregados — edite evoluções/skills/identidade/passivas e salve.');

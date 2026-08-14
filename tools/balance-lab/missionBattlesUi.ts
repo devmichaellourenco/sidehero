@@ -7,8 +7,11 @@ import {
   enemyTriggerHtml,
   openEnemyPicker,
 } from './enemyPicker';
+import { confirmChangeReview } from './changeReview';
+import { debounce } from './debounce';
 import { enemySpriteUrlForLab } from './enemySprites';
 import { withPreservedScroll } from './scrollPreserve';
+import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
 
 type MissionKind = 'main' | 'side' | 'normal';
 
@@ -260,6 +263,11 @@ async function saveAllDirty(): Promise<void> {
     setStatus('Nada para salvar.');
     return;
   }
+  if (
+    !(await confirmChangeReview('Salvar batalhas das missões', dirtyMissionIds.size, updates))
+  ) {
+    return;
+  }
 
   const data = await api<{
     backupPath: string | null;
@@ -369,7 +377,7 @@ function renderWaveEditor(wave: WaveDraft, waveIndex: number): string {
           <label>level
             <input type="number" data-field="level" value="${slot.level ?? ''}" placeholder="auto" />
           </label>
-          <button type="button" class="mb-btn-danger" data-action="remove-slot">×</button>
+          <button type="button" class="mb-btn-danger lab-btn--icon" data-action="remove-slot" title="Remover slot">×</button>
         </div>
       `;
     })
@@ -380,8 +388,8 @@ function renderWaveEditor(wave: WaveDraft, waveIndex: number): string {
       <header class="mb-wave-head">
         <strong>Wave ${waveIndex + 1}</strong>
         <label>id <input type="text" data-field="id" value="${wave.id}" /></label>
-        <label>ouro × <input type="number" step="0.05" min="0" data-field="goldMultiplier" value="${wave.goldMultiplier ?? 1}" /></label>
-        <button type="button" data-action="add-slot">+ slot</button>
+        <label class="mb-field--gold">ouro × <input type="number" step="0.05" min="0" data-field="goldMultiplier" value="${wave.goldMultiplier ?? 1}" /></label>
+        <button type="button" class="lab-btn--create" data-action="add-slot">+ slot</button>
         <button type="button" class="mb-btn-danger" data-action="remove-wave">Remover wave</button>
       </header>
       <div class="mb-slots">${slots}</div>
@@ -415,7 +423,9 @@ function renderList(): string {
               <button type="button" class="mb-list-item${active}${
                 dirtyMissionIds.has(mission.missionId) ? ' is-dirty' : ''
               }" data-select-mission="${mission.missionId}">
-                <span class="mb-list-kind">${mission.kind}${stars ? ` · ${stars}` : ''}</span>
+                <span class="mb-list-kind mb-list-kind--${mission.kind}">${mission.kind}${
+                  stars ? ` · <span class="mb-stars">${stars}</span>` : ''
+                }</span>
                 <span class="mb-list-name">${mission.name}</span>
                 <span class="mb-list-meta">${mission.phaseTemplateId} · cap.${mission.chapterMainPhase} · ${mission.waveCount}w ${dirty}${badge}${shared}</span>
               </button>
@@ -451,10 +461,14 @@ function renderEditor(): string {
         <span class="mb-editor-id">${selectedMission.missionId}</span>
       </div>
       <div class="mb-editor-chips">
-        <span class="mb-chip">${selectedMission.kind}</span>
-        <span class="mb-chip">mapa ${selectedMission.mapId}</span>
-        <span class="mb-chip">cap. ${selectedMission.chapterMainPhase} (${selectedMission.chapterMin}–${selectedMission.chapterMax})</span>
-        ${selectedMission.stars ? `<span class="mb-chip">${starsLabel(selectedMission.stars)}</span>` : ''}
+        <span class="mb-chip mb-chip--kind">${selectedMission.kind}</span>
+        <span class="mb-chip mb-chip--map">mapa ${selectedMission.mapId}</span>
+        <span class="mb-chip mb-chip--chapter">cap. ${selectedMission.chapterMainPhase} (${selectedMission.chapterMin}–${selectedMission.chapterMax})</span>
+        ${
+          selectedMission.stars
+            ? `<span class="mb-chip mb-chip--stars">${starsLabel(selectedMission.stars)}</span>`
+            : ''
+        }
       </div>
     </div>
     ${renderSharedNotice()}
@@ -465,8 +479,10 @@ function renderEditor(): string {
       <label>statMultiplier
         <input type="number" id="mb-stat-mult" step="0.01" min="0.1" value="${draft.statMultiplier}" />
       </label>
-      <button type="button" id="mb-add-wave">+ wave</button>
-      <button type="button" id="mb-save" ${dirtyMissionCount() === 0 ? 'disabled' : ''}>${
+      <button type="button" class="lab-btn--create" id="mb-add-wave">+ wave</button>
+      <button type="button" class="lab-btn--primary" id="mb-save" ${
+        dirtyMissionCount() === 0 ? 'disabled' : ''
+      }>${
         dirtyMissionCount() > 1
           ? `Salvar tudo (${dirtyMissionCount()})`
           : 'Salvar no sistema'
@@ -474,17 +490,20 @@ function renderEditor(): string {
       <span id="mb-dirty-count" class="xp-dirty-count">${
         dirtyMissionCount() > 0 ? `${dirtyMissionCount()} missão(ões) alterada(s)` : ''
       }</span>
-      <button type="button" id="mb-reset-baseline">Rascunho = baseline</button>
+      <button type="button" class="lab-btn--warn" id="mb-reset-baseline">Rascunho = baseline</button>
       <button type="button" class="mb-btn-danger" id="mb-clear-override">Apagar override</button>
     </div>
     <div class="mb-json-row">
       <label class="lab-field lab-field--full">JSON da batalha
         <textarea id="mb-json" rows="8" spellcheck="false">${JSON.stringify(draft, null, 2)}</textarea>
       </label>
-      <button type="button" id="mb-apply-json">Aplicar JSON → formulário</button>
+      <button type="button" class="lab-btn--info" id="mb-apply-json">Aplicar JSON → formulário</button>
     </div>
     <div class="mb-waves">
       ${draft.waves.map((wave, index) => renderWaveEditor(wave, index)).join('')}
+    </div>
+    <div id="mb-wave-power" class="mb-wave-power">
+      <button type="button" class="lab-btn--info" id="mb-load-wave-power">⚡ Calcular poder das waves</button>
     </div>
   `;
 }
@@ -575,6 +594,52 @@ function bindEditor(root: HTMLElement): void {
     }
   });
 
+  root.querySelector('#mb-load-wave-power')?.addEventListener('click', () => {
+    const phaseId = selectedMission?.phaseTemplateId;
+    if (!phaseId) return;
+    const container = root.querySelector('#mb-wave-power');
+    if (container) container.innerHTML = '<p class="lab-hint">Calculando…</p>';
+    fetch(`/api/wave-power?phaseId=${encodeURIComponent(phaseId)}`)
+      .then((res) => res.json())
+      .then((data: {
+        ok: boolean;
+        phaseId: string;
+        waves: Array<{ waveIndex: number; enemyCount: number; totalHp: number; totalAttack: number; estimatedEnemyBasicDps: number; referencePartyDps: number; estimatedClearSeconds: number; pressureRatio: number }>;
+        phaseClearSeconds: number;
+        totalHp: number;
+        referencePartyDps: number;
+      }) => {
+        if (!container) return;
+        if (!data.ok) { container.innerHTML = `<p class="lab-hint is-error">Erro: ${(data as { error?: string }).error ?? 'desconhecido'}</p>`; return; }
+        container.innerHTML = `
+          <div class="mb-wave-power-summary">
+            <h4>⚡ Poder da fase <code>${data.phaseId}</code></h4>
+            <p class="lab-hint lab-hint--tight">Party referência: Sorcerer + Knight + Priest Lv.10</p>
+            <div class="lab-totals-row">
+              <div class="lab-stat lab-stat--compact lab-stat--hp"><strong>${Math.round(data.totalHp).toLocaleString('pt-BR')}</strong><span>HP total</span></div>
+              <div class="lab-stat lab-stat--compact lab-stat--atk"><strong>${Math.round(data.referencePartyDps).toLocaleString('pt-BR')}</strong><span>DPS party</span></div>
+              <div class="lab-stat lab-stat--compact lab-stat--speed"><strong>${data.phaseClearSeconds.toFixed(1)}s</strong><span>Limpar fase</span></div>
+            </div>
+            <table class="ea-table">
+              <thead><tr><th>Wave</th><th>Inimigos</th><th>HP total</th><th>DPS inimigos</th><th>Limpar (s)</th><th>Pressão</th></tr></thead>
+              <tbody>
+                ${data.waves.map((w) => `<tr>
+                  <td>${w.waveIndex + 1}</td>
+                  <td>${w.enemyCount}</td>
+                  <td>${Math.round(w.totalHp).toLocaleString('pt-BR')}</td>
+                  <td>${Math.round(w.estimatedEnemyBasicDps).toLocaleString('pt-BR')}</td>
+                  <td>${w.estimatedClearSeconds.toFixed(1)}</td>
+                  <td>${(w.pressureRatio * 100).toFixed(0)}%</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+      })
+      .catch((err: Error) => {
+        if (container) container.innerHTML = `<p class="lab-hint">Erro ao calcular poder: ${err.message}</p>`;
+      });
+  });
+
   root.querySelectorAll<HTMLButtonElement>('[data-action="add-slot"]').forEach((button) => {
     button.addEventListener('click', () => {
       const wi = Number(button.closest<HTMLElement>('.mb-wave')?.dataset.waveIndex);
@@ -657,6 +722,7 @@ function reloadListAndRender(): void {
 export function renderMissionsEditor(): void {
   const host = document.getElementById('lab-missions');
   if (!host) return;
+  setWorkspaceDirty('missions', dirtyMissionCount());
   withPreservedScroll(host, ['.mb-sidebar', '.mb-main'], () => renderMissionsEditorInto(host));
 }
 
@@ -721,7 +787,7 @@ function renderMissionsEditorInto(host: HTMLElement): void {
           <label>Arquivo
             <select id="mb-backup-select">${backupOptions}</select>
           </label>
-          <button type="button" id="mb-restore-backup">Restaurar selecionado</button>
+          <button type="button" class="lab-btn--info" id="mb-restore-backup">Restaurar selecionado</button>
         </div>
       </aside>
       <section class="mb-main">
@@ -747,15 +813,16 @@ function renderMissionsEditorInto(host: HTMLElement): void {
   });
 
   const searchInput = host.querySelector('#mb-filter-q') as HTMLInputElement | null;
+  const applySearch = debounce(() => {
+    filterQuery = searchInput?.value ?? '';
+    reloadListAndRender();
+  });
+  searchInput?.addEventListener('input', applySearch);
   searchInput?.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       filterQuery = searchInput.value;
       reloadListAndRender();
     }
-  });
-  searchInput?.addEventListener('change', () => {
-    filterQuery = searchInput.value;
-    reloadListAndRender();
   });
 
   host.querySelectorAll<HTMLButtonElement>('[data-select-mission]').forEach((button) => {
@@ -784,6 +851,7 @@ function renderMissionsEditorInto(host: HTMLElement): void {
 }
 
 export async function mountMissionsTab(): Promise<void> {
+  registerWorkspaceSave('missions', saveAllDirty);
   await loadMissionBattlesList();
   renderMissionsEditor();
 }

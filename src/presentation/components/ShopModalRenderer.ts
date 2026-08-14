@@ -1,5 +1,5 @@
 import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
-import { ShopOfferDto } from '../../application/dto/ShopOfferDto';
+import { ShopDto, ShopOfferDto } from '../../application/dto/ShopOfferDto';
 import { ASSETS, getAssetUrl, getGearFrameSprite, getGearSprite, imgTag } from '../assets/AssetCatalog';
 import { gearDragAttr } from '../gear/GearDragDropBinder';
 import {
@@ -38,6 +38,7 @@ export type ShopModalHandlers = {
 
 export interface ShopModalViewModel {
   offers: ShopOfferDto[];
+  activeShop?: ShopDto | null;
   refreshCost: number;
   canAffordRefresh: boolean;
   shopRefreshUnlocked: boolean;
@@ -185,6 +186,7 @@ export class ShopModalRenderer {
     const bodyScrollTop = container.scrollTop;
     container.innerHTML = `
       <div class="shop-panel">
+        <h3 class="shop-name">${escapeHtml(viewModel.activeShop?.name ?? 'Loja indisponível')}</h3>
         ${heroSelector}
         ${heroLoadout}
         <div class="shop-toolbar">
