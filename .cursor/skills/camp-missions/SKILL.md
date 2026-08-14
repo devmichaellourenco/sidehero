@@ -13,6 +13,7 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 
 - Board do mapa, tipos de missão, estrelas, oferta normal
 - Fim de batalha → resultado → acampamento
+- **Iniciar missão** → START → combate (sem Batalhar no hub)
 - Unlock de secundárias / próxima principal
 - UI de locais no modal de campanha
 
@@ -33,13 +34,17 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 
 ## Regras de produto (resumo)
 
+- Normal = 2–4, mapa×estrela; **capítulo da main atual** (ex.: main 1-1 → templates 1–5); podem **repetir** em próximos sorteios com ouro/XP **cheios** (não são “replay”); some na derrota da oferta atual; refresh a cada N visitas ao camp
+- Sem penalidade de ouro/XP por template já cleared; main/side são únicas
+- Secundária = únicas; só as vinculadas ao capítulo da main (template na mesma faixa); unlock/expiração por grafo
 - Principal = marcos `x-1, x-5, …, x-50`; próxima incompleta no board; não repetível
-- Secundária = cadeias + paralelas; não repetível; loot exclusivo; **expira** incompleta ao concluir main posterior no mapa
-- Normal = 2–4, mapa×estrela; some na derrota; refresh a cada N visitas ao camp
-- New game: party **Nix solo**; unlocks Galneon→Elara→… na árvore com gates de main
-- Vitória/derrota → resultado com detalhes de recompensa → Continuar → acampamento
-- Derrota em missão **normal**: fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`); main/side: zero
+- New game: party **Nix solo**; unlocks Galneon→Elara→… na árvore com gates de main; inicia no hub Acampamento (`loadoutEditOpen`)
+- Vitória/derrota → CLEAR/DEFEAT → tela de recompensas (sem scroll; Continuar no deck) → acampamento + mapa
+- Iniciar no mapa → cue START → combate; Acampamento/hub sem Batalhar (`phaseRestartOnResume: false`); unpin retransmite ao painel principal
+- Derrota em missão **normal**: fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`) no overlay **apenas se o domínio concedeu** (delta nos heróis); main/side: zero
 - Preview/CTA só ao clicar no pin (popover sobre o pin; sem footer permanente)
+- Região: título + bioma compactos; painel do mapa com padding mínimo; progresso só no hover; troca via mapa-mundo
+- Pins do mapa com margem segura (não cortam no topo/laterais)
 - Clique fora do popover fecha a seleção; popover clampa nas bordas do mapa
 - Tooltip de inimigo: grade compacta com ícones de stats (~3 por linha)
 
@@ -50,7 +55,7 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 - Timeline na missão: `stage-progress-bar`
 - Cenas: `story-scenes`
 - Loot: `gear-loot`
-- Números/refresh: `game-balance`
+- Coordenação de números: skill `game-balance` + Balance Lab (aba Missões, filtro por capítulo)
 
 ## Arquivos frequentes (alvo)
 

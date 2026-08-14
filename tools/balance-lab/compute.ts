@@ -1,11 +1,16 @@
-import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
 import { getClassCombatBaseline } from '../../src/domain/combat/ClassCombatBaselines';
 import { resolveActionIntervalSeconds } from '../../src/domain/combat/CombatSpeedScaling';
 import { ENEMY_ROSTER } from '../../src/domain/enemies/EnemyRosterCatalog';
+import { enemySpriteUrlForLab } from './enemySprites';
 import { buildEnemyCombatSheet } from '../../src/domain/enemies/EnemyProgressionCatalog';
 import { HeroClass, HERO_CLASSES } from '../../src/domain/entities/HeroClass';
 import { getBaseAttributes } from '../../src/domain/progression/BaseAttributes';
 import { defaultFormulaConstants, mergeFormulaConstants } from './formulas';
+import {
+  catalogIdentityFor,
+  identityFromLegacyFormulas,
+  resolveLabIdentity,
+} from './identity';
 import {
   defaultEnemyResists,
   sampleElementalHits,
@@ -17,6 +22,7 @@ import {
 } from './elemental';
 import { buildHeroPassiveSlots, sumPassiveBonuses } from './passives';
 import {
+  LabCombatantIdentity,
   LabCombatantInput,
   LabCombatantResult,
   LabDocument,
@@ -39,11 +45,17 @@ const HERO_CLASS_BASE: Record<
 
 const PHYSICAL_MELEE: ReadonlySet<HeroClass> = new Set(['knight', 'berserker', 'paladin']);
 
-export function listEnemyTypeOptions(): Array<{ id: string; name: string; tier: number }> {
+export function listEnemyTypeOptions(): Array<{
+  id: string;
+  name: string;
+  tier: number;
+  spriteUrl: string;
+}> {
   return ENEMY_ROSTER.map((entry) => ({
     id: entry.id,
     name: entry.name,
     tier: entry.powerTier,
+    spriteUrl: enemySpriteUrlForLab(entry.id),
   }));
 }
 
@@ -54,6 +66,7 @@ export function listHeroClassOptions(): readonly LabHeroClass[] {
 export function defaultHeroInput(heroClass: LabHeroClass = 'knight', level = 1): LabCombatantInput {
   const base = HERO_CLASS_BASE[heroClass];
   const attrs = getBaseAttributes(heroClass);
+  const identity = catalogIdentityFor({ kind: 'hero', heroClass });
   const levelsGained = Math.max(0, level - 1);
   return {
     kind: 'hero',
@@ -62,9 +75,9 @@ export function defaultHeroInput(heroClass: LabHeroClass = 'knight', level = 1):
     str: attrs.str,
     dex: attrs.dex,
     int: attrs.int,
-    baseAttack: base.attack + levelsGained * getHeroCombatIdentity(heroClass).levelUpAttackGain,
-    baseDefense: base.defense + levelsGained * getHeroCombatIdentity(heroClass).levelUpDefenseGain,
-    baseMaxHealth: base.health + levelsGained * getHeroCombatIdentity(heroClass).levelUpHealthGain,
+    baseAttack: base.attack + levelsGained * identity.levelUpAttackGain,
+    baseDefense: base.defense + levelsGained * identity.levelUpDefenseGain,
+    baseMaxHealth: base.health + levelsGained * identity.levelUpHealthGain,
     gearAttack: 0,
     gearDefense: 0,
     gearHealth: 0,
@@ -83,6 +96,7 @@ export function defaultHeroInput(heroClass: LabHeroClass = 'knight', level = 1):
     elementalDamageFlat: zeroElemFlat(),
     elementalPenetration: zeroPenetration(),
     physicalDamagePercent: 0,
+    identity,
   };
 }
 
@@ -122,6 +136,7 @@ export function defaultEnemyInput(
     elementalDamageFlat: zeroElemFlat(),
     elementalPenetration: zeroPenetration(),
     physicalDamagePercent: 0,
+    identity: catalogIdentityFor({ kind: 'enemy', enemyType }),
   };
 }
 
@@ -173,9 +188,10 @@ function deriveAttack(
   attributes: { str: number; dex: number; int: number },
   attackPercent: number,
   f: LabFormulaConstants,
+  identity: LabCombatantIdentity,
 ): number {
   const gearBonus = input.kind === 'hero' ? input.gearAttack : 0;
-  const levelBonus = (level - 1) * f.attackPerLevel;
+  const levelBonus = (level - 1) * identity.attackPerLevel;
   const attrBonus = Math.floor(attributes.str * f.attrAtkStr + attributes.dex * f.attrAtkDex);
   const raw = input.baseAttack + gearBonus + levelBonus + attrBonus;
   return Math.max(0, Math.floor(raw * (1 + attackPercent / 100)));
@@ -187,9 +203,10 @@ function deriveDefense(
   attributes: { str: number; dex: number; int: number },
   defensePercent: number,
   f: LabFormulaConstants,
+  identity: LabCombatantIdentity,
 ): number {
   const gearBonus = input.kind === 'hero' ? input.gearDefense : 0;
-  const levelBonus = (level - 1) * f.defensePerLevel;
+  const levelBonus = (level - 1) * identity.defensePerLevel;
   const attrBonus = Math.floor(attributes.dex * f.attrDefDex + attributes.str * f.attrDefStr);
   const raw = input.baseDefense + gearBonus + levelBonus + attrBonus;
   return Math.max(0, Math.floor(raw * (1 + defensePercent / 100)));
@@ -201,9 +218,10 @@ function deriveMaxHealth(
   attributes: { str: number; dex: number; int: number },
   healthPercent: number,
   f: LabFormulaConstants,
+  identity: LabCombatantIdentity,
 ): number {
   const gearBonus = input.kind === 'hero' ? input.gearHealth : 0;
-  const levelBonus = (level - 1) * f.healthPerLevel;
+  const levelBonus = (level - 1) * identity.healthPerLevel;
   const attrBonus = attributes.str * f.attrHpStr;
   const raw = input.baseMaxHealth + gearBonus + levelBonus + attrBonus;
   return Math.max(1, Math.floor(raw * (1 + healthPercent / 100)));
@@ -215,6 +233,7 @@ export function computeCombatant(
   skillRank: number = LAB_DEFAULT_SKILL_RANK,
 ): LabCombatantResult {
   const f = mergeFormulaConstants(formulas);
+  const identity = resolveLabIdentity(input);
   const level = Math.max(1, Math.floor(input.level));
   const attributes = {
     str: Math.max(0, Math.floor(input.str)),
@@ -243,13 +262,13 @@ export function computeCombatant(
   const attackPercent = input.attackPercent + passives.attackPercent;
   const defensePercent = input.defensePercent + passives.defensePercent;
 
-  const defense = deriveDefense(input, level, attributes, defensePercent, f);
+  const defense = deriveDefense(input, level, attributes, defensePercent, f, identity);
   const healthPercent =
     input.healthPercent +
     passives.healthPercentFromFlatAndLevel +
     passives.healthPercentPerDefense * defense;
-  const attack = deriveAttack(input, level, attributes, attackPercent, f);
-  const maxHealth = deriveMaxHealth(input, level, attributes, healthPercent, f);
+  const attack = deriveAttack(input, level, attributes, attackPercent, f, identity);
+  const maxHealth = deriveMaxHealth(input, level, attributes, healthPercent, f, identity);
 
   let baselineAspd: number;
   let critChance: number;
@@ -280,18 +299,18 @@ export function computeCombatant(
     input.physicalMeleeAspd ??
     (input.kind === 'hero' ? PHYSICAL_MELEE.has(input.heroClass ?? 'knight') : true);
 
-  const classAspd = baselineAspd * f.baseAspdFactor;
+  const classAspd = baselineAspd * identity.attackSpeedFactor;
   const dexBonus = attributes.dex * f.dexAspdScale;
   const strBonus = physicalMelee ? attributes.str * f.strAspdScale : 0;
   const attackSpeed = Math.max(f.aspdFloor, classAspd + dexBonus + strBonus);
   const timeToAction = resolveActionIntervalSeconds(attackSpeed);
-  const basicHit = Math.max(1, Math.floor(attack * f.basicAttackRatio));
+  const basicHit = Math.max(1, Math.floor(attack * identity.basicAttackDamageRatio));
   const critMultiplier = 1 + critChance * (critDamage - 1);
   const estimatedBasicDps = basicHit * attackSpeed * critMultiplier;
 
-  const levelAtk = (level - 1) * f.attackPerLevel;
-  const levelDef = (level - 1) * f.defensePerLevel;
-  const levelHp = (level - 1) * f.healthPerLevel;
+  const levelAtk = (level - 1) * identity.attackPerLevel;
+  const levelDef = (level - 1) * identity.defensePerLevel;
+  const levelHp = (level - 1) * identity.healthPerLevel;
   const attrAtk = Math.floor(attributes.str * f.attrAtkStr + attributes.dex * f.attrAtkDex);
   const attrDef = Math.floor(attributes.dex * f.attrDefDex + attributes.str * f.attrDefStr);
   const attrHp = attributes.str * f.attrHpStr;
@@ -331,7 +350,7 @@ export function computeCombatant(
       attack: {
         finalLabel: 'ATK final',
         finalValue: String(attack),
-        appliedEquation: `floor( (${n(input.baseAttack)} + ${n(gearAtk)} + ${n(levelsAbove1)}×${n(f.attackPerLevel)} + floor(${n(attributes.str)}×${n(f.attrAtkStr)} + ${n(attributes.dex)}×${n(f.attrAtkDex)}) ) × (1 + [${n(input.attackPercent)} + ${n(passives.attackPercent)}]/100) ) = ${n(attack)}`,
+        appliedEquation: `floor( (${n(input.baseAttack)} + ${n(gearAtk)} + ${n(levelsAbove1)}×${n(identity.attackPerLevel)} + floor(${n(attributes.str)}×${n(f.attrAtkStr)} + ${n(attributes.dex)}×${n(f.attrAtkDex)}) ) × (1 + [${n(input.attackPercent)} + ${n(passives.attackPercent)}]/100) ) = ${n(attack)}`,
         steps: [
           {
             label: 'Base ATK',
@@ -341,7 +360,7 @@ export function computeCombatant(
           {
             label: 'Nível',
             detail: `+${levelAtk}`,
-            note: `(nível − 1) × ${f.attackPerLevel}`,
+            note: `(nível − 1) × ${identity.attackPerLevel} (identidade)`,
           },
           {
             label: 'Atributos',
@@ -365,7 +384,7 @@ export function computeCombatant(
       defense: {
         finalLabel: 'DEF final',
         finalValue: String(defense),
-        appliedEquation: `floor( (${n(input.baseDefense)} + ${n(gearDef)} + ${n(levelsAbove1)}×${n(f.defensePerLevel)} + floor(${n(attributes.dex)}×${n(f.attrDefDex)} + ${n(attributes.str)}×${n(f.attrDefStr)}) ) × (1 + [${n(input.defensePercent)} + ${n(passives.defensePercent)}]/100) ) = ${n(defense)}`,
+        appliedEquation: `floor( (${n(input.baseDefense)} + ${n(gearDef)} + ${n(levelsAbove1)}×${n(identity.defensePerLevel)} + floor(${n(attributes.dex)}×${n(f.attrDefDex)} + ${n(attributes.str)}×${n(f.attrDefStr)}) ) × (1 + [${n(input.defensePercent)} + ${n(passives.defensePercent)}]/100) ) = ${n(defense)}`,
         steps: [
           {
             label: 'Base DEF',
@@ -375,7 +394,7 @@ export function computeCombatant(
           {
             label: 'Nível',
             detail: `+${levelDef}`,
-            note: `(nível − 1) × ${f.defensePerLevel}`,
+            note: `(nível − 1) × ${identity.defensePerLevel} (identidade)`,
           },
           {
             label: 'Atributos',
@@ -399,7 +418,7 @@ export function computeCombatant(
       health: {
         finalLabel: 'HP final',
         finalValue: String(maxHealth),
-        appliedEquation: `floor( (${n(input.baseMaxHealth)} + ${n(gearHp)} + ${n(levelsAbove1)}×${n(f.healthPerLevel)} + ${n(attributes.str)}×${n(f.attrHpStr)} ) × (1 + [${n(input.healthPercent)} + ${n(healthPercent - input.healthPercent, 1)}]/100) ) = ${n(maxHealth)}`,
+        appliedEquation: `floor( (${n(input.baseMaxHealth)} + ${n(gearHp)} + ${n(levelsAbove1)}×${n(identity.healthPerLevel)} + ${n(attributes.str)}×${n(f.attrHpStr)} ) × (1 + [${n(input.healthPercent)} + ${n(healthPercent - input.healthPercent, 1)}]/100) ) = ${n(maxHealth)}`,
         steps: [
           {
             label: 'Base HP',
@@ -409,7 +428,7 @@ export function computeCombatant(
           {
             label: 'Nível',
             detail: `+${levelHp}`,
-            note: `(nível − 1) × ${f.healthPerLevel}`,
+            note: `(nível − 1) × ${identity.healthPerLevel} (identidade)`,
           },
           {
             label: 'Atributos',
@@ -434,13 +453,13 @@ export function computeCombatant(
         finalLabel: 'ASPD',
         finalValue: `${attackSpeed.toFixed(3)}/s`,
         appliedEquation: physicalMelee
-          ? `ASPD = max(${n(f.aspdFloor)}, ${n(baselineAspd)}×${n(f.baseAspdFactor)} + ${n(attributes.dex)}×${n(f.dexAspdScale)} + ${n(attributes.str)}×${n(f.strAspdScale)}) = ${n(attackSpeed)}/s · TTA = 1/${n(attackSpeed)} = ${n(timeToAction, 2)}s · Hit básico = floor(${n(attack)}×${n(f.basicAttackRatio)}) = ${n(basicHit)}`
-          : `ASPD = max(${n(f.aspdFloor)}, ${n(baselineAspd)}×${n(f.baseAspdFactor)} + ${n(attributes.dex)}×${n(f.dexAspdScale)} + 0) = ${n(attackSpeed)}/s · TTA = 1/${n(attackSpeed)} = ${n(timeToAction, 2)}s · Hit básico = floor(${n(attack)}×${n(f.basicAttackRatio)}) = ${n(basicHit)}`,
+          ? `ASPD = max(${n(f.aspdFloor)}, ${n(baselineAspd)}×${n(identity.attackSpeedFactor)} + ${n(attributes.dex)}×${n(f.dexAspdScale)} + ${n(attributes.str)}×${n(f.strAspdScale)}) = ${n(attackSpeed)}/s · TTA = 1/${n(attackSpeed)} = ${n(timeToAction, 2)}s · Hit básico = floor(${n(attack)}×${n(identity.basicAttackDamageRatio)}) = ${n(basicHit)}`
+          : `ASPD = max(${n(f.aspdFloor)}, ${n(baselineAspd)}×${n(identity.attackSpeedFactor)} + ${n(attributes.dex)}×${n(f.dexAspdScale)} + 0) = ${n(attackSpeed)}/s · TTA = 1/${n(attackSpeed)} = ${n(timeToAction, 2)}s · Hit básico = floor(${n(attack)}×${n(identity.basicAttackDamageRatio)}) = ${n(basicHit)}`,
         steps: [
           {
             label: 'Baseline × fator',
-            detail: `${(baselineAspd * f.baseAspdFactor).toFixed(3)}/s`,
-            note: `perfil ${baselineAspd.toFixed(3)} × ${f.baseAspdFactor}`,
+            detail: `${(baselineAspd * identity.attackSpeedFactor).toFixed(3)}/s`,
+            note: `perfil ${baselineAspd.toFixed(3)} × ${identity.attackSpeedFactor} (identidade)`,
           },
           {
             label: 'DEX',
@@ -464,7 +483,7 @@ export function computeCombatant(
           {
             label: 'Hit básico',
             detail: String(basicHit),
-            note: `floor(ATK × ${f.basicAttackRatio})`,
+            note: `floor(ATK × ${identity.basicAttackDamageRatio}) (identidade)`,
           },
           {
             label: 'DPS est.',
@@ -523,8 +542,8 @@ export function createLabDocument(
   return {
     version: 1,
     mode,
-    left,
-    right: mode === 'compare' ? right : null,
+    left: hydrateCombatant(left),
+    right: mode === 'compare' && right ? hydrateCombatant(right) : null,
     formulas: mergeFormulaConstants(formulas),
     exportedAt: new Date().toISOString(),
   };
@@ -538,13 +557,19 @@ export function parseLabDocument(raw: string): LabDocument {
   if (data.mode !== 'single' && data.mode !== 'compare') {
     throw new Error('JSON inválido: mode deve ser single|compare');
   }
+  const legacyIdentity = identityFromLegacyFormulas(
+    data.formulas as unknown as Record<string, unknown>,
+  );
   const formulas = mergeFormulaConstants(data.formulas);
-  const left = hydrateCombatant(data.left);
-  const right = data.right ? hydrateCombatant(data.right) : null;
+  const left = hydrateCombatant(data.left, legacyIdentity);
+  const right = data.right ? hydrateCombatant(data.right, legacyIdentity) : null;
   return { ...data, formulas, left, right };
 }
 
-function hydrateCombatant(input: LabCombatantInput): LabCombatantInput {
+function hydrateCombatant(
+  input: LabCombatantInput,
+  legacyIdentity?: Partial<LabCombatantIdentity>,
+): LabCombatantInput {
   const withElemental: LabCombatantInput = {
     ...input,
     resists: input.resists ?? zeroResists(),
@@ -552,6 +577,11 @@ function hydrateCombatant(input: LabCombatantInput): LabCombatantInput {
     elementalDamageFlat: input.elementalDamageFlat ?? zeroElemFlat(),
     elementalPenetration: input.elementalPenetration ?? zeroPenetration(),
     physicalDamagePercent: input.physicalDamagePercent ?? 0,
+    identity: {
+      ...catalogIdentityFor(input),
+      ...(legacyIdentity ?? {}),
+      ...(input.identity ?? {}),
+    },
   };
   if (withElemental.kind !== 'hero') {
     return { ...withElemental, passives: [] };
@@ -572,26 +602,36 @@ export function toTsSnippet(
   formulas: LabFormulaConstants,
 ): string {
   const f = mergeFormulaConstants(formulas);
-  const formulaBlock = `// Constantes lab
+  const identity = resolveLabIdentity(input);
+  const formulaBlock = `// Pesos globais (lab) — crescimento/básico/ASPD/CD na identidade
 const formulas = {
-  attackPerLevel: ${f.attackPerLevel},
-  defensePerLevel: ${f.defensePerLevel},
-  healthPerLevel: ${f.healthPerLevel},
   attrAtkStr: ${f.attrAtkStr},
   attrAtkDex: ${f.attrAtkDex},
   attrDefDex: ${f.attrDefDex},
   attrDefStr: ${f.attrDefStr},
   attrHpStr: ${f.attrHpStr},
-  baseAspdFactor: ${f.baseAspdFactor},
   dexAspdScale: ${f.dexAspdScale},
   strAspdScale: ${f.strAspdScale},
-  basicAttackRatio: ${f.basicAttackRatio},
+  aspdFloor: ${f.aspdFloor},
+};
+
+const identity = {
+  basicAttackDamageRatio: ${identity.basicAttackDamageRatio},
+  skillCooldownTurnSeconds: ${identity.skillCooldownTurnSeconds},
+  attackSpeedFactor: ${identity.attackSpeedFactor},
+  attackPerLevel: ${identity.attackPerLevel},
+  defensePerLevel: ${identity.defensePerLevel},
+  healthPerLevel: ${identity.healthPerLevel},
+  levelUpAttackGain: ${identity.levelUpAttackGain},
+  levelUpDefenseGain: ${identity.levelUpDefenseGain},
+  levelUpHealthGain: ${identity.levelUpHealthGain},
 };`;
 
   if (input.kind === 'enemy') {
     return `${formulaBlock}
 
 // Inimigo lab → ${input.label} Lv.${result.level} (${input.enemyType}, ${input.enemyRole})
+// Colar identity em EnemyCombatIdentityCatalog
 // Derivado: ATK ${result.attack} · DEF ${result.defense} · HP ${result.maxHealth} · ASPD ${result.attackSpeed.toFixed(3)} · DPS básico ${result.estimatedBasicDps.toFixed(1)}
 {
   level: ${result.level},
@@ -615,6 +655,7 @@ const formulas = {
   return `${formulaBlock}
 
 // Herói lab → ${input.label} (${input.heroClass}) Lv.${result.level} asc=${input.ascensionId ?? 'null'}
+// Colar identity em HeroCombatIdentityCatalog
 // Derivado: ATK ${result.attack} · DEF ${result.defense} · HP ${result.maxHealth} · ASPD ${result.attackSpeed.toFixed(3)}
 // Passivas: ATK% ${result.passiveAttackPercent} · DEF% ${result.passiveDefensePercent} · HP% ${result.passiveHealthPercent.toFixed(1)} · skills ${result.treeDamagePercent.toFixed(1)}%
 {

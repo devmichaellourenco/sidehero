@@ -27,7 +27,7 @@ export const SEASON_FINALE_EPILOGUE: ActSceneDefinition = {
   recap:
     'O Duque de Morthaven caiu. A party atravessou Stendra, Gruftall, Valdris e o castelo sombrio — e encerrou a ameaça que pairava sobre o reino.',
   preview:
-    'Esta é a última fase do jogo base. Você pode repetir qualquer fase liberada quando quiser — use o acampamento e toque em **Batalhar**. Novas regiões, se vierem, serão conteúdo futuro — não um reinício de temporada.',
+    'Esta é a última fase do jogo base. No acampamento, use o **mapa** para missões principais, secundárias e normais (farm). Novas regiões, se vierem, serão conteúdo futuro — não um reinício de temporada.',
 };
 
 type ActCopy = Pick<ActSceneDefinition, 'title' | 'recap' | 'preview'>;

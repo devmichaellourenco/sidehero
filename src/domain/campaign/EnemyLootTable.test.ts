@@ -17,7 +17,7 @@ describe('EnemyLootTable', () => {
     expect(profile.options.length).toBeGreaterThan(0);
   });
 
-  it('usa chance reduzida ao repetir boss', () => {
+  it('usa chance de role (não 100%) após a 1ª clear do boss de fase', () => {
     const profile = resolveEnemyLootProfile({
       mapIndex: 1,
       enemyType: 'hill_ogre',
@@ -27,8 +27,7 @@ describe('EnemyLootTable', () => {
       seasonFinale: false,
     });
 
-    expect(profile.dropChancePercent).toBeLessThan(100);
-    expect(profile.dropChancePercent).toBeGreaterThan(0);
+    expect(profile.dropChancePercent).toBe(22);
   });
 
   it('monstros comuns têm chance baixa de loot', () => {

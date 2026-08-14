@@ -9,7 +9,7 @@
 
 Aplicar no painel Side Hero o padrão visual do **tutorial/onboarding**: fundo **pergaminho claro**, tipografia **tinta escura**, bordas em **ouro de selo** e CTAs em **verde floresta**.
 
-**Exceção:** a **battle strip** (arte cênica) e a **Stage Progress Bar** (waves) permanecem no tratamento visual próprio — não forçar pergaminho nelas. A barra **Acampamento / Batalhar** segue o chrome pergaminho (CTA floresta em Batalhar).
+**Exceção:** a **battle strip** (arte cênica) e a **Stage Progress Bar** (waves) permanecem no tratamento visual próprio — não forçar pergaminho nelas. A barra **Acampamento** (e demais CTAs da combat bar) segue o chrome pergaminho.
 
 Referência canônica: card `.onboarding-card`.
 

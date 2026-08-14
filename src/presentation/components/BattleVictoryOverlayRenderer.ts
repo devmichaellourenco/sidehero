@@ -27,6 +27,45 @@ export class BattleVictoryOverlayRenderer {
             : 'MARCO'
           : 'CLEAR';
     const subtitle = this.buildSubtitle(payload);
+
+    const detailsPanel = isTerminal ? this.buildDetailsPanel(payload, isDefeat) : '';
+    const actions = isTerminal
+      ? `<div class="battle-victory-compact-actions">
+          <button type="button" class="battle-victory-continue-btn hidden" data-victory-continue>
+            Continuar
+          </button>
+        </div>`
+      : '';
+
+    container.innerHTML = `
+      <div class="battle-victory-compact ${toneClass}${isMilestone ? ' battle-victory-compact--celebration' : ''}" data-victory-compact>
+        <div class="battle-victory-stage">
+          <div class="battle-victory-compact-main" data-victory-headline>
+            <span class="battle-victory-compact-label${isMilestone ? ' battle-victory-compact-label--milestone' : ''}">${headline}</span>
+            <span class="battle-victory-compact-sub">${subtitle}</span>
+          </div>
+          ${detailsPanel}
+        </div>
+        ${actions}
+      </div>
+    `;
+  }
+
+  renderStart(container: HTMLElement): void {
+    container.innerHTML = `
+      <div class="battle-victory-compact battle-victory-compact--start" data-victory-compact>
+        <div class="battle-victory-stage">
+          <div class="battle-victory-compact-main" data-victory-headline>
+            <span class="battle-victory-compact-label">START</span>
+            <span class="battle-victory-compact-sub">Missão iniciada</span>
+          </div>
+        </div>
+        <div class="battle-victory-compact-actions" aria-hidden="true"></div>
+      </div>
+    `;
+  }
+
+  private buildDetailsPanel(payload: BattleVictoryPayload, isDefeat: boolean): string {
     const rewardRows = this.buildRewardRows(payload);
     const levelUpRows = this.buildLevelUpRows(payload);
     const nextPhaseLine = payload.nextPhaseName
@@ -41,37 +80,15 @@ export class BattleVictoryOverlayRenderer {
           ? `<p class="battle-victory-defeat-hint">No Acampamento: ajuste formação, skills ou resistências e tente de novo.</p>`
           : '';
 
-    const detailsSection = `
+    return `
       <div class="battle-victory-details hidden" data-victory-details-panel>
-        <p class="battle-victory-detail-line">${payload.clearedPhaseName}</p>
+        <p class="battle-victory-detail-line battle-victory-detail-line--title">${payload.clearedPhaseName}</p>
         ${defeatHint}
         <ul class="battle-victory-rewards" aria-label="Recompensas">
           ${rewardRows}
         </ul>
         ${levelUpRows}
         ${nextPhaseLine}
-      </div>
-      <div class="battle-victory-compact-actions">
-        <button type="button" class="battle-victory-details-btn" data-victory-details-toggle aria-expanded="false">
-          Detalhes
-        </button>
-        ${
-          isTerminal
-            ? `<button type="button" class="battle-victory-continue-btn hidden" data-victory-continue>
-                Continuar
-              </button>`
-            : ''
-        }
-      </div>
-    `;
-
-    container.innerHTML = `
-      <div class="battle-victory-compact ${toneClass}${isMilestone ? ' battle-victory-compact--celebration' : ''}">
-        <div class="battle-victory-compact-main">
-          <span class="battle-victory-compact-label${isMilestone ? ' battle-victory-compact-label--milestone' : ''}">${headline}</span>
-          <span class="battle-victory-compact-sub">${subtitle}</span>
-        </div>
-        ${detailsSection}
       </div>
     `;
   }
@@ -126,7 +143,9 @@ export class BattleVictoryOverlayRenderer {
     if (rows.length === 0) {
       rows.push(
         `<li class="battle-victory-reward battle-victory-reward--empty">${
-          payload.variant === 'defeat' ? 'Sem recompensas de conclusão' : 'Sem recompensas extras'
+          payload.variant === 'defeat'
+            ? 'Sem recompensas de conclusão'
+            : 'Sem recompensas extras'
         }</li>`,
       );
     }

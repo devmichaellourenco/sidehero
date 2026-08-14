@@ -31,12 +31,13 @@ description: Implementa combate em tempo real, campanha por fases/waves, tick e 
 - Stats da tentativa: `battleSessionStats` (geral/herói/skill/elementos/mitigação); reset ao iniciar/reiniciar fase; UI via runa `battle_stats`
 - Timeline visual da fase: skill `stage-progress-bar` (roles trash/elite/boss → marcadores)
 - Identidade de mapa: `MapCombatIdentityCatalog` + `pickCommonForMapPhase` (bias soft) + resists via `resolveEnemyInnateResists(..., mapId)`
-- **Loop de produto (novo):** skill `camp-missions` — fim de missão → CLEAR/DEFEAT → detalhes de recompensa → Continuar → camp; sem auto-próxima fase
-- Overlay terminal (`phase-clear` / `defeat`): `BattleVictoryFlow` revela detalhes após a animação e aguarda CTA Continuar; waves intermediárias ainda auto-dismiss
+- **Loop de produto (novo):** skill `camp-missions` — fim de missão → CLEAR/DEFEAT → detalhes de recompensa → Continuar → camp; sem auto-próxima fase; tick com `phaseRun` nulo é no-op
+- Auto-batalha 1×: intervalo de tick = `COMBAT_DELTA_SECONDS × 1000` ms (TTA/CD alinhados ao tempo real); 2×/3× dividem o intervalo
+- Overlay terminal (`phase-clear` / `defeat`): `BattleVictoryFlow` anima CLEAR/DEFEAT, depois troca para tela só de recompensas (sem Ocultar); Continuar → camp + abre o mapa; waves intermediárias ainda auto-dismiss
 
 ## Arquivos frequentes
 
 - `PhaseCombatHandlers.ts`, `CombatTurnPhase.ts`, `CombatActionExecutor.ts`
-- `HandcraftedPhaseCatalog.ts`, `EnemyProgressionCatalog.ts`, `WaveEnemyFactory.ts`
+- `HandcraftedPhaseCatalog.ts`, `PhaseDisplayNameCatalog.ts`, `EnemyProgressionCatalog.ts`, `WaveEnemyFactory.ts`
 - `HeroCombatIdentityCatalog.ts`, `EnemyCombatIdentityCatalog.ts` — básico, CD/turno, ASPD, crescimento por combatente
 - `CampaignMapPresentation.ts`, `CampaignModalRenderer.ts`, `CampaignTooltipBinder.ts`

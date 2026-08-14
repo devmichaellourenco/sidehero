@@ -2,16 +2,11 @@ import { CampaignMapDto, CampaignOverviewDto } from '../../application/dto/Campa
 import { CampaignViewMode } from '../campaign/CampaignViewStorage';
 import {
   escapeHtml,
-  getCampaignMapTheme,
   getMapBiomeKind,
-  mapProgress,
   parseMapIndex,
   renderCampaignWorldMap,
   renderLockedMapPanel,
   renderMapProgressBar,
-  renderMapRegionTooltipContent,
-  renderMapTabBiomeIcon,
-  renderMapTabRing,
   renderMapUnlockBanner,
 } from './CampaignMapPresentation';
 import {
@@ -38,45 +33,6 @@ export function resolveInitialMapId(campaign: CampaignOverviewDto): string {
 }
 
 export class CampaignModalRenderer {
-  renderTabs(campaign: CampaignOverviewDto, activeMapId: string): string {
-    return campaign.maps
-      .map((map) => {
-        const active = map.id === activeMapId ? ' campaign-map-tab--active' : '';
-        const progress = mapProgress(map);
-        const locked = !isMapUnlocked(map);
-        const tabState = locked ? ' campaign-map-tab--locked' : '';
-        const disabled = locked ? ' aria-disabled="true"' : '';
-        const theme = getCampaignMapTheme(map.id);
-        const mapIndex = parseMapIndex(map);
-        const regionTooltip = renderMapRegionTooltipContent(map, mapIndex);
-
-        return `
-          <button
-            type="button"
-            class="campaign-map-tab${active}${tabState}"
-            data-campaign-map-tab="${escapeHtml(map.id)}"
-            data-campaign-theme="${escapeHtml(map.id)}"
-            data-campaign-tooltip
-            data-map-unlocked="${map.unlocked}"
-            aria-selected="${map.id === activeMapId}"
-            ${disabled}
-          >
-            <span class="campaign-map-tab-visual">
-              ${locked ? '<span class="campaign-map-tab-lock" aria-hidden="true"></span>' : renderMapTabRing(progress.cleared, progress.total)}
-              ${renderMapTabBiomeIcon(map.id)}
-              ${locked ? '<span class="campaign-map-tab-fog" aria-hidden="true"></span>' : ''}
-            </span>
-            <span class="campaign-map-tab-copy">
-              <span class="campaign-map-tab-name">${escapeHtml(map.name)}</span>
-              <span class="campaign-map-tab-meta">${escapeHtml(theme.biomeLabel)} · ${progress.cleared}/${progress.total}</span>
-            </span>
-            <span class="campaign-tooltip-content hidden">${regionTooltip}</span>
-          </button>
-        `;
-      })
-      .join('');
-  }
-
   renderMapPanel(
     map: CampaignMapDto,
     pendingPhaseId: string | null,
@@ -141,15 +97,6 @@ export class CampaignModalRenderer {
 
     return `
       <div class="campaign-modal" data-campaign-theme="${escapeHtml(activeMapId)}" data-campaign-view="${viewMode}">
-        ${
-          viewMode === 'region'
-            ? `
-          <div class="campaign-map-tabs" data-campaign-map-tabs role="tablist" aria-label="Mapas">
-            ${this.renderTabs(campaign, activeMapId)}
-          </div>
-        `
-            : ''
-        }
         <section
           class="campaign-map-panel${viewMode === 'world' ? ' campaign-map-panel--world' : ''}"
           data-campaign-map-panel

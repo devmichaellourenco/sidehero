@@ -1,9 +1,14 @@
-import { MapId } from '../CampaignIds';
+import { MapId, parsePhaseId } from '../CampaignIds';
 import { CampaignReleaseProfile, CAMPAIGN_RELEASE_PROFILE } from '../CampaignReleaseScope';
 import { getMissionById, listMainMissionsForMap } from './MissionCatalog';
 import { MissionDefinition } from './MissionDefinition';
 import { MissionId, phaseIdFromMainMissionId } from './MissionId';
 import { listEligibleSideMissionIds } from './MissionUnlockGraph';
+import {
+  filterNormalMissionIdsForMainBand,
+  filterNormalMissionsForMainBand,
+  filterSideMissionsForMainBand,
+} from './NormalMissionMainBand';
 import { rollNormalMissionOffer } from './NormalMissionOffer';
 
 export interface CampMissionBoard {
@@ -24,9 +29,20 @@ export function nextMainMissionForMap(
   return mains.find((m) => !completed.has(m.id)) ?? null;
 }
 
+/** Número da fase da próxima main incompleta (fallback 1). */
+export function currentMainPhaseNumberForMap(
+  mapId: MapId,
+  completedMainIds: ReadonlySet<MissionId> | readonly MissionId[],
+  profile: CampaignReleaseProfile = CAMPAIGN_RELEASE_PROFILE,
+): number {
+  const main = nextMainMissionForMap(mapId, completedMainIds, profile);
+  if (!main) return 50;
+  return parsePhaseId(main.phaseTemplateId).phaseNumber;
+}
+
 /**
  * Snapshot do que deve aparecer no mapa de locais nesta visita.
- * Normais: usa oferta já sorteada (não rerola aqui).
+ * Normais: usa oferta já sorteada (não rerola aqui), filtrada pelo marco da main.
  */
 export function buildCampMissionBoard(params: {
   mapId: MapId;
@@ -39,6 +55,11 @@ export function buildCampMissionBoard(params: {
 }): CampMissionBoard {
   const profile = params.profile ?? CAMPAIGN_RELEASE_PROFILE;
   const main = nextMainMissionForMap(params.mapId, params.completedMainIds, profile);
+  const currentMainPhaseNumber = currentMainPhaseNumberForMap(
+    params.mapId,
+    params.completedMainIds,
+    profile,
+  );
 
   const sideIds = listEligibleSideMissionIds(
     params.mapId,
@@ -52,34 +73,46 @@ export function buildCampMissionBoard(params: {
     return !completedSides.has(id);
   });
 
-  const sides = sideIds
-    .map((id) => getMissionById(id, profile))
-    .filter((m): m is MissionDefinition => Boolean(m));
+  const sides = filterSideMissionsForMainBand(
+    sideIds
+      .map((id) => getMissionById(id, profile))
+      .filter((m): m is MissionDefinition => Boolean(m)),
+    currentMainPhaseNumber,
+  );
 
-  const normals = params.normalOfferIds
-    .map((id) => getMissionById(id, profile))
-    .filter((m): m is MissionDefinition => Boolean(m))
-    .filter((m) => m.mapId === params.mapId);
+  const normals = filterNormalMissionsForMainBand(
+    params.normalOfferIds
+      .map((id) => getMissionById(id, profile))
+      .filter((m): m is MissionDefinition => Boolean(m))
+      .filter((m) => m.mapId === params.mapId),
+    currentMainPhaseNumber,
+  );
 
   return { mapId: params.mapId, main, sides, normals };
 }
 
-/** Garante oferta inicial se o progresso ainda não tiver normais para o mapa. */
+/** Garante oferta inicial se o progresso ainda não tiver normais válidas para o mapa. */
 export function ensureNormalOfferForBoard(params: {
   mapId: MapId;
   saveSeed: number;
   offerEpoch: number;
   currentOffer: readonly MissionId[];
+  currentMainPhaseNumber: number;
   profile?: CampaignReleaseProfile;
 }): { offer: MissionId[]; offerEpoch: number } {
-  if (params.currentOffer.length > 0) {
-    return { offer: [...params.currentOffer], offerEpoch: params.offerEpoch };
-  }
   const epoch = Math.max(0, params.offerEpoch);
+  const filtered = filterNormalMissionIdsForMainBand(
+    params.currentOffer,
+    params.currentMainPhaseNumber,
+  );
+  if (filtered.length > 0) {
+    return { offer: filtered, offerEpoch: epoch };
+  }
   const offer = rollNormalMissionOffer({
     mapId: params.mapId,
     saveSeed: params.saveSeed,
     offerEpoch: epoch,
+    currentMainPhaseNumber: params.currentMainPhaseNumber,
     profile: params.profile,
   });
   return { offer, offerEpoch: epoch };

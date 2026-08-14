@@ -27,6 +27,18 @@ import {
 const STORAGE_KEY = 'side_hero_game_state';
 const LEGACY_STORAGE_KEY = 'taskbar_hero_game_state';
 
+/**
+ * Hub do acampamento: `loadoutEditOpen` sem exigir `phaseRestartOnResume`.
+ * Saves antigos (AND com restart) ou hub sem flag: se não há missão/combate, abre o acampamento.
+ */
+function resolveLoadoutEditOpenOnLoad(raw: Record<string, unknown>): boolean {
+  if (raw.loadoutEditOpen === true) return true;
+  const hasPhaseRun = Boolean(raw.phaseRun && typeof raw.phaseRun === 'object');
+  const hasCombat = Boolean(raw.combat && typeof raw.combat === 'object');
+  if (!hasPhaseRun && !hasCombat) return true;
+  return false;
+}
+
 function serializeHero(hero: Hero): Record<string, unknown> {
   const heroProps = hero.toProps();
   const equipment = heroProps.equipment ?? {};
@@ -126,8 +138,8 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       shopRefreshSeed: props.shopRefreshSeed,
       upgradeLevels: props.upgradeLevels,
       shopRefreshUses: props.shopRefreshUses,
-      loadoutEditOpen: props.loadoutEditOpen && props.phaseRestartOnResume,
-      phaseRestartOnResume: props.phaseRestartOnResume,
+      loadoutEditOpen: props.loadoutEditOpen === true,
+      phaseRestartOnResume: props.phaseRestartOnResume === true,
       combatIntermission: props.combatIntermission,
       battlePaused: props.battlePaused === true,
       battleSessionStats: props.battleSessionStats ?? { damageDealt: 0, healingDone: 0, damageTaken: 0 },
@@ -200,8 +212,7 @@ export class ChromeStorageGameRepository implements IGameStateRepository {
       upgradeLevels,
       shopRefreshUses: typeof raw.shopRefreshUses === 'number' ? raw.shopRefreshUses : 0,
       phaseRestartOnResume: raw.phaseRestartOnResume === true,
-      loadoutEditOpen:
-        raw.loadoutEditOpen === true && raw.phaseRestartOnResume === true,
+      loadoutEditOpen: resolveLoadoutEditOpenOnLoad(raw),
       combatIntermission:
         raw.combatIntermission && typeof raw.combatIntermission === 'object'
           ? (raw.combatIntermission as CombatIntermissionProps)

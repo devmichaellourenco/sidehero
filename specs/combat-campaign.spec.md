@@ -24,7 +24,7 @@ Os itens abaixo descrevem o v1 linear entregue; a feature [`camp-missions`](camp
 - [x] Tick avança combate quando não pausado; respeita `combatIntermission`, pausa de loadout e **pausa de batalha** (`battlePaused`)
 - [x] Pausa de batalha: congela o combate no estado atual (sem reiniciar fase); Continuar retoma; sem edição de party/loadout; Detalhes exibe totais da tentativa (dano/cura/sofrido)
 - [x] Recompensas por kill: ouro, XP e loot ao derrotar cada inimigo (tabela por mundo/monstro)
-- [x] Boss: loot garantido na 1ª vitória da fase; replay com chance reduzida; progresso de fase no fim
+- [x] Boss: loot garantido na 1ª vitória do template; depois chance normal de role (sem penalidade de “replay”); progresso de missão no fim
 - [x] Scaling de inimigos segue level (difficultyTier ou `slot.level`) via `EnemyProgressionCatalog` (BAL-013)
 - [x] No máximo **3 inimigos por wave** (`WaveEnemyCap` / `MAX_ENEMIES_PER_WAVE`)
 - [x] Skills inimigas e heróis resolvem via `CombatActionExecutor` com elementos (`physical`/`fire`/`cold`/`lightning`/`air`) e status
@@ -84,7 +84,7 @@ Os itens abaixo descrevem o v1 linear entregue; a feature [`camp-missions`](camp
 ## Invariantes
 
 - Domínio não conhece Chrome nem DOM
-- `phaseRun` nulo + tick não inicia fase se campanha pausada para loadout
+- `phaseRun` nulo + tick **não** inicia fase (hub do acampamento); combate só via `START_MISSION` + restart
 - Herói derrotado não permanece como turno ativo
 - Dano/cura publicados como eventos para UI (`CombatFloatingEvent`)
 
@@ -110,6 +110,7 @@ Os itens abaixo descrevem o v1 linear entregue; a feature [`camp-missions`](camp
 - [x] `EncounterResolver.test.ts`, `WaveEnemyFactory.test.ts`, `EnemyProgressionCatalog.test.ts`
 - [x] `PauseBattleUseCase.test.ts` — pausa/retoma preservando combate e phaseRun
 - [x] `BattleVictoryFlow.test.ts` — terminal clear/defeat aguarda Continuar; intermissões de wave auto-dismiss
+- [x] `BattleStartFlow.test.ts` — cue START antes do combate
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts`, `CampaignModalRenderer.test.ts` — mapa, trilha e tooltips
 - [x] `ResolveMissionOutcome.test.ts` — vitória/derrota por tipo; fração de recompensa em derrota normal (ver também `camp-missions`)
 - [x] `MapCombatIdentityCatalog.test.ts`, `EnemyTierProgression.mapBias.test.ts`, `MilestonePhaseBlueprints.theme.test.ts` — identidade por mapa

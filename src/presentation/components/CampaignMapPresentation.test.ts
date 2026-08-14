@@ -129,17 +129,21 @@ describe('CampaignMapPresentation — markup e tooltips', () => {
     expect(html).toContain('title="Fase 1-2');
   });
 
-  it('renderMapProgressBar mantém tooltip do bloco e meta compacta', () => {
+  it('renderMapProgressBar mostra título/bioma e progresso só no tooltip', () => {
     const campaignMap = map('stendra', 'Stendra', true, [
       phase('1-1', { unlocked: true, cleared: true }),
       phase('1-2', { unlocked: true, selected: true }),
     ]);
     const html = renderMapProgressBar(campaignMap, 1);
-    expect(html).toContain('campaign-map-progress');
-    expect(html).toContain('campaign-map-progress-block');
-    expect(html).toContain('title="Fases 1–10');
+    expect(html).toContain('campaign-map-header-main');
+    expect(html).toContain('campaign-map-title');
+    expect(html).toContain('Stendra');
+    expect(html).toContain('data-campaign-tooltip');
     expect(html).toContain('concluídas');
     expect(html).toContain('desbloqueadas');
+    expect(html).toContain('T1–50');
+    expect(html).not.toContain('campaign-map-progress-block');
+    expect(html).not.toContain('campaign-map-progress-meta');
   });
 
   it('renderPhasePreviewFooter mostra estado vazio e desabilita iniciar se não jogável', () => {

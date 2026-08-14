@@ -21,16 +21,20 @@ describe('MissionCatalog (Fase 5)', () => {
 
   it('normais têm estrelas 1–5, nomes e recompensas', () => {
     const normals = listNormalMissionsForMap('stendra');
+    expect(normals).toHaveLength(50);
     expect(normals.every((m) => m.stars && m.stars >= 1 && m.stars <= 5)).toBe(true);
     expect(normals.every((m) => (m.rewards?.gold ?? 0) > 0)).toBe(true);
 
     const mid = getMissionById(normalMissionId('1-2'));
     expect(mid?.stars).toBe(1);
     expect(mid?.name).not.toMatch(/^Missão ·/);
+
+    expect(getMissionById(normalMissionId('1-1'))?.kind).toBe('normal');
+    expect(getMissionById(normalMissionId('1-5'))?.stars).toBe(2);
   });
 
   it('sides piloto cobrem os quatro mapas base', () => {
-    expect(listSideMissionsForMap('stendra').length).toBeGreaterThanOrEqual(3);
+    expect(listSideMissionsForMap('stendra').length).toBeGreaterThanOrEqual(5);
     expect(listSideMissionsForMap('gruftall').length).toBeGreaterThanOrEqual(1);
     expect(listSideMissionsForMap('valdris').length).toBeGreaterThanOrEqual(1);
     expect(listSideMissionsForMap('morthaven').length).toBeGreaterThanOrEqual(1);

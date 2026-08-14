@@ -367,7 +367,9 @@ export class GameHudController {
     this.pauseLoadoutBtn.disabled = !Boolean(state.phaseRun) || loadoutPause;
     this.pauseLoadoutBtn.classList.toggle('hidden', loadoutPause);
 
-    this.continueLoadoutBtn.classList.toggle('hidden', !loadoutPause);
+    // Combate inicia pelo mapa (START). Batalhar na barra fica desnecessário.
+    this.continueLoadoutBtn.classList.add('hidden');
+    this.continueLoadoutBtn.disabled = true;
 
     const statsUnlocked = Boolean(flags.battleStats);
     this.openBattleStatsBtn.classList.toggle('hidden', !statsUnlocked);

@@ -1,5 +1,6 @@
 import { FeatureFlagsDto } from '../../application/dto/FeatureFlagsDto';
 import { GameStateDto } from '../../application/dto/GameStateDto';
+import { COMBAT_DELTA_SECONDS } from '../../domain/combat/CombatTimingConstants';
 import { getFeatureFlags } from '../helpers/FeatureFlagsHelper';
 import {
   GamePreferences,
@@ -84,7 +85,8 @@ export class GamePreferencesController {
   getAutoBattleIntervalMs(state: GameStateDto | null): number {
     const flags = getFeatureFlags(state);
     const speed = Math.min(this.autoBattleSpeed, flags.autoBattleMaxSpeed);
-    return Math.floor(600 / speed);
+    // 1× = 1s de parede por COMBAT_DELTA_SECONDS de simulação (TTA/CD em tempo real).
+    return Math.floor((COMBAT_DELTA_SECONDS * 1000) / speed);
   }
 
   private clampToFlags(preferences: GamePreferences, flags: FeatureFlagsDto): GamePreferences {

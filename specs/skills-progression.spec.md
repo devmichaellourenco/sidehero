@@ -17,6 +17,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 - [x] Ascensão: uma evolução por vez por caminho; skills de tiers anteriores acumulam; concede `pointsGranted` em **Aprimoramento** (não há pool separado de evolução)
 - [x] Skills de evolução (`pointType: 'ascension'`) gastam/refundam o mesmo `unspentImprovementPoints` e sobem até `maxRank` 3
 - [x] Combate usa `HeroCombatSkillCatalog` + `CombatSkillRegistry`
+- [x] Balance Lab aba Personagens edita knobs de skill/identidade/passiva/evolução em `hero-combat-overrides.json` (merge no lookup)
 - [x] Cadência early: TTA = 1/ASPD por combatente; CD = turns × s/turno do herói − per-rank da skill; básico = `ATK × basicAttackDamageRatio` da identidade
 - [x] Ao clicar `+` rank (aba Skills ou ascensão), a lista mantém a posição de scroll no drawer/modal
 - [x] Aba Skills do herói **sem** textos de instrução (equipar, drag, hover); slots e cards comunicam a ação só por highlight visual no tap-to-assign

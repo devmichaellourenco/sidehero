@@ -1,5 +1,6 @@
 import { HeroClass } from '../entities/HeroClass';
 import { AscensionId } from '../progression/SkillId';
+import { applyPassiveOverride } from '../progression/HeroCombatOverrides';
 import { PassiveDefinition, PassiveId } from './PassiveTypes';
 
 const PASSIVES: Record<PassiveId, PassiveDefinition> = {
@@ -220,11 +221,16 @@ export const ASCENSION_PASSIVE_IDS: Record<AscensionId, PassiveId> = {
 };
 
 export function getPassiveDefinition(id: PassiveId): PassiveDefinition {
+  return applyPassiveOverride(PASSIVES[id]);
+}
+
+/** Passiva do catálogo, sem override do lab. */
+export function getCatalogPassiveDefinition(id: PassiveId): PassiveDefinition {
   return PASSIVES[id];
 }
 
 export function listPassiveDefinitions(): PassiveDefinition[] {
-  return Object.values(PASSIVES);
+  return Object.values(PASSIVES).map((definition) => applyPassiveOverride(definition));
 }
 
 export function isPassiveId(value: string): value is PassiveId {

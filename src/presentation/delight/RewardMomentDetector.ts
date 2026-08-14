@@ -126,7 +126,7 @@ export class RewardMomentDetector {
           iconUrl: getAssetUrl(ASSETS.ui.victoryFrame),
           detailLines: [
             'Stendra · Gruftall · Valdris · Morthaven',
-            'Repita fases liberadas quando quiser — toque em Batalhar no acampamento.',
+            'Abra o mapa no acampamento e escolha missões normais para farmar ouro e XP.',
           ],
         }),
       );

@@ -111,7 +111,7 @@ describe('ResolveMissionOutcome', () => {
     const ashState = GameState.initial().withCampaignProgress(
       GameState.initial().campaignProgress.withMissionProgress(
         MissionProgress.initial()
-          .markMainCompleted(mainMissionId('1-5'))
+          .markMainCompleted(mainMissionId('1-1'))
           .withActiveMission(ashId),
       ),
     );
@@ -142,7 +142,7 @@ describe('ResolveMissionOutcome', () => {
     const camp = enterCampHub(state, 'camp');
 
     expect(camp.loadoutEditOpen).toBe(true);
-    expect(camp.phaseRestartOnResume).toBe(true);
+    expect(camp.phaseRestartOnResume).toBe(false);
     expect(camp.phaseRun).toBeNull();
     expect(camp.combat).toBeNull();
     expect(camp.campaignProgress.missionProgress.campVisitsSinceNormalRefresh).toBe(1);
@@ -157,7 +157,7 @@ describe('ResolveMissionOutcome', () => {
     const ashState = GameState.initial().withCampaignProgress(
       GameState.initial().campaignProgress.withMissionProgress(
         MissionProgress.initial()
-          .markMainCompleted(mainMissionId('1-5'))
+          .markMainCompleted(mainMissionId('1-1'))
           .withActiveMission(ashId),
       ),
     );
@@ -180,7 +180,7 @@ describe('ResolveMissionOutcome', () => {
     const state = GameState.initial().withCampaignProgress(
       GameState.initial().campaignProgress.withMissionProgress(
         MissionProgress.initial()
-          .markMainCompleted(mainMissionId('1-5'))
+          .markMainCompleted(mainMissionId('1-1'))
           .markSideCompleted(sideMissionId('stendra_ash_trail'))
           .withActiveMission(cacheId),
       ),

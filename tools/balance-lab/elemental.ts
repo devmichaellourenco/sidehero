@@ -1,5 +1,4 @@
-import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
-import { getEnemyCombatIdentity } from '../../src/domain/enemies/EnemyCombatIdentityCatalog';
+import { getCooldownSeconds } from '../../src/domain/combat/SkillCooldownTiming';
 import {
   DAMAGE_ELEMENT_LABELS,
   DamageElement,
@@ -42,6 +41,7 @@ import {
   resolveDamageSkillAttackFloor,
 } from '../../src/domain/progression/combat/SkillDamageBalance';
 import { LabBreakdownSection, LabCombatantInput } from './types';
+import { resolveLabIdentity } from './identity';
 import { sumPassiveBonuses } from './passives';
 
 export const ELEMENT_KEYS = ['fire', 'cold', 'lightning', 'air'] as const;
@@ -131,10 +131,7 @@ function dominantElement(skill: CombatSkillDefinition): DamageElement {
 }
 
 function labBasicRatio(input: LabCombatantInput): number {
-  if (input.kind === 'hero') {
-    return getHeroCombatIdentity(input.heroClass ?? 'knight').basicAttackDamageRatio;
-  }
-  return getEnemyCombatIdentity(input.enemyType ?? 'giant_rat').basicAttackDamageRatio;
+  return resolveLabIdentity(input).basicAttackDamageRatio;
 }
 
 function resolveSkillRawPower(
@@ -186,6 +183,14 @@ export interface LabSkillSample {
   /** Equação só com números (raw → outgoing → vs si). */
   appliedEquation: string;
   usesAttackStat: boolean;
+  actionRecoverySeconds: number;
+  cooldownTurns: number;
+  skillCooldownTurnSeconds: number;
+  cooldownSecondsPerRank: number;
+  baseCooldownSeconds: number;
+  effectiveCooldownSeconds: number;
+  maxCooldownReduction: number;
+  minCooldownReduction: number;
 }
 
 function fmtLabNum(value: number, digits = 3): string {
@@ -329,6 +334,7 @@ export function sampleElementalHits(
   };
 
   const skills = listLabDamageSkills(input);
+  const identity = resolveLabIdentity(input);
   const samples: LabSkillSample[] = skills.map((skill) => {
     const definition = getSkillById(skill.skillId);
     const maxRank = definition?.maxRank ?? 3;
@@ -370,6 +376,12 @@ export function sampleElementalHits(
       physPct,
       pen,
     );
+    const turnSeconds = identity.skillCooldownTurnSeconds;
+    const baseCooldownSeconds = getCooldownSeconds(skill, { rank: 1, turnSeconds });
+    const effectiveCooldownSeconds = getCooldownSeconds(skill, {
+      rank: effectiveRank,
+      turnSeconds,
+    });
     const element = dominantElement(skill);
     const primary = components.reduce((best, cur) => (cur.weight > best.weight ? cur : best));
     const elemPercent =
@@ -401,6 +413,14 @@ export function sampleElementalHits(
       outgoing,
       mitigatedVsSelf,
       usesAttackStat: Boolean(skill.usesAttackStat),
+      actionRecoverySeconds: skill.actionRecoverySeconds ?? 0,
+      cooldownTurns: skill.cooldownTurns,
+      skillCooldownTurnSeconds: turnSeconds,
+      cooldownSecondsPerRank: skill.cooldownSecondsPerRank ?? 0,
+      baseCooldownSeconds,
+      effectiveCooldownSeconds,
+      maxCooldownReduction: skill.maxCooldownReduction ?? 0,
+      minCooldownReduction: skill.minCooldownReduction ?? 0,
       appliedEquation: buildSkillAppliedEquation({
         skill,
         input,

@@ -9,6 +9,7 @@ import { MapId, PhaseId, mapIdFromIndex, parsePhaseId } from '../CampaignIds';
 import {
   allMissionsOnBoard,
   buildCampMissionBoard,
+  currentMainPhaseNumberForMap,
   ensureNormalOfferForBoard,
 } from './CampMissionBoard';
 import { getMissionById } from './MissionCatalog';
@@ -71,10 +72,12 @@ function applyMissionRewards(
   }
 
   const xp = scaleMissionRewardAmount(rewards.xp ?? 0, scale);
-  if (xp > 0 && next.heroes.length > 0) {
-    const [leader, ...rest] = next.heroes;
-    next = next.withHeroes([leader.gainExperience(xp), ...rest]);
-    events.push(`+${xp} XP`);
+  if (xp > 0) {
+    const recipient = next.activeHeroes()[0] ?? next.heroes[0];
+    if (recipient) {
+      next = next.withRosterHeroes([recipient.gainExperience(xp)]);
+      events.push(`+${xp} XP`);
+    }
   }
 
   if (grantExclusive && rewards.itemId) {
@@ -249,19 +252,24 @@ export function applyMissionDefeat(params: {
 
 /**
  * Hub do acampamento após resultado (sem auto-start de fase).
- * Mantém loadoutEditOpen + phaseRestartOnResume para bloquear ticks e persistir o camp.
+ * Mantém loadoutEditOpen para UI de camp; sem phaseRestartOnResume — batalha só via mapa.
  */
 export function enterCampHub(state: GameState, logMessage?: string): GameState {
   const mapId = mapIdFromIndex(
     parsePhaseId(state.campaignProgress.selectedPhaseId).mapIndex,
   );
   let missionProgress = state.campaignProgress.missionProgress;
+  const currentMainPhaseNumber = currentMainPhaseNumberForMap(
+    mapId,
+    state.campaignProgress.missionProgress.completedMainIds,
+  );
   const visit = nextNormalOfferAfterCampVisit({
     mapId,
     saveSeed: missionProgress.offerSeed,
     offerEpoch: missionProgress.offerEpochFor(mapId),
     campVisitsSinceRefresh: missionProgress.campVisitsSinceNormalRefresh,
     currentOffer: missionProgress.normalOfferFor(mapId),
+    currentMainPhaseNumber,
   });
   missionProgress = missionProgress
     .withNormalOffer(mapId, visit.offer, visit.offerEpoch)
@@ -274,7 +282,7 @@ export function enterCampHub(state: GameState, logMessage?: string): GameState {
     .withBattlePaused(false)
     .clearBattleSessionStats()
     .withLoadoutEditOpen(true)
-    .withPhaseRestartOnResume(true)
+    .withPhaseRestartOnResume(false)
     .withCombatIntermission(null);
 
   if (logMessage) {
@@ -287,11 +295,16 @@ function ensureOfferOnProgress(
   missionProgress: MissionProgress,
   mapId: MapId,
 ): MissionProgress {
+  const currentMainPhaseNumber = currentMainPhaseNumberForMap(
+    mapId,
+    missionProgress.completedMainIds,
+  );
   const ensured = ensureNormalOfferForBoard({
     mapId,
     saveSeed: missionProgress.offerSeed,
     offerEpoch: missionProgress.offerEpochFor(mapId),
     currentOffer: missionProgress.normalOfferFor(mapId),
+    currentMainPhaseNumber,
   });
   return missionProgress.withNormalOffer(mapId, ensured.offer, ensured.offerEpoch);
 }

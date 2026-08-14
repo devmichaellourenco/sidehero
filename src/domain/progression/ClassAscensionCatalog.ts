@@ -1,5 +1,6 @@
 import { HeroClass } from '../entities/HeroClass';
 import { ClassAscension } from './ClassAscension';
+import { applyAscensionOverride } from './HeroCombatOverrides';
 import { AscensionId } from './SkillId';
 
 export const CLASS_ASCENSION_CATALOG: ClassAscension[] = [
@@ -282,12 +283,22 @@ const ascensionMap = new Map<AscensionId, ClassAscension>(
   CLASS_ASCENSION_CATALOG.map((entry) => [entry.id, entry]),
 );
 
-export function getAscensionById(ascensionId: AscensionId): ClassAscension | undefined {
+/** Catálogo canônico, sem override do Balance Lab. */
+export function getCatalogAscensionById(
+  ascensionId: AscensionId,
+): ClassAscension | undefined {
   return ascensionMap.get(ascensionId);
 }
 
+export function getAscensionById(ascensionId: AscensionId): ClassAscension | undefined {
+  const baseline = getCatalogAscensionById(ascensionId);
+  return baseline ? applyAscensionOverride(baseline) : undefined;
+}
+
 export function getAscensionsForClass(heroClass: HeroClass): ClassAscension[] {
-  return CLASS_ASCENSION_CATALOG.filter((entry) => entry.heroClass === heroClass);
+  return CLASS_ASCENSION_CATALOG.filter((entry) => entry.heroClass === heroClass).map(
+    (entry) => applyAscensionOverride(entry),
+  );
 }
 
 export function getNextAscensionOptions(

@@ -14,7 +14,6 @@ import { LootDropResult, rollEnemyLoot } from './EnemyLootTable';
 import { isNamedChapterBossKill, tryCreateUniqueBossGearDrop } from './UniqueGearLootService';
 import {
   grantsPhaseChests,
-  isPhaseReplay,
   scalePhaseGold,
   scalePhaseXp,
 } from './PhaseLootPolicy';
@@ -90,7 +89,6 @@ export class EnemyKillRewardService {
     const phaseId = meta.phaseId;
     const phase = resolvePhase(phaseId);
     const { mapIndex } = parsePhaseId(phaseId);
-    const replay = isPhaseReplay(state.campaignProgress, phaseId);
     const legacyBonuses = MetaBonusScope.get();
     const isPhaseBoss = isNamedChapterBossKill({
       phaseId,
@@ -115,7 +113,7 @@ export class EnemyKillRewardService {
 
     if (gold > 0) {
       nextState = nextState.withGold(nextState.gold.add(gold));
-      rewardParts.push(replay ? `+${gold} ouro (50%)` : `+${gold} ouro`);
+      rewardParts.push(`+${gold} ouro`);
     }
 
     if (xp > 0) {
@@ -130,7 +128,7 @@ export class EnemyKillRewardService {
       const benchUpdates =
         benchXp > 0 ? nextState.benchHeroes().map((hero) => hero.gainExperience(benchXp)) : [];
       nextState = nextState.withRosterHeroes([...activeUpdates, ...benchUpdates]);
-      rewardParts.push(replay ? `+${xp} XP (75%)` : `+${xp} XP`);
+      rewardParts.push(`+${xp} XP`);
     }
 
     const lootDrop = rollEnemyLoot({
@@ -174,10 +172,9 @@ export class EnemyKillRewardService {
       rewardParts.push('baú de chefe de ato');
     }
 
-    const replayTag = replay && rewardParts.length > 0 ? '' : '';
     const message =
       rewardParts.length > 0
-        ? `O ${enemy.name} foi derrotado!\nRecompensas: ${rewardParts.join(', ')}${replayTag}`
+        ? `O ${enemy.name} foi derrotado!\nRecompensas: ${rewardParts.join(', ')}`
         : `O ${enemy.name} foi derrotado!`;
 
     nextState = nextState.addLog(message);

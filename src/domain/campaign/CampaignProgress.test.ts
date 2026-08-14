@@ -3,7 +3,7 @@ import { buildPhaseId } from './CampaignIds';
 import { CampaignProgress } from './CampaignProgress';
 
 describe('CampaignProgress', () => {
-  it('permite replay de fases concluídas', () => {
+  it('mantém fase cleared no progresso (legado linear; board usa missões)', () => {
     const progress = CampaignProgress.initial().markCleared(buildPhaseId(1, 1), [buildPhaseId(1, 2)], 1);
 
     expect(progress.canPlayPhase(buildPhaseId(1, 1))).toBe(true);

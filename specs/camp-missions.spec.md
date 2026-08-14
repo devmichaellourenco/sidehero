@@ -26,7 +26,7 @@ Acampamento → abrir mapa → escolher missão → batalha (waves)
 |------|--------|------------|---------|
 | **Principal** (`main`) | Avança a história do mapa (marcos) | Não, após concluir | Sempre a **próxima** incompleta |
 | **Secundária** (`side`) | História paralela + loot exclusivo | Não, após concluir | Desbloqueadas e incompletas (várias ok) |
-| **Normal** (`normal`) | Loot/recursos; não avança história | Oferta some na derrota ou ao concluir; na derrota concede fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`); pool renova | 2–4 por oferta |
+| **Normal** (`normal`) | Loot/recursos; não avança história | Sim, em **próximos** sorteios; some da oferta atual na derrota/vitória; derrota concede fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`) | 2–4 por oferta, só do capítulo da main atual |
 
 ### Principais (marcos)
 
@@ -41,8 +41,8 @@ Por mapa (`stendra` … `morthaven` no v1), ids alinhados às fases-marco:
 ### Secundárias
 
 - Únicas por arco de conteúdo; **várias** podem estar ativas ao mesmo tempo.
-- Cadeias de unlock (ex.: concluir `x-5` → oferece `side_xyz` → concluir → `side_hyj` final).
-- Cadeias independentes podem coexistir no mapa.
+- **Vinculadas ao capítulo da main atual**: só aparecem no board se o `phaseTemplateId` estiver na mesma faixa da main incompleta (ex.: main `1-1` → sides com fases `1-2`…`1-5`).
+- Cadeias de unlock (ex.: sides do capítulo `1-1` livres no início; após `1-1` → `Trilha de Cinzas` no capítulo `1-5`).
 - Concluídas **não** repetíveis.
 - **Expiram** se incompletas quando o jogador conclui uma main **posterior** no mesmo mapa (janela entre o maior pré-requisito main e a próxima main; ex.: unlock em `1-1` some ao zerar `1-5`).
 - Derrota: permanece no mapa; tentativa zera.
@@ -50,12 +50,14 @@ Por mapa (`stendra` … `morthaven` no v1), ids alinhados às fases-marco:
 
 ### Normais
 
-- Templates por **mapa** e **estrela (1–5)** — cada estrela aponta a um template distinto no catálogo.
-- Conteúdo das fases intermediárias legadas (`x-2`, `x-3`, … não-marco) alimenta o **pool** de templates normais.
-- Oferta: entre **2 e 4** missões sorteadas.
+- Templates por **mapa** para fases `1–50` (incluindo marcos): `normal:x-n` usa o combate da fase `x-n`.
+- **Capítulo da main atual**: oferta só sorteia templates na faixa `[marco atual .. próximo marco]` (ex.: main `1-1` → `1-1`…`1-5`; main `1-5` → `5`…`10`).
+- Dentro do capítulo há templates mais fáceis e mais exigentes (próximo ao marco seguinte pede grind/build); não devem ser triviais nem impossíveis cedo demais.
+- Oferta: entre **2 e 4** missões sorteadas (sem repetir **no mesmo** sorteio).
+- **Repetíveis entre sorteios**: o mesmo template pode voltar em refreshes futuros (diferente de main/side). **Não** há penalidade de ouro/XP por “replay” — kills pagam cheio.
 - Renovação: a cada `NORMAL_MISSION_REFRESH_EVERY_N_CAMP_VISITS` visitas ao acampamento (constante de domínio, default calibrável).
-- Derrota: a missão **some** da oferta atual (não reaparece até o próximo refresh do pool).
-- Vitória: remove da oferta; concede loot/recursos sem avançar história.
+- Derrota: a missão **some** da oferta atual (pode voltar no próximo refresh).
+- Vitória: remove da oferta atual; concede loot/recursos sem avançar história.
 
 ## Estrelas (1–5)
 
@@ -73,21 +75,26 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 
 ## Critérios de aceite
 
-- [x] Fim de batalha (vitória ou derrota) mostra CLEAR/DEFEAT, depois detalhes de recompensas; Continuar → acampamento
-- [x] Derrota em missão normal concede fração de ouro/XP; main/side na derrota sem recompensa de conclusão
+- [x] Fim de batalha (vitória ou derrota) mostra CLEAR/DEFEAT, depois tela só de recompensas (sem scroll; Continuar no deck); Continuar → hub ACAMPAMENTO e abre o mapa
+- [x] **Iniciar missão** no mapa → cue START → combate (sem clique em Batalhar); em campanha unpin, relay para o side panel (`MissionBattleStartRelay`)
+- [x] Hub / Acampamento sem reinício via Batalhar (`phaseRestartOnResume: false`); combate só pelo mapa
+- [x] New game inicia no hub do acampamento (`loadoutEditOpen: true`) com overlay Acampamento
+- [x] Derrota em missão normal concede fração de ouro/XP **e** o overlay de recompensas exibe esses valores (só o delta real nos heróis — sem inventar XP a partir de `xpReward` dos inimigos); main/side na derrota sem recompensa de conclusão
 - [x] Sem auto-seleção / auto-start da próxima fase ao limpar boss de missão
 - [x] Board do mapa lista próxima principal + secundárias elegíveis + oferta normal (2–4)
 - [x] Principais = marcos `x-1`…`x-50` apenas; concluídas fora do board
 - [x] Secundárias respeitam grafo de unlock; múltiplas ativas permitidas; incompletas expiram ao concluir main posterior no mapa
 - [x] New game / party inicial: só Nix até unlocks na árvore (gates de main)
-- [x] Normais sorteadas de templates por mapa×estrela; pool parametrizado por visitas ao camp
+- [x] Normais sorteadas no **capítulo da main atual** (ex.: `1-1` → fases `1–5`); templates repetíveis entre sorteios; pool por visitas ao camp
+- [x] Secundárias no board filtradas pelo mesmo capítulo (template na faixa) + grafo de unlock/expiração
+- [x] Pins do mapa de locais com margem segura (visíveis por completo; sem corte no topo/laterais)
 - [x] Derrota: normal some; main/side permanecem com tentativa zerada
 - [x] Vitória main: marca concluída, libera próxima principal (e unlocks side se houver)
 - [x] Vitória side: marca concluída, aplica unlocks e loot exclusivo
 - [x] Vitória normal: remove da oferta, loot/recursos sem progresso de história
 - [x] Preview de waves/monstros/stats antes de iniciar
 - [x] Estrelas 1–5 visíveis nas normais (e onde aplicável)
-- [x] Modal: mapa-mundo + mapa de locais (sem trilha linear antiga como UX principal)
+- [x] Modal: mapa-mundo + mapa de locais (região compacta: padding/gap mínimos; progresso no hover; sem abas laterais)
 - [x] Persistência: board, ofertas, concluídas, visitas desde refresh, tentativa ativa
 - [x] `CampaignReleaseScope` base (mapas 1–4) respeitado
 - [x] Presentation consome apenas DTOs
@@ -120,6 +127,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 
 - Acampamento é o hub; combate só após `StartMission`
 - Principais/secundárias concluídas nunca reaparecem no board
+- Sem multiplicador de ouro/XP por template já cleared (normais farmam cheio)
 - Sides incompletas saem do board ao expirar a janela de main
 - Oferta normal é determinística por seed de save + epoch de refresh
 - Domínio não conhece Chrome nem DOM
@@ -135,8 +143,10 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 ## Testes obrigatórios
 
 - [x] `MissionUnlockGraph.test.ts` — cadeias, paralelas e expiry ao completar main posterior
-- [x] `NormalMissionOffer.test.ts` — 2–4, refresh por visitas, seed
-- [x] `CampMissionBoard.test.ts` — próxima main, sides elegíveis, normais
+- [x] `NormalMissionOffer.test.ts` — 2–4, refresh por visitas, seed, faixa da main
+- [x] `NormalMissionMainBand.test.ts` — banda de fases por marco da main
+- [x] `CampMissionBoard.test.ts` — próxima main, sides elegíveis, normais na faixa
+- [x] `MissionMapLayoutCatalog.test.ts` — margem segura dos pins
 - [x] `ResolveMissionOutcomeUseCase.test.ts` — vitória/derrota por tipo → camp
 - [x] `ResolveMissionOutcome.test.ts` — domínio: fração de ouro/XP na derrota normal; main/side sem recompensa
 - [x] `StartMissionUseCase.test.ts` — inicia tentativa / rejeita inválida
@@ -144,7 +154,9 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / popover no pin / tooltip de stats
 - [x] `EnemyBattlePresentation.test.ts` — tooltip compacto com ícones (~3 por linha)
 - [x] `MissionEnemyPreviewMapper.test.ts` — ficha de combate dos inimigos em destaque
-- [x] `BattleVictoryFlow.test.ts` — CLEAR/DEFEAT revelam detalhes e aguardam Continuar (ver também `battle-ui` / `combat-campaign`)
+- [x] `BattleVictoryDetector.test.ts` — vitória com rewards; derrota normal com ouro/XP parcial no payload
+- [x] `BattleVictoryFlow.test.ts` — CLEAR/DEFEAT → tela de recompensas e Continuar (ver também `battle-ui` / `combat-campaign`)
+- [x] `BattleStartFlow.test.ts` — START antes do combate (ver também `battle-ui`)
 - [x] Migração de save: progresso linear → marcos concluídos + board
 
 ## Relacionado

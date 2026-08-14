@@ -505,43 +505,26 @@ export function renderMapRegionTooltipContent(map: CampaignMapDto, mapIndex: num
 }
 
 export function renderMapProgressBar(map: CampaignMapDto, mapIndex: number): string {
+  const theme = getCampaignMapTheme(map.id);
   const progress = mapProgress(map);
-  const blocks = Array.from({ length: 5 }, (_, blockIndex) => {
-    const blockStart = blockIndex * 10;
-    const blockEnd = blockStart + 10;
-    const clearedInBlock = map.phases.filter((phase) => {
-      const phaseNumber = Number.parseInt(phase.id.split('-')[1] ?? '0', 10);
-      return phaseNumber > blockStart && phaseNumber <= blockEnd && phase.cleared;
-    }).length;
-    const fillPct = Math.round((clearedInBlock / 10) * 100);
-    const isCurrentBlock =
-      progress.cleared >= blockStart && progress.cleared < blockEnd && progress.cleared < progress.total;
-
-    return `
-      <div
-        class="campaign-map-progress-block${isCurrentBlock ? ' campaign-map-progress-block--current' : ''}"
-        title="Fases ${blockStart + 1}–${blockEnd}: ${clearedInBlock}/10"
-      >
-        <div class="campaign-map-progress-block-fill" style="width: ${fillPct}%"></div>
-        <span class="campaign-map-progress-block-label">${blockIndex + 1}</span>
-      </div>
-    `;
-  }).join('');
-
-  const selectedPhase = map.phases.find((phase) => phase.selected);
-  const selectedNumber = selectedPhase
-    ? Number.parseInt(selectedPhase.id.split('-')[1] ?? '0', 10)
-    : progress.cleared || 1;
-  const tooltip = `Fase ${selectedNumber}/${progress.total} · ${tierRangeForMap(mapIndex)}`;
+  const combatHint = mapCombatHintLine(map.id);
+  const tooltip = `
+    <strong class="campaign-tooltip-title">${escapeHtml(map.name)}</strong>
+    <span class="campaign-tooltip-line campaign-tooltip-biome">${escapeHtml(theme.biomeLabel)} · ${tierRangeForMap(mapIndex)}</span>
+    <span class="campaign-tooltip-line">${progress.cleared}/${progress.total} concluídas · ${progress.unlocked} desbloqueadas</span>
+    <span class="campaign-tooltip-line campaign-tooltip-flavor">${escapeHtml(theme.flavorText)}</span>
+    ${
+      combatHint
+        ? `<span class="campaign-tooltip-line campaign-tooltip-combat-hint">${escapeHtml(combatHint)}</span>`
+        : ''
+    }
+  `;
 
   return `
-    <div class="campaign-map-progress" title="${escapeHtml(tooltip)}">
-      <div class="campaign-map-progress-track">${blocks}</div>
-      <p class="campaign-map-progress-meta">
-        <span>${progress.cleared}/${progress.total} concluídas</span>
-        <span>${progress.unlocked} desbloqueadas</span>
-        <span>${tierRangeForMap(mapIndex)}</span>
-      </p>
+    <div class="campaign-map-header-main" data-campaign-tooltip>
+      <h3 class="campaign-map-title">${escapeHtml(map.name)}</h3>
+      <p class="campaign-map-biome">${escapeHtml(theme.biomeLabel)}</p>
+      <span class="campaign-tooltip-content hidden">${tooltip}</span>
     </div>
   `;
 }

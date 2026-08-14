@@ -2,6 +2,7 @@ import { damageComponent, standardDamage } from '../../combat/DamageComponentPre
 import { Hero } from '../../entities/Hero';
 import { SkillId } from '../SkillId';
 import { BASIC_ATTACK_SKILL } from './BasicAttackSkill';
+import { applySkillCombatOverride } from '../HeroCombatOverrides';
 import { CatalogCombatSkillDefinition, CombatSkillDefinition } from './CombatSkillDefinition';
 
 export { BASIC_ATTACK_SKILL } from './BasicAttackSkill';
@@ -1412,6 +1413,14 @@ export const HERO_COMBAT_SKILL_CATALOG: CatalogCombatSkillDefinition[] = [
 const heroSkillMap = new Map(HERO_COMBAT_SKILL_CATALOG.map((skill) => [skill.skillId, skill]));
 
 export function getHeroCombatSkill(skillId: string): CombatSkillDefinition | undefined {
+  const base = heroSkillMap.get(skillId);
+  return base ? applySkillCombatOverride(base) : undefined;
+}
+
+/** Skill do catálogo, sem override do lab. */
+export function getCatalogHeroCombatSkill(
+  skillId: string,
+): CatalogCombatSkillDefinition | undefined {
   return heroSkillMap.get(skillId);
 }
 
@@ -1421,6 +1430,6 @@ export function listHeroCombatSkills(hero: Hero): CombatSkillDefinition[] {
   return props.equippedSkillIds
     .filter((skillId): skillId is SkillId => Boolean(skillId))
     .filter((skillId) => (props.skillRanks[skillId] ?? 0) >= 1)
-    .map((skillId) => heroSkillMap.get(skillId))
+    .map((skillId) => getHeroCombatSkill(skillId))
     .filter((skill): skill is CombatSkillDefinition => skill !== undefined);
 }

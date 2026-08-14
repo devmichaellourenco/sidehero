@@ -3,6 +3,7 @@ import { applyEnemyBorrowedCombatSkillOverrides } from './EnemyBorrowedCombatSki
 import { ENEMY_MONSTER_COMBAT_SKILL_CATALOG } from './EnemyMonsterCombatSkillCatalog';
 import { BASIC_ATTACK_SKILL, ENEMY_BASIC_ATTACK_SKILL } from './BasicAttackSkill';
 import { HERO_COMBAT_SKILL_CATALOG } from './HeroCombatSkillCatalog';
+import { applySkillCombatOverride } from '../HeroCombatOverrides';
 
 const REGISTRY = new Map<string, CombatSkillDefinition>();
 
@@ -17,7 +18,8 @@ for (const skill of ENEMY_MONSTER_COMBAT_SKILL_CATALOG) {
 export const ALL_COMBAT_SKILL_IDS = [...REGISTRY.keys()];
 
 export function getBaseCombatSkill(skillId: string): CombatSkillDefinition | undefined {
-  return REGISTRY.get(skillId);
+  const base = REGISTRY.get(skillId);
+  return base ? applySkillCombatOverride(base) : undefined;
 }
 
 function flipTargetPool(pool: CombatSkillDefinition['targetPool']): CombatSkillDefinition['targetPool'] {
@@ -32,14 +34,19 @@ export function resolveCombatSkill(
   side: 'hero' | 'enemy',
 ): CombatSkillDefinition {
   if (skillId === 'basic_attack') {
-    return side === 'hero' ? BASIC_ATTACK_SKILL : ENEMY_BASIC_ATTACK_SKILL;
+    return side === 'hero'
+      ? applySkillCombatOverride(BASIC_ATTACK_SKILL)
+      : ENEMY_BASIC_ATTACK_SKILL;
   }
 
-  const base = REGISTRY.get(skillId);
-  if (!base) {
-    return side === 'hero' ? BASIC_ATTACK_SKILL : ENEMY_BASIC_ATTACK_SKILL;
+  const raw = REGISTRY.get(skillId);
+  if (!raw) {
+    return side === 'hero'
+      ? applySkillCombatOverride(BASIC_ATTACK_SKILL)
+      : ENEMY_BASIC_ATTACK_SKILL;
   }
 
+  const base = applySkillCombatOverride(raw);
   if (side === 'hero') {
     return base;
   }

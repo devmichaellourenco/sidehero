@@ -22,35 +22,65 @@ export interface MissionMapLayout {
   normalPinSlots: MapPercentPoint[];
 }
 
-/** Stendra v1 — landmarks estáveis para o artista alinhar a arte depois. */
+/**
+ * Margens seguras para o pin completo (âncora = ponta inferior via translate(-50%, -100%)).
+ * yMin mais alto evita corte no topo; x evita corte nas laterais.
+ */
+export const MISSION_PIN_SAFE_MARGIN = {
+  xMin: 14,
+  xMax: 86,
+  yMin: 22,
+  yMax: 88,
+} as const;
+
+export function clampMissionPinPoint(
+  point: MapPercentPoint,
+  kind: 'main' | 'side' | 'normal' = 'normal',
+): MapPercentPoint {
+  const yMin =
+    kind === 'main'
+      ? MISSION_PIN_SAFE_MARGIN.yMin + 4
+      : kind === 'side'
+        ? MISSION_PIN_SAFE_MARGIN.yMin + 2
+        : MISSION_PIN_SAFE_MARGIN.yMin;
+  return {
+    x: Math.min(
+      MISSION_PIN_SAFE_MARGIN.xMax,
+      Math.max(MISSION_PIN_SAFE_MARGIN.xMin, point.x),
+    ),
+    y: Math.min(MISSION_PIN_SAFE_MARGIN.yMax, Math.max(yMin, point.y)),
+  };
+}
+
+/** Stendra v1 — landmarks dentro da margem segura do pin. */
 export const STENDRA_MISSION_MAP_LAYOUT: MissionMapLayout = {
   mapId: 'stendra',
   aspectRatio: 1.55,
   backgroundAssetPath: 'campaign/stendra/map_1.png',
-  mainSlot: { x: 52, y: 42 },
+  mainSlot: { x: 52, y: 48 },
   sideSlots: [
-    { x: 24, y: 30 },
-    { x: 76, y: 34 },
+    { x: 26, y: 36 },
+    { x: 74, y: 38 },
     { x: 28, y: 68 },
     { x: 70, y: 72 },
   ],
   normalPinSlots: [
-    { x: 14, y: 18 },
-    { x: 38, y: 16 },
-    { x: 62, y: 18 },
-    { x: 86, y: 22 },
-    { x: 12, y: 42 },
-    { x: 36, y: 38 },
+    { x: 18, y: 28 },
+    { x: 38, y: 26 },
+    { x: 62, y: 28 },
+    { x: 80, y: 30 },
+    { x: 16, y: 44 },
+    { x: 36, y: 42 },
     { x: 68, y: 48 },
-    { x: 88, y: 46 },
-    { x: 18, y: 56 },
+    { x: 82, y: 46 },
+    { x: 20, y: 58 },
     { x: 44, y: 58 },
     { x: 58, y: 64 },
-    { x: 82, y: 60 },
-    { x: 16, y: 78 },
-    { x: 48, y: 80 },
-    { x: 74, y: 84 },
-    { x: 90, y: 78 },
+    { x: 78, y: 60 },
+    { x: 18, y: 76 },
+    { x: 48, y: 78 },
+    { x: 72, y: 82 },
+    { x: 84, y: 76 },
   ],
 };
 
@@ -98,7 +128,7 @@ export interface PlacedMissionMarker {
 
 /**
  * Posiciona main/side em slots fixos e normais em pins do pool (sem colisão).
- * Determinístico por conjunto de ids na oferta.
+ * Determinístico por conjunto de ids na oferta. Pontos sempre clampados na margem segura.
  */
 export function placeMissionsOnLayout(params: {
   layout: MissionMapLayout;
@@ -112,14 +142,18 @@ export function placeMissionsOnLayout(params: {
     placed.push({
       missionId: params.mainId,
       kind: 'main',
-      point: params.layout.mainSlot,
+      point: clampMissionPinPoint(params.layout.mainSlot, 'main'),
     });
   }
 
   params.sideIds.forEach((id, index) => {
     const slot = params.layout.sideSlots[index];
     if (!slot) return;
-    placed.push({ missionId: id, kind: 'side', point: slot });
+    placed.push({
+      missionId: id,
+      kind: 'side',
+      point: clampMissionPinPoint(slot, 'side'),
+    });
   });
 
   const pinPool = [...params.layout.normalPinSlots];
@@ -131,7 +165,11 @@ export function placeMissionsOnLayout(params: {
   params.normalIds.forEach((id, index) => {
     const point = pinPool[index];
     if (!point) return;
-    placed.push({ missionId: id, kind: 'normal', point });
+    placed.push({
+      missionId: id,
+      kind: 'normal',
+      point: clampMissionPinPoint(point, 'normal'),
+    });
   });
 
   return placed;

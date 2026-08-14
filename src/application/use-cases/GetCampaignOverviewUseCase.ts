@@ -3,6 +3,7 @@ import { MapId } from '../../domain/campaign/CampaignIds';
 import { PhaseDefinition } from '../../domain/campaign/PhaseDefinition';
 import {
   buildCampMissionBoard,
+  currentMainPhaseNumberForMap,
   ensureNormalOfferForBoard,
 } from '../../domain/campaign/missions/CampMissionBoard';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
@@ -60,11 +61,16 @@ export class GetCampaignOverviewUseCase {
     const info = getCampaignInfo();
     const maps = info.maps.map((map) => {
       const mapId = map.id as MapId;
+      const currentMainPhaseNumber = currentMainPhaseNumberForMap(
+        mapId,
+        missionProgress.completedMainIds,
+      );
       const ensured = ensureNormalOfferForBoard({
         mapId,
         saveSeed: missionProgress.offerSeed,
         offerEpoch: missionProgress.offerEpochFor(mapId),
         currentOffer: missionProgress.normalOfferFor(mapId),
+        currentMainPhaseNumber,
       });
       if (
         ensured.offer.join('|') !== missionProgress.normalOfferFor(mapId).join('|') ||

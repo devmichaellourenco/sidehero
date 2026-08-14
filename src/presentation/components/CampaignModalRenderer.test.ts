@@ -108,7 +108,7 @@ describe('CampaignModalRenderer', () => {
     expect(resolveInitialPendingPhaseId(map)).toBe('1-50');
   });
 
-  it('renderiza board de missões, preview no pin e abas bloqueadas no modo região', () => {
+  it('renderiza board de missões e header compacto no modo região', () => {
     const overview = buildOverview();
     const html = renderer.render(overview, 'stendra', null, 'region', {
       pendingMissionId: 'main:1-50',
@@ -123,17 +123,20 @@ describe('CampaignModalRenderer', () => {
     expect(html).toContain('campaign-mission-popover');
     expect(html).toContain('data-campaign-start-mission="main:1-50"');
     expect(html).not.toContain('campaign-mission-select-hint');
-    expect(html).toContain('campaign-map-tabs');
-    expect(html).toContain('data-campaign-map-tab="gruftall"');
-    expect(html).toContain('aria-disabled="true"');
-    expect(html).toContain('campaign-map-tab--locked');
+    expect(html).not.toContain('campaign-map-tabs');
+    expect(html).not.toContain('data-campaign-map-tab');
+    expect(html).not.toContain('campaign-map-progress-block');
+    expect(html).toContain('campaign-map-title');
+    expect(html).toContain('Stendra');
+    expect(html).toContain('data-campaign-tooltip');
+    expect(html).toContain('concluídas');
+    expect(html).toContain('desbloqueadas');
+    expect(html).toContain(getMapFlavorText('stendra'));
+    expect(html).not.toContain('campaign-map-flavor');
     expect(html).toContain('Guardião das Esgotos');
     expect(html).toContain('campaign-mission-pin--pending');
     expect(html).toContain('campaign-mission-pin--main');
     expect(html).toContain('data-mission-map="stendra"');
-    expect(html).toContain('campaign-map-progress');
-    expect(html).toContain(getMapFlavorText('stendra'));
-    expect(html).not.toContain('campaign-map-flavor');
     expect(html).not.toContain('data-phase-id="2-1"');
   });
 

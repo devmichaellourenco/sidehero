@@ -1,6 +1,7 @@
 import { Enemy } from '../entities/Enemy';
 import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
 import { phaseGoldScaleForPhase } from '../balance/PhaseGoldBudget';
+import { phaseXpScaleForPhase } from '../balance/PhaseXpBudget';
 import { resolveCampaignKillXp } from '../balance/CampaignXpScaling';
 import {
   deriveCombatMaxHealth,
@@ -22,6 +23,11 @@ export interface WaveSpawnContext {
   milestoneGoldScale?: number;
   /** Quando false, ignora o teto de ouro por fase (cálculo interno do orçamento). */
   applyPhaseGoldBudget?: boolean;
+  /**
+   * Quando false, ignora overrides de XP/ouro do lab e o orçamento derivado
+   * (cálculo interno de escala).
+   */
+  applyPhaseRewardOverrides?: boolean;
 }
 
 const ROLE_REWARD_SCALE: Record<EnemyRole, number> = {
@@ -94,8 +100,14 @@ export function createEnemyFromSlot(
     }),
   );
 
-  const phaseGoldScale =
-    context.applyPhaseGoldBudget === false ? 1 : phaseGoldScaleForPhase(context.phaseId);
+  const applyGoldBudget = context.applyPhaseGoldBudget !== false;
+  const applyRewardOverrides = context.applyPhaseRewardOverrides !== false;
+  const phaseGoldScale = applyGoldBudget
+    ? phaseGoldScaleForPhase(context.phaseId, {
+        ignoreLabOverride: !applyRewardOverrides,
+      })
+    : 1;
+  const phaseXpScale = applyRewardOverrides ? phaseXpScaleForPhase(context.phaseId) : 1;
   const goldReward = Math.floor(
     8 *
       (1 + (level - 1) * 0.12) *
@@ -105,7 +117,9 @@ export function createEnemyFromSlot(
       phaseGoldScale,
   );
   const xpBase = slot.role === 'boss' ? 8 : slot.role === 'elite' ? 5 : 2;
-  const xpReward = resolveCampaignKillXp(xpBase, context.difficultyTier, roleScale);
+  const xpReward = Math.floor(
+    resolveCampaignKillXp(xpBase, context.difficultyTier, roleScale) * phaseXpScale,
+  );
 
   const rosterEntry = getEnemyRosterEntry(slot.enemyType);
   const baseName = rosterEntry?.name ?? slot.enemyType;

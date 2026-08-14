@@ -16,11 +16,12 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Overlay de derrota sugere contramedida (resist elemental quando detectável)
 - [x] Todo card Wow exibe botão de rodapé (padrão **Entendi** para dispensar); o [×] só aparece em CTAs de ação no modo center
 - [x] Baú flutuante na batalha quando pendente
-- [x] Pausa loadout: banner compacto + overlay ACAMPAMENTO
+- [x] Pausa loadout / hub: banner compacto + overlay ACAMPAMENTO (também após Continuar do resultado)
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats em menu Runas (`battle_stats`)
 - [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos; abas Dano / Sofrido / Mitigado com ranking por tipo de dano; **Por skill** exibe CD com tooltip do cálculo (turns×s, level, CDR)
 - [x] Compra de runa não gera Wow duplicado quando o mesmo evento já dispara unlock de herói/feature (`isUpgradePurchaseCoveredByStateChange`)
 - [x] Todos os menus da barra de sistemas (`SystemsMenuId`) suportam **Fixar/Desafixar** com preferência por menu (padrão: janela popup `panel.html?detached=<id>`, 520×832 sem resize); modo detached não inicia auto-battle
+- [x] Campanha unpin: **Iniciar missão** retransmite START/batalha ao side panel (`MissionBattleStartRelay`) e fecha a janela destacada
 - [x] Overlays interruptivos (tutorial, cena, resultado de batalha, Wow) **não se sobrepõem**: `UiOverlayOrchestrator` com prioridade tutorial > cena > batalha > Wow; o restante espera na fila
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú** e **Abrir todos** na faixa de ações rápidas (**Otimizar equipe** desativado)
@@ -28,7 +29,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo); clone visual do âncora no overlay (`onboarding-anchor-clone`) para ícone/texto legíveis (ex.: Abrir baú)
 - [x] Barras de vida: heróis verdes, inimigos vermelhas; texto só da vida atual (negrito) sobre barra fina; tooltip com atual/máx; HP no deck da strip
 - [x] Barras de TTA: countdown regressivo (herói/inimigo) sobre a barra; tooltip com ASPD e cálculo `1÷ASPD`; cadência no painel Estatísticas e na ficha Status
-- [x] Battle field: cena **333×133** intacta (sprites na elevação legada); deck HUD opaco (~50px) abaixo com HP + TTA + skills alinhados coluna a coluna; overlays só na zona da cena
+- [x] Battle field: cena **333×133** intacta (sprites na elevação legada); deck HUD opaco (~50px) abaixo com HP + TTA + skills alinhados coluna a coluna; overlays de resultado/START cobrem cena + deck (Continuar no espaço do deck; sem scroll)
 - [x] Botão **Apoiar** no header (direita) abre card de doação voluntária; link Stripe em nova aba; jogo permanece 100% gratuito
 - [x] Heróis / Formação / Loja / Inventário / Baús só aparecem no **acampamento** (`canEditParty`)
 - [x] Pista de combate do mapa (ameaça/favorável) no tooltip da campanha e header do mapa; eficácia vs área nas stats de skill
@@ -38,8 +39,13 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 - [x] Modal de campanha: mapa-mundo + **mapa de locais** (missões disponíveis), sem trilha linear como UX principal
 - [x] Detalhe de missão: tipo, estrelas, preview waves/monstros/stats, CTA iniciar (popover no pin; ver `camp-missions`)
-- [x] Tela/fluxo de resultado pós-batalha (vitória/derrota + recompensas) antes de voltar ao acampamento — após CLEAR/DEFEAT, detalhes abrem automaticamente; Continuar → camp
+- [x] Tela/fluxo de resultado pós-batalha: CLEAR/DEFEAT → tela só de recompensas (sem headline nem Ocultar; sem scroll; Continuar no deck) → Continuar → hub com overlay ACAMPAMENTO **e** abre o mapa
 - [x] Acampamento permanece hub de party/loja/inventário; combate só após iniciar missão
+- [x] **Iniciar missão** no mapa fecha o mapa, mostra cue **START**, e só então inicia o combate (sem clique extra em Batalhar)
+- [x] Hub pós-missão e Acampamento mid-missão sem reinício via barra — Batalhar permanece oculto; retomar só pelo mapa
+- [x] New game mostra overlay Acampamento (`loadoutEditOpen`); save persiste o hub sem exigir restart
+- [x] Overlay ACAMPAMENTO tem fundo opaco cobrindo todo o `.battle-field` (cena + deck de HUD), sem sprites/barras ao fundo sugerindo combate ativo; pausa de batalha segue translúcida e restrita à cena para mostrar o campo congelado
+- [x] Cue **START** precede o combate ao iniciar missão no mapa
 
 ## Camadas e arquivos-chave
 
@@ -81,7 +87,9 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `SplashScreenController.test.ts` — splash de abertura antes do loop
 - [x] `BattleHudDeckLayout.test.ts` — cena 133px + deck HUD separado no markup
 - [x] `ActionTimeBarPresentation.test.ts` — countdown e tooltip de cálculo TTA
-- [x] `BattleVictoryFlow.test.ts` — clear/defeat revelam detalhes e aguardam Continuar; wave-clear auto-dismiss
+- [x] `BattleVictoryFlow.test.ts` — clear/defeat revelam detalhes (sem headline) e aguardam Continuar; wave-clear auto-dismiss
+- [x] `BattleStartFlow.test.ts` — cue START bloqueia avanço e dispara início ao dismiss
+- [x] `MissionBattleStartRelay.test.ts` — pedido unpin → painel principal para iniciar batalha
 
 ## Relacionado
 

@@ -1,4 +1,4 @@
-import { MapId } from '../CampaignIds';
+import { MapId, parsePhaseId } from '../CampaignIds';
 import { CampaignReleaseProfile, CAMPAIGN_RELEASE_PROFILE } from '../CampaignReleaseScope';
 import {
   NORMAL_MISSION_OFFER_MAX,
@@ -7,6 +7,10 @@ import {
 } from './MissionConstants';
 import { listNormalMissionsForMap } from './MissionCatalog';
 import { MissionId } from './MissionId';
+import {
+  filterNormalMissionIdsForMainBand,
+  isNormalPhaseInBandForMain,
+} from './NormalMissionMainBand';
 
 /** PRNG determinístico (mulberry32). */
 export function missionOfferRng(seed: number): () => number {
@@ -42,13 +46,16 @@ export function shouldRefreshNormalOffer(
 }
 
 /**
- * Sorteia entre MIN e MAX missões normais do mapa, sem repetir template.
- * Determinístico por seed.
+ * Sorteia entre MIN e MAX missões normais do mapa (sem repetir no mesmo sorteio).
+ * Em próximos sorteios o mesmo template pode voltar (normais são repetíveis).
+ * Determinístico por seed. Pool = capítulo da main atual (ex.: 1-1 → fases 1–5).
  */
 export function rollNormalMissionOffer(params: {
   mapId: MapId;
   saveSeed: number;
   offerEpoch: number;
+  /** Número da fase da main incompleta atual (ex.: 1, 5, 10…). */
+  currentMainPhaseNumber: number;
   excludeMissionIds?: ReadonlySet<MissionId> | readonly MissionId[];
   profile?: CampaignReleaseProfile;
   offerMin?: number;
@@ -63,6 +70,10 @@ export function rollNormalMissionOffer(params: {
       : new Set(params.excludeMissionIds ?? []);
 
   const pool = listNormalMissionsForMap(params.mapId, undefined, profile)
+    .filter((m) => {
+      const phaseNumber = parsePhaseId(m.phaseTemplateId).phaseNumber;
+      return isNormalPhaseInBandForMain(phaseNumber, params.currentMainPhaseNumber);
+    })
     .map((m) => m.id)
     .filter((id) => !exclude.has(id));
 
@@ -92,6 +103,7 @@ export function nextNormalOfferAfterCampVisit(params: {
   offerEpoch: number;
   campVisitsSinceRefresh: number;
   currentOffer: readonly MissionId[];
+  currentMainPhaseNumber: number;
   profile?: CampaignReleaseProfile;
 }): {
   offer: MissionId[];
@@ -101,12 +113,19 @@ export function nextNormalOfferAfterCampVisit(params: {
 } {
   const visits = params.campVisitsSinceRefresh + 1;
   if (!shouldRefreshNormalOffer(visits)) {
-    return {
-      offer: [...params.currentOffer],
-      offerEpoch: params.offerEpoch,
-      campVisitsSinceRefresh: visits,
-      refreshed: false,
-    };
+    const filtered = filterNormalMissionIdsForMainBand(
+      params.currentOffer,
+      params.currentMainPhaseNumber,
+    );
+    if (filtered.length > 0) {
+      return {
+        offer: filtered,
+        offerEpoch: params.offerEpoch,
+        campVisitsSinceRefresh: visits,
+        refreshed: false,
+      };
+    }
+    // Oferta legada fora da faixa: rerola sem esperar o ciclo completo.
   }
 
   const nextEpoch = params.offerEpoch + 1;
@@ -114,6 +133,7 @@ export function nextNormalOfferAfterCampVisit(params: {
     mapId: params.mapId,
     saveSeed: params.saveSeed,
     offerEpoch: nextEpoch,
+    currentMainPhaseNumber: params.currentMainPhaseNumber,
     profile: params.profile,
   });
 

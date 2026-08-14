@@ -1,6 +1,7 @@
 import { CombatProfileProvider } from '../../domain/combat/CombatProfileProvider';
 import { estimateHeroSkillThroughput } from '../../domain/combat/DamageThroughputEstimate';
 import { getClassCombatBaseline } from '../../domain/combat/ClassCombatBaselines';
+import { resolveHeroStoredBaseStat } from '../../domain/combat/HeroBaseStatsCatalog';
 import { getHeroCombatIdentity } from '../../domain/combat/HeroCombatIdentityCatalog';
 import {
   DEX_ATTACK_SPEED_SCALE,
@@ -182,8 +183,19 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const vitalityBonus = isPassiveSkillActive(hero, 'vitality')
     ? passiveVitalityHealthBonus(hero)
     : 0;
+  const effectiveBaseAttack = resolveHeroStoredBaseStat(hero.heroClass, hero.baseAttack, 'attack');
+  const effectiveBaseDefense = resolveHeroStoredBaseStat(
+    hero.heroClass,
+    hero.baseDefense,
+    'defense',
+  );
+  const effectiveBaseHealth = resolveHeroStoredBaseStat(
+    hero.heroClass,
+    hero.baseMaxHealth,
+    'health',
+  );
   const healthRaw =
-    hero.baseMaxHealth + healthGearFlat + healthLevelBonus + healthAttrBonus + vitalityBonus;
+    effectiveBaseHealth + healthGearFlat + healthLevelBonus + healthAttrBonus + vitalityBonus;
 
   const critMultiplier = 1 + profile.critChance * (profile.critDamage - 1);
   const basicThroughput = estimateHeroSkillThroughput(hero, BASIC_ATTACK_SKILL);
@@ -206,7 +218,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const offense: HeroCombatStatLineDto[] = [
     buildScaledStatLines(
       'Ataque',
-      hero.baseAttack,
+      effectiveBaseAttack,
       attackLevelBonus,
       attackAttrBonus,
       'Atributos (STR×0,5 + DEX×0,3)',
@@ -313,7 +325,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
   const defenseLines: HeroCombatStatLineDto[] = [
     buildScaledStatLines(
       'Defesa',
-      hero.baseDefense,
+      effectiveBaseDefense,
       defenseLevelBonus,
       defenseAttrBonus,
       'Atributos (DEX×0,5 + STR×0,2)',
@@ -328,7 +340,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       label: 'Vida máxima',
       value: fmtInt(hero.maxHealth),
       tooltipLines: [
-        `Base da classe: ${fmtInt(hero.baseMaxHealth)}`,
+        `Base da classe: ${fmtInt(effectiveBaseHealth)}`,
         `Nível: +${fmtInt(healthLevelBonus)}`,
         `STR (${hero.totalAttributes.str} × 2): +${fmtInt(healthAttrBonus)}`,
         ...(vitalityBonus > 0

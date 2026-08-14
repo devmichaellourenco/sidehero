@@ -23,9 +23,10 @@ export class PauseForLoadoutUseCase {
       .withCombat(null)
       .withBattlePaused(false)
       .clearBattleSessionStats()
+      .withPhaseRun(null)
       .withLoadoutEditOpen(true)
-      .withPhaseRestartOnResume(true)
-      .addLog('🏕 Retorno ao acampamento — a fase reiniciará ao batalhar');
+      .withPhaseRestartOnResume(false)
+      .addLog('🏕 Retorno ao acampamento — inicie a missão no mapa para batalhar');
 
     await this.repository.save(nextState);
     return this.presenter.present(nextState);

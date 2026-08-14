@@ -12,20 +12,28 @@ export type LabHeroClass =
 
 export type LabEnemyRole = 'trash' | 'elite' | 'boss';
 
-/** Constantes das fórmulas — editáveis no lab (defaults = domínio). */
-export interface LabFormulaConstants {
+/** Identidade de combate do combatente (catálogo herói/monstro; editável no lab). */
+export interface LabCombatantIdentity {
+  basicAttackDamageRatio: number;
+  skillCooldownTurnSeconds: number;
+  attackSpeedFactor: number;
   attackPerLevel: number;
   defensePerLevel: number;
   healthPerLevel: number;
+  levelUpAttackGain: number;
+  levelUpDefenseGain: number;
+  levelUpHealthGain: number;
+}
+
+/** Constantes globais das fórmulas — só pesos de atributo / piso ASPD do lab. */
+export interface LabFormulaConstants {
   attrAtkStr: number;
   attrAtkDex: number;
   attrDefDex: number;
   attrDefStr: number;
   attrHpStr: number;
-  baseAspdFactor: number;
   dexAspdScale: number;
   strAspdScale: number;
-  basicAttackRatio: number;
   aspdFloor: number;
 }
 
@@ -104,6 +112,8 @@ export interface LabCombatantInput {
   };
   /** % dano físico (gear). */
   physicalDamagePercent?: number;
+  /** Identidade do combatente (catálogo; override no lab). */
+  identity?: LabCombatantIdentity;
 }
 
 export interface LabDocument {
@@ -173,6 +183,14 @@ export interface LabCombatantResult {
     mitigatedVsSelf: number;
     appliedEquation: string;
     usesAttackStat: boolean;
+    actionRecoverySeconds: number;
+    cooldownTurns: number;
+    skillCooldownTurnSeconds: number;
+    cooldownSecondsPerRank: number;
+    baseCooldownSeconds: number;
+    effectiveCooldownSeconds: number;
+    maxCooldownReduction: number;
+    minCooldownReduction: number;
   }>;
   breakdown: {
     attack: LabBreakdownSection;

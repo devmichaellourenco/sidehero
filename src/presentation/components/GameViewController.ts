@@ -11,6 +11,7 @@ import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
 import { LootFlowController } from '../controllers/LootFlowController';
 import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
+import { BattleStartFlow } from '../flows/BattleStartFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
 import { ActSceneFlow } from '../flows/ActSceneFlow';
 import { SplashScreenController } from './SplashScreenController';
@@ -40,6 +41,11 @@ import {
   parseActSceneViewRequest,
   requestActSceneViewOnMainPanel,
 } from '../helpers/ActSceneViewRelay';
+import {
+  MISSION_BATTLE_START_REQUEST_KEY,
+  parseMissionBattleStartRequest,
+  requestMissionBattleStartOnMainPanel,
+} from '../helpers/MissionBattleStartRelay';
 import {
   applySurfacePinButton,
   hideSurfacePinButton,
@@ -178,6 +184,7 @@ export class GameViewController {
   private readonly battleImpacts: BattleImpactFeedbackController;
   private readonly battleSkillVfx: BattleSkillVfxController;
   private readonly victoryFlow: BattleVictoryFlow;
+  private readonly battleStartFlow: BattleStartFlow;
   private readonly modal: ModalController;
   private readonly heroDrawer: SideDrawerController;
   private readonly inventoryModal: InventoryModalRenderer;
@@ -314,6 +321,11 @@ export class GameViewController {
       battleFieldEl,
     );
     this.victoryFlow = new BattleVictoryFlow(
+      root.querySelector('#battle-victory-overlay')!,
+      this.battleStripEl,
+      new BattleVictoryOverlayRenderer(),
+    );
+    this.battleStartFlow = new BattleStartFlow(
       root.querySelector('#battle-victory-overlay')!,
       this.battleStripEl,
       new BattleVictoryOverlayRenderer(),
@@ -529,6 +541,17 @@ export class GameViewController {
       }
       this.presentActScene(scene, { markViewedOnDismiss: false });
     });
+    this.campaignFlow.setMissionStartedHandler((state) => {
+      this.render(state);
+      if (this.detachedSurfaceId) {
+        // START/batalha ficam no side panel — janela unpin não tem o campo de combate.
+        void requestMissionBattleStartOnMainPanel().then(() => {
+          this.maybeCloseDetachedWindow();
+        });
+        return;
+      }
+      this.beginMissionBattleWithStart();
+    });
     this.partyFlow = new PartyFlow(this.client);
 
     this.chestLootFlow = new ChestLootFlow(
@@ -675,7 +698,7 @@ export class GameViewController {
       void this.pauseForLoadout();
     });
     this.continueLoadoutBtn.addEventListener('click', () => {
-      void this.continueFromLoadoutPause();
+      this.beginMissionBattleWithStart();
     });
     this.pauseBattleBtn.addEventListener('click', () => {
       void this.pauseBattle();
@@ -787,7 +810,7 @@ export class GameViewController {
       return;
     }
 
-    if (this.isManualLoadoutPause(this.state) || this.state?.battlePaused) {
+    if (this.isCampHubOpen(this.state) || this.state?.battlePaused) {
       this.syncLoadoutPauseBanner(this.state!);
     }
 
@@ -860,6 +883,12 @@ export class GameViewController {
     }
   }
 
+  /** Hub do acampamento (`loadoutEditOpen`) — overlay ACAMPAMENTO, sem combate ativo. */
+  private isCampHubOpen(state: GameStateDto | null = this.state): boolean {
+    return Boolean(state?.loadoutEditOpen);
+  }
+
+  /** Missão pronta para iniciar (mapa → START → restart). */
   private isManualLoadoutPause(state: GameStateDto | null = this.state): boolean {
     return Boolean(state?.loadoutEditOpen && state?.phaseRestartOnResume);
   }
@@ -869,11 +898,12 @@ export class GameViewController {
     if (this.overlayOrchestrator.isBusy()) return true;
     if (this.onboarding.isActive()) return true;
     if (this.victoryFlow.isBlockingAdvance()) return true;
+    if (this.battleStartFlow.isBlockingAdvance()) return true;
     if (this.wowCelebration.isBlockingAdvance()) return true;
     if (this.actSceneFlow.isBlocking()) return true;
     if (this.pausingLoadout) return true;
     if (state?.battlePaused) return true;
-    return this.isManualLoadoutPause(state);
+    return this.isCampHubOpen(state);
   }
 
   private openSettingsModal(): void {
@@ -1067,6 +1097,11 @@ export class GameViewController {
       this.stopAutoBattle();
       return;
     }
+    // Sem missão ativa (hub), não dispara ticks — combate só via mapa → START.
+    if (!this.state?.phaseRun || this.state.canEditParty) {
+      this.stopAutoBattle();
+      return;
+    }
     if (this.prefsController.autoBattleEnabled && !this.isAdvanceBlocked()) {
       this.stopAutoBattle();
       this.startAutoBattle();
@@ -1098,11 +1133,11 @@ export class GameViewController {
       !this.detachedSurfaceId &&
       this.state &&
       !this.state.canEditParty &&
-      !this.isManualLoadoutPause(this.state)
+      !this.isCampHubOpen(this.state)
     ) {
       return;
     }
-    if (!this.detachedSurfaceId && this.modal.isOpen() && this.isManualLoadoutPause(this.state)) {
+    if (!this.detachedSurfaceId && this.modal.isOpen() && this.isCampHubOpen(this.state)) {
       return;
     }
 
@@ -1187,7 +1222,7 @@ export class GameViewController {
 
   private async pauseBattle(): Promise<void> {
     if (this.contextInvalidated || this.state?.battlePaused) return;
-    if (this.isManualLoadoutPause(this.state)) return;
+    if (this.isCampHubOpen(this.state)) return;
 
     this.stopAutoBattle();
     this.skillCooldownAnimator.setCombatActive(false);
@@ -1218,6 +1253,17 @@ export class GameViewController {
     this.render(response.state);
     this.syncAutoBattleTimer();
     this.toasts.show('Batalha retomada', 'info');
+  }
+
+  private beginMissionBattleWithStart(): void {
+    if (!this.isManualLoadoutPause(this.state)) return;
+    if (this.battleStartFlow.isActive() || this.victoryFlow.isActive()) return;
+
+    this.stopAutoBattle();
+    this.hideBattlePauseOverlay();
+    this.battleStartFlow.show(() => {
+      void this.continueFromLoadoutPause();
+    });
   }
 
   private async continueFromLoadoutPause(): Promise<void> {
@@ -1367,9 +1413,15 @@ export class GameViewController {
       }
       this.shownIntermissionKey = key;
       this.stopAutoBattle();
+      const openMapAfterContinue =
+        payload.variant === 'phase-clear' || payload.variant === 'defeat';
       this.victoryFlow.show(payload, () => {
         this.overlayOrchestrator.release('battle_result', key);
-        void this.resumeCombatIntermission();
+        void this.resumeCombatIntermission().then(() => {
+          if (openMapAfterContinue && !this.contextInvalidated && this.canEditParty()) {
+            void this.openCampaignModal();
+          }
+        });
       });
     });
   }
@@ -1480,7 +1532,7 @@ export class GameViewController {
   }
 
   private canEditParty(): boolean {
-    return Boolean(this.state?.canEditParty || this.isManualLoadoutPause(this.state));
+    return Boolean(this.state?.canEditParty || this.isCampHubOpen(this.state));
   }
 
   private syncInlineEquipHosts(): void {
@@ -1881,7 +1933,7 @@ export class GameViewController {
   }
 
   private async handlePartyPanelAction(target: HTMLElement): Promise<void> {
-    if (!this.state?.canEditParty && !this.isManualLoadoutPause(this.state)) {
+    if (!this.state?.canEditParty && !this.isCampHubOpen(this.state)) {
       this.toasts.show('Volte ao acampamento para ajustar party e loadout', 'info');
       return;
     }
@@ -2321,6 +2373,11 @@ export class GameViewController {
         if (actSceneChange) {
           this.handleActSceneViewRequest(actSceneChange.newValue);
         }
+
+        const missionStartChange = changes[MISSION_BATTLE_START_REQUEST_KEY];
+        if (missionStartChange) {
+          void this.handleMissionBattleStartRequest(missionStartChange.newValue);
+        }
       });
     } catch {
       // chrome.storage indisponível
@@ -2335,6 +2392,21 @@ export class GameViewController {
     if (!scene) return;
 
     this.presentActScene(scene, { markViewedOnDismiss: false });
+  }
+
+  private async handleMissionBattleStartRequest(value: unknown): Promise<void> {
+    if (this.detachedSurfaceId) return;
+    const request = parseMissionBattleStartRequest(value);
+    if (!request) return;
+
+    const response = await this.client.send({ type: 'GET_STATE' });
+    if (!response.ok) {
+      this.handleFailedResponse(response.error);
+      return;
+    }
+
+    this.render(response.state);
+    this.beginMissionBattleWithStart();
   }
 
   private surfacePinMode(): SurfacePinMode {
@@ -2640,7 +2712,12 @@ export class GameViewController {
   private syncLoadoutPauseBanner(state: GameStateDto): void {
     const label = this.battlePauseOverlay.querySelector('.battle-pause-label');
 
-    if (this.isManualLoadoutPause(state)) {
+    if (this.battleStartFlow.isActive() || this.victoryFlow.isActive()) {
+      this.hideBattlePauseOverlay();
+      return;
+    }
+
+    if (this.isCampHubOpen(state)) {
       this.battlePauseOverlay.classList.remove('hidden', 'battle-pause-overlay--battle');
       if (label) label.textContent = 'Acampamento';
       this.stopAutoBattle();
@@ -2721,7 +2798,7 @@ export class GameViewController {
 
     this.hud.render(mergedState, {
       openingChests: this.chestLootFlow.openingChests,
-      loadoutPauseActive: this.isManualLoadoutPause(mergedState),
+      loadoutPauseActive: this.isCampHubOpen(mergedState),
       battlePauseActive: Boolean(mergedState.battlePaused),
     });
 

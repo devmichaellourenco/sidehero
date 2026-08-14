@@ -1,6 +1,7 @@
 import { MapId } from '../../domain/campaign/CampaignIds';
 import {
   buildCampMissionBoard,
+  currentMainPhaseNumberForMap,
   ensureNormalOfferForBoard,
 } from '../../domain/campaign/missions/CampMissionBoard';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
@@ -23,11 +24,16 @@ export class GetMissionBoardUseCase {
   async execute(mapId: MapId): Promise<GetMissionBoardResult> {
     let state = await this.repository.load();
     let missionProgress = state.campaignProgress.missionProgress;
+    const currentMainPhaseNumber = currentMainPhaseNumberForMap(
+      mapId,
+      missionProgress.completedMainIds,
+    );
     const ensured = ensureNormalOfferForBoard({
       mapId,
       saveSeed: missionProgress.offerSeed,
       offerEpoch: missionProgress.offerEpochFor(mapId),
       currentOffer: missionProgress.normalOfferFor(mapId),
+      currentMainPhaseNumber,
     });
     missionProgress = missionProgress.withNormalOffer(mapId, ensured.offer, ensured.offerEpoch);
 

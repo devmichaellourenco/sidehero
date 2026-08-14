@@ -34,8 +34,6 @@ const ROLE_DROP_CHANCE: Record<EnemyRole, number> = {
   boss: 22,
 };
 
-const BOSS_REPLAY_DROP_CHANCE = 18;
-
 const ENEMY_LOOT_OVERRIDES: Partial<Record<EnemyType, Partial<EnemyLootProfile>>> = {
   saci: {
     dropChancePercent: 100,
@@ -101,13 +99,9 @@ function lootOptionsForRole(mapIndex: number, role: EnemyRole, seasonFinale: boo
   ];
 }
 
-function baseDropChance(mapIndex: number, role: EnemyRole, isPhaseBoss: boolean, firstClearBoss: boolean): number {
+function baseDropChance(mapIndex: number, role: EnemyRole, _isPhaseBoss: boolean, firstClearBoss: boolean): number {
   if (firstClearBoss) {
     return 100;
-  }
-
-  if (isPhaseBoss) {
-    return BOSS_REPLAY_DROP_CHANCE + Math.min(8, mapIndex);
   }
 
   const worldBonus = Math.min(6, Math.floor(mapIndex / 2));

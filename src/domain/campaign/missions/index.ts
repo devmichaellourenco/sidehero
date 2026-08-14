@@ -40,10 +40,20 @@ export {
 export {
   buildCampMissionBoard,
   nextMainMissionForMap,
+  currentMainPhaseNumberForMap,
   ensureNormalOfferForBoard,
   allMissionsOnBoard,
 } from './CampMissionBoard';
 export type { CampMissionBoard } from './CampMissionBoard';
+export {
+  normalPhaseNumberBandForCurrentMain,
+  chapterMainPhaseForPhaseNumber,
+  listMissionChapterOptions,
+  isNormalPhaseInBandForMain,
+  isMissionPhaseInMainChapterBand,
+  filterNormalMissionIdsForMainBand,
+  filterSideMissionsForMainBand,
+} from './NormalMissionMainBand';
 export { MissionProgress } from './MissionProgress';
 export type { MissionProgressProps } from './MissionProgress';
 export {

@@ -22,7 +22,7 @@ import {
   zeroPenetration,
   zeroResists,
 } from './elemental';
-import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
+import { catalogIdentityFor, resolveLabIdentity } from './identity';
 import {
   defaultFormulaConstants,
   FORMULA_FIELDS,
@@ -37,6 +37,7 @@ import {
 } from './passives';
 import type {
   LabBreakdownSection,
+  LabCombatantIdentity,
   LabCombatantInput,
   LabCombatantResult,
   LabEnemyRole,
@@ -46,9 +47,17 @@ import type {
   LabSide,
 } from './types';
 import { mountMissionsTab } from './missionBattlesUi';
+import { mountPhaseRewardsTab } from './phaseRewardsUi';
+import { mountHeroLevelXpTab } from './heroLevelXpUi';
+import { mountHeroCombatTab } from './heroCombatUi';
+import {
+  bindSpriteFallback,
+  enemyTriggerHtml,
+  openEnemyPicker,
+} from './enemyPicker';
 
 type PanelId = 'left' | 'right';
-type LabTab = 'sim' | 'missions';
+type LabTab = 'sim' | 'missions' | 'xp' | 'levels' | 'heroes';
 
 const enemyOptions = listEnemyTypeOptions();
 const heroClasses = listHeroClassOptions();
@@ -59,6 +68,9 @@ let right: LabCombatantInput = defaultEnemyInput('goblin_raider', 10, 'trash');
 let formulas: LabFormulaConstants = defaultFormulaConstants();
 let activeTab: LabTab = 'sim';
 let missionsMounted = false;
+let xpRewardsMounted = false;
+let heroLevelXpMounted = false;
+let heroCombatMounted = false;
 
 const mainEl = document.getElementById('lab-main')!;
 const modeSelect = document.getElementById('lab-mode') as HTMLSelectElement;
@@ -68,6 +80,9 @@ const statusEl = document.getElementById('lab-status')!;
 const importFile = document.getElementById('import-file') as HTMLInputElement;
 const panelSim = document.getElementById('lab-panel-sim');
 const panelMissions = document.getElementById('lab-panel-missions');
+const panelXp = document.getElementById('lab-panel-xp');
+const panelLevels = document.getElementById('lab-panel-levels');
+const panelHeroes = document.getElementById('lab-panel-heroes');
 
 function setStatus(message: string, isError = false): void {
   statusEl.textContent = message;
@@ -175,6 +190,7 @@ function readPanelForm(id: PanelId): LabCombatantInput {
     physicalDamagePercent: num(
       root.querySelector('[data-field="physicalDamagePercent"]') as HTMLInputElement,
     ),
+    identity: readIdentityFromPanel(root, previous),
   };
 
   if (kind === 'hero') {
@@ -183,7 +199,7 @@ function readPanelForm(id: PanelId): LabCombatantInput {
     const ascSel = root.querySelector('[data-field="ascensionId"]') as HTMLSelectElement | null;
     base.ascensionId = ascSel?.value ? ascSel.value : null;
   } else {
-    base.enemyType = (root.querySelector('[data-field="enemyType"]') as HTMLSelectElement).value;
+    base.enemyType = (root.querySelector('[data-field="enemyType"]') as HTMLInputElement).value;
     base.enemyRole = (root.querySelector('[data-field="enemyRole"]') as HTMLSelectElement)
       .value as LabEnemyRole;
     base.passives = [];
@@ -191,6 +207,30 @@ function readPanelForm(id: PanelId): LabCombatantInput {
   }
 
   return base;
+}
+
+function readIdentityFromPanel(
+  root: HTMLElement,
+  previous: LabCombatantInput,
+): LabCombatantIdentity {
+  const fallback = resolveLabIdentity(previous);
+  const read = (key: keyof LabCombatantIdentity): number => {
+    const el = root.querySelector(`[data-identity="${key}"]`) as HTMLInputElement | null;
+    if (!el) return fallback[key];
+    const value = Number(el.value);
+    return Number.isFinite(value) ? value : fallback[key];
+  };
+  return {
+    basicAttackDamageRatio: read('basicAttackDamageRatio'),
+    skillCooldownTurnSeconds: read('skillCooldownTurnSeconds'),
+    attackSpeedFactor: read('attackSpeedFactor'),
+    attackPerLevel: read('attackPerLevel'),
+    defensePerLevel: read('defensePerLevel'),
+    healthPerLevel: read('healthPerLevel'),
+    levelUpAttackGain: read('levelUpAttackGain'),
+    levelUpDefenseGain: read('levelUpDefenseGain'),
+    levelUpHealthGain: read('levelUpHealthGain'),
+  };
 }
 
 function readFormulasFromDom(): LabFormulaConstants {
@@ -333,9 +373,9 @@ function skillDetailHtml(sample: LabCombatantResult['skillSamples'][number]): st
         <li>
           <div class="lab-live-step-main">
             <span class="lab-live-step-label">Ratio básico</span>
-            <span class="lab-live-step-detail">constante do lab</span>
+            <span class="lab-live-step-detail">${fmt(sample.attackFloorRatio, 3)}</span>
           </div>
-          <span class="lab-live-step-note">Ataque básico: floor(ATK × Ratio básico). Editável em ASPD → Ratio básico.</span>
+          <span class="lab-live-step-note">Identidade do combatente: floor(ATK × ratio). Editável no painel Identidade.</span>
         </li>`
     : `
         <li>
@@ -391,6 +431,27 @@ function skillDetailHtml(sample: LabCombatantResult['skillSamples'][number]): st
           <span class="lab-live-step-note">Nível da skill — altere no campo Rank acima</span>
         </li>
         ${catalogRows}
+        <li>
+          <div class="lab-live-step-main">
+            <span class="lab-live-step-label">Recovery</span>
+            <span class="lab-live-step-detail">${fmt(sample.actionRecoverySeconds, 2)}s</span>
+          </div>
+          <span class="lab-live-step-note">actionRecoverySeconds desta skill (escala com Cast Speed)</span>
+        </li>
+        <li>
+          <div class="lab-live-step-main">
+            <span class="lab-live-step-label">CD base</span>
+            <span class="lab-live-step-detail">${fmt(sample.baseCooldownSeconds, 2)}s</span>
+          </div>
+          <span class="lab-live-step-note">${sample.cooldownTurns} turns × ${fmt(sample.skillCooldownTurnSeconds, 2)}s (identidade) · −${fmt(sample.cooldownSecondsPerRank, 2)}s/rank</span>
+        </li>
+        <li>
+          <div class="lab-live-step-main">
+            <span class="lab-live-step-label">CD no rank</span>
+            <span class="lab-live-step-detail">${fmt(sample.effectiveCooldownSeconds, 2)}s</span>
+          </div>
+          <span class="lab-live-step-note">sem piso global · teto CDR ${(sample.maxCooldownReduction * 100).toFixed(0)}% · piso ${(sample.minCooldownReduction * 100).toFixed(0)}%</span>
+        </li>
         <li>
           <div class="lab-live-step-main">
             <span class="lab-live-step-label">Peso</span>
@@ -452,7 +513,7 @@ function skillDetailHtml(sample: LabCombatantResult['skillSamples'][number]): st
       </ul>
       ${
         sample.cappedByAttackFloor
-          ? `<p class="lab-hint lab-hint--tight">Toda skill de dano tem piso ≥ ataque básico (ATK×${getHeroCombatIdentity('knight').basicAttackDamageRatio}). Subir Rank só muda o final quando o raw do catálogo passa esse piso.</p>`
+          ? `<p class="lab-hint lab-hint--tight">Toda skill de dano tem piso ≥ ataque básico (ATK×${fmt(sample.attackFloorRatio, 3)} da identidade). Subir Rank só muda o final quando o raw do catálogo passa esse piso.</p>`
           : ''
       }
     </div>
@@ -711,16 +772,52 @@ function elementalFieldsHtml(input: LabCombatantInput): string {
   `;
 }
 
+function identityFieldsHtml(input: LabCombatantInput): string {
+  const identity = resolveLabIdentity(input);
+  const source =
+    input.kind === 'hero'
+      ? `HeroCombatIdentityCatalog · ${input.heroClass ?? 'knight'}`
+      : `EnemyCombatIdentityCatalog · ${input.enemyType ?? 'goblin_raider'}`;
+  const rows: Array<[keyof LabCombatantIdentity, string, string]> = [
+    ['basicAttackDamageRatio', 'Ratio básico', 'ATK × isto no ataque básico'],
+    ['skillCooldownTurnSeconds', 's / turno CD', 'cooldownTurns × isto'],
+    ['attackSpeedFactor', 'Fator ASPD', 'baseline × isto'],
+    ['attackPerLevel', 'ATK / nível', '(nível − 1) × isto'],
+    ['defensePerLevel', 'DEF / nível', '(nível − 1) × isto'],
+    ['healthPerLevel', 'HP / nível', '(nível − 1) × isto'],
+    ['levelUpAttackGain', 'Level-up ATK', 'ganho em Base ATK ao subir nível'],
+    ['levelUpDefenseGain', 'Level-up DEF', 'ganho em Base DEF ao subir nível'],
+    ['levelUpHealthGain', 'Level-up HP', 'ganho em Base HP ao subir nível'],
+  ];
+  return `
+    <div class="lab-form-section">
+      <h3 class="lab-form-section-title">Identidade de combate</h3>
+      <p class="lab-hint lab-hint--tight">${source}. Mudar classe/tipo recarrega o catálogo; edite aqui para what-if.</p>
+      <div class="lab-form-rows">
+        ${rows
+          .map(
+            ([key, label, hint]) => `
+          <label class="lab-field" title="${hint}">
+            <span class="lab-field-name">${label}</span>
+            <input type="number" step="any" data-identity="${key}" value="${identity[key]}" />
+          </label>`,
+          )
+          .join('')}
+      </div>
+    </div>
+  `;
+}
+
 function panelHtml(id: PanelId, input: LabCombatantInput, title: string): string {
   const heroOpts = heroClasses
     .map((c) => `<option value="${c}" ${input.heroClass === c ? 'selected' : ''}>${c}</option>`)
     .join('');
-  const enemyOpts = enemyOptions
-    .map(
-      (e) =>
-        `<option value="${e.id}" ${input.enemyType === e.id ? 'selected' : ''}>${e.name} (T${e.tier})</option>`,
-    )
-    .join('');
+  const enemyType = input.enemyType ?? 'goblin_raider';
+  const enemyPicker = enemyTriggerHtml({
+    enemyId: enemyType,
+    enemies: enemyOptions,
+    openAction: 'open-sim-enemy-picker',
+  });
   const roles: LabEnemyRole[] = ['trash', 'elite', 'boss'];
   const roleOpts = roles
     .map((r) => `<option value="${r}" ${input.enemyRole === r ? 'selected' : ''}>${r}</option>`)
@@ -760,7 +857,10 @@ function panelHtml(id: PanelId, input: LabCombatantInput, title: string): string
         </label>
         <label class="lab-field lab-enemy-only" ${input.kind !== 'enemy' ? 'hidden' : ''}>
           <span class="lab-field-name">Tipo inimigo</span>
-          <select data-field="enemyType">${enemyOpts}</select>
+          <div class="lab-enemy-field">
+            <input type="hidden" data-field="enemyType" value="${enemyType}" />
+            ${enemyPicker}
+          </div>
         </label>
         <label class="lab-field lab-enemy-only" ${input.kind !== 'enemy' ? 'hidden' : ''}>
           <span class="lab-field-name">Role</span>
@@ -784,6 +884,8 @@ function panelHtml(id: PanelId, input: LabCombatantInput, title: string): string
         ${field('critDamage', 'Crit dmg', 'number', input.critDamage ?? 0)}
         ${field('physicalMeleeAspd', 'ASPD melee (STR)', 'checkbox', !!input.physicalMeleeAspd)}
       </div>
+
+      ${identityFieldsHtml(input)}
 
       ${elementalFieldsHtml(input)}
 
@@ -857,7 +959,7 @@ function formulasPanelHtml(): string {
   return `
     <aside class="lab-panel lab-panel--formulas" id="panel-formulas">
       <div class="lab-side-head">
-        <h2 class="lab-panel-title">Fórmulas e constantes<span>editáveis + breakdown</span></h2>
+        <h2 class="lab-panel-title">Fórmulas e constantes<span>pesos globais + breakdown</span></h2>
         <button type="button" id="btn-reset-formulas">Reset domínio</button>
       </div>
 
@@ -950,6 +1052,7 @@ function wirePanel(id: PanelId): void {
       next.baseDefense = preset.baseDefense;
       next.baseMaxHealth = preset.baseMaxHealth;
       next.physicalMeleeAspd = preset.physicalMeleeAspd;
+      next.identity = preset.identity;
       next.passives = buildHeroPassiveSlots(heroClass, ascensionId);
     }
     setInput(id, next);
@@ -959,16 +1062,28 @@ function wirePanel(id: PanelId): void {
   heroClassSelect?.addEventListener('change', rebuildPassives);
   ascensionSelect?.addEventListener('change', rebuildPassives);
 
-  const enemyTypeSelect = root.querySelector('[data-field="enemyType"]') as HTMLSelectElement | null;
-  enemyTypeSelect?.addEventListener('change', () => {
+  const enemyTypeInput = root.querySelector('[data-field="enemyType"]') as HTMLInputElement | null;
+  root.querySelector('[data-action="open-sim-enemy-picker"]')?.addEventListener('click', () => {
     const current = readPanelForm(id);
-    if (current.kind !== 'enemy') return;
-    setInput(id, {
-      ...current,
-      resists: defaultEnemyResists(current.enemyType ?? 'goblin_raider', current.level),
+    openEnemyPicker({
+      enemies: enemyOptions,
+      selectedId: current.enemyType ?? 'goblin_raider',
+      onPick: (pickedId) => {
+        const latest = readPanelForm(id);
+        if (latest.kind !== 'enemy') return;
+        const next = {
+          ...latest,
+          enemyType: pickedId,
+          identity: catalogIdentityFor({ ...latest, enemyType: pickedId }),
+          resists: defaultEnemyResists(pickedId, latest.level),
+        };
+        setInput(id, next);
+        render();
+      },
     });
-    render();
   });
+
+  root.querySelectorAll<HTMLImageElement>('img[data-enemy-thumb]').forEach(bindSpriteFallback);
 
   root.querySelector('[data-action="preset"]')?.addEventListener('click', () => {
     const current = readPanelForm(id);
@@ -987,7 +1102,7 @@ function wirePanel(id: PanelId): void {
     if (document.activeElement === kindSelect) return;
     if (document.activeElement === heroClassSelect) return;
     if (document.activeElement === ascensionSelect) return;
-    if (document.activeElement === enemyTypeSelect) return;
+    if (document.activeElement === enemyTypeInput) return;
     syncFromDom();
     refreshAll();
   });
@@ -999,7 +1114,7 @@ function wireFormulasPanel(): void {
   document.getElementById('btn-reset-formulas')?.addEventListener('click', () => {
     formulas = defaultFormulaConstants();
     render();
-    setStatus('Constantes restauradas do domínio.');
+    setStatus('Pesos globais restaurados do domínio. Identidade fica no combatente.');
   });
   document.getElementById('btn-reset-passives')?.addEventListener('click', () => {
     syncFromDom();
@@ -1157,6 +1272,9 @@ async function switchLabTab(tab: LabTab): Promise<void> {
   });
   panelSim?.toggleAttribute('hidden', tab !== 'sim');
   panelMissions?.toggleAttribute('hidden', tab !== 'missions');
+  panelXp?.toggleAttribute('hidden', tab !== 'xp');
+  panelLevels?.toggleAttribute('hidden', tab !== 'levels');
+  panelHeroes?.toggleAttribute('hidden', tab !== 'heroes');
 
   if (tab === 'missions' && !missionsMounted) {
     missionsMounted = true;
@@ -1165,6 +1283,39 @@ async function switchLabTab(tab: LabTab): Promise<void> {
       setStatus('Aba Missões: edite waves e salve em phase-battle-overrides.json');
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Falha ao carregar missões', true);
+    }
+  }
+
+  if (tab === 'xp' && !xpRewardsMounted) {
+    xpRewardsMounted = true;
+    try {
+      await mountPhaseRewardsTab();
+      setStatus('Aba XP por fase: totais de kill por fase (domínio atual)');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar XP por fase', true);
+      xpRewardsMounted = false;
+    }
+  }
+
+  if (tab === 'levels' && !heroLevelXpMounted) {
+    heroLevelXpMounted = true;
+    try {
+      await mountHeroLevelXpTab();
+      setStatus('Aba XP por nível: curva de level-up dos heróis');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar XP por nível', true);
+      heroLevelXpMounted = false;
+    }
+  }
+
+  if (tab === 'heroes' && !heroCombatMounted) {
+    heroCombatMounted = true;
+    try {
+      await mountHeroCombatTab();
+      setStatus('Aba Personagens: edite skills, identidade e passivas');
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Falha ao carregar personagens', true);
+      heroCombatMounted = false;
     }
   }
 }
@@ -1179,4 +1330,4 @@ document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) 
 
 modeSelect.value = mode;
 render();
-setStatus('Lab pronto: fórmulas e passivas editáveis à direita.');
+setStatus('Lab pronto: identidade no combatente; pesos globais e passivas à direita.');

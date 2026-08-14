@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GameStateDto } from '../../application/dto/GameStateDto';
-import { detectBattleVictory } from './BattleVictoryDetector';
+import { detectBattleVictory, buildBattleIntermissionPayload } from './BattleVictoryDetector';
 
 function baseState(partial: Partial<GameStateDto> = {}): GameStateDto {
   return {
@@ -174,5 +174,162 @@ describe('BattleVictoryDetector', () => {
 
     expect(payload).not.toBeNull();
     expect(payload?.variant).toBe('boss-approach');
+  });
+
+  it('buildBattleIntermissionPayload na derrota exibe ouro/XP parciais da missão normal', () => {
+    const previous = baseState({
+      gold: 100,
+      heroes: [
+        {
+          id: 'h1',
+          name: 'Nix',
+          heroClass: 'sorcerer',
+          emoji: '✦',
+          level: 1,
+          experience: 0,
+          experienceToNextLevel: 100,
+          attack: 10,
+          defense: 5,
+          health: 50,
+          maxHealth: 50,
+          baseAttributes: { str: 1, dex: 3, int: 5 },
+          allocatedAttributes: { str: 0, dex: 0, int: 0 },
+          totalAttributes: { str: 1, dex: 3, int: 5 },
+          unspentImprovementPoints: 0,
+          unspentAscensionPoints: 0,
+          skillRanks: {},
+          equippedSkillIds: [],
+          activeSkills: [],
+          maxActiveSkills: 1,
+          unlockedActiveSkillSlots: 1,
+          ascensionId: null,
+          hasUnspentPoints: false,
+          equipment: {},
+          combatIntent: null,
+          combatSkills: [],
+          combatSkillCooldowns: [],
+          statusEffects: [],
+        },
+      ],
+      phaseRun: {
+        phaseId: '1-2',
+        displayName: 'Patrulha',
+        waveIndex: 0,
+        waveCount: 2,
+        isBossWave: false,
+      },
+    });
+
+    const next = baseState({
+      gold: 103,
+      heroes: [
+        {
+          ...previous.heroes[0],
+          experience: 2,
+        },
+      ],
+      phaseRun: null,
+      combatIntermission: {
+        variant: 'defeat',
+        clearedPhaseId: '1-2',
+        clearedPhaseName: 'Patrulha',
+        nextPhaseId: null,
+        nextPhaseName: null,
+      },
+    });
+
+    const payload = buildBattleIntermissionPayload(next.combatIntermission!, next, previous);
+
+    expect(payload.variant).toBe('defeat');
+    expect(payload.goldGained).toBe(3);
+    expect(payload.xpGained).toBe(2);
+  });
+
+  it('derrota sem delta de XP no herói não inventa XP a partir dos inimigos', () => {
+    const previous = baseState({
+      gold: 100,
+      enemies: [
+        {
+          id: 'e1',
+          name: 'Rato',
+          enemyType: 'giant_rat',
+          health: 10,
+          maxHealth: 10,
+          attack: 2,
+          defense: 0,
+          goldReward: 5,
+          xpReward: 40,
+          signatureSkills: [],
+          combatIntent: null,
+          combatSkills: [],
+          statusEffects: [],
+        },
+      ],
+      heroes: [
+        {
+          id: 'h1',
+          name: 'Nix',
+          heroClass: 'sorcerer',
+          emoji: '✦',
+          level: 1,
+          experience: 7,
+          experienceToNextLevel: 100,
+          attack: 10,
+          defense: 5,
+          health: 0,
+          maxHealth: 50,
+          baseAttributes: { str: 1, dex: 3, int: 5 },
+          allocatedAttributes: { str: 0, dex: 0, int: 0 },
+          totalAttributes: { str: 1, dex: 3, int: 5 },
+          unspentImprovementPoints: 0,
+          unspentAscensionPoints: 0,
+          skillRanks: {},
+          equippedSkillIds: [],
+          activeSkills: [],
+          maxActiveSkills: 1,
+          unlockedActiveSkillSlots: 1,
+          ascensionId: null,
+          hasUnspentPoints: false,
+          equipment: {},
+          combatIntent: null,
+          combatSkills: [],
+          combatSkillCooldowns: [],
+          statusEffects: [],
+        },
+      ],
+      phaseRun: {
+        phaseId: '1-1',
+        displayName: 'Aventuras na Estrada',
+        waveIndex: 0,
+        waveCount: 1,
+        isBossWave: true,
+      },
+    });
+
+    const next = baseState({
+      gold: 100,
+      enemies: [],
+      heroes: [
+        {
+          ...previous.heroes[0],
+          health: 50,
+          experience: 7,
+        },
+      ],
+      phaseRun: null,
+      combatIntermission: {
+        variant: 'defeat',
+        clearedPhaseId: '1-1',
+        clearedPhaseName: 'Aventuras na Estrada',
+        nextPhaseId: null,
+        nextPhaseName: null,
+      },
+    });
+
+    const payload = buildBattleIntermissionPayload(next.combatIntermission!, next, previous);
+
+    expect(payload.variant).toBe('defeat');
+    expect(payload.goldGained).toBe(0);
+    expect(payload.xpGained).toBe(0);
   });
 });

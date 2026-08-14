@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { buildPhaseId } from './CampaignIds';
 import { EncounterResolver } from './EncounterResolver';
-import { CAMPAIGN_REPLAY_XP_MULTIPLIER } from '../balance/CampaignXpScaling';
 import { EnemyKillRewardService } from './EnemyKillRewardService';
 import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
@@ -75,7 +74,7 @@ describe('EnemyKillRewardService', () => {
     vi.restoreAllMocks();
   });
 
-  it('concede 50% ouro e 75% XP em replay', () => {
+  it('concede ouro e XP cheios mesmo com template já cleared (normais não são replay)', () => {
     const phaseId = buildPhaseId(1, 2);
     const cleared = GameState.initial()
       .campaignProgress.markCleared(phaseId, [buildPhaseId(1, 3)], 2)
@@ -88,10 +87,8 @@ describe('EnemyKillRewardService', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.99);
     const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
 
-    const expectedGold = Math.floor(enemy.goldReward * 0.5);
-    const expectedXp = Math.floor(enemy.xpReward * CAMPAIGN_REPLAY_XP_MULTIPLIER);
-    expect(result.state.gold.amount).toBe(expectedGold);
-    expect(result.state.activeHeroes()[0].experience.current).toBe(expectedXp);
+    expect(result.state.gold.amount).toBe(enemy.goldReward);
+    expect(result.state.activeHeroes()[0].experience.current).toBe(enemy.xpReward);
     vi.restoreAllMocks();
   });
 

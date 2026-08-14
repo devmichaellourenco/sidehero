@@ -47,18 +47,29 @@ export function buildBattleIntermissionPayload(
   const fromDiff = previous ? detectBattleVictory(previous, state) : null;
   if (fromDiff) return fromDiff;
 
+  const rewards = previous
+    ? computeRewardDelta(previous, state, { preferXpSource: 'hero' })
+    : {
+        goldGained: 0,
+        xpGained: 0,
+        heroRewards: [] as HeroVictoryReward[],
+        chestDropped: false,
+        chestCount: 0,
+        tierReached: null as number | null,
+      };
+
   return {
     variant: intermission.variant,
     clearedPhaseId: intermission.clearedPhaseId,
     clearedPhaseName: intermission.clearedPhaseName,
     nextPhaseId: intermission.nextPhaseId,
     nextPhaseName: intermission.nextPhaseName,
-    goldGained: 0,
-    xpGained: 0,
-    heroRewards: [],
-    chestDropped: false,
-    chestCount: 0,
-    tierReached: null,
+    goldGained: rewards.goldGained,
+    xpGained: rewards.xpGained,
+    heroRewards: rewards.heroRewards,
+    chestDropped: rewards.chestDropped,
+    chestCount: rewards.chestCount,
+    tierReached: rewards.tierReached,
     seasonCompleted: state.seasonCompleted,
     milestoneVictory: null,
     defeatHint:
@@ -127,20 +138,50 @@ function detectPhaseVictory(
   });
 }
 
-function buildVictoryPayload(
+function computeHeroXpGained(previous: GameStateDto, next: GameStateDto): number {
+  return next.heroes.reduce((sum, hero) => {
+    const oldHero = previous.heroes.find((entry) => entry.id === hero.id);
+    if (!oldHero) return sum;
+
+    if (hero.level === oldHero.level) {
+      return sum + Math.max(0, hero.experience - oldHero.experience);
+    }
+
+    if (hero.level > oldHero.level) {
+      const toLevelUp = Math.max(0, oldHero.experienceToNextLevel - oldHero.experience);
+      const afterLevels = Math.max(0, hero.experience);
+      // Níveis intermediários: usa o toNext do herói antigo como aproximação por nível.
+      const midLevels = Math.max(0, hero.level - oldHero.level - 1) * oldHero.experienceToNextLevel;
+      return sum + toLevelUp + midLevels + afterLevels;
+    }
+
+    return sum;
+  }, 0);
+}
+
+function computeRewardDelta(
   previous: GameStateDto,
   next: GameStateDto,
-  context: {
-    variant: BattleVictoryVariant;
-    clearedPhaseId: string;
-    clearedPhaseName: string;
-    nextPhaseId: string | null;
-    nextPhaseName: string | null;
-    seasonCompleted: boolean;
-  },
-): BattleVictoryPayload {
+  options: { preferXpSource: 'hero' | 'enemy' } = { preferXpSource: 'enemy' },
+): {
+  goldGained: number;
+  xpGained: number;
+  heroRewards: HeroVictoryReward[];
+  chestDropped: boolean;
+  chestCount: number;
+  tierReached: number | null;
+} {
   const goldGained = Math.max(0, next.gold - previous.gold);
-  const xpGained = previous.enemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
+  const xpFromHeroes = computeHeroXpGained(previous, next);
+  const xpFromEnemies = previous.enemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
+  // Em derrota usamos só delta nos heróis — fallback em xpReward dos inimigos
+  // inventava "+XP" sem o domínio ter concedido nada nesta transição.
+  const xpGained =
+    options.preferXpSource === 'hero'
+      ? xpFromHeroes
+      : xpFromEnemies > 0
+        ? xpFromEnemies
+        : xpFromHeroes;
   const chestCount = Math.max(0, next.pendingChestCount - previous.pendingChestCount);
   const tierReached = next.stage > previous.stage ? next.stage : null;
 
@@ -161,17 +202,41 @@ function buildVictoryPayload(
     .filter((entry): entry is HeroVictoryReward => entry !== null);
 
   return {
-    variant: context.variant,
-    clearedPhaseId: context.clearedPhaseId,
-    clearedPhaseName: context.clearedPhaseName,
-    nextPhaseId: context.nextPhaseId,
-    nextPhaseName: context.nextPhaseName,
     goldGained,
     xpGained,
     heroRewards,
     chestDropped: chestCount > 0,
     chestCount,
     tierReached,
+  };
+}
+
+function buildVictoryPayload(
+  previous: GameStateDto,
+  next: GameStateDto,
+  context: {
+    variant: BattleVictoryVariant;
+    clearedPhaseId: string;
+    clearedPhaseName: string;
+    nextPhaseId: string | null;
+    nextPhaseName: string | null;
+    seasonCompleted: boolean;
+  },
+): BattleVictoryPayload {
+  const rewards = computeRewardDelta(previous, next);
+
+  return {
+    variant: context.variant,
+    clearedPhaseId: context.clearedPhaseId,
+    clearedPhaseName: context.clearedPhaseName,
+    nextPhaseId: context.nextPhaseId,
+    nextPhaseName: context.nextPhaseName,
+    goldGained: rewards.goldGained,
+    xpGained: rewards.xpGained,
+    heroRewards: rewards.heroRewards,
+    chestDropped: rewards.chestDropped,
+    chestCount: rewards.chestCount,
+    tierReached: rewards.tierReached,
     seasonCompleted: context.seasonCompleted,
     milestoneVictory:
       context.variant === 'phase-clear'
@@ -183,3 +248,4 @@ function buildVictoryPayload(
     defeatHint: null,
   };
 }
+

@@ -114,4 +114,28 @@ describe('GamePreferencesController', () => {
     expect(localStore.get('sidehero_ui_theme')).toBe('dark');
     expect(document.documentElement.getAttribute(UI_THEME_ATTR)).toBe('dark');
   });
+
+  it('intervalo 1× alinha tick com COMBAT_DELTA (1s de combate ≈ 1s real)', () => {
+    const controller = new GamePreferencesController();
+    const state = createStateWithAutoBattle();
+    controller.apply(state);
+
+    expect(controller.getAutoBattleIntervalMs(state)).toBe(1000);
+  });
+
+  it('velocidade 2× e 3× encurtam o intervalo proporcionalmente', () => {
+    const controller = new GamePreferencesController();
+    const state = {
+      ...createStateWithAutoBattle(),
+      featureFlags: {
+        ...createStateWithAutoBattle().featureFlags,
+        autoBattleMaxSpeed: 3 as const,
+      },
+    };
+    controller.apply(state);
+    controller.update('autoBattleSpeed', 2, state);
+    expect(controller.getAutoBattleIntervalMs(state)).toBe(500);
+    controller.update('autoBattleSpeed', 3, state);
+    expect(controller.getAutoBattleIntervalMs(state)).toBe(333);
+  });
 });

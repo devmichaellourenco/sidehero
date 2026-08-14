@@ -26,8 +26,8 @@ Este documento é **transversal** — não substitui specs de feature (`combat-c
 | **Combate e fórmulas** | Dano, cura, crítico, status, turnos/tick | `combat-campaign` | `MitigationPipeline`, `CombatDamageResolver`, `CombatActionExecutor`, `CombatTurnPhase` |
 | **Elementos** | Cada elemento (`physical`/`fire`/`cold`/`lightning`/`air`) usa mitigação do tipo; multi-componente; DOT | `combat-campaign`, `skills-progression` | `DamageElement`, `ResistanceProfile`, `HeroCombatSkillCatalog`, `EnemyMonsterCombatSkillCatalog` |
 | **Gear e loot** | Stats por raridade/tier; resist/def por slot; caps | `gear-loot` | `LootService`, `GearTemplateCatalog`, `DifficultyCombatScaling` |
-| **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted; overrides do Balance Lab | `combat-campaign`, `camp-missions` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `PhaseBattleOverrides` |
-| **Missões / board** | Oferta normal 2–4; refresh por visitas; templates ★; unlock side; fração na derrota normal | `camp-missions` | `NormalMissionOffer`, `MissionCatalog`, `CampMissionBoard`, `ResolveMissionOutcome` |
+| **Waves e fases** | HP/ATK/DEF por level+attrs+role; boss vs trash; handcrafted; overrides do Balance Lab | `combat-campaign`, `camp-missions` | `EnemyProgressionCatalog`, `WaveEnemyFactory`, `HandcraftedPhaseCatalog`, `PhaseBattleOverrides`, `PhaseRewardOverrides` |
+| Missões / board | Oferta normal 2–4 no capítulo da main (ex.: 1-1 → 1–5); refresh por visitas; templates ★; unlock side; fração na derrota normal | `camp-missions` | `NormalMissionOffer`, `NormalMissionMainBand`, `MissionCatalog`, `CampMissionBoard`, `ResolveMissionOutcome` |
 | **Skills e progressão** | `Base × (powerPerRank × nível) × (attr × fator)`; cooldowns; ascensão vs tier | `skills-progression`, `heroes-party` | `HeroCombatSkillCatalog`, `SkillPowerCalculator`, `SkillDamageBalance`, `HeroLevelXpCatalog` |
 | **Economia** | Ouro in/out; loja; baús; forja; loja refresh | `shop-economy`, `stash-forge`, `gear-loot` | `ShopCatalog`, `ShopService`, `ShopPricing`, `EconomyReference`, `PhaseGoldBudget`, `ForgeSalvageGoldCatalog`, `PhaseCombatHandlers` |
 | **Melhorias e meta** | Gates, custos, impacto em features | `upgrade-tree`, `meta-legacy` | `UpgradeCatalog`, `MetaUpgradeCatalog`, `FeatureAccessPolicy` |
@@ -61,7 +61,10 @@ Poder × crítico → split damageComponents[]
 - [x] BAL-012 — cadência early: TTA = 1/ASPD por combatente; CD/básico/ASPD/crescimento na identidade do herói ou tipo de monstro; recovery/CDR/rank na skill
 - [x] BAL-013 — inimigos no mesmo modelo de combate dos heróis (level/attrs/ranks/passivas; CD e básico unificados; sem knobs ATK/HP/skill)
 - [x] BAL-015 — rebalance camp-missions: ASPD efetiva ~½ (TTA ~2×, fator por combatente); recovery/CDR por skill; `powerPerRank` das skills de herói com CD ×3 no catálogo; raridade da loja por mains; party Nix solo + unlocks por main
-- [x] Balance Lab: aba **Missões** edita waves/inimigos por fase; overrides em `phase-battle-overrides.json` mesclados via `PhaseBattleOverrides` / `CampaignCatalog.resolvePhase`; backups em `data/backups/phase-battle-overrides/`
+- [x] Balance Lab: aba **Missões** edita waves/inimigos por fase; filtros por capítulo da main / tipo / mapa / busca; aviso de template compartilhado (main↔normal); overrides em `phase-battle-overrides.json` mesclados via `PhaseBattleOverrides` / `CampaignCatalog.resolvePhase`; backups em `data/backups/phase-battle-overrides/`
+- [x] Balance Lab: aba **XP por fase** lista XP/ouro por fase (soma de kills), acumulado, nível projetado e filtros mapa/capítulo; edição de alvos com save em `phase-reward-overrides.json` + backups (`GET|PUT|DELETE /api/phase-rewards`)
+- [x] Balance Lab: aba **XP por nível** lista a curva de level-up 1→100 (XP base, XP efetiva, crescimento vs nível anterior, XP acumulada) com filtro por faixa de 10 níveis; edição por nível com save em `hero-level-xp-overrides.json` + backups (`GET|PUT|DELETE /api/hero-level-xp`); merge em `expRequiredToAdvanceFromLevel`
+- [x] Balance Lab: aba **Personagens** edita stats base (ATK/DEF/HP), identidade, skills de combate, passivas e evoluções (ascensão); save em `hero-combat-overrides.json` + backups (`GET|PUT /api/hero-combat`); merge em `getHeroCombatSkill` / `getHeroCombatIdentity` / `getHeroBaseStats` / `getPassiveDefinition` / `getAscensionById`
 
 ## Coordenação com outros agents
 
@@ -139,6 +142,9 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `SkillPowerCalculator.test.ts` — básico/skill inimigo alinhados ao herói
 - [x] `SkillCooldownTiming.test.ts` — CD unificado herói/inimigo
 - [x] `PhaseBattleOverrides.test.ts` — merge de waves do Balance Lab sobre fase handcrafted
+- [x] `PhaseRewardOverrides.test.ts` — alvos XP do lab escalam kills da fase
+- [x] `HeroCombatOverrides.test.ts` — knobs de skill/identidade/passiva/evolução do lab no lookup do domínio
+- [x] `HeroLevelXpOverrides.test.ts` — XP por nível do lab na curva efetiva e no level-up de `Experience`
 
 ## Balance Lab (ferramenta de calibração)
 
@@ -146,13 +152,31 @@ Ferramenta **fora do produto jogável** (`npm run balance-lab` → http://127.0.
 
 | Peça | Função |
 |------|--------|
-| Aba Missões | Editar composição de batalhas (waves/inimigos) por `phaseTemplateId` |
+| Aba Simulador | Combatente com **identidade** (básico, s/turno CD, ASPD, ATK/DEF/HP, level-up); fórmulas só com pesos STR/DEX e piso ASPD |
+| Skill no lab | Recovery, CD (turns × s/turno da identidade − per-rank) e CDR teto/piso da skill selecionada |
+| Aba Missões | Editar composição de batalhas por `phaseTemplateId`; filtrar por capítulo da main (faixa do board), tipo, mapa e busca; alertar missões que compartilham o mesmo template; seletor de inimigos com miniatura |
+| Aba XP por fase | Distribuição de XP/ouro por fase; editar alvos e salvar overrides; XP acumulado e nível projetado; filtros mapa/capítulo |
+| Aba XP por nível | Curva de XP para subir de nível (1→100); XP base vs efetiva, crescimento, acumulado; filtro por faixa; salvar overrides; backups |
+| Aba Personagens | Editar stats base, identidade, skills, passivas e evoluções por herói; impacto (pts/skills/passiva); salvar overrides; backups |
 | `src/domain/campaign/data/phase-battle-overrides.json` | Overrides persistidos; merge sobre handcrafted |
+| `src/domain/campaign/data/phase-reward-overrides.json` | Alvos XP/ouro por fase; escala em `WaveEnemyFactory` |
 | `PhaseBattleOverrides.ts` | Merge determinístico usado por `CampaignCatalog.resolvePhase` |
-| `tools/balance-lab/missionBattlesUi.ts` | UI da aba |
-| `src/domain/campaign/data/backups/phase-battle-overrides/` | Snapshots ao salvar |
+| `PhaseRewardOverrides.ts` / `PhaseXpBudget.ts` | Overrides de recompensa + escala de XP |
+| `tools/balance-lab/missionBattlesCatalog.ts` | Snapshot + filtros de capítulo/shared |
+| `tools/balance-lab/missionBattlesUi.ts` | UI da aba Missões |
+| `tools/balance-lab/phaseRewardsCatalog.ts` | Soma XP/ouro por fase + acumulado + disk overrides |
+| `tools/balance-lab/phaseRewardsUi.ts` | UI editável da aba XP por fase |
+| `src/domain/progression/data/hero-level-xp-overrides.json` | XP por nível (N→N+1); merge em `expRequiredToAdvanceFromLevel` |
+| `HeroLevelXpOverrides.ts` / `HeroLevelXpCatalog.ts` | Curva canônica (`catalogExpRequiredToAdvanceFromLevel`) + override do lab |
+| `tools/balance-lab/heroLevelXpCatalog.ts` / `heroLevelXpUi.ts` | Snapshot e UI editável da aba XP por nível |
+| `src/domain/progression/data/hero-combat-overrides.json` | Knobs de skill/identidade/stats base/passiva/ascensão; merge nos lookups |
+| `HeroCombatOverrides.ts` / `HeroBaseStatsCatalog.ts` | Normalize + apply de recursos de herói (incl. ATK/DEF/HP base) |
+| `tools/balance-lab/heroCombatCatalog.ts` | Snapshot por herói para o lab |
+| `tools/balance-lab/heroCombatUi.ts` | UI da aba Personagens |
+| `src/domain/campaign/data/backups/phase-battle-overrides/` | Snapshots ao salvar batalhas |
+| `src/domain/campaign/data/backups/phase-reward-overrides/` | Snapshots ao salvar recompensas |
 
-Não substitui catálogos canônicos: overrides são camada de calibração até promoção ao handcrafted.
+Não substitui catálogos canônicos: identidade/skills calibrados no lab gravam `hero-combat-overrides.json` (merge no lookup); cola no catálogo TS só na promoção. Overrides de missão são camada até promoção ao handcrafted.
 
 ## Backlog conhecido (auditoria 2026-07-03)
 

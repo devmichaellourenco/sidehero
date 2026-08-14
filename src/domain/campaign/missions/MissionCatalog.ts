@@ -9,7 +9,6 @@ import {
 } from '../CampaignReleaseScope';
 import { MissionDefinition } from './MissionDefinition';
 import {
-  isMainQuestPhaseNumber,
   MAIN_QUEST_PHASE_NUMBERS,
   mainMissionId,
   MissionId,
@@ -41,12 +40,32 @@ const NORMAL_NAME_POOL: Record<MissionStars, readonly string[]> = {
   5: ['Assalto brutal', 'Covil do terror', 'Última linha', 'Prova de fogo'],
 };
 
+function chapterBoundsForPhase(phaseNumber: number): { start: number; end: number } {
+  const mains = MAIN_QUEST_PHASE_NUMBERS as readonly number[];
+  const start = [...mains].filter((n) => n <= phaseNumber).pop() ?? 1;
+  const end = mains.find((n) => n > start) ?? start;
+  return { start, end };
+}
+
+/**
+ * Estrelas sobem com o ato; dentro do capítulo, fases perto do próximo marco
+ * ficam um pouco mais exigentes (grind/build) sem saltar de impossível.
+ */
 function starsForNormalPhase(phaseNumber: number): MissionStars {
-  if (phaseNumber <= 12) return 1;
-  if (phaseNumber <= 22) return 2;
-  if (phaseNumber <= 32) return 3;
-  if (phaseNumber <= 42) return 4;
-  return 5;
+  let base: MissionStars = 1;
+  if (phaseNumber <= 12) base = 1;
+  else if (phaseNumber <= 22) base = 2;
+  else if (phaseNumber <= 32) base = 3;
+  else if (phaseNumber <= 42) base = 4;
+  else base = 5;
+
+  const { start, end } = chapterBoundsForPhase(phaseNumber);
+  const span = Math.max(1, end - start);
+  const progress = (phaseNumber - start) / span;
+  if (progress >= 0.75 && base < 5) {
+    return (base + 1) as MissionStars;
+  }
+  return base;
 }
 
 function normalRewardsForStars(stars: MissionStars): { gold: number; xp: number } {
@@ -87,8 +106,8 @@ function buildMainMissions(mapIndex: number, mapId: MapId, mapName: string): Mis
 
 function buildNormalMissions(mapIndex: number, mapId: MapId, mapName: string): MissionDefinition[] {
   const missions: MissionDefinition[] = [];
+  // Templates 1–50 (inclui marcos): farmáveis e repetíveis no sorteio; main/side são únicas.
   for (let phaseNumber = 1; phaseNumber <= 50; phaseNumber += 1) {
-    if (isMainQuestPhaseNumber(phaseNumber)) continue;
     const phaseId = buildPhaseId(mapIndex, phaseNumber);
     const stars = starsForNormalPhase(phaseNumber);
     missions.push({
@@ -104,16 +123,51 @@ function buildNormalMissions(mapIndex: number, mapId: MapId, mapName: string): M
   return missions;
 }
 
-/** Sides piloto — cadeias + paralelas nos quatro mapas base. */
+/**
+ * Sides piloto — vinculadas ao capítulo da main (template na faixa do marco).
+ * Capítulo 1-1: disponíveis desde o início; capítulo 1-5: após concluir 1-1; etc.
+ */
 function buildPilotSideMissions(): MissionDefinition[] {
+  const stendraWatch = sideMissionId('stendra_village_watch');
+  const stendraPatrol = sideMissionId('stendra_wayward_patrol');
+  const stendraSkirmish = sideMissionId('stendra_border_skirmish');
   const stendraAsh = sideMissionId('stendra_ash_trail');
   const stendraCache = sideMissionId('stendra_hidden_cache');
-  const stendraPatrol = sideMissionId('stendra_wayward_patrol');
   const gruftallScout = sideMissionId('gruftall_ash_scout');
   const valdrisWhisper = sideMissionId('valdris_whisper');
   const morthavenRun = sideMissionId('morthaven_seal_run');
 
   return [
+    {
+      id: stendraWatch,
+      kind: 'side',
+      mapId: 'stendra',
+      name: 'Vigília da Aldeia',
+      phaseTemplateId: '1-2',
+      stars: 1,
+      unlockAfterMissionIds: [],
+      rewards: { gold: 15, xp: 10 },
+    },
+    {
+      id: stendraPatrol,
+      kind: 'side',
+      mapId: 'stendra',
+      name: 'Patrulha Desgarrada',
+      phaseTemplateId: '1-3',
+      stars: 1,
+      unlockAfterMissionIds: [],
+      rewards: { gold: 20, xp: 15 },
+    },
+    {
+      id: stendraSkirmish,
+      kind: 'side',
+      mapId: 'stendra',
+      name: 'Escaramuça na Fronteira',
+      phaseTemplateId: '1-4',
+      stars: 2,
+      unlockAfterMissionIds: [],
+      rewards: { gold: 28, xp: 18 },
+    },
     {
       id: stendraAsh,
       kind: 'side',
@@ -121,7 +175,7 @@ function buildPilotSideMissions(): MissionDefinition[] {
       name: 'Trilha de Cinzas',
       phaseTemplateId: '1-6',
       stars: 2,
-      unlockAfterMissionIds: [mainMissionId('1-5')],
+      unlockAfterMissionIds: [mainMissionId('1-1')],
       rewards: { gold: 40, xp: 25, sceneId: 'side:stendra_ash_trail' },
     },
     {
@@ -140,23 +194,13 @@ function buildPilotSideMissions(): MissionDefinition[] {
       },
     },
     {
-      id: stendraPatrol,
-      kind: 'side',
-      mapId: 'stendra',
-      name: 'Patrulha Desgarrada',
-      phaseTemplateId: '1-3',
-      stars: 1,
-      unlockAfterMissionIds: [mainMissionId('1-1')],
-      rewards: { gold: 20, xp: 15 },
-    },
-    {
       id: gruftallScout,
       kind: 'side',
       mapId: 'gruftall',
       name: 'Batedor nas Cinzas',
       phaseTemplateId: '2-6',
       stars: 2,
-      unlockAfterMissionIds: [mainMissionId('2-5')],
+      unlockAfterMissionIds: [mainMissionId('2-1')],
       rewards: { gold: 45, xp: 30, sceneId: 'side:gruftall_ash_scout' },
     },
     {
@@ -166,7 +210,7 @@ function buildPilotSideMissions(): MissionDefinition[] {
       name: 'Sussurro nas Ruínas',
       phaseTemplateId: '3-3',
       stars: 2,
-      unlockAfterMissionIds: [mainMissionId('3-1')],
+      unlockAfterMissionIds: [],
       rewards: { gold: 50, xp: 35, sceneId: 'side:valdris_whisper' },
     },
     {
@@ -176,7 +220,7 @@ function buildPilotSideMissions(): MissionDefinition[] {
       name: 'Corrida ao Selo',
       phaseTemplateId: '4-12',
       stars: 3,
-      unlockAfterMissionIds: [mainMissionId('4-10')],
+      unlockAfterMissionIds: [mainMissionId('4-5')],
       rewards: { gold: 70, xp: 45, sceneId: 'side:morthaven_seal_run' },
     },
   ];

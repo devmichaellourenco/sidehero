@@ -43,7 +43,7 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | Resist | gear + inato | `getEffectiveResistance` | `ResistanceProfile.ts` |
 | Esquiva/block/DR | gear + passivas | Após soma de componentes | `DefensiveMitigation.ts` |
 | DOT tick | `onHitDot` | **Deve** usar pipeline (backlog BAL-001) | `CombatTurnPhase.ts` |
-| XP por kill | mapa, tier, replay | `CampaignXpScaling` | `WaveEnemyFactory.ts`, `PhaseLootPolicy.ts` |
+| XP por kill | mapa, tier (sem penalidade de replay) | `CampaignXpScaling` | `WaveEnemyFactory.ts`, `PhaseLootPolicy.ts` |
 | Loot primário | itemLevel, raridade | `rolledGearPrimaryStat` | `DifficultyCombatScaling.ts`, `MapGearLevelPolicy.ts` |
 | Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → referência | `PhaseGoldBudget.ts`, `EconomyReference.ts` |
 | Loja | mains + tier | cap raridade por main; mythic `3-21`/tier≥121 | `ShopCatalog.ts` |
@@ -79,8 +79,11 @@ npm run balance-lab
 
 Arquivos: `tools/balance-lab/` (+ `scripts/balance-lab.mjs`).
 
-- **Simulador:** 1 combatente | lado a lado; fórmulas e passivas editáveis; export/import JSON.
-- **Missões:** aba no lab para editar batalhas (main/side/normal) via formulário + JSON. Grava em `src/domain/campaign/data/phase-battle-overrides.json` (merge em `CampaignCatalog.resolvePhase`). Cada save/delete gera backup em `src/domain/campaign/data/backups/phase-battle-overrides/`. Após salvar, rebuild da extensão para o jogo embutir o JSON.
+- **Simulador:** 1 combatente | lado a lado; identidade por herói/tipo de monstro (básico, CD, ASPD, crescimento); timing por skill; pesos globais (STR/DEX) e passivas editáveis; export/import JSON.
+- **Missões:** aba no lab para editar batalhas (main/side/normal) via formulário + JSON. Filtros por **capítulo da main** (ex. Cap. 1 = fases 1–5), tipo, mapa e busca. Badge `shared` quando main/normal usam o mesmo `phaseTemplateId`. Seletor de inimigos com **miniatura** (sprites de `dist/panel/assets/characters`). Grava em `src/domain/campaign/data/phase-battle-overrides.json` (merge em `CampaignCatalog.resolvePhase`). Cada save/delete gera backup em `src/domain/campaign/data/backups/phase-battle-overrides/`. Após salvar, rebuild da extensão para o jogo embutir o JSON.
+- **XP por fase:** aba com soma de XP/ouro de todos os kills por fase, XP acumulado, nível projetado, filtros mapa/capítulo. Edição de **nome**, **XP/ouro alvo** com save em `phase-reward-overrides.json` (backup automático); domínio aplica nome via `resolvePhase` e escala kills via `PhaseXpBudget` / `PhaseGoldBudget`. API `GET|PUT /api/phase-rewards`.
+- **XP por nível:** aba com a curva de level-up 1→100 (XP base do catálogo, XP efetiva editável, crescimento vs nível anterior, XP acumulada), filtro por faixa de 10 níveis. Níveis 1–50 vêm de `campaignHeroXpRequired`; 51–100 da tabela legada em `HERO_LEVEL_XP_TABLE`. Save em `src/domain/progression/data/hero-level-xp-overrides.json` (backup automático); merge em `expRequiredToAdvanceFromLevel` (canônico segue em `catalogExpRequiredToAdvanceFromLevel`). API `GET|PUT|DELETE /api/hero-level-xp`. Rebuild da extensão para o jogo.
+- **Personagens:** aba para editar stats base (ATK/DEF/HP), identidade (ASPD/crescimento/`basicAttackDamageRatio`), skills de combate (`powerPerRank`, CD, recovery, CDR), passivas e evoluções (`pointsGranted`, requisitos, textos) com preview de impacto (pts acumulados, skills/passiva do tier). **Ataque básico** usa `ATK × basicAttackDamageRatio` da identidade — não `basePower` da skill. Grava em `src/domain/progression/data/hero-combat-overrides.json`; merge em `getHeroCombatSkill` / `getHeroCombatIdentity` / `getHeroBaseStats` / `getPassiveDefinition` / `getAscensionById`. API `GET|PUT /api/hero-combat`. Rebuild da extensão para o jogo.
 
 Não entra no zip de release.
 

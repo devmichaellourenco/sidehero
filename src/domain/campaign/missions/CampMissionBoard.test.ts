@@ -6,6 +6,8 @@ import {
 } from './CampMissionBoard';
 import { mainMissionId, sideMissionId } from './MissionId';
 import { rollNormalMissionOffer } from './NormalMissionOffer';
+import { parsePhaseId } from '../CampaignIds';
+import { getMissionById } from './MissionCatalog';
 
 describe('CampMissionBoard', () => {
   it('próxima main é 1-1 no início e 1-5 após concluir 1-1', () => {
@@ -15,11 +17,68 @@ describe('CampMissionBoard', () => {
     );
   });
 
-  it('board inclui main + sides elegíveis + normais da oferta', () => {
+  it('com main 1-1: sides do capítulo 1 + normais 1–5', () => {
     const offer = rollNormalMissionOffer({
       mapId: 'stendra',
       saveSeed: 1,
       offerEpoch: 0,
+      currentMainPhaseNumber: 1,
+    });
+    const board = buildCampMissionBoard({
+      mapId: 'stendra',
+      completedMainIds: [],
+      completedSideIds: [],
+      completedMissionIds: [],
+      normalOfferIds: offer,
+    });
+
+    expect(board.main?.id).toBe(mainMissionId('1-1'));
+    expect(board.sides.map((s) => s.id)).toEqual(
+      expect.arrayContaining([
+        sideMissionId('stendra_village_watch'),
+        sideMissionId('stendra_wayward_patrol'),
+        sideMissionId('stendra_border_skirmish'),
+      ]),
+    );
+    expect(board.sides.map((s) => s.id)).not.toContain(sideMissionId('stendra_ash_trail'));
+    for (const normal of board.normals) {
+      const phaseNumber = parsePhaseId(normal.phaseTemplateId).phaseNumber;
+      expect(phaseNumber).toBeGreaterThanOrEqual(1);
+      expect(phaseNumber).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it('com main 1-5: trilha de cinzas + normais 5–10', () => {
+    const offer = rollNormalMissionOffer({
+      mapId: 'stendra',
+      saveSeed: 1,
+      offerEpoch: 0,
+      currentMainPhaseNumber: 5,
+    });
+    const board = buildCampMissionBoard({
+      mapId: 'stendra',
+      completedMainIds: [mainMissionId('1-1')],
+      completedSideIds: [],
+      completedMissionIds: [mainMissionId('1-1')],
+      normalOfferIds: offer,
+    });
+
+    expect(board.main?.id).toBe(mainMissionId('1-5'));
+    expect(board.sides.map((s) => s.id)).toContain(sideMissionId('stendra_ash_trail'));
+    expect(board.sides.map((s) => s.id)).not.toContain(sideMissionId('stendra_wayward_patrol'));
+    for (const normal of board.normals) {
+      const phaseNumber = parsePhaseId(normal.phaseTemplateId).phaseNumber;
+      expect(phaseNumber).toBeGreaterThanOrEqual(5);
+      expect(phaseNumber).toBeLessThanOrEqual(10);
+    }
+  });
+
+  it('board na main 1-10 usa faixa 10–15 e não traz sides do capítulo anterior', () => {
+    const offer = rollNormalMissionOffer({
+      mapId: 'stendra',
+      saveSeed: 1,
+      offerEpoch: 0,
+      currentMainPhaseNumber: 10,
     });
     const board = buildCampMissionBoard({
       mapId: 'stendra',
@@ -30,30 +89,48 @@ describe('CampMissionBoard', () => {
     });
 
     expect(board.main?.id).toBe(mainMissionId('1-10'));
-    expect(board.sides.map((s) => s.id)).toEqual(
-      expect.arrayContaining([
-        sideMissionId('stendra_ash_trail'),
-        sideMissionId('stendra_wayward_patrol'),
-      ]),
-    );
+    expect(board.sides.map((s) => s.id)).not.toContain(sideMissionId('stendra_ash_trail'));
     expect(board.normals.length).toBe(offer.length);
-    expect(board.normals.every((n) => n.kind === 'normal')).toBe(true);
+    for (const normal of board.normals) {
+      const phaseNumber = parsePhaseId(normal.phaseTemplateId).phaseNumber;
+      expect(phaseNumber).toBeGreaterThanOrEqual(10);
+      expect(phaseNumber).toBeLessThanOrEqual(15);
+    }
   });
 
-  it('ensureNormalOfferForBoard cria oferta se vazia', () => {
+  it('ensureNormalOfferForBoard cria oferta se vazia e descarta legado fora da faixa', () => {
     const ensured = ensureNormalOfferForBoard({
       mapId: 'stendra',
       saveSeed: 3,
       offerEpoch: 0,
       currentOffer: [],
+      currentMainPhaseNumber: 1,
     });
     expect(ensured.offer.length).toBeGreaterThanOrEqual(2);
+    for (const id of ensured.offer) {
+      const mission = getMissionById(id)!;
+      const phaseNumber = parsePhaseId(mission.phaseTemplateId).phaseNumber;
+      expect(phaseNumber).toBeGreaterThanOrEqual(1);
+      expect(phaseNumber).toBeLessThanOrEqual(5);
+    }
+
     const kept = ensureNormalOfferForBoard({
       mapId: 'stendra',
       saveSeed: 3,
       offerEpoch: 0,
       currentOffer: ensured.offer,
+      currentMainPhaseNumber: 1,
     });
     expect(kept.offer).toEqual(ensured.offer);
+
+    const scrubbed = ensureNormalOfferForBoard({
+      mapId: 'stendra',
+      saveSeed: 3,
+      offerEpoch: 0,
+      currentOffer: ['normal:1-20', 'normal:1-30'],
+      currentMainPhaseNumber: 1,
+    });
+    expect(scrubbed.offer.every((id) => id !== 'normal:1-20')).toBe(true);
+    expect(scrubbed.offer.length).toBeGreaterThan(0);
   });
 });

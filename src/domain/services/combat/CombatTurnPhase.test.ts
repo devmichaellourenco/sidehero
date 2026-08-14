@@ -151,7 +151,7 @@ describe('CombatTurnPhase', () => {
     expect(result.events.length).toBeGreaterThan(0);
   });
 
-  it('inicia fase 1-3 após derrotar boss da 1-2 no tick seguinte', () => {
+  it('no hub pós-missão, tick não auto-inicia outra fase', () => {
     const phaseHandlers = new PhaseCombatHandlers();
     const resolver = new EncounterResolver();
     const phaseId = buildPhaseId(1, 2);
@@ -186,11 +186,13 @@ describe('CombatTurnPhase', () => {
     const resumed = phaseHandlers.resumeIntermission(state);
     state = resumed.state;
 
+    expect(state.loadoutEditOpen).toBe(true);
+    expect(state.phaseRun).toBeNull();
+
     const nextTick = phase.execute(state);
 
-    expect(nextTick.state.phaseRun?.phaseId).toBe(buildPhaseId(1, 3));
-    expect(nextTick.state.phaseRun?.waveIndex).toBe(0);
-    expect(nextTick.state.combat?.encounterMeta?.phaseId).toBe(buildPhaseId(1, 3));
+    expect(nextTick.state.phaseRun).toBeNull();
+    expect(nextTick.state.combat).toBeNull();
   });
 
   it('mesmo herói dispara só uma skill por tick mesmo com timer atrasado e 2 skills prontas', () => {

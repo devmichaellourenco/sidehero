@@ -2,24 +2,17 @@ import {
   DEX_ATTACK_SPEED_SCALE,
   STR_ATTACK_SPEED_SCALE,
 } from '../../src/domain/combat/CombatSpeedScaling';
-import { getHeroCombatIdentity } from '../../src/domain/combat/HeroCombatIdentityCatalog';
 import { LabFormulaConstants } from './types';
 
 export function defaultFormulaConstants(): LabFormulaConstants {
-  const knight = getHeroCombatIdentity('knight');
   return {
-    attackPerLevel: knight.attackPerLevel,
-    defensePerLevel: knight.defensePerLevel,
-    healthPerLevel: knight.healthPerLevel,
     attrAtkStr: 0.5,
     attrAtkDex: 0.3,
     attrDefDex: 0.5,
     attrDefStr: 0.2,
     attrHpStr: 2,
-    baseAspdFactor: knight.attackSpeedFactor,
     dexAspdScale: DEX_ATTACK_SPEED_SCALE,
     strAspdScale: STR_ATTACK_SPEED_SCALE,
-    basicAttackRatio: knight.basicAttackDamageRatio,
     aspdFloor: 0.175,
   };
 }
@@ -38,21 +31,16 @@ export interface FormulaGroup {
   fields: readonly FormulaFieldMeta[];
 }
 
-/** Grupos do painel direito — uma fórmula por bloco, constantes abaixo. */
+/** Grupos do painel direito — uma fórmula por bloco, constantes globais abaixo. */
 export const FORMULA_GROUPS: readonly FormulaGroup[] = [
   {
     id: 'atk',
     title: 'ATK — ataque',
     equation:
-      'floor( (Base ATK + Gear ATK + (Level − 1)×[ATK / nível] + floor(STR×[STR → ATK] + DEX×[DEX → ATK]) ) × (1 + [ATK % gear + ATK % passivas]/100) )',
+      'floor( (Base ATK + Gear ATK + (Level − 1)×[ATK / nível da identidade] + floor(STR×[STR → ATK] + DEX×[DEX → ATK]) ) × (1 + [ATK % gear + ATK % passivas]/100) )',
     meaning:
-      'Base ATK = classe/nível-up ou sheet inimigo. Gear ATK e ATK % gear vêm do Combatente; ATK % passivas soma passivas ativas.',
+      'ATK / nível e level-up ATK vêm da identidade do combatente (classe ou tipo de monstro). Pesos STR/DEX continuam globais.',
     fields: [
-      {
-        key: 'attackPerLevel',
-        label: 'ATK / nível',
-        formulaHint: '(Level − 1) × isto',
-      },
       {
         key: 'attrAtkStr',
         label: 'STR → ATK',
@@ -69,15 +57,10 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
     id: 'def',
     title: 'DEF — defesa',
     equation:
-      'floor( (Base DEF + Gear DEF + (Level − 1)×[DEF / nível] + floor(DEX×[DEX → DEF] + STR×[STR → DEF]) ) × (1 + [DEF % gear + DEF % passivas]/100) )',
+      'floor( (Base DEF + Gear DEF + (Level − 1)×[DEF / nível da identidade] + floor(DEX×[DEX → DEF] + STR×[STR → DEF]) ) × (1 + [DEF % gear + DEF % passivas]/100) )',
     meaning:
-      'Base DEF = armadura base. Gear DEF e DEF % gear no Combatente; DEF % passivas no mesmo %. Usada por HP%/DEF (ex.: Saúde de Titã).',
+      'DEF / nível e level-up DEF vêm da identidade do combatente. Pesos DEX/STR globais.',
     fields: [
-      {
-        key: 'defensePerLevel',
-        label: 'DEF / nível',
-        formulaHint: '(Level − 1) × isto',
-      },
       {
         key: 'attrDefDex',
         label: 'DEX → DEF',
@@ -94,15 +77,10 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
     id: 'hp',
     title: 'HP — vida máxima',
     equation:
-      'floor( (Base HP + Gear HP + (Level − 1)×[HP / nível] + STR×[STR → HP] ) × (1 + [HP % gear + HP % passivas]/100) )',
+      'floor( (Base HP + Gear HP + (Level − 1)×[HP / nível da identidade] + STR×[STR → HP] ) × (1 + [HP % gear + HP % passivas]/100) )',
     meaning:
-      'Base HP = vida base. Gear HP e HP % gear no Combatente; HP % passivas inclui flat, por nível e % por ponto de DEF.',
+      'HP / nível e level-up HP vêm da identidade do combatente. Peso STR → HP global.',
     fields: [
-      {
-        key: 'healthPerLevel',
-        label: 'HP / nível',
-        formulaHint: '(Level − 1) × isto',
-      },
       {
         key: 'attrHpStr',
         label: 'STR → HP',
@@ -114,15 +92,10 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
     id: 'aspd',
     title: 'ASPD / TTA — velocidade',
     equation:
-      'ASPD = max([Piso ASPD], [ASPD baseline]×[Fator baseline] + DEX×[DEX → ASPD] + STR×[STR → ASPD]?) · TTA = 1/ASPD · Hit básico = floor(ATK × [Ratio básico])',
+      'ASPD = max([Piso ASPD], [ASPD baseline]×[Fator ASPD da identidade] + DEX×[DEX → ASPD] + STR×[STR → ASPD]?) · TTA = 1/ASPD · Hit básico = floor(ATK × [Ratio básico da identidade])',
     meaning:
-      'ASPD baseline = perfil da classe (ou override no Combatente). STR → ASPD só com ASPD melee (STR) ligado.',
+      'Fator ASPD e ratio do ataque básico vêm da identidade do combatente. CD de skill = turns × s/turno da identidade − per-rank da skill.',
     fields: [
-      {
-        key: 'baseAspdFactor',
-        label: 'Fator baseline',
-        formulaHint: 'ASPD baseline × isto',
-      },
       {
         key: 'dexAspdScale',
         label: 'DEX → ASPD',
@@ -132,11 +105,6 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
         key: 'strAspdScale',
         label: 'STR → ASPD',
         formulaHint: 'só se ASPD melee (STR)',
-      },
-      {
-        key: 'basicAttackRatio',
-        label: 'Ratio básico',
-        formulaHint: 'Hit básico = ATK × isto',
       },
       {
         key: 'aspdFloor',
@@ -158,9 +126,9 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
     id: 'elemental',
     title: 'Skills de dano (classe / inimigo)',
     equation:
-      'raw = max( Base×(powerPerRank×Rank)×(Attr×Fator) , piso ATK×Ratio ) · outgoing = raw×[Peso]×(1+[Dano %]/100)+[flat] · básico = floor(ATK×[Ratio básico])',
+      'raw = max( Base×(powerPerRank×Rank)×(Attr×Fator) , piso ATK×Ratio identidade ) · CD = turns×s/turno identidade − per-rank skill · recovery e CDR na skill',
     meaning:
-      'Skills de dano nunca ficam abaixo do ataque básico (ATK×Ratio básico). Rank/Attr sobem o catálogo; o piso só segura se o produto for menor. Inimigos flat podem ter minAttackRatio maior no catálogo.',
+      'Ratio básico, s/turno de CD e crescimento vêm da identidade. Recovery, redução por rank e teto/piso de CDR vêm da skill selecionada.',
     fields: [],
   },
 ];
@@ -173,5 +141,15 @@ export const FORMULA_FIELDS: readonly FormulaFieldMeta[] = FORMULA_GROUPS.flatMa
 export function mergeFormulaConstants(
   partial?: Partial<LabFormulaConstants> | null,
 ): LabFormulaConstants {
-  return { ...defaultFormulaConstants(), ...(partial ?? {}) };
+  const defaults = defaultFormulaConstants();
+  return {
+    attrAtkStr: partial?.attrAtkStr ?? defaults.attrAtkStr,
+    attrAtkDex: partial?.attrAtkDex ?? defaults.attrAtkDex,
+    attrDefDex: partial?.attrDefDex ?? defaults.attrDefDex,
+    attrDefStr: partial?.attrDefStr ?? defaults.attrDefStr,
+    attrHpStr: partial?.attrHpStr ?? defaults.attrHpStr,
+    dexAspdScale: partial?.dexAspdScale ?? defaults.dexAspdScale,
+    strAspdScale: partial?.strAspdScale ?? defaults.strAspdScale,
+    aspdFloor: partial?.aspdFloor ?? defaults.aspdFloor,
+  };
 }

@@ -56,6 +56,42 @@ describe('ChromeStorageGameRepository', () => {
     expect(loaded.phaseRun?.phaseId).toBe('1-1');
   });
 
+  it('persiste hub do acampamento (loadoutEditOpen sem phaseRestartOnResume)', async () => {
+    const repository = new ChromeStorageGameRepository();
+    const camp = GameState.initial()
+      .withPhaseRun(null)
+      .withCombat(null)
+      .withLoadoutEditOpen(true)
+      .withPhaseRestartOnResume(false);
+
+    await repository.save(camp);
+    expect(storage[STORAGE_KEY]).toMatchObject({
+      loadoutEditOpen: true,
+      phaseRestartOnResume: false,
+    });
+
+    const loaded = await repository.load();
+    expect(loaded.loadoutEditOpen).toBe(true);
+    expect(loaded.phaseRestartOnResume).toBe(false);
+    expect(loaded.phaseRun).toBeNull();
+  });
+
+  it('new game / save sem missão abre no acampamento mesmo sem flag legado', async () => {
+    const repository = new ChromeStorageGameRepository();
+    await repository.save(GameState.initial().withLoadoutEditOpen(false));
+    const saved = storage[STORAGE_KEY] as Record<string, unknown>;
+    storage[STORAGE_KEY] = {
+      ...saved,
+      loadoutEditOpen: false,
+      phaseRestartOnResume: false,
+      phaseRun: null,
+      combat: null,
+    };
+
+    const loaded = await repository.load();
+    expect(loaded.loadoutEditOpen).toBe(true);
+  });
+
   it('migra save legado taskbar_hero_game_state para side_hero_game_state', async () => {
     const repository = new ChromeStorageGameRepository();
     const paused = GameState.initial().withPhaseRun(PhaseRun.start('2-3'));

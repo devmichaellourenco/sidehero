@@ -3,6 +3,7 @@ import { CAMPAIGN_MAPS } from './CampaignMaps';
 import { releasedCampaignMaps, seasonFinalePhaseId } from './CampaignReleaseScope';
 import { HANDCRAFTED_PHASES } from './HandcraftedPhaseCatalog';
 import { mergePhaseWithEmbeddedOverride } from './PhaseBattleOverrides';
+import { mergePhaseWithEmbeddedRewardDisplayName } from './PhaseRewardOverrides';
 import { PhaseDefinition } from './PhaseDefinition';
 
 export interface CampaignMapInfo {
@@ -33,11 +34,21 @@ export function getCampaignInfo(): CampaignInfo {
   return CAMPAIGN;
 }
 
-/** Fase handcrafted + override de batalha do Balance Lab (JSON), se houver. */
-export function resolvePhase(phaseId: PhaseId): PhaseDefinition | null {
+/**
+ * Fase handcrafted + override de batalha do Balance Lab (JSON).
+ * Sem rename de `phase-reward-overrides`.
+ */
+export function resolvePhaseBattle(phaseId: PhaseId): PhaseDefinition | null {
   const base = handcraftedMap.get(phaseId);
   if (!base) return null;
   return mergePhaseWithEmbeddedOverride(base);
+}
+
+/** Fase completa: batalha + nome opcional de `phase-reward-overrides`. */
+export function resolvePhase(phaseId: PhaseId): PhaseDefinition | null {
+  const withBattle = resolvePhaseBattle(phaseId);
+  if (!withBattle) return null;
+  return mergePhaseWithEmbeddedRewardDisplayName(withBattle);
 }
 
 export function listPhasesForMap(mapId: MapId): PhaseDefinition[] {

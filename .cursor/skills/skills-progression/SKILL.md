@@ -19,6 +19,7 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 ## Padrões
 
 - Poder de combate (herói): `Base × (powerPerRank × nível) × (atributo × fator)` — sem multiplicador global; níveis começam com `powerPerRank` no rank 1; skills com CD têm `powerPerRank` 3× o legado no catálogo (BAL-015)
+- Calibração no Balance Lab: aba **Personagens** (`hero-combat-overrides.json`) — skills, identidade, passivas e evoluções (`pointsGranted`/requisitos); não editar números só na UI do jogo
 - Recarga: `cooldownTurns × skillCooldownTurnSeconds` do herói − `cooldownSecondsPerRank` da skill — `SkillCooldownTiming.ts`
 - Recovery: `actionRecoverySeconds` por skill; CDR teto/piso por skill
 - Ataque básico: `ATK × basicAttackDamageRatio` da identidade do herói; TTA = `1/ASPD` por combatente (DEX)

@@ -14,6 +14,7 @@ import {
 } from '../enemies/EnemyTierProgression';
 import { applyMilestoneBlueprint, getMilestoneBlueprint } from './MilestonePhaseBlueprints';
 import { applyPhaseChallenge, getPhaseChallenge } from './PhaseChallengeCatalog';
+import { phaseDisplayName } from './PhaseDisplayNameCatalog';
 import { PhaseDefinition } from './PhaseDefinition';
 import { EnemySlot, WaveDefinition } from './WaveDefinition';
 import { capPhaseWavesToMaxEnemies } from './WaveEnemyCap';
@@ -147,7 +148,7 @@ function buildPhase(mapIndex: number, phaseNumber: number): PhaseDefinition {
     id: phaseId,
     campaignId: 'apprentice',
     mapId: map.id,
-    displayName: `${map.name} ${phaseNumber}`,
+    displayName: phaseDisplayName(map.id, phaseNumber),
     difficultyTier: globalTier,
     waves: buildWaves(mapIndex, phaseNumber, globalTier, milestoneBoss, seasonFinale),
     unlocks: buildUnlocks(mapIndex, phaseNumber),

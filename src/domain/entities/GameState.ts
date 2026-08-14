@@ -134,7 +134,7 @@ export class GameState {
       shopRefreshSeed: 0,
       upgradeLevels: {},
       shopRefreshUses: 0,
-      loadoutEditOpen: false,
+      loadoutEditOpen: true,
       phaseRestartOnResume: false,
       combatIntermission: null,
       battlePaused: false,

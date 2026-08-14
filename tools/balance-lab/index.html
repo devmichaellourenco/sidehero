@@ -11,13 +11,18 @@
       <div>
         <h1>Balance Lab</h1>
         <p class="lab-sub">
-          Simulador local e editor de batalhas de missões. Overrides gravam em
-          <code>phase-battle-overrides.json</code> com backup automático. Não entra no release.
+          Simulador local, editor de batalhas, XP por fase, XP por nível e
+          recursos dos heróis.
+          Overrides gravam em <code>phase-battle-overrides.json</code> com backup
+          automático. Não entra no release.
         </p>
       </div>
       <nav class="lab-tabs" aria-label="Seções do lab">
         <button type="button" class="lab-tab is-active" data-lab-tab="sim">Simulador</button>
         <button type="button" class="lab-tab" data-lab-tab="missions">Missões</button>
+        <button type="button" class="lab-tab" data-lab-tab="xp">XP por fase</button>
+        <button type="button" class="lab-tab" data-lab-tab="levels">XP por nível</button>
+        <button type="button" class="lab-tab" data-lab-tab="heroes">Personagens</button>
       </nav>
     </header>
 
@@ -40,8 +45,9 @@
       <section class="lab-io">
         <h2>Export / Import</h2>
         <p class="lab-hint">
-          JSON completo do cenário (modo + combatentes). Snippet TS para colar no catálogo depois de
-          calibrar.
+          JSON completo do cenário (modo + combatentes + identidade). Snippet TS com
+          <code>identity</code> para colar em <code>HeroCombatIdentityCatalog</code> /
+          <code>EnemyCombatIdentityCatalog</code>.
         </p>
         <div class="lab-io-grid">
           <label class="lab-field lab-field--full">
@@ -64,6 +70,18 @@
 
     <div id="lab-panel-missions" class="lab-panel" hidden>
       <section id="lab-missions" class="lab-missions" aria-label="Editor de batalhas"></section>
+    </div>
+
+    <div id="lab-panel-xp" class="lab-panel" hidden>
+      <section id="lab-xp-rewards" class="lab-xp-rewards" aria-label="Distribuição de XP por fase"></section>
+    </div>
+
+    <div id="lab-panel-levels" class="lab-panel" hidden>
+      <section id="lab-level-xp" class="lab-xp-rewards" aria-label="Progressão de XP por nível"></section>
+    </div>
+
+    <div id="lab-panel-heroes" class="lab-panel" hidden>
+      <section id="lab-hero-combat" class="lab-hero-combat" aria-label="Editor de recursos dos heróis"></section>
     </div>
 
     <script type="module" src="./lab.js"></script>

@@ -16,11 +16,13 @@ describe('NormalMissionOffer', () => {
       mapId: 'stendra',
       saveSeed: 42,
       offerEpoch: 1,
+      currentMainPhaseNumber: 1,
     });
     const b = rollNormalMissionOffer({
       mapId: 'stendra',
       saveSeed: 42,
       offerEpoch: 1,
+      currentMainPhaseNumber: 1,
     });
     expect(a).toEqual(b);
     expect(a.length).toBeGreaterThanOrEqual(NORMAL_MISSION_OFFER_MIN);
@@ -29,10 +31,19 @@ describe('NormalMissionOffer', () => {
   });
 
   it('epoch diferente muda a oferta', () => {
-    const a = rollNormalMissionOffer({ mapId: 'stendra', saveSeed: 7, offerEpoch: 1 });
-    const b = rollNormalMissionOffer({ mapId: 'stendra', saveSeed: 7, offerEpoch: 2 });
+    const a = rollNormalMissionOffer({
+      mapId: 'stendra',
+      saveSeed: 7,
+      offerEpoch: 1,
+      currentMainPhaseNumber: 1,
+    });
+    const b = rollNormalMissionOffer({
+      mapId: 'stendra',
+      saveSeed: 7,
+      offerEpoch: 2,
+      currentMainPhaseNumber: 1,
+    });
     expect(hashMissionOfferSeed(7, 'stendra', 1)).not.toBe(hashMissionOfferSeed(7, 'stendra', 2));
-    // Pode coincidir por acaso, mas em geral difere; garantimos pelo menos seeds distintos
     expect(a.length).toBeGreaterThan(0);
     expect(b.length).toBeGreaterThan(0);
   });
@@ -49,6 +60,7 @@ describe('NormalMissionOffer', () => {
       mapId: 'stendra',
       saveSeed: 99,
       offerEpoch: 0,
+      currentMainPhaseNumber: 1,
     });
     const firstVisit = nextNormalOfferAfterCampVisit({
       mapId: 'stendra',
@@ -56,6 +68,7 @@ describe('NormalMissionOffer', () => {
       offerEpoch: 0,
       campVisitsSinceRefresh: 0,
       currentOffer: current,
+      currentMainPhaseNumber: 1,
     });
     expect(firstVisit.refreshed).toBe(false);
     expect(firstVisit.campVisitsSinceRefresh).toBe(1);
@@ -67,6 +80,7 @@ describe('NormalMissionOffer', () => {
       offerEpoch: firstVisit.offerEpoch,
       campVisitsSinceRefresh: firstVisit.campVisitsSinceRefresh,
       currentOffer: firstVisit.offer,
+      currentMainPhaseNumber: 1,
     });
     expect(secondVisit.refreshed).toBe(true);
     expect(secondVisit.campVisitsSinceRefresh).toBe(0);

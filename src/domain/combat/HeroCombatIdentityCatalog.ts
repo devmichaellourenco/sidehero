@@ -1,4 +1,5 @@
 import { HeroClass, HERO_CLASSES } from '../entities/HeroClass';
+import { applyIdentityOverride } from '../progression/HeroCombatOverrides';
 import { CombatantIdentity } from './CombatantIdentity';
 
 export type HeroCombatIdentity = CombatantIdentity;
@@ -73,6 +74,11 @@ const HERO_COMBAT_IDENTITY: Record<HeroClass, HeroCombatIdentity> = {
 };
 
 export function getHeroCombatIdentity(heroClass: HeroClass): HeroCombatIdentity {
+  return applyIdentityOverride(HERO_COMBAT_IDENTITY[heroClass], heroClass);
+}
+
+/** Identidade do catálogo, sem override do lab. */
+export function getCatalogHeroCombatIdentity(heroClass: HeroClass): HeroCombatIdentity {
   return HERO_COMBAT_IDENTITY[heroClass];
 }
 
@@ -82,6 +88,6 @@ export function listHeroCombatIdentities(): ReadonlyArray<{
 }> {
   return HERO_CLASSES.map((heroClass) => ({
     heroClass,
-    identity: HERO_COMBAT_IDENTITY[heroClass],
+    identity: getHeroCombatIdentity(heroClass),
   }));
 }

@@ -74,6 +74,6 @@ describe('ResolveMissionOutcomeUseCase', () => {
 
     const camp = await useCase.execute('enter_camp');
     expect(camp.loadoutEditOpen).toBe(true);
-    expect(camp.phaseRestartOnResume).toBe(true);
+    expect(camp.phaseRestartOnResume).toBe(false);
   });
 });

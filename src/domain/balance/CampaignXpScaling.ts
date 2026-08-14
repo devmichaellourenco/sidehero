@@ -3,8 +3,8 @@ import { mapIndexFromDifficultyTier } from '../gear/MapGearLevelPolicy';
 /** Multiplicador global sobre a escala de XP por kill (independente do combate). */
 export const CAMPAIGN_XP_KILL_MULTIPLIER = 1.75;
 
-/** XP concedido ao repetir fases já concluídas. */
-export const CAMPAIGN_REPLAY_XP_MULTIPLIER = 0.47;
+/** @deprecated Sem replay de fase — normais dão XP cheio. Mantido só por imports legados. */
+export const CAMPAIGN_REPLAY_XP_MULTIPLIER = 1;
 
 /** Níveis 1–50 usam curva de campanha; acima disso mantém tabela legada. */
 export const CAMPAIGN_HERO_LEVEL_SOFT_CAP = 50;

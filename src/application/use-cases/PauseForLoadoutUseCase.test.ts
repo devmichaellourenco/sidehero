@@ -24,7 +24,7 @@ class MemoryRepository implements IGameStateRepository {
 describe('PauseForLoadoutUseCase', () => {
   const presenter = new GameStatePresenter(new UpgradeService());
 
-  it('abre janela de edição e marca reinício da fase', async () => {
+  it('abre edição no acampamento e encerra a tentativa atual', async () => {
     const repository = new MemoryRepository(GameState.initial());
     const base = GameState.initial();
     const phaseRun = PhaseRun.start('1-1');
@@ -35,7 +35,8 @@ describe('PauseForLoadoutUseCase', () => {
     const dto = await useCase.execute();
 
     expect(dto.loadoutEditOpen).toBe(true);
-    expect(dto.phaseRestartOnResume).toBe(true);
+    expect(dto.phaseRestartOnResume).toBe(false);
+    expect(dto.phaseRun).toBeNull();
     expect(dto.canEditParty).toBe(true);
     expect(dto.combatRound).toBe(1);
     expect(dto.enemies).toHaveLength(0);

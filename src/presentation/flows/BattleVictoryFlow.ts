@@ -43,6 +43,7 @@ export class BattleVictoryFlow {
     this.overlayVisible = true;
     this.renderer.render(this.overlayEl, payload);
     this.overlayEl.classList.remove('hidden');
+    this.overlayEl.classList.remove('battle-victory-overlay--await-continue');
     const milestone = payload.milestoneVictory?.isMilestone === true;
     this.battleStripEl.classList.add(
       milestone ? 'battle-strip--milestone-victory' : 'battle-strip--victory',
@@ -74,17 +75,7 @@ export class BattleVictoryFlow {
   }
 
   private bindActions(): void {
-    const detailsToggle = this.overlayEl.querySelector('[data-victory-details-toggle]');
-    const detailsPanel = this.overlayEl.querySelector('[data-victory-details-panel]');
     const continueBtn = this.overlayEl.querySelector('[data-victory-continue]');
-
-    detailsToggle?.addEventListener('click', () => {
-      if (!detailsPanel || !(detailsToggle instanceof HTMLButtonElement)) return;
-      const expanded = detailsPanel.classList.toggle('hidden') === false;
-      detailsToggle.textContent = expanded ? 'Ocultar' : 'Detalhes';
-      detailsToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    });
-
     continueBtn?.addEventListener('click', () => this.dismiss());
   }
 
@@ -106,22 +97,21 @@ export class BattleVictoryFlow {
     );
   }
 
+  /** Após CLEAR/DEFEAT: só recompensas + Continuar (sem headline nem Ocultar). */
   private revealDetailsAndAwaitContinue(): void {
     if (!this.overlayVisible || this.detailsRevealed) return;
     this.detailsRevealed = true;
     this.clearTimers();
 
+    const compact = this.overlayEl.querySelector('[data-victory-compact]');
+    const headline = this.overlayEl.querySelector('[data-victory-headline]');
     const detailsPanel = this.overlayEl.querySelector('[data-victory-details-panel]');
-    const detailsToggle = this.overlayEl.querySelector('[data-victory-details-toggle]');
     const continueBtn = this.overlayEl.querySelector('[data-victory-continue]');
 
+    compact?.classList.add('battle-victory-compact--details');
+    headline?.classList.add('hidden');
     detailsPanel?.classList.remove('hidden');
     continueBtn?.classList.remove('hidden');
-
-    if (detailsToggle instanceof HTMLButtonElement) {
-      detailsToggle.textContent = 'Ocultar';
-      detailsToggle.setAttribute('aria-expanded', 'true');
-    }
 
     this.overlayEl.classList.add('battle-victory-overlay--await-continue');
   }

@@ -2,6 +2,7 @@ import {
   CAMPAIGN_HERO_LEVEL_SOFT_CAP,
   campaignHeroXpRequired,
 } from '../balance/CampaignXpScaling';
+import { applyHeroLevelXpOverride } from './HeroLevelXpOverrides';
 
 /**
  * XP necessária para avançar do nível N para N+1 (níveis 1–100).
@@ -116,8 +117,8 @@ export const HERO_LEVEL_XP_TABLE: readonly HeroLevelXpEntry[] = [
   { level: 100, expForLevelUp: 1_398_440_283 },
 ] as const;
 
-/** XP para sair do nível informado. Retorna 0 no nível máximo. */
-export function expRequiredToAdvanceFromLevel(level: number): number {
+/** XP canônica para sair do nível (curva/tabela, sem override do Balance Lab). */
+export function catalogExpRequiredToAdvanceFromLevel(level: number): number {
   if (level >= HERO_MAX_LEVEL) {
     return 0;
   }
@@ -130,6 +131,20 @@ export function expRequiredToAdvanceFromLevel(level: number): number {
 
   const entry = HERO_LEVEL_XP_TABLE.find((row) => row.level === safeLevel);
   return entry?.expForLevelUp ?? HERO_LEVEL_XP_TABLE[0].expForLevelUp;
+}
+
+/** XP para sair do nível informado. Retorna 0 no nível máximo. */
+export function expRequiredToAdvanceFromLevel(level: number): number {
+  if (level >= HERO_MAX_LEVEL) {
+    return 0;
+  }
+
+  const safeLevel = Math.max(1, Math.floor(level));
+
+  return applyHeroLevelXpOverride(
+    safeLevel,
+    catalogExpRequiredToAdvanceFromLevel(safeLevel),
+  );
 }
 
 export function clampHeroLevel(level: number): number {

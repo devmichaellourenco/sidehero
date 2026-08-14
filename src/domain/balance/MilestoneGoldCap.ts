@@ -35,6 +35,8 @@ function rawPhaseGoldTotal(phase: PhaseDefinition): number {
       statMultiplier: phase.statMultiplier ?? 1,
       milestoneGoldScale: 1,
       applyPhaseGoldBudget: false,
+      // Evita recursão: spawn → phaseXpScale → rawPhaseXp → milestoneGoldScale → spawn.
+      applyPhaseRewardOverrides: false,
     });
 
     total += enemies.reduce((sum, enemy) => sum + enemy.goldReward, 0);

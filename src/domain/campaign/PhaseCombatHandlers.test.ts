@@ -108,7 +108,7 @@ describe('PhaseCombatHandlers', () => {
     const camp = handlers.resumeIntermission(victory.state);
     expect(camp.state.loadoutEditOpen).toBe(true);
     expect(camp.state.phaseRun).toBeNull();
-    expect(camp.state.phaseRestartOnResume).toBe(true);
+    expect(camp.state.phaseRestartOnResume).toBe(false);
   });
 
   it('marca temporada concluída ao derrotar boss final do jogo base e vai ao camp', () => {
@@ -139,7 +139,7 @@ describe('PhaseCombatHandlers', () => {
     const camp = handlers.resumeIntermission(victory.state);
 
     expect(camp.state.loadoutEditOpen).toBe(true);
-    expect(camp.state.phaseRestartOnResume).toBe(true);
+    expect(camp.state.phaseRestartOnResume).toBe(false);
     expect(camp.state.combat).toBeNull();
     expect(camp.state.phaseRun).toBeNull();
   });
@@ -171,7 +171,7 @@ describe('PhaseCombatHandlers', () => {
     const camp = handlers.resumeIntermission(victory.state);
 
     expect(camp.state.loadoutEditOpen).toBe(true);
-    expect(camp.state.phaseRestartOnResume).toBe(true);
+    expect(camp.state.phaseRestartOnResume).toBe(false);
     expect(camp.state.combat).toBeNull();
     expect(camp.state.phaseRun).toBeNull();
   });

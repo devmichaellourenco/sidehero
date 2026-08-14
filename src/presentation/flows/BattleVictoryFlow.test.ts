@@ -28,6 +28,8 @@ function createMockElement() {
   const listeners = new Map<string, EventListener>();
   const panelClasses = new Set<string>(['hidden']);
   const continueClasses = new Set<string>(['hidden']);
+  const headlineClasses = new Set<string>();
+  const compactClasses = new Set<string>();
 
   return {
     classList: {
@@ -49,26 +51,25 @@ function createMockElement() {
           },
         };
       }
-      if (selector === '[data-victory-details-toggle]') {
+      if (selector === '[data-victory-compact]') {
         return {
-          textContent: 'Detalhes',
-          setAttribute() {},
-          addEventListener: (event: string, listener: EventListener) => {
-            listeners.set(`details:${event}`, listener);
+          classList: {
+            add: (...items: string[]) => items.forEach((item) => compactClasses.add(item)),
+            contains: (item: string) => compactClasses.has(item),
+          },
+        };
+      }
+      if (selector === '[data-victory-headline]') {
+        return {
+          classList: {
+            add: (...items: string[]) => items.forEach((item) => headlineClasses.add(item)),
+            contains: (item: string) => headlineClasses.has(item),
           },
         };
       }
       if (selector === '[data-victory-details-panel]') {
         return {
           classList: {
-            toggle: (item: string) => {
-              if (panelClasses.has(item)) {
-                panelClasses.delete(item);
-                return false;
-              }
-              panelClasses.add(item);
-              return true;
-            },
             remove: (...items: string[]) => items.forEach((item) => panelClasses.delete(item)),
             contains: (item: string) => panelClasses.has(item),
           },
@@ -99,6 +100,12 @@ function createMockElement() {
     isContinueHidden() {
       return continueClasses.has('hidden');
     },
+    isHeadlineHidden() {
+      return headlineClasses.has('hidden');
+    },
+    hasDetailsMode() {
+      return compactClasses.has('battle-victory-compact--details');
+    },
   };
 }
 
@@ -120,7 +127,7 @@ describe('BattleVictoryFlow', () => {
     const renderer = {
       render: (container: { innerHTML: string }) => {
         container.innerHTML =
-          '<span class="battle-victory-compact-label"></span><button data-victory-details-toggle></button><div data-victory-details-panel class="hidden"></div><button data-victory-continue class="hidden"></button>';
+          '<div data-victory-compact><div data-victory-headline><span class="battle-victory-compact-label"></span></div><div data-victory-details-panel class="hidden"></div><button data-victory-continue class="hidden"></button></div>';
       },
     };
 
@@ -139,7 +146,7 @@ describe('BattleVictoryFlow', () => {
     expect(flow.isActive()).toBe(true);
   });
 
-  it('no clear final revela detalhes após animação e só fecha no Continuar', () => {
+  it('no clear final troca CLEAR por detalhes e só fecha no Continuar', () => {
     const flow = createFlow();
     const onDismiss = vi.fn();
 
@@ -148,6 +155,8 @@ describe('BattleVictoryFlow', () => {
 
     expect(flow.isActive()).toBe(true);
     expect(onDismiss).not.toHaveBeenCalled();
+    expect(overlay.isHeadlineHidden()).toBe(true);
+    expect(overlay.hasDetailsMode()).toBe(true);
     expect(overlay.isPanelHidden()).toBe(false);
     expect(overlay.isContinueHidden()).toBe(false);
 
@@ -165,6 +174,7 @@ describe('BattleVictoryFlow', () => {
 
     expect(flow.isActive()).toBe(true);
     expect(onDismiss).not.toHaveBeenCalled();
+    expect(overlay.isHeadlineHidden()).toBe(true);
     expect(overlay.isPanelHidden()).toBe(false);
 
     overlay.clickContinue();

@@ -36,4 +36,16 @@ describe('HandcraftedPhaseCatalog', () => {
     expect(resolvePhase('5-25')).not.toBeNull();
     expect(resolvePhase('99-99')).toBeNull();
   });
+
+  it('usa nomes temáticos em vez de "Mapa N"', () => {
+    const generic = /^(Stendra|Gruftall|Valdris|Morthaven|Céu Quebrado|Abismo Carmesim|Forja Eterna|Bosque Antigo|Torre do Crepúsculo|Trono do Vazio) \d+$/;
+    for (const phase of HANDCRAFTED_PHASES) {
+      expect(phase.displayName).not.toMatch(generic);
+      expect(phase.displayName.trim().length).toBeGreaterThan(3);
+    }
+    expect(resolvePhase('1-1')?.displayName).toBe('Aventuras na Estrada');
+    expect(resolvePhase('1-14')?.displayName).toBe('Vale das Teias');
+    expect(resolvePhase('2-1')?.displayName).toBe('Chegada Calorosa');
+    expect(resolvePhase('4-50')?.displayName).toBe('Duque de Morthaven');
+  });
 });

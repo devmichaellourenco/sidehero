@@ -9,24 +9,31 @@ import {
 } from './PhaseLootPolicy';
 
 describe('PhaseLootPolicy', () => {
-  it('concede baús na primeira conclusão', () => {
+  it('concede baús na primeira conclusão do template', () => {
     const progress = CampaignProgress.initial();
     expect(grantsPhaseChests(progress, buildPhaseId(1, 1))).toBe(true);
-    expect(isPhaseReplay(progress, buildPhaseId(1, 1))).toBe(false);
   });
 
-  it('bloqueia baús ao repetir fase já cleared', () => {
-    const progress = CampaignProgress.initial().markCleared(buildPhaseId(1, 2), [buildPhaseId(1, 3)], 2);
+  it('não garante baú de 1ª clear após template cleared (normais usam chance normal)', () => {
+    const progress = CampaignProgress.initial().markCleared(
+      buildPhaseId(1, 2),
+      [buildPhaseId(1, 3)],
+      2,
+    );
     expect(grantsPhaseChests(progress, buildPhaseId(1, 2))).toBe(false);
-    expect(isPhaseReplay(progress, buildPhaseId(1, 2))).toBe(true);
   });
 
-  it('aplica 50% ouro e 47% XP na repetição', () => {
-    const progress = CampaignProgress.initial().markCleared(buildPhaseId(1, 2), [buildPhaseId(1, 3)], 2);
+  it('não aplica penalidade de ouro/XP (sem replay de fase)', () => {
+    const progress = CampaignProgress.initial().markCleared(
+      buildPhaseId(1, 2),
+      [buildPhaseId(1, 3)],
+      2,
+    );
     const phaseId = buildPhaseId(1, 2);
 
-    expect(scalePhaseGold(100, progress, phaseId)).toBe(50);
-    expect(scalePhaseXp(100, progress, phaseId)).toBe(47);
+    expect(isPhaseReplay(progress, phaseId)).toBe(false);
+    expect(scalePhaseGold(100, progress, phaseId)).toBe(100);
+    expect(scalePhaseXp(100, progress, phaseId)).toBe(100);
   });
 
   it('mantém 100% ouro e XP na primeira conclusão', () => {

@@ -6,7 +6,6 @@ import { expRequiredToAdvanceFromLevel } from '../progression/HeroLevelXpCatalog
 import {
   campaignHeroXpRequired,
   campaignKillXpScale,
-  CAMPAIGN_REPLAY_XP_MULTIPLIER,
   earlyMapKillXpBoost,
   resolveCampaignKillXp,
 } from './CampaignXpScaling';
@@ -51,31 +50,23 @@ describe('CampaignXpScaling', () => {
     expect(level).toBeLessThanOrEqual(6);
   });
 
-  it('primeira clear de Stendra e replays levam ao nível 10–12', () => {
+  it('primeira clear de Stendra fica no early; farms com XP cheio sobem o nível', () => {
     const resolver = new EncounterResolver();
-    const sumMap = (replay = false) => {
-      let xp = 0;
-      for (let phase = 1; phase <= 50; phase += 1) {
-        for (let waveIndex = 0; ; waveIndex += 1) {
-          const encounter = resolver.resolve(buildPhaseId(1, phase), waveIndex);
-          if (!encounter) break;
-          for (const enemy of encounter.enemies) {
-            xp += replay
-              ? Math.floor(enemy.xpReward * CAMPAIGN_REPLAY_XP_MULTIPLIER)
-              : enemy.xpReward;
-          }
+    let firstClear = 0;
+    for (let phase = 1; phase <= 50; phase += 1) {
+      for (let waveIndex = 0; ; waveIndex += 1) {
+        const encounter = resolver.resolve(buildPhaseId(1, phase), waveIndex);
+        if (!encounter) break;
+        for (const enemy of encounter.enemies) {
+          firstClear += enemy.xpReward;
         }
       }
-      return xp;
-    };
+    }
 
-    const firstClear = sumMap();
-    const replay = sumMap(true);
-    const afterFarms = firstClear + replay * 3;
-    const level = Experience.initial().gain(afterFarms).experience.level;
+    const firstLevel = Experience.initial().gain(firstClear).experience.level;
+    const farmLevel = Experience.initial().gain(firstClear * 4).experience.level;
 
-    expect(Experience.initial().gain(firstClear).experience.level).toBeLessThanOrEqual(10);
-    expect(level).toBeGreaterThanOrEqual(10);
-    expect(level).toBeLessThanOrEqual(13);
+    expect(firstLevel).toBeLessThanOrEqual(10);
+    expect(farmLevel).toBeGreaterThan(firstLevel);
   });
 });

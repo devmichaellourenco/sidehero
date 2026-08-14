@@ -28,6 +28,8 @@ export class CampaignFlow {
   private viewMode: CampaignViewMode = 'region';
   private actSceneReader: ((scene: ActSceneDto) => void) | null = null;
 
+  private onMissionStarted: ((state: GameStateDto) => void) | null = null;
+
   constructor(
     private readonly client: IGameClient,
     private readonly modal: ModalController,
@@ -36,6 +38,10 @@ export class CampaignFlow {
 
   setActSceneReader(handler: (scene: ActSceneDto) => void): void {
     this.actSceneReader = handler;
+  }
+
+  setMissionStartedHandler(handler: (state: GameStateDto) => void): void {
+    this.onMissionStarted = handler;
   }
 
   async open(
@@ -108,7 +114,6 @@ export class CampaignFlow {
     hideEnemyTooltip();
     this.bindViewToggle(modalBody, onState);
     this.bindWorldMapNodes(modalBody, onState);
-    this.bindMapTabs(modalBody, onState);
     this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
     this.bindMissionPopoverDismiss(modalBody, onState);
@@ -181,24 +186,6 @@ export class CampaignFlow {
     });
   }
 
-  private bindMapTabs(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-map-tab]').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        if (tab.getAttribute('aria-disabled') === 'true') return;
-
-        const mapId = tab.dataset.campaignMapTab;
-        if (!mapId || mapId === this.activeMapId || !this.campaign) return;
-
-        const map = this.campaign.maps.find((entry) => entry.id === mapId);
-        if (!map || !isMapUnlocked(map)) return;
-
-        this.activeMapId = mapId;
-        this.pendingMissionId = null;
-        this.refreshRegionView(modalBody, onState);
-      });
-    });
-  }
-
   private bindMissionButtons(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
     modalBody.querySelectorAll<HTMLButtonElement>('[data-mission-id]').forEach((button) => {
       button.addEventListener('click', () => {
@@ -259,10 +246,9 @@ export class CampaignFlow {
     this.updateViewToggleUi(modalBody);
 
     const panelHost = modalBody.querySelector('[data-campaign-map-panel]') as HTMLElement | null;
-    let tabsHost = modalBody.querySelector('[data-campaign-map-tabs]');
+    modalBody.querySelector('[data-campaign-map-tabs]')?.remove();
 
     if (this.viewMode === 'world') {
-      tabsHost?.remove();
       if (panelHost) {
         panelHost.classList.add('campaign-map-panel--world');
         panelHost.setAttribute('aria-label', 'Mapa-mundo');
@@ -273,19 +259,6 @@ export class CampaignFlow {
       this.bindWorldMapNodes(modalBody, onState);
       this.scrollPendingMissionIntoView(modalBody);
       return;
-    }
-
-    if (!tabsHost) {
-      panelHost?.insertAdjacentHTML(
-        'beforebegin',
-        `<div class="campaign-map-tabs" data-campaign-map-tabs role="tablist" aria-label="Mapas"></div>`,
-      );
-      tabsHost = modalBody.querySelector('[data-campaign-map-tabs]');
-    }
-
-    if (tabsHost) {
-      tabsHost.innerHTML = this.renderer.renderTabs(this.campaign, this.activeMapId);
-      bindCampaignTooltips(tabsHost as HTMLElement);
     }
 
     const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
@@ -306,7 +279,6 @@ export class CampaignFlow {
     }
 
     this.syncCampaignTheme(modalBody);
-    this.bindMapTabs(modalBody, onState);
     this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
     this.scrollPendingMissionIntoView(modalBody);
@@ -315,14 +287,8 @@ export class CampaignFlow {
   private refreshRegionView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
     if (!this.campaign) return;
 
-    const tabsHost = modalBody.querySelector('[data-campaign-map-tabs]');
     const panelHost = modalBody.querySelector('[data-campaign-map-panel]');
     const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
-
-    if (tabsHost) {
-      tabsHost.innerHTML = this.renderer.renderTabs(this.campaign, this.activeMapId);
-      bindCampaignTooltips(tabsHost as HTMLElement);
-    }
 
     if (panelHost && activeMap) {
       panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, null, {
@@ -339,7 +305,6 @@ export class CampaignFlow {
     }
 
     this.syncCampaignTheme(modalBody);
-    this.bindMapTabs(modalBody, onState);
     this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
     this.scrollPendingMissionIntoView(modalBody);
@@ -365,5 +330,6 @@ export class CampaignFlow {
 
     onState(response.state);
     this.modal.close();
+    this.onMissionStarted?.(response.state);
   }
 }

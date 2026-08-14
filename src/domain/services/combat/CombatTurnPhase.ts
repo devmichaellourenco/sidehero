@@ -80,20 +80,13 @@ export class CombatTurnPhase {
       return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
     }
 
+    // Hub do acampamento: sem missão ativa não inicia combate (só via START_MISSION + restart).
     if (!workingState.phaseRun) {
-      const phaseRun = PhaseRun.start(workingState.campaignProgress.selectedPhaseId);
-      const started = this.phaseHandlers.startPhaseRun(workingState, phaseRun);
-      workingState = started.state;
-      if (started.events.length > 0) {
-        return this.finish(workingState, started.events, []);
-      }
+      return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
     }
 
     let combat = workingState.combat;
     if (!combat || combat.livingEnemies().length === 0) {
-      if (!workingState.phaseRun) {
-        return { state: workingState.touchTick(), events: [], floatingEvents: [], skillVfxEvents: [] };
-      }
       const started = this.phaseHandlers.startPhaseRun(workingState, workingState.phaseRun);
       return this.finish(started.state, started.events, []);
     }

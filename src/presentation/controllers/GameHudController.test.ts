@@ -262,6 +262,38 @@ describe('GameHudController — acesso no acampamento', () => {
     expect(buttons.formation.classList.contains('hidden')).toBe(true);
   });
 
+  it('mantém Batalhar oculto no hub e após Acampamento', () => {
+    const { hud, buttons } = createHud();
+
+    hud.render(
+      mockState({
+        canEditParty: true,
+        loadoutEditOpen: true,
+        phaseRestartOnResume: false,
+        phaseRun: null,
+      }),
+      { openingChests: false, loadoutPauseActive: false },
+    );
+    expect(buttons.continue.classList.contains('hidden')).toBe(true);
+
+    hud.render(
+      mockState({
+        canEditParty: true,
+        loadoutEditOpen: true,
+        phaseRestartOnResume: true,
+        phaseRun: {
+          phaseId: '1-1',
+          waveIndex: 0,
+          waveCount: 3,
+          isBossWave: false,
+        } as GameStateDto['phaseRun'],
+      }),
+      { openingChests: false, loadoutPauseActive: true },
+    );
+    expect(buttons.continue.classList.contains('hidden')).toBe(true);
+    expect(buttons.continue.disabled).toBe(true);
+  });
+
   it('exibe menu Stats somente com runa battle_stats', () => {
     const { hud, buttons } = createHud();
 
