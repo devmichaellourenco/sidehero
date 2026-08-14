@@ -23,7 +23,14 @@ import {
   zeroResists,
 } from './elemental';
 import { catalogIdentityFor, resolveLabIdentity } from './identity';
-import { OPEN_HERO_IN_SIMULATOR_EVENT } from './navigation';
+import { OPEN_HERO_IN_SIMULATOR_EVENT, OPEN_ENEMY_IN_SIMULATOR_EVENT } from './navigation';
+import type { OpenEnemyDetail } from './navigation';
+import {
+  initKeyboardShortcuts,
+  parseHashDeepLink,
+  applyEntityDeepLink,
+  registerEntitySelector,
+} from './deepLinks';
 import {
   defaultFormulaConstants,
   FORMULA_FIELDS,
@@ -47,15 +54,12 @@ import type {
   LabPassiveSlot,
   LabSide,
 } from './types';
-import { mountMissionsTab } from './missionBattlesUi';
-import { mountPhaseRewardsTab } from './phaseRewardsUi';
-import { mountHeroLevelXpTab } from './heroLevelXpUi';
-import { mountGearItemsTab } from './gearItemsUi';
-import { mountShopsTab } from './shopUi';
-import { mountHeroCombatTab } from './heroCombatUi';
-import { mountEnemyCombatTab } from './enemyCombatUi';
-import { mountUpgradeTreeTab } from './upgradeTreeUi';
-import { mountEconomyAuditTab } from './economyAuditUi';
+import { selectHeroByClass } from './heroCombatUi';
+import { selectEnemyByType } from './enemyCombatUi';
+import { selectGearById } from './gearItemsUi';
+import { renderMissionsEditor, selectMission } from './missionBattlesUi';
+import { selectShopById } from './shopUi';
+import { selectUpgradeById } from './upgradeTreeUi';
 import {
   bindSpriteFallback,
   enemyTriggerHtml,
@@ -63,14 +67,16 @@ import {
 } from './enemyPicker';
 import {
   bindWorkspaceGuards,
-  setWorkspaceActiveTab,
+  hasWorkspaceDrafts,
+  startWorkspaceVersionPolling,
   type BalanceLabTab,
 } from './workspaceState';
+import { mountTab, type LabTab as TabMountLabTab, type TabMountState } from './tabMount';
 
 type PanelId = 'left' | 'right';
 type LabTab = Extract<
   BalanceLabTab,
-  'sim' | 'missions' | 'xp' | 'levels' | 'gear' | 'shops' | 'heroes' | 'enemies' | 'upgrades' | 'economy'
+  'sim' | 'missions' | 'xp' | 'levels' | 'gear' | 'shops' | 'heroes' | 'enemies' | 'upgrades' | 'economy' | 'maintenance'
 >;
 
 const enemyOptions = listEnemyTypeOptions();
@@ -81,15 +87,18 @@ let left: LabCombatantInput = defaultHeroInput('knight', 10);
 let right: LabCombatantInput = defaultEnemyInput('goblin_raider', 10, 'trash');
 let formulas: LabFormulaConstants = defaultFormulaConstants();
 let activeTab: LabTab = 'sim';
-let missionsMounted = false;
-let xpRewardsMounted = false;
-let heroLevelXpMounted = false;
-let gearItemsMounted = false;
-let shopsMounted = false;
-let heroCombatMounted = false;
-let enemyCombatMounted = false;
-let upgradeMounted = false;
-let economyMounted = false;
+const tabMountState: TabMountState = {
+  missions: false,
+  xp: false,
+  levels: false,
+  gear: false,
+  shops: false,
+  heroes: false,
+  enemies: false,
+  upgrades: false,
+  economy: false,
+  maintenance: false,
+};
 
 const mainEl = document.getElementById('lab-main')!;
 const modeSelect = document.getElementById('lab-mode') as HTMLSelectElement;
@@ -97,16 +106,6 @@ const ioJson = document.getElementById('io-json') as HTMLTextAreaElement;
 const ioSnippet = document.getElementById('io-snippet') as HTMLTextAreaElement;
 const statusEl = document.getElementById('lab-status')!;
 const importFile = document.getElementById('import-file') as HTMLInputElement;
-const panelSim = document.getElementById('lab-panel-sim');
-const panelMissions = document.getElementById('lab-panel-missions');
-const panelXp = document.getElementById('lab-panel-xp');
-const panelLevels = document.getElementById('lab-panel-levels');
-const panelGear = document.getElementById('lab-panel-gear');
-const panelShops = document.getElementById('lab-panel-shops');
-const panelHeroes = document.getElementById('lab-panel-heroes');
-const panelEnemies = document.getElementById('lab-panel-enemies');
-const panelUpgrades = document.getElementById('lab-panel-upgrades');
-const panelEconomy = document.getElementById('lab-panel-economy');
 
 function setStatus(message: string, isError = false): void {
   statusEl.textContent = message;
@@ -1291,123 +1290,9 @@ document.getElementById('btn-copy-snippet')?.addEventListener('click', () => {
   void copyText(ioSnippet.value, 'Snippet TS copiado.');
 });
 
-async function switchLabTab(tab: LabTab): Promise<void> {
+async function switchLabTab(tab: LabTab, entityKey?: string, entityValue?: string): Promise<void> {
   activeTab = tab;
-  setWorkspaceActiveTab(tab);
-  if (window.location.hash !== `#${tab}`) {
-    history.replaceState(null, '', `#${tab}`);
-  }
-  document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) => {
-    button.classList.toggle('is-active', button.dataset.labTab === tab);
-  });
-  panelSim?.toggleAttribute('hidden', tab !== 'sim');
-  panelMissions?.toggleAttribute('hidden', tab !== 'missions');
-  panelXp?.toggleAttribute('hidden', tab !== 'xp');
-  panelLevels?.toggleAttribute('hidden', tab !== 'levels');
-  panelGear?.toggleAttribute('hidden', tab !== 'gear');
-  panelShops?.toggleAttribute('hidden', tab !== 'shops');
-  panelHeroes?.toggleAttribute('hidden', tab !== 'heroes');
-  panelEnemies?.toggleAttribute('hidden', tab !== 'enemies');
-  panelUpgrades?.toggleAttribute('hidden', tab !== 'upgrades');
-  panelEconomy?.toggleAttribute('hidden', tab !== 'economy');
-
-  if (tab === 'missions' && !missionsMounted) {
-    missionsMounted = true;
-    try {
-      await mountMissionsTab();
-      setStatus('Aba Missões: edite waves e salve em phase-battle-overrides.json');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar missões', true);
-    }
-  }
-
-  if (tab === 'xp' && !xpRewardsMounted) {
-    xpRewardsMounted = true;
-    try {
-      await mountPhaseRewardsTab();
-      setStatus('Aba XP por fase: totais de kill por fase (domínio atual)');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar XP por fase', true);
-      xpRewardsMounted = false;
-    }
-  }
-
-  if (tab === 'levels' && !heroLevelXpMounted) {
-    heroLevelXpMounted = true;
-    try {
-      await mountHeroLevelXpTab();
-      setStatus('Aba XP por nível: curva de level-up dos heróis');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar XP por nível', true);
-      heroLevelXpMounted = false;
-    }
-  }
-
-  if (tab === 'gear' && !gearItemsMounted) {
-    gearItemsMounted = true;
-    try {
-      await mountGearItemsTab();
-      setStatus('Aba Itens: edite nome, raridade, requisitos e stats do catálogo');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar itens', true);
-      gearItemsMounted = false;
-    }
-  }
-
-  if (tab === 'shops' && !shopsMounted) {
-    shopsMounted = true;
-    try {
-      await mountShopsTab();
-      setStatus('Aba Lojas: crie, duplique, edite e exclua lojas');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar lojas', true);
-      shopsMounted = false;
-    }
-  }
-
-  if (tab === 'heroes' && !heroCombatMounted) {
-    heroCombatMounted = true;
-    try {
-      await mountHeroCombatTab();
-      setStatus('Aba Personagens: edite skills, identidade e passivas');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar personagens', true);
-      heroCombatMounted = false;
-    }
-  }
-
-  if (tab === 'enemies' && !enemyCombatMounted) {
-    enemyCombatMounted = true;
-    try {
-      await mountEnemyCombatTab();
-      setStatus('Aba Inimigos: edite identidade e skills de monstro e salve');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar inimigos', true);
-      enemyCombatMounted = false;
-    }
-  }
-
-  if (tab === 'upgrades' && !upgradeMounted) {
-    upgradeMounted = true;
-    try {
-      await mountUpgradeTreeTab();
-      setStatus('Aba Melhorias: edite custo, nome e descrição e salve');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar melhorias', true);
-      upgradeMounted = false;
-    }
-  }
-
-  if (tab === 'economy' && !economyMounted) {
-    economyMounted = true;
-    try {
-      await mountEconomyAuditTab();
-      setStatus('Aba Economia: ouro por fase + lojas');
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Falha ao carregar economia', true);
-      economyMounted = false;
-    }
-  }
+  await mountTab(tab as TabMountLabTab, tabMountState, setStatus, entityKey, entityValue);
 }
 
 document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) => {
@@ -1419,9 +1304,18 @@ document.querySelectorAll<HTMLButtonElement>('[data-lab-tab]').forEach((button) 
 });
 
 window.addEventListener('hashchange', () => {
-  const tab = window.location.hash.slice(1) as LabTab;
+  const parsed = parseHashDeepLink(window.location.hash);
+  if (!parsed) return;
+  const tab = parsed.tab as LabTab;
   const exists = document.querySelector(`[data-lab-tab="${tab}"]`);
-  if (exists && tab !== activeTab) void switchLabTab(tab);
+  if (!exists) return;
+  if (tab !== activeTab) {
+    void switchLabTab(tab, parsed.entityKey, parsed.entityValue).then(() => {
+      if (parsed.entityKey && parsed.entityValue) applyEntityDeepLink(parsed);
+    });
+  } else if (parsed.entityKey && parsed.entityValue) {
+    applyEntityDeepLink(parsed);
+  }
 });
 
 window.addEventListener(OPEN_HERO_IN_SIMULATOR_EVENT, (event) => {
@@ -1435,12 +1329,99 @@ window.addEventListener(OPEN_HERO_IN_SIMULATOR_EVENT, (event) => {
   setStatus(`${heroClass} carregado no Simulador no nível 10.`);
 });
 
+window.addEventListener(OPEN_ENEMY_IN_SIMULATOR_EVENT, (event) => {
+  const { enemyType, level, role } = (event as CustomEvent<OpenEnemyDetail>).detail;
+  const found = enemyOptions.find((opt) => opt.id === enemyType);
+  if (!found) {
+    setStatus(`Inimigo "${enemyType}" não encontrado no catálogo.`, true);
+    return;
+  }
+  left = defaultEnemyInput(enemyType, level, role);
+  mode = 'single';
+  modeSelect.value = mode;
+  render();
+  void switchLabTab('sim');
+  setStatus(`${enemyType} (${role}) Lv.${level} carregado no Simulador.`);
+});
+
+// Registrar seletores de entidade para deep-links
+registerEntitySelector('enemies', (id) => { selectEnemyByType(id); });
+registerEntitySelector('heroes', (cls) => { selectHeroByClass(cls); });
+registerEntitySelector('gear', (id) => { selectGearById(id); });
+registerEntitySelector('shops', (id) => { selectShopById(id); });
+registerEntitySelector('upgrades', (id) => { selectUpgradeById(id); });
+// Aceita missionId ou phaseTemplateId após o mount.
+registerEntitySelector('missions', (id) => {
+  void selectMission(id).then(() => renderMissionsEditor());
+});
+
+const labTabs: readonly LabTab[] = [
+  'sim', 'missions', 'xp', 'levels', 'gear', 'shops', 'heroes', 'enemies', 'upgrades', 'economy', 'maintenance',
+];
+
+// Atalhos de teclado Alt+←/→ e Ctrl/Cmd+1..0
+initKeyboardShortcuts({
+  tabs: labTabs,
+  getActiveTab: () => activeTab,
+  onSwitchTab: (tab) => { void switchLabTab(tab as LabTab); },
+});
+
 bindWorkspaceGuards();
 modeSelect.value = mode;
 render();
 setStatus('Lab pronto: identidade no combatente; pesos globais e passivas à direita.');
 
-const initialTab = window.location.hash.slice(1) as LabTab;
-if (document.querySelector(`[data-lab-tab="${initialTab}"]`) && initialTab !== 'sim') {
-  void switchLabTab(initialTab);
+const initialParsed = parseHashDeepLink(window.location.hash);
+if (initialParsed) {
+  const initialTab = initialParsed.tab as LabTab;
+  if (document.querySelector(`[data-lab-tab="${initialTab}"]`) && initialTab !== 'sim') {
+    void switchLabTab(initialTab, initialParsed.entityKey, initialParsed.entityValue).then(() => {
+      if (initialParsed.entityKey && initialParsed.entityValue) applyEntityDeepLink(initialParsed);
+    });
+  }
 }
+
+// ── Auto-reload: polling de versão do workspace ───────────────────────────────
+
+const externalChangeBanner = document.getElementById('lab-external-change-banner');
+const externalChangeMsg = document.getElementById('lab-external-change-msg');
+
+function showExternalChangeBanner(hasDrafts: boolean): void {
+  if (!externalChangeBanner) return;
+  if (hasDrafts) {
+    if (externalChangeMsg) {
+      externalChangeMsg.textContent = '⚠ Mudança externa detectada. Você tem drafts não salvos — dados não foram recarregados.';
+    }
+    const reloadBtn = document.getElementById('btn-reload-data');
+    if (reloadBtn) reloadBtn.hidden = true;
+  } else {
+    if (externalChangeMsg) {
+      externalChangeMsg.textContent = '⚠ Mudança externa detectada nos arquivos de override.';
+    }
+    const reloadBtn = document.getElementById('btn-reload-data');
+    if (reloadBtn) reloadBtn.hidden = false;
+  }
+  externalChangeBanner.hidden = false;
+}
+
+document.getElementById('btn-dismiss-banner')?.addEventListener('click', () => {
+  if (externalChangeBanner) externalChangeBanner.hidden = true;
+});
+
+document.getElementById('btn-reload-data')?.addEventListener('click', () => {
+  if (externalChangeBanner) externalChangeBanner.hidden = true;
+  // Recarrega a aba ativa forçando re-mount
+  const tab = activeTab;
+  const reloadableTabs: Array<keyof TabMountState> = [
+    'missions', 'xp', 'levels', 'gear', 'shops', 'heroes', 'enemies', 'upgrades', 'economy',
+  ];
+  if (reloadableTabs.includes(tab as keyof TabMountState)) {
+    tabMountState[tab as keyof TabMountState] = false;
+    void switchLabTab(tab);
+  }
+  setStatus('Dados recarregados.');
+});
+
+startWorkspaceVersionPolling((hasDrafts) => {
+  showExternalChangeBanner(hasDrafts);
+});

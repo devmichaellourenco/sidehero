@@ -147,7 +147,7 @@ function readDraft(): ShopEntry | null {
   return draft;
 }
 
-function selectShop(id: string): void {
+export function selectShopById(id: string): void {
   const shop = payload?.shops.find((entry) => entry.id === id);
   if (!shop) return;
   selectedId = id;
@@ -440,7 +440,7 @@ export function renderShops(): void {
     void deleteSelected().catch((error: Error) => setStatus(error.message, true));
   });
   host.querySelectorAll<HTMLButtonElement>('[data-shop-select]').forEach((button) => {
-    button.addEventListener('click', () => selectShop(button.dataset.shopSelect!));
+    button.addEventListener('click', () => selectShopById(button.dataset.shopSelect!));
   });
   host.querySelectorAll<HTMLButtonElement>('[data-shop-restore]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -551,7 +551,7 @@ export async function mountShopsTab(): Promise<void> {
   registerWorkspaceSave('shops', saveDraft);
   await loadShops();
   const first = payload?.shops[0];
-  if (first) selectShop(first.id);
+  if (first) selectShopById(first.id);
   else renderShops();
   setStatus('Catálogo de lojas carregado.');
 }

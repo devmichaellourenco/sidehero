@@ -8,7 +8,8 @@ export type BalanceLabTab =
   | 'heroes'
   | 'enemies'
   | 'economy'
-  | 'upgrades';
+  | 'upgrades'
+  | 'maintenance';
 
 type SaveAction = () => void | Promise<void>;
 
@@ -16,6 +17,61 @@ const dirtyByTab = new Map<BalanceLabTab, number>();
 const saveByTab = new Map<BalanceLabTab, SaveAction>();
 let activeTab: BalanceLabTab = 'sim';
 let guardsBound = false;
+
+// ── Auto-reload ───────────────────────────────────────────────────────────────
+
+const POLL_INTERVAL_MS = 3000;
+let lastVersion: string | null = null;
+let pollTimer: ReturnType<typeof setTimeout> | null = null;
+type ReloadCallback = (hasDrafts: boolean, newVersion: string) => void;
+let onExternalChange: ReloadCallback | null = null;
+
+async function pollWorkspaceVersion(): Promise<void> {
+  try {
+    const res = await fetch('/api/workspace-version', { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    const version: string = data.version ?? '';
+    if (!version) return;
+
+    if (lastVersion === null) {
+      lastVersion = version;
+      return;
+    }
+
+    if (version !== lastVersion) {
+      lastVersion = version;
+      onExternalChange?.(hasWorkspaceDrafts(), version);
+    }
+  } catch {
+    // Servidor pode estar reiniciando — ignorar silenciosamente
+  }
+}
+
+function schedulePoll(): void {
+  pollTimer = setTimeout(async () => {
+    await pollWorkspaceVersion();
+    schedulePoll();
+  }, POLL_INTERVAL_MS);
+}
+
+/**
+ * Inicia o polling de versão do workspace.
+ * callback recebe (hasDrafts, newVersion) quando uma mudança externa é detectada.
+ */
+export function startWorkspaceVersionPolling(callback: ReloadCallback): void {
+  onExternalChange = callback;
+  if (pollTimer !== null) return;
+  void pollWorkspaceVersion().then(() => schedulePoll());
+}
+
+export function stopWorkspaceVersionPolling(): void {
+  if (pollTimer !== null) {
+    clearTimeout(pollTimer);
+    pollTimer = null;
+  }
+  onExternalChange = null;
+}
 
 function updateTabBadge(tab: BalanceLabTab): void {
   const button = document.querySelector<HTMLButtonElement>(`[data-lab-tab="${tab}"]`);

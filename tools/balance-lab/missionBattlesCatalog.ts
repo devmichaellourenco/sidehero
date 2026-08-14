@@ -284,7 +284,12 @@ export {
 } from './upgradeTreeCatalog';
 export {
   buildEconomyAuditPayload,
+  buildForgeSalvagePayload,
 } from './economyAuditCatalog';
+export {
+  buildConsistencyAuditPayload,
+  EXTREME_STAT_MULTIPLIER_THRESHOLD,
+} from './consistencyAuditCatalog';
 export {
   previewShopStock,
 } from './shopCatalog';

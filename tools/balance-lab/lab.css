@@ -2308,6 +2308,90 @@ textarea {
   border: 1px solid var(--border);
 }
 
+/* Party de referência editável */
+.rp-editor {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--surface-3, var(--surface-2));
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+
+.rp-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted, var(--text));
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rp-members {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.rp-member {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rp-class {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.82rem;
+  padding: 3px 4px;
+}
+
+.rp-level-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.rp-level {
+  width: 52px;
+  font-size: 0.82rem;
+  padding: 3px 4px;
+}
+
+.rp-btn-add,
+.rp-btn-reset {
+  font-size: 0.78rem;
+  margin-right: 6px;
+}
+
+.rp-btn-remove {
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  color: var(--danger, #e06c75);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.rp-btn-remove:hover {
+  background: var(--danger, #e06c75);
+  color: #fff;
+}
+
+.rp-summary {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--text-muted, var(--text));
+}
+
+.rp-economy-note {
+  margin-top: 4px;
+  font-size: 0.75rem;
+}
+
 .mb-wave-power-summary h4 {
   margin: 0 0 8px;
   font-size: 0.9rem;
@@ -2367,4 +2451,301 @@ textarea {
   border-radius: 4px;
   font-size: 0.85rem;
   margin-bottom: 6px;
+}
+
+/* ── Sparklines ────────────────────────────────────────────────────────────── */
+
+.lab-sparkline {
+  margin: 0;
+  padding: 4px 0;
+  flex: 1 1 180px;
+  min-width: 120px;
+}
+
+.lab-sparkline-caption {
+  font-size: 0.75rem;
+  color: var(--muted, #888);
+  margin-top: 2px;
+  text-align: center;
+}
+
+.lab-sparkline-pair {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0 16px;
+}
+
+.ea-sparkline-row {
+  margin: 8px 0 16px;
+}
+
+.ea-sparkline-legend {
+  font-size: 0.78rem;
+  margin-top: 4px;
+  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* ── Auditoria de Inconsistências ─────────────────────────────────────────── */
+
+.ea-consistency-section {
+  margin-top: 24px;
+}
+
+.ea-audit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ea-audit-issue {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+}
+
+.ea-audit-issue--error {
+  background: color-mix(in srgb, var(--danger, #c04040) 10%, var(--surface-2));
+  border-left-color: var(--danger, #c04040);
+}
+
+.ea-audit-issue--warning {
+  background: color-mix(in srgb, var(--accent, #d4a850) 10%, var(--surface-2));
+  border-left-color: var(--accent, #d4a850);
+}
+
+.ea-audit-issue--info {
+  background: color-mix(in srgb, var(--rar-rare, #4080d8) 8%, var(--surface-2));
+  border-left-color: var(--rar-rare, #4080d8);
+}
+
+.ea-audit-sev {
+  flex-shrink: 0;
+  font-size: 0.9em;
+}
+
+.ea-audit-msg {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.ea-audit-link {
+  color: var(--accent, #d4a850);
+  font-size: 0.8em;
+  flex-shrink: 0;
+}
+
+.ea-audit-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ea-audit-badge--error { background: var(--danger, #c04040); color: #fff; }
+.ea-audit-badge--warning { background: var(--accent, #d4a850); color: #000; }
+.ea-audit-badge--info { background: var(--rar-rare, #4080d8); color: #fff; }
+
+/* ── Forja / Salvage ─────────────────────────────────────────────────────── */
+
+.ea-forge-section {
+  margin-top: 24px;
+}
+
+.ea-forge-section h4 {
+  margin: 12px 0 4px;
+  font-size: 0.9rem;
+  color: var(--muted, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+
+/* ── Aba Manutenção ──────────────────────────────────────────────────────── */
+
+.maint-section {
+  padding: 16px;
+  max-width: 1000px;
+}
+
+.maint-card {
+  background: var(--surface, #1e1e2a);
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.maint-card h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--text, #e0e0e0);
+}
+
+.maint-form-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.maint-ts-notice {
+  border: 1px solid var(--danger, #c04040);
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.maint-patch-code {
+  background: var(--bg, #12121a);
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 0.75rem;
+  overflow: auto;
+  max-height: 300px;
+  white-space: pre;
+  margin-top: 10px;
+}
+
+.maint-diff-summary {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.maint-diff-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.maint-diff-badge--added { background: #1a4a1a; color: #6fcf6f; border: 1px solid #3a7a3a; }
+.maint-diff-badge--removed { background: #4a1a1a; color: #cf6f6f; border: 1px solid #7a3a3a; }
+.maint-diff-badge--changed { background: #3a3a1a; color: #cfcf6f; border: 1px solid #7a7a3a; }
+
+.maint-diff-table-wrap {
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.maint-diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.maint-diff-table th {
+  background: var(--surface2, #2a2a36);
+  padding: 6px 10px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: var(--muted, #888);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.maint-diff-table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border, #333);
+  vertical-align: top;
+}
+
+.maint-diff-row--added td { background: rgba(60, 120, 60, 0.12); }
+.maint-diff-row--removed td { background: rgba(120, 60, 60, 0.12); }
+.maint-diff-row--changed td { background: rgba(100, 100, 40, 0.12); }
+
+.maint-diff-kind {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.maint-diff-row--added .maint-diff-kind { background: #1a4a1a; color: #6fcf6f; }
+.maint-diff-row--removed .maint-diff-kind { background: #4a1a1a; color: #cf6f6f; }
+.maint-diff-row--changed .maint-diff-kind { background: #3a3a1a; color: #cfcf6f; }
+
+.maint-diff-path code {
+  font-size: 0.75rem;
+  color: var(--accent, #d4a850);
+  word-break: break-all;
+}
+
+.maint-diff-val {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--muted, #888);
+  word-break: break-all;
+  max-width: 200px;
+}
+
+.maint-apply-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.maint-apply-warning {
+  color: var(--accent, #d4a850) !important;
+  margin: 0;
+}
+
+.maint-success {
+  border: 1px solid #3a7a3a;
+  border-radius: 6px;
+  padding: 12px;
+  background: rgba(60, 120, 60, 0.12);
+  margin-top: 10px;
+}
+
+/* Banner de mudança externa */
+.lab-external-change-banner {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface, #1e1e2a);
+  border: 1px solid var(--accent, #d4a850);
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  max-width: 600px;
+  font-size: 0.85rem;
+}
+
+.lab-external-change-banner[hidden] { display: none; }
+
+.lab-btn--muted {
+  background: transparent;
+  border: 1px solid var(--border, #333);
+  color: var(--muted, #888);
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
 }

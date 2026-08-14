@@ -223,6 +223,16 @@ export function renderUpgradeTree(): void {
   bindUpgradeTree(host);
 }
 
+export function selectUpgradeById(id: string): void {
+  if (!payload?.upgrades.some((upgrade) => upgrade.id === id)) return;
+  filterBranch = '';
+  filterQuery = id;
+  renderUpgradeTree();
+  const card = document.querySelector<HTMLElement>(`[data-upgrade-id="${CSS.escape(id)}"]`);
+  card?.scrollIntoView({ block: 'center' });
+  card?.focus({ preventScroll: true });
+}
+
 function bindUpgradeTree(host: HTMLElement): void {
   host.querySelector<HTMLInputElement>('#ut-filter')?.addEventListener('input', (event) => {
     filterQuery = (event.target as HTMLInputElement).value;

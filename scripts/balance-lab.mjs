@@ -3,82 +3,44 @@
  * Uso: npm run balance-lab
  */
 import * as esbuild from 'esbuild';
-import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { backupFile, listBackupFiles, isPathSafe } from './balance-lab/backup.mjs';
+import { getWorkspaceVersion } from './balance-lab/version.mjs';
+import { diffJsonSnapshots } from './balance-lab/diff.mjs';
+import {
+  previewPromotion,
+  applyPromotion,
+  isScopeJsonBacked,
+} from './balance-lab/promotion.mjs';
+import {
+  OVERRIDES_PATH,
+  BACKUPS_DIR,
+  REWARD_OVERRIDES_PATH,
+  REWARD_BACKUPS_DIR,
+  HERO_COMBAT_PATH,
+  HERO_COMBAT_BACKUPS_DIR,
+  HERO_LEVEL_XP_PATH,
+  HERO_LEVEL_XP_BACKUPS_DIR,
+  GEAR_ITEM_OVERRIDES_PATH,
+  GEAR_ITEM_BACKUPS_DIR,
+  SHOP_OVERRIDES_PATH,
+  SHOP_BACKUPS_DIR,
+  ENEMY_COMBAT_PATH,
+  ENEMY_COMBAT_BACKUPS_DIR,
+  UPGRADE_OVERRIDES_PATH,
+  UPGRADE_BACKUPS_DIR,
+  PANEL_ASSETS_DIR,
+  PUBLIC_ENEMY_SPRITES_DIR,
+  SCOPE_MAP,
+} from './balance-lab/paths.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const outDir = join(root, 'tools/balance-lab/dist');
 const port = Number(process.env.BALANCE_LAB_PORT ?? 5179);
-
-const OVERRIDES_PATH = join(
-  root,
-  'src/domain/campaign/data/phase-battle-overrides.json',
-);
-const BACKUPS_DIR = join(
-  root,
-  'src/domain/campaign/data/backups/phase-battle-overrides',
-);
-const REWARD_OVERRIDES_PATH = join(
-  root,
-  'src/domain/campaign/data/phase-reward-overrides.json',
-);
-const REWARD_BACKUPS_DIR = join(
-  root,
-  'src/domain/campaign/data/backups/phase-reward-overrides',
-);
-const HERO_COMBAT_PATH = join(
-  root,
-  'src/domain/progression/data/hero-combat-overrides.json',
-);
-const HERO_COMBAT_BACKUPS_DIR = join(
-  root,
-  'src/domain/progression/data/backups/hero-combat-overrides',
-);
-const HERO_LEVEL_XP_PATH = join(
-  root,
-  'src/domain/progression/data/hero-level-xp-overrides.json',
-);
-const HERO_LEVEL_XP_BACKUPS_DIR = join(
-  root,
-  'src/domain/progression/data/backups/hero-level-xp-overrides',
-);
-const GEAR_ITEM_OVERRIDES_PATH = join(
-  root,
-  'src/domain/gear/data/gear-item-overrides.json',
-);
-const GEAR_ITEM_BACKUPS_DIR = join(
-  root,
-  'src/domain/gear/data/backups/gear-item-overrides',
-);
-const SHOP_OVERRIDES_PATH = join(
-  root,
-  'src/domain/shop/data/shop-overrides.json',
-);
-const SHOP_BACKUPS_DIR = join(
-  root,
-  'src/domain/shop/data/backups/shop-overrides',
-);
-const ENEMY_COMBAT_PATH = join(
-  root,
-  'src/domain/enemies/data/enemy-combat-overrides.json',
-);
-const ENEMY_COMBAT_BACKUPS_DIR = join(
-  root,
-  'src/domain/enemies/data/backups/enemy-combat-overrides',
-);
-const UPGRADE_OVERRIDES_PATH = join(
-  root,
-  'src/domain/upgrades/data/upgrade-overrides.json',
-);
-const UPGRADE_BACKUPS_DIR = join(
-  root,
-  'src/domain/upgrades/data/backups/upgrade-overrides',
-);
-const PANEL_ASSETS_DIR = join(root, 'dist/panel/assets');
-const PUBLIC_ENEMY_SPRITES_DIR = join(root, 'public/sprites/enemies');
 
 /** @type {null | typeof import('../tools/balance-lab/missionBattlesCatalog.ts')} */
 let catalogApi = null;
@@ -190,6 +152,30 @@ function sendJson(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+/**
+ * Faz parse de `sorcerer:10,knight:10` em array de party members.
+ * Retorna null se o formato for inválido.
+ * @param {string} raw
+ * @returns {Array<{heroClass: string, level: number}> | null}
+ */
+function parsePartyQueryParam(raw) {
+  try {
+    const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    const members = [];
+    for (const part of parts) {
+      const colonIdx = part.lastIndexOf(':');
+      if (colonIdx === -1) return null;
+      const heroClass = part.slice(0, colonIdx);
+      const level = parseInt(part.slice(colonIdx + 1), 10);
+      if (!heroClass || !Number.isFinite(level) || level < 1) return null;
+      members.push({ heroClass, level });
+    }
+    return members.length > 0 ? members.slice(0, 3) : null;
+  } catch {
+    return null;
+  }
+}
+
 async function readBody(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
@@ -219,16 +205,7 @@ async function writeOverridesFile(file) {
 }
 
 async function backupCurrentOverrides() {
-  await mkdir(BACKUPS_DIR, { recursive: true });
-  try {
-    await readFile(OVERRIDES_PATH);
-  } catch {
-    return null;
-  }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(BACKUPS_DIR, `phase-battle-overrides-${stamp}.json`);
-  await copyFile(OVERRIDES_PATH, dest);
-  return dest;
+  return backupFile(OVERRIDES_PATH, BACKUPS_DIR, 'phase-battle-overrides');
 }
 
 async function readRewardOverridesFile() {
@@ -252,26 +229,11 @@ async function writeRewardOverridesFile(file) {
 }
 
 async function backupCurrentRewardOverrides() {
-  await mkdir(REWARD_BACKUPS_DIR, { recursive: true });
-  try {
-    await readFile(REWARD_OVERRIDES_PATH);
-  } catch {
-    return null;
-  }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(REWARD_BACKUPS_DIR, `phase-reward-overrides-${stamp}.json`);
-  await copyFile(REWARD_OVERRIDES_PATH, dest);
-  return dest;
+  return backupFile(REWARD_OVERRIDES_PATH, REWARD_BACKUPS_DIR, 'phase-reward-overrides');
 }
 
 async function listRewardBackups() {
-  await mkdir(REWARD_BACKUPS_DIR, { recursive: true });
-  const names = await readdir(REWARD_BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(REWARD_BACKUPS_DIR);
 }
 
 function validateRewardOverride(body) {
@@ -314,26 +276,11 @@ async function writeHeroCombatFile(file) {
 }
 
 async function backupCurrentHeroCombat() {
-  await mkdir(HERO_COMBAT_BACKUPS_DIR, { recursive: true });
-  try {
-    await readFile(HERO_COMBAT_PATH);
-  } catch {
-    return null;
-  }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(HERO_COMBAT_BACKUPS_DIR, `hero-combat-overrides-${stamp}.json`);
-  await copyFile(HERO_COMBAT_PATH, dest);
-  return dest;
+  return backupFile(HERO_COMBAT_PATH, HERO_COMBAT_BACKUPS_DIR, 'hero-combat-overrides');
 }
 
 async function listHeroCombatBackups() {
-  await mkdir(HERO_COMBAT_BACKUPS_DIR, { recursive: true });
-  const names = await readdir(HERO_COMBAT_BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(HERO_COMBAT_BACKUPS_DIR);
 }
 
 async function readHeroLevelXpFile() {
@@ -356,26 +303,11 @@ async function writeHeroLevelXpFile(file) {
 }
 
 async function backupCurrentHeroLevelXp() {
-  await mkdir(HERO_LEVEL_XP_BACKUPS_DIR, { recursive: true });
-  try {
-    await readFile(HERO_LEVEL_XP_PATH);
-  } catch {
-    return null;
-  }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(HERO_LEVEL_XP_BACKUPS_DIR, `hero-level-xp-overrides-${stamp}.json`);
-  await copyFile(HERO_LEVEL_XP_PATH, dest);
-  return dest;
+  return backupFile(HERO_LEVEL_XP_PATH, HERO_LEVEL_XP_BACKUPS_DIR, 'hero-level-xp-overrides');
 }
 
 async function listHeroLevelXpBackups() {
-  await mkdir(HERO_LEVEL_XP_BACKUPS_DIR, { recursive: true });
-  const names = await readdir(HERO_LEVEL_XP_BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(HERO_LEVEL_XP_BACKUPS_DIR);
 }
 
 async function readGearItemOverridesFile() {
@@ -398,26 +330,11 @@ async function writeGearItemOverridesFile(file) {
 }
 
 async function backupCurrentGearItemOverrides() {
-  await mkdir(GEAR_ITEM_BACKUPS_DIR, { recursive: true });
-  try {
-    await readFile(GEAR_ITEM_OVERRIDES_PATH);
-  } catch {
-    return null;
-  }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(GEAR_ITEM_BACKUPS_DIR, `gear-item-overrides-${stamp}.json`);
-  await copyFile(GEAR_ITEM_OVERRIDES_PATH, dest);
-  return dest;
+  return backupFile(GEAR_ITEM_OVERRIDES_PATH, GEAR_ITEM_BACKUPS_DIR, 'gear-item-overrides');
 }
 
 async function listGearItemBackups() {
-  await mkdir(GEAR_ITEM_BACKUPS_DIR, { recursive: true });
-  const names = await readdir(GEAR_ITEM_BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(GEAR_ITEM_BACKUPS_DIR);
 }
 
 async function readShopOverridesFile() {
@@ -436,36 +353,15 @@ async function writeShopOverridesFile(file) {
 }
 
 async function backupCurrentShopOverrides() {
-  await mkdir(SHOP_BACKUPS_DIR, { recursive: true });
-  try {
-    await readFile(SHOP_OVERRIDES_PATH);
-  } catch {
-    return null;
-  }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(SHOP_BACKUPS_DIR, `shop-overrides-${stamp}.json`);
-  await copyFile(SHOP_OVERRIDES_PATH, dest);
-  return dest;
+  return backupFile(SHOP_OVERRIDES_PATH, SHOP_BACKUPS_DIR, 'shop-overrides');
 }
 
 async function listShopBackups() {
-  await mkdir(SHOP_BACKUPS_DIR, { recursive: true });
-  const names = await readdir(SHOP_BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(SHOP_BACKUPS_DIR);
 }
 
 async function listBackups() {
-  await mkdir(BACKUPS_DIR, { recursive: true });
-  const names = await readdir(BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(BACKUPS_DIR);
 }
 
 async function readEnemyCombatFile() {
@@ -488,22 +384,11 @@ async function writeEnemyCombatFile(file) {
 }
 
 async function backupCurrentEnemyCombat() {
-  await mkdir(ENEMY_COMBAT_BACKUPS_DIR, { recursive: true });
-  try { await readFile(ENEMY_COMBAT_PATH); } catch { return null; }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(ENEMY_COMBAT_BACKUPS_DIR, `enemy-combat-overrides-${stamp}.json`);
-  await copyFile(ENEMY_COMBAT_PATH, dest);
-  return dest;
+  return backupFile(ENEMY_COMBAT_PATH, ENEMY_COMBAT_BACKUPS_DIR, 'enemy-combat-overrides');
 }
 
 async function listEnemyCombatBackups() {
-  await mkdir(ENEMY_COMBAT_BACKUPS_DIR, { recursive: true });
-  const names = await readdir(ENEMY_COMBAT_BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(ENEMY_COMBAT_BACKUPS_DIR);
 }
 
 async function readUpgradeOverridesFile() {
@@ -525,22 +410,11 @@ async function writeUpgradeOverridesFile(file) {
 }
 
 async function backupCurrentUpgradeOverrides() {
-  await mkdir(UPGRADE_BACKUPS_DIR, { recursive: true });
-  try { await readFile(UPGRADE_OVERRIDES_PATH); } catch { return null; }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dest = join(UPGRADE_BACKUPS_DIR, `upgrade-overrides-${stamp}.json`);
-  await copyFile(UPGRADE_OVERRIDES_PATH, dest);
-  return dest;
+  return backupFile(UPGRADE_OVERRIDES_PATH, UPGRADE_BACKUPS_DIR, 'upgrade-overrides');
 }
 
 async function listUpgradeBackups() {
-  await mkdir(UPGRADE_BACKUPS_DIR, { recursive: true });
-  const names = await readdir(UPGRADE_BACKUPS_DIR);
-  return names
-    .filter((name) => name.endsWith('.json'))
-    .sort()
-    .reverse()
-    .map((name) => ({ id: name, path: `backups/${name}` }));
+  return listBackupFiles(UPGRADE_BACKUPS_DIR);
 }
 
 function validateOverride(body) {
@@ -1304,18 +1178,55 @@ async function handleApi(req, res, url) {
       mapIndex: Number.isFinite(mapIndex) ? mapIndex : undefined,
       chapterMain: Number.isFinite(chapterMain) ? chapterMain : undefined,
     });
-    sendJson(res, 200, { ok: true, ...payload });
+    const forge = catalogApi.buildForgeSalvagePayload();
+    sendJson(res, 200, { ok: true, ...payload, forge });
+    return;
+  }
+
+  // ──── Auditoria de Inconsistências ────
+  if (req.method === 'GET' && url.pathname === '/api/consistency-audit') {
+    const result = catalogApi.buildConsistencyAuditPayload();
+    sendJson(res, 200, { ok: true, ...result });
     return;
   }
 
   // ──── Wave Power ────
-  if (req.method === 'GET' && url.pathname === '/api/wave-power') {
-    const phaseId = url.searchParams.get('phaseId');
+  if ((req.method === 'GET' || req.method === 'POST') && url.pathname === '/api/wave-power') {
+    let body = {};
+    if (req.method === 'POST') {
+      try {
+        const raw = await readBody(req);
+        body = raw ? JSON.parse(raw) : {};
+      } catch {
+        sendJson(res, 400, { ok: false, error: 'Body JSON inválido' });
+        return;
+      }
+    }
+
+    const phaseId = url.searchParams.get('phaseId') ?? body.phaseId;
     if (!phaseId) {
       sendJson(res, 400, { ok: false, error: 'phaseId obrigatório' });
       return;
     }
-    const snapshot = catalogApi.estimatePhasePower(phaseId, catalogApi.DEFAULT_REFERENCE_PARTY);
+
+    // party pode vir de query string `party=sorcerer:10,knight:10` ou do body `{ party: [...] }`
+    const partyParam = url.searchParams.get('party') ?? null;
+    let party = catalogApi.DEFAULT_REFERENCE_PARTY;
+    if (partyParam) {
+      const parsed = parsePartyQueryParam(partyParam);
+      if (parsed) party = parsed;
+    } else if (Array.isArray(body.party) && body.party.length > 0) {
+      const valid = body.party.filter(
+        (m) =>
+          m &&
+          typeof m.heroClass === 'string' &&
+          typeof m.level === 'number' &&
+          m.level >= 1,
+      );
+      if (valid.length > 0) party = valid;
+    }
+
+    const snapshot = catalogApi.estimatePhasePower(phaseId, party);
     sendJson(res, 200, { ok: true, ...snapshot });
     return;
   }
@@ -1337,6 +1248,129 @@ async function handleApi(req, res, url) {
       return;
     }
     sendJson(res, 200, { ok: true, ...preview });
+    return;
+  }
+
+  // ──── Versão do workspace (auto-reload) ────
+  if (req.method === 'GET' && url.pathname === '/api/workspace-version') {
+    const versionData = await getWorkspaceVersion();
+    sendJson(res, 200, { ok: true, ...versionData });
+    return;
+  }
+
+  // ──── Listagem genérica de backups e diff ────
+  if (req.method === 'GET' && url.pathname === '/api/backups') {
+    const scope = url.searchParams.get('scope') || '';
+    const info = SCOPE_MAP[scope];
+    if (!info) {
+      sendJson(res, 400, {
+        ok: false,
+        error: `Scope inválido. Válidos: ${Object.keys(SCOPE_MAP).join(', ')}`,
+      });
+      return;
+    }
+    const backups = await listBackupFiles(info.backupsDir);
+    sendJson(res, 200, { ok: true, scope, backups });
+    return;
+  }
+
+  const backupsDiffMatch = url.pathname.match(/^\/api\/backups\/diff$/);
+  if (req.method === 'GET' && backupsDiffMatch) {
+    const scope = url.searchParams.get('scope') || '';
+    const idA = url.searchParams.get('a') || '';
+    const idB = url.searchParams.get('b') || '';
+    const info = SCOPE_MAP[scope];
+    if (!info) {
+      sendJson(res, 400, { ok: false, error: `Scope inválido: ${scope}` });
+      return;
+    }
+    if (!idA || !idB) {
+      sendJson(res, 400, { ok: false, error: 'Parâmetros a e b são obrigatórios' });
+      return;
+    }
+    if (!idA.endsWith('.json') || !idB.endsWith('.json')) {
+      sendJson(res, 400, { ok: false, error: 'IDs de backup devem terminar em .json' });
+      return;
+    }
+    if (idA.includes('/') || idA.includes('..') || idB.includes('/') || idB.includes('..')) {
+      sendJson(res, 400, { ok: false, error: 'ID de backup inválido' });
+      return;
+    }
+    const pathA = join(info.backupsDir, idA);
+    const pathB = join(info.backupsDir, idB);
+    if (!isPathSafe(pathA, info.backupsDir) || !isPathSafe(pathB, info.backupsDir)) {
+      sendJson(res, 403, { ok: false, error: 'Path fora do diretório de backups' });
+      return;
+    }
+    let snapA, snapB;
+    try { snapA = JSON.parse(await readFile(pathA, 'utf8')); }
+    catch { sendJson(res, 404, { ok: false, error: `Backup não encontrado: ${idA}` }); return; }
+    try { snapB = JSON.parse(await readFile(pathB, 'utf8')); }
+    catch { sendJson(res, 404, { ok: false, error: `Backup não encontrado: ${idB}` }); return; }
+    const diff = diffJsonSnapshots(snapA, snapB);
+    sendJson(res, 200, { ok: true, scope, a: idA, b: idB, diff });
+    return;
+  }
+
+  // ──── Promoção de overrides para catálogo canônico ────
+
+  /** Helper que resolve a função de backup do override pelo scope */
+  function resolveOverrideBackupFn(scope) {
+    const fns = {
+      'phase-battle': backupCurrentOverrides,
+      'phase-reward': backupCurrentRewardOverrides,
+      'hero-combat': backupCurrentHeroCombat,
+      'hero-level-xp': backupCurrentHeroLevelXp,
+      'gear-items': backupCurrentGearItemOverrides,
+      shops: backupCurrentShopOverrides,
+      'enemy-combat': backupCurrentEnemyCombat,
+      upgrades: backupCurrentUpgradeOverrides,
+    };
+    return fns[scope] ?? null;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/promotion/preview') {
+    const scope = url.searchParams.get('scope') || '';
+    if (!SCOPE_MAP[scope]) {
+      sendJson(res, 400, { ok: false, error: `Scope inválido: ${scope}` });
+      return;
+    }
+    const preview = await previewPromotion(scope);
+    sendJson(res, preview.ok ? 200 : 400, preview);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/promotion/apply') {
+    const body = await readBody(req);
+    const scope = (typeof body?.scope === 'string' ? body.scope : '') || '';
+    const confirmed = body?.confirmed === true;
+
+    if (!SCOPE_MAP[scope]) {
+      sendJson(res, 400, { ok: false, error: `Scope inválido: ${scope}` });
+      return;
+    }
+    if (!confirmed) {
+      sendJson(res, 400, { ok: false, error: 'Confirmação explícita necessária: { scope, confirmed: true }' });
+      return;
+    }
+    if (!isScopeJsonBacked(scope)) {
+      sendJson(res, 422, {
+        ok: false,
+        error: 'Scope TS-backed: use GET /api/promotion/preview para obter o patchJson e aplique manualmente.',
+        scope,
+        isJsonBacked: false,
+        tsBackedOnly: true,
+      });
+      return;
+    }
+
+    const backupFn = resolveOverrideBackupFn(scope);
+    if (!backupFn) {
+      sendJson(res, 500, { ok: false, error: 'Função de backup não encontrada' });
+      return;
+    }
+    const result = await applyPromotion(scope, backupFn);
+    sendJson(res, result.ok ? 200 : 400, result);
     return;
   }
 
@@ -1391,7 +1425,8 @@ async function main() {
     console.log('Aba Personagens: skills/identidade/passivas/evoluções → hero-combat-overrides.json');
     console.log('Aba Inimigos: identidade e skills de monstro → enemy-combat-overrides.json');
     console.log('Aba Melhorias: custo/nome/desc → upgrade-overrides.json');
-    console.log('Aba Economia: auditoria de ouro por fase + lojas (read-only)');
+    console.log('Aba Economia: auditoria de ouro por fase + lojas');
+    console.log('GET /api/consistency-audit → inconsistências e órfãos (read-only)');
     console.log('Ctrl+C para encerrar.\n');
   });
 }

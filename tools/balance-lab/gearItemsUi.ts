@@ -789,3 +789,12 @@ export async function mountGearItemsTab(): Promise<void> {
   }
   setStatus('Catálogo de itens carregado — edite e salve no sistema.');
 }
+
+/** Seleciona item por id (para deep-link `#gear?id=iron_sword`). */
+export function selectGearById(id: string): void {
+  if (!listPayload) return;
+  const found = listPayload.items.find((item) => item.id === id);
+  if (found) {
+    void selectItem(found.id).catch(() => undefined);
+  }
+}

@@ -12,6 +12,14 @@ import { debounce } from './debounce';
 import { enemySpriteUrlForLab } from './enemySprites';
 import { withPreservedScroll } from './scrollPreserve';
 import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
+import {
+  getReferenceParty,
+  renderPartyEditorHtml,
+  bindPartyEditor,
+  partyToQueryParam,
+  partyLabel,
+} from './referenceParty';
+import { openEnemyInSimulator } from './navigation';
 
 type MissionKind = 'main' | 'side' | 'normal';
 
@@ -216,22 +224,27 @@ export async function loadMissionBattlesList(): Promise<void> {
 
 export async function selectMission(missionId: string): Promise<void> {
   stashCurrentMissionDraft();
+  const resolvedMissionId =
+    missions.find(
+      (mission) =>
+        mission.missionId === missionId || mission.phaseTemplateId === missionId,
+    )?.missionId ?? missionId;
 
   const data = await api<{
     mission: MissionListEntry;
     phase: { displayName: string; statMultiplier?: number; waves: WaveDraft[] };
-  }>(`/api/mission-battles/${encodeURIComponent(missionId)}`);
-  selectedId = missionId;
+  }>(`/api/mission-battles/${encodeURIComponent(resolvedMissionId)}`);
+  selectedId = resolvedMissionId;
   selectedMission = data.mission;
 
-  const cached = draftsByMissionId.get(missionId);
-  if (cached && dirtyMissionIds.has(missionId)) {
+  const cached = draftsByMissionId.get(resolvedMissionId);
+  if (cached && dirtyMissionIds.has(resolvedMissionId)) {
     draft = cloneDraft(cached);
   } else {
     draft = phaseToDraft(data.phase);
-    draftsByMissionId.set(missionId, cloneDraft(draft));
-    loadedSnapshotByMissionId.set(missionId, snapshotDraft(draft));
-    dirtyMissionIds.delete(missionId);
+    draftsByMissionId.set(resolvedMissionId, cloneDraft(draft));
+    loadedSnapshotByMissionId.set(resolvedMissionId, snapshotDraft(draft));
+    dirtyMissionIds.delete(resolvedMissionId);
   }
 
   const shared =
@@ -383,12 +396,23 @@ function renderWaveEditor(wave: WaveDraft, waveIndex: number): string {
     })
     .join('');
 
+  const firstSlot = wave.slots[0];
+  const openSimBtn = firstSlot
+    ? `<button type="button" class="lab-btn--info"
+         data-open-enemy-sim="${firstSlot.enemyType}"
+         data-open-enemy-level="${firstSlot.level ?? 1}"
+         data-open-enemy-role="${firstSlot.role}"
+         title="${wave.slots.length > 1 ? 'Abre o 1º slot da wave' : ''}"
+       >▶ Sim${wave.slots.length > 1 ? ' (1º slot)' : ''}</button>`
+    : '';
+
   return `
     <section class="mb-wave" data-wave-index="${waveIndex}">
       <header class="mb-wave-head">
         <strong>Wave ${waveIndex + 1}</strong>
         <label>id <input type="text" data-field="id" value="${wave.id}" /></label>
         <label class="mb-field--gold">ouro × <input type="number" step="0.05" min="0" data-field="goldMultiplier" value="${wave.goldMultiplier ?? 1}" /></label>
+        ${openSimBtn}
         <button type="button" class="lab-btn--create" data-action="add-slot">+ slot</button>
         <button type="button" class="mb-btn-danger" data-action="remove-wave">Remover wave</button>
       </header>
@@ -503,6 +527,9 @@ function renderEditor(): string {
       ${draft.waves.map((wave, index) => renderWaveEditor(wave, index)).join('')}
     </div>
     <div id="mb-wave-power" class="mb-wave-power">
+      <div id="mb-party-editor-wrap">
+        ${renderPartyEditorHtml(getReferenceParty())}
+      </div>
       <button type="button" class="lab-btn--info" id="mb-load-wave-power">⚡ Calcular poder das waves</button>
     </div>
   `;
@@ -594,12 +621,31 @@ function bindEditor(root: HTMLElement): void {
     }
   });
 
+  // Bind party editor dentro do painel de wave power
+  const partyEditorWrap = root.querySelector<HTMLElement>('#mb-party-editor-wrap');
+  if (partyEditorWrap) {
+    const editorEl = partyEditorWrap.querySelector<HTMLElement>('#rp-editor');
+    if (editorEl) bindPartyEditor(editorEl);
+  }
+
   root.querySelector('#mb-load-wave-power')?.addEventListener('click', () => {
     const phaseId = selectedMission?.phaseTemplateId;
     if (!phaseId) return;
     const container = root.querySelector('#mb-wave-power');
-    if (container) container.innerHTML = '<p class="lab-hint">Calculando…</p>';
-    fetch(`/api/wave-power?phaseId=${encodeURIComponent(phaseId)}`)
+    const resultsId = 'mb-wave-power-results';
+    let resultsEl = root.querySelector<HTMLElement>(`#${resultsId}`);
+    if (!resultsEl) {
+      resultsEl = document.createElement('div');
+      resultsEl.id = resultsId;
+      container?.appendChild(resultsEl);
+    }
+    resultsEl.innerHTML = '<p class="lab-hint">Calculando…</p>';
+
+    const party = getReferenceParty();
+    const partyParam = partyToQueryParam(party);
+    fetch(
+      `/api/wave-power?phaseId=${encodeURIComponent(phaseId)}&party=${encodeURIComponent(partyParam)}`,
+    )
       .then((res) => res.json())
       .then((data: {
         ok: boolean;
@@ -609,12 +655,16 @@ function bindEditor(root: HTMLElement): void {
         totalHp: number;
         referencePartyDps: number;
       }) => {
-        if (!container) return;
-        if (!data.ok) { container.innerHTML = `<p class="lab-hint is-error">Erro: ${(data as { error?: string }).error ?? 'desconhecido'}</p>`; return; }
-        container.innerHTML = `
+        if (!resultsEl) return;
+        if (!(data as { ok?: boolean }).ok) {
+          resultsEl.innerHTML = `<p class="lab-hint is-error">Erro: ${(data as { error?: string }).error ?? 'desconhecido'}</p>`;
+          return;
+        }
+        const partyLabelText = partyLabel(party);
+        resultsEl.innerHTML = `
           <div class="mb-wave-power-summary">
             <h4>⚡ Poder da fase <code>${data.phaseId}</code></h4>
-            <p class="lab-hint lab-hint--tight">Party referência: Sorcerer + Knight + Priest Lv.10</p>
+            <p class="lab-hint lab-hint--tight">Party: ${partyLabelText}</p>
             <div class="lab-totals-row">
               <div class="lab-stat lab-stat--compact lab-stat--hp"><strong>${Math.round(data.totalHp).toLocaleString('pt-BR')}</strong><span>HP total</span></div>
               <div class="lab-stat lab-stat--compact lab-stat--atk"><strong>${Math.round(data.referencePartyDps).toLocaleString('pt-BR')}</strong><span>DPS party</span></div>
@@ -636,8 +686,18 @@ function bindEditor(root: HTMLElement): void {
           </div>`;
       })
       .catch((err: Error) => {
-        if (container) container.innerHTML = `<p class="lab-hint">Erro ao calcular poder: ${err.message}</p>`;
+        if (resultsEl) resultsEl.innerHTML = `<p class="lab-hint">Erro ao calcular poder: ${err.message}</p>`;
       });
+  });
+
+  // Abrir primeiro inimigo de cada wave no Simulador
+  root.querySelectorAll<HTMLButtonElement>('[data-open-enemy-sim]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const enemyType = btn.dataset.openEnemySim ?? '';
+      const level = parseInt(btn.dataset.openEnemyLevel ?? '1', 10) || 1;
+      const role = (btn.dataset.openEnemyRole ?? 'trash') as 'trash' | 'elite' | 'boss';
+      openEnemyInSimulator(enemyType, level, role);
+    });
   });
 
   root.querySelectorAll<HTMLButtonElement>('[data-action="add-slot"]').forEach((button) => {

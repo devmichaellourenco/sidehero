@@ -1127,3 +1127,13 @@ export async function mountHeroCombatTab(): Promise<void> {
   renderHeroCombat();
   setStatus('Personagens carregados — edite evoluções/skills/identidade/passivas e salve.');
 }
+
+/** Seleciona herói por classe (para deep-link `#heroes?class=knight`). */
+export function selectHeroByClass(heroClass: string): void {
+  if (!payload) return;
+  const found = payload.heroes.find((h) => h.heroClass === heroClass);
+  if (found) {
+    selected = found.heroClass as typeof selected;
+    renderHeroCombat();
+  }
+}

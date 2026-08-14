@@ -27,6 +27,7 @@
         <button type="button" class="lab-tab" data-lab-tab="enemies">Inimigos</button>
         <button type="button" class="lab-tab" data-lab-tab="upgrades">Melhorias</button>
         <button type="button" class="lab-tab" data-lab-tab="economy">Economia</button>
+        <button type="button" class="lab-tab" data-lab-tab="maintenance">Manutenção</button>
       </nav>
     </header>
 
@@ -106,6 +107,17 @@
 
     <div id="lab-panel-economy" class="lab-panel" hidden>
       <section id="lab-economy-audit" class="lab-economy-audit" aria-label="Auditoria de economia"></section>
+    </div>
+
+    <div id="lab-panel-maintenance" class="lab-panel" hidden>
+      <section id="lab-maintenance" class="lab-maintenance" aria-label="Manutenção e promoção"></section>
+    </div>
+
+    <!-- Banner de mudança externa (auto-reload) -->
+    <div id="lab-external-change-banner" class="lab-external-change-banner" hidden>
+      <span id="lab-external-change-msg">⚠ Mudança externa detectada nos arquivos de override.</span>
+      <button type="button" id="btn-reload-data" class="lab-btn--info">Atualizar dados</button>
+      <button type="button" id="btn-dismiss-banner" class="lab-btn--muted">Ignorar</button>
     </div>
 
     <script type="module" src="./lab.js"></script>

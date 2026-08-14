@@ -1,5 +1,5 @@
 /**
- * Auditoria de economia — ouro por fase + preços de loja + custo de renovação.
+ * Auditoria de economia — ouro por fase + preços de loja + custo de renovação + forja/salvage.
  */
 import { buildPhaseId, type MapId } from '../../src/domain/campaign/CampaignIds';
 import { CAMPAIGN_MAPS } from '../../src/domain/campaign/CampaignMaps';
@@ -14,6 +14,7 @@ import { milestoneGoldScaleForPhase } from '../../src/domain/balance/MilestoneGo
 import {
   calculateShopItemPrice,
   calculateShopRefreshCost,
+  calculateReferenceShopPrice,
 } from '../../src/domain/shop/ShopPricing';
 import {
   listConfiguredShops,
@@ -21,6 +22,14 @@ import {
 } from '../../src/domain/shop/ConfigurableShopCatalog';
 import { getGearCatalogItem } from '../../src/domain/gear/GearItemCatalog';
 import { phaseIdFromMainMissionId } from '../../src/domain/campaign/missions/MissionId';
+import { GEAR_RARITIES, type GearRarity } from '../../src/domain/entities/Gear';
+import { calculateForgeSalvageGold } from '../../src/domain/forge/ForgeSalvageGoldCatalog';
+import {
+  canForgeFuseRarity,
+  FORGE_FUSE_REQUIRED_COUNT,
+  getNextGearRarity,
+} from '../../src/domain/gear/GearRarityProgression';
+import { referenceGoldPerPhaseForTier } from '../../src/domain/balance/EconomyReference';
 
 export interface EconomyPhaseRow {
   phaseId: string;
@@ -58,6 +67,48 @@ export interface EconomyMapRow {
 export interface EconomyAuditPayload {
   maps: EconomyMapRow[];
   chapters: ReturnType<typeof listMissionChapterOptions>;
+}
+
+// ── Forja / Salvage ──────────────────────────────────────────────────────────
+
+/** Estágios representativos usados para calcular salvage gold na auditoria. */
+export const FORGE_AUDIT_STAGES = [1, 10, 25, 50, 100] as const;
+
+export interface ForgeSalvageRarityRow {
+  rarity: GearRarity;
+  /** Raridade resultante da fusão (null = não pode fundir). */
+  nextRarity: GearRarity | null;
+  canFuse: boolean;
+  /** Ouro base de salvage (stage 0). */
+  baseGold: number;
+  /** Ouro de salvage por estágio representativo. */
+  goldByStage: Record<number, number>;
+  /**
+   * Custo implícito de fusão = FORGE_FUSE_REQUIRED_COUNT × salvageGold.
+   * Valor de oportunidade perdido ao fundir em vez de salvar.
+   */
+  fusionOpportunityCostByStage: Record<number, number>;
+}
+
+export interface ForgeSalvagePhasesRow {
+  rarity: GearRarity;
+  /** Preço de referência deste item no tier 10 (early). */
+  refPriceTier10: number;
+  /** Preço épico de referência no tier 10. */
+  epicRefPriceTier10: number;
+  /** Salvages (stage 10) para acumular ouro do preço de referência. */
+  salvagesToAffordRef: number;
+  /** Salvages (stage 10) para acumular ouro do preço épico. */
+  salvagesToAffordEpic: number;
+}
+
+export interface ForgeSalvagePayload {
+  rarityRows: ForgeSalvageRarityRow[];
+  phasesRows: ForgeSalvagePhasesRow[];
+  /** Número de itens necessários para fusão (canônico). */
+  fuseRequiredCount: number;
+  /** Ouro de referência por fase no tier 10. */
+  refGoldPerPhaseTier10: number;
 }
 
 function sumPhaseGold(phaseId: string): { goldTotal: number; enemyCount: number } | null {
@@ -171,4 +222,54 @@ export function buildEconomyAuditPayload(filters?: {
   }
 
   return { maps, chapters: listMissionChapterOptions() };
+}
+
+// ── Forja / Salvage ──────────────────────────────────────────────────────────
+
+const FORGE_REFERENCE_TIER = 10;
+
+export function buildForgeSalvagePayload(): ForgeSalvagePayload {
+  const refGoldPerPhaseTier10 = referenceGoldPerPhaseForTier(FORGE_REFERENCE_TIER);
+  const epicRefPrice = calculateReferenceShopPrice(FORGE_REFERENCE_TIER, 'epic');
+
+  const rarityRows: ForgeSalvageRarityRow[] = GEAR_RARITIES.map((rarity) => {
+    const goldByStage: Record<number, number> = {};
+    const fusionOpportunityCostByStage: Record<number, number> = {};
+
+    for (const stage of FORGE_AUDIT_STAGES) {
+      const gold = calculateForgeSalvageGold(rarity, stage);
+      goldByStage[stage] = gold;
+      fusionOpportunityCostByStage[stage] = canForgeFuseRarity(rarity)
+        ? gold * FORGE_FUSE_REQUIRED_COUNT
+        : 0;
+    }
+
+    return {
+      rarity,
+      nextRarity: getNextGearRarity(rarity),
+      canFuse: canForgeFuseRarity(rarity),
+      baseGold: calculateForgeSalvageGold(rarity, 0),
+      goldByStage,
+      fusionOpportunityCostByStage,
+    };
+  });
+
+  const phasesRows: ForgeSalvagePhasesRow[] = GEAR_RARITIES.map((rarity) => {
+    const refPrice = calculateReferenceShopPrice(FORGE_REFERENCE_TIER, rarity);
+    const salvageAtStage10 = calculateForgeSalvageGold(rarity, 10);
+    return {
+      rarity,
+      refPriceTier10: refPrice,
+      epicRefPriceTier10: epicRefPrice,
+      salvagesToAffordRef: Math.ceil(refPrice / Math.max(1, salvageAtStage10)),
+      salvagesToAffordEpic: Math.ceil(epicRefPrice / Math.max(1, salvageAtStage10)),
+    };
+  });
+
+  return {
+    rarityRows,
+    phasesRows,
+    fuseRequiredCount: FORGE_FUSE_REQUIRED_COUNT,
+    refGoldPerPhaseTier10,
+  };
 }

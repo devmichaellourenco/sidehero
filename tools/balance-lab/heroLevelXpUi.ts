@@ -4,6 +4,7 @@
 import { withPreservedScroll } from './scrollPreserve';
 import { confirmChangeReview } from './changeReview';
 import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
+import { renderSparklinePair } from './sparkline';
 
 interface LevelRow {
   level: number;
@@ -119,6 +120,24 @@ function maxXpInView(rows: LevelRow[]): number {
     if (value > max) max = value;
   }
   return max;
+}
+
+function buildLevelSparklines(rows: LevelRow[]): string {
+  if (rows.length === 0) return '';
+  const xpPerLevel = rows.map((r) => draftXp.get(r.level) ?? r.xp);
+  const cumulativeXp = rows.map((r) => r.cumulativeXp);
+  return renderSparklinePair(
+    {
+      values: xpPerLevel,
+      caption: 'XP por nível (N→N+1)',
+      color: 'var(--accent, #d4a850)',
+    },
+    {
+      values: cumulativeXp,
+      caption: 'XP acumulada total',
+      color: 'var(--rar-rare, #4080d8)',
+    },
+  );
 }
 
 function updateDirtyChrome(): void {
@@ -348,7 +367,7 @@ export function renderHeroLevelXp(): void {
         ${
           rows.length === 0
             ? '<p class="lab-hint">Nenhum nível nesta faixa.</p>'
-            : `<section class="xp-map-block">
+            : buildLevelSparklines(rows) + `<section class="xp-map-block">
                 <header class="xp-map-head">
                   <h2>Progressão de XP por nível</h2>
                   <p>

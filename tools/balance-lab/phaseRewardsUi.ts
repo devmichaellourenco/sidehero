@@ -3,6 +3,7 @@
  */
 import { confirmChangeReview } from './changeReview';
 import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
+import { renderSparklinePair } from './sparkline';
 
 interface PhaseRewardOverride {
   displayName?: string;
@@ -136,6 +137,27 @@ export async function loadPhaseRewards(options?: { resetDrafts?: boolean }): Pro
 
 function fmt(n: number): string {
   return Math.round(n).toLocaleString('pt-BR');
+}
+
+function buildPhaseSparklines(maps: PhaseRewardsMapSummary[]): string {
+  const phases = maps.flatMap((m) => m.phases);
+  if (phases.length === 0) return '';
+
+  const xpValues = phases.map((p) => p.xpCumulative);
+  const levelValues = phases.map((p) => p.heroLevelAfter);
+
+  return renderSparklinePair(
+    {
+      values: xpValues,
+      caption: 'XP acumulado por fase',
+      color: 'var(--accent, #d4a850)',
+    },
+    {
+      values: levelValues,
+      caption: 'Nível projetado por fase',
+      color: 'var(--rar-rare, #4080d8)',
+    },
+  );
 }
 
 function maxXpInView(maps: PhaseRewardsMapSummary[]): number {
@@ -476,7 +498,7 @@ export function renderPhaseRewards(): void {
         ${
           maps.length === 0
             ? '<p class="lab-hint">Nenhuma fase neste filtro.</p>'
-            : maps.map((map) => renderTable(map, maxXp)).join('')
+            : buildPhaseSparklines(maps) + maps.map((map) => renderTable(map, maxXp)).join('')
         }
         <p id="xp-rewards-status" class="lab-status${statusError ? ' is-error' : ''}" role="status">${statusMessage}</p>
       </section>

@@ -70,6 +70,9 @@ Poder × crítico → split damageComponents[]
 - [x] Balance Lab: aba **Inimigos** edita identidade e skills de monstro por tipo de inimigo; roster completo com tier/role/sprite; save em `enemy-combat-overrides.json` + backups (`GET|PUT /api/enemy-combat`); merge em `EnemyCombatOverrides` / `EnemyCombatIdentityCatalog` / `CombatSkillRegistry`
 - [x] Balance Lab: aba **Melhorias** edita custo, nome e descrição dos upgrades da árvore; save em `upgrade-overrides.json` + backups (`GET|PUT /api/upgrades`); merge em `UpgradeOverrides` / `UpgradeCatalog`
 - [x] Balance Lab: aba **Economia** auditoria read-only de ouro por fase (por mapa/capítulo) + pool de lojas com preços efetivos e custo de renovação (`GET /api/economy-audit`)
+- [x] Balance Lab: **Sparklines SVG leves** (sem deps externas) em XP por fase (XP acumulado + nível projetado), XP por nível (XP por nível + acumulada) e Economia (ouro vs preço médio/épico); helper `tools/balance-lab/sparkline.ts`; aria-label + figcaption; CSS responsivo
+- [x] Balance Lab: aba **Economia** inclui seção **Forja/Salvage** — salvage por raridade em stages representativos, custo de oportunidade de fusão (FORGE_FUSE_REQUIRED_COUNT × salvage gold), salvages necessários para atingir preços de referência por tier; cálculo via `calculateForgeSalvageGold` + `buildForgeSalvagePayload` (sem duplicar fórmula na UI)
+- [x] Balance Lab: **Auditoria de Inconsistências** integrada à aba Economia — itens em nenhuma loja, lojas com pool vazio ou sem itens elegíveis no tier, lojas sem épico quando marco permite (map ≥ 2), fases com statMultiplier > 3.0, upgrades com parent inexistente ou custo zero; severidade/tipo/entidade/mensagem/deep-link; `consistencyAuditCatalog.ts` read-only; `GET /api/consistency-audit`
 - [x] Balance Lab: **Wave Power** em Missões — botão no editor de batalha carrega poder da fase via `GET /api/wave-power?phaseId=` usando `estimatePhasePower` + `DEFAULT_REFERENCE_PARTY`; mostra HP total, DPS da party, tempo de clear e pressão por wave
 - [x] Balance Lab: **Stock Preview** de loja — painel seed/tier na aba Lojas gera prévia determinística do estoque via `GET /api/shops/:id/stock-preview?seed=&tier=`
 
@@ -157,6 +160,8 @@ Criar ou atualizar; **não executar** automaticamente.
 - [x] `HeroLevelXpOverrides.test.ts` — XP por nível do lab na curva efetiva e no level-up de `Experience`
 - [x] `GearItemOverrides.test.ts` — nome/stats/requisitos do lab no lookup do catálogo de itens
 - [x] `ConfigurableShopCatalog.test.ts` — criar/editar/excluir lojas e resolver a ativa por marco
+- [x] `sparkline.test.ts` — SVG gerado sem DOM, aria-label/figcaption, responsividade, linhas secundárias
+- [x] `consistencyAuditCatalog.test.ts` — contrato de tipos, idempotência, severidades por kind, limiar statMultiplier
 
 ## Balance Lab (ferramenta de calibração)
 
@@ -197,6 +202,33 @@ Ferramenta **fora do produto jogável** (`npm run balance-lab` → http://127.0.
 | `src/domain/campaign/data/backups/phase-reward-overrides/` | Snapshots ao salvar recompensas |
 
 Não substitui catálogos canônicos: identidade/skills calibrados no lab gravam `hero-combat-overrides.json` (merge no lookup); cola no catálogo TS só na promoção. Overrides de missão são camada até promoção ao handcrafted.
+
+### Melhorias de segurança do Balance Lab (2026-08)
+
+| Peça | Função |
+|------|--------|
+| Aba Manutenção | Promoção segura de overrides para catálogos canônicos (JSON-backed e TS-backed); histórico de backups com diff |
+| `/api/promotion/preview` | Diff entre override e catálogo canônico, sem escrita. Para TS-backed, gera `patchJson` para revisão manual |
+| `/api/promotion/apply` | Mescla override no JSON canônico, backup de ambos, zera override. Requer `confirmed: true`. Nunca reescreve TS |
+| `/api/backups` | Lista backups de um scope (`?scope=gear-items`) — read-only |
+| `/api/backups/diff` | Compara dois snapshots de backup (`?scope=…&a=…&b=…`) recursivamente |
+| `/api/workspace-version` | Fingerprint baseada em mtimes; cliente faz polling a cada 3s para auto-reload |
+| `scripts/balance-lab/backup.mjs` | `backupFile`, `listBackupFiles`, `isPathSafe` (prevenção de path traversal) |
+| `scripts/balance-lab/version.mjs` | `collectFileMtimes`, `computeVersionToken`, `getWorkspaceVersion` |
+| `scripts/balance-lab/diff.mjs` | `diffJsonSnapshots` — diff recursivo com path completo, before/after e kind |
+| `scripts/balance-lab/promotion.mjs` | `previewPromotion`, `applyPromotion` — lógica de merge JSON-backed |
+| `scripts/balance-lab/paths.mjs` | Centraliza todos os caminhos de override/catálogo/backup em `SCOPE_MAP` |
+| `tools/balance-lab/tabMount.ts` | Gerenciamento de abas (mount lazy) extraído de `lab.ts` |
+| `tools/balance-lab/maintenanceUi.ts` | UI da aba Manutenção |
+| `tools/balance-lab/workspaceState.ts` | `startWorkspaceVersionPolling` + banner de mudança externa |
+| `tools/balance-lab/deepLinks.ts` | Deep-link `#missions?id=` corrigido (seletor registrado em `lab.ts`) |
+
+**Scopes JSON-backed (promovíveis automaticamente):** `gear-items`, `shops`.
+**Scopes TS-backed (revisão manual):** `hero-combat`, `hero-level-xp`, `enemy-combat`, `upgrades`, `phase-battle`, `phase-reward`.
+
+### Testes do Balance Lab Manutenção
+
+- `tools/balance-lab/balanceLabMaintenance.test.ts` — `diffJsonSnapshots`, `isPathSafe`, `computeVersionToken`
 
 ## Backlog conhecido (auditoria 2026-07-03)
 

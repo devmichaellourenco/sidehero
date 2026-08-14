@@ -3,6 +3,7 @@
  */
 import { confirmChangeReview } from './changeReview';
 import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
+import { openEnemyInSimulator } from './navigation';
 
 type FieldDef = { key: string; label: string; step: number };
 
@@ -225,6 +226,10 @@ export function renderEnemyCombat(): void {
               <strong>${enemy.name}</strong>
               ${enemy.identity.hasOverride ? '<span class="xp-badge">override</span>' : ''}
               <span class="xp-muted">${enemy.enemyType} · Tier ${enemy.powerTier} · ${enemy.rosterRole}</span>
+              <button type="button" class="lab-btn--info"
+                data-open-enemy-simulator="${enemy.enemyType}"
+                data-open-enemy-role="${enemy.rosterRole === 'boss' ? 'boss' : enemy.rosterRole === 'elite' ? 'elite' : 'trash'}"
+              >Abrir no Simulador</button>
             </header>
             <p class="lab-hint">Identidade de combate — crescimento de stats e timing de skills.</p>
             <div class="hc-fields">
@@ -343,6 +348,15 @@ function bindEnemyCombat(host: HTMLElement): void {
     });
   });
 
+  host.querySelector<HTMLButtonElement>('[data-open-enemy-simulator]')?.addEventListener('click', (event) => {
+    const btn = event.currentTarget as HTMLButtonElement;
+    const enemyType = btn.dataset.openEnemySimulator ?? '';
+    const role = (btn.dataset.openEnemyRole ?? 'trash') as 'trash' | 'elite' | 'boss';
+    const enemy = payload?.enemies.find((e) => e.enemyType === enemyType);
+    const level = enemy ? Math.max(1, enemy.powerTier * 5) : 1;
+    openEnemyInSimulator(enemyType, level, role);
+  });
+
   host.querySelector('#ec-save')?.addEventListener('click', () => {
     void saveDirty().catch((err: Error) => setStatus(err.message, true));
   });
@@ -414,4 +428,14 @@ export async function mountEnemyCombatTab(): Promise<void> {
   await loadEnemyCombat();
   renderEnemyCombat();
   setStatus('Inimigos carregados — edite identidade e skills de monstro e salve.');
+}
+
+/** Seleciona inimigo por tipo (para deep-link `#enemies?id=goblin_raider`). */
+export function selectEnemyByType(enemyType: string): void {
+  if (!payload) return;
+  const found = payload.enemies.find((e) => e.enemyType === enemyType);
+  if (found) {
+    selectedType = found.enemyType;
+    renderEnemyCombat();
+  }
 }
