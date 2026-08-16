@@ -11,6 +11,13 @@
   --font: 'Segoe UI', system-ui, sans-serif;
   --mono: ui-monospace, 'Cascadia Code', monospace;
 
+  /* Scrollbar — espelha o tema escuro do painel do jogo (trilho fosco + polegar dourado) */
+  --scrollbar-track: #201c15;
+  --scrollbar-thumb: #d4a82a;
+  --scrollbar-thumb-hi: #ffe494;
+  --scrollbar-thumb-lo: #c9892f;
+  --scrollbar-thumb-hover-hi: #fff0b0;
+
   /* Ações: cada intenção tem sua própria cor */
   --act-primary: #4f9a63;
   --act-primary-ink: #dff3e2;

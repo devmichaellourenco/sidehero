@@ -4,6 +4,59 @@
   box-sizing: border-box;
 }
 
+/*
+ * Scrollbars com a mesma identidade do painel do jogo (`.game-scroll` em panel.css).
+ * Aplicado globalmente: o lab tem dezenas de contêineres roláveis (tabelas, listas,
+ * modais, textareas) e o scrollbar nativo destoava da paleta escura.
+ * `scrollbar-width`/`scrollbar-color` são herdados, então declarar em `html` basta no Firefox.
+ */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(
+    180deg,
+    var(--scrollbar-track),
+    color-mix(in srgb, var(--scrollbar-track) 65%, #000)
+  );
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  border: 1px solid rgba(70, 45, 15, 0.7);
+  background: linear-gradient(
+    180deg,
+    var(--scrollbar-thumb-hi) 0%,
+    var(--scrollbar-thumb) 40%,
+    var(--scrollbar-thumb-lo) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    var(--scrollbar-thumb-hover-hi) 0%,
+    var(--scrollbar-thumb) 35%,
+    var(--accent) 100%
+  );
+  border-color: rgba(139, 58, 47, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
