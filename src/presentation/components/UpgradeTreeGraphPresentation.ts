@@ -58,6 +58,46 @@ export function buildUpgradeTreeEdges(nodes: UpgradeNodeDto[]): UpgradeTreeEdge[
   return edges;
 }
 
+export interface SiblingBranchConflict {
+  parentId: string;
+  direction: string;
+  childIds: string[];
+}
+
+/**
+ * Duas arestas do mesmo pai com a mesma direção se sobrepõem: a mais longa passa
+ * por cima do irmão mais próximo. O layout precisa dar um ângulo distinto a cada filho.
+ */
+export function findSiblingBranchConflicts(
+  edges: readonly UpgradeTreeEdge[],
+): SiblingBranchConflict[] {
+  const byParentDirection = new Map<string, { parentId: string; direction: string; childIds: string[] }>();
+
+  for (const edge of edges) {
+    const from = getUpgradeNodePosition(edge.fromId);
+    const to = getUpgradeNodePosition(edge.toId);
+    if (!from || !to) continue;
+
+    const direction = branchDirection(from, to);
+    const key = `${edge.fromId}|${direction}`;
+    const bucket = byParentDirection.get(key) ?? {
+      parentId: edge.fromId,
+      direction,
+      childIds: [],
+    };
+    bucket.childIds.push(edge.toId);
+    byParentDirection.set(key, bucket);
+  }
+
+  return [...byParentDirection.values()].filter((bucket) => bucket.childIds.length > 1);
+}
+
+function branchDirection(from: Point, to: Point): string {
+  const angle = Math.atan2(to.y - from.y, to.x - from.x);
+  const step = Math.round((angle * 180) / Math.PI / 45) * 45;
+  return String(((step % 360) + 360) % 360);
+}
+
 /** @deprecated use buildUpgradeTreeEdges */
 export const buildBranchEdges = buildUpgradeTreeEdges;
 
@@ -88,15 +128,9 @@ export function isStraightBranchEdge(from: Point, to: Point): boolean {
   return dx <= AXIS_EPSILON || dy <= AXIS_EPSILON || Math.abs(dx - dy) <= AXIS_EPSILON;
 }
 
-export function buildEdgePath(
-  from: PositionedUpgradeNode,
-  to: PositionedUpgradeNode,
-  _viewBox: { width: number; height: number } = UPGRADE_TREE_VIEWBOX,
-): string {
-  const fromCenter = { x: from.x, y: from.y };
-  const toCenter = { x: to.x, y: to.y };
-  const start = anchorOnNode(from, toCenter);
-  const end = anchorOnNode(to, fromCenter);
+export function buildEdgePath(from: PositionedUpgradeNode, to: PositionedUpgradeNode): string {
+  const start = anchorOnNode(from, { x: to.x, y: to.y });
+  const end = anchorOnNode(to, { x: from.x, y: from.y });
 
   return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
 }

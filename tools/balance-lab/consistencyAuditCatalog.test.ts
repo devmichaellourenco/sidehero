@@ -56,6 +56,7 @@ describe('buildConsistencyAuditPayload — estrutura de cada issue', () => {
     'phase_extreme_stat_multiplier',
     'upgrade_missing_parent',
     'upgrade_zero_cost',
+    'upgrade_overlapping_branch',
   ];
 
   for (const issue of payload.issues) {
@@ -149,6 +150,14 @@ describe('buildConsistencyAuditPayload — upgrades', () => {
     )) {
       expect(issue.severity).toBe('warning');
     }
+  });
+
+  it('layout atual não tem irmãos saindo do mesmo pai na mesma direção', () => {
+    const payload = buildConsistencyAuditPayload();
+    const overlapping = payload.issues.filter(
+      (i: AuditIssue) => i.kind === 'upgrade_overlapping_branch',
+    );
+    expect(overlapping.map((i) => i.message)).toEqual([]);
   });
 });
 

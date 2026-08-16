@@ -19,11 +19,11 @@ describe('MissionCatalog (Fase 5)', () => {
     expect(finale?.name).toBe('Guardião Elemental');
   });
 
-  it('normais têm estrelas 1–5, nomes e recompensas', () => {
+  it('normais têm estrelas 1–5, nomes e nenhuma recompensa de conclusão (XP/ouro vêm da fase)', () => {
     const normals = listNormalMissionsForMap('stendra');
     expect(normals).toHaveLength(50);
     expect(normals.every((m) => m.stars && m.stars >= 1 && m.stars <= 5)).toBe(true);
-    expect(normals.every((m) => (m.rewards?.gold ?? 0) > 0)).toBe(true);
+    expect(normals.every((m) => m.rewards === undefined)).toBe(true);
 
     const mid = getMissionById(normalMissionId('1-2'));
     expect(mid?.stars).toBe(1);

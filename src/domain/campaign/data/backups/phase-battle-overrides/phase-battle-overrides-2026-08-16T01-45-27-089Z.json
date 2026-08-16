@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-16T01:45:27.090Z",
+  "updatedAt": "2026-08-14T13:31:12.964Z",
   "overrides": {
     "1-5": {
       "displayName": "Alerta nas Fronteiras",
@@ -115,7 +115,7 @@
             {
               "enemyType": "giant_rat",
               "role": "trash",
-              "count": 1
+              "count": 2
             }
           ]
         }
@@ -181,7 +181,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "giant_rat",
+              "enemyType": "cave_bat",
               "role": "trash",
               "count": 1
             }

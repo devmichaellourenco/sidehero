@@ -26,7 +26,7 @@ Acampamento → abrir mapa → escolher missão → batalha (waves)
 |------|--------|------------|---------|
 | **Principal** (`main`) | Avança a história do mapa (marcos) | Não, após concluir | Sempre a **próxima** incompleta |
 | **Secundária** (`side`) | História paralela + loot exclusivo | Não, após concluir | Desbloqueadas e incompletas (várias ok) |
-| **Normal** (`normal`) | Loot/recursos; não avança história | Sim, em **próximos** sorteios; some da oferta atual na derrota/vitória; derrota concede fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`) | 2–4 por oferta, só do capítulo da main atual |
+| **Normal** (`normal`) | Loot/recursos; não avança história | Sim, em **próximos** sorteios; some da oferta atual na derrota/vitória; XP/ouro vêm só do orçamento da fase (kills), sem recompensa de conclusão | 2–4 por oferta, só do capítulo da main atual |
 
 ### Principais (marcos)
 
@@ -112,7 +112,8 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 | `NORMAL_MISSION_OFFER_MIN` | 2 | Inclusivo — **somente** missões normais |
 | `NORMAL_MISSION_OFFER_MAX` | 4 | Inclusivo — principal/secundária não entram na contagem |
 | `NORMAL_MISSION_REFRESH_EVERY_N_CAMP_VISITS` | 2 | Renova a cada 2 retornos ao camp (calibração Fase 6) |
-| `NORMAL_MISSION_DEFEAT_REWARD_FRACTION` | 0.25 | Fração de ouro/XP de conclusão na derrota de normal (main/side = 0) |
+
+XP e ouro de cada fase vêm exclusivamente do orçamento `targetXp`/`targetGold` (Balance Lab → aba XP), pagos via kills durante o combate. Missões não têm recompensa de conclusão em ouro/XP — apenas item exclusivo e cena (só na vitória).
 
 ## Camadas e arquivos-chave (alvo)
 

@@ -56,7 +56,7 @@ function boardFixture(): MissionBoardDto {
         difficultyTier: 2,
         featuredEnemyTypes: [],
         featuredEnemies: [],
-        rewards: { gold: 10 },
+        rewards: null,
         selected: false,
       },
       {

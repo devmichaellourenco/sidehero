@@ -1104,6 +1104,35 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
+.ut-dependencies {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.ut-dependencies summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ut-dependencies label {
+  display: grid;
+  gap: 5px;
+  margin-top: 9px;
+}
+
+.ut-dependencies select,
+.ut-dependencies textarea {
+  width: 100%;
+  font: inherit;
+}
+
+.ut-dependencies select {
+  min-height: 132px;
+}
+
 .hc-subsection {
   margin: 4px 0 0;
   font-size: 0.8rem;
@@ -2719,6 +2748,34 @@ textarea {
   margin-top: 10px;
 }
 
+.maint-file-btn {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+}
+
+.maint-pack-scope {
+  margin-top: 10px;
+  border: 1px solid color-mix(in srgb, var(--border, #3a3a4a) 80%, transparent);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--surface, #1e1e2a) 90%, transparent);
+}
+
+.maint-pack-scope summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.maint-pack-scope summary label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  cursor: pointer;
+}
+
 /* Banner de mudança externa */
 .lab-external-change-banner {
   position: fixed;
@@ -2749,3 +2806,53 @@ textarea {
   cursor: pointer;
   font-size: 0.8rem;
 }
+
+/* ── Simulação de combate real ────────────────────────────────────────────────── */
+
+.cs-action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.cs-sep { color: var(--muted, #888); }
+
+.cs-runs-select {
+  background: var(--surface, #1e1e2a);
+  color: var(--text, #e0d7c7);
+  border: 1px solid var(--border, #333);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+.cs-sim-result {
+  margin-top: 10px;
+}
+
+.cs-outcome {
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.cs-outcome--victory { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+.cs-outcome--wipe    { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+.cs-outcome--timeout { background: rgba(251, 191, 36, 0.15);  color: #fbbf24; }
+
+.cs-batch-row { margin-bottom: 8px; }
+
+.cs-single-run {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.cs-hero-table { margin-top: 8px; width: 100%; max-width: 420px; }
+
+.ec-sim-result { margin: 6px 0; min-height: 0; }

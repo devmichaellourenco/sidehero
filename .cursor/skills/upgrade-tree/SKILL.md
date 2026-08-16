@@ -12,7 +12,7 @@ description: Árvore de melhorias com grafo, layout e UI no Side Hero. Use para 
 ## Fluxo ao adicionar nó
 
 1. `UpgradeDefinition` em `UpgradeCatalog.ts` — `parents`, `requirements`, `branch`
-2. Posição em `UpgradeTreeLayout.ts` — reta com pai (H/V/45°)
+2. Posição em `UpgradeTreeLayout.ts` — reta com pai (H/V/45°) e **ângulo distinto dos irmãos**
 3. Se desbloqueia feature → `FeatureKey` + `FeatureAccessPolicy`
 4. Se desbloqueia herói → `unlockHeroClass`
 5. Testes: `UpgradeCatalog.test.ts`, `UpgradeTreeLayout.test.ts` — criar ou atualizar; não executar automaticamente.
@@ -27,7 +27,8 @@ description: Árvore de melhorias com grafo, layout e UI no Side Hero. Use para 
 
 - `UpgradeTreeModalRenderer` — canvas único; sem hint estático de pan/zoom
 - `UpgradeTreeViewportBinder` — pan/zoom; exporta `UpgradeTreeViewportState`
-- `buildEdgePath` — linha reta entre nodos
+- `buildEdgePath` — sempre linha reta (`M ... L ...`); nunca curva
+- `findSiblingBranchConflicts` — acusa filhos do mesmo pai que saem no mesmo ângulo (arestas sobrepostas)
 
 ## Viewport após compra
 
@@ -39,6 +40,12 @@ Padrão: `beginSession()` na abertura → capturar estado antes do re-render →
 
 Ramo principal parte de `battle_stats_1`; integrar novos ramos com `parents` explícitos.
 - **Otimizar equipe** desativado (2026-08): nós `optimize_loadout_*` fora do catálogo; flags sempre off em `FeatureAccessPolicy`
+
+## Balance Lab
+
+- Aba **Melhorias** edita custo, textos, `parents[]` e `requirements[]`
+- O save valida IDs, autorreferência, ciclos e mantém `battle_stats_1` como única raiz
+- Dependências persistem em `upgrade-overrides.json` e entram no runtime por `listEffectiveUpgrades` / `getUpgradeById`
 
 ## Relacionado
 

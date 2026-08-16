@@ -59,7 +59,7 @@ describe('ResolveMissionOutcome', () => {
     expect(result.state.campaignProgress.missionProgress.completedMainIds).toHaveLength(0);
   });
 
-  it('derrota normal remove da oferta e concede fração de ouro/XP; main sem recompensa', () => {
+  it('derrota normal remove da oferta e não concede recompensa de conclusão; main sem recompensa', () => {
     const phaseId = '1-2';
     const missionId = normalMissionId(phaseId);
     const progress = MissionProgress.initial()
@@ -81,11 +81,9 @@ describe('ResolveMissionOutcome', () => {
       missionId,
     );
     expect(defeat.state.combatIntermission?.variant).toBe('defeat');
-    expect(defeat.state.gold.value()).toBeGreaterThan(goldBefore);
-    expect(defeat.state.heroes[0]!.toProps().experience.current).toBeGreaterThan(xpBefore);
-    // 25% de 14 ouro / 10 XP (normal 1★) → 3 / 2
-    expect(defeat.state.gold.value() - goldBefore).toBe(3);
-    expect(defeat.state.heroes[0]!.toProps().experience.current - xpBefore).toBe(2);
+    // XP/ouro saem só do orçamento da fase (kills); derrota não paga conclusão.
+    expect(defeat.state.gold.value()).toBe(goldBefore);
+    expect(defeat.state.heroes[0]!.toProps().experience.current).toBe(xpBefore);
 
     const mainState = GameState.initial().withCampaignProgress(
       GameState.initial().campaignProgress.withMissionProgress(
@@ -152,7 +150,7 @@ describe('ResolveMissionOutcome', () => {
     expect(camp2.campaignProgress.missionProgress.offerEpochFor('stendra')).toBe(1);
   });
 
-  it('vitória side marca concluída e aplica ouro/XP declarados', () => {
+  it('vitória side marca concluída e desbloqueia cena sem conceder ouro/XP', () => {
     const ashId = sideMissionId('stendra_ash_trail');
     const ashState = GameState.initial().withCampaignProgress(
       GameState.initial().campaignProgress.withMissionProgress(
@@ -162,6 +160,7 @@ describe('ResolveMissionOutcome', () => {
       ),
     );
     const goldBefore = ashState.gold.value();
+    const xpBefore = ashState.heroes[0]!.toProps().experience.current;
     const result = applyMissionVictory({
       state: ashState,
       phaseId: '1-6',
@@ -169,7 +168,8 @@ describe('ResolveMissionOutcome', () => {
       phaseDisplayName: 'Trilha',
     });
     expect(result.state.campaignProgress.missionProgress.isSideCompleted(ashId)).toBe(true);
-    expect(result.state.gold.value()).toBeGreaterThan(goldBefore);
+    expect(result.state.gold.value()).toBe(goldBefore);
+    expect(result.state.heroes[0]!.toProps().experience.current).toBe(xpBefore);
     expect(result.state.campaignProgress.missionProgress.pendingNarrativeSceneIds).toContain(
       'side:stendra_ash_trail',
     );

@@ -2,7 +2,7 @@ import { GameState } from '../entities/GameState';
 import { FeatureKey, getFeatureLevel, UpgradeLevels } from './FeatureKey';
 import { HeroUnlockService } from '../party/HeroUnlockService';
 import { UpgradeRequirementEvaluator } from '../requirements/UpgradeRequirementEvaluator';
-import { getUpgradeById, UPGRADE_CATALOG } from './UpgradeCatalog';
+import { getUpgradeById, listEffectiveUpgrades, UPGRADE_CATALOG } from './UpgradeCatalog';
 import { UpgradeDefinition } from './UpgradeDefinition';
 
 function minCatalogLevelForFeature(feature: FeatureKey): number {
@@ -29,7 +29,7 @@ export class UpgradeService {
   }
 
   buildTree(state: GameState): UpgradeNodeView[] {
-    return UPGRADE_CATALOG.map((definition) => {
+    return listEffectiveUpgrades().map((definition) => {
       const status = this.getStatus(state, definition);
       return {
         definition,

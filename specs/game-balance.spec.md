@@ -61,6 +61,7 @@ Poder × crítico → split damageComponents[]
 - [x] BAL-012 — cadência early: TTA = 1/ASPD por combatente; CD/básico/ASPD/crescimento na identidade do herói ou tipo de monstro; recovery/CDR/rank na skill
 - [x] BAL-013 — inimigos no mesmo modelo de combate dos heróis (level/attrs/ranks/passivas; CD e básico unificados; sem knobs ATK/HP/skill)
 - [x] BAL-015 — rebalance camp-missions: ASPD efetiva ~½ (TTA ~2×, fator por combatente); recovery/CDR por skill; `powerPerRank` das skills de herói com CD ×3 no catálogo; raridade da loja por mains; party Nix solo + unlocks por main
+- [x] BAL-016 — simulação de combate headless real no Balance Lab (`CombatEncounterSimulator`): motor real tick a tick, seed determinística, batch com winRate/tempo/HP; rota `POST /api/combat-sim`; botões na aba Missões e Inimigos
 - [x] Balance Lab: aba **Missões** edita waves/inimigos por fase; filtros por capítulo da main / tipo / mapa / busca; aviso de template compartilhado (main↔normal); overrides em `phase-battle-overrides.json` mesclados via `PhaseBattleOverrides` / `CampaignCatalog.resolvePhase`; backups em `data/backups/phase-battle-overrides/`
 - [x] Balance Lab: aba **XP por fase** lista XP/ouro por fase (soma de kills), acumulado, nível projetado e filtros mapa/capítulo; edição de alvos com save em `phase-reward-overrides.json` + backups (`GET|PUT|DELETE /api/phase-rewards`)
 - [x] Balance Lab: aba **XP por nível** lista a curva de level-up 1→100 (XP base, XP efetiva, crescimento vs nível anterior, XP acumulada) com filtro por faixa de 10 níveis; edição por nível com save em `hero-level-xp-overrides.json` + backups (`GET|PUT|DELETE /api/hero-level-xp`); merge em `expRequiredToAdvanceFromLevel`
@@ -68,13 +69,15 @@ Poder × crítico → split damageComponents[]
 - [x] Balance Lab: aba **Lojas** cria/edita/duplica/exclui lojas vinculadas a marcos `main:X-Y`, com pool explícito e modificadores globais; save em `shop-overrides.json` + backups (`GET|PUT|DELETE /api/shops`); merge em `listConfiguredShops` / `resolveActiveShop`
 - [x] Balance Lab: aba **Personagens** edita stats base (ATK/DEF/HP), identidade, skills de combate, passivas e evoluções (ascensão); save em `hero-combat-overrides.json` + backups (`GET|PUT /api/hero-combat`); merge em `getHeroCombatSkill` / `getHeroCombatIdentity` / `getHeroBaseStats` / `getPassiveDefinition` / `getAscensionById`
 - [x] Balance Lab: aba **Inimigos** edita identidade e skills de monstro por tipo de inimigo; roster completo com tier/role/sprite; save em `enemy-combat-overrides.json` + backups (`GET|PUT /api/enemy-combat`); merge em `EnemyCombatOverrides` / `EnemyCombatIdentityCatalog` / `CombatSkillRegistry`
-- [x] Balance Lab: aba **Melhorias** edita custo, nome e descrição dos upgrades da árvore; save em `upgrade-overrides.json` + backups (`GET|PUT /api/upgrades`); merge em `UpgradeOverrides` / `UpgradeCatalog`
+- [x] Balance Lab: aba **Melhorias** edita custo, textos, `parents[]` e `requirements[]`; valida IDs/ciclos/raiz antes do save em `upgrade-overrides.json` + backups (`GET|PUT /api/upgrades`); merge em `UpgradeOverrides` / `UpgradeCatalog`
 - [x] Balance Lab: aba **Economia** auditoria read-only de ouro por fase (por mapa/capítulo) + pool de lojas com preços efetivos e custo de renovação (`GET /api/economy-audit`)
 - [x] Balance Lab: **Sparklines SVG leves** (sem deps externas) em XP por fase (XP acumulado + nível projetado), XP por nível (XP por nível + acumulada) e Economia (ouro vs preço médio/épico); helper `tools/balance-lab/sparkline.ts`; aria-label + figcaption; CSS responsivo
 - [x] Balance Lab: aba **Economia** inclui seção **Forja/Salvage** — salvage por raridade em stages representativos, custo de oportunidade de fusão (FORGE_FUSE_REQUIRED_COUNT × salvage gold), salvages necessários para atingir preços de referência por tier; cálculo via `calculateForgeSalvageGold` + `buildForgeSalvagePayload` (sem duplicar fórmula na UI)
 - [x] Balance Lab: **Auditoria de Inconsistências** integrada à aba Economia — itens em nenhuma loja, lojas com pool vazio ou sem itens elegíveis no tier, lojas sem épico quando marco permite (map ≥ 2), fases com statMultiplier > 3.0, upgrades com parent inexistente ou custo zero; severidade/tipo/entidade/mensagem/deep-link; `consistencyAuditCatalog.ts` read-only; `GET /api/consistency-audit`
 - [x] Balance Lab: **Wave Power** em Missões — botão no editor de batalha carrega poder da fase via `GET /api/wave-power?phaseId=` usando `estimatePhasePower` + `DEFAULT_REFERENCE_PARTY`; mostra HP total, DPS da party, tempo de clear e pressão por wave
 - [x] Balance Lab: **Stock Preview** de loja — painel seed/tier na aba Lojas gera prévia determinística do estoque via `GET /api/shops/:id/stock-preview?seed=&tier=`
+- [x] Balance Lab: **Simulação de combate real** — `CombatEncounterSimulator` headless (motor `CombatTurnPhase` tick a tick, seed determinística, batch com winRate/tempo/HP); `POST /api/combat-sim`; UI em Missões e Inimigos
+- [x] Balance Lab: **Balance Pack** — export/preview/import de todos os overrides (`GET /api/balance-pack`, `POST /api/balance-pack/preview|import`); UI na aba Manutenção; backup por scope antes de importar
 
 ## Coordenação com outros agents
 
@@ -222,6 +225,9 @@ Não substitui catálogos canônicos: identidade/skills calibrados no lab gravam
 | `tools/balance-lab/maintenanceUi.ts` | UI da aba Manutenção |
 | `tools/balance-lab/workspaceState.ts` | `startWorkspaceVersionPolling` + banner de mudança externa |
 | `tools/balance-lab/deepLinks.ts` | Deep-link `#missions?id=` corrigido (seletor registrado em `lab.ts`) |
+| Balance Pack | Export/import versionado de todos os overrides (`side-hero-balance-pack` v1) |
+| `/api/balance-pack` | `GET` exporta pack atual; `POST …/preview` e `POST …/import` (com `confirmed: true`) |
+| `scripts/balance-lab/balancePack.mjs` | `buildBalancePack`, `validateBalancePack`, `previewBalancePack`, `resolveImportScopes` |
 
 **Scopes JSON-backed (promovíveis automaticamente):** `gear-items`, `shops`.
 **Scopes TS-backed (revisão manual):** `hero-combat`, `hero-level-xp`, `enemy-combat`, `upgrades`, `phase-battle`, `phase-reward`.
@@ -229,6 +235,7 @@ Não substitui catálogos canônicos: identidade/skills calibrados no lab gravam
 ### Testes do Balance Lab Manutenção
 
 - `tools/balance-lab/balanceLabMaintenance.test.ts` — `diffJsonSnapshots`, `isPathSafe`, `computeVersionToken`
+- `tools/balance-lab/balancePack.test.ts` — validação/preview do Balance Pack
 
 ## Backlog conhecido (auditoria 2026-07-03)
 
@@ -249,3 +256,4 @@ Não substitui catálogos canônicos: identidade/skills calibrados no lab gravam
 | BAL-013 | Alta | Inimigos usavam knobs/fórmulas paralelas (HP factor, ASPD por stage, CD 1s/turn) | Combate/Campanha | ✅ Resolvido (`EnemyProgressionCatalog`, `CombatantDerivedStats`, CD/básico unificados) |
 | BAL-014 | Alta | Loop camp-missions: oferta normal, refresh N visitas, curva ★1–5 por mapa | Missões | Calibrado — refresh=2; ver [`camp-missions.spec.md`](camp-missions.spec.md) |
 | BAL-015 | Alta | Loop camp lento demais cedo / party 3 starters trivializa; loja por tier antecipa raridade | Camp/Missões/Combate/Loja | ✅ Resolvido (Nix solo + unlocks por main; sides expiram; ASPD½; `powerPerRank` CD ×3 no catálogo; loja por main; knobs globais de combate extraídos para identidade por herói/monstro/skill) |
+| BAL-016 | Alta | Balance Lab sem simulação real — estimativas imprecisas para ajuste fino de dificuldade | Balance Lab | ✅ Resolvido (`CombatEncounterSimulator` headless, seed determinística, `POST /api/combat-sim`, UI em Missões e Inimigos) |

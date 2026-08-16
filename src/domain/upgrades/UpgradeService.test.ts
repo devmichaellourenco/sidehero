@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { GameState } from '../entities/GameState';
 import { Gold } from '../value-objects/Gold';
+import { getCatalogUpgradeById } from './UpgradeCatalog';
+import { setRuntimeUpgradeOverrides } from './UpgradeOverrides';
 import { UpgradeService } from './UpgradeService';
 
 describe('UpgradeService', () => {
@@ -58,5 +60,44 @@ describe('UpgradeService', () => {
     const state = progressionReadyState().withUpgradeLevels({ auto_battle: 2 });
 
     expect(nodeStatus(state, 'battle_skill_slot_2')).toBe('locked');
+  });
+
+  describe('overrides do Balance Lab', () => {
+    afterEach(() => {
+      setRuntimeUpgradeOverrides(null);
+    });
+
+    it('buildTree usa o custo com override, não o do catálogo', () => {
+      const baseline = getCatalogUpgradeById('battle_stats_1')!;
+      const overriddenCost = baseline.cost + 777;
+      setRuntimeUpgradeOverrides({
+        version: 1,
+        updatedAt: null,
+        upgrades: { battle_stats_1: { cost: overriddenCost } },
+      });
+
+      const node = new UpgradeService()
+        .buildTree(progressionReadyState())
+        .find((entry) => entry.definition.id === 'battle_stats_1');
+
+      expect(node?.definition.cost).toBe(overriddenCost);
+    });
+
+    it('custo exibido na árvore casa com o cobrado na compra', () => {
+      setRuntimeUpgradeOverrides({
+        version: 1,
+        updatedAt: null,
+        upgrades: { battle_stats_1: { cost: 20 } },
+      });
+
+      const state = progressionReadyState();
+      const shown = new UpgradeService()
+        .buildTree(state)
+        .find((entry) => entry.definition.id === 'battle_stats_1')!.definition.cost;
+      const spent = state.gold.value() - service.purchase(state, 'battle_stats_1').gold.value();
+
+      expect(shown).toBe(20);
+      expect(spent).toBe(shown);
+    });
   });
 });

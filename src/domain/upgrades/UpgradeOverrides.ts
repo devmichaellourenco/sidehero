@@ -1,4 +1,5 @@
 import type { UpgradeDefinition } from './UpgradeDefinition';
+import { FEATURE_KEYS, type FeatureKey } from './FeatureKey';
 import type { UpgradeRequirement } from './UpgradeRequirement';
 import staticOverrides from './data/upgrade-overrides.json';
 
@@ -25,6 +26,44 @@ function emptyFile(): UpgradeOverridesFile {
 
 function finiteNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+export function normalizeUpgradeRequirement(input: unknown): UpgradeRequirement | null {
+  if (!input || typeof input !== 'object') return null;
+  const raw = input as Record<string, unknown>;
+  switch (raw.type) {
+    case 'upgrade_level': {
+      const feature = raw.feature;
+      const minLevel = finiteNumber(raw.minLevel);
+      if (
+        typeof feature !== 'string' ||
+        !FEATURE_KEYS.includes(feature as FeatureKey) ||
+        minLevel === undefined
+      ) {
+        return null;
+      }
+      return {
+        type: 'upgrade_level',
+        feature: feature as FeatureKey,
+        minLevel: Math.max(0, Math.floor(minLevel)),
+      };
+    }
+    case 'main_mission_completed':
+      return typeof raw.missionId === 'string' && raw.missionId.trim()
+        ? { type: 'main_mission_completed', missionId: raw.missionId.trim() }
+        : null;
+    case 'min_stage':
+    case 'min_battles_won':
+    case 'min_chests_opened':
+    case 'min_hero_level': {
+      const value = finiteNumber(raw.value);
+      return value === undefined
+        ? null
+        : { type: raw.type, value: Math.max(0, Math.floor(value)) };
+    }
+    default:
+      return null;
+  }
 }
 
 export function getEmbeddedUpgradeOverrides(): UpgradeOverridesFile {
@@ -64,10 +103,9 @@ export function normalizeUpgradeOverride(
       .map((parent) => parent.trim());
   }
   if (Array.isArray(input.requirements)) {
-    next.requirements = input.requirements.filter(
-      (requirement): requirement is UpgradeRequirement =>
-        !!requirement && typeof requirement === 'object' && 'type' in requirement,
-    );
+    next.requirements = input.requirements
+      .map(normalizeUpgradeRequirement)
+      .filter((requirement): requirement is UpgradeRequirement => requirement !== null);
   }
   return Object.keys(next).length > 0 ? next : null;
 }

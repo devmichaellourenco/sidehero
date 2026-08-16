@@ -30,8 +30,6 @@ export function mapMissionPreview(
     challengeHint: phase?.challengeHint,
     rewards: mission.rewards
       ? {
-          gold: mission.rewards.gold,
-          xp: mission.rewards.xp,
           itemId: mission.rewards.itemId,
           sceneId: mission.rewards.sceneId,
         }

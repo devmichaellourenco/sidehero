@@ -67,8 +67,9 @@ export class UpgradeTreeModalRenderer {
         if (!from || !to) return '';
 
         const owned = from.node.status === 'owned' && to.node.status !== 'locked';
-        const path = buildEdgePath(from, to, viewBox);
-        return `<path class="upgrade-tree-edge${owned ? ' upgrade-tree-edge--active' : ''}" d="${path}" />`;
+        const edgeKey = `${edge.fromId}->${edge.toId}`;
+        const path = buildEdgePath(from, to);
+        return `<path class="upgrade-tree-edge${owned ? ' upgrade-tree-edge--active' : ''}" data-upgrade-edge="${edgeKey}" d="${path}" />`;
       })
       .join('');
 

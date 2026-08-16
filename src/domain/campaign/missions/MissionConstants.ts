@@ -9,9 +9,3 @@ export const NORMAL_MISSION_OFFER_MAX = 4;
  * 2 = renova a cada duas voltas ao camp (calibração Fase 6).
  */
 export const NORMAL_MISSION_REFRESH_EVERY_N_CAMP_VISITS = 2;
-
-/**
- * Fração das recompensas de conclusão (ouro/XP) concedida ao perder uma missão **normal**.
- * Main/side na derrota: zero. Item exclusivo e cena não entram na fração.
- */
-export const NORMAL_MISSION_DEFEAT_REWARD_FRACTION = 0.25;

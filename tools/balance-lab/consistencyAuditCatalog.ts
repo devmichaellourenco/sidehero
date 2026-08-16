@@ -8,18 +8,23 @@
  * - Fases com statMultiplier extremo (> EXTREME_STAT_MULTIPLIER_THRESHOLD)
  * - Upgrades com parent inexistente
  * - Upgrades com custo zero inesperado (cost === 0, exceto raiz da árvore)
+ * - Irmãos que saem do mesmo pai no mesmo ângulo (arestas sobrepostas na árvore)
  */
 
 import { GEAR_RARITIES } from '../../src/domain/entities/Gear';
 import { listCatalogGearItems } from '../../src/domain/gear/GearItemCatalog';
 import { listConfiguredShops, shopProgressionTier } from '../../src/domain/shop/ConfigurableShopCatalog';
 import { getShopMaxRarityForTier } from '../../src/domain/shop/ShopCatalog';
-import { UPGRADE_CATALOG } from '../../src/domain/upgrades/UpgradeCatalog';
+import { listEffectiveUpgrades } from '../../src/domain/upgrades/UpgradeCatalog';
 import { CAMPAIGN_MAPS } from '../../src/domain/campaign/CampaignMaps';
 import { buildPhaseId } from '../../src/domain/campaign/CampaignIds';
 import { BASE_GAME_MAX_MAP_INDEX } from '../../src/domain/campaign/CampaignReleaseScope';
 import { resolvePhase } from '../../src/domain/campaign/CampaignCatalog';
 import { phaseIdFromMainMissionId } from '../../src/domain/campaign/missions/MissionId';
+import {
+  findSiblingBranchConflicts,
+  resolveUpgradeParentIds,
+} from '../../src/presentation/components/UpgradeTreeGraphPresentation';
 
 // ── Tipos exportados ─────────────────────────────────────────────────────────
 
@@ -32,7 +37,8 @@ export type AuditKind =
   | 'shop_missing_epic_at_milestone'
   | 'phase_extreme_stat_multiplier'
   | 'upgrade_missing_parent'
-  | 'upgrade_zero_cost';
+  | 'upgrade_zero_cost'
+  | 'upgrade_overlapping_branch';
 
 export interface AuditIssue {
   severity: AuditSeverity;
@@ -179,9 +185,10 @@ function auditPhasesStatMultiplier(): AuditIssue[] {
 
 function auditUpgrades(): AuditIssue[] {
   const issues: AuditIssue[] = [];
-  const upgradeIds = new Set(UPGRADE_CATALOG.map((u) => u.id));
+  const effective = listEffectiveUpgrades();
+  const upgradeIds = new Set(effective.map((u) => u.id));
 
-  for (const upgrade of UPGRADE_CATALOG) {
+  for (const upgrade of effective) {
     // Parent inexistente
     for (const parentId of upgrade.parents ?? []) {
       if (!upgradeIds.has(parentId)) {
@@ -210,6 +217,31 @@ function auditUpgrades(): AuditIssue[] {
   return issues;
 }
 
+/**
+ * O layout da árvore é estático, então trocar `parents` no lab pode fazer dois filhos
+ * saírem do mesmo pai na mesma direção — as retas se sobrepõem e a mais longa cruza o
+ * irmão mais próximo. Só o layout resolve, por isso aqui é aviso e não bloqueio.
+ */
+function auditUpgradeBranchAngles(): AuditIssue[] {
+  const edges = listEffectiveUpgrades().flatMap((upgrade) =>
+    resolveUpgradeParentIds(upgrade.id).map((parentId) => ({
+      fromId: parentId,
+      toId: upgrade.id,
+    })),
+  );
+
+  return findSiblingBranchConflicts(edges).map((conflict) => ({
+    severity: 'warning' as const,
+    kind: 'upgrade_overlapping_branch' as const,
+    entity: conflict.parentId,
+    message:
+      `Upgrade "${conflict.parentId}" liga ${conflict.childIds.join(' e ')} na mesma direção` +
+      ` (${conflict.direction}°) — as linhas se sobrepõem na árvore.` +
+      ` Reposicione um dos filhos em UpgradeTreeLayout.ts.`,
+    deepLink: `#upgrades?id=${encodeURIComponent(conflict.parentId)}`,
+  }));
+}
+
 // ── ponto de entrada público ─────────────────────────────────────────────────
 
 export function buildConsistencyAuditPayload(): ConsistencyAuditPayload {
@@ -218,6 +250,7 @@ export function buildConsistencyAuditPayload(): ConsistencyAuditPayload {
     ...auditShops(),
     ...auditPhasesStatMultiplier(),
     ...auditUpgrades(),
+    ...auditUpgradeBranchAngles(),
   ];
 
   const counts: Record<AuditSeverity, number> = { error: 0, warning: 0, info: 0 };

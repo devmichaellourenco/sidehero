@@ -41,7 +41,7 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 - New game: party **Nix solo**; unlocks Galneon→Elara→… na árvore com gates de main; inicia no hub Acampamento (`loadoutEditOpen`)
 - Vitória/derrota → CLEAR/DEFEAT → tela de recompensas (sem scroll; Continuar no deck) → acampamento + mapa
 - Iniciar no mapa → cue START → combate; Acampamento/hub sem Batalhar (`phaseRestartOnResume: false`); unpin retransmite ao painel principal
-- Derrota em missão **normal**: fração de ouro/XP (`NORMAL_MISSION_DEFEAT_REWARD_FRACTION`) no overlay **apenas se o domínio concedeu** (delta nos heróis); main/side: zero
+- XP/ouro de fase vêm só do orçamento `targetXp`/`targetGold` (pagos via kills); missões não têm recompensa de conclusão em ouro/XP. O overlay mostra o delta real nos heróis/ouro, então derrota exibe só o que os kills já pagaram
 - Preview/CTA só ao clicar no pin (popover sobre o pin; sem footer permanente)
 - Região: título + bioma compactos; painel do mapa com padding mínimo; progresso só no hover; troca via mapa-mundo
 - Pins do mapa com margem segura (não cortam no topo/laterais)

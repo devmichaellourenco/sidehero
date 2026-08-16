@@ -13,7 +13,6 @@ import {
   ensureNormalOfferForBoard,
 } from './CampMissionBoard';
 import { getMissionById } from './MissionCatalog';
-import { NORMAL_MISSION_DEFEAT_REWARD_FRACTION } from './MissionConstants';
 import {
   MissionId,
   mainMissionId,
@@ -30,11 +29,6 @@ export interface MissionOutcomeResult {
   missionId: MissionId | null;
 }
 
-export interface ApplyMissionRewardsOptions {
-  /** 1 = vitória completa; menor que 1 = parcial (ex.: derrota de normal). */
-  scale?: number;
-}
-
 function inferMissionIdFromPhase(phaseId: PhaseId, progress: MissionProgress): MissionId | null {
   if (progress.activeMissionId) return progress.activeMissionId;
   const mainId = mainMissionId(phaseId);
@@ -44,43 +38,23 @@ function inferMissionIdFromPhase(phaseId: PhaseId, progress: MissionProgress): M
   return null;
 }
 
-/** Escala ouro/XP; garante pelo menos 1 quando o valor original é positivo e scale > 0. */
-export function scaleMissionRewardAmount(amount: number, scale: number): number {
-  if (amount <= 0 || scale <= 0) return 0;
-  if (scale >= 1) return amount;
-  return Math.max(1, Math.floor(amount * scale));
-}
-
+/**
+ * Recompensa de conclusão de missão: apenas item exclusivo e cena narrativa.
+ * Ouro/XP vêm exclusivamente do orçamento da fase (kills), então não entram aqui.
+ * Chamada só na vitória; na derrota nada é concedido.
+ */
 function applyMissionRewards(
   state: GameState,
   missionId: MissionId,
-  options: ApplyMissionRewardsOptions = {},
 ): { state: GameState; events: string[] } {
   const rewards = getMissionById(missionId)?.rewards;
   if (!rewards) return { state, events: [] };
 
-  const scale = options.scale ?? 1;
-  const grantExclusive = scale >= 1;
   let next = state;
   const events: string[] = [];
   let missionProgress = next.campaignProgress.missionProgress;
 
-  const gold = scaleMissionRewardAmount(rewards.gold ?? 0, scale);
-  if (gold > 0) {
-    next = next.withGold(next.gold.add(gold));
-    events.push(`+${gold} ouro`);
-  }
-
-  const xp = scaleMissionRewardAmount(rewards.xp ?? 0, scale);
-  if (xp > 0) {
-    const recipient = next.activeHeroes()[0] ?? next.heroes[0];
-    if (recipient) {
-      next = next.withRosterHeroes([recipient.gainExperience(xp)]);
-      events.push(`+${xp} XP`);
-    }
-  }
-
-  if (grantExclusive && rewards.itemId) {
+  if (rewards.itemId) {
     const itemId = rewards.itemId;
     const alreadyAwarded =
       missionProgress.hasAwardedExclusiveItem(itemId) ||
@@ -106,7 +80,7 @@ function applyMissionRewards(
     }
   }
 
-  if (grantExclusive && rewards.sceneId && resolveMissionScene(rewards.sceneId)) {
+  if (rewards.sceneId && resolveMissionScene(rewards.sceneId)) {
     missionProgress = missionProgress.unlockNarrativeScene(rewards.sceneId);
     events.push('Cena narrativa desbloqueada');
   }
@@ -201,7 +175,8 @@ export function applyMissionVictory(params: {
 }
 
 /**
- * Derrota: normal some da oferta e recebe fração de ouro/XP; main/side sem recompensa de conclusão.
+ * Derrota: normal some da oferta; nenhuma recompensa de conclusão em qualquer tipo.
+ * O XP/ouro parcial da tentativa vem só dos kills já pagos durante o combate.
  */
 export function applyMissionDefeat(params: {
   state: GameState;
@@ -238,14 +213,6 @@ export function applyMissionDefeat(params: {
       }),
     )
     .addLog(`Party derrotada em ${phaseDisplayName}! Retorno ao acampamento.`);
-
-  if (missionId && kind === 'normal') {
-    const rewarded = applyMissionRewards(nextState, missionId, {
-      scale: NORMAL_MISSION_DEFEAT_REWARD_FRACTION,
-    });
-    nextState = rewarded.state;
-    events.push(...rewarded.events);
-  }
 
   return { state: nextState.touchTick(), events, missionId };
 }

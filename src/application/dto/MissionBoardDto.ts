@@ -2,8 +2,6 @@ import type { MissionKind } from '../../domain/campaign/missions/MissionKind';
 import type { EnemyDto } from './GameStateDto';
 
 export interface MissionRewardDto {
-  gold?: number;
-  xp?: number;
   itemId?: string;
   sceneId?: string;
 }

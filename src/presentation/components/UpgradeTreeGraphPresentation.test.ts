@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { UpgradeNodeDto } from '../../application/dto/UpgradeNodeDto';
 import {
+  buildEdgePath,
   buildPositionedNodes,
   buildUpgradeTreeEdges,
   findFocusNodeId,
+  findSiblingBranchConflicts,
   resolveUpgradeParentIds,
 } from './UpgradeTreeGraphPresentation';
 
@@ -64,6 +66,34 @@ describe('UpgradeTreeGraphPresentation', () => {
       ]),
     );
     expect(buildUpgradeTreeEdges(nodes)).toHaveLength(5);
+  });
+
+  it('acusa irmãos que saem do mesmo pai na mesma direção', () => {
+    // battle_stats_1 → open_all_chests_1 é leste; hero_unlock_knight é sul.
+    expect(
+      findSiblingBranchConflicts([
+        { fromId: 'battle_stats_1', toId: 'open_all_chests_1' },
+        { fromId: 'battle_stats_1', toId: 'hero_unlock_knight' },
+      ]),
+    ).toEqual([]);
+
+    // item_stash_2 e open_all_chests_1 estão ambos a leste de seus pais, mas o pai
+    // aqui é o mesmo nodo — direção duplicada.
+    const conflicts = findSiblingBranchConflicts([
+      { fromId: 'battle_stats_1', toId: 'open_all_chests_1' },
+      { fromId: 'battle_stats_1', toId: 'item_stash_2' },
+    ]);
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0].childIds).toEqual(['open_all_chests_1', 'item_stash_2']);
+  });
+
+  it('desenha toda aresta como linha reta', () => {
+    const root = { node: node({ id: 'root', branch: 'qol' }), x: 100, y: 100 };
+    const child = { node: node({ id: 'child', branch: 'combat' }), x: 220, y: 220 };
+
+    const path = buildEdgePath(root, child);
+
+    expect(path).toMatch(/^M [\d.]+ [\d.]+ L [\d.]+ [\d.]+$/);
   });
 
   it('posiciona nodos com layout unificado', () => {

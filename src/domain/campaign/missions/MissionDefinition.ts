@@ -2,10 +2,11 @@ import { MapId, PhaseId } from '../CampaignIds';
 import { MissionId } from './MissionId';
 import { MissionKind, MissionStars } from './MissionKind';
 
-/** Recompensas declarativas (loot exclusivo side / normal). */
+/**
+ * Recompensas declarativas de conclusão. Ouro/XP saem exclusivamente do orçamento
+ * da fase (`targetXp`/`targetGold`), então aqui só entram item exclusivo e cena.
+ */
 export interface MissionRewardSpec {
-  gold?: number;
-  xp?: number;
   /** Id de gear template ou item único. */
   itemId?: string;
   /** Id de cena narrativa (`story-scenes` / catálogo). */

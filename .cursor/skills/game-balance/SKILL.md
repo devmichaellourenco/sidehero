@@ -90,6 +90,8 @@ Arquivos: `tools/balance-lab/` (+ `scripts/balance-lab.mjs`).
 - **Melhorias:** aba para editar custo, nome e descrição dos nós da árvore; filtro por ramo/busca. Grava em `src/domain/upgrades/data/upgrade-overrides.json`; merge em `UpgradeOverrides` / `UpgradeCatalog`. API `GET|PUT /api/upgrades` + restore de backups.
 - **Economia:** auditoria read-only de ouro por fase (mapa/capítulo) + pool das lojas (preços efetivos e custo de renovação). API `GET /api/economy-audit`.
 - **Wave Power (Missões):** botão no editor de batalha calcula poder da fase via `estimatePhasePower` + `DEFAULT_REFERENCE_PARTY`; exibe HP total, DPS da party, tempo de clear e pressão por wave. API `GET /api/wave-power?phaseId=`.
+- **Simulação Real (Missões + Inimigos):** botão "▶️ Simular combate (real)" roda o motor real (`CombatTurnPhase`) tick a tick via `CombatEncounterSimulator`; suporta fase completa, wave única ou encontro ad-hoc; seed determinística; `POST /api/combat-sim`; resultado: outcome, winRate, tempo, HP% restante por herói, waves limpas.
+- **Balance Pack (Manutenção):** export/preview/import de todos os overrides em JSON versionado (`side-hero-balance-pack` v1); backup por scope antes do import. API `GET /api/balance-pack`, `POST /api/balance-pack/preview|import`.
 - **Stock Preview (Lojas):** painel seed/tier gera prévia determinística do estoque via `previewShopStock`; exibe itens sorteados com preço efetivo. API `GET /api/shops/:id/stock-preview?seed=&tier=`.
 
 Não entra no zip de release.

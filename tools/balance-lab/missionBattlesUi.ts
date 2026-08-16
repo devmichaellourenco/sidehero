@@ -20,6 +20,13 @@ import {
   partyLabel,
 } from './referenceParty';
 import { openEnemyInSimulator } from './navigation';
+import {
+  renderRunsSelectHtml,
+  readRunsSelect,
+  getRefPartyForApi,
+  fetchCombatSim,
+  renderSimResult,
+} from './combatSimUi';
 
 type MissionKind = 'main' | 'side' | 'normal';
 
@@ -530,7 +537,12 @@ function renderEditor(): string {
       <div id="mb-party-editor-wrap">
         ${renderPartyEditorHtml(getReferenceParty())}
       </div>
-      <button type="button" class="lab-btn--info" id="mb-load-wave-power">⚡ Calcular poder das waves</button>
+      <div class="cs-action-row">
+        <button type="button" class="lab-btn--info" id="mb-load-wave-power">⚡ Calcular poder das waves</button>
+        <span class="cs-sep">·</span>
+        ${renderRunsSelectHtml('mb-sim-runs', 1)}
+        <button type="button" class="lab-btn--info" id="mb-load-combat-sim">▶️ Simular combate (real)</button>
+      </div>
     </div>
   `;
 }
@@ -688,6 +700,24 @@ function bindEditor(root: HTMLElement): void {
       .catch((err: Error) => {
         if (resultsEl) resultsEl.innerHTML = `<p class="lab-hint">Erro ao calcular poder: ${err.message}</p>`;
       });
+  });
+
+  root.querySelector('#mb-load-combat-sim')?.addEventListener('click', () => {
+    const phaseId = selectedMission?.phaseTemplateId;
+    if (!phaseId) return;
+    const container = root.querySelector<HTMLElement>('#mb-wave-power');
+    const resultsId = 'mb-combat-sim-results';
+    let resultsEl = root.querySelector<HTMLElement>(`#${resultsId}`);
+    if (!resultsEl) {
+      resultsEl = document.createElement('div');
+      resultsEl.id = resultsId;
+      container?.appendChild(resultsEl);
+    }
+    resultsEl.innerHTML = '<p class="lab-hint">Simulando…</p>';
+    const runs = readRunsSelect(root, 'mb-sim-runs');
+    void fetchCombatSim({ phaseId, party: getRefPartyForApi(), runs, seed: 1 })
+      .then((data) => { if (resultsEl) renderSimResult(resultsEl, data, runs, phaseId); })
+      .catch((err: Error) => { if (resultsEl) resultsEl.innerHTML = `<p class="lab-hint is-error">Erro: ${err.message}</p>`; });
   });
 
   // Abrir primeiro inimigo de cada wave no Simulador

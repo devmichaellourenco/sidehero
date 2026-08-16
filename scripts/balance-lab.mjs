@@ -16,6 +16,13 @@ import {
   isScopeJsonBacked,
 } from './balance-lab/promotion.mjs';
 import {
+  buildBalancePack,
+  validateBalancePack,
+  previewBalancePack,
+  resolveImportScopes,
+  listBalancePackScopes,
+} from './balance-lab/balancePack.mjs';
+import {
   OVERRIDES_PATH,
   BACKUPS_DIR,
   REWARD_OVERRIDES_PATH,
@@ -36,7 +43,6 @@ import {
   PUBLIC_ENEMY_SPRITES_DIR,
   SCOPE_MAP,
 } from './balance-lab/paths.mjs';
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const outDir = join(root, 'tools/balance-lab/dist');
@@ -44,6 +50,9 @@ const port = Number(process.env.BALANCE_LAB_PORT ?? 5179);
 
 /** @type {null | typeof import('../tools/balance-lab/missionBattlesCatalog.ts')} */
 let catalogApi = null;
+
+/** @type {null | typeof import('../tools/balance-lab/combatSimCatalog.ts')} */
+let combatSimApi = null;
 
 async function build() {
   await mkdir(outDir, { recursive: true });
@@ -78,11 +87,23 @@ async function build() {
     logLevel: 'info',
   });
 
+  await esbuild.build({
+    entryPoints: [join(root, 'tools/balance-lab/combatSimCatalog.ts')],
+    outfile: join(outDir, 'combatSimCatalog.mjs'),
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    target: 'node20',
+    packages: 'bundle',
+    logLevel: 'info',
+  });
+
   await copyFile(join(root, 'tools/balance-lab/index.html'), join(outDir, 'index.html'));
   await copyFile(join(root, 'tools/balance-lab/lab.css'), join(outDir, 'lab.css'));
   await copyFile(join(root, 'tools/balance-lab/lab.tokens.css'), join(outDir, 'lab.tokens.css'));
 
   catalogApi = await import(pathToFileURL(join(outDir, 'missionBattlesCatalog.mjs')).href);
+  combatSimApi = await import(pathToFileURL(join(outDir, 'combatSimCatalog.mjs')).href);
 }
 
 function contentType(path) {
@@ -202,6 +223,46 @@ async function writeOverridesFile(file) {
   await mkdir(dirname(OVERRIDES_PATH), { recursive: true });
   const payload = `${JSON.stringify(file, null, 2)}\n`;
   await writeFile(OVERRIDES_PATH, payload, 'utf8');
+}
+
+/**
+ * Lê o JSON de override de qualquer scope do SCOPE_MAP.
+ * Se o arquivo não existir, retorna um stub mínimo.
+ *
+ * @param {string} scope
+ * @returns {Promise<object>}
+ */
+async function readScopeOverridePayload(scope) {
+  const info = SCOPE_MAP[scope];
+  if (!info) throw new Error(`Scope inválido: ${scope}`);
+  try {
+    const raw = await readFile(info.override, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return { version: 1, updatedAt: null };
+  }
+}
+
+/**
+ * Escreve o JSON de override de um scope (substituição completa do arquivo).
+ *
+ * @param {string} scope
+ * @param {unknown} payload
+ */
+async function writeScopeOverridePayload(scope, payload) {
+  const info = SCOPE_MAP[scope];
+  if (!info) throw new Error(`Scope inválido: ${scope}`);
+  await mkdir(dirname(info.override), { recursive: true });
+  await writeFile(info.override, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+}
+
+async function collectWorkspaceScopePayloads() {
+  /** @type {Record<string, unknown>} */
+  const scopes = {};
+  for (const id of listBalancePackScopes()) {
+    scopes[id] = await readScopeOverridePayload(id);
+  }
+  return scopes;
 }
 
 async function backupCurrentOverrides() {
@@ -1136,17 +1197,36 @@ async function handleApi(req, res, url) {
   if (req.method === 'PUT' && url.pathname === '/api/upgrades') {
     const upgradeFile = await readUpgradeOverridesFile();
     const body = await readBody(req);
-    const backupPath = await backupCurrentUpgradeOverrides();
 
     for (const id of Array.isArray(body?.clearIds) ? body.clearIds : []) {
       if (typeof id === 'string') delete upgradeFile.upgrades[id];
     }
     for (const [upgradeId, raw] of Object.entries(body?.upgrades ?? {})) {
+      const inputErrors = catalogApi.validateUpgradeOverrideInput(raw);
+      if (inputErrors.length > 0) {
+        sendJson(res, 400, {
+          ok: false,
+          error: `${upgradeId}: ${inputErrors.join(' · ')}`,
+          dependencyErrors: inputErrors,
+        });
+        return;
+      }
       const normalized = catalogApi.normalizeUpgradeOverride(raw);
       if (!normalized) { delete upgradeFile.upgrades[upgradeId]; continue; }
       upgradeFile.upgrades[upgradeId] = normalized;
     }
 
+    const dependencyErrors = catalogApi.validateUpgradeDependencies(upgradeFile);
+    if (dependencyErrors.length > 0) {
+      sendJson(res, 400, {
+        ok: false,
+        error: dependencyErrors.join(' · '),
+        dependencyErrors,
+      });
+      return;
+    }
+
+    const backupPath = await backupCurrentUpgradeOverrides();
     upgradeFile.updatedAt = new Date().toISOString();
     upgradeFile.version = 1;
     await writeUpgradeOverridesFile(upgradeFile);
@@ -1228,6 +1308,40 @@ async function handleApi(req, res, url) {
 
     const snapshot = catalogApi.estimatePhasePower(phaseId, party);
     sendJson(res, 200, { ok: true, ...snapshot });
+    return;
+  }
+
+  // ──── Simulação de combate real (headless) ────
+  if (req.method === 'POST' && url.pathname === '/api/combat-sim') {
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { ok: false, error: 'Body JSON inválido' });
+      return;
+    }
+
+    if (!body || (!body.phaseId && !body.slots)) {
+      sendJson(res, 400, { ok: false, error: 'Informe phaseId ou slots' });
+      return;
+    }
+
+    const runs = Math.max(1, Math.min(50, parseInt(body.runs ?? 1, 10) || 1));
+    const request = {
+      party: Array.isArray(body.party) && body.party.length > 0 ? body.party : undefined,
+      phaseId: body.phaseId ?? undefined,
+      waveIndex: body.waveIndex !== undefined ? Number(body.waveIndex) : undefined,
+      slots: Array.isArray(body.slots) && body.slots.length > 0 ? body.slots : undefined,
+      maxSeconds: body.maxSeconds ? Number(body.maxSeconds) : undefined,
+      seed: body.seed !== undefined ? Number(body.seed) : undefined,
+    };
+
+    try {
+      const result = combatSimApi.simulateEncounterBatch(request, runs);
+      sendJson(res, 200, { ok: true, ...result });
+    } catch (err) {
+      sendJson(res, 500, { ok: false, error: String(err?.message ?? err) });
+    }
     return;
   }
 
@@ -1371,6 +1485,92 @@ async function handleApi(req, res, url) {
     }
     const result = await applyPromotion(scope, backupFn);
     sendJson(res, result.ok ? 200 : 400, result);
+    return;
+  }
+
+  // ──── Balance Pack (export / preview / import de todos os overrides) ────
+  if (req.method === 'GET' && url.pathname === '/api/balance-pack') {
+    const label = url.searchParams.get('label') || undefined;
+    const scopes = await collectWorkspaceScopePayloads();
+    const pack = buildBalancePack(scopes, { label });
+    sendJson(res, 200, { ok: true, pack });
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/balance-pack/preview') {
+    const body = await readBody(req);
+    const validated = validateBalancePack(body?.pack ?? body);
+    if (!validated.ok) {
+      sendJson(res, 400, validated);
+      return;
+    }
+    const current = await collectWorkspaceScopePayloads();
+    const onlyScopes = Array.isArray(body?.scopes) ? body.scopes.filter((s) => typeof s === 'string') : undefined;
+    const preview = previewBalancePack(validated.pack, current, onlyScopes);
+    sendJson(res, 200, preview);
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/balance-pack/import') {
+    const body = await readBody(req);
+    const confirmed = body?.confirmed === true;
+    if (!confirmed) {
+      sendJson(res, 400, {
+        ok: false,
+        error: 'Confirmação explícita necessária: { pack, confirmed: true }',
+      });
+      return;
+    }
+    const validated = validateBalancePack(body?.pack);
+    if (!validated.ok) {
+      sendJson(res, 400, validated);
+      return;
+    }
+    const onlyScopes = Array.isArray(body?.scopes)
+      ? body.scopes.filter((s) => typeof s === 'string')
+      : undefined;
+    const targets = resolveImportScopes(validated.pack, onlyScopes);
+    if (targets.length === 0) {
+      sendJson(res, 400, { ok: false, error: 'Nenhum scope selecionado para importar' });
+      return;
+    }
+
+    const current = await collectWorkspaceScopePayloads();
+    const preview = previewBalancePack(validated.pack, current, targets);
+    if (preview.totalChanges === 0) {
+      sendJson(res, 200, {
+        ok: true,
+        imported: [],
+        backups: {},
+        message: 'Nenhuma alteração — workspace já está alinhado ao pack.',
+        preview,
+      });
+      return;
+    }
+
+    /** @type {Record<string, string | null>} */
+    const backups = {};
+    const imported = [];
+    for (const scope of targets) {
+      const row = preview.scopes.find((s) => s.scope === scope);
+      if (!row || row.changeCount === 0) continue;
+      const backupFn = resolveOverrideBackupFn(scope);
+      if (!backupFn) {
+        sendJson(res, 500, { ok: false, error: `Backup indisponível para scope ${scope}` });
+        return;
+      }
+      backups[scope] = await backupFn();
+      await writeScopeOverridePayload(scope, validated.pack.scopes[scope]);
+      imported.push(scope);
+    }
+
+    sendJson(res, 200, {
+      ok: true,
+      imported,
+      backups,
+      importedAt: new Date().toISOString(),
+      preview,
+    });
     return;
   }
 

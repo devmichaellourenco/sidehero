@@ -68,13 +68,6 @@ function starsForNormalPhase(phaseNumber: number): MissionStars {
   return base;
 }
 
-function normalRewardsForStars(stars: MissionStars): { gold: number; xp: number } {
-  return {
-    gold: 8 + stars * 6,
-    xp: 6 + stars * 4,
-  };
-}
-
 function normalMissionName(mapName: string, phaseNumber: number, stars: MissionStars): string {
   const pool = NORMAL_NAME_POOL[stars];
   const label = pool[phaseNumber % pool.length]!;
@@ -117,7 +110,6 @@ function buildNormalMissions(mapIndex: number, mapId: MapId, mapName: string): M
       name: normalMissionName(mapName, phaseNumber, stars),
       phaseTemplateId: phaseId,
       stars,
-      rewards: normalRewardsForStars(stars),
     });
   }
   return missions;
@@ -146,7 +138,6 @@ function buildPilotSideMissions(): MissionDefinition[] {
       phaseTemplateId: '1-2',
       stars: 1,
       unlockAfterMissionIds: [],
-      rewards: { gold: 15, xp: 10 },
     },
     {
       id: stendraPatrol,
@@ -156,7 +147,6 @@ function buildPilotSideMissions(): MissionDefinition[] {
       phaseTemplateId: '1-3',
       stars: 1,
       unlockAfterMissionIds: [],
-      rewards: { gold: 20, xp: 15 },
     },
     {
       id: stendraSkirmish,
@@ -166,7 +156,6 @@ function buildPilotSideMissions(): MissionDefinition[] {
       phaseTemplateId: '1-4',
       stars: 2,
       unlockAfterMissionIds: [],
-      rewards: { gold: 28, xp: 18 },
     },
     {
       id: stendraAsh,
@@ -176,7 +165,7 @@ function buildPilotSideMissions(): MissionDefinition[] {
       phaseTemplateId: '1-6',
       stars: 2,
       unlockAfterMissionIds: [mainMissionId('1-1')],
-      rewards: { gold: 40, xp: 25, sceneId: 'side:stendra_ash_trail' },
+      rewards: { sceneId: 'side:stendra_ash_trail' },
     },
     {
       id: stendraCache,
@@ -187,8 +176,6 @@ function buildPilotSideMissions(): MissionDefinition[] {
       stars: 3,
       unlockAfterMissionIds: [stendraAsh],
       rewards: {
-        gold: 60,
-        xp: 40,
         itemId: 'side_stendra_cache_charm',
         sceneId: 'side:stendra_hidden_cache',
       },
@@ -201,7 +188,7 @@ function buildPilotSideMissions(): MissionDefinition[] {
       phaseTemplateId: '2-6',
       stars: 2,
       unlockAfterMissionIds: [mainMissionId('2-1')],
-      rewards: { gold: 45, xp: 30, sceneId: 'side:gruftall_ash_scout' },
+      rewards: { sceneId: 'side:gruftall_ash_scout' },
     },
     {
       id: valdrisWhisper,
@@ -211,7 +198,7 @@ function buildPilotSideMissions(): MissionDefinition[] {
       phaseTemplateId: '3-3',
       stars: 2,
       unlockAfterMissionIds: [],
-      rewards: { gold: 50, xp: 35, sceneId: 'side:valdris_whisper' },
+      rewards: { sceneId: 'side:valdris_whisper' },
     },
     {
       id: morthavenRun,
@@ -221,7 +208,7 @@ function buildPilotSideMissions(): MissionDefinition[] {
       phaseTemplateId: '4-12',
       stars: 3,
       unlockAfterMissionIds: [mainMissionId('4-5')],
-      rewards: { gold: 70, xp: 45, sceneId: 'side:morthaven_seal_run' },
+      rewards: { sceneId: 'side:morthaven_seal_run' },
     },
   ];
 }

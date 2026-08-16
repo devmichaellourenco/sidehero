@@ -1,1 +1,12 @@
-{"version":1,"updatedAt":null,"upgrades":{}}
+{
+  "version": 1,
+  "updatedAt": "2026-08-16T01:18:38.520Z",
+  "upgrades": {
+    "battle_stats_1": {
+      "cost": 20
+    },
+    "battle_skill_slot_2": {
+      "cost": 50
+    }
+  }
+}

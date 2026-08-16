@@ -5,7 +5,17 @@ import {
   listUpgradeLayoutEntries,
   UPGRADE_TREE_MIN_NODE_DISTANCE,
 } from './UpgradeTreeLayout';
-import { isStraightBranchEdge, resolveUpgradeParentIds } from './UpgradeTreeGraphPresentation';
+import {
+  findSiblingBranchConflicts,
+  isStraightBranchEdge,
+  resolveUpgradeParentIds,
+} from './UpgradeTreeGraphPresentation';
+
+function catalogEdges() {
+  return UPGRADE_CATALOG.flatMap((entry) =>
+    resolveUpgradeParentIds(entry.id).map((parentId) => ({ fromId: parentId, toId: entry.id })),
+  );
+}
 
 describe('UpgradeTreeLayout', () => {
   it('mantém distância mínima entre centros dos nodos', () => {
@@ -43,4 +53,51 @@ describe('UpgradeTreeLayout', () => {
       }
     }
   });
+
+  it('dá um ângulo distinto para cada filho do mesmo pai', () => {
+    const conflicts = findSiblingBranchConflicts(catalogEdges());
+
+    expect(
+      conflicts,
+      conflicts
+        .map((c) => `${c.parentId} envia ${c.childIds.join(' e ')} na direção ${c.direction}°`)
+        .join('; '),
+    ).toEqual([]);
+  });
+
+  it('nenhuma aresta atravessa um nodo que não é sua ponta', () => {
+    const entries = listUpgradeLayoutEntries();
+
+    for (const edge of catalogEdges()) {
+      const from = getUpgradeNodePosition(edge.fromId);
+      const to = getUpgradeNodePosition(edge.toId);
+      if (!from || !to) continue;
+
+      for (const other of entries) {
+        if (other.id === edge.fromId || other.id === edge.toId) continue;
+
+        expect(
+          distanceToSegment(other, from, to),
+          `${edge.fromId} -> ${edge.toId} passa por cima de ${other.id}`,
+        ).toBeGreaterThanOrEqual(UPGRADE_TREE_MIN_NODE_DISTANCE / 2);
+      }
+    }
+  });
 });
+
+function distanceToSegment(
+  point: { x: number; y: number },
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared === 0) return Math.hypot(point.x - start.x, point.y - start.y);
+
+  const t = Math.max(
+    0,
+    Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared),
+  );
+  return Math.hypot(point.x - (start.x + t * dx), point.y - (start.y + t * dy));
+}

@@ -3,6 +3,13 @@
  */
 import { confirmChangeReview } from './changeReview';
 import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
+import {
+  parseRequirementsJson,
+  renderDependencyEditor,
+  sameDependencyDraft,
+  selectedParentIds,
+  type UpgradeDependencyDraft,
+} from './upgradeDependencyEditor';
 
 type FieldDef = { key: string; label: string; step: number };
 type TextField = { key: string; label: string };
@@ -13,8 +20,20 @@ interface UpgradeRow {
   feature: string;
   level: number;
   parents: string[];
-  baseline: { name: string; description: string; cost: number };
-  effective: { name: string; description: string; cost: number };
+  baseline: {
+    name: string;
+    description: string;
+    cost: number;
+    parents: string[];
+    requirements: unknown[];
+  };
+  effective: {
+    name: string;
+    description: string;
+    cost: number;
+    parents: string[];
+    requirements: unknown[];
+  };
   hasOverride: boolean;
 }
 
@@ -35,6 +54,7 @@ let statusError = false;
 const dirtyIds = new Set<string>();
 const draftNumbers = new Map<string, Record<string, number>>();
 const draftTexts = new Map<string, { name: string; description: string }>();
+const draftDependencies = new Map<string, UpgradeDependencyDraft>();
 
 function setStatus(message: string, isError = false): void {
   statusMessage = message;
@@ -59,10 +79,15 @@ function syncDraft(): void {
   dirtyIds.clear();
   draftNumbers.clear();
   draftTexts.clear();
+  draftDependencies.clear();
   if (!payload) return;
   for (const row of payload.upgrades) {
     draftNumbers.set(row.id, { cost: row.effective.cost });
     draftTexts.set(row.id, { name: row.effective.name, description: row.effective.description });
+    draftDependencies.set(row.id, {
+      parents: [...row.effective.parents],
+      requirements: structuredClone(row.effective.requirements),
+    });
   }
 }
 
@@ -97,10 +122,16 @@ function updateDirtyChrome(): void {
 function markDirty(id: string, row: UpgradeRow): void {
   const nums = draftNumbers.get(id) ?? {};
   const texts = draftTexts.get(id) ?? { name: row.effective.name, description: row.effective.description };
+  const effectiveDependencies = {
+    parents: row.effective.parents,
+    requirements: row.effective.requirements,
+  };
+  const dependencies = draftDependencies.get(id) ?? effectiveDependencies;
   const changed =
     Number(nums.cost) !== row.effective.cost ||
     texts.name !== row.effective.name ||
-    texts.description !== row.effective.description;
+    texts.description !== row.effective.description ||
+    !sameDependencyDraft(dependencies, effectiveDependencies);
   if (changed) dirtyIds.add(id);
   else dirtyIds.delete(id);
   document.querySelector(`[data-upgrade-id="${id}"]`)?.classList.toggle('is-dirty', dirtyIds.has(id));
@@ -108,6 +139,15 @@ function markDirty(id: string, row: UpgradeRow): void {
 }
 
 async function saveDirty(): Promise<void> {
+  const invalidRequirements = Array.from(
+    document.querySelectorAll<HTMLTextAreaElement>('[data-upgrade-requirements]'),
+  ).find((textarea) => !textarea.checkValidity());
+  if (invalidRequirements) {
+    invalidRequirements.reportValidity();
+    setStatus('Corrija o JSON de requisitos antes de salvar.', true);
+    return;
+  }
+
   const upgrades: Record<string, Record<string, unknown>> = {};
   const clearIds: string[] = [];
 
@@ -116,10 +156,26 @@ async function saveDirty(): Promise<void> {
     if (!row) continue;
     const nums = draftNumbers.get(id) ?? {};
     const texts = draftTexts.get(id) ?? { name: row.effective.name, description: row.effective.description };
+    const dependencies = draftDependencies.get(id) ?? {
+      parents: row.effective.parents,
+      requirements: row.effective.requirements,
+    };
+    const baselineDependencies = {
+      parents: row.baseline.parents,
+      requirements: row.baseline.requirements,
+    };
     const patch: Record<string, unknown> = {};
     if (texts.name !== row.baseline.name) patch.name = texts.name;
     if (texts.description !== row.baseline.description) patch.description = texts.description;
     if (Number(nums.cost) !== row.baseline.cost) patch.cost = Math.max(0, Math.floor(Number(nums.cost)));
+    if (!sameDependencyDraft(dependencies, baselineDependencies)) {
+      if (JSON.stringify(dependencies.parents) !== JSON.stringify(row.baseline.parents)) {
+        patch.parents = dependencies.parents;
+      }
+      if (JSON.stringify(dependencies.requirements) !== JSON.stringify(row.baseline.requirements)) {
+        patch.requirements = dependencies.requirements;
+      }
+    }
     if (Object.keys(patch).length === 0) clearIds.push(id);
     else upgrades[id] = patch;
   }
@@ -154,7 +210,7 @@ export function renderUpgradeTree(): void {
   host.innerHTML = `
     <div class="xp-layout">
       <aside class="xp-sidebar">
-        <p class="lab-hint">Edite custo, nome e descrição das melhorias. Salva em <code>upgrade-overrides.json</code>.</p>
+        <p class="lab-hint">Edite custo, textos, pais e requisitos. A árvore rejeita pais inexistentes, ciclos e múltiplas raízes.</p>
         <input type="text" id="ut-filter" placeholder="Filtrar melhorias…" value="${filterQuery}" class="lab-filter-input" />
         <div class="mb-filter-row">
           <select id="ut-branch">
@@ -190,6 +246,10 @@ export function renderUpgradeTree(): void {
             .map((row) => {
               const nums = draftNumbers.get(row.id) ?? { cost: row.effective.cost };
               const texts = draftTexts.get(row.id) ?? { name: row.effective.name, description: row.effective.description };
+              const dependencies = draftDependencies.get(row.id) ?? {
+                parents: row.effective.parents,
+                requirements: row.effective.requirements,
+              };
               const dirty = dirtyIds.has(row.id) ? ' is-dirty' : '';
               const badge = row.hasOverride ? '<span class="xp-badge">override</span>' : '';
               return `<article class="hc-card${dirty}" data-upgrade-id="${row.id}">
@@ -209,6 +269,14 @@ export function renderUpgradeTree(): void {
                 <label class="hc-desc">Descrição
                   <textarea data-upgrade-desc="${row.id}" rows="2">${texts.description}</textarea>
                 </label>
+                ${renderDependencyEditor(
+                  row.id,
+                  dependencies,
+                  payload.upgrades.map((upgrade) => ({
+                    id: upgrade.id,
+                    name: upgrade.effective.name,
+                  })),
+                )}
                 <p class="lab-hint lab-hint--tight">Baseline: custo ${row.baseline.cost} · "${row.baseline.name}"</p>
                 <button type="button" class="lab-btn--warn" data-reset-upgrade="${row.id}">↺ baseline</button>
               </article>`;
@@ -281,6 +349,32 @@ function bindUpgradeTree(host: HTMLElement): void {
     });
   });
 
+  host.querySelectorAll<HTMLSelectElement>('[data-upgrade-parents]').forEach((select) => {
+    const id = select.dataset.upgradeParents!;
+    select.addEventListener('change', () => {
+      const current = draftDependencies.get(id) ?? { parents: [], requirements: [] };
+      draftDependencies.set(id, { ...current, parents: selectedParentIds(select) });
+      const row = payload?.upgrades.find((upgrade) => upgrade.id === id);
+      if (row) markDirty(id, row);
+    });
+  });
+
+  host.querySelectorAll<HTMLTextAreaElement>('[data-upgrade-requirements]').forEach((textarea) => {
+    const id = textarea.dataset.upgradeRequirements!;
+    textarea.addEventListener('input', () => {
+      try {
+        const requirements = parseRequirementsJson(textarea.value);
+        textarea.setCustomValidity('');
+        const current = draftDependencies.get(id) ?? { parents: [], requirements: [] };
+        draftDependencies.set(id, { ...current, requirements });
+        const row = payload?.upgrades.find((upgrade) => upgrade.id === id);
+        if (row) markDirty(id, row);
+      } catch (error) {
+        textarea.setCustomValidity(error instanceof Error ? error.message : 'JSON inválido');
+      }
+    });
+  });
+
   host.querySelectorAll<HTMLButtonElement>('[data-reset-upgrade]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.resetUpgrade!;
@@ -288,6 +382,10 @@ function bindUpgradeTree(host: HTMLElement): void {
       if (!row) return;
       draftNumbers.set(id, { cost: row.baseline.cost });
       draftTexts.set(id, { name: row.baseline.name, description: row.baseline.description });
+      draftDependencies.set(id, {
+        parents: [...row.baseline.parents],
+        requirements: structuredClone(row.baseline.requirements),
+      });
       dirtyIds.add(id);
       renderUpgradeTree();
     });

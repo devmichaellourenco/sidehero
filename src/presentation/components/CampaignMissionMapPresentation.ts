@@ -240,8 +240,6 @@ function renderFeaturedEnemies(mission: MissionPreviewDto): string {
 
 function renderMissionPreviewBody(mission: MissionPreviewDto): string {
   const rewardBits: string[] = [];
-  if (mission.rewards?.gold) rewardBits.push(`${mission.rewards.gold} ouro`);
-  if (mission.rewards?.xp) rewardBits.push(`${mission.rewards.xp} XP`);
   if (mission.rewards?.itemId) rewardBits.push('item exclusivo');
   if (mission.rewards?.sceneId) rewardBits.push('cena');
 

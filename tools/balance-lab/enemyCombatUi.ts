@@ -4,6 +4,10 @@
 import { confirmChangeReview } from './changeReview';
 import { registerWorkspaceSave, setWorkspaceDirty } from './workspaceState';
 import { openEnemyInSimulator } from './navigation';
+import {
+  fetchCombatSim,
+  renderSimResult,
+} from './combatSimUi';
 
 type FieldDef = { key: string; label: string; step: number };
 
@@ -230,7 +234,13 @@ export function renderEnemyCombat(): void {
                 data-open-enemy-simulator="${enemy.enemyType}"
                 data-open-enemy-role="${enemy.rosterRole === 'boss' ? 'boss' : enemy.rosterRole === 'elite' ? 'elite' : 'trash'}"
               >Abrir no Simulador</button>
+              <button type="button" class="lab-btn--info"
+                data-run-combat-sim="${enemy.enemyType}"
+                data-sim-tier="${enemy.powerTier}"
+                data-sim-role="${enemy.rosterRole === 'boss' ? 'boss' : enemy.rosterRole === 'subboss' ? 'elite' : 'trash'}"
+              >▶️ Simular vs party</button>
             </header>
+            <div id="ec-sim-result-${enemy.enemyType}" class="ec-sim-result"></div>
             <p class="lab-hint">Identidade de combate — crescimento de stats e timing de skills.</p>
             <div class="hc-fields">
               ${numberInputs(payload.identityFields, identityValues, 'identity-field')}
@@ -355,6 +365,23 @@ function bindEnemyCombat(host: HTMLElement): void {
     const enemy = payload?.enemies.find((e) => e.enemyType === enemyType);
     const level = enemy ? Math.max(1, enemy.powerTier * 5) : 1;
     openEnemyInSimulator(enemyType, level, role);
+  });
+
+  host.querySelector<HTMLButtonElement>('[data-run-combat-sim]')?.addEventListener('click', (event) => {
+    const btn = event.currentTarget as HTMLButtonElement;
+    const enemyType = btn.dataset.runCombatSim ?? '';
+    const tier = parseInt(btn.dataset.simTier ?? '1', 10) || 1;
+    const role = (btn.dataset.simRole ?? 'trash') as 'trash' | 'elite' | 'boss';
+    const level = Math.max(1, tier * 5);
+    const container = host.querySelector<HTMLElement>(`#ec-sim-result-${enemyType}`);
+    if (container) container.innerHTML = '<p class="lab-hint">Simulando…</p>';
+    void fetchCombatSim({
+      slots: [{ enemyType, role, count: 3, level }],
+      runs: 1,
+      seed: 0,
+    })
+      .then((data) => { if (container) renderSimResult(container, data, 1); })
+      .catch((err: Error) => { if (container) container.innerHTML = `<p class="lab-hint is-error">Erro: ${err.message}</p>`; });
   });
 
   host.querySelector('#ec-save')?.addEventListener('click', () => {

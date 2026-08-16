@@ -4,6 +4,7 @@
  * Funcionalidades:
  *  - Promoção segura de overrides para catálogo canônico (JSON-backed e TS-backed)
  *  - Histórico de backups com diff entre dois snapshots
+ *  - Export / preview / import de Balance Pack (todos os overrides)
  */
 
 const SCOPE_LABELS: Record<string, string> = {
@@ -32,7 +33,15 @@ type DiffResult = {
   changed: DiffEntry[];
 };
 
+type PackPreviewScope = {
+  scope: string;
+  changeCount: number;
+  nonempty: boolean;
+  diff: DiffResult;
+};
+
 let maintenanceMounted = false;
+let pendingPack: unknown = null;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -286,6 +295,208 @@ async function updateBackupSelects(scope: string): Promise<void> {
   if (container) container.innerHTML = '';
 }
 
+// ── Balance Pack ──────────────────────────────────────────────────────────────
+
+function downloadPackJson(pack: unknown, label?: string | null): void {
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const safeLabel = (label ?? 'workspace')
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+  const blob = new Blob([`${JSON.stringify(pack, null, 2)}\n`], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `side-hero-balance-pack-${safeLabel || 'workspace'}-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderPackDiffTable(diff: DiffResult, limit = 40): string {
+  const rows = [...diff.added, ...diff.changed, ...diff.removed].slice(0, limit);
+  if (rows.length === 0) return '<p class="lab-hint">Sem diferenças neste scope.</p>';
+  const extra =
+    diff.added.length + diff.removed.length + diff.changed.length > limit
+      ? `<p class="lab-hint lab-hint--tight">Mostrando ${limit} de ${
+          diff.added.length + diff.removed.length + diff.changed.length
+        } alterações.</p>`
+      : '';
+  return `
+    ${extra}
+    <div class="maint-diff-table-wrap">
+      <table class="maint-diff-table">
+        <thead><tr><th>Tipo</th><th>Caminho</th><th>Antes</th><th>Depois</th></tr></thead>
+        <tbody>
+          ${rows
+            .map(
+              (entry) => `
+            <tr class="maint-diff-row maint-diff-row--${entry.kind}">
+              <td><span class="maint-diff-kind">${entry.kind}</span></td>
+              <td class="maint-diff-path"><code>${escapeHtml(entry.path)}</code></td>
+              <td class="maint-diff-val">${valueLabel(entry.before)}</td>
+              <td class="maint-diff-val">${valueLabel(entry.after)}</td>
+            </tr>`,
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderPackPreview(preview: {
+  label: string | null;
+  exportedAt: string;
+  totalChanges: number;
+  scopes: PackPreviewScope[];
+}): void {
+  const container = document.getElementById('maint-pack-preview');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="maint-diff-summary">
+      <span class="maint-diff-badge maint-diff-badge--changed">${preview.totalChanges} alterações</span>
+      <span class="xp-muted">${escapeHtml(preview.label ?? '(sem rótulo)')} · ${escapeHtml(
+        preview.exportedAt,
+      )}</span>
+    </div>
+    ${preview.scopes
+      .map((row) => {
+        const checked = row.changeCount > 0 ? 'checked' : '';
+        const disabled = row.changeCount === 0 ? 'disabled' : '';
+        return `
+        <details class="maint-pack-scope" ${row.changeCount > 0 ? 'open' : ''}>
+          <summary>
+            <label>
+              <input type="checkbox" data-pack-scope="${escapeHtml(row.scope)}" ${checked} ${disabled} />
+              <strong>${escapeHtml(SCOPE_LABELS[row.scope] ?? row.scope)}</strong>
+              <span class="xp-muted">${row.changeCount} mudança(s)${
+                row.nonempty ? '' : ' · payload vazio'
+              }</span>
+            </label>
+          </summary>
+          ${renderPackDiffTable(row.diff)}
+        </details>`;
+      })
+      .join('')}
+    <div class="maint-apply-row">
+      <button type="button" class="lab-btn--warn" id="btn-import-pack" ${
+        preview.totalChanges === 0 ? 'disabled' : ''
+      }>
+        Importar scopes selecionados
+      </button>
+      <p class="lab-hint maint-apply-warning">
+        ⚠ Substitui os overrides selecionados. Backup automático por scope antes de gravar.
+      </p>
+    </div>
+  `;
+
+  document.getElementById('btn-import-pack')?.addEventListener('click', () => {
+    void importPendingPack();
+  });
+}
+
+async function exportBalancePack(): Promise<void> {
+  const labelInput = document.getElementById('maint-pack-label') as HTMLInputElement | null;
+  const label = labelInput?.value.trim() || undefined;
+  setStatus('Exportando balance pack…');
+  try {
+    const qs = label ? `?label=${encodeURIComponent(label)}` : '';
+    const res = await fetch(`/api/balance-pack${qs}`);
+    const data = await res.json();
+    if (!data.ok) {
+      setStatus(`Erro: ${data.error ?? 'Falha ao exportar'}`, true);
+      return;
+    }
+    downloadPackJson(data.pack, data.pack?.label);
+    const nonempty = (data.pack?.meta?.nonemptyScopes ?? []).length;
+    setStatus(`Pack exportado (${nonempty} scope(s) com dados).`);
+  } catch (err) {
+    setStatus(`Erro: ${String(err)}`, true);
+  }
+}
+
+async function previewPackFile(file: File): Promise<void> {
+  setStatus('Lendo pack…');
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text) as unknown;
+    pendingPack = parsed;
+    const res = await fetch('/api/balance-pack/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pack: parsed }),
+    });
+    const data = await res.json();
+    if (!data.ok && data.error) {
+      setStatus(`Erro: ${data.error}`, true);
+      const container = document.getElementById('maint-pack-preview');
+      if (container) container.innerHTML = `<p class="lab-status is-error">${escapeHtml(data.error)}</p>`;
+      return;
+    }
+    renderPackPreview(data);
+    setStatus(
+      data.totalChanges === 0
+        ? 'Pack idêntico ao workspace atual.'
+        : `Preview pronto: ${data.totalChanges} alteração(ões).`,
+    );
+  } catch (err) {
+    setStatus(`Erro: ${String(err)}`, true);
+  }
+}
+
+async function importPendingPack(): Promise<void> {
+  if (!pendingPack) {
+    setStatus('Carregue um pack antes de importar.', true);
+    return;
+  }
+  const selected = Array.from(
+    document.querySelectorAll<HTMLInputElement>('[data-pack-scope]:checked'),
+  ).map((el) => el.dataset.packScope!);
+
+  if (selected.length === 0) {
+    setStatus('Selecione ao menos um scope com alterações.', true);
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Importar ${selected.length} scope(s) do balance pack?\n\n` +
+      selected.map((s) => `• ${SCOPE_LABELS[s] ?? s}`).join('\n') +
+      '\n\nUm backup de cada override será criado antes da substituição.',
+  );
+  if (!confirmed) return;
+
+  setStatus('Importando pack…');
+  try {
+    const res = await fetch('/api/balance-pack/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pack: pendingPack, confirmed: true, scopes: selected }),
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      setStatus(`Erro: ${data.error ?? 'Falha ao importar'}`, true);
+      return;
+    }
+    const imported = (data.imported ?? []) as string[];
+    setStatus(
+      imported.length === 0
+        ? data.message ?? 'Nada importado.'
+        : `Importado: ${imported.join(', ')}. Rebuild da extensão para o jogo.`,
+    );
+    const container = document.getElementById('maint-pack-preview');
+    if (container) {
+      container.innerHTML = `
+        <div class="maint-success">
+          <p class="lab-status">✓ Importação concluída em ${escapeHtml(String(data.importedAt ?? ''))}.</p>
+          <p class="lab-hint">Scopes: ${escapeHtml(imported.join(', ') || '(nenhum)')}</p>
+        </div>`;
+    }
+  } catch (err) {
+    setStatus(`Erro: ${String(err)}`, true);
+  }
+}
+
 // ── Render da aba ─────────────────────────────────────────────────────────────
 
 function renderMaintenanceTab(): void {
@@ -349,6 +560,28 @@ function renderMaintenanceTab(): void {
         <div id="maint-diff-result"></div>
       </div>
 
+      <!-- Balance Pack -->
+      <div class="maint-card">
+        <h3>Balance Pack — export / import de overrides</h3>
+        <p class="lab-hint">
+          Empacota <strong>todos</strong> os arquivos de override do workspace em um JSON versionado
+          (<code>side-hero-balance-pack</code>). Útil para backup de sessão, troca entre máquinas e review.
+          Não inclui catálogos canônicos — só overrides.
+        </p>
+        <div class="maint-form-row">
+          <label class="lab-field">
+            <span class="lab-field-name">Rótulo (opcional)</span>
+            <input type="text" id="maint-pack-label" placeholder="ex.: early-game-v2" />
+          </label>
+          <button type="button" class="lab-btn--create" id="btn-export-pack">Exportar pack</button>
+          <label class="lab-btn--info maint-file-btn">
+            Carregar pack…
+            <input type="file" id="maint-pack-file" accept="application/json,.json" hidden />
+          </label>
+        </div>
+        <div id="maint-pack-preview"></div>
+      </div>
+
       <p id="maint-status" class="lab-status" role="status"></p>
     </section>
   `;
@@ -367,6 +600,17 @@ function renderMaintenanceTab(): void {
 
   document.getElementById('btn-diff-backups')?.addEventListener('click', () => {
     void fetchBackupDiff();
+  });
+
+  // Eventos — balance pack
+  document.getElementById('btn-export-pack')?.addEventListener('click', () => {
+    void exportBalancePack();
+  });
+  document.getElementById('maint-pack-file')?.addEventListener('change', (event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) void previewPackFile(file);
+    input.value = '';
   });
 }
 

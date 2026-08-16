@@ -43,6 +43,35 @@ describe('UpgradeOverrides', () => {
     expect(result?.cost).toBe(0);
   });
 
+  it('normaliza parents e requirements editados no Balance Lab', () => {
+    const result = normalizeUpgradeOverride({
+      parents: [' battle_stats_1 ', 'auto_battle_2'],
+      requirements: [
+        { type: 'min_stage', value: 4.8 },
+        { type: 'upgrade_level', feature: 'auto_battle', minLevel: 2 },
+      ],
+    });
+
+    expect(result).toEqual({
+      parents: ['battle_stats_1', 'auto_battle_2'],
+      requirements: [
+        { type: 'min_stage', value: 4 },
+        { type: 'upgrade_level', feature: 'auto_battle', minLevel: 2 },
+      ],
+    });
+  });
+
+  it('descarta requisitos com shape ou feature inválidos', () => {
+    const result = normalizeUpgradeOverride({
+      requirements: [
+        { type: 'unknown' } as never,
+        { type: 'upgrade_level', feature: 'invalid_feature', minLevel: 2 } as never,
+      ],
+    });
+
+    expect(result).toEqual({ requirements: [] });
+  });
+
   it('applyUpgradeOverride retorna definição original sem override', () => {
     const baseline = UPGRADE_CATALOG[0]!;
     const result = applyUpgradeOverride(baseline, null);

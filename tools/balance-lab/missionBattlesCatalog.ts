@@ -281,6 +281,8 @@ export {
   buildUpgradeTreeLabPayload,
   normalizeUpgradeOverride,
   normalizeUpgradeOverridesFile,
+  validateUpgradeDependencies,
+  validateUpgradeOverrideInput,
 } from './upgradeTreeCatalog';
 export {
   buildEconomyAuditPayload,
