@@ -377,6 +377,7 @@ function bindEnemyCombat(host: HTMLElement): void {
     if (container) container.innerHTML = '<p class="lab-hint">Simulando…</p>';
     void fetchCombatSim({
       slots: [{ enemyType, role, count: 3, level }],
+      profile: 'geared',
       runs: 1,
       seed: 0,
     })

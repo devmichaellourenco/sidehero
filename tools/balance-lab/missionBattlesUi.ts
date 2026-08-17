@@ -23,10 +23,13 @@ import { openEnemyInSimulator } from './navigation';
 import {
   renderRunsSelectHtml,
   readRunsSelect,
+  renderProfileSelectHtml,
+  readProfileSelect,
   getRefPartyForApi,
   fetchCombatSim,
   renderSimResult,
 } from './combatSimUi';
+import { renderSweepPanelHtml, bindSweepPanel } from './combatSweepUi';
 
 type MissionKind = 'main' | 'side' | 'normal';
 
@@ -540,6 +543,7 @@ function renderEditor(): string {
       <div class="cs-action-row">
         <button type="button" class="lab-btn--info" id="mb-load-wave-power">⚡ Calcular poder das waves</button>
         <span class="cs-sep">·</span>
+        ${renderProfileSelectHtml('mb-sim-profile', 'geared')}
         ${renderRunsSelectHtml('mb-sim-runs', 1)}
         <button type="button" class="lab-btn--info" id="mb-load-combat-sim">▶️ Simular combate (real)</button>
       </div>
@@ -715,7 +719,8 @@ function bindEditor(root: HTMLElement): void {
     }
     resultsEl.innerHTML = '<p class="lab-hint">Simulando…</p>';
     const runs = readRunsSelect(root, 'mb-sim-runs');
-    void fetchCombatSim({ phaseId, party: getRefPartyForApi(), runs, seed: 1 })
+    const profile = readProfileSelect(root, 'mb-sim-profile');
+    void fetchCombatSim({ phaseId, party: getRefPartyForApi(), profile, runs, seed: 1 })
       .then((data) => { if (resultsEl) renderSimResult(resultsEl, data, runs, phaseId); })
       .catch((err: Error) => { if (resultsEl) resultsEl.innerHTML = `<p class="lab-hint is-error">Erro: ${err.message}</p>`; });
   });
@@ -870,6 +875,7 @@ function renderMissionsEditorInto(host: HTMLElement): void {
             <input type="search" id="mb-filter-q" placeholder="id, nome ou fase" value="${filterQuery.replace(/"/g, '&quot;')}" />
           </label>
         </div>
+        ${renderSweepPanelHtml(filterMap)}
         ${renderList()}
         <div class="mb-backups">
           <h3>Backups</h3>
@@ -936,6 +942,8 @@ function renderMissionsEditorInto(host: HTMLElement): void {
       .then(() => renderMissionsEditor())
       .catch((error: Error) => setStatus(error.message, true));
   });
+
+  bindSweepPanel(host, () => filterMap);
 
   bindEditor(host);
 }

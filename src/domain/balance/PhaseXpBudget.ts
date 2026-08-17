@@ -54,3 +54,14 @@ export function phaseXpScaleForPhase(phaseId: PhaseId): number {
 export function clearPhaseXpScaleCache(): void {
   scaleCache.clear();
 }
+
+/**
+ * XP total que a fase paga num full-clear: o `targetXp` do override quando definido
+ * (fonte única, BAL-017) ou a soma bruta dos kills. Usado para projetar o nível em
+ * que o jogador chega a cada fase.
+ */
+export function effectivePhaseXpTotal(phaseId: PhaseId): number {
+  const targetXp = getPhaseRewardOverride(phaseId)?.targetXp;
+  if (targetXp !== undefined && targetXp > 0) return targetXp;
+  return rawPhaseXpTotal(phaseId);
+}

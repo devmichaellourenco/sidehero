@@ -90,6 +90,8 @@ export interface CombatSimRequest {
   waveIndex?: number;
   slots?: Array<{ enemyType: string; role: string; count: number; level?: number }>;
   party?: Array<{ heroClass: string; level: number }>;
+  /** Preenche gear/atributos/skills da party: `naked` | `geared` | `optimal`. */
+  profile?: string;
   runs?: number;
   seed?: number;
   maxSeconds?: number;
@@ -147,6 +149,34 @@ export function renderRunsSelectHtml(id: string, defaultValue = 1): string {
 export function readRunsSelect(root: HTMLElement, id: string): number {
   const sel = root.querySelector<HTMLSelectElement>(`#${id}`);
   return sel ? parseInt(sel.value, 10) || 1 : 1;
+}
+
+// ── Widget de perfil de referência ─────────────────────────────────────────────
+
+const PROFILE_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'geared', label: 'Equipado (Core)' },
+  { value: 'naked', label: 'Sem gear (piso)' },
+  { value: 'optimal', label: 'Otimizado (teto)' },
+];
+
+/**
+ * Seletor do build da party. Sem ele o sim roda com heróis pelados e o win rate
+ * não representa o jogador real.
+ */
+export function renderProfileSelectHtml(id: string, defaultValue = 'geared'): string {
+  const options = PROFILE_OPTIONS.map(
+    (opt) =>
+      `<option value="${opt.value}" ${opt.value === defaultValue ? 'selected' : ''}>${opt.label}</option>`,
+  ).join('');
+  return `<select id="${id}" class="cs-runs-select" aria-label="Perfil da party">${options}</select>`;
+}
+
+/**
+ * Lê o perfil selecionado.
+ */
+export function readProfileSelect(root: HTMLElement, id: string, fallback = 'geared'): string {
+  const sel = root.querySelector<HTMLSelectElement>(`#${id}`);
+  return sel?.value || fallback;
 }
 
 /**

@@ -14,6 +14,7 @@ import { STARTER_HERO_PROGRESSION } from '../entities/HeroProgression';
 import { resolvePhase } from '../campaign/CampaignCatalog';
 import { createEnemyFromSlot } from '../campaign/WaveEnemyFactory';
 import { emptyBattleSessionStats } from '../combat/BattleSessionStats';
+import { applySimHeroLoadout } from './SimHeroLoadout';
 import type { PhaseId } from '../campaign/CampaignIds';
 import type { HeroClass } from '../entities/HeroClass';
 import type { SimPartyMember, SimAdHocSlot, SimRequest } from './CombatEncounterSimulator';
@@ -27,7 +28,18 @@ export const FALLBACK_PARTY: SimPartyMember[] = [
   { heroClass: 'priest', level: 10 },
 ];
 
-export function buildSimHero(spec: SimPartyMember, index: number): Hero {
+/**
+ * Tier usado para escolher gear e perfil de referência: a fase manda, e no encontro
+ * ad-hoc o maior level dos slots serve de proxy.
+ */
+export function resolveSimTier(request: SimRequest): number {
+  if (request.slots?.length) {
+    return Math.max(1, ...request.slots.map((slot) => slot.level ?? 1));
+  }
+  return resolvePhase(request.phaseId ?? SENTINEL_PHASE)?.difficultyTier ?? 1;
+}
+
+export function buildSimHero(spec: SimPartyMember, index: number, tier = 1): Hero {
   const heroClass = spec.heroClass as HeroClass;
   const level = Math.max(1, Math.floor(spec.level));
   const identity = getHeroCombatIdentity(heroClass);
@@ -35,7 +47,7 @@ export function buildSimHero(spec: SimPartyMember, index: number): Hero {
   const baseAttack = base.attack + (level - 1) * identity.levelUpAttackGain;
   const baseDefense = base.defense + (level - 1) * identity.levelUpDefenseGain;
   const baseMaxHealth = base.health + (level - 1) * identity.levelUpHealthGain;
-  return Hero.restore({
+  const hero = Hero.restore({
     id: `sim-hero-${index}`,
     name: `${heroClass} Lv${level}`,
     heroClass,
@@ -47,6 +59,8 @@ export function buildSimHero(spec: SimPartyMember, index: number): Hero {
     equipment: {},
     ...STARTER_HERO_PROGRESSION,
   });
+
+  return applySimHeroLoadout(hero, spec, tier);
 }
 
 function baseStateProps(heroes: Hero[], stage: number) {

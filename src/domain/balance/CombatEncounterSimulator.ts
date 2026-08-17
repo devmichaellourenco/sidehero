@@ -15,11 +15,18 @@ import {
   buildPhaseState,
   buildAdHocState,
   countTotalEnemies,
+  resolveSimTier,
 } from './CombatSimulatorBuilders';
+import type { SimHeroLoadoutSpec } from './SimHeroLoadout';
+import {
+  resolveSimProfileSpec,
+  type SimReferenceProfile,
+} from './SimReferenceProfiles';
 
 // ── Tipos públicos ─────────────────────────────────────────────────────────────
 
-export interface SimPartyMember {
+/** Campos de loadout são opcionais: sem eles o herói é o piso "pelado". */
+export interface SimPartyMember extends SimHeroLoadoutSpec {
   heroClass: string;
   level: number;
 }
@@ -33,6 +40,8 @@ export interface SimAdHocSlot {
 
 export interface SimRequest {
   party?: SimPartyMember[];
+  /** Preenche o loadout de quem não definiu campos próprios. Default: `naked`. */
+  profile?: SimReferenceProfile;
   /** Fase completa (todas as waves) quando `waveIndex` omitido. */
   phaseId?: PhaseId;
   /** Wave específica; para ao limpar essa wave. */
@@ -172,8 +181,21 @@ function runSingleSim(request: SimRequest, initialState: GameState, seed: number
   return buildResult('timeout', state, ticks, wavesCleared, enemiesKilled + partialKills, totalEnemies);
 }
 
+/** O que o membro declarou vence o perfil; o perfil só preenche as lacunas. */
+function withProfileDefaults(
+  spec: SimPartyMember,
+  profile: SimReferenceProfile | undefined,
+  tier: number,
+): SimPartyMember {
+  if (!profile) return spec;
+  return { ...resolveSimProfileSpec(profile, tier), ...spec };
+}
+
 function buildInitialState(request: SimRequest, party: SimPartyMember[]): GameState {
-  const heroes = party.map((spec, i) => buildSimHero(spec, i));
+  const tier = resolveSimTier(request);
+  const heroes = party.map((spec, i) =>
+    buildSimHero(withProfileDefaults(spec, request.profile, tier), i, tier),
+  );
   if (request.slots) return buildAdHocState(heroes, request.slots);
   if (request.phaseId) return buildPhaseState(heroes, request.phaseId, request.waveIndex ?? 0);
   return buildPhaseState(heroes, SENTINEL_PHASE, 0);

@@ -2909,3 +2909,23 @@ textarea {
 .cs-hero-table { margin-top: 8px; width: 100%; max-width: 420px; }
 
 .ec-sim-result { margin: 6px 0; min-height: 0; }
+
+/* ── Varredura de win rate por mapa ── */
+.mb-sweep {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.mb-sweep h3 { margin: 0 0 4px; font-size: 0.9rem; }
+
+.cs-sweep-outliers { margin-top: 6px; }
+
+.cs-sweep-table { font-size: 0.78rem; }
+.cs-sweep-table .cs-sweep-num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.cs-sweep-row--hard td { background: rgba(248, 113, 113, 0.16); }
+.cs-sweep-row--easy td { background: rgba(251, 191, 36, 0.12); }
+.cs-sweep-row--band td { background: rgba(74, 222, 128, 0.14); }

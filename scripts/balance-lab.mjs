@@ -1329,6 +1329,7 @@ async function handleApi(req, res, url) {
     const runs = Math.max(1, Math.min(50, parseInt(body.runs ?? 1, 10) || 1));
     const request = {
       party: Array.isArray(body.party) && body.party.length > 0 ? body.party : undefined,
+      profile: combatSimApi.isSimReferenceProfile(body.profile) ? body.profile : undefined,
       phaseId: body.phaseId ?? undefined,
       waveIndex: body.waveIndex !== undefined ? Number(body.waveIndex) : undefined,
       slots: Array.isArray(body.slots) && body.slots.length > 0 ? body.slots : undefined,
@@ -1338,6 +1339,35 @@ async function handleApi(req, res, url) {
 
     try {
       const result = combatSimApi.simulateEncounterBatch(request, runs);
+      sendJson(res, 200, { ok: true, ...result });
+    } catch (err) {
+      sendJson(res, 500, { ok: false, error: String(err?.message ?? err) });
+    }
+    return;
+  }
+
+  // ──── Varredura de win rate por mapa (headless) ────
+  if (req.method === 'GET' && url.pathname === '/api/combat-sim-sweep') {
+    const mapId = url.searchParams.get('mapId');
+    if (!mapId) {
+      sendJson(res, 400, { ok: false, error: 'Informe mapId' });
+      return;
+    }
+
+    const profileRaw = url.searchParams.get('profile');
+    const runsRaw = url.searchParams.get('runs');
+    const seedRaw = url.searchParams.get('seed');
+    const classesRaw = url.searchParams.get('classes');
+
+    const options = {
+      profile: combatSimApi.isSimReferenceProfile(profileRaw) ? profileRaw : undefined,
+      runsPerPhase: runsRaw !== null ? Math.max(1, Math.min(50, Number(runsRaw) || 10)) : undefined,
+      seed: seedRaw !== null ? Number(seedRaw) : undefined,
+      partyClasses: classesRaw ? classesRaw.split(',').map((c) => c.trim()).filter(Boolean) : undefined,
+    };
+
+    try {
+      const result = combatSimApi.sweepMapWinRate(mapId, options);
       sendJson(res, 200, { ok: true, ...result });
     } catch (err) {
       sendJson(res, 500, { ok: false, error: String(err?.message ?? err) });
