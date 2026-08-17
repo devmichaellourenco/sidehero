@@ -1,205 +1,205 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-17T11:59:46.421Z",
+  "updatedAt": "2026-08-17T14:22:17.243Z",
   "overrides": {
     "1-1": {
-      "targetXp": 100,
+      "targetXp": 30,
       "targetGold": 119
     },
     "1-2": {
-      "targetXp": 100,
+      "targetXp": 19,
       "targetGold": 122
     },
     "1-3": {
-      "targetXp": 105,
+      "targetXp": 19,
       "targetGold": 125
     },
     "1-4": {
-      "targetXp": 105,
+      "targetXp": 19,
       "targetGold": 129
     },
     "1-5": {
-      "targetXp": 260,
+      "targetXp": 45,
       "targetGold": 251
     },
     "1-6": {
-      "targetXp": 110,
+      "targetXp": 28,
       "targetGold": 136
     },
     "1-7": {
-      "targetXp": 115,
+      "targetXp": 28,
       "targetGold": 140
     },
     "1-8": {
-      "targetXp": 115,
+      "targetXp": 28,
       "targetGold": 144
     },
     "1-9": {
-      "targetXp": 120,
+      "targetXp": 28,
       "targetGold": 148
     },
     "1-10": {
-      "targetXp": 290,
+      "targetXp": 66,
       "targetGold": 289
     },
     "1-11": {
-      "targetXp": 125,
+      "targetXp": 41,
       "targetGold": 156
     },
     "1-12": {
-      "targetXp": 125,
+      "targetXp": 41,
       "targetGold": 161
     },
     "1-13": {
-      "targetXp": 130,
+      "targetXp": 41,
       "targetGold": 165
     },
     "1-14": {
-      "targetXp": 130,
+      "targetXp": 41,
       "targetGold": 170
     },
     "1-15": {
-      "targetXp": 320,
+      "targetXp": 80,
       "targetGold": 331
     },
     "1-16": {
-      "targetXp": 135,
+      "targetXp": 50,
       "targetGold": 179
     },
     "1-17": {
-      "targetXp": 140,
+      "targetXp": 50,
       "targetGold": 184
     },
     "1-18": {
-      "targetXp": 140,
+      "targetXp": 50,
       "targetGold": 190
     },
     "1-19": {
-      "targetXp": 145,
+      "targetXp": 50,
       "targetGold": 195
     },
     "1-20": {
-      "targetXp": 355,
+      "targetXp": 108,
       "targetGold": 381
     },
     "1-21": {
-      "targetXp": 150,
+      "targetXp": 68,
       "targetGold": 206
     },
     "1-22": {
-      "targetXp": 155,
+      "targetXp": 68,
       "targetGold": 212
     },
     "1-23": {
-      "targetXp": 155,
+      "targetXp": 68,
       "targetGold": 218
     },
     "1-24": {
-      "targetXp": 160,
+      "targetXp": 68,
       "targetGold": 224
     },
     "1-25": {
-      "targetXp": 395,
+      "targetXp": 120,
       "targetGold": 437
     },
     "1-26": {
-      "targetXp": 170,
+      "targetXp": 75,
       "targetGold": 236
     },
     "1-27": {
-      "targetXp": 170,
+      "targetXp": 75,
       "targetGold": 243
     },
     "1-28": {
-      "targetXp": 175,
+      "targetXp": 75,
       "targetGold": 250
     },
     "1-29": {
-      "targetXp": 180,
+      "targetXp": 75,
       "targetGold": 257
     },
     "1-30": {
-      "targetXp": 435,
+      "targetXp": 128,
       "targetGold": 502
     },
     "1-31": {
-      "targetXp": 185,
+      "targetXp": 80,
       "targetGold": 271
     },
     "1-32": {
-      "targetXp": 190,
+      "targetXp": 80,
       "targetGold": 279
     },
     "1-33": {
-      "targetXp": 195,
+      "targetXp": 80,
       "targetGold": 287
     },
     "1-34": {
-      "targetXp": 200,
+      "targetXp": 80,
       "targetGold": 295
     },
     "1-35": {
-      "targetXp": 485,
+      "targetXp": 159,
       "targetGold": 576
     },
     "1-36": {
-      "targetXp": 205,
+      "targetXp": 99,
       "targetGold": 312
     },
     "1-37": {
-      "targetXp": 210,
+      "targetXp": 99,
       "targetGold": 320
     },
     "1-38": {
-      "targetXp": 215,
+      "targetXp": 99,
       "targetGold": 329
     },
     "1-39": {
-      "targetXp": 220,
+      "targetXp": 99,
       "targetGold": 338
     },
     "1-40": {
-      "targetXp": 540,
+      "targetXp": 254,
       "targetGold": 661
     },
     "1-41": {
-      "targetXp": 230,
+      "targetXp": 159,
       "targetGold": 358
     },
     "1-42": {
-      "targetXp": 235,
+      "targetXp": 159,
       "targetGold": 368
     },
     "1-43": {
-      "targetXp": 240,
+      "targetXp": 159,
       "targetGold": 378
     },
     "1-44": {
-      "targetXp": 245,
+      "targetXp": 159,
       "targetGold": 389
     },
     "1-45": {
-      "targetXp": 595,
+      "targetXp": 413,
       "targetGold": 759
     },
     "1-46": {
-      "targetXp": 255,
+      "targetXp": 258,
       "targetGold": 411
     },
     "1-47": {
-      "targetXp": 260,
+      "targetXp": 258,
       "targetGold": 422
     },
     "1-48": {
-      "targetXp": 265,
+      "targetXp": 258,
       "targetGold": 434
     },
     "1-49": {
-      "targetXp": 270,
+      "targetXp": 258,
       "targetGold": 446
     },
     "1-50": {
-      "targetXp": 660,
+      "targetXp": 520,
       "targetGold": 871
     }
   }

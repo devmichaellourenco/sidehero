@@ -55,6 +55,16 @@ describe('CampaignWinRateSweep', () => {
     expect(summary.phases[0].partyLevel).toBeGreaterThanOrEqual(5);
   });
 
+  it('farming eleva o nível projetado de chegada', () => {
+    const rush = sweepMapWinRate('stendra', { runsPerPhase: 1, seed: 1, repeatsPerPhase: 1 });
+    const farmed = sweepMapWinRate('stendra', { runsPerPhase: 1, seed: 1, repeatsPerPhase: 3 });
+
+    const lastRush = rush.phases[rush.phases.length - 1].partyLevel;
+    const lastFarmed = farmed.phases[farmed.phases.length - 1].partyLevel;
+
+    expect(lastFarmed).toBeGreaterThan(lastRush);
+  });
+
   it('mapa inexistente devolve varredura vazia', () => {
     const summary = sweepMapWinRate('void_throne', { runsPerPhase: 1 });
     expect(summary.phases).toHaveLength(0);

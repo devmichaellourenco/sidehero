@@ -40,9 +40,9 @@ describe('SkillService — ascensão', () => {
       unspentAscensionPoints: 0,
     });
 
-    expect(service.canAllocateAscension(ascended, 'mar_gla_slash')).toBe(true);
+    expect(service.canAllocateAscension(ascended, 'mar_gla_slash', 2)).toBe(true);
 
-    const updated = service.allocateAscension(ascended, 'mar_gla_slash');
+    const updated = service.allocateAscension(ascended, 'mar_gla_slash', 2);
     expect(updated.toProps().skillRanks.mar_gla_slash).toBe(1);
     expect(updated.toProps().unspentImprovementPoints).toBe(0);
     expect(updated.toProps().unspentAscensionPoints).toBe(0);
@@ -55,12 +55,25 @@ describe('SkillService — ascensão', () => {
       unspentImprovementPoints: 3,
     });
 
-    hero = service.allocateAscension(hero, 'mar_gla_slash');
-    hero = service.allocateAscension(hero, 'mar_gla_slash');
-    hero = service.allocateAscension(hero, 'mar_gla_slash');
+    hero = service.allocateAscension(hero, 'mar_gla_slash', 2);
+    hero = service.allocateAscension(hero, 'mar_gla_slash', 2);
+    hero = service.allocateAscension(hero, 'mar_gla_slash', 2);
 
     expect(hero.toProps().skillRanks.mar_gla_slash).toBe(3);
-    expect(service.canAllocateAscension(hero, 'mar_gla_slash')).toBe(false);
+    expect(service.canAllocateAscension(hero, 'mar_gla_slash', 2)).toBe(false);
+  });
+
+  it('bloqueia skill de evolução sem slot extra desbloqueado', () => {
+    const ascended = Hero.restore({
+      ...Hero.createStarter('k1', 'knight', 'Galneon').toProps(),
+      ascensionId: 'knight_martial_gladiador',
+      unspentImprovementPoints: 1,
+    });
+
+    expect(service.canAllocateAscension(ascended, 'mar_gla_slash', 1)).toBe(false);
+    expect(() => service.allocateAscension(ascended, 'mar_gla_slash', 1)).toThrow(
+      'Não é possível investir nesta skill de ascensão',
+    );
   });
 
   it('acumula skills de tiers anteriores no caminho inato da Nix', () => {

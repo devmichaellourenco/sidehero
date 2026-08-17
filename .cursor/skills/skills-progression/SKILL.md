@@ -25,6 +25,7 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 - Ataque básico: `ATK × basicAttackDamageRatio` da identidade do herói; TTA = `1/ASPD` por combatente (DEX)
 - Slot 0 = Ataque Básico (fixo)
 - Slots extras = `getUnlockedBattleSkillSlotCount(upgradeLevels)`
+- Investir Aprimoramento em skill de classe/evolução exige ao menos 1 slot extra (`battle_skill_slots >= 1`); só o slot fixo do Ataque Básico mantém `canAllocateRank=false` e o use case bloqueia chamadas diretas
 - Scroll ao `+1 rank`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`
 - Aba Skills: carregar `GET_HERO_SKILL_TREE` **e** `GET_HERO_ASCENSION_TREE` (skills de evolução vivem aqui)
 - Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltips nos cards; skills de classe + skills de evolução

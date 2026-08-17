@@ -13,6 +13,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 
 - [x] `+1 rank` respeita pré-requisitos e rank máximo
 - [x] Slots de batalha: básico fixo + slots extras via melhoria `battle_skill_slots`
+- [x] Sem slot extra de skill desbloqueado (apenas slot 0 do Ataque Básico), pontos de Aprimoramento só podem ser gastos em atributos; `[+]` e chamadas diretas para skills de classe/evolução ficam bloqueados
 - [x] Equipar skill: clique ou drag para barra de slots; cooldown na strip
 - [x] Ascensão: uma evolução por vez por caminho; skills de tiers anteriores acumulam; concede `pointsGranted` em **Aprimoramento** (não há pool separado de evolução)
 - [x] Skills de evolução (`pointType: 'ascension'`) gastam/refundam o mesmo `unspentImprovementPoints` e sobem até `maxRank` 3
@@ -41,6 +42,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 ## Invariantes
 
 - Ataque Básico não pode ser removido do slot 0
+- Slot 0 do Ataque Básico não habilita investimento em skills; exige `battle_skill_slots >= 1`
 - `SkillService` valida allocate/ascension no domínio; skills de evolução usam `unspentImprovementPoints`
 - Ascensão concede Aprimoramento (`pointsGranted`); `unspentAscensionPoints` legado migra para 0
 - Ícones via `SkillIconCatalog` / `AssetCatalog`

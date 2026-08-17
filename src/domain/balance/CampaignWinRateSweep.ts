@@ -61,7 +61,16 @@ export interface SweepOptions {
   seed?: number;
   /** Nível mínimo de chegada — evita testar 1-1 com herói nível 1 puro. */
   minLevel?: number;
+  /**
+   * Quantas vezes o jogador luta cada fase antes de avançar. `1` modela quem só
+   * faz um passe pela main; valores acima modelam quem farma normais no
+   * acampamento (o XP por fase é payout **por batalha**, não por fase única).
+   */
+  repeatsPerPhase?: number;
 }
+
+/** Ritmo pretendido no Stendra: ~107 batalhas para 24 níveis em 50 fases. */
+export const INTENDED_REPEATS_PER_PHASE = 2.1;
 
 const DEFAULT_PARTY_CLASSES = ['knight', 'sorcerer', 'priest'];
 
@@ -86,9 +95,11 @@ function levelFromCumulativeXp(cumulativeXp: number, minLevel: number): number {
 export function sweepMapWinRate(mapId: MapId, options: SweepOptions = {}): MapSweepSummary {
   const partyClasses = options.partyClasses?.length ? options.partyClasses : DEFAULT_PARTY_CLASSES;
   const profile: SimReferenceProfile = options.profile ?? 'geared';
-  const runsPerPhase = Math.max(1, Math.floor(options.runsPerPhase ?? 10));
+  // 10 runs oscilam ±20pp em fases de win rate intermediário; 20 é o mínimo estável.
+  const runsPerPhase = Math.max(1, Math.floor(options.runsPerPhase ?? 20));
   const band = options.band ?? DEFAULT_WIN_RATE_BAND;
   const minLevel = Math.max(1, Math.floor(options.minLevel ?? 2));
+  const repeats = Math.max(1, options.repeatsPerPhase ?? INTENDED_REPEATS_PER_PHASE);
 
   const phases = listPhasesForMap(mapId);
   const rows: PhaseSweepRow[] = [];
@@ -117,7 +128,7 @@ export function sweepMapWinRate(mapId: MapId, options: SweepOptions = {}): MapSw
       verdict: classifyWinRate(batch.winRate, band),
     });
 
-    cumulativeXp += effectivePhaseXpTotal(phase.id);
+    cumulativeXp += effectivePhaseXpTotal(phase.id) * repeats;
   }
 
   const outliers = rows.filter((row) => row.verdict !== 'in_band');

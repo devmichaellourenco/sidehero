@@ -103,6 +103,7 @@ function allocateSkills(
   service: SkillService,
   points: number,
   preferredSkillIds: readonly string[],
+  battleSkillSlots: number,
 ): Hero {
   const order = skillAllocationOrder(hero.heroClass, preferredSkillIds);
   let current = hero;
@@ -110,9 +111,11 @@ function allocateSkills(
 
   // Vários passes: subir um rank pode destravar o requisito de outra skill.
   while (remaining > 0) {
-    const allocatable = order.find((skill) => service.canAllocate(current, skill.id));
+    const allocatable = order.find((skill) =>
+      service.canAllocate(current, skill.id, battleSkillSlots),
+    );
     if (!allocatable) break;
-    current = service.allocate(current, allocatable.id);
+    current = service.allocate(current, allocatable.id, battleSkillSlots);
     remaining -= 1;
   }
 
@@ -207,8 +210,15 @@ export function applySimHeroLoadout(
 
     current = Hero.restore({ ...current.toProps(), unspentImprovementPoints: totalPoints });
     current = allocateAttributes(current, attributePoints);
-    current = allocateSkills(current, service, totalPoints - attributePoints, spec.preferredSkillIds ?? []);
-    current = equipBattleSkills(current, service, spec.battleSkillSlots ?? 1);
+    const battleSkillSlots = spec.battleSkillSlots ?? 1;
+    current = allocateSkills(
+      current,
+      service,
+      totalPoints - attributePoints,
+      spec.preferredSkillIds ?? [],
+      battleSkillSlots,
+    );
+    current = equipBattleSkills(current, service, battleSkillSlots);
   }
 
   return equipGear(current, spec, tier).healFull();

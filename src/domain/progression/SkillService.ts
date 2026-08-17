@@ -2,7 +2,11 @@ import { Hero } from '../entities/Hero';
 import { HeroRequirementEvaluator } from '../requirements/HeroRequirementEvaluator';
 import { ISkillService } from './ISkillService';
 import { BASIC_ATTACK_SKILL_ID } from './combat/BasicAttackSkill';
-import { MAX_ACTIVE_BATTLE_SKILLS, toSkillSlotLayout } from './SkillBattleSlots';
+import {
+  hasUnlockedInvestableSkillSlot,
+  MAX_ACTIVE_BATTLE_SKILLS,
+  toSkillSlotLayout,
+} from './SkillBattleSlots';
 import { getSkillById, getSkillsForHero, SKILL_CATALOG } from './SkillCatalog';
 import { SkillDefinition } from './SkillDefinition';
 import { SkillId } from './SkillId';
@@ -62,8 +66,8 @@ export class SkillService implements ISkillService {
 
       const canAllocateRank =
         pointType === 'improvement'
-          ? this.canAllocate(hero, definition.id)
-          : this.canAllocateAscension(hero, definition.id);
+          ? this.canAllocate(hero, definition.id, unlockedBattleSkillSlots)
+          : this.canAllocateAscension(hero, definition.id, unlockedBattleSkillSlots);
 
       return {
         definition,
@@ -78,19 +82,36 @@ export class SkillService implements ISkillService {
     });
   }
 
-  canAllocate(hero: Hero, skillId: SkillId): boolean {
-    return this.canAllocateWithPointType(hero, skillId, 'improvement');
+  canAllocate(hero: Hero, skillId: SkillId, unlockedBattleSkillSlots: number): boolean {
+    return this.canAllocateWithPointType(
+      hero,
+      skillId,
+      'improvement',
+      unlockedBattleSkillSlots,
+    );
   }
 
-  canAllocateAscension(hero: Hero, skillId: SkillId): boolean {
-    return this.canAllocateWithPointType(hero, skillId, 'ascension');
+  canAllocateAscension(
+    hero: Hero,
+    skillId: SkillId,
+    unlockedBattleSkillSlots: number,
+  ): boolean {
+    return this.canAllocateWithPointType(
+      hero,
+      skillId,
+      'ascension',
+      unlockedBattleSkillSlots,
+    );
   }
 
   private canAllocateWithPointType(
     hero: Hero,
     skillId: SkillId,
     pointType: 'improvement' | 'ascension',
+    unlockedBattleSkillSlots: number,
   ): boolean {
+    if (!hasUnlockedInvestableSkillSlot(unlockedBattleSkillSlots)) return false;
+
     const definition = getSkillById(skillId);
     if (!definition || definition.pointType !== pointType) return false;
 
@@ -104,15 +125,19 @@ export class SkillService implements ISkillService {
     return this.evaluator.allMet(hero, definition.requirements);
   }
 
-  allocate(hero: Hero, skillId: SkillId): Hero {
-    if (!this.canAllocate(hero, skillId)) {
+  allocate(hero: Hero, skillId: SkillId, unlockedBattleSkillSlots: number): Hero {
+    if (!this.canAllocate(hero, skillId, unlockedBattleSkillSlots)) {
       throw new Error('Não é possível investir nesta skill');
     }
     return hero.spendImprovementPointOnSkill(skillId);
   }
 
-  allocateAscension(hero: Hero, skillId: SkillId): Hero {
-    if (!this.canAllocateAscension(hero, skillId)) {
+  allocateAscension(
+    hero: Hero,
+    skillId: SkillId,
+    unlockedBattleSkillSlots: number,
+  ): Hero {
+    if (!this.canAllocateAscension(hero, skillId, unlockedBattleSkillSlots)) {
       throw new Error('Não é possível investir nesta skill de ascensão');
     }
     return hero.spendImprovementPointOnSkill(skillId);

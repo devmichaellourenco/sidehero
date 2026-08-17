@@ -33,7 +33,12 @@ describe('SimHeroLoadout', () => {
   describe('pontos de aprimoramento', () => {
     it('"auto" gasta exatamente level - 1 pontos', () => {
       const hero = buildSimHero(
-        { heroClass: 'knight', level: 15, improvementPoints: 'auto' },
+        {
+          heroClass: 'knight',
+          level: 15,
+          improvementPoints: 'auto',
+          battleSkillSlots: 2,
+        },
         0,
         10,
       );
@@ -108,7 +113,7 @@ describe('SimHeroLoadout', () => {
       expect(hero.toProps().equippedSkillIds).toContain('frost_shard');
     });
 
-    it('com 1 slot não equipa skill ativa', () => {
+    it('com 1 slot não investe nem equipa skill ativa', () => {
       const hero = buildSimHero(
         { heroClass: 'knight', level: 25, improvementPoints: 'auto', battleSkillSlots: 1 },
         0,
@@ -116,6 +121,8 @@ describe('SimHeroLoadout', () => {
       );
 
       expect(hero.toProps().equippedSkillIds).toEqual([BASIC_ATTACK_SKILL_ID]);
+      expect(skillRankTotal(hero)).toBe(0);
+      expect(hero.toProps().unspentImprovementPoints).toBeGreaterThan(0);
     });
   });
 

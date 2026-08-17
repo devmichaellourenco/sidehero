@@ -15,6 +15,11 @@ export function getUnlockedBattleSkillSlotCount(upgradeLevels: UpgradeLevels): n
   );
 }
 
+/** O slot 0 é só do Ataque Básico; investir em skills exige ao menos um slot extra. */
+export function hasUnlockedInvestableSkillSlot(unlockedSlotCount: number): boolean {
+  return unlockedSlotCount > BASE_UNLOCKED_BATTLE_SKILL_SLOTS;
+}
+
 export function toSkillSlotLayout(
   equippedSkillIds: readonly (SkillId | null | undefined)[],
   unlockedSlotCount: number,

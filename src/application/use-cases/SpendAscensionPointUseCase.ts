@@ -3,6 +3,7 @@ import { ISkillService } from '../../domain/progression/ISkillService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
+import { getUnlockedBattleSkillSlotCount } from '../../domain/progression/SkillBattleSlots';
 
 export class SpendAscensionPointUseCase {
   constructor(
@@ -20,7 +21,11 @@ export class SpendAscensionPointUseCase {
       throw new Error('Herói não encontrado');
     }
 
-    const updatedHero = this.skillService.allocateAscension(hero, skillId);
+    const updatedHero = this.skillService.allocateAscension(
+      hero,
+      skillId,
+      getUnlockedBattleSkillSlotCount(state.upgradeLevels),
+    );
     const heroes = state.heroes.map((entry) => (entry.id === heroId ? updatedHero : entry));
     const nextState = state
       .withHeroes(heroes)

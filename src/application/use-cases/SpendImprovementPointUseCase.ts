@@ -4,6 +4,7 @@ import { ISkillService } from '../../domain/progression/ISkillService';
 import { IGameStateRepository } from '../../domain/repositories/IGameStateRepository';
 import { GameStatePresenter } from '../presenters/GameStatePresenter';
 import { GameStateDto } from '../dto/GameStateDto';
+import { getUnlockedBattleSkillSlotCount } from '../../domain/progression/SkillBattleSlots';
 
 export type SpendTarget =
   | { type: 'attribute'; key: AttributeKey }
@@ -28,7 +29,11 @@ export class SpendImprovementPointUseCase {
     const updatedHero =
       target.type === 'attribute'
         ? hero.spendImprovementPointOnAttribute(target.key)
-        : this.skillService.allocate(hero, target.skillId);
+        : this.skillService.allocate(
+            hero,
+            target.skillId,
+            getUnlockedBattleSkillSlotCount(state.upgradeLevels),
+          );
 
     const heroes = state.heroes.map((entry) => (entry.id === heroId ? updatedHero : entry));
     const nextState = state.withHeroes(heroes).addLog(`Ponto investido em ${hero.name}`);

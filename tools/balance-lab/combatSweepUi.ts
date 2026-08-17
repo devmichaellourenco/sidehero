@@ -93,9 +93,9 @@ export function renderSweepPanelHtml(mapId: string): string {
           <option value="optimal">Otimizado (teto)</option>
         </select>
         <select id="mb-sweep-runs" class="cs-runs-select" aria-label="Runs por fase">
-          <option value="5">5×</option>
-          <option value="10" selected>10×</option>
-          <option value="20">20×</option>
+          <option value="10">10× (rápido, ruidoso)</option>
+          <option value="20" selected>20×</option>
+          <option value="30">30× (estável)</option>
         </select>
         <button type="button" class="lab-btn--info" id="mb-sweep-run" ${disabled}>▶️ Varrer mapa</button>
       </div>
@@ -118,7 +118,7 @@ export function bindSweepPanel(host: HTMLElement, getMapId: () => string): void 
       return;
     }
     const profile = host.querySelector<HTMLSelectElement>('#mb-sweep-profile')?.value || 'geared';
-    const runs = parseInt(host.querySelector<HTMLSelectElement>('#mb-sweep-runs')?.value ?? '10', 10) || 10;
+    const runs = parseInt(host.querySelector<HTMLSelectElement>('#mb-sweep-runs')?.value ?? '20', 10) || 20;
 
     resultEl.innerHTML = '<p class="lab-hint">Varrendo fases… pode levar alguns segundos.</p>';
     button.disabled = true;
