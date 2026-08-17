@@ -62,7 +62,7 @@ describe('ConfigurableShopCatalog', () => {
         {
           incomplete: { name: 'Sem campos obrigatórios' },
         },
-        ['camp-quartermaster'],
+        ['camp-quartermaster', 'mercado-fronteira', 'arsenal-marco', 'gruftall-bazaar'],
       ),
     );
 

@@ -137,6 +137,8 @@ describe('ShopCatalog balance — caps por main', () => {
     expect(getShopMaxRarityForProgress([])).toBe('uncommon');
     expect(getShopMaxRarityForProgress([mainMissionId('1-1')])).toBe('uncommon');
     expect(getShopMaxRarityForProgress([mainMissionId('1-5')])).toBe('rare');
+    expect(getShopMaxRarityForProgress([mainMissionId('1-10')])).toBe('rare');
+    expect(getShopMaxRarityForProgress([mainMissionId('1-25')])).toBe('epic');
     expect(getShopMaxRarityForProgress([mainMissionId('1-50')])).toBe('epic');
     expect(getShopMaxRarityForProgress([mainMissionId('2-1')])).toBe('epic');
     expect(getShopMaxRarityForProgress([mainMissionId('2-50')])).toBe('legendary');

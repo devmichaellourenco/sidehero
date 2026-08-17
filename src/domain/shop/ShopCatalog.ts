@@ -52,7 +52,8 @@ function highestCompletedMainMapIndex(completedMainIds: readonly MissionId[]): n
 }
 
 /**
- * BAL-015 — teto de raridade da loja por marcos de main (não por difficulty tier).
+ * BAL-015 / BAL-017 — teto de raridade da loja por marcos de main (não por difficulty tier).
+ * Stendra: uncommon (main:1-1) → rare (main:1-10) → epic (main:1-25); legendary só a partir do Ato 2.
  * Mythic mantém o gate de Valdris Ato 3 (`main:3-21` ou tier ≥ 121).
  */
 export function getShopMaxRarityIndex(
@@ -78,6 +79,7 @@ export function getShopMaxRarityIndex(
   }
 
   if (
+    hasCompletedMain(completed, '1-25') ||
     hasCompletedMain(completed, '1-50') ||
     hasCompletedMain(completed, '2-1') ||
     mapReach >= 2
@@ -85,7 +87,10 @@ export function getShopMaxRarityIndex(
     return 3;
   }
 
-  if (hasCompletedMain(completed, '1-5')) {
+  if (
+    hasCompletedMain(completed, '1-10') ||
+    hasCompletedMain(completed, '1-5')
+  ) {
     return 2;
   }
 
