@@ -245,6 +245,84 @@ describe('BattleVictoryDetector', () => {
     expect(payload.xpGained).toBe(2);
   });
 
+  it('derrota soma ouro/XP da tentativa inteira, não só o último tick', () => {
+    const attemptStart = baseState({
+      gold: 100,
+      heroes: [
+        {
+          id: 'h1',
+          name: 'Nix',
+          heroClass: 'sorcerer',
+          emoji: '✦',
+          level: 1,
+          experience: 0,
+          experienceToNextLevel: 100,
+          attack: 10,
+          defense: 5,
+          health: 50,
+          maxHealth: 50,
+          baseAttributes: { str: 1, dex: 3, int: 5 },
+          allocatedAttributes: { str: 0, dex: 0, int: 0 },
+          totalAttributes: { str: 1, dex: 3, int: 5 },
+          unspentImprovementPoints: 0,
+          unspentAscensionPoints: 0,
+          skillRanks: {},
+          equippedSkillIds: [],
+          activeSkills: [],
+          maxActiveSkills: 1,
+          unlockedActiveSkillSlots: 1,
+          ascensionId: null,
+          hasUnspentPoints: false,
+          equipment: {},
+          combatIntent: null,
+          combatSkills: [],
+          combatSkillCooldowns: [],
+          statusEffects: [],
+        },
+      ],
+    });
+    const lastTick = baseState({
+      gold: 118,
+      heroes: [{ ...attemptStart.heroes[0]!, experience: 24, health: 0 }],
+      phaseRun: {
+        phaseId: '1-2',
+        displayName: 'Patrulha',
+        waveIndex: 1,
+        waveCount: 2,
+        isBossWave: false,
+      },
+    });
+    const defeat = baseState({
+      gold: 118,
+      heroes: [{ ...attemptStart.heroes[0]!, experience: 24, health: 50 }],
+      phaseRun: null,
+      combatIntermission: {
+        variant: 'defeat',
+        clearedPhaseId: '1-2',
+        clearedPhaseName: 'Patrulha',
+        nextPhaseId: null,
+        nextPhaseName: null,
+      },
+    });
+
+    const withoutBaseline = buildBattleIntermissionPayload(
+      defeat.combatIntermission!,
+      defeat,
+      lastTick,
+    );
+    expect(withoutBaseline.goldGained).toBe(0);
+    expect(withoutBaseline.xpGained).toBe(0);
+
+    const payload = buildBattleIntermissionPayload(
+      defeat.combatIntermission!,
+      defeat,
+      lastTick,
+      attemptStart,
+    );
+    expect(payload.goldGained).toBe(18);
+    expect(payload.xpGained).toBe(24);
+  });
+
   it('derrota sem delta de XP no herói não inventa XP a partir dos inimigos', () => {
     const previous = baseState({
       gold: 100,

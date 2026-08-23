@@ -26,7 +26,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Overlay de cena narrativa e celebrações Wow bloqueiam ticks até dispensar
 - [x] Footer separa sistemas que abrem telas de ações imediatas: **Baús** no grid; **Abrir baú** e **Abrir todos** na faixa de ações rápidas (**Otimizar equipe** desativado)
 - [x] Sheets de sistema (modal, hero drawer, Log, Stats): seta para baixo fecha; faixa de ícones dos menus disponíveis (locks/acampamento) via `SystemsMenuNavigation` + `SystemsMenuIconPresentation`
-- [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo); clone visual do âncora no overlay (`onboarding-anchor-clone`) para ícone/texto legíveis (ex.: Abrir baú)
+- [x] Onboarding contextual pausa entre dicas (`OnboardingPolicy`); spotlight com furo no véu escuro no âncora (sem véu claro cobrindo o alvo); clone visual do âncora no overlay (`onboarding-anchor-clone`) para ícone/texto legíveis (ex.: Abrir baú); dica de runa (`first-upgrade`) só no acampamento (`canEditParty`), nunca no meio do combate
+- [x] Primeira sessão: após a cena de abertura, card **de boas-vindas** central (`variant: 'welcome'`, sem âncora) cujo CTA abre o mapa; em seguida o tutorial guiado do mapa (pinos → preview do local → Iniciar missão) com passos ancorados em `.campaign-mission-pin--main`, `.campaign-mission-popover` e `.campaign-phase-preview-start`. Passos do mapa só disparam com o mapa aberto (`OnboardingUiContext`) e param após a primeira fase concluída ou ao iniciar a primeira missão
 - [x] Barras de vida: heróis verdes, inimigos vermelhas; texto só da vida atual (negrito) sobre barra fina; tooltip com atual/máx; HP no deck da strip
 - [x] Barras de TTA: countdown regressivo (herói/inimigo) sobre a barra; tooltip com ASPD e cálculo `1÷ASPD`; cadência no painel Estatísticas e na ficha Status
 - [x] Battle field: cena **333×133** intacta (sprites na elevação legada); deck HUD opaco (~50px) abaixo com HP + TTA + skills alinhados coluna a coluna; overlays de resultado/START cobrem cena + deck (Continuar no espaço do deck; sem scroll)
@@ -52,7 +53,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 | Camada | Paths |
 |--------|-------|
 | Presentation | `panel/panel.html`, `panel.css`, `GameViewController`, `GameHudController` |
-| Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy`, `DonationCardPresentation` |
+| Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy` + `OnboardingStepCatalog`, `DonationCardPresentation` |
 | Presentation | `ModalStackController`, `SystemsMenuNavigation`, `BattleChestAffordanceController` |
 | Presentation | `SurfacePinPreference`, `SurfacePinPresentation` |
 | Presentation | `UiOverlayOrchestrator` — exclusividade tutorial/cena/batalha/Wow |
@@ -71,7 +72,9 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 ## Testes obrigatórios
 
 - [x] `BattleChromeLayout.test.ts`, `WowBannerBuilder.test.ts`, `WowBannerCtaPresentation.test.ts`, `WowStripRenderPolicy.test.ts`
-- [x] `OnboardingPolicy.test.ts`, `IdleProgressSummary.test.ts`
+- [x] `OnboardingPolicy.test.ts` — inclui boas-vindas e passos do tutorial do mapa
+- [x] `OnboardingController.test.ts` — spotlight/clone do âncora e card central de boas-vindas
+- [x] `IdleProgressSummary.test.ts`
 - [x] `BattleLogRenderer.test.ts` — log incremental no painel
 - [x] `CampaignMapPresentation.test.ts`, `CampaignTooltipBinder.test.ts` (campanha — ver também `combat-campaign.spec.md`)
 - [x] `DonationCardPresentation.test.ts` — copy gratuito + link Stripe
@@ -88,6 +91,8 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `BattleHudDeckLayout.test.ts` — cena 133px + deck HUD separado no markup
 - [x] `ActionTimeBarPresentation.test.ts` — countdown e tooltip de cálculo TTA
 - [x] `BattleVictoryFlow.test.ts` — clear/defeat revelam detalhes (sem headline) e aguardam Continuar; wave-clear auto-dismiss
+- [x] `BattleVictoryDetector.test.ts` — derrota usa baseline da tentativa para ouro/XP dos kills
+- [x] `BattleAttemptRewardBaseline.test.ts` — snapshot do hub no START
 - [x] `BattleStartFlow.test.ts` — cue START bloqueia avanço e dispara início ao dismiss
 - [x] `MissionBattleStartRelay.test.ts` — pedido unpin → painel principal para iniciar batalha
 

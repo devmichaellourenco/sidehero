@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-23T19:19:33.066Z",
+  "updatedAt": "2026-08-23T19:19:15.605Z",
   "shops": {
     "gruftall-bazaar": {
       "catalogItemIds": [
@@ -12,6 +12,14 @@
         "knight_insignia",
         "crusader_medallion",
         "void_medallion",
+        "ember_king_signet",
+        "lightning_king_torque",
+        "ancient_pact_ring",
+        "divine_thunder_ring",
+        "war_god_insignia",
+        "glaciem_tear",
+        "eternal_oath_medallion",
+        "primordial_relic",
         "draconic_ruby_pact",
         "forgotten_god_seal",
         "faith_amulet",

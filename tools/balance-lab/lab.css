@@ -1078,6 +1078,64 @@ textarea {
   padding: 8px 10px;
 }
 
+.hc-hero-btn.ec-list-btn {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.ec-list-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.28);
+  image-rendering: auto;
+}
+
+.ec-list-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.hc-card header.ec-editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.ec-editor-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.28);
+  image-rendering: auto;
+}
+
+.ec-editor-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ec-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .hc-hero-btn span {
   color: var(--muted);
   font-size: 0.8rem;

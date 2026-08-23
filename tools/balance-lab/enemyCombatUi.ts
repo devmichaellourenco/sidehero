@@ -8,6 +8,7 @@ import {
   fetchCombatSim,
   renderSimResult,
 } from './combatSimUi';
+import { bindSpriteFallback } from './enemyPicker';
 
 type FieldDef = { key: string; label: string; step: number };
 
@@ -191,9 +192,12 @@ export function renderEnemyCombat(): void {
               const badge = e.identity.hasOverride
                 ? '<span class="xp-badge">override</span>'
                 : '';
-              return `<li><button type="button" class="hc-hero-btn${active}${dirty}" data-select-enemy="${e.enemyType}">
-                <strong>${e.name}</strong>
-                <span>${tierBadge(e.powerTier)} · ${e.rosterRole}</span>
+              return `<li><button type="button" class="hc-hero-btn ec-list-btn${active}${dirty}" data-select-enemy="${e.enemyType}">
+                <img class="ec-list-thumb" src="${e.spriteUrl}" alt="" loading="lazy" data-enemy-thumb="${e.enemyType}" />
+                <span class="ec-list-copy">
+                  <strong>${e.name}</strong>
+                  <span>${tierBadge(e.powerTier)} · ${e.rosterRole}</span>
+                </span>
                 ${badge}
               </button></li>`;
             })
@@ -226,19 +230,24 @@ export function renderEnemyCombat(): void {
             ? `
           <section class="hc-card${dirtyIdentities.has(enemy.enemyType) ? ' is-dirty' : ''}"
                    data-identity="${enemy.enemyType}">
-            <header>
-              <strong>${enemy.name}</strong>
-              ${enemy.identity.hasOverride ? '<span class="xp-badge">override</span>' : ''}
-              <span class="xp-muted">${enemy.enemyType} · Tier ${enemy.powerTier} · ${enemy.rosterRole}</span>
-              <button type="button" class="lab-btn--info"
-                data-open-enemy-simulator="${enemy.enemyType}"
-                data-open-enemy-role="${enemy.rosterRole === 'boss' ? 'boss' : enemy.rosterRole === 'elite' ? 'elite' : 'trash'}"
-              >Abrir no Simulador</button>
-              <button type="button" class="lab-btn--info"
-                data-run-combat-sim="${enemy.enemyType}"
-                data-sim-tier="${enemy.powerTier}"
-                data-sim-role="${enemy.rosterRole === 'boss' ? 'boss' : enemy.rosterRole === 'subboss' ? 'elite' : 'trash'}"
-              >▶️ Simular vs party</button>
+            <header class="ec-editor-head">
+              <img class="ec-editor-thumb" src="${enemy.spriteUrl}" alt="" data-enemy-thumb="${enemy.enemyType}" />
+              <div class="ec-editor-copy">
+                <strong>${enemy.name}</strong>
+                ${enemy.identity.hasOverride ? '<span class="xp-badge">override</span>' : ''}
+                <span class="xp-muted">${enemy.enemyType} · Tier ${enemy.powerTier} · ${enemy.rosterRole}</span>
+              </div>
+              <div class="ec-editor-actions">
+                <button type="button" class="lab-btn--info"
+                  data-open-enemy-simulator="${enemy.enemyType}"
+                  data-open-enemy-role="${enemy.rosterRole === 'boss' ? 'boss' : enemy.rosterRole === 'elite' ? 'elite' : 'trash'}"
+                >Abrir no Simulador</button>
+                <button type="button" class="lab-btn--info"
+                  data-run-combat-sim="${enemy.enemyType}"
+                  data-sim-tier="${enemy.powerTier}"
+                  data-sim-role="${enemy.rosterRole === 'boss' ? 'boss' : enemy.rosterRole === 'subboss' ? 'elite' : 'trash'}"
+                >▶️ Simular vs party</button>
+              </div>
             </header>
             <div id="ec-sim-result-${enemy.enemyType}" class="ec-sim-result"></div>
             <p class="lab-hint">Identidade de combate — crescimento de stats e timing de skills.</p>
@@ -277,6 +286,7 @@ export function renderEnemyCombat(): void {
 
   updateDirtyChrome();
   bindEnemyCombat(host);
+  host.querySelectorAll<HTMLImageElement>('[data-enemy-thumb]').forEach(bindSpriteFallback);
 }
 
 function markIdentityDirty(enemyType: string): void {

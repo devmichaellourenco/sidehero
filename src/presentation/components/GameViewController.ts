@@ -64,6 +64,7 @@ import { bindCampaignTooltip, hideCampaignTooltip } from './CampaignTooltipBinde
 import { mountNavArrowIcons } from '../assets/NavArrowPresentation';
 import { hydratePanelIcons } from '../assets/PanelIconHydrator';
 import { buildBattleIntermissionPayload } from './BattleVictoryDetector';
+import { updateBattleAttemptBaseline } from './BattleAttemptRewardBaseline';
 import { BattleVictoryOverlayRenderer } from './BattleVictoryOverlayRenderer';
 import { BattleStripRenderer } from './BattleStripRenderer';
 import { renderBattleStatsBody } from './BattleStatsPresentation';
@@ -114,7 +115,13 @@ import { renderSystemsMenuIconStrip } from './SystemsMenuIconPresentation';
 import { InlineEquipController, InlineEquipHandlers } from '../gear/InlineEquipController';
 import { bindGearDragDrop } from '../gear/GearDragDropBinder';
 import { OnboardingController } from '../onboarding/OnboardingController';
-import { OnboardingStepId, resolveOnboardingStep } from '../onboarding/OnboardingPolicy';
+import {
+  isOnboardingComplete,
+  MAP_TUTORIAL_STEP_IDS,
+  OnboardingStepId,
+  OnboardingUiContext,
+  resolveOnboardingStep,
+} from '../onboarding/OnboardingPolicy';
 import { UiOverlayOrchestrator } from '../overlays/UiOverlayOrchestrator';
 import { bindBattleChromeLayout } from '../layout/BattleChromeLayout';
 import { detectPendingActSceneDto, detectSeasonFinaleEpilogueDto, detectPendingMissionSceneDto, actSceneDtoFromId } from '../../application/mappers/ActScenePresentationMapper';
@@ -232,10 +239,13 @@ export class GameViewController {
   private readonly inlineEquip = new InlineEquipController();
   private readonly onboarding = new OnboardingController();
   private readonly overlayOrchestrator = new UiOverlayOrchestrator();
+  private onboardingSyncTimer = 0;
 
   private shownIntermissionKey: string | null = null;
   private intermissionResuming = false;
   private deferredRewardBaseline: GameStateDto | null = null;
+  /** Hub no início da tentativa — overlay CLEAR/DEFEAT soma kills de todas as waves. */
+  private battleAttemptBaseline: GameStateDto | null = null;
   private deferredSeasonFinaleEpilogueBaseline: GameStateDto | null = null;
 
   constructor(root: HTMLElement, client: IGameClient = getDefaultGameClient()) {
@@ -541,7 +551,9 @@ export class GameViewController {
       }
       this.presentActScene(scene, { markViewedOnDismiss: false });
     });
+    this.campaignFlow.setMapViewListener(() => this.handleCampaignMapViewChange());
     this.campaignFlow.setMissionStartedHandler((state) => {
+      this.dismissMapTutorial();
       this.render(state);
       if (this.detachedSurfaceId) {
         // START/batalha ficam no side panel — janela unpin não tem o campo de combate.
@@ -1007,6 +1019,8 @@ export class GameViewController {
         this.trackedSystemsMenuId = null;
       }
       this.syncSystemsNavChrome();
+      // Fechar o mapa retira as dicas ancoradas nele.
+      if (this.state) this.syncOnboarding(this.state);
     });
     this.modal.setBackVisible(false);
     this.syncSystemsNavChrome();
@@ -1395,7 +1409,12 @@ export class GameViewController {
       return;
     }
 
-    const payload = buildBattleIntermissionPayload(state.combatIntermission, state, previous);
+    const payload = buildBattleIntermissionPayload(
+      state.combatIntermission,
+      state,
+      previous,
+      this.battleAttemptBaseline,
+    );
     if (
       payload.variant === 'phase-clear' &&
       previous &&
@@ -2767,6 +2786,12 @@ export class GameViewController {
     const mergedState =
       !state.meta && previous?.meta ? { ...state, meta: previous.meta } : state;
 
+    this.battleAttemptBaseline = updateBattleAttemptBaseline(
+      this.battleAttemptBaseline,
+      previous,
+      mergedState,
+    );
+
     this.showCombatIntermissionOverlay(previous, mergedState);
 
     if (!mergedState.combatIntermission) {
@@ -2933,8 +2958,52 @@ export class GameViewController {
     }
   }
 
+  private onboardingUiContext(): OnboardingUiContext {
+    return {
+      campaignMapOpen: this.campaignModalOpen,
+      missionPreviewOpen: this.campaignFlow.isMissionPreviewOpen(),
+    };
+  }
+
+  /** Reagenda o tutorial após o intervalo entre dicas (senão o cooldown engole o passo). */
+  private scheduleOnboardingSync(): void {
+    if (isOnboardingComplete(this.onboarding.getDismissedSteps())) return;
+
+    window.clearTimeout(this.onboardingSyncTimer);
+    this.onboardingSyncTimer = window.setTimeout(() => {
+      this.onboardingSyncTimer = 0;
+      if (this.state) this.syncOnboarding(this.state);
+    }, OnboardingController.STEP_GAP_MS + 100);
+  }
+
+  private dismissMapTutorial(): void {
+    for (const stepId of MAP_TUTORIAL_STEP_IDS) {
+      this.dismissOnboardingStep(stepId);
+    }
+  }
+
+  /** Seleção de local no mapa avança o tutorial para o passo do preview. */
+  private handleCampaignMapViewChange(): void {
+    if (!this.state) return;
+    if (this.campaignFlow.isMissionPreviewOpen()) {
+      this.dismissOnboardingStep('map-locations');
+    }
+    this.syncOnboarding(this.state);
+    this.scheduleOnboardingSync();
+  }
+
+  /** Boas-vindas terminam abrindo o mapa, onde o tutorial continua. */
+  private async openCampaignMapForOnboarding(): Promise<void> {
+    await this.openCampaignModal();
+    this.scheduleOnboardingSync();
+  }
+
   private syncOnboarding(state: GameStateDto): void {
-    const step = resolveOnboardingStep(state, this.onboarding.getDismissedSteps());
+    const step = resolveOnboardingStep(
+      state,
+      this.onboarding.getDismissedSteps(),
+      this.onboardingUiContext(),
+    );
     if (!step) {
       this.onboarding.hide();
       this.overlayOrchestrator.cancelKind('onboarding');
@@ -2947,14 +3016,19 @@ export class GameViewController {
         onDismissStep: (stepId) => {
           this.dismissOnboardingStep(stepId);
           this.overlayOrchestrator.release('onboarding', step.id);
+          if (stepId === 'welcome') {
+            void this.openCampaignMapForOnboarding();
+          }
           if (this.state) {
             this.syncOnboarding(this.state);
             // previous=state evita falso positivo de "cena recém-desbloqueada".
             this.tryShowAutoActScene(this.state, this.state);
           }
+          this.scheduleOnboardingSync();
           this.syncAutoBattleTimer();
         },
         onSkipAll: () => {
+          window.clearTimeout(this.onboardingSyncTimer);
           this.onboarding.skipAll();
           this.onboarding.hide();
           this.overlayOrchestrator.cancelKind('onboarding');

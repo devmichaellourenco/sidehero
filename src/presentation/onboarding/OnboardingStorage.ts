@@ -1,4 +1,4 @@
-import { OnboardingStepId } from './OnboardingPolicy';
+import { ONBOARDING_STEP_ORDER, OnboardingStepId } from './OnboardingStepCatalog';
 
 const DISMISSED_KEY = 'sidehero_onboarding_dismissed';
 const SKIPPED_KEY = 'sidehero_onboarding_skipped';
@@ -40,7 +40,7 @@ export function skipAllOnboarding(): void {
 
 export function loadDismissedOnboardingSteps(): Set<OnboardingStepId> {
   if (isOnboardingSkipped()) {
-    return new Set(['first-chest', 'pause-loadout', 'hero-points', 'first-upgrade']);
+    return new Set(ONBOARDING_STEP_ORDER);
   }
   return readDismissed();
 }

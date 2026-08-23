@@ -81,13 +81,20 @@ export class OnboardingController {
     this.root.innerHTML = `
       <div class="onboarding-backdrop" data-onboarding-dismiss></div>
       <div class="onboarding-spotlight hidden" aria-hidden="true"></div>
-      <div class="onboarding-card" role="dialog" aria-labelledby="onboarding-title">
-        <p class="onboarding-kicker">Dica</p>
+      <div
+        class="onboarding-card"
+        role="dialog"
+        aria-labelledby="onboarding-title"
+        ${step.variant ? `data-variant="${step.variant}"` : ''}
+      >
+        <p class="onboarding-kicker">${step.kicker ?? 'Dica'}</p>
         <h3 id="onboarding-title" class="onboarding-title">${step.title}</h3>
         <p class="onboarding-message">${step.message}</p>
         <footer class="onboarding-actions">
           <button type="button" class="onboarding-skip" data-onboarding-skip-all>Pular dicas</button>
-          <button type="button" class="primary-btn onboarding-ok" data-onboarding-ok>Entendi</button>
+          <button type="button" class="primary-btn onboarding-ok" data-onboarding-ok>${
+            step.confirmLabel ?? 'Entendi'
+          }</button>
         </footer>
       </div>
     `;
@@ -125,18 +132,21 @@ export class OnboardingController {
   private reposition(): void {
     if (!this.activeStep) return;
 
-    const anchor = document.querySelector(this.activeStep.anchorSelector) as HTMLElement | null;
+    const anchor = this.activeStep.anchorSelector
+      ? (document.querySelector(this.activeStep.anchorSelector) as HTMLElement | null)
+      : null;
     const card = this.root.querySelector('.onboarding-card') as HTMLElement | null;
     if (!card) return;
 
     this.setHighlight(anchor);
 
     if (!anchor) {
+      const centered = this.activeStep.variant === 'welcome';
       card.style.left = '50%';
-      card.style.top = 'auto';
-      card.style.bottom = '96px';
-      card.style.transform = 'translateX(-50%)';
-      card.dataset.placement = 'bottom';
+      card.style.top = centered ? '50%' : 'auto';
+      card.style.bottom = centered ? 'auto' : '96px';
+      card.style.transform = centered ? 'translate(-50%, -50%)' : 'translateX(-50%)';
+      card.dataset.placement = centered ? 'center' : 'bottom';
       return;
     }
 
@@ -222,6 +232,8 @@ export class OnboardingController {
     clone.style.width = `${Math.max(rect.width, 1)}px`;
     clone.style.height = `${Math.max(rect.height, 1)}px`;
     clone.style.margin = '0';
+    // O rect já inclui o transform do âncora (ex.: pinos do mapa) — não reaplicar.
+    clone.style.transform = 'none';
     clone.style.zIndex = '2';
     clone.style.pointerEvents = 'auto';
     clone.style.boxSizing = 'border-box';

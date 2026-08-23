@@ -14644,6 +14644,21 @@ body.party-drag-active * {
   pointer-events: auto;
 }
 
+/* Boas-vindas da primeira sessão: card central, sem âncora */
+.onboarding-card[data-variant='welcome'] {
+  width: min(420px, calc(100vw - 20px));
+  padding: 26px 24px 20px;
+  border-width: 3px;
+  box-shadow:
+    0 26px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
+    0 0 0 8px color-mix(in srgb, var(--seal-gold) 26%, transparent);
+}
+
+.onboarding-card[data-variant='welcome'] .onboarding-title {
+  font-size: 27px;
+}
+
 .onboarding-kicker {
   margin: 0 0 8px;
   font-family: var(--font-heading);

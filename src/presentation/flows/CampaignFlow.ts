@@ -29,6 +29,7 @@ export class CampaignFlow {
   private actSceneReader: ((scene: ActSceneDto) => void) | null = null;
 
   private onMissionStarted: ((state: GameStateDto) => void) | null = null;
+  private onMapViewChange: (() => void) | null = null;
 
   constructor(
     private readonly client: IGameClient,
@@ -42,6 +43,16 @@ export class CampaignFlow {
 
   setMissionStartedHandler(handler: (state: GameStateDto) => void): void {
     this.onMissionStarted = handler;
+  }
+
+  /** Notifica troca de visão / seleção de local — usado pelo tutorial do mapa. */
+  setMapViewListener(handler: () => void): void {
+    this.onMapViewChange = handler;
+  }
+
+  /** True quando o popover de um local está aberto na visão de região. */
+  isMissionPreviewOpen(): boolean {
+    return this.viewMode === 'region' && this.pendingMissionId !== null;
   }
 
   async open(
@@ -58,6 +69,7 @@ export class CampaignFlow {
     this.renderModal(modalBody);
     this.bindInteractions(modalBody, onState);
     this.scrollPendingMissionIntoView(modalBody);
+    this.onMapViewChange?.();
   }
 
   private resolveInitialViewMode(campaign: CampaignOverviewDto): CampaignViewMode {
@@ -258,6 +270,7 @@ export class CampaignFlow {
       }
       this.bindWorldMapNodes(modalBody, onState);
       this.scrollPendingMissionIntoView(modalBody);
+      this.onMapViewChange?.();
       return;
     }
 
@@ -282,6 +295,7 @@ export class CampaignFlow {
     this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
     this.scrollPendingMissionIntoView(modalBody);
+    this.onMapViewChange?.();
   }
 
   private refreshRegionView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
@@ -308,6 +322,7 @@ export class CampaignFlow {
     this.bindMissionButtons(modalBody, onState);
     this.bindStartButton(modalBody, onState);
     this.scrollPendingMissionIntoView(modalBody);
+    this.onMapViewChange?.();
   }
 
   private async confirmMission(

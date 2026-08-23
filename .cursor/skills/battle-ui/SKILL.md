@@ -33,7 +33,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Navegação menus | Faixa de ícones nos sheets (modal/drawer/Log/Stats) + seta v para fechar |
 | Apoio | `DonationPromptController`, `DonationCardPresentation`, `DonationConfig` |
 | Wow | `WowBannerBuilder`, `WowCelebrationController.syncPersistentBanners`, `WowStripRenderer` |
-| Onboarding | `OnboardingPolicy` |
+| Onboarding | `OnboardingPolicy` (gatilhos + `OnboardingUiContext`) e `OnboardingStepCatalog` (textos/âncoras); primeira sessão = boas-vindas central → mapa aberto pelo CTA → tutorial guiado do mapa; dica de runa só no acampamento, nunca no combate |
 | Overlays exclusivos | `UiOverlayOrchestrator` — prioridade tutorial > cena > resultado de batalha > Wow; um ativo por vez, fila pelo restante |
 
 ## Coordenação

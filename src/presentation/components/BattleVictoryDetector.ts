@@ -43,20 +43,39 @@ export function buildBattleIntermissionPayload(
   intermission: CombatIntermissionDto,
   state: GameStateDto,
   previous: GameStateDto | null,
+  attemptBaseline: GameStateDto | null = null,
 ): BattleVictoryPayload {
   const fromDiff = previous ? detectBattleVictory(previous, state) : null;
-  if (fromDiff) return fromDiff;
+  const isTerminal =
+    intermission.variant === 'phase-clear' || intermission.variant === 'defeat';
+  const rewardSource = isTerminal ? attemptBaseline ?? previous : previous;
 
-  const rewards = previous
-    ? computeRewardDelta(previous, state, { preferXpSource: 'hero' })
+  if (fromDiff && !attemptBaseline) {
+    return fromDiff;
+  }
+
+  const rewards = rewardSource
+    ? computeRewardDelta(rewardSource, state, { preferXpSource: 'hero' })
     : {
-        goldGained: 0,
-        xpGained: 0,
-        heroRewards: [] as HeroVictoryReward[],
-        chestDropped: false,
-        chestCount: 0,
-        tierReached: null as number | null,
+        goldGained: fromDiff?.goldGained ?? 0,
+        xpGained: fromDiff?.xpGained ?? 0,
+        heroRewards: fromDiff?.heroRewards ?? [],
+        chestDropped: fromDiff?.chestDropped ?? false,
+        chestCount: fromDiff?.chestCount ?? 0,
+        tierReached: fromDiff?.tierReached ?? null,
       };
+
+  if (fromDiff) {
+    return {
+      ...fromDiff,
+      goldGained: rewards.goldGained,
+      xpGained: rewards.xpGained,
+      heroRewards: rewards.heroRewards,
+      chestDropped: rewards.chestDropped,
+      chestCount: rewards.chestCount,
+      tierReached: rewards.tierReached,
+    };
+  }
 
   return {
     variant: intermission.variant,

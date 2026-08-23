@@ -79,7 +79,8 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] **Iniciar missão** no mapa → cue START → combate (sem clique em Batalhar); em campanha unpin, relay para o side panel (`MissionBattleStartRelay`)
 - [x] Hub / Acampamento sem reinício via Batalhar (`phaseRestartOnResume: false`); combate só pelo mapa
 - [x] New game inicia no hub do acampamento (`loadoutEditOpen: true`) com overlay Acampamento
-- [x] Derrota em missão normal concede fração de ouro/XP **e** o overlay de recompensas exibe esses valores (só o delta real nos heróis — sem inventar XP a partir de `xpReward` dos inimigos); main/side na derrota sem recompensa de conclusão
+- [x] New game: depois da cena de abertura, boas-vindas → mapa aberto automaticamente → tutorial guiado (pinos/tipos de missão, preview do local, Iniciar missão); ver `battle-ui` (`OnboardingPolicy`)
+- [x] Derrota em missão normal concede fração de ouro/XP **e** o overlay de recompensas exibe esses valores (delta da tentativa inteira vs. o hub no START — não só o último tick; sem inventar XP a partir de `xpReward` dos inimigos); main/side na derrota sem recompensa de conclusão
 - [x] Sem auto-seleção / auto-start da próxima fase ao limpar boss de missão
 - [x] Board do mapa lista próxima principal + secundárias elegíveis + oferta normal (2–4)
 - [x] Principais = marcos `x-1`…`x-50` apenas; concluídas fora do board
@@ -155,7 +156,8 @@ XP e ouro de cada fase vêm exclusivamente do orçamento `targetXp`/`targetGold`
 - [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / popover no pin / tooltip de stats
 - [x] `EnemyBattlePresentation.test.ts` — tooltip compacto com ícones (~3 por linha)
 - [x] `MissionEnemyPreviewMapper.test.ts` — ficha de combate dos inimigos em destaque
-- [x] `BattleVictoryDetector.test.ts` — vitória com rewards; derrota normal com ouro/XP parcial no payload
+- [x] `BattleVictoryDetector.test.ts` — vitória com rewards; derrota normal com ouro/XP da tentativa (baseline do START, não só o último tick)
+- [x] `BattleAttemptRewardBaseline.test.ts` — captura/limpa snapshot da tentativa
 - [x] `BattleVictoryFlow.test.ts` — CLEAR/DEFEAT → tela de recompensas e Continuar (ver também `battle-ui` / `combat-campaign`)
 - [x] `BattleStartFlow.test.ts` — START antes do combate (ver também `battle-ui`)
 - [x] Migração de save: progresso linear → marcos concluídos + board

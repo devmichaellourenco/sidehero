@@ -19,8 +19,14 @@ describe('GearItemCatalog', () => {
     expect(worn.spriteId).not.toBe(recruit.spriteId);
     expect(worn.sprite).toBeDefined();
     expect(recruit.sprite).toBeDefined();
-    expect(worn.attackBonus).toBe(9);
-    expect(recruit.attackBonus).toBe(14);
+    expect(worn.slot).toBe('weapon');
+    expect(recruit.slot).toBe('weapon');
+    expect(worn.attackBonus).toBeGreaterThan(0);
+    expect(worn.defenseBonus).toBe(0);
+    expect(worn.healthBonus).toBe(0);
+    expect(recruit.attackBonus).toBeGreaterThan(worn.attackBonus!);
+    expect(recruit.defenseBonus).toBe(0);
+    expect(recruit.healthBonus).toBe(0);
   });
 
   it('createGearFromCatalogItem usa spriteId como templateId', () => {
@@ -69,9 +75,11 @@ describe('GearItemCatalog', () => {
     const watchtower = getGearCatalogItem('watchtower_staff')!;
     const wind = getGearCatalogItem('wind_rod')!;
     const thunder = getGearCatalogItem('thunder_rod')!;
-    const patrol = getGearCatalogItem('patrol_sword')!;
 
-    expect(arcanist.attackBonus).toBeLessThan(patrol.attackBonus!);
+    expect(arcanist.slot).toBe('weapon');
+    expect(arcanist.attackBonus).toBeGreaterThan(0);
+    expect(arcanist.defenseBonus).toBe(0);
+    expect(arcanist.healthBonus).toBe(0);
     expect(arcanist.castSpeedBonus).toBe(0.09);
     expect(arcanist.allElementalDamageBonus).toBe(10);
     expect(arcanist.requirements).toEqual({ minLevel: 6, int: 3 });
@@ -80,7 +88,10 @@ describe('GearItemCatalog', () => {
     expect(oracle.healthPercentBonus).toBe(6);
     expect(oracle.requirements?.int).toBe(8);
 
-    expect(watchtower.defenseBonus).toBe(5);
+    expect(watchtower.slot).toBe('weapon');
+    expect(watchtower.defenseBonus).toBe(0);
+    expect(watchtower.healthBonus).toBe(0);
+    expect(watchtower.attackBonus).toBeGreaterThan(0);
     expect(watchtower.allElementalResistBonus).toBe(4);
 
     expect(wind.castSpeedBonus).toBeGreaterThan(thunder.castSpeedBonus!);

@@ -144,7 +144,7 @@ export class BattleVictoryOverlayRenderer {
       rows.push(
         `<li class="battle-victory-reward battle-victory-reward--empty">${
           payload.variant === 'defeat'
-            ? 'Sem recompensas de conclusão'
+            ? 'Sem recompensas nesta tentativa'
             : 'Sem recompensas extras'
         }</li>`,
       );
