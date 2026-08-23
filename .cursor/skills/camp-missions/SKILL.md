@@ -34,10 +34,10 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 
 ## Regras de produto (resumo)
 
-- Normal = 2–4, mapa×estrela; **capítulo da main atual** (ex.: main 1-1 → templates 1–5); podem **repetir** em próximos sorteios com ouro/XP **cheios** (não são “replay”); some na derrota da oferta atual; refresh a cada N visitas ao camp
+- Normal = 2–4, mapa×estrela; **capítulo da main atual** (ex.: main 1-1 → só fase 1; main 1-10 → templates 2–10); podem **repetir** em próximos sorteios com ouro/XP **cheios** (não são “replay”); some na derrota da oferta atual; refresh a cada N visitas ao camp
 - Sem penalidade de ouro/XP por template já cleared; main/side são únicas
 - Secundária = únicas; só as vinculadas ao capítulo da main (template na mesma faixa); unlock/expiração por grafo
-- Principal = marcos `x-1, x-5, …, x-50`; próxima incompleta no board; não repetível
+- Principal = marcos `x-1, x-10, …, x-50`; próxima incompleta no board; não repetível
 - New game: party **Nix solo**; unlocks Galneon→Elara→… na árvore com gates de main; inicia no hub Acampamento (`loadoutEditOpen`); cena de abertura → boas-vindas → mapa aberto automaticamente + tutorial guiado (skill `battle-ui`)
 - Vitória/derrota → CLEAR/DEFEAT → tela de recompensas (sem scroll; Continuar no deck) → acampamento + mapa
 - Iniciar no mapa → cue START → combate; Acampamento/hub sem Batalhar (`phaseRestartOnResume: false`); unpin retransmite ao painel principal

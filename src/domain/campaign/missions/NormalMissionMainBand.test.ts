@@ -11,28 +11,29 @@ import { parsePhaseId } from '../CampaignIds';
 import { getMissionById } from './MissionCatalog';
 
 describe('NormalMissionMainBand', () => {
-  it('na main 1-1 o capítulo é 1–5', () => {
-    expect(normalPhaseNumberBandForCurrentMain(1)).toEqual({ min: 1, max: 5 });
+  it('na main 1-1 o capítulo é só a fase 1 (tutorial)', () => {
+    expect(normalPhaseNumberBandForCurrentMain(1)).toEqual({ min: 1, max: 1 });
   });
 
-  it('na main 1-5 o capítulo é 5–10', () => {
-    expect(normalPhaseNumberBandForCurrentMain(5)).toEqual({ min: 5, max: 10 });
+  it('na main 1-10 o capítulo é 2–10 (meio + marco)', () => {
+    expect(normalPhaseNumberBandForCurrentMain(10)).toEqual({ min: 2, max: 10 });
   });
 
-  it('na main 1-10 o capítulo é 10–15', () => {
-    expect(normalPhaseNumberBandForCurrentMain(10)).toEqual({ min: 10, max: 15 });
+  it('na main 1-20 o capítulo é 11–20', () => {
+    expect(normalPhaseNumberBandForCurrentMain(20)).toEqual({ min: 11, max: 20 });
   });
 
-  it('no marco final o capítulo é só 50', () => {
-    expect(normalPhaseNumberBandForCurrentMain(50)).toEqual({ min: 50, max: 50 });
+  it('no marco final o capítulo é 41–50', () => {
+    expect(normalPhaseNumberBandForCurrentMain(50)).toEqual({ min: 41, max: 50 });
   });
 
   it('chapterMainPhaseForPhaseNumber aponta o marco dono', () => {
     expect(chapterMainPhaseForPhaseNumber(1)).toBe(1);
-    expect(chapterMainPhaseForPhaseNumber(4)).toBe(1);
-    expect(chapterMainPhaseForPhaseNumber(5)).toBe(5);
-    expect(chapterMainPhaseForPhaseNumber(9)).toBe(5);
-    expect(chapterMainPhaseForPhaseNumber(12)).toBe(10);
+    expect(chapterMainPhaseForPhaseNumber(2)).toBe(10);
+    expect(chapterMainPhaseForPhaseNumber(5)).toBe(10);
+    expect(chapterMainPhaseForPhaseNumber(10)).toBe(10);
+    expect(chapterMainPhaseForPhaseNumber(11)).toBe(20);
+    expect(chapterMainPhaseForPhaseNumber(22)).toBe(30);
   });
 
   it('listMissionChapterOptions cobre todos os marcos', () => {
@@ -40,22 +41,29 @@ describe('NormalMissionMainBand', () => {
     expect(options[0]).toMatchObject({
       mainPhase: 1,
       min: 1,
-      max: 5,
+      max: 1,
     });
-    expect(options[0]?.label).toContain('1–5');
+    expect(options[1]).toMatchObject({
+      mainPhase: 10,
+      min: 2,
+      max: 10,
+    });
+    expect(options).toHaveLength(6);
     expect(options.some((entry) => entry.mainPhase === 50)).toBe(true);
   });
 
   it('isNormalPhaseInBandForMain rejeita fases de outro capítulo', () => {
     expect(isNormalPhaseInBandForMain(1, 1)).toBe(true);
-    expect(isNormalPhaseInBandForMain(5, 1)).toBe(true);
-    expect(isNormalPhaseInBandForMain(6, 1)).toBe(false);
-    expect(isNormalPhaseInBandForMain(20, 1)).toBe(false);
+    expect(isNormalPhaseInBandForMain(2, 1)).toBe(false);
+    expect(isNormalPhaseInBandForMain(2, 10)).toBe(true);
+    expect(isNormalPhaseInBandForMain(5, 10)).toBe(true);
+    expect(isNormalPhaseInBandForMain(10, 10)).toBe(true);
+    expect(isNormalPhaseInBandForMain(11, 10)).toBe(false);
   });
 });
 
 describe('rollNormalMissionOffer com marco da main', () => {
-  it('na main 1-1 só sorteia templates 1-1…1-5', () => {
+  it('na main 1-1 só sorteia template 1-1', () => {
     const offer = rollNormalMissionOffer({
       mapId: 'stendra',
       saveSeed: 42,
@@ -68,33 +76,23 @@ describe('rollNormalMissionOffer com marco da main', () => {
       const mission = getMissionById(id);
       expect(mission?.kind).toBe('normal');
       const phaseNumber = parsePhaseId(mission!.phaseTemplateId).phaseNumber;
-      expect(phaseNumber).toBeGreaterThanOrEqual(1);
-      expect(phaseNumber).toBeLessThanOrEqual(5);
-      expect(id).not.toBe(normalMissionId('1-20'));
+      expect(phaseNumber).toBe(1);
+      expect(id).not.toBe(normalMissionId('1-2'));
     }
   });
 
-  it('próximo sorteio pode repetir template normal do mesmo capítulo', () => {
-    const first = rollNormalMissionOffer({
+  it('na main 1-10 sorteia templates 2–10', () => {
+    const offer = rollNormalMissionOffer({
       mapId: 'stendra',
       saveSeed: 7,
       offerEpoch: 0,
-      currentMainPhaseNumber: 1,
+      currentMainPhaseNumber: 10,
     });
-    const second = rollNormalMissionOffer({
-      mapId: 'stendra',
-      saveSeed: 7,
-      offerEpoch: 1,
-      currentMainPhaseNumber: 1,
-    });
-    expect(first.length).toBeGreaterThan(0);
-    expect(second.length).toBeGreaterThan(0);
-    // Pool pequeno (5); em epochs distintos a interseção é esperada com alta chance.
-    // Garantimos pelo menos que ambos só usam o capítulo 1–5.
-    for (const id of [...first, ...second]) {
+    expect(offer.length).toBeGreaterThan(0);
+    for (const id of offer) {
       const phaseNumber = parsePhaseId(getMissionById(id)!.phaseTemplateId).phaseNumber;
-      expect(phaseNumber).toBeGreaterThanOrEqual(1);
-      expect(phaseNumber).toBeLessThanOrEqual(5);
+      expect(phaseNumber).toBeGreaterThanOrEqual(2);
+      expect(phaseNumber).toBeLessThanOrEqual(10);
     }
   });
 });

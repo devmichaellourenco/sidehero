@@ -32,26 +32,29 @@ Acampamento → abrir mapa → escolher missão → batalha (waves)
 
 Por mapa (`stendra` … `morthaven` no v1), ids alinhados às fases-marco:
 
-`{mapIndex}-1`, `{mapIndex}-5`, `{mapIndex}-10`, `{mapIndex}-15`, `{mapIndex}-20`, `{mapIndex}-25`, `{mapIndex}-30`, `{mapIndex}-35`, `{mapIndex}-40`, `{mapIndex}-45`, `{mapIndex}-50`.
+`{mapIndex}-1`, `{mapIndex}-10`, `{mapIndex}-20`, `{mapIndex}-30`, `{mapIndex}-40`, `{mapIndex}-50`.
 
 - Ordem sequencial: só a **próxima** principal incompleta aparece no board.
 - Concluídas **não** voltam ao mapa.
 - Derrota: missão **permanece**; progresso da tentativa zera (recomeça waves do zero).
+- Marcos intermediários legados (`x-5`, `x-15`, `x-25`, `x-35`, `x-45`) existem só como **normais** do bloco anterior (ex.: `normal:1-5` no capítulo da main `1-1`).
 
 ### Secundárias
 
 - Únicas por arco de conteúdo; **várias** podem estar ativas ao mesmo tempo.
-- **Vinculadas ao capítulo da main atual**: só aparecem no board se o `phaseTemplateId` estiver na mesma faixa da main incompleta (ex.: main `1-1` → sides com fases `1-2`…`1-5`).
-- Cadeias de unlock (ex.: sides do capítulo `1-1` livres no início; após `1-1` → `Trilha de Cinzas` no capítulo `1-5`).
+- **Vinculadas ao capítulo da main atual**: só aparecem no board se o `phaseTemplateId` estiver na mesma faixa da main incompleta (ex.: main `1-10` → sides com fases `1-2`…`1-10`; main `1-1` tutorial não traz sides de farm).
+- Cadeias de unlock (ex.: sides do bloco `1-10` livres no grafo desde o início, mas só no board após o tutorial; após `1-1` → `Trilha de Cinzas` no mesmo bloco).
 - Concluídas **não** repetíveis.
-- **Expiram** se incompletas quando o jogador conclui uma main **posterior** no mesmo mapa (janela entre o maior pré-requisito main e a próxima main; ex.: unlock em `1-1` some ao zerar `1-5`).
+- **Expiram** se incompletas quando o jogador conclui uma main **posterior** no mesmo mapa (janela entre o maior pré-requisito main e a próxima main; ex.: unlock em `1-1` some ao zerar `1-10`).
 - Derrota: permanece no mapa; tentativa zera.
 - Recompensa exclusiva: item e/ou ouro e/ou XP e/ou cena narrativa (`story-scenes` / catálogo próprio).
 
 ### Normais
 
 - Templates por **mapa** para fases `1–50` (incluindo marcos): `normal:x-n` usa o combate da fase `x-n`.
-- **Capítulo da main atual**: oferta só sorteia templates na faixa `[marco atual .. próximo marco]` (ex.: main `1-1` → `1-1`…`1-5`; main `1-5` → `5`…`10`).
+- **Capítulo da main atual**:
+  - main `1-1` (tutorial): só a fase `1`.
+  - demais marcos: `(marco anterior)+1` … marco atual (ex.: main `1-10` → `2`…`10`; main `1-20` → `11`…`20`).
 - Dentro do capítulo há templates mais fáceis e mais exigentes (próximo ao marco seguinte pede grind/build); não devem ser triviais nem impossíveis cedo demais.
 - Oferta: entre **2 e 4** missões sorteadas (sem repetir **no mesmo** sorteio).
 - **Repetíveis entre sorteios**: o mesmo template pode voltar em refreshes futuros (diferente de main/side). **Não** há penalidade de ouro/XP por “replay” — kills pagam cheio.
@@ -86,7 +89,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] Principais = marcos `x-1`…`x-50` apenas; concluídas fora do board
 - [x] Secundárias respeitam grafo de unlock; múltiplas ativas permitidas; incompletas expiram ao concluir main posterior no mapa
 - [x] New game / party inicial: só Nix até unlocks na árvore (gates de main)
-- [x] Normais sorteadas no **capítulo da main atual** (ex.: `1-1` → fases `1–5`); templates repetíveis entre sorteios; pool por visitas ao camp
+- [x] Normais sorteadas no **capítulo da main atual** (ex.: `1-1` → só `1`; `1-10` → fases `2–10`); templates repetíveis entre sorteios; pool por visitas ao camp
 - [x] Secundárias no board filtradas pelo mesmo capítulo (template na faixa) + grafo de unlock/expiração
 - [x] Pins do mapa de locais com margem segura (visíveis por completo; sem corte no topo/laterais)
 - [x] Derrota: normal some; main/side permanecem com tentativa zerada

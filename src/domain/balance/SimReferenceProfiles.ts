@@ -24,7 +24,7 @@ export function isSimReferenceProfile(value: unknown): value is SimReferenceProf
 export function referenceGearRarityForTier(tier: number): GearRarity {
   if (tier >= 101) return 'mythic';
   if (tier >= 51) return 'legendary';
-  if (tier >= 25) return 'epic';
+  if (tier >= 20) return 'epic';
   if (tier >= 10) return 'rare';
   if (tier >= 5) return 'uncommon';
   return 'common';

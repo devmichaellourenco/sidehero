@@ -136,9 +136,8 @@ describe('ShopCatalog balance — caps por main', () => {
   it('cap de raridade evolui com mains concluídas', () => {
     expect(getShopMaxRarityForProgress([])).toBe('uncommon');
     expect(getShopMaxRarityForProgress([mainMissionId('1-1')])).toBe('uncommon');
-    expect(getShopMaxRarityForProgress([mainMissionId('1-5')])).toBe('rare');
     expect(getShopMaxRarityForProgress([mainMissionId('1-10')])).toBe('rare');
-    expect(getShopMaxRarityForProgress([mainMissionId('1-25')])).toBe('epic');
+    expect(getShopMaxRarityForProgress([mainMissionId('1-20')])).toBe('epic');
     expect(getShopMaxRarityForProgress([mainMissionId('1-50')])).toBe('epic');
     expect(getShopMaxRarityForProgress([mainMissionId('2-1')])).toBe('epic');
     expect(getShopMaxRarityForProgress([mainMissionId('2-50')])).toBe('legendary');
@@ -157,9 +156,9 @@ describe('ShopCatalog balance — caps por main', () => {
   });
 
   it('rollShopRarity respeita cap das mains', () => {
-    const mains = [mainMissionId('1-5')];
+    const mains = [mainMissionId('1-10')];
     for (let index = 0; index < SHOP_OFFER_COUNT; index += 1) {
-      const rarity = rollShopRarity(5, 0, index, mains);
+      const rarity = rollShopRarity(10, 0, index, mains);
       expect(GEAR_RARITIES.indexOf(rarity)).toBeLessThanOrEqual(getShopMaxRarityIndex(mains));
     }
   });

@@ -20,15 +20,10 @@ import { MissionStars } from './MissionKind';
 /** Títulos temáticos dos marcos (X-50 usa displayName da fase). */
 const MAIN_QUEST_TITLES: Record<number, string> = {
   1: 'Primeiros Passos',
-  5: 'Alerta nas Fronteiras',
   10: 'Linha de Defesa',
-  15: 'Marcha do Ato',
   20: 'Prova do Segundo Ato',
-  25: 'Meio do Caminho',
   30: 'Pressão Crescente',
-  35: 'Sombras Adiante',
   40: 'Antes do Assalto',
-  45: 'Último Fôlego',
   50: 'Guardião do Mapa',
 };
 
@@ -42,9 +37,11 @@ const NORMAL_NAME_POOL: Record<MissionStars, readonly string[]> = {
 
 function chapterBoundsForPhase(phaseNumber: number): { start: number; end: number } {
   const mains = MAIN_QUEST_PHASE_NUMBERS as readonly number[];
-  const start = [...mains].filter((n) => n <= phaseNumber).pop() ?? 1;
-  const end = mains.find((n) => n > start) ?? start;
-  return { start, end };
+  const n = Math.max(1, Math.min(50, Math.floor(phaseNumber)));
+  if (n <= 1) return { start: 1, end: 1 };
+  const end = mains.find((main) => main >= n) ?? 50;
+  const prev = [...mains].filter((m) => m < end).pop() ?? 1;
+  return { start: prev + 1, end };
 }
 
 /**
@@ -117,7 +114,7 @@ function buildNormalMissions(mapIndex: number, mapId: MapId, mapName: string): M
 
 /**
  * Sides piloto — vinculadas ao capítulo da main (template na faixa do marco).
- * Capítulo 1-1: disponíveis desde o início; capítulo 1-5: após concluir 1-1; etc.
+ * Tutorial 1-1: sem sides de farm; capítulo 1-10 (fases 2–10): sides iniciais + cadeia após 1-1.
  */
 function buildPilotSideMissions(): MissionDefinition[] {
   const stendraWatch = sideMissionId('stendra_village_watch');
@@ -205,9 +202,9 @@ function buildPilotSideMissions(): MissionDefinition[] {
       kind: 'side',
       mapId: 'morthaven',
       name: 'Corrida ao Selo',
-      phaseTemplateId: '4-12',
+      phaseTemplateId: '4-6',
       stars: 3,
-      unlockAfterMissionIds: [mainMissionId('4-5')],
+      unlockAfterMissionIds: [mainMissionId('4-1')],
       rewards: { sceneId: 'side:morthaven_seal_run' },
     },
   ];

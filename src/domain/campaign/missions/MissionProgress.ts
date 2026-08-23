@@ -1,5 +1,5 @@
 import { MapId } from '../CampaignIds';
-import { MissionId } from './MissionId';
+import { MissionId, sanitizeCompletedMainIds } from './MissionId';
 
 export interface MissionProgressProps {
   completedMainIds: MissionId[];
@@ -65,7 +65,7 @@ export class MissionProgress {
   static restore(props: Partial<MissionProgressProps> | null | undefined): MissionProgress {
     if (!props) return MissionProgress.initial();
     return new MissionProgress({
-      completedMainIds: props.completedMainIds ?? [],
+      completedMainIds: sanitizeCompletedMainIds(props.completedMainIds ?? []),
       completedSideIds: props.completedSideIds ?? [],
       normalOffersByMapId: props.normalOffersByMapId ?? {},
       normalOfferEpochByMapId: props.normalOfferEpochByMapId ?? {},

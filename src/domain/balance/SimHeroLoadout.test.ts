@@ -192,7 +192,7 @@ describe('SimHeroLoadout', () => {
     it('raridade acompanha os marcos de loja', () => {
       expect(referenceGearRarityForTier(1)).toBe('common');
       expect(referenceGearRarityForTier(10)).toBe('rare');
-      expect(referenceGearRarityForTier(25)).toBe('epic');
+      expect(referenceGearRarityForTier(20)).toBe('epic');
       expect(referenceGearRarityForTier(51)).toBe('legendary');
     });
 

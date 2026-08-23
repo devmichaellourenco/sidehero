@@ -28,7 +28,7 @@ export interface MissionBattleListEntry {
   name: string;
   phaseTemplateId: string;
   phaseNumber: number;
-  /** Marco da main dono do capítulo (1, 5, 10…). */
+  /** Marco da main dono do capítulo (1, 10, 20…). */
   chapterMainPhase: number;
   chapterMin: number;
   chapterMax: number;

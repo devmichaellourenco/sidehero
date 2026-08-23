@@ -61,15 +61,15 @@ describe('UpgradeCatalog', () => {
 
     expect(priest?.parents).toEqual(['hero_unlock_knight']);
     expect(priest?.unlockHeroClass).toBe('priest');
-    expect(priest?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-5' }]);
+    expect(priest?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-10' }]);
 
     expect(berserker?.parents).toEqual(['hero_unlock_priest']);
     expect(berserker?.unlockHeroClass).toBe('berserker');
-    expect(berserker?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-15' }]);
+    expect(berserker?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-20' }]);
 
     expect(archer?.parents).toEqual(['hero_unlock_berserker']);
     expect(archer?.unlockHeroClass).toBe('archer');
-    expect(archer?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-25' }]);
+    expect(archer?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-30' }]);
 
     expect(paladin?.parents).toEqual(['hero_unlock_archer']);
     expect(paladin?.unlockHeroClass).toBe('paladin');

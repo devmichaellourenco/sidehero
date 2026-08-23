@@ -8,8 +8,8 @@ import {
 
 describe('MissionUnlockGraph', () => {
   const main1 = mainMissionId('1-1');
-  const main5 = mainMissionId('1-5');
   const main10 = mainMissionId('1-10');
+  const main20 = mainMissionId('1-20');
   const watch = sideMissionId('stendra_village_watch');
   const patrol = sideMissionId('stendra_wayward_patrol');
   const skirmish = sideMissionId('stendra_border_skirmish');
@@ -26,17 +26,17 @@ describe('MissionUnlockGraph', () => {
     expect(isSideMissionUnlocked(cache, [main1, ash])).toBe(true);
   });
 
-  it('Trilha de Cinzas expira ao concluir 1-5 (janela do capítulo 1-5)', () => {
+  it('Trilha de Cinzas expira ao concluir 1-10 (janela do capítulo 1-10)', () => {
     expect(isSideMissionUnlocked(ash, [main1])).toBe(true);
-    expect(isSideMissionUnlocked(ash, [main1, main5])).toBe(false);
-    const eligible = listEligibleSideMissionIds('stendra', [main1, main5]);
+    expect(isSideMissionUnlocked(ash, [main1, main10])).toBe(false);
+    const eligible = listEligibleSideMissionIds('stendra', [main1, main10]);
     expect(eligible).not.toContain(ash);
     expect(eligible).not.toContain(cache);
   });
 
-  it('sides do capítulo 1-1 continuam unlocked no grafo após 1-5 (board filtra por faixa)', () => {
-    expect(isSideMissionUnlocked(patrol, [main1, main5])).toBe(true);
-    expect(listEligibleSideMissionIds('stendra', [main1, main5])).toEqual(
+  it('sides do capítulo 1-1 continuam unlocked no grafo após 1-10 (board filtra por faixa)', () => {
+    expect(isSideMissionUnlocked(patrol, [main1, main10])).toBe(true);
+    expect(listEligibleSideMissionIds('stendra', [main1, main10])).toEqual(
       expect.arrayContaining([watch, patrol, skirmish]),
     );
   });
@@ -51,7 +51,7 @@ describe('MissionUnlockGraph', () => {
     expect(sideMissionsUnlockedByCompleting(ash, [main1])).toEqual([cache]);
   });
 
-  it('concluir 1-10 não muda unlock de ash já expirada por 1-5', () => {
-    expect(isSideMissionUnlocked(ash, [main1, main5, main10])).toBe(false);
+  it('concluir 1-20 não muda unlock de ash já expirada por 1-10', () => {
+    expect(isSideMissionUnlocked(ash, [main1, main10, main20])).toBe(false);
   });
 });

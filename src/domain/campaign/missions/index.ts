@@ -4,6 +4,7 @@ export type { MissionId } from './MissionId';
 export {
   MAIN_QUEST_PHASE_NUMBERS,
   isMainQuestPhaseNumber,
+  sanitizeCompletedMainIds,
   mainMissionId,
   sideMissionId,
   normalMissionId,

@@ -3,14 +3,32 @@ import { MapId, PhaseId, mapIdFromIndex, parsePhaseId } from '../CampaignIds';
 export type MissionId = string;
 
 /** Marcos da quest principal por mapa (não confundir com milestoneBoss X-50 de loot). */
-export const MAIN_QUEST_PHASE_NUMBERS = [
-  1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50,
-] as const;
+export const MAIN_QUEST_PHASE_NUMBERS = [1, 10, 20, 30, 40, 50] as const;
 
 export type MainQuestPhaseNumber = (typeof MAIN_QUEST_PHASE_NUMBERS)[number];
 
 export function isMainQuestPhaseNumber(phaseNumber: number): boolean {
   return (MAIN_QUEST_PHASE_NUMBERS as readonly number[]).includes(phaseNumber);
+}
+
+/** Remove mains de marcos legados (ex.: main:1-5) que não existem mais no catálogo. */
+export function sanitizeCompletedMainIds(ids: readonly MissionId[]): MissionId[] {
+  const seen = new Set<MissionId>();
+  const out: MissionId[] = [];
+  for (const id of ids) {
+    const phaseId = phaseIdFromMainMissionId(id);
+    if (!phaseId) continue;
+    try {
+      const { phaseNumber } = parsePhaseId(phaseId);
+      if (!isMainQuestPhaseNumber(phaseNumber)) continue;
+    } catch {
+      continue;
+    }
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
 }
 
 export function mainMissionId(phaseId: PhaseId): MissionId {

@@ -345,7 +345,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     description: 'Elara entra na reserva — suporte e cura.',
     cost: 600,
     parents: ['hero_unlock_knight'],
-    requirements: [{ type: 'main_mission_completed', missionId: 'main:1-5' }],
+    requirements: [{ type: 'main_mission_completed', missionId: 'main:1-10' }],
     unlockHeroClass: 'priest',
   },
   {
@@ -357,7 +357,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
     description: 'Torius entra na reserva — alto dano corpo a corpo.',
     cost: 1000,
     parents: ['hero_unlock_priest'],
-    requirements: [{ type: 'main_mission_completed', missionId: 'main:1-15' }],
+    requirements: [{ type: 'main_mission_completed', missionId: 'main:1-20' }],
     unlockHeroClass: 'berserker',
   },
   {
@@ -370,7 +370,7 @@ export const UPGRADE_CATALOG: UpgradeDefinition[] = [
       'Rain entra na reserva — arqueira lendária de Kontempler, quase nunca avistada.',
     cost: 1800,
     parents: ['hero_unlock_berserker'],
-    requirements: [{ type: 'main_mission_completed', missionId: 'main:1-25' }],
+    requirements: [{ type: 'main_mission_completed', missionId: 'main:1-30' }],
     unlockHeroClass: 'archer',
   },
   {

@@ -48,7 +48,7 @@ export function shouldRefreshNormalOffer(
 /**
  * Sorteia entre MIN e MAX missões normais do mapa (sem repetir no mesmo sorteio).
  * Em próximos sorteios o mesmo template pode voltar (normais são repetíveis).
- * Determinístico por seed. Pool = capítulo da main atual (ex.: 1-1 → fases 1–5).
+ * Determinístico por seed. Pool = capítulo da main atual (ex.: 1-1 → só 1; 1-10 → fases 2–10).
  */
 export function rollNormalMissionOffer(params: {
   mapId: MapId;

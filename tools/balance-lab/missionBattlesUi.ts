@@ -835,7 +835,7 @@ function renderMissionsEditorInto(host: HTMLElement): void {
     <div class="mb-layout">
       <aside class="mb-sidebar">
         <p class="lab-hint mb-intro">
-          Filtre pelo <strong>capítulo da main</strong> (ex.: Cap. 1 = fases 1–5) para calibrar normais/sides daquele arco.
+          Filtre pelo <strong>capítulo da main</strong> (ex.: Cap. 10 = fases 2–10) para calibrar normais/sides daquele arco.
           Overrides gravam por <code>phaseTemplateId</code>.
         </p>
         <div class="mb-filters">

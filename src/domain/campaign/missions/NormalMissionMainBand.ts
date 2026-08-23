@@ -5,8 +5,9 @@ import { MissionId } from './MissionId';
 import { getMissionById } from './MissionCatalog';
 
 /**
- * Capítulo da main incompleta atual: do marco atual até o próximo (inclusive).
- * Ex.: main 1-1 → fases 1–5; main 1-5 → 5–10; main 1-10 → 10–15.
+ * Capítulo da main incompleta atual.
+ * - `1` (tutorial): só a fase 1.
+ * - Demais marcos: do marco anterior+1 até o marco atual (ex.: main 10 → 2–10; main 20 → 11–20).
  * Normais e secundárias do board usam esta faixa.
  */
 export function normalPhaseNumberBandForCurrentMain(currentMainPhaseNumber: number): {
@@ -15,20 +16,28 @@ export function normalPhaseNumberBandForCurrentMain(currentMainPhaseNumber: numb
 } {
   const mains = MAIN_QUEST_PHASE_NUMBERS as readonly number[];
   const current = Math.max(1, Math.min(50, Math.floor(currentMainPhaseNumber)));
-  const chapterStart = [...mains].filter((n) => n <= current).pop() ?? 1;
-  const nextMain = mains.find((n) => n > chapterStart) ?? chapterStart;
+  const chapterEnd = [...mains].filter((n) => n <= current).pop() ?? 1;
 
+  if (chapterEnd <= 1) {
+    return { min: 1, max: 1 };
+  }
+
+  const prevMain = [...mains].filter((n) => n < chapterEnd).pop() ?? 1;
   return {
-    min: chapterStart,
-    max: nextMain,
+    min: prevMain + 1,
+    max: chapterEnd,
   };
 }
 
-/** Marco dono do capítulo que contém a fase (maior main ≤ phaseNumber). */
+/**
+ * Marco dono do capítulo que contém a fase.
+ * Fase 1 → main 1; 2–10 → main 10; 11–20 → main 20; …
+ */
 export function chapterMainPhaseForPhaseNumber(phaseNumber: number): number {
   const mains = MAIN_QUEST_PHASE_NUMBERS as readonly number[];
   const n = Math.max(1, Math.min(50, Math.floor(phaseNumber)));
-  return [...mains].filter((main) => main <= n).pop() ?? 1;
+  if (n <= 1) return 1;
+  return mains.find((main) => main >= n) ?? 50;
 }
 
 export function listMissionChapterOptions(): Array<{

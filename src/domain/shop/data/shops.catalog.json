@@ -120,7 +120,7 @@
   {
     "id": "arsenal-marco",
     "name": "Arsenal do Marco",
-    "unlockAfterMainId": "main:1-25",
+    "unlockAfterMainId": "main:1-20",
     "catalogItemIds": [
       "patrol_sword",
       "scout_axe",

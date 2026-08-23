@@ -1,6 +1,11 @@
 import { buildPhaseId, parsePhaseId, PhaseId } from '../CampaignIds';
 import { CampaignProgress, CampaignProgressProps } from '../CampaignProgress';
-import { isMainQuestPhaseNumber, mainMissionId, MissionId } from './MissionId';
+import {
+  MAIN_QUEST_PHASE_NUMBERS,
+  isMainQuestPhaseNumber,
+  mainMissionId,
+  MissionId,
+} from './MissionId';
 import { MissionProgress, MissionProgressProps } from './MissionProgress';
 
 /**
@@ -25,7 +30,7 @@ export function completedMainIdsFromClearedPhases(
 
   for (const [mapIndex, numbers] of byMap) {
     const maxCleared = Math.max(...numbers);
-    for (const milestone of [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50] as const) {
+    for (const milestone of MAIN_QUEST_PHASE_NUMBERS) {
       if (!isMainQuestPhaseNumber(milestone)) continue;
       const phaseId = buildPhaseId(mapIndex, milestone);
       if (cleared.has(phaseId) || maxCleared >= milestone) {

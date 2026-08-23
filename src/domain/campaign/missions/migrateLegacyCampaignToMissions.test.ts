@@ -20,11 +20,12 @@ describe('migrateLegacyCampaignToMissions', () => {
     expect(mains).toEqual(
       expect.arrayContaining([
         mainMissionId('1-1'),
-        mainMissionId('1-5'),
         mainMissionId('1-10'),
       ]),
     );
+    expect(mains).not.toContain(mainMissionId('1-5'));
     expect(mains).not.toContain(mainMissionId('1-15'));
+    expect(mains).not.toContain(mainMissionId('1-20'));
   });
 
   it('CampaignProgress.restore migra save sem missionProgress', () => {
@@ -37,8 +38,9 @@ describe('migrateLegacyCampaignToMissions', () => {
     });
 
     expect(progress.missionProgress.completedMainIds).toEqual(
-      expect.arrayContaining([mainMissionId('1-1'), mainMissionId('1-5')]),
+      expect.arrayContaining([mainMissionId('1-1')]),
     );
+    expect(progress.missionProgress.completedMainIds).not.toContain(mainMissionId('1-5'));
     expect(progress.toProps().missionProgress?.completedMainIds.length).toBeGreaterThan(0);
   });
 

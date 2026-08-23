@@ -30,7 +30,8 @@ describe('MissionCatalog (Fase 5)', () => {
     expect(mid?.name).not.toMatch(/^Missão ·/);
 
     expect(getMissionById(normalMissionId('1-1'))?.kind).toBe('normal');
-    expect(getMissionById(normalMissionId('1-5'))?.stars).toBe(2);
+    expect(getMissionById(normalMissionId('1-5'))?.stars).toBe(1);
+    expect(getMissionById(normalMissionId('1-9'))?.stars).toBe(2);
   });
 
   it('sides piloto cobrem os quatro mapas base', () => {
@@ -44,7 +45,7 @@ describe('MissionCatalog (Fase 5)', () => {
     expect(resolveMissionScene(cache!.rewards!.sceneId!)?.title).toContain('esconderijo');
   });
 
-  it('lista 11 principais por mapa base', () => {
-    expect(listMainMissionsForMap('stendra')).toHaveLength(11);
+  it('lista 6 principais por mapa base', () => {
+    expect(listMainMissionsForMap('stendra')).toHaveLength(6);
   });
 });
