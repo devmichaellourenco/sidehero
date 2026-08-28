@@ -150,7 +150,8 @@ describe('GameHudController — acesso no acampamento', () => {
     expect(buttons.shop.classList.contains('hidden')).toBe(false);
     expect(buttons.inventory.classList.contains('hidden')).toBe(false);
     expect(buttons.stash.classList.contains('hidden')).toBe(false);
-    expect(buttons.stash.title).toBe('Baús (0/20)');
+    expect(buttons.stash.dataset.menuTooltip).toBe('stash');
+    expect(buttons.stash.dataset.menuTooltipDetail).toBe('Itens guardados: 0/20');
     // OTIMIZAR EQUIPE DESATIVADO (2026-08)
     expect(buttons.optimize.classList.contains('hidden')).toBe(true);
   });

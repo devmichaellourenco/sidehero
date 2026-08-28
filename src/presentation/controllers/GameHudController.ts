@@ -7,6 +7,7 @@ import {
   phaseCountForMap,
 } from '../components/CampaignMapPresentation';
 import { countUpgradeItems } from '../components/GearComparison';
+import { applyMenuTooltipAnchor } from '../components/MenuTooltipPresentation';
 
 function escapeHtml(text: string): string {
   return text
@@ -278,20 +279,26 @@ export class GameHudController {
     const heroPointsCount = state.heroes.filter((hero) => hero.hasUnspentPoints).length;
 
     this.openHeroesBtn.classList.toggle('hidden', !atCamp);
-    this.openHeroesBtn.title =
-      heroPointsCount > 0
-        ? `Heróis (${heroPointsCount} com Aprimoramento)`
-        : 'Heróis';
+    applyMenuTooltipAnchor(this.openHeroesBtn, 'heroes', {
+      detail:
+        heroPointsCount > 0
+          ? `${heroPointsCount} herói(s) com pontos de aprimoramento`
+          : undefined,
+    });
     updateBadge(this.heroesBadgeEl, atCamp ? heroPointsCount : 0);
 
     this.openFormationBtn.classList.toggle('hidden', !atCamp);
-    this.openFormationBtn.title = `Formação (${state.activeParty.length}/3)`;
+    applyMenuTooltipAnchor(this.openFormationBtn, 'formation', {
+      detail: `Party ativa: ${state.activeParty.length}/3`,
+    });
 
     this.openShopBtn.classList.toggle('hidden', !atCamp);
-    this.openShopBtn.title = 'Loja';
+    applyMenuTooltipAnchor(this.openShopBtn, 'shop');
 
     this.openInventoryBtn.classList.toggle('hidden', !atCamp);
-    this.openInventoryBtn.title = `Inventário (${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit})`;
+    applyMenuTooltipAnchor(this.openInventoryBtn, 'inventory', {
+      detail: `Espaço: ${state.storageCapacity.inventoryUsed}/${state.storageCapacity.inventoryLimit}`,
+    });
     updateBadge(
       this.inventoryBadgeEl,
       atCamp
@@ -305,7 +312,9 @@ export class GameHudController {
 
     if (atCamp && state.storageCapacity.stashUnlocked) {
       this.openStashBtn.classList.remove('hidden');
-      this.openStashBtn.title = `Baús (${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit})`;
+      applyMenuTooltipAnchor(this.openStashBtn, 'stash', {
+        detail: `Itens guardados: ${state.storageCapacity.stashUsed}/${state.storageCapacity.stashLimit}`,
+      });
       updateBadge(this.stashBadgeEl, state.storageCapacity.stashUsed);
     } else {
       this.openStashBtn.classList.add('hidden');
@@ -314,7 +323,7 @@ export class GameHudController {
 
     if (flags.divineForge) {
       this.openForgeBtn.classList.remove('hidden');
-      this.openForgeBtn.title = 'Forja Divina';
+      applyMenuTooltipAnchor(this.openForgeBtn, 'forge');
     } else {
       this.openForgeBtn.classList.add('hidden');
     }
@@ -324,8 +333,9 @@ export class GameHudController {
     // const canOptimize = atCamp && flags.optimizeLoadout;
     this.optimizeLoadoutBtn.classList.toggle('hidden', !canOptimize);
     this.optimizeLoadoutBtn.disabled = !canOptimize || upgradeCount === 0;
-    this.optimizeLoadoutBtn.title =
-      upgradeCount > 0 ? `Otimizar equipe (↑${upgradeCount})` : 'Otimizar equipe';
+    applyMenuTooltipAnchor(this.optimizeLoadoutBtn, 'optimize', {
+      detail: upgradeCount > 0 ? `${upgradeCount} upgrade(s) disponível(is)` : undefined,
+    });
     updateBadge(this.optimizeBadgeEl, canOptimize ? upgradeCount : 0);
 
     this.openAllChestsBtn.classList.toggle(
@@ -333,7 +343,12 @@ export class GameHudController {
       !flags.openAllChests || state.pendingChestCount < 2,
     );
 
-    this.openUpgradesBtn.title = 'Runas do acampamento';
+    applyMenuTooltipAnchor(this.openUpgradesBtn, 'upgrades', {
+      detail:
+        state.purchasableUpgradeCount > 0
+          ? `${state.purchasableUpgradeCount} runa(s) disponível(is)`
+          : undefined,
+    });
     updateBadge(this.upgradesBadgeEl, state.purchasableUpgradeCount);
 
     const hasChests = state.pendingChestCount > 0;
@@ -346,9 +361,11 @@ export class GameHudController {
       this.openAllChestsBadgeEl,
       flags.openAllChests && state.pendingChestCount >= 2 ? state.pendingChestCount : 0,
     );
-    this.openChestBtn.title = hasChests
-      ? `Abrir baú (${state.pendingChestCount})`
-      : 'Nenhum baú disponível';
+    applyMenuTooltipAnchor(this.openChestBtn, 'chest', {
+      detail: hasChests
+        ? `${state.pendingChestCount} baú(s) aguardando`
+        : 'Nenhum baú disponível',
+    });
 
     const loadoutPause = Boolean(options.loadoutPauseActive);
     const battlePause = Boolean(options.battlePauseActive);
@@ -375,8 +392,8 @@ export class GameHudController {
 
     const statsUnlocked = Boolean(flags.battleStats);
     this.openBattleStatsBtn.classList.toggle('hidden', !statsUnlocked);
-    this.openBattleStatsBtn.title = statsUnlocked
-      ? 'Estatísticas de batalha'
-      : 'Desbloqueie nas Runas';
+    applyMenuTooltipAnchor(this.openBattleStatsBtn, 'stats', {
+      detail: statsUnlocked ? 'Pode abrir em janela destacada' : 'Desbloqueie nas Runas',
+    });
   }
 }

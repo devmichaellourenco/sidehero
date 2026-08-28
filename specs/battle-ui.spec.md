@@ -35,6 +35,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Heróis / Formação / Loja / Inventário / Baús só aparecem no **acampamento** (`canEditParty`)
 - [x] Pista de combate do mapa (ameaça/favorável) no tooltip da campanha e header do mapa; eficácia vs área nas stats de skill
 - [x] Splash `splash_screen.png` na abertura do painel principal (≥5s) antes de tutorial/Wow/loop de batalha (`SplashScreenController`)
+- [x] Tooltips dos menus do footer e faixa de sistemas nos modais usam portal RPG (`MenuTooltipBinder`) — pergaminho, selo ouro, categoria e flavor; sem `title` nativo do navegador
 
 ## Critérios — camp-missions (novos)
 
@@ -55,6 +56,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 | Presentation | `panel/panel.html`, `panel.css`, `GameViewController`, `GameHudController` |
 | Presentation | `BattleChromeLayout`, `WowBannerBuilder`, `WowBannerCtaPresentation`, `WowStripRenderer`, `RewardOrchestrator`, `OnboardingPolicy` + `OnboardingStepCatalog`, `DonationCardPresentation` |
 | Presentation | `ModalStackController`, `SystemsMenuNavigation`, `BattleChestAffordanceController` |
+| Presentation | `MenuTooltipCatalog`, `MenuTooltipBinder`, `MenuTooltipPresentation` |
 | Presentation | `SurfacePinPreference`, `SurfacePinPresentation` |
 | Presentation | `UiOverlayOrchestrator` — exclusividade tutorial/cena/batalha/Wow |
 | Infra | `DetachedSurfaceWindowOpener`, `DetachedSurfaceWindowManager`; redirect legado `panel/stats.html` → `?detached=stats` |
@@ -88,6 +90,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] `SystemsMenuNavigation.test.ts` — disponibilidade por camp/unlock + wrap prev/next
 - [x] `UiOverlayOrchestrator.test.ts` — prioridade e fila de overlays exclusivos
 - [x] `SplashScreenController.test.ts` — splash de abertura antes do loop
+- [x] `MenuTooltipBinder.test.ts`, `MenuTooltipPresentation.test.ts` — tooltips RPG dos menus
 - [x] `BattleHudDeckLayout.test.ts` — cena 133px + deck HUD separado no markup
 - [x] `ActionTimeBarPresentation.test.ts` — countdown e tooltip de cálculo TTA
 - [x] `BattleVictoryFlow.test.ts` — clear/defeat revelam detalhes (sem headline) e aguardam Continuar; wave-clear auto-dismiss

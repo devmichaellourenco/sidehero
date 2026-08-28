@@ -1,4 +1,5 @@
 import { ASSETS, getAssetUrl } from '../assets/AssetCatalog';
+import { applyMenuTooltipAnchor } from './MenuTooltipPresentation';
 import type { SystemsMenuId } from '../flows/SystemsMenuNavigation';
 
 export type SystemsMenuIconMeta =
@@ -49,7 +50,7 @@ export function renderSystemsMenuIconStrip(
     button.type = 'button';
     button.className = 'systems-menu-icon-btn';
     button.dataset.systemsMenuId = id;
-    button.title = meta.label;
+    applyMenuTooltipAnchor(button, id);
     button.setAttribute('aria-label', meta.label);
     button.setAttribute('aria-current', id === current ? 'page' : 'false');
     button.classList.toggle('systems-menu-icon-btn--active', id === current);

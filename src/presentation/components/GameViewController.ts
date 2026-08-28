@@ -63,6 +63,7 @@ import { BattleFloatingTextController } from './BattleFloatingTextController';
 import { BattleImpactFeedbackController } from './BattleImpactFeedbackController';
 import { BattleSkillVfxController } from './BattleSkillVfxController';
 import { bindCampaignTooltip, hideCampaignTooltip } from './CampaignTooltipBinder';
+import { bindMenuTooltips, hideMenuTooltip } from './MenuTooltipBinder';
 import { mountNavArrowIcons } from '../assets/NavArrowPresentation';
 import { hydratePanelIcons } from '../assets/PanelIconHydrator';
 import { buildBattleIntermissionPayload } from './BattleVictoryDetector';
@@ -433,6 +434,7 @@ export class GameViewController {
 
     hydratePanelIcons(root);
     bindCampaignTooltip(this.campaignContextBtn);
+    bindMenuTooltips();
     bindBattleChromeLayout(
       root.querySelector('.battle-combat-bar') as HTMLElement,
       root.querySelector('#app') as HTMLElement | null,
@@ -760,6 +762,7 @@ export class GameViewController {
     });
     this.campaignContextBtn.addEventListener('click', () => {
       hideCampaignTooltip();
+      hideMenuTooltip();
       void this.openSystemsSurface('campaign');
     });
     this.openShopBtn.addEventListener('click', () => {
