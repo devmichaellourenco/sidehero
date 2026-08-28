@@ -130,7 +130,7 @@ function renderFormationBenchSlot(
 function renderPartyLockNotice(canEditParty: boolean): string {
   if (canEditParty) return '';
 
-  return `<p class="party-lock-notice" title="Use Acampamento acima da batalha para editar party e loadout.">🔒 Formação bloqueada durante a missão</p>`;
+  return `<p class="party-lock-notice" title="Formação só pode ser editada no acampamento, entre missões.">🔒 Formação bloqueada durante a missão</p>`;
 }
 
 export function renderFormationPanel(state: FormationPanelState): string {

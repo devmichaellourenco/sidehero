@@ -10,9 +10,9 @@ describe('HeroCombatIdentityCatalog', () => {
       expect(identity.basicAttackDamageRatio).toBeGreaterThan(0);
       expect(identity.skillCooldownTurnSeconds).toBeGreaterThan(0);
       expect(identity.attackSpeedFactor).toBeGreaterThan(0);
-      expect(identity.attackPerLevel).toBeGreaterThan(0);
-      expect(identity.defensePerLevel).toBeGreaterThan(0);
-      expect(identity.healthPerLevel).toBeGreaterThan(0);
+      expect(identity.attackPerLevel).toBe(0);
+      expect(identity.defensePerLevel).toBe(0);
+      expect(identity.healthPerLevel).toBe(0);
       expect(identity.levelUpAttackGain).toBe(3);
       expect(identity.levelUpDefenseGain).toBe(3);
       expect(identity.levelUpHealthGain).toBe(15);

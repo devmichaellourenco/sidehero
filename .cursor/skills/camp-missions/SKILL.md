@@ -41,7 +41,7 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 - New game: party **Nix solo**; unlocks Galneon→Elara→… na árvore com gates de main; inicia no hub Acampamento (`loadoutEditOpen`); cena de abertura → boas-vindas → mapa aberto automaticamente + tutorial guiado (skill `battle-ui`)
 - Vitória/derrota → CLEAR/DEFEAT → tela de recompensas (sem scroll; Continuar no deck) → acampamento + mapa
 - Iniciar no mapa → cue START → combate; Acampamento/hub sem Batalhar (`phaseRestartOnResume: false`); unpin retransmite ao painel principal
-- XP/ouro de fase vêm só do orçamento `targetXp`/`targetGold` (pagos via kills); missões não têm recompensa de conclusão em ouro/XP. O overlay CLEAR/DEFEAT compara com o hub no START da tentativa (`BattleAttemptRewardBaseline`), então a derrota mostra o que os kills já pagaram — não “Sem recompensas de conclusão” só porque o último tick não gerou delta
+- XP/ouro: ouro nos kills (`targetGold`); XP = orçamento `targetXp` só na vitória (`grantPhaseVictoryXp`). Derrota: ouro parcial dos kills, XP 0. Overlay CLEAR/DEFEAT usa baseline do START (`BattleAttemptRewardBaseline`)
 - Preview/CTA só ao clicar no pin (popover sobre o pin; sem footer permanente)
 - Região: título + bioma compactos; painel do mapa com padding mínimo; progresso só no hover; troca via mapa-mundo
 - Pins do mapa com margem segura (não cortam no topo/laterais)

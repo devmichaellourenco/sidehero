@@ -1,4 +1,5 @@
 import { GEAR_RARITY_ORDER } from './GearRarityPresentation';
+import { resolveEquipmentTooltipPosition } from './EquipmentTooltipPosition';
 
 const PORTAL_ID = 'gear-tooltip-portal';
 
@@ -28,21 +29,25 @@ function positionPortal(portal: HTMLElement, anchor: DOMRect): void {
   portal.classList.remove('hidden');
 
   const portalRect = portal.getBoundingClientRect();
-  let top = anchor.top - portalRect.height - margin;
-  let left = anchor.left + anchor.width / 2 - portalRect.width / 2;
-
-  const maxLeft = window.innerWidth - portalRect.width - margin;
-  left = Math.max(margin, Math.min(left, maxLeft));
-
   const modalHeader = document.querySelector(
     '.modal-root:not(.hidden) .modal-header',
   ) as HTMLElement | null;
   const headerBottom = modalHeader?.getBoundingClientRect().bottom ?? 0;
   const minTop = Math.max(margin, headerBottom + margin);
 
-  if (top < minTop) {
-    top = anchor.bottom + margin;
-  }
+  const { top, left } = resolveEquipmentTooltipPosition({
+    anchor: {
+      top: anchor.top,
+      bottom: anchor.bottom,
+      left: anchor.left,
+      width: anchor.width,
+    },
+    portal: { width: portalRect.width, height: portalRect.height },
+    viewportWidth: window.innerWidth,
+    viewportHeight: window.innerHeight,
+    minTop,
+    margin,
+  });
 
   portal.style.top = `${top}px`;
   portal.style.left = `${left}px`;

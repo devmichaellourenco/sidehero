@@ -140,7 +140,8 @@ describe('BattleVictoryDetector', () => {
     expect(payload?.clearedPhaseName).toBe('Esgotos Profundos');
     expect(payload?.nextPhaseId).toBe('1-3');
     expect(payload?.goldGained).toBe(25);
-    expect(payload?.xpGained).toBe(40);
+    // XP vem do delta nos heróis (orçamento da fase na vitória), não de xpReward do inimigo.
+    expect(payload?.xpGained).toBe(110);
     expect(payload?.tierReached).toBe(2);
     expect(payload?.heroRewards).toHaveLength(1);
     expect(payload?.heroRewards[0].newLevel).toBe(2);
@@ -176,7 +177,7 @@ describe('BattleVictoryDetector', () => {
     expect(payload?.variant).toBe('boss-approach');
   });
 
-  it('buildBattleIntermissionPayload na derrota exibe ouro/XP parciais da missão normal', () => {
+  it('buildBattleIntermissionPayload na derrota exibe ouro parcial e zero XP', () => {
     const previous = baseState({
       gold: 100,
       heroes: [
@@ -225,7 +226,7 @@ describe('BattleVictoryDetector', () => {
       heroes: [
         {
           ...previous.heroes[0],
-          experience: 2,
+          experience: 0,
         },
       ],
       phaseRun: null,
@@ -242,10 +243,10 @@ describe('BattleVictoryDetector', () => {
 
     expect(payload.variant).toBe('defeat');
     expect(payload.goldGained).toBe(3);
-    expect(payload.xpGained).toBe(2);
+    expect(payload.xpGained).toBe(0);
   });
 
-  it('derrota soma ouro/XP da tentativa inteira, não só o último tick', () => {
+  it('derrota soma ouro da tentativa inteira e não concede XP', () => {
     const attemptStart = baseState({
       gold: 100,
       heroes: [
@@ -283,7 +284,7 @@ describe('BattleVictoryDetector', () => {
     });
     const lastTick = baseState({
       gold: 118,
-      heroes: [{ ...attemptStart.heroes[0]!, experience: 24, health: 0 }],
+      heroes: [{ ...attemptStart.heroes[0]!, experience: 0, health: 0 }],
       phaseRun: {
         phaseId: '1-2',
         displayName: 'Patrulha',
@@ -294,7 +295,7 @@ describe('BattleVictoryDetector', () => {
     });
     const defeat = baseState({
       gold: 118,
-      heroes: [{ ...attemptStart.heroes[0]!, experience: 24, health: 50 }],
+      heroes: [{ ...attemptStart.heroes[0]!, experience: 0, health: 50 }],
       phaseRun: null,
       combatIntermission: {
         variant: 'defeat',
@@ -320,7 +321,7 @@ describe('BattleVictoryDetector', () => {
       attemptStart,
     );
     expect(payload.goldGained).toBe(18);
-    expect(payload.xpGained).toBe(24);
+    expect(payload.xpGained).toBe(0);
   });
 
   it('derrota sem delta de XP no herói não inventa XP a partir dos inimigos', () => {

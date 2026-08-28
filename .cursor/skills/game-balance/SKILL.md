@@ -36,16 +36,16 @@ description: Balanceamento transversal do Side Hero — fórmulas de combate, el
 | Recovery pós-skill | `actionRecoverySeconds` da skill / castSpeed | por skill | `CombatSkillDefinition` |
 | Ataque básico | ATK × `basicAttackDamageRatio` do combatente | por herói/tipo de monstro | `HeroCombatIdentityCatalog.ts`, `EnemyCombatIdentityCatalog.ts` |
 | CDR | % do gear, teto/piso na skill | `maxCooldownReduction` / `minCooldownReduction` | `CombatProfileProvider.ts` |
-| Crescimento ATK/DEF/HP | tabela por herói / tipo de monstro | `attackPerLevel` + `levelUp*Gain` | `HeroCombatIdentityCatalog.ts` |
+| Crescimento ATK/DEF/HP | herói: base + atributos + gear (+ `levelUp*Gain` na base); monstro: `attackPerLevel` + `levelUp*Gain` | `HeroCombatIdentityCatalog.ts`, `EnemyCombatIdentityCatalog.ts` |
 | Skill herói com CD | powerPerRank no catálogo | valores 3× o legado (sem constante global) | `HeroCombatSkillCatalog.ts` |
 | Crítico | `critChance`, `critDamage` | Multiplicador antes do split | `CombatDamageResolver.ts` |
 | DEF efetiva | base + debuff | Só componente `physical` | `CombatStatResolver.ts` |
 | Resist | gear + inato | `getEffectiveResistance` | `ResistanceProfile.ts` |
 | Esquiva/block/DR | gear + passivas | Após soma de componentes | `DefensiveMitigation.ts` |
 | DOT tick | `onHitDot` | **Deve** usar pipeline (backlog BAL-001) | `CombatTurnPhase.ts` |
-| XP por kill | mapa, tier (sem penalidade de replay) | `CampaignXpScaling` | `WaveEnemyFactory.ts`, `PhaseLootPolicy.ts` |
+| XP por fase | `targetXp` (vitória) | lump sum; kills sem XP | `PhaseVictoryXp.ts`, `PhaseXpBudget.ts` |
 | Loot primário | itemLevel, raridade | `rolledGearPrimaryStat` | `DifficultyCombatScaling.ts`, `MapGearLevelPolicy.ts` |
-| Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → referência | `PhaseGoldBudget.ts`, `EconomyReference.ts` |
+| Ouro por fase | tier, # inimigos | `PhaseGoldBudget` → kills | `PhaseGoldBudget.ts`, `EconomyReference.ts` |
 | Loja | `basePrice` do item + definição da loja | `priceMultiplier`/`flatPriceAdjustment`; pool explícito; cap de raridade por main | `ShopPricing.ts`, `ConfigurableShopCatalog.ts`, `ShopService.ts` |
 | Identidade de mapa | mapId | bias pool + resists soft (−15/+20) | `MapCombatIdentityCatalog.ts`, `EnemyTierProgression.ts` |
 

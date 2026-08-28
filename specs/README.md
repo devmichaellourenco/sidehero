@@ -27,8 +27,9 @@ Este diretório é a **fonte de verdade** para features do jogo. Todo trabalho n
 | [medieval-theme](medieval-theme.spec.md) | 9/9 | 1/1 | Paleta medieval (tutorial) |
 | [ui-theme](ui-theme.spec.md) | 7/7 | 2/2 | Claro/escuro (batalha isolada) |
 | [passives](passives.spec.md) | 10/14 | 4/8 | Fase A–B; gear/inimigo pendentes |
+| [game-audio](game-audio.spec.md) | 7/8 | 2/2 | SFX pendentes |
 
-**Total aceite (features):** ~226/241 · *passives / art-scenes / story-scenes com pendências*  
+**Total aceite (features):** ~233/249 · *passives / art-scenes / story-scenes / game-audio com pendências*  
 **Balanceamento transversal:** 11/11  
 **Total testes listados nas specs:** ver specs individuais
 
@@ -87,6 +88,7 @@ Secundário: calibração Balance Lab (aba Missões) — [`game-balance.spec.md`
 | [medieval-theme](medieval-theme.spec.md) | Paleta medieval do painel (tutorial) | `.cursor/agents/medieval-theme.md` | `.cursor/skills/medieval-theme/` |
 | [ui-theme](ui-theme.spec.md) | Tema claro/escuro do painel (preferência) | `.cursor/agents/medieval-theme.md` | `.cursor/skills/medieval-theme/` |
 | [passives](passives.spec.md) | Passivas sempre ativas (classe, ascensão, gear, inimigos) | `.cursor/agents/passives.md` | `.cursor/skills/passives/` |
+| [game-audio](game-audio.spec.md) | Música de fundo e SFX | — | `.cursor/skills/game-audio/` |
 | [game-design-document](game-design-document.spec.md) | Visão do produto, GDD, pitch e apresentação | `.cursor/agents/game-design-document.md` | `.cursor/skills/game-design-document/` |
 
 ## Arquitetura global

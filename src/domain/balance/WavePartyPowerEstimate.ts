@@ -39,8 +39,9 @@ function estimateHeroBasicDps(heroClass: HeroClass, level: number): number {
   const safeLevel = Math.max(1, Math.floor(level));
   const identity = getHeroCombatIdentity(heroClass);
   const base = getHeroBaseStats(heroClass);
+  const levelsGained = safeLevel - 1;
   const attack = deriveCombatAttack({
-    baseAttack: base.attack,
+    baseAttack: base.attack + levelsGained * identity.levelUpAttackGain,
     attributes: createAttributes(10, 10, 10),
     level: safeLevel,
     attackPerLevel: identity.attackPerLevel,

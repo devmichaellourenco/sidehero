@@ -325,6 +325,21 @@ export function computeCombatant(
     const fixed = value.toFixed(digits).replace(/\.?0+$/, '');
     return fixed.replace('.', ',');
   };
+  const levelTerm = (perLevel: number): string =>
+    perLevel === 0 ? '' : ` + ${n(levelsAbove1)}×${n(perLevel)}`;
+  const levelStep = (
+    bonus: number,
+    perLevel: number,
+  ): Array<{ label: string; detail: string; note: string }> =>
+    perLevel === 0
+      ? []
+      : [
+          {
+            label: 'Nível',
+            detail: `+${bonus}`,
+            note: `(nível − 1) × ${perLevel} (identidade)`,
+          },
+        ];
 
   return {
     label: input.label,
@@ -350,18 +365,14 @@ export function computeCombatant(
       attack: {
         finalLabel: 'ATK final',
         finalValue: String(attack),
-        appliedEquation: `floor( (${n(input.baseAttack)} + ${n(gearAtk)} + ${n(levelsAbove1)}×${n(identity.attackPerLevel)} + floor(${n(attributes.str)}×${n(f.attrAtkStr)} + ${n(attributes.dex)}×${n(f.attrAtkDex)}) ) × (1 + [${n(input.attackPercent)} + ${n(passives.attackPercent)}]/100) ) = ${n(attack)}`,
+        appliedEquation: `floor( (${n(input.baseAttack)} + ${n(gearAtk)}${levelTerm(identity.attackPerLevel)} + floor(${n(attributes.str)}×${n(f.attrAtkStr)} + ${n(attributes.dex)}×${n(f.attrAtkDex)}) ) × (1 + [${n(input.attackPercent)} + ${n(passives.attackPercent)}]/100) ) = ${n(attack)}`,
         steps: [
           {
             label: 'Base ATK',
             detail: String(input.baseAttack),
             note: 'Stat base (classe + level-ups, ou sheet do inimigo)',
           },
-          {
-            label: 'Nível',
-            detail: `+${levelAtk}`,
-            note: `(nível − 1) × ${identity.attackPerLevel} (identidade)`,
-          },
+          ...levelStep(levelAtk, identity.attackPerLevel),
           {
             label: 'Atributos',
             detail: `+${attrAtk}`,
@@ -384,18 +395,14 @@ export function computeCombatant(
       defense: {
         finalLabel: 'DEF final',
         finalValue: String(defense),
-        appliedEquation: `floor( (${n(input.baseDefense)} + ${n(gearDef)} + ${n(levelsAbove1)}×${n(identity.defensePerLevel)} + floor(${n(attributes.dex)}×${n(f.attrDefDex)} + ${n(attributes.str)}×${n(f.attrDefStr)}) ) × (1 + [${n(input.defensePercent)} + ${n(passives.defensePercent)}]/100) ) = ${n(defense)}`,
+        appliedEquation: `floor( (${n(input.baseDefense)} + ${n(gearDef)}${levelTerm(identity.defensePerLevel)} + floor(${n(attributes.dex)}×${n(f.attrDefDex)} + ${n(attributes.str)}×${n(f.attrDefStr)}) ) × (1 + [${n(input.defensePercent)} + ${n(passives.defensePercent)}]/100) ) = ${n(defense)}`,
         steps: [
           {
             label: 'Base DEF',
             detail: String(input.baseDefense),
             note: 'Armadura base (classe + level-ups, ou sheet do inimigo)',
           },
-          {
-            label: 'Nível',
-            detail: `+${levelDef}`,
-            note: `(nível − 1) × ${identity.defensePerLevel} (identidade)`,
-          },
+          ...levelStep(levelDef, identity.defensePerLevel),
           {
             label: 'Atributos',
             detail: `+${attrDef}`,
@@ -418,18 +425,14 @@ export function computeCombatant(
       health: {
         finalLabel: 'HP final',
         finalValue: String(maxHealth),
-        appliedEquation: `floor( (${n(input.baseMaxHealth)} + ${n(gearHp)} + ${n(levelsAbove1)}×${n(identity.healthPerLevel)} + ${n(attributes.str)}×${n(f.attrHpStr)} ) × (1 + [${n(input.healthPercent)} + ${n(healthPercent - input.healthPercent, 1)}]/100) ) = ${n(maxHealth)}`,
+        appliedEquation: `floor( (${n(input.baseMaxHealth)} + ${n(gearHp)}${levelTerm(identity.healthPerLevel)} + ${n(attributes.str)}×${n(f.attrHpStr)} ) × (1 + [${n(input.healthPercent)} + ${n(healthPercent - input.healthPercent, 1)}]/100) ) = ${n(maxHealth)}`,
         steps: [
           {
             label: 'Base HP',
             detail: String(input.baseMaxHealth),
             note: 'Vida base (classe + level-ups, ou sheet do inimigo)',
           },
-          {
-            label: 'Nível',
-            detail: `+${levelHp}`,
-            note: `(nível − 1) × ${identity.healthPerLevel} (identidade)`,
-          },
+          ...levelStep(levelHp, identity.healthPerLevel),
           {
             label: 'Atributos',
             detail: `+${attrHp}`,

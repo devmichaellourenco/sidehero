@@ -22,6 +22,7 @@ import {
 import { MissionProgress } from './MissionProgress';
 import { resolveMissionScene } from './MissionSceneCatalog';
 import { nextNormalOfferAfterCampVisit } from './NormalMissionOffer';
+import { grantPhaseVictoryXp } from '../PhaseVictoryXp';
 
 export interface MissionOutcomeResult {
   state: GameState;
@@ -40,8 +41,8 @@ function inferMissionIdFromPhase(phaseId: PhaseId, progress: MissionProgress): M
 
 /**
  * Recompensa de conclusão de missão: apenas item exclusivo e cena narrativa.
- * Ouro/XP vêm exclusivamente do orçamento da fase (kills), então não entram aqui.
- * Chamada só na vitória; na derrota nada é concedido.
+ * Ouro vem dos kills; XP vem do orçamento da fase na vitória (`grantPhaseVictoryXp`).
+ * Chamada só na vitória; na derrota nada é concedido aqui.
  */
 function applyMissionRewards(
   state: GameState,
@@ -167,6 +168,12 @@ export function applyMissionVictory(params: {
     events.push(...rewarded.events);
   }
 
+  const xpResult = grantPhaseVictoryXp(nextState, phaseId);
+  nextState = xpResult.state;
+  if (xpResult.xpGranted > 0) {
+    events.push(`+${xpResult.xpGranted} XP`);
+  }
+
   nextState = nextState.addLog(
     `Boss derrotado em ${phaseDisplayName}! · Party recuperada · Retorno ao acampamento`,
   );
@@ -175,8 +182,8 @@ export function applyMissionVictory(params: {
 }
 
 /**
- * Derrota: normal some da oferta; nenhuma recompensa de conclusão em qualquer tipo.
- * O XP/ouro parcial da tentativa vem só dos kills já pagos durante o combate.
+ * Derrota: normal some da oferta; sem XP (só ouro já pago nos kills).
+ * Nenhuma recompensa de conclusão em qualquer tipo.
  */
 export function applyMissionDefeat(params: {
   state: GameState;

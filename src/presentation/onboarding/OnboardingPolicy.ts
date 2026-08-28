@@ -52,7 +52,8 @@ export function isOnboardingStepTriggered(
     case 'first-chest':
       return state.pendingChestCount > 0;
     case 'pause-loadout':
-      return Boolean(state.phaseRun) || !state.canEditParty;
+      // Botão mid-missão oculto — passo legado, não dispara.
+      return false;
     case 'hero-points':
       return (
         state.canEditParty && state.heroes.some((hero) => hero.hasUnspentPoints)

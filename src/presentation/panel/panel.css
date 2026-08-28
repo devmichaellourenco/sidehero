@@ -8487,6 +8487,22 @@ body.modal-open {
   font-size: 11px;
 }
 
+.settings-item-range {
+  align-items: center;
+  justify-content: space-between;
+  cursor: default;
+}
+
+.settings-volume-range {
+  width: 120px;
+  accent-color: var(--gold);
+}
+
+.settings-volume-range:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .settings-hint {
   margin-top: 14px;
   font-size: 10px;

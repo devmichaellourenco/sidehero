@@ -1,34 +1,16 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearPhaseGoldScaleCache } from '../balance/PhaseGoldBudget';
-import { clearPhaseXpScaleCache, phaseXpScaleForPhase } from '../balance/PhaseXpBudget';
+import {
+  clearPhaseXpScaleCache,
+  effectivePhaseXpTotal,
+  phaseXpScaleForPhase,
+} from '../balance/PhaseXpBudget';
 import { resolvePhase } from './CampaignCatalog';
 import { buildPhaseId } from './CampaignIds';
 import {
   normalizePhaseRewardOverride,
   setRuntimePhaseRewardOverrides,
 } from './PhaseRewardOverrides';
-import { spawnEnemiesForWave } from './WaveEnemyFactory';
-import { milestoneGoldScaleForPhase } from '../balance/MilestoneGoldCap';
-
-function sumPhaseXp(phaseId: string, applyOverrides: boolean): number {
-  const phase = resolvePhase(phaseId);
-  if (!phase) return 0;
-  const milestoneGoldScale = milestoneGoldScaleForPhase(phase);
-  let total = 0;
-  for (let waveIndex = 0; waveIndex < phase.waves.length; waveIndex += 1) {
-    const enemies = spawnEnemiesForWave(phase.waves[waveIndex], {
-      phaseId,
-      waveIndex,
-      difficultyTier: phase.difficultyTier,
-      isBossWave: waveIndex === phase.waves.length - 1,
-      statMultiplier: phase.statMultiplier ?? 1,
-      milestoneGoldScale,
-      applyPhaseRewardOverrides: applyOverrides,
-    });
-    total += enemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
-  }
-  return total;
-}
 
 describe('PhaseRewardOverrides', () => {
   afterEach(() => {
@@ -67,37 +49,32 @@ describe('PhaseRewardOverrides', () => {
     expect(resolvePhase(phaseId)?.displayName).toBe('Nome do Lab');
   });
 
-  it('escala XP dos kills da fase para aproximar targetXp', () => {
+  it('targetXp define o XP efetivo da fase (payout na vitória)', () => {
     const phaseId = buildPhaseId(1, 1);
-    const baselineXp = sumPhaseXp(phaseId, false);
+    const baselineXp = effectivePhaseXpTotal(phaseId);
     expect(baselineXp).toBeGreaterThan(0);
 
     const targetXp = Math.max(baselineXp * 3, baselineXp + 10);
     setRuntimePhaseRewardOverrides({ [phaseId]: { targetXp } });
     clearPhaseXpScaleCache();
-    clearPhaseGoldScaleCache();
 
+    expect(effectivePhaseXpTotal(phaseId)).toBe(targetXp);
     expect(phaseXpScaleForPhase(phaseId)).toBeCloseTo(targetXp / baselineXp, 5);
-
-    const scaledXp = sumPhaseXp(phaseId, true);
-    expect(scaledXp).toBeGreaterThanOrEqual(targetXp - 5);
-    expect(scaledXp).toBeLessThanOrEqual(targetXp);
   });
 
-  it('não entra em recursão ao escalar XP de milestone com targetXp', () => {
+  it('não entra em recursão ao resolver XP de milestone com targetXp', () => {
     const phaseId = buildPhaseId(1, 50);
     const phase = resolvePhase(phaseId);
     expect(phase?.milestoneBoss || phase?.seasonFinale).toBeTruthy();
 
-    const baselineXp = sumPhaseXp(phaseId, false);
+    const baselineXp = effectivePhaseXpTotal(phaseId);
     expect(baselineXp).toBeGreaterThan(0);
 
     setRuntimePhaseRewardOverrides({ [phaseId]: { targetXp: Math.max(baselineXp * 2, 40) } });
     clearPhaseXpScaleCache();
-    clearPhaseGoldScaleCache();
 
     expect(() => phaseXpScaleForPhase(phaseId)).not.toThrow();
     expect(phaseXpScaleForPhase(phaseId)).toBeGreaterThan(0);
-    expect(() => sumPhaseXp(phaseId, true)).not.toThrow();
+    expect(effectivePhaseXpTotal(phaseId)).toBeGreaterThan(0);
   });
 });

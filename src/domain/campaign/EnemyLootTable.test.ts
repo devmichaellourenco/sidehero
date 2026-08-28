@@ -73,17 +73,14 @@ describe('EnemyLootTable', () => {
 });
 
 describe('WaveEnemyFactory XP', () => {
-  it('trash dá pouco XP e boss reduzido', async () => {
+  it('inimigos não carregam XP por kill (payout é orçamento da fase)', async () => {
     const { EncounterResolver } = await import('./EncounterResolver');
     const resolver = new EncounterResolver();
     const trash = resolver.resolve(buildPhaseId(1, 2), 0);
     const boss = resolver.resolve(buildPhaseId(1, 2), 1);
 
-    expect(trash?.enemies.every((enemy) => enemy.xpReward > 0 && enemy.xpReward <= 12)).toBe(true);
-    expect(boss?.enemies.some((enemy) => enemy.xpReward > 0)).toBe(true);
-    const bossXp = boss!.enemies.find((enemy) => enemy.role === 'boss')!.xpReward;
-    const trashXp = trash!.enemies[0].xpReward;
-    expect(bossXp).toBeGreaterThan(trashXp);
-    expect(bossXp).toBeLessThan(50);
+    expect(trash?.enemies.every((enemy) => enemy.xpReward === 0)).toBe(true);
+    expect(boss?.enemies.every((enemy) => enemy.xpReward === 0)).toBe(true);
+    expect(trash?.enemies.every((enemy) => enemy.goldReward > 0)).toBe(true);
   });
 });

@@ -130,6 +130,12 @@ export const ASSETS = {
     battle: 'backgrounds/battle.png',
     app: 'backgrounds/app.png',
   },
+  audio: {
+    music: {
+      camp: 'audio/music/camp.wav',
+      battle: 'audio/music/battle.wav',
+    },
+  },
   frames: {
     card: 'frames/card.png',
   },

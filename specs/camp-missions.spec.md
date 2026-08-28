@@ -26,7 +26,7 @@ Acampamento → abrir mapa → escolher missão → batalha (waves)
 |------|--------|------------|---------|
 | **Principal** (`main`) | Avança a história do mapa (marcos) | Não, após concluir | Sempre a **próxima** incompleta |
 | **Secundária** (`side`) | História paralela + loot exclusivo | Não, após concluir | Desbloqueadas e incompletas (várias ok) |
-| **Normal** (`normal`) | Loot/recursos; não avança história | Sim, em **próximos** sorteios; some da oferta atual na derrota/vitória; XP/ouro vêm só do orçamento da fase (kills), sem recompensa de conclusão | 2–4 por oferta, só do capítulo da main atual |
+| **Normal** (`normal`) | Loot/recursos; não avança história | Sim, em **próximos** sorteios; some da oferta atual na derrota/vitória; ouro nos kills; XP só na vitória (`targetXp` da fase) | 2–4 por oferta, só do capítulo da main atual |
 
 ### Principais (marcos)
 
@@ -57,7 +57,7 @@ Por mapa (`stendra` … `morthaven` no v1), ids alinhados às fases-marco:
   - demais marcos: `(marco anterior)+1` … marco atual (ex.: main `1-10` → `2`…`10`; main `1-20` → `11`…`20`).
 - Dentro do capítulo há templates mais fáceis e mais exigentes (próximo ao marco seguinte pede grind/build); não devem ser triviais nem impossíveis cedo demais.
 - Oferta: entre **2 e 4** missões sorteadas (sem repetir **no mesmo** sorteio).
-- **Repetíveis entre sorteios**: o mesmo template pode voltar em refreshes futuros (diferente de main/side). **Não** há penalidade de ouro/XP por “replay” — kills pagam cheio.
+- **Repetíveis entre sorteios**: o mesmo template pode voltar em refreshes futuros (diferente de main/side). **Não** há penalidade de ouro por “replay” — kills pagam ouro cheio; XP só na vitória.
 - Renovação: a cada `NORMAL_MISSION_REFRESH_EVERY_N_CAMP_VISITS` visitas ao acampamento (constante de domínio, default calibrável).
 - Derrota: a missão **some** da oferta atual (pode voltar no próximo refresh).
 - Vitória: remove da oferta atual; concede loot/recursos sem avançar história.
@@ -83,7 +83,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] Hub / Acampamento sem reinício via Batalhar (`phaseRestartOnResume: false`); combate só pelo mapa
 - [x] New game inicia no hub do acampamento (`loadoutEditOpen: true`) com overlay Acampamento
 - [x] New game: depois da cena de abertura, boas-vindas → mapa aberto automaticamente → tutorial guiado (pinos/tipos de missão, preview do local, Iniciar missão); ver `battle-ui` (`OnboardingPolicy`)
-- [x] Derrota em missão normal concede fração de ouro/XP **e** o overlay de recompensas exibe esses valores (delta da tentativa inteira vs. o hub no START — não só o último tick; sem inventar XP a partir de `xpReward` dos inimigos); main/side na derrota sem recompensa de conclusão
+- [x] Derrota concede ouro já pago nos kills e **zero XP**; overlay mostra ouro da tentativa (delta vs. START) e XP 0; main/side na derrota sem recompensa de conclusão
 - [x] Sem auto-seleção / auto-start da próxima fase ao limpar boss de missão
 - [x] Board do mapa lista próxima principal + secundárias elegíveis + oferta normal (2–4)
 - [x] Principais = marcos `x-1`…`x-50` apenas; concluídas fora do board
@@ -117,7 +117,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 | `NORMAL_MISSION_OFFER_MAX` | 4 | Inclusivo — principal/secundária não entram na contagem |
 | `NORMAL_MISSION_REFRESH_EVERY_N_CAMP_VISITS` | 2 | Renova a cada 2 retornos ao camp (calibração Fase 6) |
 
-XP e ouro de cada fase vêm exclusivamente do orçamento `targetXp`/`targetGold` (Balance Lab → aba XP), pagos via kills durante o combate. Missões não têm recompensa de conclusão em ouro/XP — apenas item exclusivo e cena (só na vitória).
+Ouro de cada fase vem do orçamento `targetGold` (pago via kills). XP vem do orçamento `targetXp` (Balance Lab → aba XP) **somente na vitória**, em valor fixo independente do número de inimigos. Derrota: sem XP. Missões não têm recompensa de conclusão em ouro/XP — apenas item exclusivo e cena (só na vitória).
 
 ## Camadas e arquivos-chave (alvo)
 
@@ -132,7 +132,7 @@ XP e ouro de cada fase vêm exclusivamente do orçamento `targetXp`/`targetGold`
 
 - Acampamento é o hub; combate só após `StartMission`
 - Principais/secundárias concluídas nunca reaparecem no board
-- Sem multiplicador de ouro/XP por template já cleared (normais farmam cheio)
+- Sem multiplicador de ouro por template já cleared (normais farmam ouro cheio); XP só na vitória
 - Sides incompletas saem do board ao expirar a janela de main
 - Oferta normal é determinística por seed de save + epoch de refresh
 - Domínio não conhece Chrome nem DOM
@@ -153,7 +153,7 @@ XP e ouro de cada fase vêm exclusivamente do orçamento `targetXp`/`targetGold`
 - [x] `CampMissionBoard.test.ts` — próxima main, sides elegíveis, normais na faixa
 - [x] `MissionMapLayoutCatalog.test.ts` — margem segura dos pins
 - [x] `ResolveMissionOutcomeUseCase.test.ts` — vitória/derrota por tipo → camp
-- [x] `ResolveMissionOutcome.test.ts` — domínio: fração de ouro/XP na derrota normal; main/side sem recompensa
+- [x] `ResolveMissionOutcome.test.ts` — domínio: XP na vitória; derrota sem XP; main/side sem recompensa de conclusão
 - [x] `StartMissionUseCase.test.ts` — inicia tentativa / rejeita inválida
 - [x] `GetMissionBoardUseCase.test.ts` — DTO / escopo base
 - [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / popover no pin / tooltip de stats

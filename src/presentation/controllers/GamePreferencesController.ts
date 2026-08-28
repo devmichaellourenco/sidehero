@@ -17,6 +17,8 @@ export class GamePreferencesController {
   autoBattleSpeed: GamePreferences['autoBattleSpeed'] = 1;
   logFilterImportant = false;
   uiTheme: GamePreferences['uiTheme'] = 'dark';
+  musicEnabled = true;
+  musicVolume = 0.55;
 
   apply(state: GameStateDto | null): { autoBattleChanged: boolean } {
     const flags = getFeatureFlags(state);
@@ -34,6 +36,8 @@ export class GamePreferencesController {
     ) as GamePreferences['autoBattleSpeed'];
     this.logFilterImportant = clamped.logFilterImportant && flags.logFilter;
     this.uiTheme = clamped.uiTheme;
+    this.musicEnabled = clamped.musicEnabled;
+    this.musicVolume = clamped.musicVolume;
 
     const autoBattleChanged =
       wasAutoBattle !== this.autoBattleEnabled || wasSpeed !== this.autoBattleSpeed;
@@ -61,6 +65,8 @@ export class GamePreferencesController {
       case 'logFilterImportant':
         return flags.logFilter;
       case 'uiTheme':
+      case 'musicEnabled':
+      case 'musicVolume':
         return true;
       default:
         return true;
@@ -100,6 +106,8 @@ export class GamePreferencesController {
       ) as GamePreferences['autoBattleSpeed'],
       logFilterImportant: flags.logFilter ? preferences.logFilterImportant : false,
       uiTheme: preferences.uiTheme === 'light' ? 'light' : 'dark',
+      musicEnabled: preferences.musicEnabled,
+      musicVolume: Math.max(0, Math.min(1, preferences.musicVolume)),
     };
   }
 }

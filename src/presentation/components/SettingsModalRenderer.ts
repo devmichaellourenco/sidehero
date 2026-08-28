@@ -24,6 +24,14 @@ export class SettingsModalRenderer {
       <div class="settings-list">
         ${this.renderThemeSelect(preferences)}
         ${this.renderToggle({
+          key: 'musicEnabled',
+          title: 'Música',
+          hint: 'Trilha de acampamento e batalha',
+          unlocked: true,
+          checked: preferences.musicEnabled,
+        })}
+        ${this.renderMusicVolume(preferences)}
+        ${this.renderToggle({
           key: 'autoBattle',
           title: 'Auto-batalha',
           hint: 'Avança batalhas automaticamente',
@@ -67,6 +75,15 @@ export class SettingsModalRenderer {
     container.querySelectorAll('[data-pref]').forEach((element) => {
       const key = element.getAttribute('data-pref') as keyof GamePreferences;
       if (!key) return;
+
+      if (element instanceof HTMLInputElement && element.type === 'range') {
+        if (element.disabled) return;
+        element.addEventListener('input', () => {
+          if (key !== 'musicVolume') return;
+          handlers.onPreferenceChange('musicVolume', Number(element.value));
+        });
+        return;
+      }
 
       if (element instanceof HTMLInputElement && element.type === 'checkbox') {
         if (element.disabled) return;
@@ -157,6 +174,31 @@ export class SettingsModalRenderer {
             )
             .join('')}
         </select>
+      </label>
+    `;
+  }
+
+  private renderMusicVolume(preferences: GamePreferences): string {
+    const volumePercent = Math.round(preferences.musicVolume * 100);
+    const disabled = preferences.musicEnabled ? '' : 'disabled';
+
+    return `
+      <label class="settings-item settings-item-range">
+        <span class="settings-item-text">
+          <strong>Volume da música</strong>
+          <small>${volumePercent}%</small>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="${preferences.musicVolume}"
+          data-pref="musicVolume"
+          class="settings-volume-range"
+          aria-label="Volume da música"
+          ${disabled}
+        />
       </label>
     `;
   }

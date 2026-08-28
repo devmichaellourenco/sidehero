@@ -111,10 +111,21 @@ describe('OnboardingPolicy', () => {
     expect(step?.id).toBe('first-chest');
   });
 
-  it('mostra pausa após dispensar baú', () => {
+  it('após baú segue para Aprimoramento quando há pontos (sem dica do botão Acampamento)', () => {
     const dismissed = new Set(['first-chest'] as const);
-    const step = resolveOnboardingStep(mockState({ pendingChestCount: 0 }), dismissed);
-    expect(step?.id).toBe('pause-loadout');
+    const step = resolveOnboardingStep(
+      mockState({
+        canEditParty: true,
+        phaseRun: null,
+        pendingChestCount: 0,
+        heroes: [{ id: 'h1', hasUnspentPoints: true } as GameStateDto['heroes'][number]],
+      }),
+      dismissed,
+    );
+    expect(step?.id).toBe('hero-points');
+    expect(isOnboardingStepTriggered('pause-loadout', mockState({ phaseRun: { phaseId: '1-1' } }))).toBe(
+      false,
+    );
   });
 
   it('detecta Aprimoramento pendente no acampamento', () => {

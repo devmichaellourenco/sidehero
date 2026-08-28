@@ -7,9 +7,9 @@ const PASSIVES: Record<PassiveId, PassiveDefinition> = {
   titan_health: {
     id: 'titan_health',
     name: 'Saúde de Titã',
-    description: '+2% de vida máxima por ponto de armadura (defesa total, incluindo equipamento).',
+    description: '+1% de vida máxima por ponto de armadura (defesa total, incluindo equipamento).',
     stacking: 'additive',
-    effects: [{ kind: 'max_health_percent_per_defense', percentPerPoint: 2 }],
+    effects: [{ kind: 'max_health_percent_per_defense', percentPerPoint: 1 }],
   },
   magic_affinity: {
     id: 'magic_affinity',

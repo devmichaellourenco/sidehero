@@ -234,7 +234,25 @@ describe('PhaseCombatHandlers', () => {
     expect(replayWave.state.chests).toHaveLength(0);
   });
 
-  it('não concede ouro/XP em lote ao repetir boss de fase já cleared', () => {
+  it('concede XP do orçamento da fase ao derrotar o boss', () => {
+    const phaseId = buildPhaseId(1, 2);
+    const phaseRun = PhaseRun.start(phaseId);
+    const boss = resolver.resolve(phaseId, 1);
+    expect(boss).not.toBeNull();
+
+    let state = GameState.initial()
+      .withGold(GameState.initial().gold.add(1000))
+      .withPhaseRun(phaseRun);
+    state = handlers.startPhaseRun(state, phaseRun).state;
+    const xpBefore = state.activeHeroes()[0].toProps().experience.current;
+
+    const victory = handlers.onBossDefeated(state, boss!.enemies, state.activeHeroes(), boss!.meta);
+
+    expect(victory.state.gold.value()).toBe(1000);
+    expect(victory.state.activeHeroes()[0].toProps().experience.current).toBeGreaterThan(xpBefore);
+  });
+
+  it('não concede baú extra ao repetir boss de fase já cleared', () => {
     const phaseId = buildPhaseId(1, 2);
     const phaseRun = PhaseRun.start(phaseId);
     const boss = resolver.resolve(phaseId, 1);
@@ -254,10 +272,9 @@ describe('PhaseCombatHandlers', () => {
 
     expect(victory.state.gold.value()).toBe(1000);
     expect(victory.state.chests).toHaveLength(0);
-    expect(victory.state.activeHeroes()[0].toProps().experience.current).toBe(0);
   });
 
-  it('recupera vida da party ao derrotar boss sem XP em lote', () => {
+  it('recupera vida da party ao derrotar boss', () => {
     let state = GameState.initial().withActivePartyIds(['hero-1', 'hero-2']);
     state = HeroUnlockService.applyUnlock(state, 'berserker');
 

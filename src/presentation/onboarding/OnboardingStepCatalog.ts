@@ -29,7 +29,6 @@ export const ONBOARDING_STEP_ORDER: OnboardingStepId[] = [
   'map-mission-preview',
   'map-start-mission',
   'first-chest',
-  'pause-loadout',
   'hero-points',
   'first-upgrade',
   'open-campaign',
@@ -88,7 +87,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepId, Omit<OnboardingStep, 'id
   'pause-loadout': {
     title: 'Acampamento',
     message:
-      'Use Acampamento para editar equipe, inventário e skills com calma. A fase reinicia ao batalhar.',
+      'Após a batalha você volta ao acampamento para editar equipe, inventário e skills antes da próxima missão no mapa.',
     anchorSelector: '#pause-loadout-btn',
   },
   'hero-points': {

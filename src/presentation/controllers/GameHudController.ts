@@ -364,8 +364,10 @@ export class GameHudController {
 
     this.resumeBattleBtn.classList.toggle('hidden', !battlePause || loadoutPause);
 
-    this.pauseLoadoutBtn.disabled = !Boolean(state.phaseRun) || loadoutPause;
-    this.pauseLoadoutBtn.classList.toggle('hidden', loadoutPause);
+    // Mid-missão → hub via barra desativado por agora (retomar só pelo mapa).
+    this.pauseLoadoutBtn.classList.add('hidden');
+    this.pauseLoadoutBtn.disabled = true;
+    this.pauseLoadoutBtn.hidden = true;
 
     // Combate inicia pelo mapa (START). Batalhar na barra fica desnecessário.
     this.continueLoadoutBtn.classList.add('hidden');

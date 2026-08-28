@@ -181,7 +181,7 @@ function computeHeroXpGained(previous: GameStateDto, next: GameStateDto): number
 function computeRewardDelta(
   previous: GameStateDto,
   next: GameStateDto,
-  options: { preferXpSource: 'hero' | 'enemy' } = { preferXpSource: 'enemy' },
+  _options: { preferXpSource: 'hero' | 'enemy' } = { preferXpSource: 'hero' },
 ): {
   goldGained: number;
   xpGained: number;
@@ -191,16 +191,8 @@ function computeRewardDelta(
   tierReached: number | null;
 } {
   const goldGained = Math.max(0, next.gold - previous.gold);
-  const xpFromHeroes = computeHeroXpGained(previous, next);
-  const xpFromEnemies = previous.enemies.reduce((sum, enemy) => sum + enemy.xpReward, 0);
-  // Em derrota usamos só delta nos heróis — fallback em xpReward dos inimigos
-  // inventava "+XP" sem o domínio ter concedido nada nesta transição.
-  const xpGained =
-    options.preferXpSource === 'hero'
-      ? xpFromHeroes
-      : xpFromEnemies > 0
-        ? xpFromEnemies
-        : xpFromHeroes;
+  // XP da fase é concedido na vitória nos heróis; inimigos não carregam XP por kill.
+  const xpGained = computeHeroXpGained(previous, next);
   const chestCount = Math.max(0, next.pendingChestCount - previous.pendingChestCount);
   const tierReached = next.stage > previous.stage ? next.stage : null;
 

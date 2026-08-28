@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { EncounterResolver } from '../campaign/EncounterResolver';
 import { buildPhaseId } from '../campaign/CampaignIds';
 import { Experience } from '../value-objects/Experience';
 import { expRequiredToAdvanceFromLevel } from '../progression/HeroLevelXpCatalog';
@@ -9,6 +8,7 @@ import {
   earlyMapKillXpBoost,
   resolveCampaignKillXp,
 } from './CampaignXpScaling';
+import { effectivePhaseXpTotal } from './PhaseXpBudget';
 
 describe('CampaignXpScaling', () => {
   it('desacopla XP de kill da curva de combate', () => {
@@ -31,18 +31,10 @@ describe('CampaignXpScaling', () => {
     expect(campaignHeroXpRequired(20)).toBeGreaterThan(campaignHeroXpRequired(13));
   });
 
-  it('primeira run até 1-16 não passa do nível 6', () => {
-    const resolver = new EncounterResolver();
+  it('primeira run até 1-16 não passa do nível 6 (XP por fase)', () => {
     let xp = 0;
-
     for (let phase = 1; phase <= 16; phase += 1) {
-      for (let waveIndex = 0; ; waveIndex += 1) {
-        const encounter = resolver.resolve(buildPhaseId(1, phase), waveIndex);
-        if (!encounter) break;
-        for (const enemy of encounter.enemies) {
-          xp += enemy.xpReward;
-        }
-      }
+      xp += effectivePhaseXpTotal(buildPhaseId(1, phase));
     }
 
     const level = Experience.initial().gain(xp).experience.level;
@@ -51,16 +43,9 @@ describe('CampaignXpScaling', () => {
   });
 
   it('primeira clear de Stendra fica no early; farms com XP cheio sobem o nível', () => {
-    const resolver = new EncounterResolver();
     let firstClear = 0;
     for (let phase = 1; phase <= 50; phase += 1) {
-      for (let waveIndex = 0; ; waveIndex += 1) {
-        const encounter = resolver.resolve(buildPhaseId(1, phase), waveIndex);
-        if (!encounter) break;
-        for (const enemy of encounter.enemies) {
-          firstClear += enemy.xpReward;
-        }
-      }
+      firstClear += effectivePhaseXpTotal(buildPhaseId(1, phase));
     }
 
     const firstLevel = Experience.initial().gain(firstClear).experience.level;

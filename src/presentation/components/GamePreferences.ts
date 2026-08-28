@@ -8,6 +8,8 @@ export interface GamePreferences {
   autoBattleSpeed: 1 | 2 | 3;
   logFilterImportant: boolean;
   uiTheme: UiThemeId;
+  musicEnabled: boolean;
+  musicVolume: number;
 }
 
 const STORAGE_KEYS = {
@@ -17,6 +19,8 @@ const STORAGE_KEYS = {
   autoBattleSpeed: 'sidehero_auto_battle_speed',
   logFilterImportant: 'sidehero_log_filter_important',
   uiTheme: 'sidehero_ui_theme',
+  musicEnabled: 'sidehero_music_enabled',
+  musicVolume: 'sidehero_music_volume',
 } as const;
 
 const DEFAULT_PREFERENCES: GamePreferences = {
@@ -26,6 +30,8 @@ const DEFAULT_PREFERENCES: GamePreferences = {
   autoBattleSpeed: 1,
   logFilterImportant: false,
   uiTheme: 'dark',
+  musicEnabled: true,
+  musicVolume: 0.55,
 };
 
 function readFlag(key: string, defaultValue = false): boolean {
@@ -41,6 +47,26 @@ function readFlag(key: string, defaultValue = false): boolean {
 function writeFlag(key: string, enabled: boolean): void {
   try {
     sessionStorage.setItem(key, enabled ? '1' : '0');
+  } catch {
+    // sessionStorage indisponível
+  }
+}
+
+function readVolume(key: string, defaultValue: number): number {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (raw === null) return defaultValue;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed)) return defaultValue;
+    return Math.max(0, Math.min(100, parsed)) / 100;
+  } catch {
+    return defaultValue;
+  }
+}
+
+function writeVolume(key: string, volume: number): void {
+  try {
+    sessionStorage.setItem(key, String(Math.round(Math.max(0, Math.min(1, volume)) * 100)));
   } catch {
     // sessionStorage indisponível
   }
@@ -72,6 +98,8 @@ export function loadGamePreferences(): GamePreferences {
       autoBattleSpeed: speedRaw === '3' ? 3 : speedRaw === '2' ? 2 : 1,
       logFilterImportant: readFlag(STORAGE_KEYS.logFilterImportant),
       uiTheme: readUiTheme(),
+      musicEnabled: readFlag(STORAGE_KEYS.musicEnabled, true),
+      musicVolume: readVolume(STORAGE_KEYS.musicVolume, DEFAULT_PREFERENCES.musicVolume),
     };
   } catch {
     return { ...DEFAULT_PREFERENCES };
@@ -83,6 +111,8 @@ export function saveGamePreferences(preferences: GamePreferences): void {
   writeFlag(STORAGE_KEYS.autoOpenChests, preferences.autoOpenChests);
   writeFlag(STORAGE_KEYS.autoEquipLoot, preferences.autoEquipLoot);
   writeFlag(STORAGE_KEYS.logFilterImportant, preferences.logFilterImportant);
+  writeFlag(STORAGE_KEYS.musicEnabled, preferences.musicEnabled);
+  writeVolume(STORAGE_KEYS.musicVolume, preferences.musicVolume);
   writeUiTheme(preferences.uiTheme);
 
   try {

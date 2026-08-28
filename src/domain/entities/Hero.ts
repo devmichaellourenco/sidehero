@@ -128,43 +128,34 @@ export class Hero {
   }
 
   get attack(): number {
-    const identity = getHeroCombatIdentity(this.heroClass);
     const gearBonus = this.sumGear((g) => g.attackBonus);
-    const levelBonus = (this.level - 1) * identity.attackPerLevel;
     const attrBonus = Math.floor(this.totalAttributes.str * 0.5 + this.totalAttributes.dex * 0.3);
     const raw =
       resolveHeroStoredBaseStat(this.heroClass, this.baseAttack, 'attack') +
       gearBonus +
-      levelBonus +
       attrBonus;
     const percent = this.sumGear((g) => g.attackPercentBonus) + heroPassiveAttackPercent(this);
     return Math.max(0, Math.floor(raw * (1 + percent / 100)));
   }
 
   get defense(): number {
-    const identity = getHeroCombatIdentity(this.heroClass);
     const gearBonus = this.sumGear((g) => g.defenseBonus);
-    const levelBonus = (this.level - 1) * identity.defensePerLevel;
     const attrBonus = Math.floor(this.totalAttributes.dex * 0.5 + this.totalAttributes.str * 0.2);
     const raw =
       resolveHeroStoredBaseStat(this.heroClass, this.baseDefense, 'defense') +
       gearBonus +
-      levelBonus +
       attrBonus;
     const percent = this.sumGear((g) => g.defensePercentBonus) + heroPassiveDefensePercent(this);
     return Math.max(0, Math.floor(raw * (1 + percent / 100)));
   }
 
   get maxHealth(): number {
-    const identity = getHeroCombatIdentity(this.heroClass);
     const gearBonus = this.sumGear((g) => g.healthBonus);
-    const levelBonus = (this.level - 1) * identity.healthPerLevel;
     const attrBonus = this.totalAttributes.str * 2;
     const vitalityBonus = passiveVitalityHealthBonus(this);
     const raw =
       resolveHeroStoredBaseStat(this.heroClass, this.baseMaxHealth, 'health') +
       gearBonus +
-      levelBonus +
       attrBonus +
       vitalityBonus;
     const percent = this.sumGear((g) => g.healthPercentBonus) + heroPassiveMaxHealthPercent(this);

@@ -22,7 +22,11 @@ import {
   type PhaseRewardOverride,
 } from '../../src/domain/campaign/PhaseRewardOverrides';
 import { clearPhaseGoldScaleCache } from '../../src/domain/balance/PhaseGoldBudget';
-import { clearPhaseXpScaleCache } from '../../src/domain/balance/PhaseXpBudget';
+import {
+  catalogPhaseXpTotal,
+  clearPhaseXpScaleCache,
+  effectivePhaseXpTotal,
+} from '../../src/domain/balance/PhaseXpBudget';
 import { resolvePhase, resolvePhaseBattle } from '../../src/domain/campaign/CampaignCatalog';
 import { spawnEnemiesForWave } from '../../src/domain/campaign/WaveEnemyFactory';
 import { milestoneGoldScaleForPhase } from '../../src/domain/balance/MilestoneGoldCap';
@@ -88,14 +92,12 @@ function sumPhaseSpawn(
   difficultyTier: number;
   waveCount: number;
   enemyCount: number;
-  xpTotal: number;
   goldTotal: number;
 } | null {
   const phase = resolvePhase(phaseId);
   if (!phase) return null;
 
   const milestoneGoldScale = milestoneGoldScaleForPhase(phase);
-  let xpTotal = 0;
   let goldTotal = 0;
   let enemyCount = 0;
 
@@ -112,7 +114,6 @@ function sumPhaseSpawn(
     });
     enemyCount += enemies.length;
     for (const enemy of enemies) {
-      xpTotal += enemy.xpReward;
       goldTotal += enemy.goldReward;
     }
   }
@@ -124,7 +125,6 @@ function sumPhaseSpawn(
     difficultyTier: phase.difficultyTier,
     waveCount: phase.waves.length,
     enemyCount,
-    xpTotal,
     goldTotal,
   };
 }
@@ -141,6 +141,8 @@ function buildPhaseRow(mapIndex: number, phaseNumber: number): Omit<
   const override = getPhaseRewardOverride(phaseId);
   const battlePhase = resolvePhaseBattle(phaseId);
   const baselineDisplayName = battlePhase?.displayName ?? baseline.displayName;
+  const xpTotal = effectivePhaseXpTotal(phaseId);
+  const baselineXp = catalogPhaseXpTotal(phaseId);
 
   return {
     phaseId,
@@ -151,9 +153,9 @@ function buildPhaseRow(mapIndex: number, phaseNumber: number): Omit<
     difficultyTier: effective.difficultyTier,
     waveCount: effective.waveCount,
     enemyCount: effective.enemyCount,
-    baselineXp: baseline.xpTotal,
+    baselineXp,
     baselineGold: baseline.goldTotal,
-    xpTotal: effective.xpTotal,
+    xpTotal,
     goldTotal: effective.goldTotal,
     xpScale: campaignKillXpScale(effective.difficultyTier),
     earlyBoost: earlyMapKillXpBoost(effective.difficultyTier),
@@ -250,7 +252,7 @@ export function buildPhaseRewardsLabPayload(filters?: {
     knobs: {
       campaignXpKillMultiplier: CAMPAIGN_XP_KILL_MULTIPLIER,
       note:
-        'Edite nome, XP/ouro alvo por fase e salve em phase-reward-overrides.json. O domínio aplica o nome e escala os kills para aproximar o alvo. Rebuild da extensão para embutir no jogo.',
+        'Edite nome, XP/ouro alvo por fase e salve em phase-reward-overrides.json. XP alvo é pago na vitória (lump sum); ouro continua via kills. Rebuild da extensão para embutir no jogo.',
     },
     updatedAt: filters?.updatedAt ?? null,
   };

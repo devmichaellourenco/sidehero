@@ -23,7 +23,7 @@ Os itens abaixo descrevem o v1 linear entregue; a feature [`camp-missions`](camp
 
 - [x] Tick avança combate quando não pausado; respeita `combatIntermission`, pausa de loadout e **pausa de batalha** (`battlePaused`)
 - [x] Pausa de batalha: congela o combate no estado atual (sem reiniciar fase); Continuar retoma; sem edição de party/loadout; Detalhes exibe totais da tentativa (dano/cura/sofrido)
-- [x] Recompensas por kill: ouro, XP e loot ao derrotar cada inimigo (tabela por mundo/monstro)
+- [x] Recompensas por kill: ouro e loot ao derrotar cada inimigo; XP só na vitória da fase (`targetXp` / `grantPhaseVictoryXp`)
 - [x] Boss: loot garantido na 1ª vitória do template; depois chance normal de role (sem penalidade de “replay”); progresso de missão no fim
 - [x] Scaling de inimigos segue level (difficultyTier ou `slot.level`) via `EnemyProgressionCatalog` (BAL-013)
 - [x] No máximo **3 inimigos por wave** (`WaveEnemyCap` / `MAX_ENEMIES_PER_WAVE`)

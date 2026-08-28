@@ -33,7 +33,7 @@ Decisões da spec estão **fechadas** (ver `specs/passives.spec.md`). Implementa
 
 | Id sugerido | Nome | Herói | Efeito |
 |-------------|------|-------|--------|
-| `titan_health` | Saúde de Titã | Galneon (`knight`) | +2% max HP / ponto de `defense` |
+| `titan_health` | Saúde de Titã | Galneon (`knight`) | +1% max HP / ponto de `defense` |
 | `magic_affinity` | Afinidade Mágica | Nix (`sorcerer`) | +1% dano de skill / nível |
 | `life_bond` | Elo com a Vida | Elara (`priest`) | +1% poder de suporte aliado / INT |
 

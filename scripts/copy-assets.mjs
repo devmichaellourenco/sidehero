@@ -304,6 +304,39 @@ async function copyCampaignScenes() {
   return copied;
 }
 
+/** Copia recursivamente public/audio/ → dist/panel/assets/audio/. */
+async function copyAudioAssets() {
+  const audioRoot = join(root, 'public', 'audio');
+  let copied = 0;
+
+  async function walk(relativeDir = '') {
+    const currentDir = join(audioRoot, relativeDir);
+    let entries;
+    try {
+      entries = await readdir(currentDir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      const relativePath = relativeDir ? join(relativeDir, entry.name) : entry.name;
+      if (entry.isDirectory()) {
+        await walk(relativePath);
+        continue;
+      }
+
+      if (!/\.(wav|ogg|mp3|m4a|webm)$/i.test(entry.name)) continue;
+      const destPath = join(outRoot, 'audio', relativePath);
+      await mkdir(dirname(destPath), { recursive: true });
+      await copyFile(join(currentDir, entry.name), destPath);
+      copied += 1;
+    }
+  }
+
+  await walk();
+  return copied;
+}
+
 export async function copyAssets() {
   await copyAssetBatch(resourcesRoot, ASSET_MAP);
   const equipmentIconCount = await copyEquipmentIcons();
@@ -316,6 +349,7 @@ export async function copyAssets() {
   await copyAssetBatch(itemsSpritesRoot, ITEM_WEAPON_SPRITE_MAP);
   await copyAssetBatch(publicRoot, PUBLIC_ASSET_MAP);
   const campaignSceneCount = await copyCampaignScenes();
+  const audioAssetCount = await copyAudioAssets();
 
   const total =
     ASSET_MAP.length +
@@ -328,9 +362,10 @@ export async function copyAssets() {
     skillVfxSheetCount +
     ITEM_WEAPON_SPRITE_MAP.length +
     PUBLIC_ASSET_MAP.length +
-    campaignSceneCount;
+    campaignSceneCount +
+    audioAssetCount;
   console.log(
-    `Assets copiados: ${total} arquivos em dist/panel/assets/ (${campaignSceneCount} cenas de campanha)`,
+    `Assets copiados: ${total} arquivos em dist/panel/assets/ (${campaignSceneCount} cenas de campanha, ${audioAssetCount} áudio)`,
   );
 }
 

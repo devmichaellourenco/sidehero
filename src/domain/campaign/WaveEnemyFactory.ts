@@ -1,8 +1,6 @@
 import { Enemy } from '../entities/Enemy';
 import { getEnemyRosterEntry } from '../enemies/EnemyRosterCatalog';
 import { phaseGoldScaleForPhase } from '../balance/PhaseGoldBudget';
-import { phaseXpScaleForPhase } from '../balance/PhaseXpBudget';
-import { resolveCampaignKillXp } from '../balance/CampaignXpScaling';
 import {
   deriveCombatMaxHealth,
 } from '../combat/CombatantDerivedStats';
@@ -107,7 +105,6 @@ export function createEnemyFromSlot(
         ignoreLabOverride: !applyRewardOverrides,
       })
     : 1;
-  const phaseXpScale = applyRewardOverrides ? phaseXpScaleForPhase(context.phaseId) : 1;
   const goldReward = Math.floor(
     8 *
       (1 + (level - 1) * 0.12) *
@@ -116,10 +113,8 @@ export function createEnemyFromSlot(
       (context.milestoneGoldScale ?? 1) *
       phaseGoldScale,
   );
-  const xpBase = slot.role === 'boss' ? 8 : slot.role === 'elite' ? 5 : 2;
-  const xpReward = Math.floor(
-    resolveCampaignKillXp(xpBase, context.difficultyTier, roleScale) * phaseXpScale,
-  );
+  // XP vem só do orçamento da fase na vitória (`grantPhaseVictoryXp`), não por kill.
+  const xpReward = 0;
 
   const rosterEntry = getEnemyRosterEntry(slot.enemyType);
   const baseName = rosterEntry?.name ?? slot.enemyType;

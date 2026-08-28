@@ -8,17 +8,15 @@ import { spawnEnemiesForWave } from './WaveEnemyFactory';
 describe('EncounterResolver', () => {
   const resolver = new EncounterResolver();
 
-  it('resolve fase 1-2 com XP em todas as waves', () => {
+  it('resolve fase 1-2 sem XP por inimigo (XP é orçamento da fase na vitória)', () => {
     const trash = resolver.resolve(buildPhaseId(1, 2), 0);
     const boss = resolver.resolve(buildPhaseId(1, 2), 1);
 
     expect(trash?.meta.isBossWave).toBe(false);
-    expect(trash?.enemies.every((enemy) => enemy.xpReward > 0)).toBe(true);
+    expect(trash?.enemies.every((enemy) => enemy.xpReward === 0)).toBe(true);
     expect(boss?.meta.isBossWave).toBe(true);
-    expect(boss?.enemies.some((enemy) => enemy.xpReward > 0)).toBe(true);
-    const bossXp = boss!.enemies.find((enemy) => enemy.role === 'boss')!.xpReward;
-    const trashXp = trash!.enemies[0].xpReward;
-    expect(bossXp).toBeGreaterThan(trashXp);
+    expect(boss?.enemies.every((enemy) => enemy.xpReward === 0)).toBe(true);
+    expect(trash?.enemies.every((enemy) => enemy.goldReward > 0)).toBe(true);
   });
 
   it('gera fase procedural 1-20', () => {

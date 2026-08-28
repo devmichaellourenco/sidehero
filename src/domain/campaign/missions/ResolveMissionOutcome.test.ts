@@ -11,6 +11,25 @@ import {
 import { MissionProgress } from './MissionProgress';
 
 describe('ResolveMissionOutcome', () => {
+  it('vitória concede XP do orçamento da fase', () => {
+    const phaseId = '1-1';
+    const state = GameState.initial().withCampaignProgress(
+      GameState.initial().campaignProgress.withMissionProgress(
+        MissionProgress.initial().withActiveMission(mainMissionId(phaseId)),
+      ),
+    );
+    const xpBefore = state.heroes[0]!.toProps().experience.current;
+
+    const result = applyMissionVictory({
+      state,
+      phaseId,
+      heroes: state.heroes,
+      phaseDisplayName: 'Fase 1-1',
+    });
+
+    expect(result.state.heroes[0]!.toProps().experience.current).toBeGreaterThan(xpBefore);
+  });
+
   it('vitória main marca concluída e prepara retorno ao camp sem próxima fase', () => {
     const phaseId = '1-1';
     const state = GameState.initial().withCampaignProgress(
@@ -81,7 +100,7 @@ describe('ResolveMissionOutcome', () => {
       missionId,
     );
     expect(defeat.state.combatIntermission?.variant).toBe('defeat');
-    // XP/ouro saem só do orçamento da fase (kills); derrota não paga conclusão.
+    // XP só na vitória (orçamento da fase); derrota não paga conclusão nem XP.
     expect(defeat.state.gold.value()).toBe(goldBefore);
     expect(defeat.state.heroes[0]!.toProps().experience.current).toBe(xpBefore);
 

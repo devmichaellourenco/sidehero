@@ -4,7 +4,6 @@ import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
 import { MetaBonusScope } from '../meta/MetaBonusScope';
-import { BenchXpPolicy } from '../party/BenchXpPolicy';
 import { LootService } from '../services/LootService';
 import { ILootService } from '../services/ILootService';
 import { resolvePhase } from './CampaignCatalog';
@@ -12,17 +11,13 @@ import { parsePhaseId } from './CampaignIds';
 import { EncounterMeta } from './EncounterResolver';
 import { LootDropResult, rollEnemyLoot } from './EnemyLootTable';
 import { isNamedChapterBossKill, tryCreateUniqueBossGearDrop } from './UniqueGearLootService';
-import {
-  grantsPhaseChests,
-  scalePhaseGold,
-  scalePhaseXp,
-} from './PhaseLootPolicy';
+import { grantsPhaseChests, scalePhaseGold } from './PhaseLootPolicy';
 
 export interface KillRewardBatchResult {
   state: GameState;
   combat: CombatState;
   events: string[];
-  /** Heróis da party ativa que subiram de nível neste lote (para float na strip). */
+  /** Sempre vazio: XP só na vitória da fase (`grantPhaseVictoryXp`). */
   levelUpHeroIds: string[];
 }
 
@@ -44,21 +39,15 @@ export class EnemyKillRewardService {
     let nextState = state;
     let nextCombat = combat;
     const events: string[] = [];
-    const levelUpHeroIds: string[] = [];
 
     for (const enemy of newlyDefeated) {
       const result = this.applySingleKill(nextState, nextCombat, enemy, meta);
       nextState = result.state;
       nextCombat = result.combat;
       events.push(...result.events);
-      for (const heroId of result.levelUpHeroIds) {
-        if (!levelUpHeroIds.includes(heroId)) {
-          levelUpHeroIds.push(heroId);
-        }
-      }
     }
 
-    return { state: nextState, combat: nextCombat, events, levelUpHeroIds };
+    return { state: nextState, combat: nextCombat, events, levelUpHeroIds: [] };
   }
 
   private findNewlyDefeated(
@@ -103,32 +92,13 @@ export class EnemyKillRewardService {
       scalePhaseGold(enemy.goldReward, state.campaignProgress, phaseId) *
         legacyBonuses.goldMultiplier,
     );
-    const xp = Math.floor(
-      scalePhaseXp(enemy.xpReward, state.campaignProgress, phaseId) * legacyBonuses.xpMultiplier,
-    );
 
     let nextState = state;
     const rewardParts: string[] = [];
-    const levelUpHeroIds: string[] = [];
 
     if (gold > 0) {
       nextState = nextState.withGold(nextState.gold.add(gold));
       rewardParts.push(`+${gold} ouro`);
-    }
-
-    if (xp > 0) {
-      const activeBefore = nextState.activeHeroes();
-      const activeUpdates = activeBefore.map((hero) => hero.gainExperience(xp));
-      for (let i = 0; i < activeBefore.length; i += 1) {
-        if (activeUpdates[i]!.level > activeBefore[i]!.level) {
-          levelUpHeroIds.push(activeUpdates[i]!.id);
-        }
-      }
-      const benchXp = BenchXpPolicy.benchExperience(xp);
-      const benchUpdates =
-        benchXp > 0 ? nextState.benchHeroes().map((hero) => hero.gainExperience(benchXp)) : [];
-      nextState = nextState.withRosterHeroes([...activeUpdates, ...benchUpdates]);
-      rewardParts.push(`+${xp} XP`);
     }
 
     const lootDrop = rollEnemyLoot({
@@ -183,7 +153,7 @@ export class EnemyKillRewardService {
       state: nextState,
       combat: combat.withRewardedEnemy(enemy.id),
       events: rewardParts,
-      levelUpHeroIds,
+      levelUpHeroIds: [],
     };
   }
 
@@ -194,7 +164,6 @@ export class EnemyKillRewardService {
     directGearChestType: ChestType,
   ): { state: GameState; label: string } {
     if (drop.kind === 'gear') {
-      // Recompensa de batalha nunca entrega gear direto: vira baú comum, sorteado ao abrir.
       const chest = Chest.create(difficultyTier, directGearChestType);
       return {
         state: state.withChests([...state.chests, chest]),

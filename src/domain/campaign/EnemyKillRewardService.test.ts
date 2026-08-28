@@ -5,12 +5,9 @@ import { EnemyKillRewardService } from './EnemyKillRewardService';
 import { CombatState } from '../entities/CombatState';
 import { Enemy } from '../entities/Enemy';
 import { GameState } from '../entities/GameState';
-import { Hero } from '../entities/Hero';
 import { ILootService } from '../services/ILootService';
-import { Experience } from '../value-objects/Experience';
 import { Stats } from '../value-objects/Stats';
 import { ActionTimerService } from '../services/combat/ActionTimerService';
-import { expRequiredToAdvanceFromLevel } from '../progression/HeroLevelXpCatalog';
 
 describe('EnemyKillRewardService', () => {
   const service = new EnemyKillRewardService();
@@ -37,7 +34,7 @@ describe('EnemyKillRewardService', () => {
     );
   }
 
-  it('concede ouro e XP ao matar inimigo', () => {
+  it('concede ouro ao matar inimigo, sem XP (XP só na vitória da fase)', () => {
     const phaseId = buildPhaseId(1, 2);
     const state = GameState.initial().withCampaignProgress(
       GameState.initial().campaignProgress.withSelectedPhase(phaseId),
@@ -45,13 +42,14 @@ describe('EnemyKillRewardService', () => {
     const combat = combatWithEnemies(state, phaseId, 0);
     const enemy = combat.enemies[0];
     const defeated = defeatEnemy(combat.enemies, enemy.id);
+    const xpBefore = state.activeHeroes()[0].experience.current;
 
     vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
     const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
 
     expect(result.state.gold.amount).toBeGreaterThan(0);
-    expect(result.state.activeHeroes()[0].experience.current).toBeGreaterThan(0);
+    expect(result.state.activeHeroes()[0].experience.current).toBe(xpBefore);
     expect(result.combat.hasRewardedEnemy(enemy.id)).toBe(true);
     expect(result.levelUpHeroIds).toEqual([]);
     vi.restoreAllMocks();
@@ -74,7 +72,7 @@ describe('EnemyKillRewardService', () => {
     vi.restoreAllMocks();
   });
 
-  it('concede ouro e XP cheios mesmo com template já cleared (normais não são replay)', () => {
+  it('concede ouro cheio mesmo com template já cleared (normais não são replay)', () => {
     const phaseId = buildPhaseId(1, 2);
     const cleared = GameState.initial()
       .campaignProgress.markCleared(phaseId, [buildPhaseId(1, 3)], 2)
@@ -88,34 +86,7 @@ describe('EnemyKillRewardService', () => {
     const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
 
     expect(result.state.gold.amount).toBe(enemy.goldReward);
-    expect(result.state.activeHeroes()[0].experience.current).toBe(enemy.xpReward);
-    vi.restoreAllMocks();
-  });
-
-  it('lista heróis ativos que sobem de nível no kill', () => {
-    const phaseId = buildPhaseId(1, 2);
-    let state = GameState.initial().withCampaignProgress(
-      GameState.initial().campaignProgress.withSelectedPhase(phaseId),
-    );
-    const need = expRequiredToAdvanceFromLevel(1);
-    const leveledRoster = state.activeHeroes().map((hero) =>
-      Hero.restore({
-        ...hero.toProps(),
-        experience: Experience.restore(need - 1, need, 1),
-      }),
-    );
-    state = state.withRosterHeroes([...leveledRoster, ...state.benchHeroes()]);
-
-    const combat = combatWithEnemies(state, phaseId, 0);
-    const enemy = combat.enemies[0];
-    const defeated = defeatEnemy(combat.enemies, enemy.id);
-
-    vi.spyOn(Math, 'random').mockReturnValue(0.99);
-    const result = service.applyKillRewards(state, combat, combat.enemies, defeated);
-
-    expect(result.levelUpHeroIds.length).toBeGreaterThan(0);
-    expect(result.levelUpHeroIds).toEqual(leveledRoster.map((hero) => hero.id));
-    expect(result.state.activeHeroes()[0].level).toBeGreaterThan(1);
+    expect(result.state.activeHeroes()[0].experience.current).toBe(0);
     vi.restoreAllMocks();
   });
 

@@ -10,6 +10,8 @@ import { GearMutationQueue } from '../controllers/GearMutationQueue';
 import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
 import { LootFlowController } from '../controllers/LootFlowController';
+import { GameMusicController } from '../audio/GameMusicController';
+import { resolveGameMusicTrack } from '../audio/resolveGameMusicTrack';
 import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
 import { BattleStartFlow } from '../flows/BattleStartFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
@@ -220,6 +222,7 @@ export class GameViewController {
   private readonly battleStatsPanel: BattleStatsPanelController;
   private readonly battleLogRenderer = new BattleLogRenderer();
   private readonly skillCooldownAnimator = new SkillCooldownDisplayAnimator();
+  private readonly musicController = new GameMusicController();
 
   private readonly heroDetailFlow: HeroDetailFlow;
   private readonly shopFlow: ShopFlow;
@@ -689,6 +692,7 @@ export class GameViewController {
     });
 
     this.prefsController.apply(this.state);
+    this.syncMusicPreferences();
     this.bindHeroPanelDelegation();
     this.bindBattleStripDelegation();
     this.bindHeroDrawerNavigation();
@@ -780,10 +784,17 @@ export class GameViewController {
       if (this.detachedSurfaceId || this.contextInvalidated) return;
       if (document.hidden) {
         this.stopAutoBattle();
+        this.musicController.onVisibilityHidden();
         return;
       }
+      this.musicController.onVisibilityVisible();
       this.syncAutoBattleTimer();
+      if (this.state) {
+        this.syncGameMusic(this.state);
+      }
     });
+
+    this.musicController.bindUnlock();
   }
 
   async init(): Promise<void> {
@@ -874,6 +885,17 @@ export class GameViewController {
       return;
     }
 
+    if (key === 'musicEnabled' || key === 'musicVolume') {
+      this.syncMusicPreferences();
+      if (this.state) {
+        this.syncGameMusic(this.state);
+      }
+      if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'settings') {
+        this.renderModalTop();
+      }
+      return;
+    }
+
     if (key === 'autoOpenChests' && value === true) {
       this.chestLootFlow.scheduleAutoOpenChests();
     }
@@ -898,6 +920,24 @@ export class GameViewController {
   /** Hub do acampamento (`loadoutEditOpen`) — overlay ACAMPAMENTO, sem combate ativo. */
   private isCampHubOpen(state: GameStateDto | null = this.state): boolean {
     return Boolean(state?.loadoutEditOpen);
+  }
+
+  private syncMusicPreferences(): void {
+    this.musicController.setPreferences({
+      enabled: this.prefsController.musicEnabled,
+      volume: this.prefsController.musicVolume,
+    });
+  }
+
+  private syncGameMusic(state: GameStateDto): void {
+    if (this.detachedSurfaceId) {
+      this.musicController.sync(null, { active: false });
+      return;
+    }
+
+    const active = this.bootReady && !this.splashScreen.isActive() && !document.hidden;
+    const track = resolveGameMusicTrack(state);
+    this.musicController.sync(track, { active });
   }
 
   /** Missão pronta para iniciar (mapa → START → restart). */
@@ -2833,6 +2873,7 @@ export class GameViewController {
     this.stageProgressBar.render(mergedState);
     if (this.bootReady) {
       this.syncPersistentWowInbox(mergedState);
+      this.syncGameMusic(mergedState);
     }
 
     this.shopFlow.state.shopRefreshUnlocked = mergedState.featureFlags.shopRefresh;

@@ -43,7 +43,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Tela/fluxo de resultado pós-batalha: CLEAR/DEFEAT → tela só de recompensas (sem headline nem Ocultar; sem scroll; Continuar no deck) → Continuar → hub com overlay ACAMPAMENTO **e** abre o mapa
 - [x] Acampamento permanece hub de party/loja/inventário; combate só após iniciar missão
 - [x] **Iniciar missão** no mapa fecha o mapa, mostra cue **START**, e só então inicia o combate (sem clique extra em Batalhar)
-- [x] Hub pós-missão e Acampamento mid-missão sem reinício via barra — Batalhar permanece oculto; retomar só pelo mapa
+- [x] Hub pós-missão sem reinício via barra — botão Acampamento mid-missão **oculto**; Batalhar oculto; retomar só pelo mapa
 - [x] New game mostra overlay Acampamento (`loadoutEditOpen`); save persiste o hub sem exigir restart
 - [x] Overlay ACAMPAMENTO tem fundo opaco cobrindo todo o `.battle-field` (cena + deck de HUD), sem sprites/barras ao fundo sugerindo combate ativo; pausa de batalha segue translúcida e restrita à cena para mostrar o campo congelado
 - [x] Cue **START** precede o combate ao iniciar missão no mapa

@@ -33,7 +33,7 @@ Heróis e inimigos podem ter **passivas sempre ativas** (traits), **cumulativas*
 
 ### Conteúdo v1 — classes iniciais
 
-- [x] **Saúde de Titã** (Galneon / `knight`): +2% vida máx. por ponto de `defense` total
+- [x] **Saúde de Titã** (Galneon / `knight`): +1% vida máx. por ponto de `defense` total
 - [x] **Afinidade Mágica** (Nix / `sorcerer`): +1% dano skills da árvore por nível (exclui básico)
 - [x] **Elo com a Vida** (Elara / `priest`): +1% curas e buffs de aliado por INT
 - [x] **Sede de Sangue** (Berserker): +1% dano skills da árvore por FOR

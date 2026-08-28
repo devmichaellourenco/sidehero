@@ -91,7 +91,7 @@ function buildScaledStatLines(
 ): HeroCombatStatLineDto {
   const tooltipLines = [
     `Base da classe: ${fmtInt(base)}`,
-    `Nível: +${fmtInt(levelBonus)}`,
+    ...(levelBonus !== 0 ? [`Nível: +${fmtInt(levelBonus)}`] : []),
     `${attrFormula}: +${fmtInt(attrBonus)}`,
   ];
 
@@ -341,7 +341,7 @@ export function mapHeroCombatStatSheet(hero: Hero): HeroCombatStatSectionDto[] {
       value: fmtInt(hero.maxHealth),
       tooltipLines: [
         `Base da classe: ${fmtInt(effectiveBaseHealth)}`,
-        `Nível: +${fmtInt(healthLevelBonus)}`,
+        ...(healthLevelBonus !== 0 ? [`Nível: +${fmtInt(healthLevelBonus)}`] : []),
         `STR (${hero.totalAttributes.str} × 2): +${fmtInt(healthAttrBonus)}`,
         ...(vitalityBonus > 0
           ? [

@@ -21,7 +21,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 |------|----------|
 | Strip | `BattleStripRenderer`, `BattleActorCardPresentation`, `BattleFloatingTextController` (`Lv UP`); cena `.battle-strip` + deck `.battle-hud-deck` em `.battle-field`; TTA com countdown + tooltip (`ActionTimeBarPresentation`) |
 
-| Pausa | Acampamento (`PauseForLoadout`) ≠ pausa de batalha (`PauseBattle` / `ResumeBattle`); Pausar/Continuar à **esquerda**; Acampamento à **direita**; Batalhar oculto (mapa → START → combate) |
+| Pausa | Pausar/Continuar à **esquerda**; botão **Acampamento** mid-missão na barra **oculto** (hub só pós-missão / mapa); Batalhar oculto (mapa → START → combate) |
 | Hub | New game / pós-missão: `loadoutEditOpen` + overlay **Acampamento**; persistir flag sem exigir `phaseRestartOnResume` |
 | Overlay Acampamento | `.battle-pause-overlay` com fundo **opaco** (noite + brilho de fogueira) cobrindo o `.battle-field` inteiro (`inset: 0`, cena + deck de HUD); a pausa de batalha (`--battle`) é translúcida e limitada à cena (`--battle-strip-height`) |
 | Splash | `SplashScreenController` — ≥5s antes de tutorial/Wow/auto-battle no painel principal |

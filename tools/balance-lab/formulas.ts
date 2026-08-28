@@ -37,9 +37,8 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
     id: 'atk',
     title: 'ATK — ataque',
     equation:
-      'floor( (Base ATK + Gear ATK + (Level − 1)×[ATK / nível da identidade] + floor(STR×[STR → ATK] + DEX×[DEX → ATK]) ) × (1 + [ATK % gear + ATK % passivas]/100) )',
-    meaning:
-      'ATK / nível e level-up ATK vêm da identidade do combatente (classe ou tipo de monstro). Pesos STR/DEX continuam globais.',
+      'floor( (Base ATK + Gear ATK + floor(STR×[STR → ATK] + DEX×[DEX → ATK]) ) × (1 + [ATK % gear + ATK % passivas]/100) )',
+    meaning: 'Base + gear flat + bônus de atributos (STR/DEX), depois multiplicador % de gear e passivas.',
     fields: [
       {
         key: 'attrAtkStr',
@@ -57,9 +56,8 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
     id: 'def',
     title: 'DEF — defesa',
     equation:
-      'floor( (Base DEF + Gear DEF + (Level − 1)×[DEF / nível da identidade] + floor(DEX×[DEX → DEF] + STR×[STR → DEF]) ) × (1 + [DEF % gear + DEF % passivas]/100) )',
-    meaning:
-      'DEF / nível e level-up DEF vêm da identidade do combatente. Pesos DEX/STR globais.',
+      'floor( (Base DEF + Gear DEF + floor(DEX×[DEX → DEF] + STR×[STR → DEF]) ) × (1 + [DEF % gear + DEF % passivas]/100) )',
+    meaning: 'Base + gear flat + bônus de atributos (DEX/STR), depois multiplicador % de gear e passivas.',
     fields: [
       {
         key: 'attrDefDex',
@@ -77,9 +75,8 @@ export const FORMULA_GROUPS: readonly FormulaGroup[] = [
     id: 'hp',
     title: 'HP — vida máxima',
     equation:
-      'floor( (Base HP + Gear HP + (Level − 1)×[HP / nível da identidade] + STR×[STR → HP] ) × (1 + [HP % gear + HP % passivas]/100) )',
-    meaning:
-      'HP / nível e level-up HP vêm da identidade do combatente. Peso STR → HP global.',
+      'floor( (Base HP + Gear HP + STR×[STR → HP] ) × (1 + [HP % gear + HP % passivas]/100) )',
+    meaning: 'Base + gear flat + STR×peso, depois multiplicador % de gear e passivas.',
     fields: [
       {
         key: 'attrHpStr',

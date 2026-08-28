@@ -97,7 +97,11 @@ export function renderEnemyTooltipContent(enemy: EnemyDto, stage: number): strin
     ${sheetGrid || renderFallbackCombatGrid(enemy)}
     <div class="enemy-tooltip-grid" aria-label="Recompensas">
       ${renderTooltipChip(goldIcon, `+${enemy.goldReward}`, 'Ouro')}
-      ${renderTooltipChip(xpIcon, `+${enemy.xpReward} XP`, 'Experiência')}
+      ${
+        enemy.xpReward > 0
+          ? renderTooltipChip(xpIcon, `+${enemy.xpReward} XP`, 'Experiência')
+          : ''
+      }
     </div>
     ${elementalPips ? `<span class="enemy-tooltip-line enemy-tooltip-elements">${elementalPips}</span>` : ''}
     ${skillLines}
