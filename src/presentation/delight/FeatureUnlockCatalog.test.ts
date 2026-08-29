@@ -21,7 +21,7 @@ describe('FeatureUnlockCatalog — dedupe de Wow', () => {
 
   it('não cobre níveis seguintes nem runas sem meta de feature', () => {
     expect(isUpgradePurchaseCoveredByStateChange(getUpgradeById('shop_refresh_2')!)).toBe(false);
-    expect(isUpgradePurchaseCoveredByStateChange(getUpgradeById('battle_stats_1')!)).toBe(false);
+    expect(isUpgradePurchaseCoveredByStateChange(getUpgradeById('battle_skill_slot_2')!)).toBe(false);
     expect(isUpgradePurchaseCoveredByStateChange(getUpgradeById('auto_battle_2')!)).toBe(false);
   });
 
@@ -53,9 +53,9 @@ describe('RewardMomentDetector — upgrade purchase dedupe', () => {
   });
 
   it('gera Wow de compra para runas sem celebração duplicada', () => {
-    const battleStats = detector.buildUpgradePurchasedMoment('battle_stats_1');
-    expect(battleStats?.kind).toBe('upgrade_purchased');
-    expect(battleStats?.title).toBe('Estatísticas de batalha');
+    const skillSlot = detector.buildUpgradePurchasedMoment('battle_skill_slot_2');
+    expect(skillSlot?.kind).toBe('upgrade_purchased');
+    expect(skillSlot?.title).toBe('Slot de skill II');
 
     const shopRefresh2 = detector.buildUpgradePurchasedMoment('shop_refresh_2');
     expect(shopRefresh2?.kind).toBe('upgrade_purchased');

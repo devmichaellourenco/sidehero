@@ -6,6 +6,7 @@ describe('FeatureAccessPolicy', () => {
     const flags = FeatureAccessPolicy.resolve({});
     expect(flags.autoBattle).toBe(true);
     expect(flags.autoBattleMaxSpeed).toBe(1);
+    expect(flags.battleStats).toBe(true);
     expect(flags.optimizeLoadout).toBe(false);
     expect(flags.backgroundTickMultiplier).toBe(1);
   });

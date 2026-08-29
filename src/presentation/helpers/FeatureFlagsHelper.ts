@@ -12,7 +12,7 @@ const DEFAULT_FLAGS: FeatureFlagsDto = {
   autoEquipLoot: false,
   autoEquipSilent: false,
   logFilter: false,
-  battleStats: false,
+  battleStats: true,
   shopRefresh: false,
   backgroundTick: false,
   backgroundTickMultiplier: 1,

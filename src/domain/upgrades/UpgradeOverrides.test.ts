@@ -45,7 +45,7 @@ describe('UpgradeOverrides', () => {
 
   it('normaliza parents e requirements editados no Balance Lab', () => {
     const result = normalizeUpgradeOverride({
-      parents: [' battle_stats_1 ', 'auto_battle_2'],
+      parents: [' battle_skill_slot_2 ', 'auto_battle_2'],
       requirements: [
         { type: 'min_stage', value: 4.8 },
         { type: 'upgrade_level', feature: 'auto_battle', minLevel: 2 },
@@ -53,7 +53,7 @@ describe('UpgradeOverrides', () => {
     });
 
     expect(result).toEqual({
-      parents: ['battle_stats_1', 'auto_battle_2'],
+      parents: ['battle_skill_slot_2', 'auto_battle_2'],
       requirements: [
         { type: 'min_stage', value: 4 },
         { type: 'upgrade_level', feature: 'auto_battle', minLevel: 2 },

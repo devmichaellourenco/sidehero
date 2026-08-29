@@ -135,6 +135,11 @@ export const ASSETS = {
       camp: 'audio/music/camp.wav',
       battle: 'audio/music/battle.wav',
     },
+    sfx: {
+      uiClickMenu: 'audio/sfx/ui_click_menu.ogg',
+      uiClickConfirm: 'audio/sfx/ui_click_confirm.ogg',
+      uiClickBack: 'audio/sfx/ui_click_back.ogg',
+    },
   },
   frames: {
     card: 'frames/card.png',

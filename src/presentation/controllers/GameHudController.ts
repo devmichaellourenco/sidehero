@@ -390,10 +390,8 @@ export class GameHudController {
     this.continueLoadoutBtn.classList.add('hidden');
     this.continueLoadoutBtn.disabled = true;
 
-    const statsUnlocked = Boolean(flags.battleStats);
-    this.openBattleStatsBtn.classList.toggle('hidden', !statsUnlocked);
     applyMenuTooltipAnchor(this.openBattleStatsBtn, 'stats', {
-      detail: statsUnlocked ? 'Pode abrir em janela destacada' : 'Desbloqueie nas Runas',
+      detail: 'Pode abrir em janela destacada',
     });
   }
 }

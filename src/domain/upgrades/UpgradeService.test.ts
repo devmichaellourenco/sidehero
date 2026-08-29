@@ -21,45 +21,56 @@ describe('UpgradeService', () => {
     return service.buildTree(state).find((node) => node.definition.id === id)?.status;
   }
 
-  it('tem apenas battle_stats_1 como raiz desbloqueável inicial', () => {
+  it('tem apenas battle_skill_slot_2 como raiz desbloqueável inicial', () => {
     const state = progressionReadyState();
     const roots = service
       .buildTree(state)
       .filter((node) => node.definition.parents.length === 0);
 
-    expect(roots.map((node) => node.definition.id)).toEqual(['battle_stats_1']);
-    expect(nodeStatus(state, 'battle_stats_1')).toBe('available');
+    expect(roots.map((node) => node.definition.id)).toEqual(['battle_skill_slot_2']);
+    expect(nodeStatus(state, 'battle_skill_slot_2')).toBe('locked');
     expect(nodeStatus(state, 'auto_battle_2')).toBe('locked');
     expect(nodeStatus(state, 'open_all_chests_1')).toBe('locked');
   });
 
-  it('permite auto_battle_2 com tier implícito 1x antes da primeira compra', () => {
-    const state = progressionReadyState().withUpgradeLevels({
-      battle_stats: 1,
-    });
+  it('libera slot de skill na raiz quando herói atinge nível 3', () => {
+    const roster = progressionReadyState().roster.map((hero, index) =>
+      index === 0 ? hero.gainExperience(200) : hero,
+    );
+    const state = progressionReadyState().withRoster(roster);
 
-    expect(nodeStatus(state, 'battle_stats_1')).toBe('owned');
-    expect(nodeStatus(state, 'auto_battle_2')).toBe('available');
+    expect(state.roster[0].level).toBeGreaterThanOrEqual(3);
+    expect(nodeStatus(state, 'battle_skill_slot_2')).toBe('available');
   });
 
-  it('libera baús e slots após Estatísticas (raiz)', () => {
+  it('permite auto_battle_2 com tier implícito 1x após comprar slot de skill', () => {
     const roster = progressionReadyState().roster.map((hero, index) =>
       index === 0 ? hero.gainExperience(200) : hero,
     );
     const state = progressionReadyState()
       .withRoster(roster)
-      .withUpgradeLevels({ battle_stats: 1 });
+      .withUpgradeLevels({ battle_skill_slots: 1 });
 
-    expect(state.roster[0].level).toBeGreaterThanOrEqual(3);
-    expect(nodeStatus(state, 'open_all_chests_1')).toBe('available');
-    expect(nodeStatus(state, 'auto_open_chests_1')).toBeUndefined();
-    expect(nodeStatus(state, 'battle_skill_slot_2')).toBe('available');
+    expect(nodeStatus(state, 'battle_skill_slot_2')).toBe('owned');
+    expect(nodeStatus(state, 'auto_battle_2')).toBe('available');
   });
 
-  it('bloqueia slot de skill sem a raiz Estatísticas', () => {
+  it('libera baús após slot de skill (raiz)', () => {
+    const roster = progressionReadyState().roster.map((hero, index) =>
+      index === 0 ? hero.gainExperience(200) : hero,
+    );
+    const state = progressionReadyState()
+      .withRoster(roster)
+      .withUpgradeLevels({ battle_skill_slots: 1 });
+
+    expect(nodeStatus(state, 'open_all_chests_1')).toBe('available');
+    expect(nodeStatus(state, 'auto_open_chests_1')).toBeUndefined();
+  });
+
+  it('bloqueia auto-batalha II sem a raiz de slot de skill', () => {
     const state = progressionReadyState().withUpgradeLevels({ auto_battle: 2 });
 
-    expect(nodeStatus(state, 'battle_skill_slot_2')).toBe('locked');
+    expect(nodeStatus(state, 'auto_battle_2')).toBe('locked');
   });
 
   describe('overrides do Balance Lab', () => {
@@ -68,33 +79,37 @@ describe('UpgradeService', () => {
     });
 
     it('buildTree usa o custo com override, não o do catálogo', () => {
-      const baseline = getCatalogUpgradeById('battle_stats_1')!;
+      const baseline = getCatalogUpgradeById('battle_skill_slot_2')!;
       const overriddenCost = baseline.cost + 777;
       setRuntimeUpgradeOverrides({
         version: 1,
         updatedAt: null,
-        upgrades: { battle_stats_1: { cost: overriddenCost } },
+        upgrades: { battle_skill_slot_2: { cost: overriddenCost } },
       });
 
       const node = new UpgradeService()
         .buildTree(progressionReadyState())
-        .find((entry) => entry.definition.id === 'battle_stats_1');
+        .find((entry) => entry.definition.id === 'battle_skill_slot_2');
 
       expect(node?.definition.cost).toBe(overriddenCost);
     });
 
     it('custo exibido na árvore casa com o cobrado na compra', () => {
+      const roster = progressionReadyState().roster.map((hero, index) =>
+        index === 0 ? hero.gainExperience(200) : hero,
+      );
       setRuntimeUpgradeOverrides({
         version: 1,
         updatedAt: null,
-        upgrades: { battle_stats_1: { cost: 20 } },
+        upgrades: { battle_skill_slot_2: { cost: 20 } },
       });
 
-      const state = progressionReadyState();
+      const state = progressionReadyState().withRoster(roster);
       const shown = new UpgradeService()
         .buildTree(state)
-        .find((entry) => entry.definition.id === 'battle_stats_1')!.definition.cost;
-      const spent = state.gold.value() - service.purchase(state, 'battle_stats_1').gold.value();
+        .find((entry) => entry.definition.id === 'battle_skill_slot_2')!.definition.cost;
+      const spent =
+        state.gold.value() - service.purchase(state, 'battle_skill_slot_2').gold.value();
 
       expect(shown).toBe(20);
       expect(spent).toBe(shown);

@@ -55,7 +55,7 @@ export class FeatureAccessPolicy {
       autoEquipLoot: autoEquipLevel >= 1,
       autoEquipSilent: autoEquipLevel >= 2,
       logFilter: getFeatureLevel(levels, 'log_filter') >= 1,
-      battleStats: getFeatureLevel(levels, 'battle_stats') >= 1,
+      battleStats: true,
       shopRefresh: getFeatureLevel(levels, 'shop_refresh') >= 1,
       backgroundTick: false,
       backgroundTickMultiplier: 1,

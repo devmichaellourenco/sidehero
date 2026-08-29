@@ -32,6 +32,14 @@ export class SettingsModalRenderer {
         })}
         ${this.renderMusicVolume(preferences)}
         ${this.renderToggle({
+          key: 'sfxEnabled',
+          title: 'Efeitos sonoros',
+          hint: 'Cliques de menu, confirmar e fechar',
+          unlocked: true,
+          checked: preferences.sfxEnabled,
+        })}
+        ${this.renderSfxVolume(preferences)}
+        ${this.renderToggle({
           key: 'autoBattle',
           title: 'Auto-batalha',
           hint: 'Avança batalhas automaticamente',
@@ -79,8 +87,11 @@ export class SettingsModalRenderer {
       if (element instanceof HTMLInputElement && element.type === 'range') {
         if (element.disabled) return;
         element.addEventListener('input', () => {
-          if (key !== 'musicVolume') return;
-          handlers.onPreferenceChange('musicVolume', Number(element.value));
+          if (key !== 'musicVolume' && key !== 'sfxVolume') return;
+          handlers.onPreferenceChange(
+            key,
+            Number(element.value) as GamePreferences[typeof key],
+          );
         });
         return;
       }
@@ -197,6 +208,31 @@ export class SettingsModalRenderer {
           data-pref="musicVolume"
           class="settings-volume-range"
           aria-label="Volume da música"
+          ${disabled}
+        />
+      </label>
+    `;
+  }
+
+  private renderSfxVolume(preferences: GamePreferences): string {
+    const volumePercent = Math.round(preferences.sfxVolume * 100);
+    const disabled = preferences.sfxEnabled ? '' : 'disabled';
+
+    return `
+      <label class="settings-item settings-item-range">
+        <span class="settings-item-text">
+          <strong>Volume dos efeitos</strong>
+          <small>${volumePercent}%</small>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value="${preferences.sfxVolume}"
+          data-pref="sfxVolume"
+          class="settings-volume-range"
+          aria-label="Volume dos efeitos sonoros"
           ${disabled}
         />
       </label>

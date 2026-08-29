@@ -10,6 +10,8 @@ export interface GamePreferences {
   uiTheme: UiThemeId;
   musicEnabled: boolean;
   musicVolume: number;
+  sfxEnabled: boolean;
+  sfxVolume: number;
 }
 
 const STORAGE_KEYS = {
@@ -21,6 +23,8 @@ const STORAGE_KEYS = {
   uiTheme: 'sidehero_ui_theme',
   musicEnabled: 'sidehero_music_enabled',
   musicVolume: 'sidehero_music_volume',
+  sfxEnabled: 'sidehero_sfx_enabled',
+  sfxVolume: 'sidehero_sfx_volume',
 } as const;
 
 const DEFAULT_PREFERENCES: GamePreferences = {
@@ -32,6 +36,8 @@ const DEFAULT_PREFERENCES: GamePreferences = {
   uiTheme: 'dark',
   musicEnabled: true,
   musicVolume: 0.55,
+  sfxEnabled: true,
+  sfxVolume: 0.75,
 };
 
 function readFlag(key: string, defaultValue = false): boolean {
@@ -100,6 +106,8 @@ export function loadGamePreferences(): GamePreferences {
       uiTheme: readUiTheme(),
       musicEnabled: readFlag(STORAGE_KEYS.musicEnabled, true),
       musicVolume: readVolume(STORAGE_KEYS.musicVolume, DEFAULT_PREFERENCES.musicVolume),
+      sfxEnabled: readFlag(STORAGE_KEYS.sfxEnabled, true),
+      sfxVolume: readVolume(STORAGE_KEYS.sfxVolume, DEFAULT_PREFERENCES.sfxVolume),
     };
   } catch {
     return { ...DEFAULT_PREFERENCES };
@@ -113,6 +121,8 @@ export function saveGamePreferences(preferences: GamePreferences): void {
   writeFlag(STORAGE_KEYS.logFilterImportant, preferences.logFilterImportant);
   writeFlag(STORAGE_KEYS.musicEnabled, preferences.musicEnabled);
   writeVolume(STORAGE_KEYS.musicVolume, preferences.musicVolume);
+  writeFlag(STORAGE_KEYS.sfxEnabled, preferences.sfxEnabled);
+  writeVolume(STORAGE_KEYS.sfxVolume, preferences.sfxVolume);
   writeUiTheme(preferences.uiTheme);
 
   try {

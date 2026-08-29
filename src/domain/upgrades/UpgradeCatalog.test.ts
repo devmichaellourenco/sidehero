@@ -55,7 +55,7 @@ describe('UpgradeCatalog', () => {
     const paladin = UPGRADE_CATALOG.find((entry) => entry.id === 'hero_unlock_paladin');
 
     expect(knight?.branch).toBe('heroes');
-    expect(knight?.parents).toEqual(['battle_stats_1']);
+    expect(knight?.parents).toEqual(['battle_skill_slot_2']);
     expect(knight?.unlockHeroClass).toBe('knight');
     expect(knight?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-1' }]);
 
@@ -76,26 +76,24 @@ describe('UpgradeCatalog', () => {
     expect(paladin?.requirements).toEqual([{ type: 'main_mission_completed', missionId: 'main:1-40' }]);
   });
 
-  it('tem uma única raiz: Estatísticas de batalha', () => {
+  it('tem uma única raiz: slot de skill II', () => {
     const roots = UPGRADE_CATALOG.filter((entry) => entry.parents.length === 0);
-    expect(roots.map((entry) => entry.id)).toEqual(['battle_stats_1']);
+    expect(roots.map((entry) => entry.id)).toEqual(['battle_skill_slot_2']);
     expect(UPGRADE_CATALOG.find((entry) => entry.id === 'optimize_loadout_1')).toBeUndefined();
+    expect(UPGRADE_CATALOG.find((entry) => entry.id === 'battle_stats_1')).toBeUndefined();
   });
 
-  it('combate integra slots de skill a partir da raiz (tick idle, otimizar e auto-abrir desativados)', () => {
-    // OFFLINE PROGRESS DESATIVADO (2026-07)
-    // const tick = UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1');
+  it('combate integra slots de skill como raiz (tick idle, otimizar e auto-abrir desativados)', () => {
     const skillSlot = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_skill_slot_2');
     const autoBattle = UPGRADE_CATALOG.find((entry) => entry.id === 'auto_battle_2');
     const openAll = UPGRADE_CATALOG.find((entry) => entry.id === 'open_all_chests_1');
 
-    expect(autoBattle?.parents).toEqual(['battle_stats_1']);
-    expect(openAll?.parents).toEqual(['battle_stats_1']);
-    // expect(tick?.parents).toEqual(['auto_battle_2']);
+    expect(skillSlot?.parents).toEqual([]);
+    expect(autoBattle?.parents).toEqual(['battle_skill_slot_2']);
+    expect(openAll?.parents).toEqual(['battle_skill_slot_2']);
     expect(UPGRADE_CATALOG.find((entry) => entry.id === 'background_tick_1')).toBeUndefined();
     expect(UPGRADE_CATALOG.find((entry) => entry.id === 'auto_open_chests_1')).toBeUndefined();
     expect(UPGRADE_CATALOG.find((entry) => entry.id === 'open_all_chests_2')).toBeUndefined();
-    expect(skillSlot?.parents).toEqual(['battle_stats_1']);
   });
 
   it('economia integra renovar loja na árvore principal', () => {
@@ -105,12 +103,7 @@ describe('UpgradeCatalog', () => {
     expect(shop?.parents).toEqual(['auto_battle_2']);
   });
 
-  it('qol libera estatísticas como raiz e log após auto-batalha III', () => {
-    const battleStats = UPGRADE_CATALOG.find((entry) => entry.id === 'battle_stats_1');
-    expect(battleStats?.feature).toBe('battle_stats');
-    expect(battleStats?.cost).toBe(200);
-    expect(battleStats?.parents).toEqual([]);
-
+  it('qol libera log após auto-batalha III', () => {
     const logFilter = UPGRADE_CATALOG.find((entry) => entry.id === 'log_filter_1');
     expect(logFilter?.branch).toBe('qol');
     expect(logFilter?.parents).toEqual(['auto_battle_3']);

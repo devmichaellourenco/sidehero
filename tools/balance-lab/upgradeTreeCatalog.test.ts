@@ -38,19 +38,19 @@ describe('validateUpgradeDependencies', () => {
       validateUpgradeDependencies({
         version: 1,
         updatedAt: null,
-        upgrades: { battle_stats_1: { parents: ['auto_battle_2'] } },
+        upgrades: { battle_skill_slot_2: { parents: ['auto_battle_2'] } },
       }).join(' '),
     ).toContain('ciclo');
   });
 
-  it('mantém battle_stats_1 como única raiz', () => {
+  it('mantém battle_skill_slot_2 como única raiz', () => {
     const errors = validateUpgradeDependencies({
       version: 1,
       updatedAt: null,
       upgrades: { open_all_chests_1: { parents: [] } },
     });
 
-    expect(errors).toContain('A árvore deve manter battle_stats_1 como única raiz');
+    expect(errors).toContain('A árvore deve manter battle_skill_slot_2 como única raiz');
   });
 });
 

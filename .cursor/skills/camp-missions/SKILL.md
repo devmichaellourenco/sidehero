@@ -40,7 +40,7 @@ description: Acampamento, mapa de missões e tipos principal/secundária/normal 
 - Principal = marcos `x-1, x-10, …, x-50`; próxima incompleta no board; não repetível
 - New game: party **Nix solo**; unlocks Galneon→Elara→… na árvore com gates de main; inicia no hub Acampamento (`loadoutEditOpen`); cena de abertura → boas-vindas → mapa aberto automaticamente + tutorial guiado (skill `battle-ui`)
 - Vitória/derrota → CLEAR/DEFEAT → tela de recompensas (sem scroll; Continuar no deck) → acampamento + mapa
-- Iniciar no mapa → cue START → combate; Acampamento/hub sem Batalhar (`phaseRestartOnResume: false`); unpin retransmite ao painel principal
+- Iniciar no mapa → cue START → combate + abrir Estatísticas; Acampamento/hub sem Batalhar (`phaseRestartOnResume: false`); unpin retransmite ao painel principal
 - XP/ouro: ouro nos kills (`targetGold`); XP = orçamento `targetXp` só na vitória (`grantPhaseVictoryXp`). Derrota: ouro parcial dos kills, XP 0. Overlay CLEAR/DEFEAT usa baseline do START (`BattleAttemptRewardBaseline`)
 - Preview/CTA só ao clicar no pin (popover sobre o pin; sem footer permanente)
 - Região: título + bioma compactos; painel do mapa com padding mínimo; progresso só no hover; troca via mapa-mundo

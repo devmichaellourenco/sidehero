@@ -38,13 +38,13 @@ Padrão: `beginSession()` na abertura → capturar estado antes do re-render →
 
 ## Núcleo
 
-Ramo principal parte de `battle_stats_1`; integrar novos ramos com `parents` explícitos.
+Ramo principal parte de `battle_skill_slot_2`; integrar novos ramos com `parents` explícitos.
 - **Otimizar equipe** desativado (2026-08): nós `optimize_loadout_*` fora do catálogo; flags sempre off em `FeatureAccessPolicy`
 
 ## Balance Lab
 
 - Aba **Melhorias** edita custo, textos, `parents[]` e `requirements[]`
-- O save valida IDs, autorreferência, ciclos e mantém `battle_stats_1` como única raiz
+- O save valida IDs, autorreferência, ciclos e mantém `battle_skill_slot_2` como única raiz
 - Dependências persistem em `upgrade-overrides.json` e entram no runtime por `listEffectiveUpgrades` / `getUpgradeById`
 
 ## Relacionado

@@ -79,7 +79,7 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 ## Critérios de aceite
 
 - [x] Fim de batalha (vitória ou derrota) mostra CLEAR/DEFEAT, depois tela só de recompensas (sem scroll; Continuar no deck); Continuar → hub ACAMPAMENTO e abre o mapa
-- [x] **Iniciar missão** no mapa → cue START → combate (sem clique em Batalhar); em campanha unpin, relay para o side panel (`MissionBattleStartRelay`)
+- [x] **Iniciar missão** no mapa → cue START → combate (sem clique em Batalhar); painel **Estatísticas** abre automaticamente; em campanha unpin, relay para o side panel (`MissionBattleStartRelay`)
 - [x] Hub / Acampamento sem reinício via Batalhar (`phaseRestartOnResume: false`); combate só pelo mapa
 - [x] New game inicia no hub do acampamento (`loadoutEditOpen: true`) com overlay Acampamento
 - [x] New game: depois da cena de abertura, boas-vindas → mapa aberto automaticamente → tutorial guiado (pinos/tipos de missão, preview do local, Iniciar missão); ver `battle-ui` (`OnboardingPolicy`)

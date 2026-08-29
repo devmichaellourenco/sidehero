@@ -6,7 +6,7 @@ export interface UpgradeNodePosition {
 export type UpgradeTreeLayoutMap = Record<string, UpgradeNodePosition>;
 
 /**
- * Layout em ramos retos: raiz `battle_stats_1` no centro.
+ * Layout em ramos retos: raiz `battle_skill_slot_2` no centro.
  * (OTIMIZAR EQUIPE DESATIVADO 2026-08 — antiga raiz `optimize_loadout_1`.)
  *
  * Cada filho de um mesmo pai precisa sair num ângulo distinto (múltiplo de 45°),
@@ -15,7 +15,7 @@ export type UpgradeTreeLayoutMap = Record<string, UpgradeNodePosition>;
 export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   // optimize_loadout_1: { x: 500, y: 400 },
 
-  battle_stats_1: { x: 500, y: 400 },
+  battle_skill_slot_2: { x: 500, y: 400 },
 
   // Raiz → oeste
   auto_battle_2: { x: 380, y: 400 },
@@ -59,7 +59,6 @@ export const UPGRADE_TREE_UNIFIED_LAYOUT: UpgradeTreeLayoutMap = {
   auto_equip_loot_2: { x: 260, y: 520 },
 
   // Raiz → sudeste
-  battle_skill_slot_2: { x: 620, y: 520 },
   battle_skill_slot_3: { x: 740, y: 640 },
 };
 

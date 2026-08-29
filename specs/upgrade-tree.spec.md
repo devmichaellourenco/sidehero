@@ -14,13 +14,13 @@ Desbloquear automações e QoL comprando nós na **árvore única** com ouro, de
 - [x] Canvas único: pan, zoom, legenda por ramo
 - [x] Cada nó tem `parents[]` válidos; `UpgradeService.areParentsOwned` bloqueia compra
 - [x] Layout colinear (H/V/45°) em `UpgradeTreeLayout.ts`
-- [x] Ramos integrados à raiz `battle_stats_1`: combate, baús (abrir todos manual), slots, loja, heróis; log via `auto_battle_3` (otimizar equipe e auto-abrir baús desativados)
+- [x] Ramos integrados à raiz `battle_skill_slot_2`: combate, baús (abrir todos manual), slots, loja, heróis; log via `auto_battle_3` (otimizar equipe e auto-abrir baús desativados)
 - [x] Compra aplica `feature` level + `unlockHeroClass` quando aplicável
 - [x] Tooltip com requisitos; runas **não compradas** mostram o custo no canto inferior direito (sem botão Comprar)
 - [x] Clique no nó **disponível** (ouro suficiente) compra direto; hover continua só informativo
 - [x] **Viewport estável após compra:** ao habilitar uma melhoria (clique no nó disponível), o canvas **mantém** pan e zoom atuais — a visão não volta ao início nem recentraliza sozinha
 - [x] Modal **sem** hint estático de pan/zoom/hover; legenda, nodos com tooltip e botão **Ir para disponível** comunicam a interação
-- [x] Balance Lab edita `parents[]` e `requirements[]`; save rejeita IDs inexistentes, autorreferência, ciclos e mudança da raiz única `battle_stats_1`
+- [x] Balance Lab edita `parents[]` e `requirements[]`; save rejeita IDs inexistentes, autorreferência, ciclos e mudança da raiz única `battle_skill_slot_2`
 - [x] Toda aresta é uma **linha reta**; filhos da mesma dependência se distinguem pelo **ângulo de saída**, nunca por curvatura
 
 ## Comportamento esperado do viewport
@@ -77,5 +77,6 @@ Implementado via `captureUpgradeTreeViewport`, `bindUpgradeTreeViewport({ initia
 
 ## Notas
 
-- `battle_stats_1` é a **única raiz** (`parents: []`); demais ramos partem dela ou de descendentes
+- `battle_skill_slot_2` é a **única raiz** (`parents: []`); demais ramos partem dela ou de descendentes
+- Estatísticas de batalha **não** são runa — disponíveis desde o início; abrem automaticamente ao iniciar missão
 - **Otimizar equipe** (`optimize_loadout_*`) está **desativado** (2026-08): fora do catálogo e flags sempre off — o jogador avalia itens manualmente

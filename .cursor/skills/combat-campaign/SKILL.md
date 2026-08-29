@@ -28,7 +28,7 @@ description: Implementa combate em tempo real, campanha por fases/waves, tick e 
 - XP na vitória da fase (`grantPhaseVictoryXp` / `targetXp`); kills pagam ouro/loot
 - Intermissão: setar `combatIntermission`, não avançar combate até resume
 - Pausa de batalha: `battlePaused` mantém `combat`/`phaseRun`; ticks no-op até `ResumeBattleUseCase`
-- Stats da tentativa: `battleSessionStats` (geral/herói/skill/elementos/mitigação); reset ao iniciar/reiniciar fase; UI via runa `battle_stats`
+- Stats da tentativa: `battleSessionStats` (geral/herói/skill/elementos/mitigação); reset ao iniciar/reiniciar fase; UI sempre disponível (abre ao iniciar missão)
 - Timeline visual da fase: skill `stage-progress-bar` (roles trash/elite/boss → marcadores)
 - Identidade de mapa: `MapCombatIdentityCatalog` + `pickCommonForMapPhase` (bias soft) + resists via `resolveEnemyInnateResists(..., mapId)`
 - **Loop de produto (novo):** skill `camp-missions` — fim de missão → CLEAR/DEFEAT → detalhes de recompensa → Continuar → camp; sem auto-próxima fase; tick com `phaseRun` nulo é no-op

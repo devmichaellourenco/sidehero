@@ -107,8 +107,8 @@ export function validateUpgradeDependencies(file: UpgradeOverridesFile): string[
   }
 
   const roots = effective.filter((upgrade) => upgrade.parents.length === 0).map((upgrade) => upgrade.id);
-  if (roots.length !== 1 || roots[0] !== 'battle_stats_1') {
-    errors.push('A árvore deve manter battle_stats_1 como única raiz');
+  if (roots.length !== 1 || roots[0] !== 'battle_skill_slot_2') {
+    errors.push('A árvore deve manter battle_skill_slot_2 como única raiz');
   }
 
   const parentsById = new Map(effective.map((upgrade) => [upgrade.id, upgrade.parents]));

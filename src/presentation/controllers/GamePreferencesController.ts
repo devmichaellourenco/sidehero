@@ -19,6 +19,8 @@ export class GamePreferencesController {
   uiTheme: GamePreferences['uiTheme'] = 'dark';
   musicEnabled = true;
   musicVolume = 0.55;
+  sfxEnabled = true;
+  sfxVolume = 0.75;
 
   apply(state: GameStateDto | null): { autoBattleChanged: boolean } {
     const flags = getFeatureFlags(state);
@@ -38,6 +40,8 @@ export class GamePreferencesController {
     this.uiTheme = clamped.uiTheme;
     this.musicEnabled = clamped.musicEnabled;
     this.musicVolume = clamped.musicVolume;
+    this.sfxEnabled = clamped.sfxEnabled;
+    this.sfxVolume = clamped.sfxVolume;
 
     const autoBattleChanged =
       wasAutoBattle !== this.autoBattleEnabled || wasSpeed !== this.autoBattleSpeed;
@@ -67,6 +71,8 @@ export class GamePreferencesController {
       case 'uiTheme':
       case 'musicEnabled':
       case 'musicVolume':
+      case 'sfxEnabled':
+      case 'sfxVolume':
         return true;
       default:
         return true;
@@ -108,6 +114,8 @@ export class GamePreferencesController {
       uiTheme: preferences.uiTheme === 'light' ? 'light' : 'dark',
       musicEnabled: preferences.musicEnabled,
       musicVolume: Math.max(0, Math.min(1, preferences.musicVolume)),
+      sfxEnabled: preferences.sfxEnabled,
+      sfxVolume: Math.max(0, Math.min(1, preferences.sfxVolume)),
     };
   }
 }

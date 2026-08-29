@@ -27,7 +27,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Splash | `SplashScreenController` — ≥5s antes de tutorial/Wow/auto-battle no painel principal |
 | Stage progress | Ver skill `stage-progress-bar` — timeline entre localização e a strip |
 | Resultado / START | `BattleVictoryFlow` + `BattleStartFlow`; Continuar no deck; recompensas sem scroll; START antes do tick |
-| Stats | Runa `battle_stats` → janela popup (padrão) ou sheet no side panel; botão Fixar/Desafixar |
+| Stats | Sempre no menu; abre automaticamente ao iniciar missão; janela popup (padrão) ou sheet no side panel; botão Fixar/Desafixar |
 | Pin/unpin menus | Todos `SystemsMenuId`: `SurfacePinPreference` + `OPEN/CLOSE_DETACHED_SURFACE` + `panel.html?detached=`; UI `SurfacePinPresentation` / `sheet-title-row`; campanha unpin → `MissionBattleStartRelay` |
 | Modais | `ModalStackController`, `GameViewController`, `SystemsMenuNavigation`, `SystemsMenuIconPresentation` |
 | Navegação menus | Faixa de ícones nos sheets (modal/drawer/Log/Stats) + seta v para fechar |

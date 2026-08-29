@@ -11,6 +11,7 @@ import { GameHudController } from '../controllers/GameHudController';
 import { GamePreferencesController } from '../controllers/GamePreferencesController';
 import { LootFlowController } from '../controllers/LootFlowController';
 import { GameMusicController } from '../audio/GameMusicController';
+import { GameSfxController } from '../audio/GameSfxController';
 import { resolveGameMusicTrack } from '../audio/resolveGameMusicTrack';
 import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
 import { BattleStartFlow } from '../flows/BattleStartFlow';
@@ -224,6 +225,7 @@ export class GameViewController {
   private readonly battleLogRenderer = new BattleLogRenderer();
   private readonly skillCooldownAnimator = new SkillCooldownDisplayAnimator();
   private readonly musicController = new GameMusicController();
+  private readonly sfxController = new GameSfxController();
 
   private readonly heroDetailFlow: HeroDetailFlow;
   private readonly shopFlow: ShopFlow;
@@ -568,6 +570,7 @@ export class GameViewController {
         return;
       }
       this.beginMissionBattleWithStart();
+      void this.showBattleStatsSheet();
     });
     this.partyFlow = new PartyFlow(this.client);
 
@@ -695,6 +698,7 @@ export class GameViewController {
 
     this.prefsController.apply(this.state);
     this.syncMusicPreferences();
+    this.syncSfxPreferences();
     this.bindHeroPanelDelegation();
     this.bindBattleStripDelegation();
     this.bindHeroDrawerNavigation();
@@ -798,6 +802,10 @@ export class GameViewController {
     });
 
     this.musicController.bindUnlock();
+    this.sfxController.bindUnlock();
+    this.sfxController.bindUiClicks(document, {
+      active: () => this.bootReady && !this.contextInvalidated,
+    });
   }
 
   async init(): Promise<void> {
@@ -899,6 +907,14 @@ export class GameViewController {
       return;
     }
 
+    if (key === 'sfxEnabled' || key === 'sfxVolume') {
+      this.syncSfxPreferences();
+      if (this.modal.isOpen() && this.modalStack[this.modalStack.length - 1]?.type === 'settings') {
+        this.renderModalTop();
+      }
+      return;
+    }
+
     if (key === 'autoOpenChests' && value === true) {
       this.chestLootFlow.scheduleAutoOpenChests();
     }
@@ -929,6 +945,13 @@ export class GameViewController {
     this.musicController.setPreferences({
       enabled: this.prefsController.musicEnabled,
       volume: this.prefsController.musicVolume,
+    });
+  }
+
+  private syncSfxPreferences(): void {
+    this.sfxController.setPreferences({
+      enabled: this.prefsController.sfxEnabled,
+      volume: this.prefsController.sfxVolume,
     });
   }
 
@@ -2470,6 +2493,7 @@ export class GameViewController {
 
     this.render(response.state);
     this.beginMissionBattleWithStart();
+    void this.showBattleStatsSheet();
   }
 
   private surfacePinMode(): SurfacePinMode {
@@ -2745,7 +2769,7 @@ export class GameViewController {
   }
 
   private async showBattleStatsSheet(): Promise<void> {
-    if (!this.state?.featureFlags.battleStats && !this.detachedSurfaceId) return;
+    if (!this.state) return;
 
     this.trackedSystemsMenuId = 'stats';
     this.battleStatsPanel.setContent(
@@ -2892,12 +2916,10 @@ export class GameViewController {
 
     this.battleLogRenderer.render(this.battleLog, logMessages);
 
-    if (mergedState.featureFlags.battleStats && this.battleStatsPanel.isVisible()) {
+    if (this.battleStatsPanel.isVisible()) {
       this.battleStatsPanel.setContent(
         renderBattleStatsBody(mergedState, this.battleStatsPanel.getActiveTab()),
       );
-    } else if (!mergedState.featureFlags.battleStats && !this.detachedSurfaceId) {
-      this.battleStatsPanel.hide();
     }
 
     this.enforceUpgradeGates();

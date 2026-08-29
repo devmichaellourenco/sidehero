@@ -315,13 +315,13 @@ describe('GameHudController — acesso no acampamento', () => {
     expect(buttons.pause.disabled).toBe(true);
   });
 
-  it('exibe menu Stats somente com runa battle_stats', () => {
+  it('exibe menu Stats desde o início', () => {
     const { hud, buttons } = createHud();
 
     hud.render(mockState({ featureFlags: { ...mockState().featureFlags, battleStats: false } }), {
       openingChests: false,
     });
-    expect(buttons.battleStats.classList.contains('hidden')).toBe(true);
+    expect(buttons.battleStats.classList.contains('hidden')).toBe(false);
 
     hud.render(mockState({ featureFlags: { ...mockState().featureFlags, battleStats: true } }), {
       openingChests: false,

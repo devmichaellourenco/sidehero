@@ -26,31 +26,28 @@ function node(partial: Partial<UpgradeNodeDto> & Pick<UpgradeNodeDto, 'id' | 'br
 describe('UpgradeTreeGraphPresentation', () => {
   it('resolve pais via parents explícitos ou requisito upgrade_level', () => {
     expect(resolveUpgradeParentIds('auto_battle_3')).toEqual(['auto_battle_2']);
-    expect(resolveUpgradeParentIds('auto_battle_2')).toEqual(['battle_stats_1']);
-    expect(resolveUpgradeParentIds('battle_stats_1')).toEqual([]);
-    expect(resolveUpgradeParentIds('open_all_chests_1')).toEqual(['battle_stats_1']);
-    // AUTO-ABRIR BAÚS DESATIVADO (2026-08)
+    expect(resolveUpgradeParentIds('auto_battle_2')).toEqual(['battle_skill_slot_2']);
+    expect(resolveUpgradeParentIds('battle_skill_slot_2')).toEqual([]);
+    expect(resolveUpgradeParentIds('open_all_chests_1')).toEqual(['battle_skill_slot_2']);
     expect(resolveUpgradeParentIds('auto_open_chests_1')).toEqual([]);
     expect(resolveUpgradeParentIds('open_all_chests_2')).toEqual([]);
-    expect(resolveUpgradeParentIds('hero_unlock_knight')).toEqual(['battle_stats_1']);
+    expect(resolveUpgradeParentIds('hero_unlock_knight')).toEqual(['battle_skill_slot_2']);
     expect(resolveUpgradeParentIds('hero_unlock_priest')).toEqual(['hero_unlock_knight']);
     expect(resolveUpgradeParentIds('hero_unlock_berserker')).toEqual(['hero_unlock_priest']);
     expect(resolveUpgradeParentIds('hero_unlock_archer')).toEqual(['hero_unlock_berserker']);
     expect(resolveUpgradeParentIds('hero_unlock_paladin')).toEqual(['hero_unlock_archer']);
-    // OFFLINE PROGRESS DESATIVADO (2026-07)
     expect(resolveUpgradeParentIds('background_tick_1')).toEqual([]);
-    // OTIMIZAR EQUIPE DESATIVADO (2026-08)
     expect(resolveUpgradeParentIds('optimize_loadout_1')).toEqual([]);
-    expect(resolveUpgradeParentIds('battle_skill_slot_2')).toEqual(['battle_stats_1']);
+    expect(resolveUpgradeParentIds('battle_skill_slot_3')).toEqual(['battle_skill_slot_2']);
     expect(resolveUpgradeParentIds('shop_refresh_1')).toEqual(['auto_battle_2']);
     expect(resolveUpgradeParentIds('log_filter_1')).toEqual(['auto_battle_3']);
   });
 
   it('monta arestas entre nodos visíveis, inclusive entre ramos', () => {
     const nodes = [
-      node({ id: 'battle_stats_1', branch: 'qol' }),
-      node({ id: 'auto_battle_2', branch: 'combat' }),
       node({ id: 'battle_skill_slot_2', branch: 'combat' }),
+      node({ id: 'auto_battle_2', branch: 'combat' }),
+      node({ id: 'battle_skill_slot_3', branch: 'combat' }),
       node({ id: 'hero_unlock_knight', branch: 'heroes' }),
       node({ id: 'hero_unlock_priest', branch: 'heroes' }),
       node({ id: 'hero_unlock_berserker', branch: 'heroes' }),
@@ -58,9 +55,9 @@ describe('UpgradeTreeGraphPresentation', () => {
 
     expect(buildUpgradeTreeEdges(nodes)).toEqual(
       expect.arrayContaining([
-        { fromId: 'battle_stats_1', toId: 'auto_battle_2' },
-        { fromId: 'battle_stats_1', toId: 'battle_skill_slot_2' },
-        { fromId: 'battle_stats_1', toId: 'hero_unlock_knight' },
+        { fromId: 'battle_skill_slot_2', toId: 'auto_battle_2' },
+        { fromId: 'battle_skill_slot_2', toId: 'battle_skill_slot_3' },
+        { fromId: 'battle_skill_slot_2', toId: 'hero_unlock_knight' },
         { fromId: 'hero_unlock_knight', toId: 'hero_unlock_priest' },
         { fromId: 'hero_unlock_priest', toId: 'hero_unlock_berserker' },
       ]),
@@ -69,19 +66,16 @@ describe('UpgradeTreeGraphPresentation', () => {
   });
 
   it('acusa irmãos que saem do mesmo pai na mesma direção', () => {
-    // battle_stats_1 → open_all_chests_1 é leste; hero_unlock_knight é sul.
     expect(
       findSiblingBranchConflicts([
-        { fromId: 'battle_stats_1', toId: 'open_all_chests_1' },
-        { fromId: 'battle_stats_1', toId: 'hero_unlock_knight' },
+        { fromId: 'battle_skill_slot_2', toId: 'open_all_chests_1' },
+        { fromId: 'battle_skill_slot_2', toId: 'hero_unlock_knight' },
       ]),
     ).toEqual([]);
 
-    // item_stash_2 e open_all_chests_1 estão ambos a leste de seus pais, mas o pai
-    // aqui é o mesmo nodo — direção duplicada.
     const conflicts = findSiblingBranchConflicts([
-      { fromId: 'battle_stats_1', toId: 'open_all_chests_1' },
-      { fromId: 'battle_stats_1', toId: 'item_stash_2' },
+      { fromId: 'battle_skill_slot_2', toId: 'open_all_chests_1' },
+      { fromId: 'battle_skill_slot_2', toId: 'item_stash_2' },
     ]);
     expect(conflicts).toHaveLength(1);
     expect(conflicts[0].childIds).toEqual(['open_all_chests_1', 'item_stash_2']);
@@ -112,11 +106,11 @@ describe('UpgradeTreeGraphPresentation', () => {
   it('foca primeiro nodo disponível, depois Ready, depois bloqueado', () => {
     const nodes = [
       node({ id: 'auto_battle_2', branch: 'combat', status: 'locked' }),
-      node({ id: 'battle_stats_1', branch: 'qol', status: 'available' }),
+      node({ id: 'battle_skill_slot_2', branch: 'combat', status: 'available' }),
       node({ id: 'shop_refresh_1', branch: 'economy', status: 'ready' }),
     ];
 
-    expect(findFocusNodeId(nodes)).toBe('battle_stats_1');
+    expect(findFocusNodeId(nodes)).toBe('battle_skill_slot_2');
 
     const onlyReady = [
       node({ id: 'auto_battle_2', branch: 'combat', status: 'locked' }),
