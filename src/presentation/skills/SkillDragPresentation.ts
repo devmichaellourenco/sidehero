@@ -27,7 +27,9 @@ function createSkillDragGhost(icon: HTMLImageElement): HTMLElement {
 }
 
 export function applySkillDragImage(dragEvent: DragEvent, source: HTMLElement): void {
-  const icon = source.querySelector('.skill-card-icon') as HTMLImageElement | null;
+  const icon =
+    (source.querySelector('.skill-row__icon') as HTMLImageElement | null) ??
+    (source.querySelector('.skill-card-icon') as HTMLImageElement | null);
   if (!icon || !dragEvent.dataTransfer) return;
 
   removeSkillDragGhost();

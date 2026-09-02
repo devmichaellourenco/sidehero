@@ -108,6 +108,25 @@ describe('CampaignModalRenderer', () => {
     expect(resolveInitialPendingPhaseId(map)).toBe('1-50');
   });
 
+  it('variante pins-only renderiza só o board com pins (sem header/trilha)', () => {
+    const overview = buildOverview();
+    const html = renderer.render(overview, 'stendra', null, 'region', {
+      pendingMissionId: 'main:1-50',
+      variant: 'pins-only',
+    });
+
+    expect(html).toContain('campaign-modal--pins-only');
+    expect(html).toContain('campaign-map-body--pins-only');
+    expect(html).toContain('campaign-mission-board');
+    expect(html).toContain('data-mission-map="stendra"');
+    expect(html).not.toContain('campaign-map-header');
+    expect(html).not.toContain('campaign-map-title');
+    expect(html).not.toContain('Stendra');
+    expect(html).not.toContain('campaign-view-toggle');
+    expect(html).not.toContain('campaign-mission-select-hint');
+    expect(html).not.toContain('campaign-unlock-banner');
+  });
+
   it('renderiza board de missões e header compacto no modo região', () => {
     const overview = buildOverview();
     const html = renderer.render(overview, 'stendra', null, 'region', {

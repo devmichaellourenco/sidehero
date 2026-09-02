@@ -12,14 +12,26 @@ import {
   CampaignModalRenderer,
   isMapUnlocked,
   resolveInitialMapId,
+  type CampaignMapPanelOptions,
 } from '../components/CampaignModalRenderer';
 import { renderCampaignViewToggle } from '../components/CampaignMapPresentation';
 import {
+  clearMissionPopoverPortal,
+  MISSION_POPOVER_PORTAL_ID,
   syncMissionPopoverPlacement,
 } from '../components/CampaignMissionMapPresentation';
 import { bindCampaignTooltips, hideCampaignTooltip } from '../components/CampaignTooltipBinder';
 import { bindEnemyTooltips, hideEnemyTooltip } from '../components/EnemyTooltipBinder';
 import { ModalController } from '../components/ModalController';
+
+export type CampaignPresentationMode = 'modal' | 'embedded';
+
+export type CampaignHost = {
+  mode: CampaignPresentationMode;
+  body: HTMLElement;
+  /** Toggle mapa-mundo/região — no modal usa o título do sheet. */
+  header: HTMLElement | null;
+};
 
 export class CampaignFlow {
   private campaign: CampaignOverviewDto | null = null;
@@ -27,6 +39,8 @@ export class CampaignFlow {
   private pendingMissionId: string | null = null;
   private viewMode: CampaignViewMode = 'region';
   private actSceneReader: ((scene: ActSceneDto) => void) | null = null;
+  private host: CampaignHost | null = null;
+  private onStateHandler: ((state: GameStateDto) => void) | null = null;
 
   private onMissionStarted: ((state: GameStateDto) => void) | null = null;
   private onMapViewChange: (() => void) | null = null;
@@ -50,26 +64,53 @@ export class CampaignFlow {
     this.onMapViewChange = handler;
   }
 
+  isEmbeddedActive(): boolean {
+    return this.host?.mode === 'embedded';
+  }
+
   /** True quando o popover de um local está aberto na visão de região. */
   isMissionPreviewOpen(): boolean {
     return this.viewMode === 'region' && this.pendingMissionId !== null;
   }
 
-  async open(
-    onState: (state: GameStateDto) => void,
-    modalBody: HTMLElement,
-  ): Promise<void> {
+  async open(host: CampaignHost, onState: (state: GameStateDto) => void): Promise<void> {
+    this.host = host;
+    this.onStateHandler = onState;
+
     const response = await this.client.send({ type: 'GET_CAMPAIGN_OVERVIEW' });
     if (!response.ok || !response.campaign) return;
 
+    const hadCampaign = this.campaign !== null;
     this.campaign = response.campaign;
-    this.activeMapId = resolveInitialMapId(response.campaign);
-    this.pendingMissionId = null;
-    this.viewMode = this.resolveInitialViewMode(response.campaign);
-    this.renderModal(modalBody);
-    this.bindInteractions(modalBody, onState);
-    this.scrollPendingMissionIntoView(modalBody);
+
+    const activeMapStillValid = this.campaign.maps.some(
+      (map) => map.id === this.activeMapId && isMapUnlocked(map),
+    );
+
+    if (!hadCampaign || !activeMapStillValid) {
+      this.activeMapId = resolveInitialMapId(response.campaign);
+      this.pendingMissionId = null;
+    }
+
+    if (host.mode === 'embedded') {
+      this.viewMode = 'region';
+    } else if (!hadCampaign) {
+      this.viewMode = this.resolveInitialViewMode(response.campaign);
+    }
+
+    this.renderSurface();
+    this.bindInteractions();
+    this.scrollPendingMissionIntoView();
     this.onMapViewChange?.();
+  }
+
+  detachEmbedded(): void {
+    if (this.host?.mode !== 'embedded') return;
+    this.host = null;
+    this.onStateHandler = null;
+    hideCampaignTooltip();
+    hideEnemyTooltip();
+    clearMissionPopoverPortal();
   }
 
   private resolveInitialViewMode(campaign: CampaignOverviewDto): CampaignViewMode {
@@ -87,18 +128,29 @@ export class CampaignFlow {
     return isMapNewToPlayer(activeMap.id, activeMap.unlocked);
   }
 
-  private renderModal(modalBody: HTMLElement): void {
+  private surfaceBody(): HTMLElement {
+    if (!this.host) throw new Error('CampaignFlow sem host');
+    return this.host.body;
+  }
+
+  private panelOptions(): CampaignMapPanelOptions {
+    return {
+      showUnlockBanner: this.shouldShowUnlockBanner(),
+      pendingMissionId: this.pendingMissionId,
+      variant: this.host?.mode === 'embedded' ? 'pins-only' : 'full',
+    };
+  }
+
+  private renderSurface(): void {
+    const body = this.surfaceBody();
     if (!this.campaign) return;
 
-    modalBody.innerHTML = this.renderer.render(
+    body.innerHTML = this.renderer.render(
       this.campaign,
       this.activeMapId,
       null,
       this.viewMode,
-      {
-        showUnlockBanner: this.shouldShowUnlockBanner(),
-        pendingMissionId: this.pendingMissionId,
-      },
+      this.panelOptions(),
     );
 
     if (this.viewMode === 'region' && this.shouldShowUnlockBanner()) {
@@ -106,37 +158,45 @@ export class CampaignFlow {
     }
 
     this.mountHeaderToggle();
-    bindCampaignTooltips(modalBody);
-    bindEnemyTooltips(modalBody);
-    syncMissionPopoverPlacement(modalBody);
+    bindCampaignTooltips(body);
+    bindEnemyTooltips(body);
+    syncMissionPopoverPlacement(body);
   }
 
-  private chromeRoot(modalBody: HTMLElement): HTMLElement {
-    return (modalBody.closest('.modal-dialog') as HTMLElement | null) ?? modalBody;
+  private chromeRoot(): HTMLElement {
+    if (!this.host) throw new Error('CampaignFlow sem host');
+    if (this.host.header) return this.host.header;
+    return (this.host.body.closest('.modal-dialog') as HTMLElement | null) ?? this.host.body;
   }
 
   private mountHeaderToggle(): void {
-    if (!this.campaign) return;
-    this.modal.setTitleHtml(renderCampaignViewToggle(this.campaign, this.viewMode));
+    if (!this.campaign || this.host?.mode === 'embedded') return;
+    const html = renderCampaignViewToggle(this.campaign, this.viewMode);
+    if (this.host?.header) {
+      this.host.header.innerHTML = html;
+      bindCampaignTooltips(this.host.header);
+      return;
+    }
+
+    this.modal.setTitleHtml(html);
     bindCampaignTooltips(this.modal.getTitleElement());
   }
 
-  private bindInteractions(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+  private bindInteractions(): void {
+    const body = this.surfaceBody();
     hideCampaignTooltip();
     hideEnemyTooltip();
-    this.bindViewToggle(modalBody, onState);
-    this.bindWorldMapNodes(modalBody, onState);
-    this.bindMissionButtons(modalBody, onState);
-    this.bindStartButton(modalBody, onState);
-    this.bindMissionPopoverDismiss(modalBody, onState);
-    this.bindActSceneButtons(modalBody);
+    this.bindViewToggle();
+    this.bindWorldMapNodes();
+    this.bindMissionButtons();
+    this.bindStartButton();
+    this.bindMissionPopoverDismiss();
+    this.bindActSceneButtons();
   }
 
-  private bindMissionPopoverDismiss(
-    modalBody: HTMLElement,
-    onState: (state: GameStateDto) => void,
-  ): void {
-    modalBody.addEventListener('pointerdown', (event) => {
+  private bindMissionPopoverDismiss(): void {
+    const body = this.surfaceBody();
+    body.addEventListener('pointerdown', (event) => {
       if (!this.pendingMissionId || this.viewMode !== 'region') return;
 
       const target = event.target as HTMLElement | null;
@@ -145,14 +205,16 @@ export class CampaignFlow {
       if (target.closest('[data-mission-id]')) return;
       if (target.closest('[data-campaign-mission-preview]')) return;
       if (target.closest('#enemy-tooltip-portal')) return;
+      if (target.closest(`#${MISSION_POPOVER_PORTAL_ID}`)) return;
 
       this.pendingMissionId = null;
-      this.refreshRegionView(modalBody, onState);
+      this.refreshRegionView();
     });
   }
 
-  private bindActSceneButtons(modalBody: HTMLElement): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-act-scene-read]').forEach((button) => {
+  private bindActSceneButtons(): void {
+    const body = this.surfaceBody();
+    body.querySelectorAll<HTMLButtonElement>('[data-act-scene-read]').forEach((button) => {
       button.addEventListener('click', () => {
         const sceneId = button.dataset.actSceneRead;
         if (!sceneId || !this.campaign) return;
@@ -166,8 +228,8 @@ export class CampaignFlow {
     });
   }
 
-  private bindViewToggle(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    this.chromeRoot(modalBody)
+  private bindViewToggle(): void {
+    this.chromeRoot()
       .querySelectorAll<HTMLButtonElement>('[data-campaign-view]')
       .forEach((button) => {
         button.addEventListener('click', () => {
@@ -175,13 +237,14 @@ export class CampaignFlow {
           if (!mode || mode === this.viewMode) return;
           this.viewMode = mode;
           setStoredCampaignViewMode(mode);
-          this.refreshViewMode(modalBody, onState);
+          this.refreshViewMode();
         });
       });
   }
 
-  private bindWorldMapNodes(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-world-map]').forEach((button) => {
+  private bindWorldMapNodes(): void {
+    const body = this.surfaceBody();
+    body.querySelectorAll<HTMLButtonElement>('[data-campaign-world-map]').forEach((button) => {
       button.addEventListener('click', () => {
         const mapId = button.dataset.campaignWorldMap;
         if (!mapId || button.getAttribute('aria-disabled') === 'true' || !this.campaign) return;
@@ -193,38 +256,50 @@ export class CampaignFlow {
         this.pendingMissionId = null;
         this.viewMode = 'region';
         setStoredCampaignViewMode('region');
-        this.refreshViewMode(modalBody, onState);
+        if (this.host?.mode === 'modal') {
+          this.modal.close();
+          return;
+        }
+        this.refreshViewMode();
       });
     });
   }
 
-  private bindMissionButtons(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-mission-id]').forEach((button) => {
+  private bindMissionButtons(): void {
+    const body = this.surfaceBody();
+    body.querySelectorAll<HTMLButtonElement>('[data-mission-id]').forEach((button) => {
       button.addEventListener('click', () => {
         const missionId = button.dataset.missionId;
         if (!missionId || button.disabled) return;
         this.pendingMissionId = this.pendingMissionId === missionId ? null : missionId;
-        this.refreshRegionView(modalBody, onState);
+        this.refreshRegionView();
       });
     });
   }
 
-  private bindStartButton(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
-    modalBody.querySelectorAll<HTMLButtonElement>('[data-campaign-start-mission]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const missionId = button.dataset.campaignStartMission;
-        if (!missionId || button.disabled) return;
-        void this.confirmMission(missionId, button, onState);
+  private bindStartButton(): void {
+    const roots: ParentNode[] = [this.surfaceBody()];
+    const portal = document.getElementById(MISSION_POPOVER_PORTAL_ID);
+    if (portal) roots.push(portal);
+
+    for (const root of roots) {
+      root.querySelectorAll<HTMLButtonElement>('[data-campaign-start-mission]').forEach((button) => {
+        if (button.dataset.campaignStartBound === 'true') return;
+        button.dataset.campaignStartBound = 'true';
+        button.addEventListener('click', () => {
+          const missionId = button.dataset.campaignStartMission;
+          if (!missionId || button.disabled) return;
+          void this.confirmMission(missionId, button);
+        });
       });
-    });
+    }
   }
 
-  private scrollPendingMissionIntoView(modalBody: HTMLElement): void {
+  private scrollPendingMissionIntoView(): void {
+    const body = this.surfaceBody();
     requestAnimationFrame(() => {
-      modalBody
-        .querySelector(
-          '.campaign-mission-pin--pending, .campaign-world-node--active',
-        )
+      body
+        .querySelector('.campaign-mission-pin--pending, .campaign-world-node--active')
         ?.scrollIntoView({
           block: 'nearest',
           behavior: 'smooth',
@@ -232,13 +307,15 @@ export class CampaignFlow {
     });
   }
 
-  private syncCampaignTheme(modalBody: HTMLElement): void {
-    modalBody.querySelector('.campaign-modal')?.setAttribute('data-campaign-theme', this.activeMapId);
-    modalBody.querySelector('[data-campaign-map-panel]')?.setAttribute('data-campaign-theme', this.activeMapId);
+  private syncCampaignTheme(): void {
+    const body = this.surfaceBody();
+    body.querySelector('.campaign-modal')?.setAttribute('data-campaign-theme', this.activeMapId);
+    body.querySelector('[data-campaign-map-panel]')?.setAttribute('data-campaign-theme', this.activeMapId);
   }
 
-  private updateViewToggleUi(modalBody: HTMLElement): void {
-    this.chromeRoot(modalBody)
+  private updateViewToggleUi(): void {
+    const body = this.surfaceBody();
+    this.chromeRoot()
       .querySelectorAll<HTMLButtonElement>('[data-campaign-view]')
       .forEach((button) => {
         const mode = button.dataset.campaignView as CampaignViewMode | undefined;
@@ -247,40 +324,40 @@ export class CampaignFlow {
         button.setAttribute('aria-selected', active ? 'true' : 'false');
       });
 
-    modalBody.querySelector('.campaign-modal')?.setAttribute('data-campaign-view', this.viewMode);
+    body.querySelector('.campaign-modal')?.setAttribute('data-campaign-view', this.viewMode);
   }
 
-  private refreshViewMode(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+  private refreshViewMode(): void {
     if (!this.campaign) return;
 
     hideCampaignTooltip();
     hideEnemyTooltip();
-    this.updateViewToggleUi(modalBody);
+    this.updateViewToggleUi();
 
-    const panelHost = modalBody.querySelector('[data-campaign-map-panel]') as HTMLElement | null;
-    modalBody.querySelector('[data-campaign-map-tabs]')?.remove();
+    const body = this.surfaceBody();
+    const panelHost = body.querySelector('[data-campaign-map-panel]') as HTMLElement | null;
+    body.querySelector('[data-campaign-map-tabs]')?.remove();
 
     if (this.viewMode === 'world') {
       if (panelHost) {
+        clearMissionPopoverPortal();
         panelHost.classList.add('campaign-map-panel--world');
         panelHost.setAttribute('aria-label', 'Mapa-mundo');
         panelHost.setAttribute('data-campaign-theme', this.activeMapId);
         panelHost.innerHTML = this.renderer.renderWorldPanel(this.campaign, this.activeMapId);
         bindCampaignTooltips(panelHost);
       }
-      this.bindWorldMapNodes(modalBody, onState);
-      this.scrollPendingMissionIntoView(modalBody);
+      this.bindWorldMapNodes();
+      this.scrollPendingMissionIntoView();
       this.onMapViewChange?.();
       return;
     }
 
     const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
     if (panelHost && activeMap) {
+      clearMissionPopoverPortal();
       panelHost.classList.remove('campaign-map-panel--world');
-      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, null, {
-        showUnlockBanner: this.shouldShowUnlockBanner(),
-        pendingMissionId: this.pendingMissionId,
-      });
+      panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, null, this.panelOptions());
       panelHost.setAttribute('aria-label', activeMap.name);
       panelHost.setAttribute('data-campaign-theme', this.activeMapId);
       if (this.shouldShowUnlockBanner()) {
@@ -291,23 +368,25 @@ export class CampaignFlow {
       syncMissionPopoverPlacement(panelHost);
     }
 
-    this.syncCampaignTheme(modalBody);
-    this.bindMissionButtons(modalBody, onState);
-    this.bindStartButton(modalBody, onState);
-    this.scrollPendingMissionIntoView(modalBody);
+    this.syncCampaignTheme();
+    this.bindMissionButtons();
+    this.bindStartButton();
+    this.scrollPendingMissionIntoView();
     this.onMapViewChange?.();
   }
 
-  private refreshRegionView(modalBody: HTMLElement, onState: (state: GameStateDto) => void): void {
+  private refreshRegionView(): void {
     if (!this.campaign) return;
 
-    const panelHost = modalBody.querySelector('[data-campaign-map-panel]');
+    const body = this.surfaceBody();
+    const panelHost = body.querySelector('[data-campaign-map-panel]');
     const activeMap = this.campaign.maps.find((map) => map.id === this.activeMapId);
 
     if (panelHost && activeMap) {
+      clearMissionPopoverPortal();
       panelHost.innerHTML = this.renderer.renderMapPanel(activeMap, null, {
+        ...this.panelOptions(),
         showUnlockBanner: isMapNewToPlayer(activeMap.id, activeMap.unlocked),
-        pendingMissionId: this.pendingMissionId,
       });
       panelHost.setAttribute('aria-label', activeMap.name);
       if (isMapNewToPlayer(activeMap.id, activeMap.unlocked)) {
@@ -318,23 +397,18 @@ export class CampaignFlow {
       syncMissionPopoverPlacement(panelHost);
     }
 
-    this.syncCampaignTheme(modalBody);
-    this.bindMissionButtons(modalBody, onState);
-    this.bindStartButton(modalBody, onState);
-    this.scrollPendingMissionIntoView(modalBody);
+    this.syncCampaignTheme();
+    this.bindMissionButtons();
+    this.bindStartButton();
+    this.scrollPendingMissionIntoView();
     this.onMapViewChange?.();
   }
 
-  private async confirmMission(
-    missionId: string,
-    button: HTMLButtonElement,
-    onState: (state: GameStateDto) => void,
-  ): Promise<void> {
+  private async confirmMission(missionId: string, button: HTMLButtonElement): Promise<void> {
     if (button.classList.contains('campaign-phase-preview-start--loading')) return;
 
     button.classList.add('campaign-phase-preview-start--loading');
     button.disabled = true;
-    await new Promise((resolve) => window.setTimeout(resolve, 180));
 
     const response = await this.client.send({ type: 'START_MISSION', missionId });
     if (!response.ok) {
@@ -343,8 +417,11 @@ export class CampaignFlow {
       return;
     }
 
-    onState(response.state);
-    this.modal.close();
+    clearMissionPopoverPortal();
+    this.onStateHandler?.(response.state);
+    if (this.host?.mode === 'modal') {
+      this.modal.close();
+    }
     this.onMissionStarted?.(response.state);
   }
 }

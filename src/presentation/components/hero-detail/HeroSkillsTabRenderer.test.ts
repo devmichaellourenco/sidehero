@@ -14,6 +14,8 @@ function minimalHero(): HeroDto {
 }
 
 function skillNode(overrides: Partial<SkillNodeDto> = {}): SkillNodeDto {
+  const currentRank = overrides.currentRank ?? 1;
+  const maxRank = overrides.maxRank ?? 3;
   return {
     id: 'thrust',
     name: 'Investida',
@@ -22,8 +24,8 @@ function skillNode(overrides: Partial<SkillNodeDto> = {}): SkillNodeDto {
     branchLabel: 'Ofensivo',
     scope: 'class',
     scopeLabel: 'Classe',
-    maxRank: 3,
-    currentRank: 1,
+    maxRank,
+    currentRank,
     status: 'owned',
     isEquipped: false,
     canAllocateRank: false,
@@ -32,6 +34,17 @@ function skillNode(overrides: Partial<SkillNodeDto> = {}): SkillNodeDto {
     scalingLabel: 'STR',
     battleStats: [],
     requirements: [],
+    rankSlots: Array.from({ length: maxRank }, (_, index) => {
+      const rank = index + 1;
+      return {
+        rank,
+        filled: currentRank >= rank,
+        isNext: currentRank === rank - 1,
+        canAllocate: false,
+        previewTitle: `Level ${rank}`,
+        previewLines: ['Preview'],
+      };
+    }),
     ...overrides,
   };
 }
@@ -42,7 +55,7 @@ describe('renderHeroSkillsTab', () => {
 
     expect(html).toContain('hero-skills-tab-scroll');
     expect(html).toContain('skill-list');
-    expect(html).toContain('skill-card--tile');
+    expect(html).toContain('skill-row');
     expect(html).toContain('Investida');
     expect(html).not.toContain('hero-skills-tab-meta');
     expect(html).not.toContain('Skills equipadas');
@@ -59,7 +72,7 @@ describe('renderHeroSkillsTab', () => {
   it('mostra (−) de refund em skills de aprimoramento com feature ativa', () => {
     const html = renderHeroSkillsTab(minimalHero(), [skillNode()], [], { improvementReset: 1 });
     expect(html).toContain('data-skill-refund="thrust"');
-    expect(html).toContain('skill-card-rank-down');
+    expect(html).toContain('skill-row-rank-down');
   });
 
   it('mostra (−) em skills de evolução com feature ativa', () => {

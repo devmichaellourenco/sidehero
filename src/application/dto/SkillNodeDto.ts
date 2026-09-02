@@ -9,6 +9,15 @@ export interface SkillRequirementDto {
   met: boolean;
 }
 
+export interface SkillRankSlotDto {
+  rank: number;
+  filled: boolean;
+  isNext: boolean;
+  canAllocate: boolean;
+  previewTitle: string;
+  previewLines: string[];
+}
+
 export interface SkillNodeDto {
   id: string;
   name: string;
@@ -27,6 +36,7 @@ export interface SkillNodeDto {
   scalingLabel: string;
   battleStats: HeroActiveSkillStatDto[];
   requirements: SkillRequirementDto[];
+  rankSlots: SkillRankSlotDto[];
 }
 
 export const SKILL_BRANCH_LABELS: Record<SkillBranchDto, string> = {

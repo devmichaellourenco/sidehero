@@ -2,7 +2,25 @@ import { describe, expect, it } from 'vitest';
 import { SkillNodeDto } from '../../application/dto/SkillNodeDto';
 import { renderSkillCard } from './SkillCardPresentation';
 
+function defaultRankSlots(currentRank: number, maxRank = 3): SkillNodeDto['rankSlots'] {
+  return Array.from({ length: maxRank }, (_, index) => {
+    const rank = index + 1;
+    const filled = currentRank >= rank;
+    const isNext = currentRank === rank - 1;
+    return {
+      rank,
+      filled,
+      isNext,
+      canAllocate: isNext,
+      previewTitle: filled ? `Level ${rank} ativo` : `Level ${rank}`,
+      previewLines: filled ? ['Poder: 24'] : ['Poder: 24 → 48'],
+    };
+  });
+}
+
 function skillNode(overrides: Partial<SkillNodeDto> = {}): SkillNodeDto {
+  const currentRank = overrides.currentRank ?? 1;
+  const maxRank = overrides.maxRank ?? 3;
   return {
     id: 'fireball',
     name: 'Bola de Fogo',
@@ -11,16 +29,17 @@ function skillNode(overrides: Partial<SkillNodeDto> = {}): SkillNodeDto {
     branchLabel: 'Ofensivo',
     scope: 'class',
     scopeLabel: 'Classe',
-    maxRank: 3,
-    currentRank: 1,
+    maxRank,
+    currentRank,
     status: 'owned',
     isEquipped: true,
     canAllocateRank: true,
     canEquip: true,
     scaling: 'int',
     scalingLabel: 'INT',
-    battleStats: [{ label: 'Dano', value: '24' }],
+    battleStats: [{ label: 'Poder', value: '24' }],
     requirements: [{ label: 'Lv.5', met: true }],
+    rankSlots: defaultRankSlots(currentRank, maxRank),
     ...overrides,
   };
 }
@@ -31,86 +50,76 @@ const cardOptions = {
 };
 
 describe('SkillCardPresentation', () => {
-  it('mostra tile com título, arte full-bleed, level e meta rápida', () => {
+  it('renderiza linha com nome, ícone e círculos de level', () => {
     const html = renderSkillCard(skillNode(), cardOptions);
 
-    expect(html).toContain('skill-card--tile');
-    expect(html).toContain('skill-card-tile');
-    expect(html).toContain('skill-card-header');
-    expect(html).toContain('skill-card-visual__glow');
-    expect(html).toContain('skill-card-visual__spark');
-    expect(html).toContain('skill-card-level');
-    expect(html).toContain('skill-card-level-shape');
-    expect(html).toContain('skill-card-level-value');
-    expect(html).toContain('>1<');
-    expect(html).toContain('skill-card-meta');
-    expect(html).toContain('skill-card-meta-row');
-    expect(html).toContain('Ofensivo');
-    expect(html).toContain('INT');
-    expect(html).toContain('Fogo');
-    expect(html).toContain('skill-card--equipped-active');
+    expect(html).toContain('skill-row');
+    expect(html).toContain('skill-row__name');
     expect(html).toContain('Bola de Fogo');
-    expect(html).not.toContain('skill-card-body');
-    expect(html).not.toContain('skill-card-essentials-row');
-    expect(html).not.toContain('skill-card-desc');
-    expect(html).not.toContain('skill-card-combat');
-    expect(html).not.toContain('skill-card-reqs');
-    expect(html).not.toContain('Ativar');
-    expect(html).not.toContain('Desativar');
-    expect(html).not.toContain('Ativa');
-    expect(html).not.toContain('Inativa');
-    expect(html).not.toContain('+1 rank');
-    expect(html).not.toContain('Rank ');
-    expect(html).toContain('skill-card-rank-up');
-    expect(html).toContain('skill-card-rank-up--available');
-    expect(html).not.toContain('Toque para equipar');
-    expect(html).not.toContain('arraste até um slot');
-    expect(html).not.toContain('skill-card-equip-hint');
+    expect(html).toContain('skill-row__icon');
+    expect(html).toContain('skill-row__ranks');
+    expect(html).toContain('skill-rank-dot');
+    expect(html).toContain('skill-rank-dot--filled');
+    expect(html).toContain('skill-rank-dot--next');
+    expect(html).not.toContain('skill-card--tile');
+    expect(html).not.toContain('skill-card-rank-up');
   });
 
-  it('não exibe badge Disponível quando level pode subir', () => {
+  it('próximo círculo aloca level quando disponível', () => {
     const html = renderSkillCard(
       skillNode({ status: 'ready', currentRank: 0, isEquipped: false, canAllocateRank: true }),
       cardOptions,
     );
 
-    expect(html).toContain('skill-card-rank-up--available');
+    expect(html).toContain('data-skill-allocate="fireball"');
+    expect(html).toContain('skill-rank-dot--next');
     expect(html).not.toContain('skill-card-badge--ready');
-    expect(html).not.toContain('>Disponível<');
   });
 
-  it('não aplica fundo verde quando a skill não está equipada', () => {
+  it('não aplica destaque verde quando a skill não está equipada', () => {
     const html = renderSkillCard(skillNode({ isEquipped: false }), cardOptions);
 
-    expect(html).not.toContain('skill-card--equipped-active');
-    expect(html).not.toContain('Inativa');
+    expect(html).not.toContain('skill-row--equipped-active');
   });
 
-  it('mantém detalhes no tooltip oculto', () => {
+  it('mantém detalhes completos no tooltip do ícone', () => {
     const html = renderSkillCard(skillNode(), cardOptions);
 
     expect(html).toContain('hero-skill-chip-tooltip');
-    expect(html).toContain('tooltip-preview-image');
     expect(html).toContain('Lança uma esfera flamejante');
     expect(html).toContain('hero-skill-chip-tooltip-stat-label');
-    expect(html).toContain('hero-skill-chip-tooltip-reqs');
-    expect(html).toContain('Level 1/3');
+  });
+
+  it('cada círculo inclui preview de progressão para hover', () => {
+    const html = renderSkillCard(skillNode(), cardOptions);
+
+    expect(html).toContain('skill-rank-dot-preview');
+    expect(html).toContain('data-skill-rank-tooltip');
+    expect(html).toContain('Poder: 24 → 48');
   });
 
   it('exibe cadeado no ícone quando a skill está bloqueada', () => {
     const html = renderSkillCard(
-      skillNode({ status: 'locked', currentRank: 0, canAllocateRank: false, canEquip: false }),
+      skillNode({
+        status: 'locked',
+        currentRank: 0,
+        canAllocateRank: false,
+        canEquip: false,
+        rankSlots: defaultRankSlots(0).map((slot) => ({
+          ...slot,
+          canAllocate: false,
+          previewLines: ['Skill bloqueada — requisitos não atendidos.'],
+        })),
+      }),
       { ...cardOptions, canAllocate: false },
     );
 
-    expect(html).toContain('skill-card-visual--locked');
+    expect(html).toContain('skill-row__icon-wrap--locked');
     expect(html).toContain('skill-card-lock');
     expect(html).toContain('🔒');
-    expect(html).not.toContain('Não desbloqueada');
-    expect(html).not.toContain('skill-card-badge--locked');
   });
 
-  it('permite arrastar skills desbloqueadas para os slots', () => {
+  it('permite arrastar pelo ícone quando equipável', () => {
     const html = renderSkillCard(skillNode({ canEquip: true }), cardOptions);
 
     expect(html).toContain('data-skill-equip="fireball"');

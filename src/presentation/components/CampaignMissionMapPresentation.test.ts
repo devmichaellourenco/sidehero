@@ -5,7 +5,9 @@ import {
   STENDRA_MISSION_MAP_LAYOUT,
 } from '../campaign/MissionMapLayoutCatalog';
 import {
+  computeMissionPopoverPosition,
   findMissionOnBoard,
+  intersectPopoverBounds,
   kindLabel,
   renderMissionLocalesMap,
   resolveInitialPendingMissionId,
@@ -198,5 +200,40 @@ describe('CampaignMissionMapPresentation', () => {
     expect(html).toContain('1★');
     expect(html).toContain('data-campaign-start-mission="normal:1-2"');
     expect(findMissionOnBoard(board, 'normal:1-2')?.stars).toBe(1);
+  });
+});
+
+describe('Mission popover placement', () => {
+  it('intersectPopoverBounds usa a interseção da viewport com o scrollport', () => {
+    const bounds = intersectPopoverBounds(
+      { top: 0, left: 0, width: 400, height: 800 },
+      { top: 40, left: 20, width: 360, height: 500 },
+      8,
+    );
+    expect(bounds).toEqual({ top: 48, left: 28, width: 344, height: 484 });
+  });
+
+  it('computeMissionPopoverPosition flipa para baixo quando não cabe acima', () => {
+    const placement = computeMissionPopoverPosition({
+      pin: { top: 20, left: 180, width: 24, height: 24 },
+      popover: { top: 0, left: 0, width: 200, height: 120 },
+      bounds: { top: 8, left: 8, width: 384, height: 600 },
+      gap: 8,
+    });
+    expect(placement.placement).toBe('below');
+    expect(placement.top).toBeGreaterThanOrEqual(52);
+    expect(placement.left).toBeGreaterThanOrEqual(8);
+    expect(placement.left + 200).toBeLessThanOrEqual(392);
+  });
+
+  it('computeMissionPopoverPosition clampa horizontalmente perto da borda', () => {
+    const placement = computeMissionPopoverPosition({
+      pin: { top: 200, left: 12, width: 24, height: 24 },
+      popover: { top: 0, left: 0, width: 200, height: 120 },
+      bounds: { top: 8, left: 8, width: 384, height: 600 },
+      gap: 8,
+    });
+    expect(placement.left).toBe(8);
+    expect(placement.top + 120).toBeLessThanOrEqual(608);
   });
 });

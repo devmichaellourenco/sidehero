@@ -42,7 +42,9 @@ const SK = {
   necromancer2: ['basic_attack', 'wraith_drain', 'wraith_curse'] as const,
   orcChief2: ['basic_attack', 'orc_smash', 'reaver_cleave'] as const,
   troll2: ['basic_attack', 'orc_smash', 'regenerate'] as const,
+  capelobo2: ['basic_attack', 'wild_bite', 'capelobo_brain_drink'] as const,
   hydra3: ['basic_attack', 'poison_spit', 'reaver_cleave'] as const,
+  mapinguari3: ['basic_attack', 'wild_bite', 'mapinguari_belly_roar'] as const,
   general3: ['basic_attack', 'wraith_drain', 'wraith_curse'] as const,
   dragon3: ['basic_attack', 'dragon_breath', 'dragon_bite'] as const,
   lich4: ['basic_attack', 'wraith_curse', 'arcane_surge'] as const,
@@ -56,7 +58,7 @@ const SK = {
   morthavenDuke: ['basic_attack', 'power_attack', 'reaver_cleave', 'wraith_curse'] as const,
 };
 
-/** 50 inimigos de campanha + Saci (único narrativo). */
+/** 52 inimigos de campanha + únicos narrativos. */
 export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   // Nível 1 — Aprendiz
   { id: 'giant_rat', name: 'Rato Gigante', powerTier: T1, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.beast1 },
@@ -82,6 +84,16 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'minor_fire_elemental', name: 'Elemental Menor de Fogo', powerTier: T2, rosterRole: 'common', spriteVariant: 'common', skillIds: SK.fire1, innateResists: { fire: 20 } },
   { id: 'renegade_necromancer', name: 'Necromante Renegado', powerTier: T2, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.necromancer2 },
   { id: 'bloody_orc_chief', name: 'Chefe Orc do Clã Sangrento', powerTier: T2, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.orcChief2 },
+  {
+    id: 'capelobo',
+    name: 'Capelobo',
+    powerTier: T2,
+    rosterRole: 'subboss',
+    spriteVariant: 'common',
+    skillIds: SK.capelobo2,
+    tags: ['beast', 'physical'],
+    passiveIds: ['blood_thirst'],
+  },
   { id: 'mountain_troll', name: 'Troll das Montanhas', powerTier: T2, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.troll2 },
 
   // Nível 3 — Profissional
@@ -95,6 +107,17 @@ export const ENEMY_ROSTER: readonly EnemyRosterEntry[] = [
   { id: 'major_elemental', name: 'Elemental Maior', powerTier: T3, rosterRole: 'common', spriteVariant: 'common', skillIds: ['basic_attack', 'fireball', 'arcane_surge'], innateResists: { fire: 15, lightning: 10 } },
   { id: 'three_head_hydra', name: 'Hidra de Três Cabeças', powerTier: T3, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.hydra3 },
   { id: 'dead_general', name: 'General dos Mortos', powerTier: T3, rosterRole: 'subboss', spriteVariant: 'boss', skillIds: SK.general3 },
+  {
+    id: 'mapinguari',
+    name: 'Mapinguari',
+    powerTier: T3,
+    rosterRole: 'subboss',
+    spriteVariant: 'common',
+    skillIds: SK.mapinguari3,
+    tags: ['beast', 'physical'],
+    innateResists: { cold: -20 },
+    passiveIds: ['titan_health'],
+  },
   { id: 'young_green_dragon', name: 'Dragão Verde Jovem', powerTier: T3, rosterRole: 'boss', spriteVariant: 'boss', skillIds: SK.dragon3, passiveIds: ['magic_affinity'] },
 
   // Nível 4 — Especialista

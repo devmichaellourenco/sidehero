@@ -22,11 +22,12 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 | Strip | `BattleStripRenderer`, `BattleActorCardPresentation`, `BattleFloatingTextController` (`Lv UP`); cena `.battle-strip` + deck `.battle-hud-deck` em `.battle-field`; TTA com countdown + tooltip (`ActionTimeBarPresentation`) |
 
 | Pausa | Pausar/Continuar à **esquerda**; botão **Acampamento** mid-missão na barra **oculto** (hub só pós-missão / mapa); Batalhar oculto (mapa → START → combate) |
-| Hub | New game / pós-missão: `loadoutEditOpen` + overlay **Acampamento**; persistir flag sem exigir `phaseRestartOnResume` |
-| Overlay Acampamento | `.battle-pause-overlay` com fundo **opaco** (noite + brilho de fogueira) cobrindo o `.battle-field` inteiro (`inset: 0`, cena + deck de HUD); a pausa de batalha (`--battle`) é translúcida e limitada à cena (`--battle-strip-height`) |
+| Hub | New game / pós-missão: `loadoutEditOpen` + **mapa embutido** no `battle-field`; ícone Mapa expande para modal |
+| Mapa embutido | `#camp-campaign-map-root` — só pins; preenche o `battle-field` sem scroll; mapa-mundo no modal expandido |
+| Overlay Acampamento | Removido no hub — `.battle-pause-overlay` só na **pausa de batalha** (`--battle`, translúcido na strip) |
 | Splash | `SplashScreenController` — ≥5s antes de tutorial/Wow/auto-battle no painel principal |
 | Stage progress | Ver skill `stage-progress-bar` — timeline entre localização e a strip |
-| Resultado / START | `BattleVictoryFlow` + `BattleStartFlow`; Continuar no deck; recompensas sem scroll; START antes do tick |
+| Resultado / START | `BattleVictoryFlow` + `BattleStartFlow`; Continuar no deck; recompensas sem scroll; START só no botão **Batalhar** (Iniciar missão no mapa vai direto ao tick) |
 | Stats | Sempre no menu; abre automaticamente ao iniciar missão; janela popup (padrão) ou sheet no side panel; botão Fixar/Desafixar |
 | Pin/unpin menus | Todos `SystemsMenuId`: `SurfacePinPreference` + `OPEN/CLOSE_DETACHED_SURFACE` + `panel.html?detached=`; UI `SurfacePinPresentation` / `sheet-title-row`; campanha unpin → `MissionBattleStartRelay` |
 | Modais | `ModalStackController`, `GameViewController`, `SystemsMenuNavigation`, `SystemsMenuIconPresentation` |
@@ -40,7 +41,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 
 Tema de cores do chrome: skill `medieval-theme` (`specs/medieval-theme.spec.md`).
 
-Overlays interruptivos (tutorial, cena narrativa, CLEAR/DEFEAT → recompensas, START, Wow central) passam pelo `UiOverlayOrchestrator` em `GameViewController` / `WowCelebrationController` (resultado/START bloqueiam ticks via flows). Pausa/Acampamento ficam fora (estado do jogador). Resultado terminal: Continuar → hub com overlay ACAMPAMENTO + mapa. Início de missão: mapa → START → combate.
+Overlays interruptivos (tutorial, cena narrativa, CLEAR/DEFEAT → recompensas, START, Wow central) passam pelo `UiOverlayOrchestrator` em `GameViewController` / `WowCelebrationController` (resultado/START bloqueiam ticks via flows). Pausa de batalha fica fora (estado do jogador). Resultado terminal: Continuar → hub com mapa embutido. Início de missão: mapa → START → combate.
 ## Testes de apresentação
 
 Listados em `specs/battle-ui.spec.md` — criar ou atualizar ao mudar markup/CSS crítico (não executar `npm test` automaticamente).

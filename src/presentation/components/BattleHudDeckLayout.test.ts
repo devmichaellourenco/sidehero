@@ -22,6 +22,7 @@ describe('battle-hud-deck layout', () => {
   it('mantém overlays e float fora do deck (irmãos na battle-field)', () => {
     expect(html).toContain('id="battle-float-layer"');
     expect(html).toContain('id="battle-victory-overlay"');
+    expect(html).toContain('id="camp-campaign-map-root"');
     expect(html).toContain('id="battle-pause-overlay"');
     const deckOpen = html.indexOf('class="battle-hud-deck"');
     const deckClose = html.indexOf('>', deckOpen);

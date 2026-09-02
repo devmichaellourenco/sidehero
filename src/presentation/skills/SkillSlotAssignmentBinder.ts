@@ -52,8 +52,8 @@ export function bindSkillSlotAssignment(
     layoutRoot.querySelectorAll('.hero-skill-slot-bar__slot--pick-target').forEach((element) => {
       element.classList.remove('hero-skill-slot-bar__slot--pick-target');
     });
-    layoutRoot.querySelectorAll('.skill-card--pick-target').forEach((element) => {
-      element.classList.remove('skill-card--pick-target');
+    layoutRoot.querySelectorAll('.skill-card--pick-target, .skill-row--pick-target').forEach((element) => {
+      element.classList.remove('skill-card--pick-target', 'skill-row--pick-target');
     });
   };
 
@@ -71,8 +71,8 @@ export function bindSkillSlotAssignment(
     layoutRoot.classList.remove('hero-skills-tab--slot-picked');
     layoutRoot.classList.add('hero-skills-tab--skill-picked');
 
-    layoutRoot.querySelectorAll('.skill-card--pick-target').forEach((element) => {
-      element.classList.remove('skill-card--pick-target');
+    layoutRoot.querySelectorAll('.skill-card--pick-target, .skill-row--pick-target').forEach((element) => {
+      element.classList.remove('skill-card--pick-target', 'skill-row--pick-target');
     });
 
     layoutRoot.querySelectorAll(SKILL_SLOT_SELECTOR).forEach((element) => {
@@ -96,7 +96,7 @@ export function bindSkillSlotAssignment(
     });
 
     layoutRoot.querySelectorAll('[data-skill-equip]').forEach((element) => {
-      element.classList.add('skill-card--pick-target');
+      element.classList.add('skill-card--pick-target', 'skill-row--pick-target');
     });
   };
 
@@ -179,19 +179,19 @@ export function bindSkillSlotAssignment(
       dragEvent.dataTransfer?.setData('text/plain', skillId);
       if (dragEvent.dataTransfer) dragEvent.dataTransfer.effectAllowed = 'move';
       beginSkillDragSession(dragEvent, element);
-      element.classList.add('skill-card--dragging');
+      element.classList.add('skill-card--dragging', 'skill-row--dragging');
       clearPlacementMode();
     });
 
     element.addEventListener('dragend', () => {
       endSkillDragSession();
       hideSkillChipTooltip();
-      element.classList.remove('skill-card--dragging');
+      element.classList.remove('skill-card--dragging', 'skill-row--dragging');
     });
 
     element.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
-      if (target.closest('button[data-skill-allocate], button[data-ascension-allocate], button[data-skill-refund], button[data-ascension-refund]')) return;
+      if (target.closest('button[data-skill-allocate], button[data-ascension-allocate], button[data-skill-refund], button[data-ascension-refund], button[data-skill-rank-tooltip]')) return;
 
       event.stopPropagation();
 
@@ -224,7 +224,7 @@ export function bindSkillSlotAssignment(
     const target = event.target as HTMLElement;
     if (
       target.closest(
-        '[data-skill-equip], [data-skill-slot-index], [data-skill-slot-clear], [data-skill-allocate], [data-skill-refund], [data-ascension-allocate], [data-ascension-refund]',
+        '[data-skill-equip], [data-skill-slot-index], [data-skill-slot-clear], [data-skill-allocate], [data-skill-refund], [data-ascension-allocate], [data-ascension-refund], [data-skill-rank-tooltip]',
       )
     ) {
       return;

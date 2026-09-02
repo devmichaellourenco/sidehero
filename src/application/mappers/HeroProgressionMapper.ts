@@ -7,6 +7,7 @@ import {
   formatScalingLabel,
   formatScopeLabel,
 } from './SkillBattleStatsMapper';
+import { buildSkillRankSlots } from './SkillRankPreviewMapper';
 
 export function mapSkillTree(hero: Hero, nodes: SkillNodeView[]): SkillNodeDto[] {
   return nodes.map((node) => {
@@ -33,6 +34,16 @@ export function mapSkillTree(hero: Hero, nodes: SkillNodeView[]): SkillNodeDto[]
       scalingLabel: formatScalingLabel(scaling),
       battleStats: buildSkillBattleStats(hero, node.definition.id, scaling),
       requirements: node.requirements,
+      rankSlots: buildSkillRankSlots({
+        hero,
+        skillId: node.definition.id,
+        scaling,
+        maxRank: node.definition.maxRank,
+        currentRank: node.currentRank,
+        status: node.status,
+        canAllocateRank: node.canAllocateRank,
+        canSpendPoint: node.canAllocateRank,
+      }),
     };
   });
 }

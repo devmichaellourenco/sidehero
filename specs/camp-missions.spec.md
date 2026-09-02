@@ -70,18 +70,17 @@ Por mapa (`stendra` … `morthaven` no v1), ids alinhados às fases-marco:
 
 ## UI do mapa
 
-Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
+Evoluir o mapa de campanha (`CampaignFlow` / `CampaignModalRenderer`):
 
-1. **Mapa-mundo** (regiões) — mantém o padrão atual.
-2. **Mapa de locais do mapa ativo** — substitui a trilha linear de fases: locais clicáveis (visual semelhante à árvore de skills **sem** edges/nós de pré-requisito), mostrando as missões **disponíveis nesta visita**.
-3. Detalhe da missão: ao clicar no pin, popover ancorado **sobre o próprio pin** (tipo, estrelas, waves/monstros/stats, CTA iniciar). Sem footer fixo de preview — libera altura no painel pinado. Clique fora fecha. Popover clampa nas bordas. Tooltip de inimigo em grade compacta com ícones de estatística.
+1. **Hub:** mapa **embutido** no `battle-field` — **somente** o board com pins e scroll (sem header Stendra/bioma, sem toggle mapa-mundo).
+2. **Expandir:** ícone Mapa abre modal com mapa-mundo/trilha completa; ao clicar numa região no mapa-mundo, fecha o modal e mostra só os pins dessa região no hub.
 
 ## Critérios de aceite
 
-- [x] Fim de batalha (vitória ou derrota) mostra CLEAR/DEFEAT, depois tela só de recompensas (sem scroll; Continuar no deck); Continuar → hub ACAMPAMENTO e abre o mapa
-- [x] **Iniciar missão** no mapa → cue START → combate (sem clique em Batalhar); painel **Estatísticas** abre automaticamente; em campanha unpin, relay para o side panel (`MissionBattleStartRelay`)
+- [x] Fim de batalha (vitória ou derrota) mostra CLEAR/DEFEAT, depois tela só de recompensas (sem scroll; Continuar no deck); Continuar → hub com **mapa embutido** no battle-field
+- [x] **Iniciar missão** no mapa → combate imediato (sem overlay START; o CTA já confirma); painel **Estatísticas** abre automaticamente; em campanha unpin, relay para o side panel (`MissionBattleStartRelay`)
 - [x] Hub / Acampamento sem reinício via Batalhar (`phaseRestartOnResume: false`); combate só pelo mapa
-- [x] New game inicia no hub do acampamento (`loadoutEditOpen: true`) com overlay Acampamento
+- [x] New game inicia no hub do acampamento (`loadoutEditOpen: true`) com **mapa embutido** (sem overlay “Acampamento”)
 - [x] New game: depois da cena de abertura, boas-vindas → mapa aberto automaticamente → tutorial guiado (pinos/tipos de missão, preview do local, Iniciar missão); ver `battle-ui` (`OnboardingPolicy`)
 - [x] Derrota concede ouro já pago nos kills e **zero XP**; overlay mostra ouro da tentativa (delta vs. START) e XP 0; main/side na derrota sem recompensa de conclusão
 - [x] Sem auto-seleção / auto-start da próxima fase ao limpar boss de missão
@@ -92,6 +91,8 @@ Evoluir o modal de campanha atual (`CampaignModal` / `CampaignFlow`):
 - [x] Normais sorteadas no **capítulo da main atual** (ex.: `1-1` → só `1`; `1-10` → fases `2–10`); templates repetíveis entre sorteios; pool por visitas ao camp
 - [x] Secundárias no board filtradas pelo mesmo capítulo (template na faixa) + grafo de unlock/expiração
 - [x] Pins do mapa de locais com margem segura (visíveis por completo; sem corte no topo/laterais)
+- [x] Popover de missão em portal fixo; clamp na viewport e scrollport visível (não corta nos cantos); CTA verde (--forest)
+- [x] Hub: mapa no `battle-field` (altura fixa); stage encaixa por altura com aspect-ratio do layout, centralizado, sem scroll
 - [x] Derrota: normal some; main/side permanecem com tentativa zerada
 - [x] Vitória main: marca concluída, libera próxima principal (e unlocks side se houver)
 - [x] Vitória side: marca concluída, aplica unlocks e loot exclusivo

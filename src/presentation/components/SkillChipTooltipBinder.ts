@@ -21,7 +21,8 @@ function getBranchClass(element: Element): string {
   for (const branch of ['offense', 'defense', 'utility']) {
     if (
       element.classList.contains(`hero-skill-chip--${branch}`) ||
-      element.classList.contains(`skill-card--${branch}`)
+      element.classList.contains(`skill-card--${branch}`) ||
+      element.classList.contains(`skill-row--${branch}`)
     ) {
       return branch;
     }
@@ -156,8 +157,8 @@ function pinAndShow(anchor: HTMLElement, tooltip: HTMLElement): void {
   applyPortalPointerMode(ensurePortal());
 }
 
-function bindAnchor(anchor: HTMLElement): void {
-  const tooltip = anchor.querySelector('.hero-skill-chip-tooltip');
+function bindAnchor(anchor: HTMLElement, tooltipSelector: string): void {
+  const tooltip = anchor.querySelector(tooltipSelector);
   if (!tooltip) return;
 
   const onShow = () => showPortal(anchor, tooltip as HTMLElement);
@@ -175,14 +176,28 @@ function bindAnchor(anchor: HTMLElement): void {
   anchor.addEventListener('focus', onShow);
   anchor.addEventListener('blur', onHide);
   anchor.addEventListener('dragstart', () => hidePortal());
-  anchor.addEventListener('click', () => {
-    pinAndShow(anchor, tooltip as HTMLElement);
-  });
+
+  if (tooltipSelector === '.hero-skill-chip-tooltip') {
+    anchor.addEventListener('click', () => {
+      pinAndShow(anchor, tooltip as HTMLElement);
+    });
+  }
+}
+
+function bindSkillTooltipAnchor(anchor: HTMLElement): void {
+  bindAnchor(anchor, '.hero-skill-chip-tooltip');
+}
+
+function bindRankDotTooltipAnchor(anchor: HTMLElement): void {
+  bindAnchor(anchor, '.skill-rank-dot-preview');
 }
 
 export function bindSkillChipTooltips(container: HTMLElement): void {
   container.querySelectorAll('[data-skill-tooltip]').forEach((element) => {
-    bindAnchor(element as HTMLElement);
+    bindSkillTooltipAnchor(element as HTMLElement);
+  });
+  container.querySelectorAll('[data-skill-rank-tooltip]').forEach((element) => {
+    bindRankDotTooltipAnchor(element as HTMLElement);
   });
 }
 

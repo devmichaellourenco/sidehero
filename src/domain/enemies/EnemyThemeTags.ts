@@ -17,7 +17,7 @@ export type EnemyThemeTag =
   | 'cold';
 
 const ID_TAG_RULES: Array<{ pattern: RegExp; tags: EnemyThemeTag[] }> = [
-  { pattern: /rat|bat|wolf|worg|gnoll|spider|hydra|manticore|behemoth|chimera/, tags: ['beast'] },
+  { pattern: /rat|bat|wolf|worg|gnoll|spider|hydra|manticore|behemoth|chimera|capelobo|mapinguari/, tags: ['beast'] },
   { pattern: /goblin|kobold/, tags: ['goblin'] },
   { pattern: /bandit/, tags: ['bandit', 'physical'] },
   { pattern: /orc|ogre|troll|minotaur|lizard/, tags: ['orc', 'physical'] },

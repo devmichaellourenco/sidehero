@@ -32,15 +32,32 @@ export function resolveInitialMapId(campaign: CampaignOverviewDto): string {
   return firstUnlocked?.id ?? campaign.maps[0]?.id ?? 'stendra';
 }
 
+export type CampaignMapPanelVariant = 'full' | 'pins-only';
+
+export type CampaignMapPanelOptions = {
+  showUnlockBanner?: boolean;
+  pendingMissionId?: string | null;
+  variant?: CampaignMapPanelVariant;
+};
+
 export class CampaignModalRenderer {
   renderMapPanel(
     map: CampaignMapDto,
     pendingPhaseId: string | null,
-    options: { showUnlockBanner?: boolean; pendingMissionId?: string | null } = {},
+    options: CampaignMapPanelOptions = {},
   ): string {
+    const variant = options.variant ?? 'full';
     const biomeKind = getMapBiomeKind(map.id);
 
     if (!isMapUnlocked(map)) {
+      if (variant === 'pins-only') {
+        return `
+          <div class="campaign-map-body campaign-map-body--pins-only" data-campaign-biome="${biomeKind}">
+            <p class="empty-state">Mapa bloqueado.</p>
+          </div>
+        `;
+      }
+
       return `
         <div class="campaign-map-body" data-campaign-biome="${biomeKind}">
           ${renderLockedMapPanel(map)}
@@ -50,7 +67,6 @@ export class CampaignModalRenderer {
 
     const mapIndex = parseMapIndex(map);
     const unlockBanner = options.showUnlockBanner ? renderMapUnlockBanner(map) : '';
-    // `null` explícito = sem seleção (popover só após clique no pin).
     const pendingMissionId =
       options.pendingMissionId !== undefined
         ? options.pendingMissionId
@@ -59,6 +75,17 @@ export class CampaignModalRenderer {
     const boardHtml = map.missionBoard
       ? renderMissionLocalesMap(map.missionBoard, pendingMissionId)
       : '<p class="empty-state">Board de missões indisponível.</p>';
+
+    if (variant === 'pins-only') {
+      return `
+        <div class="campaign-map-body campaign-map-body--pins-only" data-campaign-biome="${biomeKind}">
+          <div class="campaign-path-scroll campaign-path-scroll--pins-only game-scroll">
+            ${boardHtml}
+          </div>
+        </div>
+      `;
+    }
+
     const hintHtml = pendingMissionId ? '' : renderMissionSelectHint();
 
     return `
@@ -88,12 +115,33 @@ export class CampaignModalRenderer {
     activeMapId: string,
     pendingPhaseId: string | null,
     viewMode: CampaignViewMode,
-    options: { showUnlockBanner?: boolean; pendingMissionId?: string | null } = {},
+    options: CampaignMapPanelOptions = {},
   ): string {
+    const variant = options.variant ?? 'full';
     const activeMap = campaign.maps.find((map) => map.id === activeMapId) ?? campaign.maps[0];
     const regionPanel = activeMap
       ? this.renderMapPanel(activeMap, pendingPhaseId, options)
       : '<p class="empty-state">Nenhum mapa disponível.</p>';
+
+    if (variant === 'pins-only') {
+      return `
+        <div
+          class="campaign-modal campaign-modal--pins-only"
+          data-campaign-theme="${escapeHtml(activeMapId)}"
+          data-campaign-view="region"
+        >
+          <section
+            class="campaign-map-panel campaign-map-panel--pins-only"
+            data-campaign-map-panel
+            data-campaign-theme="${escapeHtml(activeMapId)}"
+            role="region"
+            aria-label="${escapeHtml(activeMap?.name ?? 'Mapa de missões')}"
+          >
+            ${regionPanel}
+          </section>
+        </div>
+      `;
+    }
 
     return `
       <div class="campaign-modal" data-campaign-theme="${escapeHtml(activeMapId)}" data-campaign-view="${viewMode}">

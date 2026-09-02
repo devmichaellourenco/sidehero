@@ -16,7 +16,7 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 - [x] Overlay de derrota sugere contramedida (resist elemental quando detectável)
 - [x] Todo card Wow exibe botão de rodapé (padrão **Entendi** para dispensar); o [×] só aparece em CTAs de ação no modo center
 - [x] Baú flutuante na batalha quando pendente
-- [x] Pausa loadout / hub: banner compacto + overlay ACAMPAMENTO (também após Continuar do resultado)
+- [x] Pausa loadout / hub: mapa embutido no `battle-field` (substitui overlay ACAMPAMENTO); após Continuar do resultado o mapa reaparece no hub
 - [x] Pausa de batalha (≠ acampamento): overlay PAUSA + Continuar; stats sempre no menu (abrem ao iniciar missão)
 - [x] Menu **Stats** (runa): modo **janela** (padrão) ou **fixado no side panel** via botão Fixar/Desafixar; atualiza em tempo real; abas Geral | Dano | Cura | Sofrido | Mitigado | Críticos; abas Dano / Sofrido / Mitigado com ranking por tipo de dano; **Por skill** exibe CD com tooltip do cálculo (turns×s, level, CDR)
 - [x] Compra de runa não gera Wow duplicado quando o mesmo evento já dispara unlock de herói/feature (`isUpgradePurchaseCoveredByStateChange`)
@@ -41,11 +41,11 @@ Interface lateral Chrome: battle strip sempre visível, modais/drawers **sem cob
 
 - [x] Modal de campanha: mapa-mundo + **mapa de locais** (missões disponíveis), sem trilha linear como UX principal
 - [x] Detalhe de missão: tipo, estrelas, preview waves/monstros/stats, CTA iniciar (popover no pin; ver `camp-missions`)
-- [x] Tela/fluxo de resultado pós-batalha: CLEAR/DEFEAT → tela só de recompensas (sem headline nem Ocultar; sem scroll; Continuar no deck) → Continuar → hub com overlay ACAMPAMENTO **e** abre o mapa
+- [x] Tela/fluxo de resultado pós-batalha: CLEAR/DEFEAT → tela só de recompensas (sem headline nem Ocultar; sem scroll; Continuar no deck) → Continuar → hub com **mapa embutido**
 - [x] Acampamento permanece hub de party/loja/inventário; combate só após iniciar missão
 - [x] **Iniciar missão** no mapa fecha o mapa, mostra cue **START**, e só então inicia o combate (sem clique extra em Batalhar)
 - [x] Hub pós-missão sem reinício via barra — botão Acampamento mid-missão **oculto**; Batalhar oculto; retomar só pelo mapa
-- [x] New game mostra overlay Acampamento (`loadoutEditOpen`); save persiste o hub sem exigir restart
+- [x] New game mostra mapa embutido no hub (`loadoutEditOpen`); save persiste o hub sem exigir restart
 - [x] Overlay ACAMPAMENTO tem fundo opaco cobrindo todo o `.battle-field` (cena + deck de HUD), sem sprites/barras ao fundo sugerindo combate ativo; pausa de batalha segue translúcida e restrita à cena para mostrar o campo congelado
 - [x] Cue **START** precede o combate ao iniciar missão no mapa
 

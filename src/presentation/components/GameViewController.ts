@@ -140,6 +140,8 @@ export class GameViewController {
   private readonly gearMutations = new GearMutationQueue();
   private trackedSystemsMenuId: SystemsMenuId | null = null;
   private campaignModalOpen = false;
+  private campaignEmbeddedActive = false;
+  private embeddedCampaignLoadPromise: Promise<void> | null = null;
   private systemsIconsSignature = '';
   /** Quando `panel.html?detached=<id>`, esta janela só exibe aquela superfície. */
   private readonly detachedSurfaceId: SystemsMenuId | null;
@@ -176,6 +178,11 @@ export class GameViewController {
   private readonly openUpgradesBtn: HTMLButtonElement;
   private readonly openAchievementsBtn: HTMLButtonElement;
   private readonly battlePauseOverlay: HTMLElement;
+  private readonly appRoot: HTMLElement;
+  private readonly battleStageEl: HTMLElement;
+  private readonly battleFieldEl: HTMLElement;
+  private readonly campCampaignMapRoot: HTMLElement;
+  private readonly campCampaignMapBody: HTMLElement;
   private readonly wowCelebrationRoot: HTMLElement;
   private readonly wowCelebrationStage: HTMLElement;
   private readonly wowInboxRoot: HTMLElement;
@@ -302,6 +309,11 @@ export class GameViewController {
     this.openUpgradesBtn = root.querySelector('#open-upgrades-btn') as HTMLButtonElement;
     this.openAchievementsBtn = root.querySelector('#open-achievements-btn') as HTMLButtonElement;
     this.battlePauseOverlay = root.querySelector('#battle-pause-overlay') as HTMLElement;
+    this.appRoot = (root.closest('#app') as HTMLElement | null) ?? root;
+    this.battleStageEl = root.querySelector('.battle-stage') as HTMLElement;
+    this.battleFieldEl = root.querySelector('.battle-field') as HTMLElement;
+    this.campCampaignMapRoot = root.querySelector('#camp-campaign-map-root') as HTMLElement;
+    this.campCampaignMapBody = root.querySelector('#camp-campaign-map-body') as HTMLElement;
     this.wowCelebrationRoot = root.querySelector('#wow-celebration-root') as HTMLElement;
     this.wowCelebrationStage = root.querySelector('#wow-celebration-stage') as HTMLElement;
     this.wowInboxRoot = root.querySelector('#wow-inbox-root') as HTMLElement;
@@ -569,7 +581,7 @@ export class GameViewController {
         });
         return;
       }
-      this.beginMissionBattleWithStart();
+      this.beginMissionBattleWithStart({ skipStartCue: true });
       void this.showBattleStatsSheet();
     });
     this.partyFlow = new PartyFlow(this.client);
@@ -1076,6 +1088,7 @@ export class GameViewController {
     this.closeHeroDrawer();
     this.battleLogPanel.hide();
     this.battleStatsPanel.hide();
+    this.hideEmbeddedCampaignMap();
     this.modalStack.length = 0;
     this.trackedSystemsMenuId = 'campaign';
     this.campaignModalOpen = true;
@@ -1085,12 +1098,17 @@ export class GameViewController {
         this.trackedSystemsMenuId = null;
       }
       this.syncSystemsNavChrome();
-      // Fechar o mapa retira as dicas ancoradas nele.
-      if (this.state) this.syncOnboarding(this.state);
+      if (this.state) {
+        this.syncEmbeddedCampaignMap(this.state);
+        this.syncOnboarding(this.state);
+      }
     });
     this.modal.setBackVisible(false);
     this.syncSystemsNavChrome();
-    await this.campaignFlow.open((state) => this.render(state), modalBody);
+    await this.campaignFlow.open(
+      { mode: 'modal', body: modalBody, header: null },
+      (state) => this.render(state),
+    );
   }
 
   private async openShopModal(): Promise<void> {
@@ -1336,12 +1354,18 @@ export class GameViewController {
     this.toasts.show('Batalha retomada', 'info');
   }
 
-  private beginMissionBattleWithStart(): void {
+  private beginMissionBattleWithStart(options?: { skipStartCue?: boolean }): void {
     if (!this.isManualLoadoutPause(this.state)) return;
     if (this.battleStartFlow.isActive() || this.victoryFlow.isActive()) return;
 
     this.stopAutoBattle();
     this.hideBattlePauseOverlay();
+
+    if (options?.skipStartCue) {
+      void this.continueFromLoadoutPause();
+      return;
+    }
+
     this.battleStartFlow.show(() => {
       void this.continueFromLoadoutPause();
     });
@@ -1499,15 +1523,9 @@ export class GameViewController {
       }
       this.shownIntermissionKey = key;
       this.stopAutoBattle();
-      const openMapAfterContinue =
-        payload.variant === 'phase-clear' || payload.variant === 'defeat';
       this.victoryFlow.show(payload, () => {
         this.overlayOrchestrator.release('battle_result', key);
-        void this.resumeCombatIntermission().then(() => {
-          if (openMapAfterContinue && !this.contextInvalidated && this.canEditParty()) {
-            void this.openCampaignModal();
-          }
-        });
+        void this.resumeCombatIntermission();
       });
     });
   }
@@ -2329,7 +2347,7 @@ export class GameViewController {
       drawerOpen: this.heroDrawer.isOpen(),
       modalOpen: this.modal.isOpen(),
       modalStackRootType: rootType,
-      campaignOpen: this.campaignModalOpen,
+      campaignOpen: this.campaignModalOpen || this.campaignEmbeddedActive,
       trackedId: this.trackedSystemsMenuId,
     });
   }
@@ -2492,7 +2510,7 @@ export class GameViewController {
     }
 
     this.render(response.state);
-    this.beginMissionBattleWithStart();
+    this.beginMissionBattleWithStart({ skipStartCue: true });
     void this.showBattleStatsSheet();
   }
 
@@ -2805,8 +2823,7 @@ export class GameViewController {
     }
 
     if (this.isCampHubOpen(state)) {
-      this.battlePauseOverlay.classList.remove('hidden', 'battle-pause-overlay--battle');
-      if (label) label.textContent = 'Acampamento';
+      this.hideBattlePauseOverlay();
       this.stopAutoBattle();
       return;
     }
@@ -2825,6 +2842,72 @@ export class GameViewController {
   private hideBattlePauseOverlay(): void {
     this.battlePauseOverlay.classList.add('hidden');
     this.battlePauseOverlay.classList.remove('battle-pause-overlay--battle');
+  }
+
+  private shouldShowEmbeddedCampaignMap(state: GameStateDto): boolean {
+    return (
+      this.isCampHubOpen(state) &&
+      !this.battleStartFlow.isActive() &&
+      !this.victoryFlow.isActive() &&
+      !this.campaignModalOpen &&
+      !this.detachedSurfaceId
+    );
+  }
+
+  private syncEmbeddedCampaignMap(state: GameStateDto): void {
+    if (!this.shouldShowEmbeddedCampaignMap(state)) {
+      this.hideEmbeddedCampaignMap();
+      return;
+    }
+
+    this.appRoot.classList.add('app--camp-map');
+    this.battleStageEl.classList.add('battle-stage--camp-map');
+    this.battleFieldEl.classList.add('battle-field--camp-map');
+    this.campCampaignMapRoot.classList.remove('hidden');
+    if (!this.campaignEmbeddedActive && !this.embeddedCampaignLoadPromise) {
+      this.trackedSystemsMenuId = 'campaign';
+    }
+    void this.ensureEmbeddedCampaignMap();
+    this.syncSystemsNavChrome();
+  }
+
+  private hideEmbeddedCampaignMap(): void {
+    this.campaignEmbeddedActive = false;
+    this.embeddedCampaignLoadPromise = null;
+    this.campaignFlow.detachEmbedded();
+    this.campCampaignMapRoot.classList.add('hidden');
+    this.campCampaignMapBody.innerHTML = '';
+    this.appRoot.classList.remove('app--camp-map');
+    this.battleStageEl.classList.remove('battle-stage--camp-map');
+    this.battleFieldEl.classList.remove('battle-field--camp-map');
+    if (this.trackedSystemsMenuId === 'campaign' && !this.campaignModalOpen) {
+      this.trackedSystemsMenuId = null;
+      this.syncSystemsNavChrome();
+    }
+  }
+
+  private ensureEmbeddedCampaignMap(): void {
+    if (this.campaignEmbeddedActive || this.embeddedCampaignLoadPromise) return;
+
+    this.embeddedCampaignLoadPromise = this.campaignFlow
+      .open(
+        {
+          mode: 'embedded',
+          body: this.campCampaignMapBody,
+          header: null,
+        },
+        (nextState) => this.render(nextState),
+      )
+      .then(() => {
+        this.campaignEmbeddedActive = true;
+        if (this.state) {
+          this.syncOnboarding(this.state);
+        }
+        this.syncSystemsNavChrome();
+      })
+      .finally(() => {
+        this.embeddedCampaignLoadPromise = null;
+      });
   }
 
   private render(
@@ -2886,6 +2969,7 @@ export class GameViewController {
     }
 
     this.syncLoadoutPauseBanner(mergedState);
+    this.syncEmbeddedCampaignMap(mergedState);
 
     const animateStripTimers = shouldAnimateBattleStripTimers(mergedState);
 
@@ -3025,8 +3109,9 @@ export class GameViewController {
   }
 
   private onboardingUiContext(): OnboardingUiContext {
+    const embeddedVisible = this.state ? this.shouldShowEmbeddedCampaignMap(this.state) : false;
     return {
-      campaignMapOpen: this.campaignModalOpen,
+      campaignMapOpen: this.campaignModalOpen || this.campaignEmbeddedActive || embeddedVisible,
       missionPreviewOpen: this.campaignFlow.isMissionPreviewOpen(),
     };
   }
@@ -3058,9 +3143,11 @@ export class GameViewController {
     this.scheduleOnboardingSync();
   }
 
-  /** Boas-vindas terminam abrindo o mapa, onde o tutorial continua. */
+  /** Boas-vindas terminam com o mapa embutido no acampamento — tutorial continua ali. */
   private async openCampaignMapForOnboarding(): Promise<void> {
-    await this.openCampaignModal();
+    if (this.state) {
+      this.syncEmbeddedCampaignMap(this.state);
+    }
     this.scheduleOnboardingSync();
   }
 

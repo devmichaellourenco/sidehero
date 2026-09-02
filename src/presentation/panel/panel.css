@@ -2008,6 +2008,134 @@ h2 {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
+/* Hub do acampamento: mapa embutido no battle-field (substitui overlay “Acampamento”). */
+#app.app--camp-map {
+  min-height: 0;
+}
+
+/* battle-stage mantém altura natural — não expande (menus ficam no lugar). */
+.battle-field--camp-map {
+  height: calc(var(--battle-strip-height) + var(--battle-hud-deck-height));
+  flex-shrink: 0;
+}
+
+.battle-field--camp-map .battle-strip,
+.battle-field--camp-map .battle-hud-deck,
+.battle-field--camp-map .heroes-row,
+.battle-field--camp-map .enemy-slot,
+.battle-field--camp-map .battle-float-layer,
+.battle-field--camp-map .battle-victory-overlay {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.camp-campaign-map-root {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      120% 70% at 50% 108%,
+      rgba(255, 178, 76, 0.22) 0%,
+      rgba(126, 66, 26, 0.12) 45%,
+      transparent 72%
+    ),
+    linear-gradient(180deg, #241a10 0%, #16100a 100%);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+}
+
+.camp-campaign-map-root.hidden {
+  display: none;
+}
+
+.camp-campaign-map-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.camp-campaign-map-body .campaign-modal--pins-only,
+.camp-campaign-map-body .campaign-map-panel--pins-only,
+.camp-campaign-map-body .campaign-map-body--pins-only,
+.camp-campaign-map-body .campaign-path-scroll--pins-only {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.camp-campaign-map-body .campaign-map-panel--pins-only {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.camp-campaign-map-body .campaign-path-scroll--pins-only {
+  overflow: hidden;
+  align-items: center;
+}
+
+.battle-field--camp-map .campaign-map-body--pins-only:has(.campaign-mission-board--has-popover) {
+  overflow: hidden;
+}
+
+.battle-field--camp-map .campaign-map-body--pins-only:has(.campaign-mission-board--has-popover)
+  .campaign-path-scroll--pins-only {
+  overflow: hidden;
+}
+
+.battle-field--camp-map .campaign-mission-board {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  gap: 0;
+  align-items: center;
+}
+
+.battle-field--camp-map .campaign-mission-board--stage {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Encaixe por altura: mapa inteiro visível, proporção do layout, sem scroll nem corte vertical. */
+.battle-field--camp-map .campaign-mission-stage {
+  flex: 0 0 auto;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.battle-field--camp-map .campaign-mission-stage-art {
+  background-size: cover;
+  background-position: center center;
+}
+
+.battle-field--camp-map .campaign-mission-board--has-popover .campaign-mission-stage {
+  overflow: hidden;
+}
+
+.battle-field--camp-map .campaign-map-body--pins-only {
+  min-height: 0;
+}
+
 .battle-stats-panel {
   display: flex;
   flex-direction: column;
@@ -3623,7 +3751,7 @@ html[data-ui-theme='dark'] .battle-stats-skill-cd {
 
 .enemy-tooltip-portal {
   position: fixed;
-  z-index: 1550;
+  z-index: 10100;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -3935,6 +4063,14 @@ button.hero-skill-chip:hover {
 
 [data-skill-tooltip] > .hero-skill-chip-tooltip {
   display: none;
+}
+
+.skill-row__icon-wrap[data-skill-tooltip] {
+  cursor: help;
+}
+
+.skill-row--equippable .skill-row__icon-wrap[data-skill-tooltip] {
+  cursor: grab;
 }
 
 .skill-card[data-skill-tooltip] {
@@ -9130,11 +9266,233 @@ body.modal-open {
 }
 
 .hero-skills-tab-scroll .skill-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 8px 6px 4px;
-  align-items: stretch;
+}
+
+.hero-skills-tab-scroll .skill-list--evolution {
+  margin-top: 4px;
+}
+
+/* Skill row — ícone + círculos de level */
+.skill-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border-soft);
+  background: var(--panel-chip);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mix-light) 12%, transparent);
+}
+
+.skill-row--equipped-active {
+  background: var(--skill-equipped-fill);
+  border-color: var(--skill-equipped-border);
+  box-shadow:
+    inset 0 0 0 1px var(--skill-equipped-ring),
+    0 0 0 2px var(--skill-equipped-glow);
+}
+
+.skill-row--offense {
+  border-left: 3px solid color-mix(in srgb, var(--accent) 55%, var(--panel-border-soft));
+}
+
+.skill-row--defense {
+  border-left: 3px solid color-mix(in srgb, var(--info) 55%, var(--panel-border-soft));
+}
+
+.skill-row--utility {
+  border-left: 3px solid color-mix(in srgb, var(--forest-hi) 55%, var(--panel-border-soft));
+}
+
+.skill-row__name {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.skill-row__body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.skill-row__icon-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 70%, transparent);
+  background: color-mix(in srgb, var(--parchment-1) 88%, transparent);
+  display: grid;
+  place-items: center;
+  cursor: help;
+}
+
+.skill-row--equippable .skill-row__icon-wrap {
+  cursor: grab;
+}
+
+.skill-row__icon-wrap--locked .skill-row__icon {
+  opacity: 0.45;
+  filter: grayscale(0.35);
+}
+
+.skill-row__icon {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.skill-row__icon-wrap .skill-card-lock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.skill-row__ranks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.skill-row-rank-down {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--panel-border) 80%, transparent);
+  background: var(--panel-card);
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.skill-row-rank-down--available:hover:not(:disabled) {
+  border-color: var(--seal-gold);
+  color: var(--ink);
+}
+
+.skill-rank-dot {
+  position: relative;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.skill-rank-dot__ring {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 2px auto;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--ink-muted) 55%, var(--panel-border));
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.skill-rank-dot--filled .skill-rank-dot__ring {
+  border-color: var(--seal-gold);
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--seal-gold) 95%, #fff),
+    var(--seal-gold)
+  );
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--seal-gold) 40%, transparent);
+}
+
+.skill-rank-dot--next:not(:disabled) {
+  cursor: pointer;
+}
+
+.skill-rank-dot--next:not(:disabled) .skill-rank-dot__ring {
+  border-color: var(--forest-hi);
+  border-style: dashed;
+  animation: skill-rank-dot-pulse 1.6s ease-in-out infinite;
+}
+
+.skill-rank-dot--next:not(:disabled):hover .skill-rank-dot__ring {
+  background: color-mix(in srgb, var(--forest-hi) 18%, transparent);
+}
+
+.skill-rank-dot:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@keyframes skill-rank-dot-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--forest-hi) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--forest-hi) 28%, transparent);
+  }
+}
+
+.skill-rank-dot-preview {
+  display: none;
+}
+
+.skill-rank-dot-preview__title {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.skill-rank-dot-preview__lines {
+  margin: 0;
+  padding-left: 14px;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.skill-rank-dot-preview__line + .skill-rank-dot-preview__line {
+  margin-top: 2px;
+}
+
+.skill-row__icon-wrap.skill-card--dragging,
+.skill-card--dragging {
+  opacity: 0.55;
+}
+
+.hero-detail-layout.hero-skills-tab--slot-picked .skill-row--pick-target {
+  box-shadow:
+    0 0 0 2px var(--seal-gold),
+    0 0 12px color-mix(in srgb, var(--seal-gold) 35%, transparent);
+}
+
+[data-skill-rank-tooltip] > .skill-rank-dot-preview {
+  display: none;
+}
+
+.skill-row__icon-wrap[data-skill-tooltip]:focus-visible {
+  outline: 2px solid var(--seal-gold);
+  outline-offset: 2px;
+}
+
+.skill-row--equippable:focus-visible {
+  outline: none;
 }
 
 .hero-skills-tab-scroll .skill-list > .skill-card--tile {
@@ -10202,7 +10560,8 @@ html[data-ui-theme='dark'] .skill-card--tile .skill-card-header h4 {
   box-shadow: 0 0 0 2px rgba(126, 231, 135, 0.65);
 }
 
-.hero-detail-layout.hero-skills-tab--slot-picked .skill-card--pick-target {
+.hero-detail-layout.hero-skills-tab--slot-picked .skill-card--pick-target,
+.hero-detail-layout.hero-skills-tab--slot-picked .skill-row--pick-target {
   box-shadow: 0 0 0 2px rgba(245, 197, 66, 0.55);
   transform: translateY(-1px);
 }
@@ -11765,6 +12124,20 @@ body.skill-drag-active * {
   transform: translate(calc(-50% + var(--popover-shift-x)), 10px);
 }
 
+.campaign-mission-popover-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  pointer-events: none;
+}
+
+.campaign-mission-popover--portaled {
+  position: fixed;
+  width: min(220px, 78vw);
+  transform: none;
+  pointer-events: auto;
+}
+
 .campaign-mission-popover-copy {
   min-width: 0;
 }
@@ -11777,6 +12150,20 @@ body.skill-drag-active * {
   width: 100%;
   min-width: 0;
   padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--forest-hi) 50%, var(--seal-gold));
+  background: linear-gradient(180deg, var(--forest-hi) 0%, var(--forest) 100%);
+  color: var(--forest-cta-label);
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--ink) 24%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent);
+}
+
+.campaign-mission-popover .campaign-phase-preview-start:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.campaign-mission-popover .campaign-phase-preview-start:disabled {
+  opacity: 0.55;
 }
 
 .campaign-mission-popover .campaign-mission-enemies {

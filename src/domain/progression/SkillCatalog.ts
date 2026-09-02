@@ -992,6 +992,17 @@ export const SKILL_CATALOG: SkillDefinition[] = [
   },
   // Monstros — acervo unificado (heróis podem desbloquear no futuro)
   { id: 'wild_bite', scope: 'monster', branch: 'offense', name: 'Mordida Selvagem', description: 'Mordida feroz do predador.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
+  {
+    id: 'capelobo_brain_drink',
+    scope: 'monster',
+    branch: 'offense',
+    name: 'Suga-Cérebro',
+    description: 'Perfura o crânio com a tromba e drena a vitalidade do alvo.',
+    maxRank: 1,
+    requirements: [],
+    scaling: 'str',
+    pointType: 'improvement',
+  },
   { id: 'goblin_stab', scope: 'monster', branch: 'offense', name: 'Facada', description: 'Golpe traiçoeiro com dano extra.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
   { id: 'orc_smash', scope: 'monster', branch: 'offense', name: 'Pancada', description: 'Golpe pesado esmagador.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
   { id: 'poison_spit', scope: 'monster', branch: 'offense', name: 'Cuspe Venenoso', description: 'Veneno corrosivo à distância.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
@@ -1004,6 +1015,17 @@ export const SKILL_CATALOG: SkillDefinition[] = [
   { id: 'dragon_bite', scope: 'monster', branch: 'offense', name: 'Mordida', description: 'Mordida devastadora.', maxRank: 1, requirements: [], scaling: 'str', pointType: 'improvement' },
   { id: 'saci_fire', scope: 'monster', branch: 'offense', name: 'Chama Elemental', description: 'Fogo concentrado no alvo.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
   { id: 'saci_wind', scope: 'monster', branch: 'offense', name: 'Rajada de Vento', description: 'Vento cortante em área.', maxRank: 1, requirements: [], scaling: 'int', pointType: 'improvement' },
+  {
+    id: 'mapinguari_belly_roar',
+    scope: 'monster',
+    branch: 'offense',
+    name: 'Rugido Torácico',
+    description: 'Uivo grave da boca na barriga que fere e aterroriza a party.',
+    maxRank: 1,
+    requirements: [],
+    scaling: 'str',
+    pointType: 'improvement',
+  },
 ];
 
 export function getSkillById(skillId: string): SkillDefinition | undefined {

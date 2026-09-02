@@ -290,34 +290,215 @@ export function renderMissionPinPopover(
   `;
 }
 
-/** Posiciona o popover acima do pin; flipa verticalmente e clampa nas bordas do stage. */
+export const MISSION_POPOVER_PORTAL_ID = 'campaign-mission-popover-portal';
+
+export type PopoverBox = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
+
+export type PopoverPlacement = 'above' | 'below';
+
+export function intersectPopoverBounds(
+  viewport: PopoverBox,
+  scrollport: PopoverBox | null,
+  margin: number,
+): PopoverBox {
+  const view = {
+    top: margin,
+    left: margin,
+    width: Math.max(0, viewport.width - margin * 2),
+    height: Math.max(0, viewport.height - margin * 2),
+  };
+
+  if (!scrollport) return view;
+
+  const top = Math.max(view.top, scrollport.top + margin);
+  const left = Math.max(view.left, scrollport.left + margin);
+  const right = Math.min(view.left + view.width, scrollport.left + scrollport.width - margin);
+  const bottom = Math.min(view.top + view.height, scrollport.top + scrollport.height - margin);
+
+  return {
+    top,
+    left,
+    width: Math.max(0, right - left),
+    height: Math.max(0, bottom - top),
+  };
+}
+
+export function computeMissionPopoverPosition(input: {
+  pin: PopoverBox;
+  popover: PopoverBox;
+  bounds: PopoverBox;
+  gap: number;
+}): { left: number; top: number; placement: PopoverPlacement } {
+  const { pin, popover, bounds, gap } = input;
+  const pinCenterX = pin.left + pin.width / 2;
+
+  const aboveTop = pin.top - gap - popover.height;
+  const belowTop = pin.top + pin.height + gap;
+  const aboveFits = aboveTop >= bounds.top;
+  const belowFits = belowTop + popover.height <= bounds.top + bounds.height;
+
+  let placement: PopoverPlacement = 'above';
+  let top = aboveTop;
+
+  if (!aboveFits && belowFits) {
+    placement = 'below';
+    top = belowTop;
+  } else if (!aboveFits && !belowFits) {
+    const spaceAbove = pin.top - bounds.top;
+    const spaceBelow = bounds.top + bounds.height - (pin.top + pin.height);
+    if (spaceBelow > spaceAbove) {
+      placement = 'below';
+      top = belowTop;
+    }
+  }
+
+  let left = pinCenterX - popover.width / 2;
+  left = Math.max(bounds.left, Math.min(left, bounds.left + bounds.width - popover.width));
+  top = Math.max(bounds.top, Math.min(top, bounds.top + bounds.height - popover.height));
+
+  return { left, top, placement };
+}
+
+function ensureMissionPopoverPortal(): HTMLElement {
+  let portal = document.getElementById(MISSION_POPOVER_PORTAL_ID);
+  if (portal) return portal;
+
+  portal = document.createElement('div');
+  portal.id = MISSION_POPOVER_PORTAL_ID;
+  portal.className = 'campaign-mission-popover-portal';
+  document.body.appendChild(portal);
+  return portal;
+}
+
+function boxFromDomRect(rect: DOMRect): PopoverBox {
+  return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
+}
+
+function findMissionPopoverScrollport(pin: HTMLElement): HTMLElement | null {
+  let node: HTMLElement | null = pin.parentElement;
+  while (node) {
+    const style = window.getComputedStyle(node);
+    const scrollable =
+      /(auto|scroll|overlay)/.test(style.overflowY) || /(auto|scroll|overlay)/.test(style.overflow);
+    if (scrollable && node.scrollHeight > node.clientHeight + 1) return node;
+    if (
+      node.classList.contains('campaign-path-scroll') ||
+      node.classList.contains('camp-campaign-map-body') ||
+      node.classList.contains('modal-body')
+    ) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
+function findPendingMissionPin(root: ParentNode): HTMLElement | null {
+  return (
+    (root.querySelector('.campaign-mission-pin[aria-pressed="true"]') as HTMLElement | null) ??
+    (root.querySelector('.campaign-mission-pin--pending') as HTMLElement | null)
+  );
+}
+
+let missionPopoverFollowCleanup: (() => void) | null = null;
+
+export function clearMissionPopoverPortal(): void {
+  missionPopoverFollowCleanup?.();
+  missionPopoverFollowCleanup = null;
+  const portal = document.getElementById(MISSION_POPOVER_PORTAL_ID);
+  if (portal) portal.innerHTML = '';
+}
+
+/** Portal + posição fixa com clamp na viewport e no scrollport visível. */
 export function syncMissionPopoverPlacement(root: ParentNode): void {
-  const popover = root.querySelector('.campaign-mission-popover') as HTMLElement | null;
+  const popoverInRoot = root.querySelector('.campaign-mission-popover') as HTMLElement | null;
+  if (!popoverInRoot) {
+    clearMissionPopoverPortal();
+    return;
+  }
+
+  const pin = findPendingMissionPin(root);
+  if (!pin) return;
+
+  const portal = ensureMissionPopoverPortal();
+  portal.querySelectorAll('.campaign-mission-popover').forEach((node) => {
+    if (node !== popoverInRoot) node.remove();
+  });
+
+  if (popoverInRoot.parentElement !== portal) {
+    portal.appendChild(popoverInRoot);
+  }
+
+  popoverInRoot.classList.add('campaign-mission-popover--portaled');
+  popoverInRoot.style.removeProperty('--popover-shift-x');
+  popoverInRoot.style.visibility = 'hidden';
+  popoverInRoot.style.left = '0px';
+  popoverInRoot.style.top = '0px';
+  popoverInRoot.style.transform = 'none';
+
+  const margin = 8;
+  const gap = 8;
+  const pinRect = pin.getBoundingClientRect();
+  const popRect = popoverInRoot.getBoundingClientRect();
+  const scrollport = findMissionPopoverScrollport(pin);
+  const scrollportBox = scrollport ? boxFromDomRect(scrollport.getBoundingClientRect()) : null;
+  const bounds = intersectPopoverBounds(
+    { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight },
+    scrollportBox,
+    margin,
+  );
+  const placement = computeMissionPopoverPosition({
+    pin: boxFromDomRect(pinRect),
+    popover: boxFromDomRect(popRect),
+    bounds,
+    gap,
+  });
+
+  popoverInRoot.dataset.placement = placement.placement;
+  popoverInRoot.style.left = `${Math.round(placement.left)}px`;
+  popoverInRoot.style.top = `${Math.round(placement.top)}px`;
+  popoverInRoot.style.visibility = 'visible';
+
+  bindMissionPopoverFollow(root);
+}
+
+export function bindMissionPopoverFollow(root: ParentNode): void {
+  missionPopoverFollowCleanup?.();
+  missionPopoverFollowCleanup = null;
+
+  const popover = document
+    .getElementById(MISSION_POPOVER_PORTAL_ID)
+    ?.querySelector('.campaign-mission-popover');
   if (!popover) return;
 
-  const container =
-    (root.querySelector('.campaign-mission-stage') as HTMLElement | null) ??
-    (root.querySelector('.campaign-mission-board-track--pins') as HTMLElement | null);
-  if (!container) return;
+  const pin = findPendingMissionPin(root);
+  if (!pin) return;
 
-  const margin = 6;
-  popover.style.setProperty('--popover-shift-x', '0px');
-  popover.dataset.placement = 'above';
-
-  const containerRect = container.getBoundingClientRect();
-  let popRect = popover.getBoundingClientRect();
-  if (popRect.top < containerRect.top + margin) {
-    popover.dataset.placement = 'below';
-    popRect = popover.getBoundingClientRect();
+  const onReposition = () => syncMissionPopoverPlacement(root);
+  const scrollTargets = new Set<EventTarget>();
+  let node: HTMLElement | null = pin;
+  while (node) {
+    scrollTargets.add(node);
+    node = node.parentElement;
   }
+  scrollTargets.add(window);
 
-  let shiftX = 0;
-  if (popRect.left < containerRect.left + margin) {
-    shiftX = containerRect.left + margin - popRect.left;
-  } else if (popRect.right > containerRect.right - margin) {
-    shiftX = containerRect.right - margin - popRect.right;
-  }
-  popover.style.setProperty('--popover-shift-x', `${Math.round(shiftX)}px`);
+  scrollTargets.forEach((target) => {
+    target.addEventListener('scroll', onReposition, { passive: true });
+  });
+  window.addEventListener('resize', onReposition, { passive: true });
+
+  missionPopoverFollowCleanup = () => {
+    scrollTargets.forEach((target) => {
+      target.removeEventListener('scroll', onReposition);
+    });
+    window.removeEventListener('resize', onReposition);
+  };
 }
 
 export function renderMissionSelectHint(): string {

@@ -26,10 +26,10 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 - Slot 0 = Ataque Básico (fixo)
 - Slots extras = `getUnlockedBattleSkillSlotCount(upgradeLevels)`
 - Investir Aprimoramento em skill de classe/evolução exige ao menos 1 slot extra (`battle_skill_slots >= 1`); só o slot fixo do Ataque Básico mantém `canAllocateRank=false` e o use case bloqueia chamadas diretas
-- Scroll ao `+1 rank`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`
+- Scroll ao `+1 level`: `pinScrollBeforeMutation` em `HeroDetailModalRenderer` + `HeroDetailScrollPresentation`
 - Aba Skills: carregar `GET_HERO_SKILL_TREE` **e** `GET_HERO_ASCENSION_TREE` (skills de evolução vivem aqui)
-- Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltips nos cards; skills de classe + skills de evolução
-- Cards da lista: estado equipado = fundo verde; sem badge Disponível (botão `[+]` basta); layout em **grade 2 colunas** de tiles (`.skill-card--tile`) com título no topo, arte full-bleed, level (bookmark) e meta rápida (ramo/atributo/elemento)
+- Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltip no ícone (detalhes) e nos círculos (ganho do level)
+- Lista de skills: linha com nome, ícone à esquerda e círculos de level à direita; equipada = fundo verde; próximo level = círculo tracejado clicável
 - Passivas equipadas (`evasion`, `vitality`, `iron_skin`, `mana_shield`): efeito numérico na seção **Na batalha** do tooltip via `PassiveSkillBattleStatsMapper`
 - Passivas **sempre ativas** de classe/ascensão/gear: ver skill `passives` / `specs/passives.spec.md` (sistema separado)
 - Cards de ascensão: requisitos/CTA no tooltip; clique no card disponível abre confirmação; `+N Aprim.` (não pool separado)
@@ -40,7 +40,7 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 
 ## Testes
 
-`SkillService.allocate.test.ts`, `SkillService.ascension.test.ts`, `SkillBattleSlots.test.ts`, `HeroDetailScrollPresentation.test.ts`, `HeroSkillsTabRenderer.test.ts` — criar ou atualizar; não executar automaticamente.
+`SkillService.allocate.test.ts`, `SkillService.ascension.test.ts`, `SkillBattleSlots.test.ts`, `HeroDetailScrollPresentation.test.ts`, `SkillRankPreviewMapper.test.ts`, `HeroSkillsTabRenderer.test.ts` — criar ou atualizar; não executar automaticamente.
 
 ## Workflow do agente
 

@@ -20,10 +20,10 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 - [x] Combate usa `HeroCombatSkillCatalog` + `CombatSkillRegistry`
 - [x] Balance Lab aba Personagens edita knobs de skill/identidade/passiva/evolução em `hero-combat-overrides.json` (merge no lookup)
 - [x] Cadência early: TTA = 1/ASPD por combatente; CD = turns × s/turno do herói − per-rank da skill; básico = `ATK × basicAttackDamageRatio` da identidade
-- [x] Ao clicar `+` rank (aba Skills ou ascensão), a lista mantém a posição de scroll no drawer/modal
-- [x] Aba Skills do herói **sem** textos de instrução (equipar, drag, hover); slots e cards comunicam a ação só por highlight visual no tap-to-assign
-- [x] Cards da lista de skills **sem** badges Ativa/Inativa nem Disponível; skill equipada usa fundo verde no card; rank disponível comunicado só pelo botão `[+]`
-- [x] Aba Skills exibe skills de classe e evolução em **grade 2 colunas** de tiles (título no topo, arte full-bleed, borda superior por ramo, level com bookmark, meta rápida de atributo/elemento); detalhes permanecem no tooltip
+- [x] Ao clicar no próximo círculo de level (aba Skills ou ascensão), a lista mantém a posição de scroll no drawer/modal
+- [x] Aba Skills do herói **sem** textos de instrução (equipar, drag, hover); slots e linhas comunicam a ação só por highlight visual no tap-to-assign
+- [x] Lista de skills **sem** badges Ativa/Inativa nem Disponível; skill equipada usa fundo verde na linha; próximo level comunicado pelo círculo tracejado
+- [x] Aba Skills exibe skills em **linhas** (nome, ícone à esquerda, círculos de level à direita); hover no círculo mostra o ganho daquele ponto; detalhes completos no tooltip do ícone
 - [x] Nomenclatura de progressão da skill na UI: **Level** (não Rank)
 - [x] Skills passivas equipadas (`evasion`, `ghost_step`, `vitality`, `iron_skin`, `mana_shield`) exibem efeito numérico em **Na batalha** no tooltip (%, HP, mecânica e condição de slot)
 - [x] Arqueira (Rain): árvore de classe `precise_shot` / `piercing_arrow` / `arrow_rain` / `marked_prey` / `ghost_step`
@@ -37,7 +37,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 |--------|-------|
 | Domain | `src/domain/progression/*`, `SkillCatalog`, `ClassAscensionService`, `SkillService` |
 | Application | `SpendImprovementPointUseCase`, `GetHeroSkillTreeUseCase`, `AssignSkillSlotUseCase`, `AscendClassUseCase` |
-| Presentation | `SkillCardPresentation`, `HeroSkillsTabRenderer`, `HeroDetailModalRenderer`, `HeroDetailScrollPresentation`, `CombatSkillBar*` |
+| Presentation | `SkillCardPresentation`, `SkillRankPreviewMapper`, `HeroSkillsTabRenderer`, `HeroDetailModalRenderer`, `HeroDetailScrollPresentation`, `CombatSkillBar*` |
 
 ## Invariantes
 
@@ -64,7 +64,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 - [x] `HeroCombatSkillCatalog.test.ts` / `EnemyMonsterCombatSkillCatalog.test.ts` — timing individual por skill
 - [x] `SkillService.allocate.test.ts`, `SkillService.ascension.test.ts`
 - [x] `SkillBattleSlots.test.ts`, `Hero.activeSkills.test.ts`
-- [x] `CombatSkillSelector.test.ts`, `SkillCardPresentation.test.ts`
+- [x] `CombatSkillSelector.test.ts`, `SkillRankPreviewMapper.test.ts`, `SkillCardPresentation.test.ts`
 - [x] `HeroDetailScrollPresentation.test.ts` — captura/restaura scroll da lista de skills
 - [x] `HeroSkillsTabRenderer.test.ts` — aba Skills sem parágrafos de hint estático (equipadas/hover/equipar)
 - [x] `HeroClassAscensionPresentation.test.ts` — cards com requisitos/CTA só no tooltip
