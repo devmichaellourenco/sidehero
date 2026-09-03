@@ -8,14 +8,21 @@ import {
   getEmbeddedPhaseBattleOverride,
   type PhaseBattleOverride,
 } from '../../src/domain/campaign/PhaseBattleOverrides';
-import { listMissionCatalog } from '../../src/domain/campaign/missions/MissionCatalog';
+import { listMissionCatalog, isSeedMissionId } from '../../src/domain/campaign/missions/MissionCatalog';
 import type { MissionDefinition } from '../../src/domain/campaign/missions/MissionDefinition';
+import { isCustomNormalMissionId } from '../../src/domain/campaign/missions/MissionId';
+import {
+  getActiveMissionOverrides,
+  isMissionFromOverride,
+  missionHasChapterChildren,
+} from '../../src/domain/campaign/missions/MissionOverrides';
 import {
   chapterMainPhaseForPhaseNumber,
   isNormalPhaseInBandForMain,
   listMissionChapterOptions,
   normalPhaseNumberBandForCurrentMain,
 } from '../../src/domain/campaign/missions/NormalMissionMainBand';
+import { CAMPAIGN_MAPS } from '../../src/domain/campaign/CampaignMaps';
 import { ENEMY_ROSTER } from '../../src/domain/enemies/EnemyRosterCatalog';
 import { enemySpriteUrlForLab } from './enemySprites';
 import type { PhaseDefinition } from '../../src/domain/campaign/PhaseDefinition';
@@ -37,6 +44,12 @@ export interface MissionBattleListEntry {
   waveCount: number;
   /** Outras missões que usam o mesmo phaseTemplateId (batalha compartilhada). */
   sharedMissionIds: string[];
+  isSeed: boolean;
+  isCustom: boolean;
+  fromOverride: boolean;
+  hasChildren: boolean;
+  canDelete: boolean;
+  canChangeKind: boolean;
 }
 
 export interface MissionBattleDetail {
@@ -99,10 +112,14 @@ function toListEntry(
   override: PhaseBattleOverride | null,
   waveCount: number,
   sharedMissionIds: string[],
+  catalog: readonly MissionDefinition[],
 ): MissionBattleListEntry {
   const phaseNumber = parsePhaseId(mission.phaseTemplateId).phaseNumber;
   const chapterMainPhase = chapterMainPhaseForPhaseNumber(phaseNumber);
   const band = normalPhaseNumberBandForCurrentMain(chapterMainPhase);
+  const file = getActiveMissionOverrides();
+  const isSeed = isSeedMissionId(mission.id);
+  const hasChildren = missionHasChapterChildren(mission, catalog);
   return {
     missionId: mission.id,
     kind: mission.kind,
@@ -117,6 +134,12 @@ function toListEntry(
     hasOverride: Boolean(override),
     waveCount,
     sharedMissionIds: sharedMissionIds.filter((id) => id !== mission.id),
+    isSeed,
+    isCustom: isCustomNormalMissionId(mission.id) || (mission.kind !== 'main' && !isSeed),
+    fromOverride: isMissionFromOverride(mission.id, file),
+    hasChildren,
+    canDelete: mission.kind !== 'main' || !hasChildren,
+    canChangeKind: mission.kind !== 'main' || !hasChildren,
   };
 }
 
@@ -146,6 +169,7 @@ export function listMissionBattleEntries(
       override,
       phase?.waves.length ?? 0,
       shared.get(mission.phaseTemplateId) ?? [mission.id],
+      catalog,
     );
   });
 
@@ -202,6 +226,7 @@ export function getMissionBattleDetail(
       override,
       phase.waves.length,
       shared.get(mission.phaseTemplateId) ?? [mission.id],
+      listMissionCatalog(),
     ),
     phase,
     override,
@@ -222,14 +247,22 @@ export function buildMissionBattleLabPayload(
   enemies: ReturnType<typeof listEnemyOptionsForLab>;
   chapters: ReturnType<typeof listMissionChapterOptions>;
   maps: string[];
+  phasesByMap: Record<string, string[]>;
 } {
   const all = listMissionBattleEntries(diskOverrides);
   const maps = [...new Set(all.map((entry) => entry.mapId))].sort();
+  const phasesByMap: Record<string, string[]> = {};
+  for (const phase of HANDCRAFTED_PHASES) {
+    const mapId = CAMPAIGN_MAPS.find((map) => map.mapIndex === parsePhaseId(phase.id).mapIndex)?.id;
+    if (!mapId) continue;
+    (phasesByMap[mapId] ??= []).push(phase.id);
+  }
   return {
     missions: filters ? filterMissionBattleEntries(all, filters) : all,
     enemies: listEnemyOptionsForLab(),
     chapters: listMissionChapterOptions(),
     maps,
+    phasesByMap,
   };
 }
 
@@ -257,6 +290,18 @@ export {
   isCanonicalShopId,
   normalizeShopOverridesFile,
 } from '../../src/domain/shop/ConfigurableShopCatalog';
+export {
+  applyLabMissionOverrides,
+  applyCreateMission,
+  applyDeleteMission,
+  applyPatchMission,
+  applyPutMissionsFile,
+  buildMissionsLabPayload,
+  emptyMissionOverridesFile,
+  getMissionLabDetail,
+  normalizeMissionOverridesFile,
+} from './missionsCatalog';
+export type { MissionLabEntry, MissionOverridesFile } from './missionsCatalog';
 export {
   buildHeroLevelXpLabPayload,
   applyLabHeroLevelXpOverrides,

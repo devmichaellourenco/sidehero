@@ -35,6 +35,8 @@ import {
   GEAR_ITEM_BACKUPS_DIR,
   SHOP_OVERRIDES_PATH,
   SHOP_BACKUPS_DIR,
+  MISSION_OVERRIDES_PATH,
+  MISSION_BACKUPS_DIR,
   ENEMY_COMBAT_PATH,
   ENEMY_COMBAT_BACKUPS_DIR,
   UPGRADE_OVERRIDES_PATH,
@@ -62,6 +64,7 @@ async function build() {
   await mkdir(HERO_LEVEL_XP_BACKUPS_DIR, { recursive: true });
   await mkdir(GEAR_ITEM_BACKUPS_DIR, { recursive: true });
   await mkdir(SHOP_BACKUPS_DIR, { recursive: true });
+  await mkdir(MISSION_BACKUPS_DIR, { recursive: true });
   await mkdir(ENEMY_COMBAT_BACKUPS_DIR, { recursive: true });
   await mkdir(UPGRADE_BACKUPS_DIR, { recursive: true });
 
@@ -421,6 +424,29 @@ async function listShopBackups() {
   return listBackupFiles(SHOP_BACKUPS_DIR);
 }
 
+async function readMissionOverridesFile() {
+  try {
+    const parsed = JSON.parse(await readFile(MISSION_OVERRIDES_PATH, 'utf8'));
+    return catalogApi.normalizeMissionOverridesFile(parsed);
+  } catch {
+    return catalogApi.emptyMissionOverridesFile();
+  }
+}
+
+async function writeMissionOverridesFile(file) {
+  const normalized = catalogApi.normalizeMissionOverridesFile(file);
+  await mkdir(dirname(MISSION_OVERRIDES_PATH), { recursive: true });
+  await writeFile(MISSION_OVERRIDES_PATH, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
+}
+
+async function backupCurrentMissionOverrides() {
+  return backupFile(MISSION_OVERRIDES_PATH, MISSION_BACKUPS_DIR, 'mission-overrides');
+}
+
+async function listMissionCatalogBackups() {
+  return listBackupFiles(MISSION_BACKUPS_DIR);
+}
+
 async function listBackups() {
   return listBackupFiles(BACKUPS_DIR);
 }
@@ -522,6 +548,159 @@ async function handleApi(req, res, url) {
   catalogApi.applyLabHeroLevelXpOverrides(levelXpFile.levels);
   const gearFile = await readGearItemOverridesFile();
   catalogApi.applyLabGearItemOverrides(gearFile);
+  const missionCatalogFile = await readMissionOverridesFile();
+  catalogApi.applyLabMissionOverrides(missionCatalogFile);
+
+  if (req.method === 'GET' && url.pathname === '/api/missions') {
+    const chapterRaw = url.searchParams.get('chapterMain');
+    const chapterMain =
+      chapterRaw !== null && chapterRaw !== '' ? Number(chapterRaw) : undefined;
+    const payload = catalogApi.buildMissionsLabPayload({
+      diskOverrides: missionCatalogFile,
+      kind: url.searchParams.get('kind') || undefined,
+      mapId: url.searchParams.get('mapId') || undefined,
+      q: url.searchParams.get('q') || undefined,
+      chapterMain:
+        chapterMain !== undefined && Number.isFinite(chapterMain) ? chapterMain : undefined,
+    });
+    sendJson(res, 200, {
+      ok: true,
+      ...payload,
+      backups: await listMissionCatalogBackups(),
+    });
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/missions') {
+    const body = await readBody(req);
+    const result = catalogApi.applyCreateMission(missionCatalogFile, {
+      kind: body?.kind,
+      mapId: body?.mapId,
+      name: body?.name,
+      phaseTemplateId: body?.phaseTemplateId,
+      stars: body?.stars,
+      slug: body?.slug,
+      unlockAfterMissionIds: body?.unlockAfterMissionIds,
+    });
+    if (!result.ok) {
+      sendJson(res, result.status, { ok: false, error: result.error });
+      return;
+    }
+    const backupPath = await backupCurrentMissionOverrides();
+    await writeMissionOverridesFile(result.file);
+    catalogApi.applyLabMissionOverrides(result.file);
+    sendJson(res, 200, {
+      ok: true,
+      backupPath,
+      updatedAt: result.file.updatedAt,
+      missionId: result.missionId,
+      mission: catalogApi.getMissionLabDetail(result.missionId, result.file),
+    });
+    return;
+  }
+
+  if (req.method === 'PUT' && url.pathname === '/api/missions') {
+    const body = await readBody(req);
+    const result = catalogApi.applyPutMissionsFile(body);
+    if (!result.ok) {
+      sendJson(res, result.status, { ok: false, error: result.error });
+      return;
+    }
+    const backupPath = await backupCurrentMissionOverrides();
+    await writeMissionOverridesFile(result.file);
+    catalogApi.applyLabMissionOverrides(result.file);
+    sendJson(res, 200, {
+      ok: true,
+      backupPath,
+      updatedAt: result.file.updatedAt,
+      overrideCount:
+        Object.keys(result.file.missions).length + result.file.deletedMissionIds.length,
+    });
+    return;
+  }
+
+  const missionDetailMatch = url.pathname.match(/^\/api\/missions\/([^/]+)$/);
+  if (req.method === 'GET' && missionDetailMatch) {
+    const missionId = decodeURIComponent(missionDetailMatch[1]);
+    const detail = catalogApi.getMissionLabDetail(missionId, missionCatalogFile);
+    if (!detail) {
+      sendJson(res, 404, { ok: false, error: 'Missão não encontrada' });
+      return;
+    }
+    sendJson(res, 200, { ok: true, mission: detail });
+    return;
+  }
+
+  if (req.method === 'PATCH' && missionDetailMatch) {
+    const missionId = decodeURIComponent(missionDetailMatch[1]);
+    const body = await readBody(req);
+    const result = catalogApi.applyPatchMission(missionCatalogFile, missionId, {
+      name: body?.name,
+      stars: body?.stars,
+      phaseTemplateId: body?.phaseTemplateId,
+      unlockAfterMissionIds: body?.unlockAfterMissionIds,
+      kind: body?.kind,
+      slug: body?.slug,
+    });
+    if (!result.ok) {
+      sendJson(res, result.status, { ok: false, error: result.error });
+      return;
+    }
+    const backupPath = await backupCurrentMissionOverrides();
+    await writeMissionOverridesFile(result.file);
+    catalogApi.applyLabMissionOverrides(result.file);
+    sendJson(res, 200, {
+      ok: true,
+      backupPath,
+      updatedAt: result.file.updatedAt,
+      missionId: result.missionId,
+      previousId: result.previousId ?? null,
+      mission: catalogApi.getMissionLabDetail(result.missionId, result.file),
+    });
+    return;
+  }
+
+  if (req.method === 'DELETE' && missionDetailMatch) {
+    const missionId = decodeURIComponent(missionDetailMatch[1]);
+    const result = catalogApi.applyDeleteMission(missionCatalogFile, missionId);
+    if (!result.ok) {
+      sendJson(res, result.status, { ok: false, error: result.error });
+      return;
+    }
+    const backupPath = await backupCurrentMissionOverrides();
+    await writeMissionOverridesFile(result.file);
+    catalogApi.applyLabMissionOverrides(result.file);
+    sendJson(res, 200, {
+      ok: true,
+      backupPath,
+      updatedAt: result.file.updatedAt,
+      missionId,
+    });
+    return;
+  }
+
+  const missionRestoreMatch = url.pathname.match(
+    /^\/api\/missions-backups\/([^/]+)\/restore$/,
+  );
+  if (req.method === 'POST' && missionRestoreMatch) {
+    const backupId = decodeURIComponent(missionRestoreMatch[1]);
+    const src = join(MISSION_BACKUPS_DIR, backupId);
+    if (!src.startsWith(MISSION_BACKUPS_DIR) || !backupId.endsWith('.json')) {
+      sendJson(res, 400, { ok: false, error: 'Backup inválido' });
+      return;
+    }
+    const previousBackupPath = await backupCurrentMissionOverrides();
+    await copyFile(src, MISSION_OVERRIDES_PATH);
+    const restored = await readMissionOverridesFile();
+    catalogApi.applyLabMissionOverrides(restored);
+    sendJson(res, 200, {
+      ok: true,
+      restoredFrom: backupId,
+      previousBackupPath,
+      updatedAt: restored.updatedAt,
+    });
+    return;
+  }
 
   if (req.method === 'GET' && url.pathname === '/api/shops') {
     const shopFile = await readShopOverridesFile();
@@ -1009,6 +1188,7 @@ async function handleApi(req, res, url) {
       missions: payload.missions,
       chapters: payload.chapters,
       maps: payload.maps,
+      phasesByMap: payload.phasesByMap,
       backups: await listBackups(),
     });
     return;
@@ -1647,7 +1827,7 @@ async function main() {
 
   server.listen(port, '127.0.0.1', () => {
     console.log(`\nBalance Lab: http://127.0.0.1:${port}/`);
-    console.log('Aba Missões: editor de batalhas → phase-battle-overrides.json');
+    console.log('Aba Missões: identidade (mission-overrides) + batalhas (phase-battle-overrides)');
     console.log('Aba XP por fase: alvos XP/ouro → phase-reward-overrides.json');
     console.log('Aba XP por nível: curva de level-up → hero-level-xp-overrides.json');
     console.log('Aba Itens: nome/stats/requisitos → gear-item-overrides.json');

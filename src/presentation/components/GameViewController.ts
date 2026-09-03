@@ -13,7 +13,7 @@ import { LootFlowController } from '../controllers/LootFlowController';
 import { GameMusicController } from '../audio/GameMusicController';
 import { GameSfxController } from '../audio/GameSfxController';
 import { resolveGameMusicTrack } from '../audio/resolveGameMusicTrack';
-import { BattleVictoryFlow } from '../flows/BattleVictoryFlow';
+import { BattleVictoryFlow, BATTLE_RESULT_REVEAL_DELAY_MS } from '../flows/BattleVictoryFlow';
 import { BattleStartFlow } from '../flows/BattleStartFlow';
 import { CampaignFlow } from '../flows/CampaignFlow';
 import { ActSceneFlow } from '../flows/ActSceneFlow';
@@ -256,6 +256,8 @@ export class GameViewController {
 
   private shownIntermissionKey: string | null = null;
   private intermissionResuming = false;
+  /** Timer do delay antes de abrir CLEAR/DEFEAT (floats do golpe final). */
+  private battleResultRevealTimer: number | null = null;
   private deferredRewardBaseline: GameStateDto | null = null;
   /** Hub no início da tentativa — overlay CLEAR/DEFEAT soma kills de todas as waves. */
   private battleAttemptBaseline: GameStateDto | null = null;
@@ -1396,6 +1398,7 @@ export class GameViewController {
         return;
       }
 
+      this.clearBattleResultRevealTimer();
       this.shownIntermissionKey = null;
       this.render(response.state);
       this.showCombatFloats(response.combatFloats, response.combatSkillVfx);
@@ -1523,11 +1526,35 @@ export class GameViewController {
       }
       this.shownIntermissionKey = key;
       this.stopAutoBattle();
-      this.victoryFlow.show(payload, () => {
-        this.overlayOrchestrator.release('battle_result', key);
-        void this.resumeCombatIntermission();
-      });
+
+      const presentResult = () => {
+        this.battleResultRevealTimer = null;
+        if (this.victoryFlow.isActive()) return;
+        this.victoryFlow.show(payload, () => {
+          this.overlayOrchestrator.release('battle_result', key);
+          void this.resumeCombatIntermission();
+        });
+      };
+
+      const delayReveal =
+        payload.variant === 'phase-clear' || payload.variant === 'defeat';
+      if (!delayReveal) {
+        presentResult();
+        return;
+      }
+
+      this.clearBattleResultRevealTimer();
+      this.battleResultRevealTimer = globalThis.setTimeout(
+        presentResult,
+        BATTLE_RESULT_REVEAL_DELAY_MS,
+      );
     });
+  }
+
+  private clearBattleResultRevealTimer(): void {
+    if (this.battleResultRevealTimer === null) return;
+    globalThis.clearTimeout(this.battleResultRevealTimer);
+    this.battleResultRevealTimer = null;
   }
 
   private async tick(
@@ -2945,6 +2972,7 @@ export class GameViewController {
     this.showCombatIntermissionOverlay(previous, mergedState);
 
     if (!mergedState.combatIntermission) {
+      this.clearBattleResultRevealTimer();
       this.shownIntermissionKey = null;
     }
 

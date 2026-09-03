@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-03T21:30:43.004Z",
+  "updatedAt": "2026-09-03T12:34:21.080Z",
   "overrides": {
     "1-5": {
       "displayName": "Alerta nas Fronteiras",
@@ -11,7 +11,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 2
             }
@@ -149,7 +149,7 @@
           "goldMultiplier": 1.2,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "boss",
               "count": 1
             }
@@ -166,18 +166,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
-              "role": "trash",
-              "count": 1
-            }
-          ]
-        },
-        {
-          "id": "w2",
-          "goldMultiplier": 1,
-          "slots": [
-            {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 1
             }
@@ -194,7 +183,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 1
             }
@@ -211,7 +200,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 1
             }
@@ -228,7 +217,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 1
             }
@@ -245,7 +234,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 1
             }
@@ -262,7 +251,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 1
             }
@@ -279,7 +268,7 @@
           "goldMultiplier": 1,
           "slots": [
             {
-              "enemyType": "goblin_raider",
+              "enemyType": "giant_rat",
               "role": "trash",
               "count": 1
             }
@@ -639,56 +628,6 @@
               "enemyType": "frost_giant",
               "role": "trash",
               "count": 2
-            }
-          ]
-        }
-      ]
-    },
-    "1-48": {
-      "displayName": "Portal Elemental",
-      "statMultiplier": 1.12,
-      "waves": [
-        {
-          "id": "w1",
-          "goldMultiplier": 1,
-          "slots": [
-            {
-              "enemyType": "goblin_raider",
-              "role": "trash",
-              "count": 1
-            }
-          ]
-        },
-        {
-          "id": "w2",
-          "goldMultiplier": 1,
-          "slots": [
-            {
-              "enemyType": "cave_bat",
-              "role": "trash",
-              "count": 2
-            }
-          ]
-        },
-        {
-          "id": "w3",
-          "goldMultiplier": 1,
-          "slots": [
-            {
-              "enemyType": "bandit_captain",
-              "role": "elite",
-              "count": 1
-            }
-          ]
-        },
-        {
-          "id": "w4",
-          "goldMultiplier": 1.2,
-          "slots": [
-            {
-              "enemyType": "hill_ogre",
-              "role": "boss",
-              "count": 1
             }
           ]
         }

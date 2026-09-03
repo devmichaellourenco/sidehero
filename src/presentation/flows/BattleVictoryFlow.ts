@@ -4,6 +4,9 @@ import { BattleVictoryPayload } from '../components/BattleVictoryDetector';
 /** Duração da animação do rótulo CLEAR/WARNING/DEFEAT. */
 export const OVERLAY_ANIMATION_MS = 2200;
 
+/** Aguarda floats/VFX do golpe final antes de abrir CLEAR/DEFEAT. */
+export const BATTLE_RESULT_REVEAL_DELAY_MS = 2000;
+
 /** Marcos X-50 — animação mais longa para reforçar conquista. */
 export const MILESTONE_OVERLAY_ANIMATION_MS = 3400;
 

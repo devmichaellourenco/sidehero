@@ -23,9 +23,9 @@ import type { EnemyType } from '../entities/EnemyType';
 export const SENTINEL_PHASE: PhaseId = '1-1';
 
 export const FALLBACK_PARTY: SimPartyMember[] = [
-  { heroClass: 'sorcerer', level: 10 },
-  { heroClass: 'knight', level: 10 },
-  { heroClass: 'priest', level: 10 },
+  { heroClass: 'sorcerer', level: 1 },
+  { heroClass: 'knight', level: 1 },
+  { heroClass: 'priest', level: 1 },
 ];
 
 /**

@@ -122,7 +122,7 @@ export function estimatePhasePower(
 }
 
 export const DEFAULT_REFERENCE_PARTY: readonly ReferencePartyMemberSpec[] = [
-  { heroClass: 'sorcerer', level: 10 },
-  { heroClass: 'knight', level: 10 },
-  { heroClass: 'priest', level: 10 },
+  { heroClass: 'sorcerer', level: 1 },
+  { heroClass: 'knight', level: 1 },
+  { heroClass: 'priest', level: 1 },
 ];

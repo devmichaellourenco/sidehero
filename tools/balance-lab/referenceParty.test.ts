@@ -1,18 +1,19 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   parsePartyQueryParam,
   partyToQueryParam,
   partyLabel,
+  withPartyLevel,
   HERO_CLASS_OPTIONS,
 } from './referenceParty';
 
 describe('parsePartyQueryParam', () => {
-  it('faz parse de sorcerer:10,knight:10,priest:10', () => {
-    const result = parsePartyQueryParam('sorcerer:10,knight:10,priest:10');
+  it('faz parse de sorcerer:1,knight:1,priest:1', () => {
+    const result = parsePartyQueryParam('sorcerer:1,knight:1,priest:1');
     expect(result).toEqual([
-      { heroClass: 'sorcerer', level: 10 },
-      { heroClass: 'knight', level: 10 },
-      { heroClass: 'priest', level: 10 },
+      { heroClass: 'sorcerer', level: 1 },
+      { heroClass: 'knight', level: 1 },
+      { heroClass: 'priest', level: 1 },
     ]);
   });
 
@@ -52,9 +53,9 @@ describe('parsePartyQueryParam', () => {
 
   it('aceita todas as classes de herói', () => {
     for (const heroClass of HERO_CLASS_OPTIONS) {
-      const result = parsePartyQueryParam(`${heroClass}:10`);
+      const result = parsePartyQueryParam(`${heroClass}:1`);
       expect(result).not.toBeNull();
-      expect(result![0]).toEqual({ heroClass, level: 10 });
+      expect(result![0]).toEqual({ heroClass, level: 1 });
     }
   });
 });
@@ -62,11 +63,11 @@ describe('parsePartyQueryParam', () => {
 describe('partyToQueryParam', () => {
   it('serializa party padrão corretamente', () => {
     const party = [
-      { heroClass: 'sorcerer', level: 10 },
-      { heroClass: 'knight', level: 10 },
-      { heroClass: 'priest', level: 10 },
+      { heroClass: 'sorcerer', level: 1 },
+      { heroClass: 'knight', level: 1 },
+      { heroClass: 'priest', level: 1 },
     ];
-    expect(partyToQueryParam(party)).toBe('sorcerer:10,knight:10,priest:10');
+    expect(partyToQueryParam(party)).toBe('sorcerer:1,knight:1,priest:1');
   });
 
   it('round-trip: parse(serialize(party)) === party', () => {
@@ -84,14 +85,29 @@ describe('partyToQueryParam', () => {
   });
 });
 
+describe('withPartyLevel', () => {
+  it('aplica o mesmo nível a todos e clampa', () => {
+    const party = [
+      { heroClass: 'sorcerer', level: 1 },
+      { heroClass: 'knight', level: 3 },
+    ];
+    expect(withPartyLevel(party, 12)).toEqual([
+      { heroClass: 'sorcerer', level: 12 },
+      { heroClass: 'knight', level: 12 },
+    ]);
+    expect(withPartyLevel(party, 0)[0]?.level).toBe(1);
+    expect(withPartyLevel(party, 999)[0]?.level).toBe(100);
+  });
+});
+
 describe('partyLabel', () => {
   it('gera rótulo legível para party padrão', () => {
     const label = partyLabel([
-      { heroClass: 'sorcerer', level: 10 },
-      { heroClass: 'knight', level: 10 },
-      { heroClass: 'priest', level: 10 },
+      { heroClass: 'sorcerer', level: 1 },
+      { heroClass: 'knight', level: 1 },
+      { heroClass: 'priest', level: 1 },
     ]);
-    expect(label).toBe('Sorcerer Lv.10 + Knight Lv.10 + Priest Lv.10');
+    expect(label).toBe('Sorcerer Lv.1 + Knight Lv.1 + Priest Lv.1');
   });
 
   it('retorna placeholder para party vazia', () => {

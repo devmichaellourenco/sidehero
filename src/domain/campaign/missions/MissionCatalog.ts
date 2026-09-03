@@ -16,6 +16,7 @@ import {
   sideMissionId,
 } from './MissionId';
 import { MissionStars } from './MissionKind';
+import { mergeMissionCatalog } from './MissionOverrides';
 
 /** Títulos temáticos dos marcos (X-50 usa displayName da fase). */
 const MAIN_QUEST_TITLES: Record<number, string> = {
@@ -227,20 +228,40 @@ function buildCatalogForMaps(maxMapIndex: number): MissionDefinition[] {
 const CATALOG_BASE = buildCatalogForMaps(BASE_GAME_MAX_MAP_INDEX);
 const CATALOG_FULL = buildCatalogForMaps(10);
 
-const BY_ID_BASE = new Map(CATALOG_BASE.map((m) => [m.id, m]));
-const BY_ID_FULL = new Map(CATALOG_FULL.map((m) => [m.id, m]));
+const BY_ID_SEED_BASE = new Map(CATALOG_BASE.map((m) => [m.id, m]));
+const BY_ID_SEED_FULL = new Map(CATALOG_FULL.map((m) => [m.id, m]));
+
+export function listSeedMissionCatalog(
+  profile: CampaignReleaseProfile = CAMPAIGN_RELEASE_PROFILE,
+): readonly MissionDefinition[] {
+  return profile === 'full' ? CATALOG_FULL : CATALOG_BASE;
+}
+
+export function getSeedMissionById(
+  missionId: MissionId,
+  profile: CampaignReleaseProfile = CAMPAIGN_RELEASE_PROFILE,
+): MissionDefinition | undefined {
+  return (profile === 'full' ? BY_ID_SEED_FULL : BY_ID_SEED_BASE).get(missionId);
+}
+
+export function isSeedMissionId(
+  missionId: MissionId,
+  profile: CampaignReleaseProfile = CAMPAIGN_RELEASE_PROFILE,
+): boolean {
+  return getSeedMissionById(missionId, profile) !== undefined;
+}
 
 export function listMissionCatalog(
   profile: CampaignReleaseProfile = CAMPAIGN_RELEASE_PROFILE,
 ): readonly MissionDefinition[] {
-  return profile === 'full' ? CATALOG_FULL : CATALOG_BASE;
+  return mergeMissionCatalog(listSeedMissionCatalog(profile));
 }
 
 export function getMissionById(
   missionId: MissionId,
   profile: CampaignReleaseProfile = CAMPAIGN_RELEASE_PROFILE,
 ): MissionDefinition | undefined {
-  return (profile === 'full' ? BY_ID_FULL : BY_ID_BASE).get(missionId);
+  return listMissionCatalog(profile).find((mission) => mission.id === missionId);
 }
 
 export function listMainMissionsForMap(

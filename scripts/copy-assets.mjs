@@ -16,6 +16,10 @@ const outRoot = join(root, 'dist', 'panel', 'assets');
 /** Sprites de heróis em public/sprites/heroes. */
 const HERO_SPRITE_MAP = [
   ['galneon_aprendiz.png', 'characters/galneon_aprendiz.png'],
+  [
+    'galneon/galneon_aprendiz_basic_attack_sheet.png',
+    'characters/galneon_aprendiz_basic_attack_sheet.png',
+  ],
   ['galneon_guerreiro.png', 'characters/galneon_guerreiro.png'],
   ['galneon_capitao.png', 'characters/galneon_capitao.png'],
   ['galneon_general.png', 'characters/galneon_general.png'],
@@ -23,6 +27,10 @@ const HERO_SPRITE_MAP = [
   ['galneon_mestre_marcial.png', 'characters/galneon_mestre_marcial.png'],
   ['galneon_campeao.png', 'characters/galneon_campeao.png'],
   ['nix_aprendiz.png', 'characters/nix_aprendiz.png'],
+  [
+    'nix/nix_aprendiz_basic_attack_sheet.png',
+    'characters/nix_aprendiz_basic_attack_sheet.png',
+  ],
   ['nix_maga.png', 'characters/nix_maga.png'],
   ['nix_arquimaga.png', 'characters/nix_arquimaga.png'],
   ['nix_imperatriz_arcana.png', 'characters/nix_imperatriz_arcana.png'],
@@ -30,6 +38,10 @@ const HERO_SPRITE_MAP = [
   ['nix_soberana_astral.png', 'characters/nix_soberana_astral.png'],
   ['nix_filha_do_eter.png', 'characters/nix_filha_do_eter.png'],
   ['elara_aprendiz.png', 'characters/elara_aprendiz.png'],
+  [
+    'elara/elara_aprendiz_basic_attack_sheet.png',
+    'characters/elara_aprendiz_basic_attack_sheet.png',
+  ],
   ['elara_cleriga_sagrada.png', 'characters/elara_cleriga_sagrada.png'],
   ['elara_alta_sacerdotiza.png', 'characters/elara_alta_sacerdotiza.png'],
   ['elara_santa.png', 'characters/elara_santa.png'],

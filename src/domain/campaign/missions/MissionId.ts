@@ -43,6 +43,21 @@ export function normalMissionId(phaseId: PhaseId): MissionId {
   return `normal:${phaseId}`;
 }
 
+const CUSTOM_NORMAL_PREFIX = 'normal:custom:';
+
+export function isCustomNormalMissionId(missionId: MissionId): boolean {
+  return missionId.startsWith(CUSTOM_NORMAL_PREFIX);
+}
+
+export function customNormalMissionId(slug: string): MissionId {
+  return `${CUSTOM_NORMAL_PREFIX}${slug}`;
+}
+
+export function slugFromCustomNormalMissionId(missionId: MissionId): string | null {
+  if (!isCustomNormalMissionId(missionId)) return null;
+  return missionId.slice(CUSTOM_NORMAL_PREFIX.length);
+}
+
 export function parseMissionIdKind(missionId: MissionId): 'main' | 'side' | 'normal' | null {
   if (missionId.startsWith('main:')) return 'main';
   if (missionId.startsWith('side:')) return 'side';
@@ -57,6 +72,7 @@ export function phaseIdFromMainMissionId(missionId: MissionId): PhaseId | null {
 
 export function phaseIdFromNormalMissionId(missionId: MissionId): PhaseId | null {
   if (!missionId.startsWith('normal:')) return null;
+  if (isCustomNormalMissionId(missionId)) return null;
   return missionId.slice('normal:'.length);
 }
 

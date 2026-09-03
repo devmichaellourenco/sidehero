@@ -11,10 +11,12 @@ export interface PartyMemberSpec {
 }
 
 const DEFAULT_PARTY: readonly PartyMemberSpec[] = [
-  { heroClass: 'sorcerer', level: 10 },
-  { heroClass: 'knight', level: 10 },
-  { heroClass: 'priest', level: 10 },
+  { heroClass: 'sorcerer', level: 1 },
+  { heroClass: 'knight', level: 1 },
+  { heroClass: 'priest', level: 1 },
 ];
+
+const DEFAULT_MEMBER_LEVEL = 1;
 
 export const HERO_CLASS_OPTIONS: readonly string[] = [
   'knight',
@@ -100,7 +102,7 @@ export function subscribePartyChange(fn: (party: PartyMemberSpec[]) => void): ()
 // ── Conversão query string ────────────────────────────────────────────────────
 
 /**
- * Serializa a party para query: `sorcerer:10,knight:10,priest:10`.
+ * Serializa a party para query: `sorcerer:1,knight:1,priest:1`.
  */
 export function partyToQueryParam(party: readonly PartyMemberSpec[]): string {
   return party.map((m) => `${m.heroClass}:${m.level}`).join(',');
@@ -158,12 +160,33 @@ function memberRowHtml(member: PartyMemberSpec, index: number): string {
     </div>`;
 }
 
+export function clampPartyLevel(level: number): number {
+  return Math.max(1, Math.min(100, Math.floor(level)));
+}
+
+/** Aplica o mesmo nível a todos os membros (mantém classes). */
+export function withPartyLevel(
+  party: readonly PartyMemberSpec[],
+  level: number,
+): PartyMemberSpec[] {
+  const next = clampPartyLevel(level);
+  return party.map((member) => ({ ...member, level: next }));
+}
+
 export function renderPartyEditorHtml(party: readonly PartyMemberSpec[]): string {
   const rows = party.map((m, i) => memberRowHtml(m, i)).join('');
   const canAdd = party.length < 3;
+  const bulkLevel = party[0]?.level ?? DEFAULT_MEMBER_LEVEL;
   return `
     <div class="rp-editor" id="rp-editor">
       <p class="rp-label">Party de referência</p>
+      <div class="rp-bulk-level">
+        <label class="rp-level-wrap">Lv. todos
+          <input type="number" class="rp-level rp-level-all" id="rp-level-all" min="1" max="100"
+                 value="${bulkLevel}" aria-label="Nível de todos os membros" />
+        </label>
+        <button type="button" class="lab-btn--info rp-btn-level-all">Aplicar a todos</button>
+      </div>
       <div class="rp-members">${rows}</div>
       ${canAdd ? `<button type="button" class="lab-btn--create rp-btn-add">+ membro</button>` : ''}
       <button type="button" class="lab-btn--warn rp-btn-reset">↺ padrão</button>
@@ -177,7 +200,9 @@ function readPartyFromEditor(host: HTMLElement): PartyMemberSpec[] {
     const classSelect = row.querySelector<HTMLSelectElement>('.rp-class');
     const levelInput = row.querySelector<HTMLInputElement>('.rp-level');
     const heroClass = classSelect?.value ?? 'knight';
-    const level = Math.max(1, Math.min(100, parseInt(levelInput?.value ?? '10', 10) || 1));
+    const level = clampPartyLevel(
+      parseInt(levelInput?.value ?? String(DEFAULT_MEMBER_LEVEL), 10) || DEFAULT_MEMBER_LEVEL,
+    );
     members.push({ heroClass, level });
   });
   return members;
@@ -206,15 +231,34 @@ export function bindPartyEditor(host: HTMLElement, onChange?: (party: PartyMembe
   host.querySelectorAll<HTMLSelectElement>('.rp-class').forEach((sel) => {
     sel.addEventListener('change', commit);
   });
-  host.querySelectorAll<HTMLInputElement>('.rp-level').forEach((inp) => {
+  host.querySelectorAll<HTMLInputElement>('.rp-member .rp-level').forEach((inp) => {
     inp.addEventListener('change', commit);
     inp.addEventListener('input', commit);
+  });
+
+  const applyAllLevels = (): void => {
+    const bulkInput = host.querySelector<HTMLInputElement>('#rp-level-all');
+    const level = clampPartyLevel(
+      parseInt(bulkInput?.value ?? String(DEFAULT_MEMBER_LEVEL), 10) || DEFAULT_MEMBER_LEVEL,
+    );
+    if (bulkInput) bulkInput.value = String(level);
+    const party = withPartyLevel(readPartyFromEditor(host), level);
+    setReferenceParty(party);
+    rerender();
+  };
+
+  host.querySelector<HTMLButtonElement>('.rp-btn-level-all')?.addEventListener('click', applyAllLevels);
+  host.querySelector<HTMLInputElement>('#rp-level-all')?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      applyAllLevels();
+    }
   });
 
   host.querySelector<HTMLButtonElement>('.rp-btn-add')?.addEventListener('click', () => {
     const party = readPartyFromEditor(host);
     if (party.length >= 3) return;
-    party.push({ heroClass: 'knight', level: 10 });
+    party.push({ heroClass: 'knight', level: DEFAULT_MEMBER_LEVEL });
     setReferenceParty(party);
     rerender();
   });

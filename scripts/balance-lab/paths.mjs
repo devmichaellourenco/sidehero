@@ -65,6 +65,15 @@ export const SHOP_BACKUPS_DIR = join(
   'src/domain/shop/data/backups/shop-overrides',
 );
 
+export const MISSION_OVERRIDES_PATH = join(
+  root,
+  'src/domain/campaign/data/mission-overrides.json',
+);
+export const MISSION_BACKUPS_DIR = join(
+  root,
+  'src/domain/campaign/data/backups/mission-overrides',
+);
+
 export const ENEMY_COMBAT_PATH = join(
   root,
   'src/domain/enemies/data/enemy-combat-overrides.json',
@@ -138,6 +147,12 @@ export const SCOPE_MAP = {
     override: SHOP_OVERRIDES_PATH,
     backupsDir: SHOP_BACKUPS_DIR,
     catalog: SHOP_CATALOG_PATH,
+    tsBackedOnly: false,
+  },
+  missions: {
+    override: MISSION_OVERRIDES_PATH,
+    backupsDir: MISSION_BACKUPS_DIR,
+    catalog: null,
     tsBackedOnly: false,
   },
   'enemy-combat': {

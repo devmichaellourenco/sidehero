@@ -1,6 +1,11 @@
 import { CombatSkillVfxDto } from '../../application/dto/CombatSkillVfxDto';
 import { getAssetUrl } from '../assets/AssetCatalog';
 import {
+  extractCharacterSpritePath,
+  getHeroAttackAnimSheet,
+  type HeroAttackAnimSheet,
+} from '../assets/HeroAttackAnimCatalog';
+import {
   getSkillVfxDefinition,
   getSkillVfxImpactSvgPath,
   getSkillVfxSvgPath,
@@ -11,6 +16,8 @@ import {
 const DEFAULT_DURATION_MS = 520;
 
 export class BattleSkillVfxController {
+  private readonly heroAttackAnimGeneration = new WeakMap<HTMLElement, number>();
+
   constructor(
     private readonly layer: HTMLElement,
     private readonly battleStrip: HTMLElement,
@@ -21,6 +28,7 @@ export class BattleSkillVfxController {
 
     for (const event of events) {
       this.flashSkillSlot(event);
+      this.playHeroAttackAnim(event);
       const definition = getSkillVfxDefinition(event.skillId);
       if (!definition) continue;
 
@@ -39,6 +47,81 @@ export class BattleSkillVfxController {
 
     slot.classList.add('combat-skill-slot--fired');
     window.setTimeout(() => slot.classList.remove('combat-skill-slot--fired'), 650);
+  }
+
+  /** Troca o portrait estático pela folha de ataque do herói (ex.: Galneon basic). */
+  private playHeroAttackAnim(event: CombatSkillVfxDto): void {
+    if (event.attackerSide !== 'hero') return;
+
+    const hitbox = this.findAnchor('hero', event.attackerId);
+    if (!hitbox) return;
+
+    const portrait = hitbox.querySelector<HTMLImageElement>('img.hero-image');
+    if (!portrait?.src) return;
+
+    const spritePath = extractCharacterSpritePath(portrait.src);
+    if (!spritePath) return;
+
+    const sheet = getHeroAttackAnimSheet(spritePath, event.skillId);
+    if (!sheet) return;
+
+    const sheetUrl = getAssetUrl(sheet.path);
+    if (!sheetUrl) return;
+
+    hitbox.querySelectorAll('.hero-attack-anim').forEach((node) => node.remove());
+
+    const generation = (this.heroAttackAnimGeneration.get(hitbox) ?? 0) + 1;
+    this.heroAttackAnimGeneration.set(hitbox, generation);
+
+    hitbox.classList.add('hero-sprite--attacking');
+
+    const anim = document.createElement('div');
+    anim.className = 'hero-attack-anim';
+    anim.setAttribute('aria-hidden', 'true');
+    this.applyHeroAttackSheet(anim, sheet, sheetUrl);
+    hitbox.appendChild(anim);
+
+    window.setTimeout(() => {
+      if (this.heroAttackAnimGeneration.get(hitbox) !== generation) return;
+      anim.remove();
+      hitbox.classList.remove('hero-sprite--attacking');
+    }, sheet.frameDurationMs + 40);
+  }
+
+  private applyHeroAttackSheet(
+    el: HTMLElement,
+    sheet: HeroAttackAnimSheet,
+    sheetUrl: string,
+  ): void {
+    const frameCount = sheet.columns * sheet.rows;
+    const cols = sheet.columns;
+    const rows = sheet.rows;
+
+    el.style.backgroundImage = `url("${sheetUrl}")`;
+    el.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
+
+    const keyframes: Keyframe[] = [];
+    for (let i = 0; i < frameCount; i += 1) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = cols <= 1 ? 0 : (col / (cols - 1)) * 100;
+      const y = rows <= 1 ? 0 : (row / (rows - 1)) * 100;
+      keyframes.push({
+        backgroundPosition: `${x}% ${y}%`,
+        offset: i / frameCount,
+        easing: 'step-end',
+      });
+    }
+    keyframes.push({
+      backgroundPosition: keyframes[frameCount - 1]?.backgroundPosition ?? '0% 0%',
+      offset: 1,
+    });
+
+    el.animate(keyframes, {
+      duration: sheet.frameDurationMs,
+      iterations: 1,
+      fill: 'forwards',
+    });
   }
 
   private async spawn(event: CombatSkillVfxDto, definition: SkillVfxDefinition): Promise<void> {

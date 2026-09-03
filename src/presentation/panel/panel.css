@@ -3233,6 +3233,30 @@ html[data-ui-theme='dark'] .battle-stats-skill-cd {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
 }
 
+/* Animação de ataque do corpo (spritesheet) — pausa o march e esconde o idle */
+.hero-sprite--attacking {
+  animation: none !important;
+}
+
+.hero-sprite--attacking .hero-image {
+  visibility: hidden;
+}
+
+.hero-attack-anim {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--strip-hero-slot);
+  height: var(--strip-hero-slot);
+  pointer-events: none;
+  z-index: 2;
+  background-repeat: no-repeat;
+  background-position: 0% 0%;
+  transform: scale(var(--strip-sprite-zoom));
+  transform-origin: center bottom;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+}
+
 .enemy-battle-hitbox {
   display: flex;
   flex-direction: column;

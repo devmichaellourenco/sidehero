@@ -30,6 +30,13 @@ import {
   renderSimResult,
 } from './combatSimUi';
 import { renderSweepPanelHtml, bindSweepPanel } from './combatSweepUi';
+import {
+  buildChapterTrack,
+  computeTrackTipPosition,
+  missionMatchesTrackFilters,
+  type ChapterTrack,
+  type TrackMissionEntry,
+} from './missionChapterTrack';
 
 type MissionKind = 'main' | 'side' | 'normal';
 
@@ -47,6 +54,12 @@ interface MissionListEntry {
   hasOverride: boolean;
   waveCount: number;
   sharedMissionIds: string[];
+  isSeed?: boolean;
+  isCustom?: boolean;
+  fromOverride?: boolean;
+  hasChildren?: boolean;
+  canDelete?: boolean;
+  canChangeKind?: boolean;
 }
 
 interface ChapterOption {
@@ -93,11 +106,16 @@ interface BackupEntry {
 
 let enemies: EnemyOption[] = [];
 let missions: MissionListEntry[] = [];
+/** Catálogo do mapa ativo (sem kind/capítulo/q) — fonte da trilha. */
+let trackMissions: MissionListEntry[] = [];
 let chapters: ChapterOption[] = [];
 let maps: string[] = [];
+let phasesByMap: Record<string, string[]> = {};
 let backups: BackupEntry[] = [];
+let createModalOpen = false;
 let selectedId: string | null = null;
 let selectedMission: MissionListEntry | null = null;
+let trackTipEl: HTMLElement | null = null;
 let draft: BattleDraft | null = null;
 /** Rascunhos por missão — sobrevivem à troca de item até salvar. */
 const draftsByMissionId = new Map<string, BattleDraft>();
@@ -212,6 +230,11 @@ function starsLabel(stars: number | null): string {
   return `★${stars}`;
 }
 
+function resolveTrackMapId(availableMaps: string[]): string {
+  if (filterMap) return filterMap;
+  return availableMaps[0] ?? maps[0] ?? '';
+}
+
 export async function loadMissionBattlesList(): Promise<void> {
   const query = new URLSearchParams();
   if (filterKind) query.set('kind', filterKind);
@@ -223,13 +246,33 @@ export async function loadMissionBattlesList(): Promise<void> {
     enemies: EnemyOption[];
     chapters?: ChapterOption[];
     maps?: string[];
+    phasesByMap?: Record<string, string[]>;
     backups?: BackupEntry[];
   }>(`/api/mission-battles?${query.toString()}`);
   enemies = data.enemies;
   missions = data.missions;
   chapters = data.chapters ?? chapters;
   maps = data.maps ?? maps;
+  phasesByMap = data.phasesByMap ?? phasesByMap;
   backups = data.backups ?? [];
+
+  const trackMapId = resolveTrackMapId(maps);
+  if (!trackMapId) {
+    trackMissions = [];
+    return;
+  }
+  if (filterMap && !filterKind && !filterChapter && !filterQuery.trim()) {
+    trackMissions = missions;
+    return;
+  }
+  const trackQuery = new URLSearchParams();
+  trackQuery.set('mapId', trackMapId);
+  const trackData = await api<{
+    missions: MissionListEntry[];
+    phasesByMap?: Record<string, string[]>;
+  }>(`/api/mission-battles?${trackQuery.toString()}`);
+  trackMissions = trackData.missions;
+  if (trackData.phasesByMap) phasesByMap = trackData.phasesByMap;
 }
 
 export async function selectMission(missionId: string): Promise<void> {
@@ -238,7 +281,12 @@ export async function selectMission(missionId: string): Promise<void> {
     missions.find(
       (mission) =>
         mission.missionId === missionId || mission.phaseTemplateId === missionId,
-    )?.missionId ?? missionId;
+    )?.missionId ??
+    trackMissions.find(
+      (mission) =>
+        mission.missionId === missionId || mission.phaseTemplateId === missionId,
+    )?.missionId ??
+    missionId;
 
   const data = await api<{
     mission: MissionListEntry;
@@ -431,6 +479,211 @@ function renderWaveEditor(wave: WaveDraft, waveIndex: number): string {
   `;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function kindShortLabel(kind: MissionKind): string {
+  if (kind === 'main') return 'Main';
+  if (kind === 'side') return 'Side';
+  return 'Normal';
+}
+
+function ensureTrackTip(): HTMLElement {
+  if (trackTipEl && document.body.contains(trackTipEl)) return trackTipEl;
+  trackTipEl = document.createElement('div');
+  trackTipEl.className = 'mb-track-tip';
+  trackTipEl.hidden = true;
+  trackTipEl.setAttribute('role', 'tooltip');
+  document.body.appendChild(trackTipEl);
+  return trackTipEl;
+}
+
+function hideTrackTip(): void {
+  if (!trackTipEl) return;
+  trackTipEl.hidden = true;
+  trackTipEl.innerHTML = '';
+}
+
+function showTrackTip(anchor: HTMLElement, mission: TrackMissionEntry): void {
+  const tip = ensureTrackTip();
+  const shared =
+    mission.sharedMissionIds.length > 0
+      ? `<div><span class="mb-track-tip-k">Shared</span> ${escapeHtml(mission.sharedMissionIds.join(', '))}</div>`
+      : '';
+  tip.innerHTML = `
+    <div class="mb-track-tip-title">${escapeHtml(mission.name)}</div>
+    <div class="mb-track-tip-row">
+      <span class="mb-track-tip-kind mb-track-tip-kind--${mission.kind}">${kindShortLabel(mission.kind)}</span>
+      <code>${escapeHtml(mission.phaseTemplateId)}</code>
+    </div>
+    <div><span class="mb-track-tip-k">Waves</span> ${mission.waveCount}</div>
+    <div><span class="mb-track-tip-k">Stars</span> ${mission.stars ?? '—'}</div>
+    <div><span class="mb-track-tip-k">Override</span> ${mission.hasOverride ? 'sim' : 'baseline'}</div>
+    ${shared}
+  `;
+  tip.hidden = false;
+  tip.style.left = '0px';
+  tip.style.top = '0px';
+
+  const anchorRect = anchor.getBoundingClientRect();
+  const tipRect = tip.getBoundingClientRect();
+  const pos = computeTrackTipPosition({
+    anchor: {
+      top: anchorRect.top,
+      left: anchorRect.left,
+      width: anchorRect.width,
+      height: anchorRect.height,
+    },
+    tip: {
+      top: 0,
+      left: 0,
+      width: tipRect.width,
+      height: tipRect.height,
+    },
+    viewport: {
+      top: 0,
+      left: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    },
+    margin: 8,
+  });
+  tip.style.left = `${pos.left}px`;
+  tip.style.top = `${pos.top}px`;
+  tip.dataset.placement = pos.placement;
+}
+
+function renderTrackNode(
+  mission: TrackMissionEntry | null,
+  opts: { role: 'main' | 'child'; selectedId: string | null; dimmed: boolean },
+): string {
+  if (!mission) {
+    return `<span class="mb-track-node mb-track-node--empty" aria-hidden="true">—</span>`;
+  }
+  const selected = opts.selectedId === mission.missionId;
+  const classes = [
+    'mb-track-node',
+    opts.role === 'main' ? 'mb-track-node--main' : 'mb-track-child',
+    `mb-track-node--${mission.kind}`,
+    selected ? 'is-selected' : '',
+    mission.hasOverride ? 'has-override' : '',
+    opts.dimmed ? 'is-dimmed' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const label =
+    opts.role === 'main'
+      ? escapeHtml(mission.phaseTemplateId)
+      : `${kindShortLabel(mission.kind)} ${escapeHtml(mission.phaseTemplateId)}`;
+
+  return `
+    <button
+      type="button"
+      class="${classes}"
+      data-select-mission="${escapeHtml(mission.missionId)}"
+      data-track-mission="${escapeHtml(mission.missionId)}"
+      aria-pressed="${selected ? 'true' : 'false'}"
+    >${label}${mission.hasOverride ? '<span class="mb-track-dot" title="override"></span>' : ''}</button>
+  `;
+}
+
+function renderChapterTrack(): string {
+  const mapOptions = maps.length > 0 ? maps : [...new Set(trackMissions.map((m) => m.mapId))].sort();
+  const trackMapId = resolveTrackMapId(mapOptions);
+  if (!trackMapId || chapters.length === 0) {
+    return `
+      <div class="mb-track mb-track--empty">
+        <p class="lab-hint">Selecione um mapa para ver a trilha de capítulos.</p>
+      </div>
+    `;
+  }
+
+  const track: ChapterTrack = buildChapterTrack(trackMissions, trackMapId, chapters);
+  const filters = { kind: filterKind || undefined, q: filterQuery || undefined };
+  const focusChapter = filterChapter ? Number(filterChapter) : null;
+
+  const columnsHtml = track.columns
+    .map((column) => {
+      const focused = focusChapter !== null && column.mainPhase === focusChapter;
+      const mainDimmed = column.main
+        ? !missionMatchesTrackFilters(column.main, filters)
+        : false;
+      const childrenHtml = column.children
+        .map((child) =>
+          renderTrackNode(child, {
+            role: 'child',
+            selectedId,
+            dimmed: !missionMatchesTrackFilters(child, filters),
+          }),
+        )
+        .join('');
+
+      return `
+        <div
+          class="mb-track-col${focused ? ' is-chapter-focus' : ''}"
+          data-chapter-main="${column.mainPhase}"
+        >
+          <div class="mb-track-main-row">
+            ${renderTrackNode(column.main, {
+              role: 'main',
+              selectedId,
+              dimmed: mainDimmed,
+            })}
+          </div>
+          <div class="mb-track-children" role="list">
+            ${childrenHtml || '<span class="mb-track-empty-kids">sem side/normal</span>'}
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+
+  const mapNote = filterMap
+    ? escapeHtml(trackMapId)
+    : `${escapeHtml(trackMapId)} <span class="mb-track-map-hint">(primeiro mapa — filtre para outro)</span>`;
+
+  return `
+    <div class="mb-track" data-track-map="${escapeHtml(trackMapId)}">
+      <div class="mb-track-head">
+        <strong>Trilha de capítulos</strong>
+        <span class="mb-track-map">${mapNote}</span>
+      </div>
+      <div class="mb-track-rail" role="navigation" aria-label="Marcos principais do mapa">
+        ${columnsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function bindChapterTrack(root: HTMLElement): void {
+  const tipMissions = new Map(trackMissions.map((mission) => [mission.missionId, mission]));
+
+  root.querySelectorAll<HTMLElement>('[data-track-mission]').forEach((node) => {
+    const missionId = node.dataset.trackMission;
+    if (!missionId) return;
+    const mission = tipMissions.get(missionId);
+    if (!mission) return;
+
+    node.addEventListener('mouseenter', () => showTrackTip(node, mission));
+    node.addEventListener('mouseleave', () => hideTrackTip());
+    node.addEventListener('focus', () => showTrackTip(node, mission));
+    node.addEventListener('blur', () => hideTrackTip());
+  });
+
+  if (filterChapter) {
+    const focusCol = root.querySelector<HTMLElement>(
+      `.mb-track-col[data-chapter-main="${CSS.escape(filterChapter)}"]`,
+    );
+    focusCol?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
 function renderList(): string {
   if (missions.length === 0) {
     return `<p class="lab-hint">Nenhuma missão neste filtro. Ajuste capítulo / tipo / mapa / busca.</p>`;
@@ -483,16 +736,318 @@ function renderSharedNotice(): string {
   `;
 }
 
+function phasesForChapter(mapId: string, chapterMainPhase: number): string[] {
+  const band = chapters.find((chapter) => chapter.mainPhase === chapterMainPhase);
+  const all = phasesByMap[mapId] ?? [];
+  if (!band) return all;
+  return all.filter((phaseId) => {
+    const num = Number(phaseId.split('-')[1]);
+    return Number.isFinite(num) && num >= band.min && num <= band.max;
+  });
+}
+
+function renderIdentityPanel(): string {
+  if (!selectedMission) return '';
+  const canChangeKind = selectedMission.canChangeKind !== false;
+  const canDelete = selectedMission.canDelete !== false;
+  const kindDisabled = selectedMission.kind === 'main' && !canChangeKind;
+  const phaseOptions = phasesForChapter(
+    selectedMission.mapId,
+    selectedMission.chapterMainPhase,
+  );
+  const badges = [
+    selectedMission.isCustom ? '<span class="mb-badge mb-badge--unique">custom</span>' : '',
+    selectedMission.isSeed ? '<span class="mb-badge mb-badge--canonical">seed</span>' : '',
+    selectedMission.fromOverride ? '<span class="mb-badge">override</span>' : '',
+    selectedMission.hasChildren
+      ? '<span class="mb-badge mb-badge--shared">tem filhos</span>'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return `
+    <section class="mb-identity" aria-label="Identidade da missão">
+      <header class="mb-identity-head">
+        <strong>Identidade</strong>
+        <span class="mb-identity-badges">${badges}</span>
+      </header>
+      <div class="mb-identity-grid">
+        <label>Nome
+          <input type="text" id="mb-identity-name" value="${escapeHtml(selectedMission.name)}" />
+        </label>
+        <label>Tipo
+          <select id="mb-identity-kind" ${kindDisabled ? 'disabled title="Main com filhos no capítulo"' : ''}>
+            <option value="main" ${selectedMission.kind === 'main' ? 'selected' : ''} ${
+              selectedMission.kind !== 'main' ? 'disabled' : ''
+            }>Principal</option>
+            <option value="side" ${selectedMission.kind === 'side' ? 'selected' : ''} ${
+              !canChangeKind && selectedMission.kind === 'main' ? 'disabled' : ''
+            }>Secundária</option>
+            <option value="normal" ${selectedMission.kind === 'normal' ? 'selected' : ''} ${
+              !canChangeKind && selectedMission.kind === 'main' ? 'disabled' : ''
+            }>Normal</option>
+          </select>
+        </label>
+        <label>Capítulo
+          <select id="mb-identity-chapter">
+            ${chapters
+              .map(
+                (chapter) =>
+                  `<option value="${chapter.mainPhase}" ${
+                    selectedMission!.chapterMainPhase === chapter.mainPhase ? 'selected' : ''
+                  }>${chapter.label}</option>`,
+              )
+              .join('')}
+          </select>
+        </label>
+        <label>Fase (template)
+          <select id="mb-identity-phase">
+            ${phaseOptions
+              .map(
+                (phaseId) =>
+                  `<option value="${phaseId}" ${
+                    selectedMission!.phaseTemplateId === phaseId ? 'selected' : ''
+                  }>${phaseId}</option>`,
+              )
+              .join('')}
+          </select>
+        </label>
+        <label>Stars
+          <select id="mb-identity-stars">
+            <option value="" ${selectedMission.stars == null ? 'selected' : ''}>—</option>
+            ${[1, 2, 3, 4, 5]
+              .map(
+                (star) =>
+                  `<option value="${star}" ${
+                    selectedMission!.stars === star ? 'selected' : ''
+                  }>${star}★</option>`,
+              )
+              .join('')}
+          </select>
+        </label>
+        <label class="mb-identity-id">Id
+          <code>${escapeHtml(selectedMission.missionId)}</code>
+        </label>
+      </div>
+      <div class="mb-identity-actions">
+        <button type="button" class="lab-btn--primary" id="mb-identity-save">Salvar identidade</button>
+        <button type="button" class="mb-btn-danger" id="mb-identity-delete" ${
+          canDelete ? '' : 'disabled title="Main com filhos no capítulo"'
+        }>Excluir missão</button>
+        ${
+          selectedMission.kind === 'main' && selectedMission.hasChildren
+            ? '<p class="lab-hint">Main com filhos: só edita nome/fase/stars — não troca tipo nem exclui.</p>'
+            : ''
+        }
+      </div>
+    </section>
+  `;
+}
+
+function renderCreateModal(): string {
+  if (!createModalOpen) return '';
+  const mapId = filterMap || maps[0] || 'stendra';
+  const chapterMain = chapters[1]?.mainPhase ?? chapters[0]?.mainPhase ?? 10;
+  const phaseOptions = phasesForChapter(mapId, chapterMain);
+  return `
+    <div class="mb-modal" id="mb-create-modal" role="dialog" aria-modal="true" aria-label="Nova missão">
+      <div class="mb-modal-card">
+        <header>
+          <strong>Nova missão</strong>
+          <button type="button" class="lab-btn--icon" id="mb-create-close" aria-label="Fechar">×</button>
+        </header>
+        <div class="mb-identity-grid">
+          <label>Tipo
+            <select id="mb-create-kind">
+              <option value="side">Secundária</option>
+              <option value="normal">Normal custom</option>
+            </select>
+          </label>
+          <label>Mapa
+            <select id="mb-create-map">
+              ${maps
+                .map((id) => `<option value="${id}" ${id === mapId ? 'selected' : ''}>${id}</option>`)
+                .join('')}
+            </select>
+          </label>
+          <label>Capítulo
+            <select id="mb-create-chapter">
+              ${chapters
+                .map(
+                  (chapter) =>
+                    `<option value="${chapter.mainPhase}" ${
+                      chapter.mainPhase === chapterMain ? 'selected' : ''
+                    }>${chapter.label}</option>`,
+                )
+                .join('')}
+            </select>
+          </label>
+          <label>Fase (template)
+            <select id="mb-create-phase">
+              ${phaseOptions
+                .map((phaseId) => `<option value="${phaseId}">${phaseId}</option>`)
+                .join('')}
+            </select>
+          </label>
+          <label>Nome
+            <input type="text" id="mb-create-name" placeholder="Nome exibido" />
+          </label>
+          <label>Slug (id)
+            <input type="text" id="mb-create-slug" placeholder="ex.: stendra_new_side" />
+          </label>
+          <label>Stars
+            <select id="mb-create-stars">
+              <option value="1">1★</option>
+              <option value="2" selected>2★</option>
+              <option value="3">3★</option>
+              <option value="4">4★</option>
+              <option value="5">5★</option>
+            </select>
+          </label>
+        </div>
+        <p class="lab-hint">A batalha usa a fase escolhida (waves no editor abaixo após criar).</p>
+        <div class="mb-identity-actions">
+          <button type="button" class="lab-btn--primary" id="mb-create-submit">Criar</button>
+          <button type="button" class="lab-btn--info" id="mb-create-cancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveMissionIdentity(): Promise<void> {
+  if (!selectedMission) return;
+  const name = (document.getElementById('mb-identity-name') as HTMLInputElement | null)?.value.trim();
+  const kind = (document.getElementById('mb-identity-kind') as HTMLSelectElement | null)?.value as
+    | MissionKind
+    | undefined;
+  const phaseTemplateId = (
+    document.getElementById('mb-identity-phase') as HTMLSelectElement | null
+  )?.value;
+  const starsRaw = (document.getElementById('mb-identity-stars') as HTMLSelectElement | null)?.value;
+  const stars = starsRaw === '' || starsRaw == null ? null : Number(starsRaw);
+
+  const body: Record<string, unknown> = {
+    name,
+    phaseTemplateId,
+    stars,
+  };
+  if (kind && kind !== selectedMission.kind) {
+    body.kind = kind;
+  }
+
+  const data = await api<{
+    missionId: string;
+    previousId?: string | null;
+  }>(`/api/missions/${encodeURIComponent(selectedMission.missionId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+
+  await loadMissionBattlesList();
+  await selectMission(data.missionId);
+  setStatus(`Identidade salva: ${data.missionId}`);
+}
+
+async function deleteSelectedMission(): Promise<void> {
+  if (!selectedMission) return;
+  if (!selectedMission.canDelete) {
+    setStatus('Não é possível excluir esta main (ainda tem filhos no capítulo).', true);
+    return;
+  }
+  if (
+    !confirm(
+      `Excluir missão ${selectedMission.missionId}? Seed vai para deletedMissionIds; custom some do override.`,
+    )
+  ) {
+    return;
+  }
+  await api(`/api/missions/${encodeURIComponent(selectedMission.missionId)}`, {
+    method: 'DELETE',
+  });
+  selectedId = null;
+  selectedMission = null;
+  draft = null;
+  await loadMissionBattlesList();
+  setStatus('Missão excluída.');
+}
+
+async function createMissionFromModal(): Promise<void> {
+  const kind = (document.getElementById('mb-create-kind') as HTMLSelectElement | null)?.value as
+    | 'side'
+    | 'normal';
+  const mapId = (document.getElementById('mb-create-map') as HTMLSelectElement | null)?.value;
+  const phaseTemplateId = (
+    document.getElementById('mb-create-phase') as HTMLSelectElement | null
+  )?.value;
+  const name = (document.getElementById('mb-create-name') as HTMLInputElement | null)?.value.trim();
+  const slug = (document.getElementById('mb-create-slug') as HTMLInputElement | null)?.value.trim();
+  const stars = Number(
+    (document.getElementById('mb-create-stars') as HTMLSelectElement | null)?.value ?? 2,
+  );
+
+  if (!kind || !mapId || !phaseTemplateId || !name) {
+    setStatus('Preencha tipo, mapa, fase e nome.', true);
+    return;
+  }
+
+  const data = await api<{ missionId: string }>('/api/missions', {
+    method: 'POST',
+    body: JSON.stringify({ kind, mapId, phaseTemplateId, name, slug, stars }),
+  });
+  createModalOpen = false;
+  filterMap = mapId;
+  await loadMissionBattlesList();
+  await selectMission(data.missionId);
+  setStatus(`Missão criada: ${data.missionId}`);
+}
+
+function refreshCreatePhaseOptions(root: HTMLElement): void {
+  const mapId = (root.querySelector('#mb-create-map') as HTMLSelectElement | null)?.value ?? '';
+  const chapterMain = Number(
+    (root.querySelector('#mb-create-chapter') as HTMLSelectElement | null)?.value ?? 0,
+  );
+  const phaseSelect = root.querySelector('#mb-create-phase') as HTMLSelectElement | null;
+  if (!phaseSelect) return;
+  const options = phasesForChapter(mapId, chapterMain);
+  phaseSelect.innerHTML = options
+    .map((phaseId) => `<option value="${phaseId}">${phaseId}</option>`)
+    .join('');
+}
+
+function refreshIdentityPhaseOptions(root: HTMLElement): void {
+  if (!selectedMission) return;
+  const chapterMain = Number(
+    (root.querySelector('#mb-identity-chapter') as HTMLSelectElement | null)?.value ??
+      selectedMission.chapterMainPhase,
+  );
+  const phaseSelect = root.querySelector('#mb-identity-phase') as HTMLSelectElement | null;
+  if (!phaseSelect) return;
+  const current = phaseSelect.value;
+  const options = phasesForChapter(selectedMission.mapId, chapterMain);
+  phaseSelect.innerHTML = options
+    .map(
+      (phaseId) =>
+        `<option value="${phaseId}" ${phaseId === current ? 'selected' : ''}>${phaseId}</option>`,
+    )
+    .join('');
+  if (!options.includes(phaseSelect.value) && options[0]) {
+    phaseSelect.value = options[0];
+  }
+}
+
 function renderEditor(): string {
   if (!draft || !selectedId || !selectedMission) {
     return `<p class="lab-hint">Selecione uma missão à esquerda para editar waves e monstros do capítulo.</p>`;
   }
 
   return `
+    ${renderIdentityPanel()}
     <div class="mb-editor-meta">
       <div>
-        <strong>${selectedMission.name}</strong>
-        <span class="mb-editor-id">${selectedMission.missionId}</span>
+        <strong>${escapeHtml(selectedMission.name)}</strong>
+        <span class="mb-editor-id">${escapeHtml(selectedMission.missionId)}</span>
       </div>
       <div class="mb-editor-chips">
         <span class="mb-chip mb-chip--kind">${selectedMission.kind}</span>
@@ -835,8 +1390,8 @@ function renderMissionsEditorInto(host: HTMLElement): void {
     <div class="mb-layout">
       <aside class="mb-sidebar">
         <p class="lab-hint mb-intro">
-          Filtre pelo <strong>capítulo da main</strong> (ex.: Cap. 10 = fases 2–10) para calibrar normais/sides daquele arco.
-          Overrides gravam por <code>phaseTemplateId</code>.
+          Filtre pelo <strong>capítulo da main</strong> (ex.: Cap. 10 = fases 2–10).
+          Identidade grava em <code>mission-overrides.json</code>; waves em <code>phase-battle-overrides</code>.
         </p>
         <div class="mb-filters">
           <label>Capítulo
@@ -874,6 +1429,7 @@ function renderMissionsEditorInto(host: HTMLElement): void {
           <label>Busca
             <input type="search" id="mb-filter-q" placeholder="id, nome ou fase" value="${filterQuery.replace(/"/g, '&quot;')}" />
           </label>
+          <button type="button" class="lab-btn--create" id="mb-open-create">+ Nova missão</button>
         </div>
         ${renderSweepPanelHtml(filterMap)}
         ${renderList()}
@@ -887,10 +1443,12 @@ function renderMissionsEditorInto(host: HTMLElement): void {
         </div>
       </aside>
       <section class="mb-main">
+        ${renderChapterTrack()}
         ${renderEditor()}
         <p id="missions-status" class="lab-status${statusError ? ' is-error' : ''}" role="status">${statusMessage}</p>
       </section>
     </div>
+    ${renderCreateModal()}
   `;
 
   host.querySelector('#mb-filter-kind')?.addEventListener('change', (event) => {
@@ -921,10 +1479,46 @@ function renderMissionsEditorInto(host: HTMLElement): void {
     }
   });
 
+  host.querySelector('#mb-open-create')?.addEventListener('click', () => {
+    createModalOpen = true;
+    renderMissionsEditor();
+  });
+
+  host.querySelector('#mb-create-close')?.addEventListener('click', () => {
+    createModalOpen = false;
+    renderMissionsEditor();
+  });
+  host.querySelector('#mb-create-cancel')?.addEventListener('click', () => {
+    createModalOpen = false;
+    renderMissionsEditor();
+  });
+  host.querySelector('#mb-create-map')?.addEventListener('change', () => refreshCreatePhaseOptions(host));
+  host.querySelector('#mb-create-chapter')?.addEventListener('change', () => refreshCreatePhaseOptions(host));
+  host.querySelector('#mb-create-submit')?.addEventListener('click', () => {
+    void createMissionFromModal()
+      .then(() => renderMissionsEditor())
+      .catch((error: Error) => setStatus(error.message, true));
+  });
+
+  host.querySelector('#mb-identity-chapter')?.addEventListener('change', () => {
+    refreshIdentityPhaseOptions(host);
+  });
+  host.querySelector('#mb-identity-save')?.addEventListener('click', () => {
+    void saveMissionIdentity()
+      .then(() => renderMissionsEditor())
+      .catch((error: Error) => setStatus(error.message, true));
+  });
+  host.querySelector('#mb-identity-delete')?.addEventListener('click', () => {
+    void deleteSelectedMission()
+      .then(() => renderMissionsEditor())
+      .catch((error: Error) => setStatus(error.message, true));
+  });
+
   host.querySelectorAll<HTMLButtonElement>('[data-select-mission]').forEach((button) => {
     button.addEventListener('click', () => {
       const id = button.dataset.selectMission;
       if (!id) return;
+      hideTrackTip();
       void selectMission(id)
         .then(() => renderMissionsEditor())
         .catch((error: Error) => setStatus(error.message, true));
@@ -944,6 +1538,7 @@ function renderMissionsEditorInto(host: HTMLElement): void {
   });
 
   bindSweepPanel(host, () => filterMap);
+  bindChapterTrack(host);
 
   bindEditor(host);
 }
