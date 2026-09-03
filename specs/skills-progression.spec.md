@@ -23,7 +23,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 - [x] Ao clicar no próximo círculo de level (aba Skills ou ascensão), a lista mantém a posição de scroll no drawer/modal
 - [x] Aba Skills do herói **sem** textos de instrução (equipar, drag, hover); slots e linhas comunicam a ação só por highlight visual no tap-to-assign
 - [x] Lista de skills **sem** badges Ativa/Inativa nem Disponível; skill equipada usa fundo verde na linha; próximo level comunicado pelo círculo tracejado
-- [x] Aba Skills exibe skills em **linhas** (nome, ícone à esquerda, círculos de level à direita); hover no círculo mostra o ganho daquele ponto; detalhes completos no tooltip do ícone
+- [x] Aba Skills exibe skills em **linhas** (nome, ícone à esquerda, círculos de level à direita); hover em **qualquer** círculo (inclusive skills bloqueadas/sem pontos) mostra o ganho daquele ponto; círculos usam `aria-disabled` (não HTML `disabled`) para manter hover; detalhes no tooltip do ícone; portal clampa na viewport (modal pin/unpin)
 - [x] Nomenclatura de progressão da skill na UI: **Level** (não Rank)
 - [x] Skills passivas equipadas (`evasion`, `ghost_step`, `vitality`, `iron_skin`, `mana_shield`) exibem efeito numérico em **Na batalha** no tooltip (%, HP, mecânica e condição de slot)
 - [x] Arqueira (Rain): árvore de classe `precise_shot` / `piercing_arrow` / `arrow_rain` / `marked_prey` / `ghost_step`

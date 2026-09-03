@@ -45,6 +45,7 @@ function formatStatDelta(before: string, after: string): string | null {
   return `${before} → ${after}`;
 }
 
+/** Ganho incremental ao subir de `fromRank` → `toRank` (sempre detalhado para planejar build). */
 function buildRankGainLines(
   hero: Hero,
   skillId: string,
@@ -54,7 +55,7 @@ function buildRankGainLines(
 ): string[] {
   if (toRank <= 0) return [];
 
-  const beforeHero = fromRank <= 0 ? heroAtSkillRank(hero, skillId, 0) : heroAtSkillRank(hero, skillId, fromRank);
+  const beforeHero = heroAtSkillRank(hero, skillId, Math.max(0, fromRank));
   const afterHero = heroAtSkillRank(hero, skillId, toRank);
 
   const beforeStats = pickComparableStats(skillId, beforeHero, scaling);
@@ -98,6 +99,26 @@ function buildActiveRankLines(
   return stats.slice(0, 4).map((stat) => `${stat.label}: ${stat.value}`);
 }
 
+function availabilityNote(input: {
+  status: SkillNodeStatusDto;
+  canAllocate: boolean;
+  isNext: boolean;
+  rank: number;
+  currentRank: number;
+}): string | null {
+  if (input.status === 'locked') {
+    return 'Skill bloqueada — requisitos não atendidos.';
+  }
+  if (input.canAllocate) return null;
+  if (input.isNext) {
+    return 'Sem pontos de Aprimoramento ou requisitos pendentes.';
+  }
+  if (input.rank > input.currentRank + 1) {
+    return `Requer level ${input.rank - 1} antes.`;
+  }
+  return null;
+}
+
 export function buildSkillRankSlots(input: {
   hero: Hero;
   skillId: string;
@@ -123,27 +144,27 @@ export function buildSkillRankSlots(input: {
     let previewTitle: string;
     let previewLines: string[];
 
-    if (input.status === 'locked') {
-      previewTitle = `Level ${rank}`;
-      previewLines = ['Skill bloqueada — requisitos não atendidos.'];
-    } else if (filled) {
+    if (filled) {
       previewTitle = `Level ${rank} ativo`;
       previewLines = buildActiveRankLines(input.hero, input.skillId, input.scaling, rank);
-    } else if (isNext) {
+    } else {
+      // Sempre mostra o ganho daquele ponto (rank-1 → rank), mesmo se ainda não for o próximo.
       previewTitle = `Level ${rank}`;
       previewLines = buildRankGainLines(
         input.hero,
         input.skillId,
         input.scaling,
-        input.currentRank,
+        rank - 1,
         rank,
       );
-      if (!canAllocate) {
-        previewLines.push('Sem pontos de Aprimoramento ou requisitos pendentes.');
-      }
-    } else {
-      previewTitle = `Level ${rank}`;
-      previewLines = [`Aplique o level ${rank - 1} antes.`];
+      const note = availabilityNote({
+        status: input.status,
+        canAllocate,
+        isNext,
+        rank,
+        currentRank: input.currentRank,
+      });
+      if (note) previewLines.push(note);
     }
 
     slots.push({

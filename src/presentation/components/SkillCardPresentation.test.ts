@@ -119,6 +119,33 @@ describe('SkillCardPresentation', () => {
     expect(html).toContain('🔒');
   });
 
+  it('círculos de skill sem pontos continuam hoveráveis (sem HTML disabled)', () => {
+    const html = renderSkillCard(
+      skillNode({
+        status: 'locked',
+        currentRank: 0,
+        isEquipped: false,
+        canAllocateRank: false,
+        canEquip: false,
+        rankSlots: defaultRankSlots(0).map((slot) => ({
+          ...slot,
+          canAllocate: false,
+          previewTitle: `Level ${slot.rank}`,
+          previewLines: [`Poder: → level ${slot.rank}`, 'Skill bloqueada — requisitos não atendidos.'],
+        })),
+      }),
+      { ...cardOptions, canAllocate: false },
+    );
+
+    expect(html).toContain('data-skill-rank-tooltip');
+    expect(html).toContain('skill-rank-dot-preview');
+    expect(html).toContain('Poder: → level 1');
+    expect(html).toContain('Poder: → level 3');
+    expect(html).toContain('aria-disabled="true"');
+    expect(html).not.toMatch(/skill-rank-dot[^>]*\sdisabled/);
+    expect(html).not.toContain('data-skill-allocate=');
+  });
+
   it('permite arrastar pelo ícone quando equipável', () => {
     const html = renderSkillCard(skillNode({ canEquip: true }), cardOptions);
 

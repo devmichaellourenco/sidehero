@@ -79,24 +79,84 @@ function ensurePortal(): HTMLElement {
   return portal;
 }
 
+export type TooltipBox = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
+
+/** Preferência acima; flip abaixo se não couber; clampa nas 4 bordas da viewport. */
+export function computeSkillTooltipPosition(input: {
+  anchor: TooltipBox;
+  portal: TooltipBox;
+  viewport: TooltipBox;
+  margin: number;
+}): { left: number; top: number; placement: 'above' | 'below' } {
+  const { anchor, portal, viewport, margin } = input;
+  const maxLeft = viewport.left + viewport.width - portal.width - margin;
+  const left = Math.max(
+    viewport.left + margin,
+    Math.min(anchor.left + anchor.width / 2 - portal.width / 2, maxLeft),
+  );
+
+  const aboveTop = anchor.top - portal.height - margin;
+  const belowTop = anchor.bottom + margin;
+  const aboveFits = aboveTop >= viewport.top + margin;
+  const belowFits = belowTop + portal.height <= viewport.top + viewport.height - margin;
+
+  let placement: 'above' | 'below' = 'above';
+  let top = aboveTop;
+
+  if (!aboveFits && belowFits) {
+    placement = 'below';
+    top = belowTop;
+  } else if (!aboveFits && !belowFits) {
+    const spaceAbove = anchor.top - (viewport.top + margin);
+    const spaceBelow = viewport.top + viewport.height - margin - (anchor.top + anchor.height);
+    if (spaceBelow > spaceAbove) {
+      placement = 'below';
+      top = belowTop;
+    }
+  }
+
+  const maxTop = viewport.top + viewport.height - portal.height - margin;
+  top = Math.max(viewport.top + margin, Math.min(top, Math.max(viewport.top + margin, maxTop)));
+
+  return { left, top, placement };
+}
+
 function positionPortal(portal: HTMLElement, anchor: DOMRect): void {
   const margin = 8;
   portal.style.visibility = 'hidden';
   portal.classList.remove('hidden');
 
   const portalRect = portal.getBoundingClientRect();
-  let top = anchor.top - portalRect.height - margin;
-  let left = anchor.left + anchor.width / 2 - portalRect.width / 2;
+  const placement = computeSkillTooltipPosition({
+    anchor: {
+      top: anchor.top,
+      left: anchor.left,
+      width: anchor.width,
+      height: anchor.height,
+    },
+    portal: {
+      top: portalRect.top,
+      left: portalRect.left,
+      width: portalRect.width,
+      height: portalRect.height,
+    },
+    viewport: {
+      top: 0,
+      left: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    },
+    margin,
+  });
 
-  const maxLeft = window.innerWidth - portalRect.width - margin;
-  left = Math.max(margin, Math.min(left, maxLeft));
-
-  if (top < margin) {
-    top = anchor.bottom + margin;
-  }
-
-  portal.style.top = `${top}px`;
-  portal.style.left = `${left}px`;
+  portal.dataset.placement = placement.placement;
+  portal.style.top = `${Math.round(placement.top)}px`;
+  portal.style.left = `${Math.round(placement.left)}px`;
   portal.style.visibility = 'visible';
 }
 

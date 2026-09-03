@@ -4201,12 +4201,15 @@ button.hero-skill-chip:hover {
 
 .skill-chip-tooltip-portal {
   position: fixed;
-  z-index: 1500;
+  z-index: 10120;
   display: flex;
   flex-direction: column;
   gap: 5px;
   min-width: 180px;
-  max-width: 260px;
+  max-width: min(260px, calc(100vw - 16px));
+  max-height: min(70vh, 420px);
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid rgba(245, 197, 66, 0.35);
@@ -9420,23 +9423,30 @@ body.modal-open {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--seal-gold) 40%, transparent);
 }
 
-.skill-rank-dot--next:not(:disabled) {
+.skill-rank-dot--next .skill-rank-dot__ring {
+  border-color: color-mix(in srgb, var(--forest-hi) 55%, var(--panel-border));
+  border-style: dashed;
+}
+
+.skill-rank-dot--interactive {
   cursor: pointer;
 }
 
-.skill-rank-dot--next:not(:disabled) .skill-rank-dot__ring {
+.skill-rank-dot--interactive.skill-rank-dot--next .skill-rank-dot__ring {
   border-color: var(--forest-hi);
-  border-style: dashed;
   animation: skill-rank-dot-pulse 1.6s ease-in-out infinite;
 }
 
-.skill-rank-dot--next:not(:disabled):hover .skill-rank-dot__ring {
+.skill-rank-dot--interactive.skill-rank-dot--next:hover .skill-rank-dot__ring {
   background: color-mix(in srgb, var(--forest-hi) 18%, transparent);
 }
 
-.skill-rank-dot:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+.skill-rank-dot[aria-disabled='true'] {
+  cursor: help;
+}
+
+.skill-rank-dot--empty[aria-disabled='true'] {
+  opacity: 0.72;
 }
 
 @keyframes skill-rank-dot-pulse {

@@ -45,25 +45,27 @@ function renderSkillRankDot(
   slot: SkillRankSlotDto,
   options: SkillCardOptions,
 ): string {
+  const canAllocate = slot.canAllocate && options.canAllocate;
   const stateClass = slot.filled
     ? 'skill-rank-dot--filled'
     : slot.isNext
       ? 'skill-rank-dot--next'
       : 'skill-rank-dot--empty';
-  const allocateAttrs =
-    slot.canAllocate && options.canAllocate
-      ? `${options.allocateAttr}="${escapeHtml(node.id)}"`
-      : 'disabled';
+  // Não usar HTML disabled: botões disabled não recebem hover e o preview some.
+  const allocateAttrs = canAllocate
+    ? `${options.allocateAttr}="${escapeHtml(node.id)}"`
+    : 'aria-disabled="true"';
+  const interactiveClass = canAllocate ? ' skill-rank-dot--interactive' : '';
   const ariaLabel = slot.filled
     ? `Level ${slot.rank} aplicado`
-    : slot.isNext
+    : canAllocate
       ? `Adicionar level ${slot.rank}`
-      : `Level ${slot.rank} bloqueado`;
+      : `Level ${slot.rank} — ver melhoria`;
 
   return `
     <button
       type="button"
-      class="skill-rank-dot ${stateClass}"
+      class="skill-rank-dot ${stateClass}${interactiveClass}"
       data-skill-rank-tooltip
       ${allocateAttrs}
       aria-label="${escapeHtml(ariaLabel)}"
