@@ -1,4 +1,5 @@
 import { GameStateDto, HeroDto } from '../../application/dto/GameStateDto';
+import { MAX_PARTY_SIZE } from '../../domain/party/PartyConstants';
 import { getHeroSprite, imgTag } from '../assets/AssetCatalog';
 import { renderHeroFormationTooltipContent } from './HeroBattlePresentation';
 import { bindHeroTooltips } from './HeroTooltipBinder';
@@ -83,7 +84,7 @@ function renderFormationEmptySlot(index: number, canEditParty: boolean): string 
 function renderFormationActiveRow(state: FormationPanelState): string {
   const parts: string[] = [];
 
-  for (let index = 0; index < 3; index += 1) {
+  for (let index = 0; index < MAX_PARTY_SIZE; index += 1) {
     const hero = state.activeParty[index];
     if (hero) {
       parts.push(renderFormationActiveSlot(hero, index, state));
@@ -91,7 +92,7 @@ function renderFormationActiveRow(state: FormationPanelState): string {
       parts.push(renderFormationEmptySlot(index, state.canEditParty));
     }
 
-    if (index < 2) {
+    if (index < MAX_PARTY_SIZE - 1) {
       parts.push(`
         <div class="formation-swap-cell">
           ${renderFormationSwapButton(index, state.canEditParty)}
@@ -134,7 +135,7 @@ function renderPartyLockNotice(canEditParty: boolean): string {
 }
 
 export function renderFormationPanel(state: FormationPanelState): string {
-  const partyFull = state.activeParty.length >= 3;
+  const partyFull = state.activeParty.length >= MAX_PARTY_SIZE;
   const activeHtml = renderFormationActiveRow(state);
   const benchHtml =
     state.benchHeroes.length > 0
@@ -147,7 +148,7 @@ export function renderFormationPanel(state: FormationPanelState): string {
     <div class="formation-panel">
       ${renderPartyLockNotice(state.canEditParty)}
       <section class="formation-section">
-        <h3 class="party-section-title">Equipe <span class="party-count">${state.activeParty.length}/3</span></h3>
+        <h3 class="party-section-title">Equipe <span class="party-count">${state.activeParty.length}/${MAX_PARTY_SIZE}</span></h3>
         <div class="formation-active-row">${activeHtml}</div>
       </section>
       <section class="formation-section formation-bench-section">

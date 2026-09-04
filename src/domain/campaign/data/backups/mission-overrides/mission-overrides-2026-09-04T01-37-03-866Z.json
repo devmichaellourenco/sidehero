@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-04T01:37:03.862Z",
+  "updatedAt": "2026-09-03T21:30:40.073Z",
   "missions": {
     "normal:custom:vig_lia_da_aldeia": {
       "id": "normal:custom:vig_lia_da_aldeia",
@@ -97,7 +97,6 @@
     "normal:1-33",
     "normal:1-43",
     "normal:1-28",
-    "normal:1-48",
-    "normal:1-1"
+    "normal:1-48"
   ]
 }

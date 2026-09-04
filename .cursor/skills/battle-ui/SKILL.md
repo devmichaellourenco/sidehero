@@ -23,7 +23,7 @@ description: Battle strip, modais, Wow e UX do painel Side Hero. Use para battle
 
 | Pausa | Pausar/Continuar à **esquerda**; botão **Acampamento** mid-missão na barra **oculto** (hub só pós-missão / mapa); Batalhar oculto (mapa → START → combate) |
 | Hub | New game / pós-missão: `loadoutEditOpen` + **mapa embutido** no `battle-field`; ícone Mapa expande para modal |
-| Mapa embutido | `#camp-campaign-map-root` — só pins; preenche o `battle-field` sem scroll; mapa-mundo no modal expandido |
+| Mapa embutido | `#camp-campaign-map-root` — só pins; preenche o `battle-field` sem scroll; tema do painel (não o reset light da batalha); mapa-mundo no modal expandido |
 | Overlay Acampamento | Removido no hub — `.battle-pause-overlay` só na **pausa de batalha** (`--battle`, translúcido na strip) |
 | Splash | `SplashScreenController` — ≥5s antes de tutorial/Wow/auto-battle no painel principal |
 | Stage progress | Ver skill `stage-progress-bar` — timeline entre localização e a strip |

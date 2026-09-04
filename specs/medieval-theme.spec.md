@@ -18,7 +18,7 @@ Referência canônica: card `.onboarding-card`.
 - [x] Tokens em `:root` + `MedievalThemeTokens.ts` — chrome claro (pergaminho) + texto tinta + semântica (dano/cura/elementos)
 - [x] `#app`, header, trilha/campanha, footer de ações, modais e cards usam fundo claro e texto escuro
 - [x] Onboarding consome as mesmas CSS vars
-- [x] `.battle-stage` (strip + combat bar) **não** herda o pergaminho como fundo de combate
+- [x] `.battle-stage` (strip + combat bar) **não** herda o pergaminho como fundo de combate; hub `.battle-stage--camp-map` segue o tema do painel (mapa = modal)
 - [x] `.stage-progress-*` (waves) **não** é recolorido para pergaminho
 - [x] Temas por mapa (`data-campaign-theme`) e raridades (`--rarity-*`) preservados
 - [x] Accent selo (`#8b3a2f`) no lugar do rosa neon; sem azul cyber como default de chrome

@@ -21,7 +21,7 @@ Manter o chrome do painel no padrão **tutorial** (claro) e o **tema escuro** op
 - Tokens CSS + `MedievalThemeTokens.ts` / `MEDIEVAL_THEME_DARK`
 - Chrome claro/escuro (app, header, modais, ações, campanha context)
 - Preferência `uiTheme` em Configurações
-- **Não** recolorir `.battle-stage` / `.stage-progress-*` com o tema escuro (v1)
+- **Não** recolorir `.battle-stage` / `.stage-progress-*` com o tema escuro em combate (v1); hub `.battle-stage--camp-map` herda o tema (mapa embutido = modal)
 - **Não** mudar combate, loot, raridades nem arte por mapa
 
 ## Checklist

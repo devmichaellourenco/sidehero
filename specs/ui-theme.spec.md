@@ -9,7 +9,7 @@
 
 Permitir escolher o **tema de UI** do painel Side Hero entre **claro** (pergaminho medieval) e **escuro** (inversão harmônica; **default**).
 
-**Exceção (v1):** `.battle-stage` (strip, floats, waves / stage-progress, barra Acampamento/Batalhar) **não** muda visualmente com o tema escuro — permanece no tratamento canônico atual.
+**Exceção (v1):** `.battle-stage` em combate (strip, floats, waves / stage-progress) **não** muda visualmente com o tema escuro — permanece no tratamento canônico claro. **Hub com mapa embutido** (`.battle-stage--camp-map`) herda o tema do painel, igual ao modal Mapa.
 
 ## Critérios de aceite
 
@@ -17,7 +17,7 @@ Permitir escolher o **tema de UI** do painel Side Hero entre **claro** (pergamin
 - [x] Tema escuro é o default (`data-ui-theme='dark'` / preferência inicial); claro disponível em Config
 - [x] Preferência `uiTheme` em Configurações (select Claro / Escuro), persistida (localStorage)
 - [x] Ao mudar o tema, `document.documentElement` recebe `data-ui-theme` imediatamente
-- [x] `.battle-stage` sob tema escuro restaura tokens canônicos claros (batalha inalterada)
+- [x] `.battle-stage:not(.battle-stage--camp-map)` sob tema escuro restaura tokens canônicos claros (batalha inalterada); mapa embutido no hub segue o tema do painel/modal
 - [x] Raridades (`--rarity-*`) e acentos de mapa (`--map-*` / `data-campaign-theme`) preservados no escuro (podem herdar; não forçar recolor)
 - [x] Poço de ícone (`--icon-well*`) permanece creme/ouro nos dois temas — contraste para sprites com linha escura
 - [x] Testes de tokens dark + preferência/aplicação de tema

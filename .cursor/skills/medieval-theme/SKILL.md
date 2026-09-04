@@ -32,7 +32,7 @@ Card do tutorial (`.onboarding-card`): borda ouro `#c9a227`, fundo `#fff9ed → 
 
 `MedievalThemeTokens.ts` → `:root` (light) + `html[data-ui-theme='dark']` (dark)  
 Preferência: `GamePreferences.uiTheme` → `applyUiTheme()` → `data-ui-theme`  
-Batalha: `html[data-ui-theme='dark'] .battle-stage` restaura tokens light.
+Batalha: `html[data-ui-theme='dark'] .battle-stage:not(.battle-stage--camp-map)` restaura tokens light. Hub com mapa embutido herda o tema do painel (como o modal Mapa).
 
 Inclui base, **semântica**, **tokens por contexto** e `MEDIEVAL_THEME_DARK`.
 

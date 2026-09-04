@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-O jogador gerencia **equipe ativa** (até 4 slots) e **reserva**, desbloqueia classes (Galneon, Elara, Berserker, Arqueira Rain, Paladino) e edita formação apenas na pausa de loadout. New game: **só Nix** na party até comprar unlocks na árvore.
+O jogador gerencia **equipe ativa** (até 3 slots) e **reserva**, desbloqueia classes (Galneon, Elara, Berserker, Arqueira Rain, Paladino) e edita formação apenas na pausa de loadout. New game: **só Nix** na party até comprar unlocks na árvore.
 
 ## Critérios de aceite
 
