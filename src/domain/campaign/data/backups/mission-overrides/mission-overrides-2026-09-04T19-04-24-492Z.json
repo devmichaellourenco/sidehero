@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-04T19:06:08.397Z",
+  "updatedAt": "2026-09-04T19:03:22.720Z",
   "missions": {
     "normal:custom:vig_lia_da_aldeia": {
       "id": "normal:custom:vig_lia_da_aldeia",
@@ -94,60 +94,6 @@
       "mapId": "stendra",
       "name": "Ronda da aldeia · Stendra",
       "phaseTemplateId": "1-6",
-      "stars": 2,
-      "unlockAfterMissionIds": []
-    },
-    "normal:1-9": {
-      "id": "normal:1-9",
-      "kind": "normal",
-      "mapId": "stendra",
-      "name": "Posto avançado · Stendra",
-      "phaseTemplateId": "1-9",
-      "stars": 3,
-      "unlockAfterMissionIds": []
-    },
-    "normal:1-10": {
-      "id": "normal:1-10",
-      "kind": "normal",
-      "mapId": "stendra",
-      "name": "Caça de elite menor · Stendra",
-      "phaseTemplateId": "1-10",
-      "stars": 4,
-      "unlockAfterMissionIds": []
-    },
-    "normal:1-4": {
-      "id": "normal:1-4",
-      "kind": "normal",
-      "mapId": "stendra",
-      "name": "Patrulha leve · Stendra",
-      "phaseTemplateId": "1-4",
-      "stars": 2,
-      "unlockAfterMissionIds": []
-    },
-    "normal:1-5": {
-      "id": "normal:1-5",
-      "kind": "normal",
-      "mapId": "stendra",
-      "name": "Caça miúda · Stendra",
-      "phaseTemplateId": "1-5",
-      "stars": 2,
-      "unlockAfterMissionIds": []
-    },
-    "normal:1-7": {
-      "id": "normal:1-7",
-      "kind": "normal",
-      "mapId": "stendra",
-      "name": "Trilha segura · Stendra",
-      "phaseTemplateId": "1-7",
-      "stars": 3,
-      "unlockAfterMissionIds": []
-    },
-    "normal:1-8": {
-      "id": "normal:1-8",
-      "kind": "normal",
-      "mapId": "stendra",
-      "name": "Emboscada curta · Stendra",
-      "phaseTemplateId": "1-8",
       "stars": 3,
       "unlockAfterMissionIds": []
     }

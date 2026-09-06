@@ -14,20 +14,16 @@ const EXPLICIT_ICON_BY_ID: Record<string, SkillIconKey> = {
   piercing_arrow: 'thrust',
   arrow_rain: 'power_attack',
   marked_prey: 'debuff',
-  ghost_step: 'evasion',
   reaver_cleave: 'power_attack',
   reaver_fury: 'power_attack',
   guardian_strike: 'power_attack',
   goblin_stab: 'thrust',
   orc_smash: 'power_attack',
   dragon_bite: 'attack',
-  iron_skin: 'iron_skin',
-  evasion: 'evasion',
   fireball: 'fireball',
   frost_shard: 'frost_shard',
   blizzard: 'blizzard',
   arcane_bolt: 'arcane_bolt',
-  vitality: 'vitality',
   smite: 'smite',
   sag_clr_smite: 'smite',
   arcane_touch: 'arcane_bolt',
@@ -52,7 +48,6 @@ const EXPLICIT_ICON_BY_ID: Record<string, SkillIconKey> = {
   guardian_resolve: 'blessing',
   blessing: 'blessing',
   wraith_curse: 'debuff',
-  mana_shield: 'mana_shield',
 };
 
 const ELEMENT_ICON: Partial<Record<string, SkillIconKey>> = {

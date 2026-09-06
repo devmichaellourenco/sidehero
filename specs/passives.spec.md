@@ -10,14 +10,13 @@
 
 Heróis e inimigos podem ter **passivas sempre ativas** (traits), **cumulativas**. Fontes: classe base, cadeia de ascensão, gear e roster de inimigos.
 
-**Não confundir** com skills passivas equipáveis (`evasion`, `vitality`…) nem com `unique-effects`.
+**Não confundir** com `unique-effects`. Skills só-passivas equipáveis **não existem** — passivas são sempre ativas via este sistema.
 
 ## Vocabulário
 
 | Termo | Significado |
 |-------|-------------|
 | **Passiva** (`PassiveId`) | Trait sempre ativo, declarativo + handler tipado |
-| **Skill passiva equipável** | Skill de árvore que só vale se equipada |
 | **Efeito único** | Comportamento especial de item (`unique-effects`) |
 
 ## Critérios de aceite
@@ -77,10 +76,9 @@ _(nenhuma — implementação liberada)_
 |-----------|-------------|
 | **Passiva declarativa** + handler tipado | Scaling contínuo (%, por nível, por atributo) |
 | **Efeito único** (`unique-effects`) | Comportamento exclusivo (heal_block, cleanse 1×) |
-| **Skill passiva equipável** | Trade-off de slot de batalha |
 
 **Não** misturar passivas cumulativas de classe com unique effects.  
-**Não** exigir slot para passivas desta spec.
+**Não** exigir slot para passivas desta spec (skills só-passivas equipáveis foram removidas).
 
 ## Modelo de domínio (proposta)
 

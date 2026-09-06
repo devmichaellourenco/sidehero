@@ -89,6 +89,22 @@ export interface CombatSimRequest {
   phaseId?: string;
   waveIndex?: number;
   slots?: Array<{ enemyType: string; role: string; count: number; level?: number }>;
+  draftPhase?: {
+    displayName?: string;
+    difficultyTier?: number;
+    statMultiplier?: number;
+    waves: Array<{
+      id?: string;
+      goldMultiplier?: number;
+      slots: Array<{
+        enemyType: string;
+        role: string;
+        count: number;
+        level?: number;
+        displayName?: string;
+      }>;
+    }>;
+  };
   party?: Array<{ heroClass: string; level: number }>;
   /** Preenche gear/atributos/skills da party: `naked` | `geared` | `optimal`. */
   profile?: string;

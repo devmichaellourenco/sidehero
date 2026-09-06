@@ -28,7 +28,6 @@ import {
   HeroActiveSkillStatTooltipLineDto,
 } from '../dto/GameStateDto';
 import { SKILL_BRANCH_LABELS, SkillBranchDto, SkillScopeDto } from '../dto/SkillNodeDto';
-import { buildPassiveSkillBattleStats } from './PassiveSkillBattleStatsMapper';
 
 const SCALING_LABELS: Record<string, string> = {
   str: 'STR',
@@ -344,9 +343,6 @@ export function buildSkillBattleStats(
   powerCalculator = new SkillPowerCalculator(),
   mapId?: string,
 ): HeroActiveSkillStatDto[] {
-  const passiveStats = buildPassiveSkillBattleStats(hero, skillId);
-  if (passiveStats.length > 0) return passiveStats;
-
   const combat = getHeroCombatSkill(skillId);
   if (!combat) return [];
 

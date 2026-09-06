@@ -186,10 +186,12 @@ describe('ImprovementResetService', () => {
   });
 
   it('bloqueia reduzir skill exigida por outra skill com rank', () => {
-    const hero = knightHero({
-      skillRanks: { [BASIC_ATTACK_SKILL_ID]: 1, thrust: 1, iron_skin: 1 },
+    const hero = Hero.createStarter('hero-s', 'sorcerer', 'Nix');
+    const withRanks = Hero.restore({
+      ...hero.toProps(),
+      skillRanks: { [BASIC_ATTACK_SKILL_ID]: 1, arcane_bolt: 1, fireball: 1 },
       equippedSkillIds: [BASIC_ATTACK_SKILL_ID],
     });
-    expect(() => service.refundSkillRank(hero, 'thrust')).toThrow(/Pele de Ferro|rank/);
+    expect(() => service.refundSkillRank(withRanks, 'arcane_bolt')).toThrow(/Bola de Fogo|rank/);
   });
 });

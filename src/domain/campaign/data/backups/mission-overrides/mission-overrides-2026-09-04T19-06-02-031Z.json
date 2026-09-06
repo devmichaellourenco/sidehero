@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-04T19:06:08.397Z",
+  "updatedAt": "2026-09-04T19:05:55.228Z",
   "missions": {
     "normal:custom:vig_lia_da_aldeia": {
       "id": "normal:custom:vig_lia_da_aldeia",
@@ -103,7 +103,7 @@
       "mapId": "stendra",
       "name": "Posto avançado · Stendra",
       "phaseTemplateId": "1-9",
-      "stars": 3,
+      "stars": 4,
       "unlockAfterMissionIds": []
     },
     "normal:1-10": {

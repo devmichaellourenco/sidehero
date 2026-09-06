@@ -5,16 +5,22 @@
 export {
   simulateEncounter,
   simulateEncounterBatch,
+  simulateEncounterPlayback,
 } from '../../src/domain/balance/CombatEncounterSimulator';
 
 export type {
   SimRequest,
   SimPartyMember,
   SimAdHocSlot,
+  SimDraftPhase,
+  SimDraftWave,
   SimOutcome,
   HeroSimResult,
   EncounterSimulationResult,
   BatchSimulationResult,
+  SimUnitSnapshot,
+  CombatSimSnapshot,
+  EncounterPlaybackResult,
 } from '../../src/domain/balance/CombatEncounterSimulator';
 
 export {

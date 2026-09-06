@@ -4,6 +4,7 @@ import { phaseIdForTier, summarizePhaseEconomy, summarizeEconomyRatios } from '.
 import { referenceGoldPerPhaseForTier } from './EconomyReference';
 import {
   clearPhaseGoldScaleCache,
+  effectivePhaseGoldTotal,
   PHASE_GOLD_TARGET_RATIO,
   phaseGoldScaleForPhase,
 } from './PhaseGoldBudget';
@@ -15,6 +16,17 @@ describe('PhaseGoldBudget', () => {
 
   it('não reduz fases com poucos inimigos no tier 1', () => {
     expect(phaseGoldScaleForPhase(buildPhaseId(1, 1))).toBe(1);
+  });
+
+  it('effectivePhaseGoldTotal acompanha a escala da fase', () => {
+    const phaseId = buildPhaseId(1, 1);
+    expect(effectivePhaseGoldTotal(phaseId)).toBeGreaterThan(0);
+
+    const crowded = buildPhaseId(1, 20);
+    expect(phaseGoldScaleForPhase(crowded)).toBeLessThan(1);
+    const economy = summarizePhaseEconomy(crowded)!;
+    expect(effectivePhaseGoldTotal(crowded)).toBeGreaterThan(0);
+    expect(Math.abs(effectivePhaseGoldTotal(crowded) - economy.totalGold)).toBeLessThanOrEqual(2);
   });
 
   it('reduz fases normais com muitos inimigos para a renda de referência', () => {

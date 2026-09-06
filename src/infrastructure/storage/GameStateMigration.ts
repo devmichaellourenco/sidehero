@@ -101,6 +101,15 @@ const LEGACY_PRIEST_SKILL_MAP: Record<string, SkillId> = {
   inquisitor_flame: 'sag_clr_light',
 };
 
+/** Skills que eram só passivas equipáveis — removidas; não ocupam mais slots. */
+const REMOVED_PASSIVE_ONLY_SKILL_IDS = new Set([
+  'evasion',
+  'vitality',
+  'iron_skin',
+  'mana_shield',
+  'ghost_step',
+]);
+
 function migrateSkillRanks(raw: unknown): Record<SkillId, number> {
   const ranks = asRecord(raw);
   const migrated = Object.fromEntries(
@@ -119,6 +128,27 @@ function migrateSkillRanks(raw: unknown): Record<SkillId, number> {
   return migrated;
 }
 
+function stripRemovedPassiveOnlySkills(
+  skillRanks: Record<SkillId, number>,
+  equippedSkillIds: SkillId[],
+): { skillRanks: Record<SkillId, number>; equippedSkillIds: SkillId[]; refundedPoints: number } {
+  let refundedPoints = 0;
+  const ranks: Record<SkillId, number> = {};
+  for (const [id, rank] of Object.entries(skillRanks)) {
+    if (REMOVED_PASSIVE_ONLY_SKILL_IDS.has(id)) {
+      refundedPoints += Math.max(0, rank);
+      continue;
+    }
+    ranks[id as SkillId] = rank;
+  }
+
+  return {
+    skillRanks: ranks,
+    equippedSkillIds: equippedSkillIds.filter((id) => !REMOVED_PASSIVE_ONLY_SKILL_IDS.has(id)),
+    refundedPoints,
+  };
+}
+
 function migrateEquippedSkillIds(raw: unknown): SkillId[] {
   if (!Array.isArray(raw)) return [];
   return raw
@@ -130,6 +160,7 @@ function migrateEquippedSkillIds(raw: unknown): SkillId[] {
         LEGACY_PRIEST_SKILL_MAP[id] ??
         id,
     )
+    .filter((id) => !REMOVED_PASSIVE_ONLY_SKILL_IDS.has(id))
     .slice(0, MAX_ACTIVE_BATTLE_SKILLS);
 }
 
@@ -161,6 +192,7 @@ function migrateProgression(raw: RawRecord): Pick<
     migrateSkillRanks(raw.skillRanks),
     migrateEquippedSkillIds(raw.equippedSkillIds),
   );
+  const stripped = stripRemovedPassiveOnlySkills(starter.skillRanks, starter.equippedSkillIds);
 
   const rawImprovement =
     typeof raw.unspentImprovementPoints === 'number' ? raw.unspentImprovementPoints : 0;
@@ -170,10 +202,10 @@ function migrateProgression(raw: RawRecord): Pick<
   // Pool unificado: saldos antigos de evolução passam a Aprimoramento.
   return {
     allocatedAttributes: migrateAttributes(raw.allocatedAttributes),
-    unspentImprovementPoints: rawImprovement + rawAscension,
+    unspentImprovementPoints: rawImprovement + rawAscension + stripped.refundedPoints,
     unspentAscensionPoints: 0,
-    skillRanks: starter.skillRanks,
-    equippedSkillIds: starter.equippedSkillIds,
+    skillRanks: stripped.skillRanks,
+    equippedSkillIds: stripped.equippedSkillIds,
     ascensionId: migrateAscensionId(raw.ascensionId),
   };
 }

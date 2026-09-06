@@ -1,3 +1,4 @@
+import { getLabSimDraftPhase } from '../balance/LabSimDraftPhase';
 import { MapId, PhaseId } from './CampaignIds';
 import { CAMPAIGN_MAPS } from './CampaignMaps';
 import { releasedCampaignMaps, seasonFinalePhaseId } from './CampaignReleaseScope';
@@ -39,6 +40,9 @@ export function getCampaignInfo(): CampaignInfo {
  * Sem rename de `phase-reward-overrides`.
  */
 export function resolvePhaseBattle(phaseId: PhaseId): PhaseDefinition | null {
+  const labDraft = getLabSimDraftPhase(phaseId);
+  if (labDraft) return labDraft;
+
   const base = handcraftedMap.get(phaseId);
   if (!base) return null;
   return mergePhaseWithEmbeddedOverride(base);

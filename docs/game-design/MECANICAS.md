@@ -89,7 +89,6 @@ Spec: `heroes-party`.
 | Slots de batalha | Slot 0 = Ataque Básico fixo; extras via runa `battle_skill_slots` |
 | Gate de investimento em skills | Sem slot extra, só atributos; skills de classe bloqueadas |
 | Equipar skills | Clique/drag para barra; CD na strip |
-| Skills passivas equipáveis | Ex.: evasion, ghost_step, vitality, iron_skin, mana_shield (ocupam slot) |
 | Ascensão de classe | Caminhos ramificados irreversíveis; concede pontos e skills de evolução |
 | Skills de evolução | `pointType: 'ascension'`, maxRank 3, mesmo pool de aprimoramento |
 

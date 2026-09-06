@@ -25,9 +25,13 @@ function boardFixture(): MissionBoardDto {
       stars: null,
       waveCount: 2,
       difficultyTier: 1,
+      expectedGold: 12,
+      victoryXp: 24,
       featuredEnemyTypes: ['goblin_raider'],
       featuredEnemies: [],
       rewards: null,
+      rewardItemName: null,
+      rewardSceneTitle: null,
       selected: false,
     },
     sides: [
@@ -40,9 +44,13 @@ function boardFixture(): MissionBoardDto {
         stars: 1,
         waveCount: 2,
         difficultyTier: 3,
+        expectedGold: 18,
+        victoryXp: 30,
         featuredEnemyTypes: [],
         featuredEnemies: [],
         rewards: null,
+        rewardItemName: null,
+        rewardSceneTitle: null,
         selected: false,
       },
     ],
@@ -56,9 +64,13 @@ function boardFixture(): MissionBoardDto {
         stars: 1,
         waveCount: 2,
         difficultyTier: 2,
+        expectedGold: 14,
+        victoryXp: 22,
         featuredEnemyTypes: [],
         featuredEnemies: [],
         rewards: null,
+        rewardItemName: null,
+        rewardSceneTitle: null,
         selected: false,
       },
       {
@@ -70,9 +82,13 @@ function boardFixture(): MissionBoardDto {
         stars: 2,
         waveCount: 2,
         difficultyTier: 4,
+        expectedGold: 20,
+        victoryXp: 28,
         featuredEnemyTypes: [],
         featuredEnemies: [],
         rewards: null,
+        rewardItemName: null,
+        rewardSceneTitle: null,
         selected: false,
       },
     ],
@@ -184,6 +200,13 @@ describe('CampaignMissionMapPresentation', () => {
 
     const html = renderMissionLocalesMap(board, 'main:1-1');
     expect(html).toContain(kindLabel('main'));
+    expect(html).toContain('campaign-mission-quest');
+    expect(html).toContain('campaign-mission-quest-kind--main');
+    expect(html).toContain('campaign-mission-quest-rewards');
+    expect(html).toContain('>12</span>');
+    expect(html).toContain('>24</span>');
+    expect(html).toContain('na vitória');
+    expect(html).toContain('Inimigos');
     expect(html).toContain('data-campaign-start-mission="main:1-1"');
     expect(html).toContain('data-enemy-tooltip');
     expect(html).toContain('enemy-tooltip-content');
@@ -193,11 +216,22 @@ describe('CampaignMissionMapPresentation', () => {
     expect(html).not.toContain('Ofensiva');
   });
 
-  it('preview no pin mostra tipo, estrelas e CTA de missão', () => {
+  it('preview no pin mostra tipo, estrelas, recompensas e CTA de missão', () => {
     const board = boardFixture();
+    board.normals[0].rewards = {
+      itemId: 'side_stendra_cache_charm',
+      sceneId: 'side:stendra_hidden_cache',
+    };
+    board.normals[0].rewardItemName = 'Talismã do Esconderijo';
+    board.normals[0].rewardSceneTitle = 'O esconderijo';
+
     const html = renderMissionLocalesMap(board, 'normal:1-2');
     expect(html).toContain(kindLabel('normal'));
-    expect(html).toContain('1★');
+    expect(html).toContain('campaign-mission-quest--normal');
+    expect(html).toContain('campaign-mission-quest-stars');
+    expect(html).toContain('★');
+    expect(html).toContain('Talismã do Esconderijo');
+    expect(html).toContain('O esconderijo');
     expect(html).toContain('data-campaign-start-mission="normal:1-2"');
     expect(findMissionOnBoard(board, 'normal:1-2')?.stars).toBe(1);
   });

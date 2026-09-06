@@ -11,13 +11,19 @@ import { getHeroCombatIdentity } from '../combat/HeroCombatIdentityCatalog';
 import { getHeroBaseStats } from '../combat/HeroBaseStatsCatalog';
 import { Experience } from '../value-objects/Experience';
 import { STARTER_HERO_PROGRESSION } from '../entities/HeroProgression';
-import { resolvePhase } from '../campaign/CampaignCatalog';
+import { resolvePhase, resolvePhaseBattle } from '../campaign/CampaignCatalog';
 import { createEnemyFromSlot } from '../campaign/WaveEnemyFactory';
 import { emptyBattleSessionStats } from '../combat/BattleSessionStats';
 import { applySimHeroLoadout } from './SimHeroLoadout';
+import type { PhaseDefinition } from '../campaign/PhaseDefinition';
 import type { PhaseId } from '../campaign/CampaignIds';
 import type { HeroClass } from '../entities/HeroClass';
-import type { SimPartyMember, SimAdHocSlot, SimRequest } from './CombatEncounterSimulator';
+import type {
+  SimPartyMember,
+  SimAdHocSlot,
+  SimDraftPhase,
+  SimRequest,
+} from './CombatEncounterSimulator';
 import type { EnemyType } from '../entities/EnemyType';
 
 export const SENTINEL_PHASE: PhaseId = '1-1';
@@ -29,12 +35,56 @@ export const FALLBACK_PARTY: SimPartyMember[] = [
 ];
 
 /**
+ * Monta uma PhaseDefinition a partir do rascunho do lab (sem gravar JSON).
+ * Usa metadados da fase base quando existir.
+ */
+export function materializeSimDraftPhase(
+  phaseId: PhaseId,
+  draft: SimDraftPhase,
+): PhaseDefinition {
+  if (!draft.waves?.length) {
+    throw new Error('draftPhase.waves deve ter ao menos uma wave');
+  }
+
+  const base = resolvePhaseBattle(phaseId);
+  return {
+    id: phaseId,
+    campaignId: base?.campaignId ?? 'apprentice',
+    mapId: base?.mapId ?? 'stendra',
+    displayName: draft.displayName?.trim() || base?.displayName || phaseId,
+    difficultyTier: draft.difficultyTier ?? base?.difficultyTier ?? 1,
+    unlocks: base?.unlocks ?? [],
+    milestoneBoss: base?.milestoneBoss,
+    seasonFinale: base?.seasonFinale,
+    statMultiplier: draft.statMultiplier ?? base?.statMultiplier ?? 1,
+    challengeKind: base?.challengeKind,
+    challengeLabel: base?.challengeLabel,
+    challengeHint: base?.challengeHint,
+    spikeElement: base?.spikeElement,
+    waves: draft.waves.map((wave, index) => ({
+      id: wave.id?.trim() || `w${index + 1}`,
+      goldMultiplier: wave.goldMultiplier,
+      slots: (wave.slots ?? []).map((slot) => ({
+        enemyType: slot.enemyType as EnemyType,
+        role: slot.role,
+        count: Math.max(1, Math.floor(slot.count || 1)),
+        displayName: slot.displayName,
+        level: slot.level,
+      })),
+    })),
+  };
+}
+
+/**
  * Tier usado para escolher gear e perfil de referência: a fase manda, e no encontro
  * ad-hoc o maior level dos slots serve de proxy.
  */
 export function resolveSimTier(request: SimRequest): number {
   if (request.slots?.length) {
     return Math.max(1, ...request.slots.map((slot) => slot.level ?? 1));
+  }
+  if (request.draftPhase?.difficultyTier != null) {
+    return Math.max(1, Math.floor(request.draftPhase.difficultyTier));
   }
   return resolvePhase(request.phaseId ?? SENTINEL_PHASE)?.difficultyTier ?? 1;
 }
@@ -107,8 +157,23 @@ export function buildAdHocState(heroes: Hero[], slots: SimAdHocSlot[]): GameStat
     slotIdx += slot.count;
     return Array.from({ length: slot.count }, (_, copy) =>
       createEnemyFromSlot(
-        { enemyType: slot.enemyType as EnemyType, role: slot.role, count: slot.count, level: slot.level },
-        { phaseId: SENTINEL_PHASE, waveIndex: 0, difficultyTier, isBossWave: true, statMultiplier: 1, milestoneGoldScale: 1, slotIndex: base + copy, goldMultiplier: 1 },
+        {
+          enemyType: slot.enemyType as EnemyType,
+          role: slot.role,
+          count: slot.count,
+          level: slot.level,
+          displayName: slot.displayName,
+        },
+        {
+          phaseId: SENTINEL_PHASE,
+          waveIndex: 0,
+          difficultyTier,
+          isBossWave: true,
+          statMultiplier: 1,
+          milestoneGoldScale: 1,
+          slotIndex: base + copy,
+          goldMultiplier: 1,
+        },
       ),
     );
   });
@@ -121,13 +186,25 @@ export function buildAdHocState(heroes: Hero[], slots: SimAdHocSlot[]): GameStat
   });
 }
 
+function countWavesEnemies(
+  waves: Array<{ slots: Array<{ count: number }> }>,
+  waveIndex: number | undefined,
+): number {
+  const selected =
+    waveIndex !== undefined ? [waves[waveIndex]].filter(Boolean) : waves;
+  return selected.reduce(
+    (sum, wave) => sum + wave.slots.reduce((s, slot) => s + slot.count, 0),
+    0,
+  );
+}
+
 export function countTotalEnemies(request: SimRequest): number {
   if (request.slots) return request.slots.reduce((s, sl) => s + sl.count, 0);
+  if (request.draftPhase?.waves?.length) {
+    return countWavesEnemies(request.draftPhase.waves, request.waveIndex);
+  }
   if (!request.phaseId) return 0;
   const phase = resolvePhase(request.phaseId);
   if (!phase) return 0;
-  const waves = request.waveIndex !== undefined
-    ? [phase.waves[request.waveIndex]].filter(Boolean)
-    : phase.waves;
-  return waves.reduce((sum, w) => sum + w.slots.reduce((s, sl) => s + sl.count, 0), 0);
+  return countWavesEnemies(phase.waves, request.waveIndex);
 }

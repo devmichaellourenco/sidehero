@@ -1501,8 +1501,8 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    if (!body || (!body.phaseId && !body.slots)) {
-      sendJson(res, 400, { ok: false, error: 'Informe phaseId ou slots' });
+    if (!body || (!body.phaseId && !body.slots && !body.draftPhase)) {
+      sendJson(res, 400, { ok: false, error: 'Informe phaseId, draftPhase ou slots' });
       return;
     }
 
@@ -1513,12 +1513,56 @@ async function handleApi(req, res, url) {
       phaseId: body.phaseId ?? undefined,
       waveIndex: body.waveIndex !== undefined ? Number(body.waveIndex) : undefined,
       slots: Array.isArray(body.slots) && body.slots.length > 0 ? body.slots : undefined,
+      draftPhase:
+        body.draftPhase && Array.isArray(body.draftPhase.waves) && body.draftPhase.waves.length > 0
+          ? body.draftPhase
+          : undefined,
       maxSeconds: body.maxSeconds ? Number(body.maxSeconds) : undefined,
       seed: body.seed !== undefined ? Number(body.seed) : undefined,
     };
 
     try {
       const result = combatSimApi.simulateEncounterBatch(request, runs);
+      sendJson(res, 200, { ok: true, ...result });
+    } catch (err) {
+      sendJson(res, 500, { ok: false, error: String(err?.message ?? err) });
+    }
+    return;
+  }
+
+  // ──── Playback visual (snapshots tick a tick) ────
+  if (req.method === 'POST' && url.pathname === '/api/combat-sim-playback') {
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { ok: false, error: 'Body JSON inválido' });
+      return;
+    }
+
+    if (!body || (!body.phaseId && !body.slots && !body.draftPhase)) {
+      sendJson(res, 400, { ok: false, error: 'Informe phaseId, draftPhase ou slots' });
+      return;
+    }
+
+    const request = {
+      party: Array.isArray(body.party) && body.party.length > 0 ? body.party : undefined,
+      profile: combatSimApi.isSimReferenceProfile(body.profile) ? body.profile : undefined,
+      phaseId: body.phaseId ?? undefined,
+      waveIndex: body.waveIndex !== undefined ? Number(body.waveIndex) : undefined,
+      slots: Array.isArray(body.slots) && body.slots.length > 0 ? body.slots : undefined,
+      draftPhase:
+        body.draftPhase && Array.isArray(body.draftPhase.waves) && body.draftPhase.waves.length > 0
+          ? body.draftPhase
+          : undefined,
+      maxSeconds: body.maxSeconds ? Number(body.maxSeconds) : undefined,
+      seed: body.seed !== undefined ? Number(body.seed) : undefined,
+      snapshotEveryTicks:
+        body.snapshotEveryTicks !== undefined ? Number(body.snapshotEveryTicks) : undefined,
+    };
+
+    try {
+      const result = combatSimApi.simulateEncounterPlayback(request);
       sendJson(res, 200, { ok: true, ...result });
     } catch (err) {
       sendJson(res, 500, { ok: false, error: String(err?.message ?? err) });

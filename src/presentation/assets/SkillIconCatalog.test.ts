@@ -10,10 +10,8 @@ describe('SkillIconCatalog', () => {
     expect(getSkillIconPath('frost_shard')).toBe(ASSETS.skills.frost_shard);
     expect(getSkillIconPath('blizzard')).toBe(ASSETS.skills.blizzard);
     expect(getSkillIconPath('smite')).toBe(ASSETS.skills.smite);
-    expect(getSkillIconPath('vitality')).toBe(ASSETS.skills.vitality);
     expect(getSkillIconPath('minor_heal')).toBe(ASSETS.skills.heal);
-    expect(getSkillIconPath('mana_shield')).toBe(ASSETS.skills.mana_shield);
-    expect(getSkillIconPath('iron_skin')).toBe(ASSETS.skills.iron_skin);
+    expect(getSkillIconPath('oracle_sanctuary')).toBe(ASSETS.skills.mana_shield);
     expect(getSkillIconPath('blessing')).toBe(ASSETS.skills.blessing);
     expect(getSkillIconPath('thrust')).toBe(ASSETS.skills.thrust);
     expect(getSkillIconPath('shield_bash')).toBe(ASSETS.skills.attack);

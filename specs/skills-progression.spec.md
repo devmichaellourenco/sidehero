@@ -25,8 +25,8 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 - [x] Lista de skills **sem** badges Ativa/Inativa nem Disponível; skill equipada usa fundo verde na linha; próximo level comunicado pelo círculo tracejado
 - [x] Aba Skills exibe skills em **linhas** (nome, ícone à esquerda, círculos de level à direita); hover em **qualquer** círculo (inclusive skills bloqueadas/sem pontos) mostra o ganho daquele ponto; círculos usam `aria-disabled` (não HTML `disabled`) para manter hover; detalhes no tooltip do ícone; portal clampa na viewport (modal pin/unpin)
 - [x] Nomenclatura de progressão da skill na UI: **Level** (não Rank)
-- [x] Skills passivas equipadas (`evasion`, `ghost_step`, `vitality`, `iron_skin`, `mana_shield`) exibem efeito numérico em **Na batalha** no tooltip (%, HP, mecânica e condição de slot)
-- [x] Arqueira (Rain): árvore de classe `precise_shot` / `piercing_arrow` / `arrow_rain` / `marked_prey` / `ghost_step`
+- [x] Skills de batalha são ativas (dano/cura/buff/debuff); skills só-passivas foram removidas — passivas de classe/ascensão/gear ficam em `passives` e **não** ocupam slot
+- [x] Arqueira (Rain): árvore de classe `precise_shot` / `piercing_arrow` / `arrow_rain` / `marked_prey`
 - [x] Aba Classe lista apenas próxima(s) ascensão(ões) e skills de evolução; classe/tier atual ficam no header do modal
 - [x] Cards de ascensão usam tema por caminho (military/martial/arcane/innate/sacred/life), showcase ampliado do sprite e CTA com estado pronto/bloqueado
 - [x] Cards de ascensão **sem** requisitos, status nem CTA no corpo visível — detalhes no tooltip ao apontar; nome e `+N Aprim.` em linhas separadas; ascensão disponível abre modal de confirmação ao clicar no card
@@ -56,7 +56,7 @@ Cada herói investe **pontos de aprimoramento** (saldo único) em árvore de ski
 ## Relacionado
 
 - [`improvement-reset.spec.md`](improvement-reset.spec.md) — devolver ranks `pointType: 'improvement'` e `'ascension'` (unitário + massa); **não** desfaz `ascensionId`
-- [`passives.spec.md`](passives.spec.md) — passivas sempre ativas de classe/ascensão (não confundir com skills passivas equipáveis)
+- [`passives.spec.md`](passives.spec.md) — passivas sempre ativas de classe/ascensão/gear (não ocupam slot)
 
 ## Testes obrigatórios
 

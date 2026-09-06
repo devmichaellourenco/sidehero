@@ -86,3 +86,17 @@ export function phaseGoldScaleForPhase(
 export function clearPhaseGoldScaleCache(): void {
   scaleCache.clear();
 }
+
+/**
+ * Ouro esperado da fase (orçamento após escala/override do lab).
+ * Pago via kills; preview do mapa usa este valor.
+ */
+export function effectivePhaseGoldTotal(phaseId: PhaseId): number {
+  const overrideTarget = getPhaseRewardOverride(phaseId)?.targetGold;
+  if (overrideTarget !== undefined && overrideTarget > 0) {
+    return Math.floor(overrideTarget);
+  }
+  const rawTotal = rawPhaseGoldTotal(phaseId);
+  if (rawTotal <= 0) return 0;
+  return Math.max(0, Math.round(rawTotal * phaseGoldScaleForPhase(phaseId)));
+}

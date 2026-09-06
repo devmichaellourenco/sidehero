@@ -12133,7 +12133,7 @@ body.skill-drag-active * {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: min(220px, 78%);
+  width: min(280px, 86%);
   padding: 10px 10px 8px;
   border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--seal-gold) 45%, var(--panel-border-soft));
@@ -12143,11 +12143,22 @@ body.skill-drag-active * {
     color-mix(in srgb, var(--parchment-2) 98%, transparent)
   );
   box-shadow:
-    0 8px 20px color-mix(in srgb, var(--ink) 28%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent);
+    0 10px 24px color-mix(in srgb, var(--ink) 32%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--seal-gold) 22%, transparent);
   --popover-shift-x: 0px;
   transform: translate(calc(-50% + var(--popover-shift-x)), calc(-100% - 8px));
   pointer-events: auto;
+}
+
+.campaign-mission-popover.campaign-mission-quest--main {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--seal-gold));
+  box-shadow:
+    0 10px 24px color-mix(in srgb, var(--ink) 32%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.campaign-mission-popover.campaign-mission-quest--side {
+  border-color: color-mix(in srgb, var(--info) 55%, var(--seal-gold));
 }
 
 .campaign-mission-popover[data-placement='below'] {
@@ -12163,7 +12174,7 @@ body.skill-drag-active * {
 
 .campaign-mission-popover--portaled {
   position: fixed;
-  width: min(220px, 78vw);
+  width: min(280px, 86vw);
   transform: none;
   pointer-events: auto;
 }
@@ -12172,19 +12183,226 @@ body.skill-drag-active * {
   min-width: 0;
 }
 
-.campaign-mission-popover .campaign-phase-preview-title {
-  font-size: 12px;
+.campaign-mission-quest-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.campaign-mission-popover .campaign-phase-preview-start {
+.campaign-mission-quest-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.campaign-mission-quest-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.campaign-mission-quest-kind {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--seal-gold) 50%, transparent);
+  background: color-mix(in srgb, var(--seal-gold) 18%, var(--parchment-0));
+  font-family: var(--font-heading);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--seal-gold-dark);
+}
+
+.campaign-mission-quest-kind--main {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--parchment-0));
+  color: var(--accent);
+}
+
+.campaign-mission-quest-kind--side {
+  border-color: color-mix(in srgb, var(--info) 55%, transparent);
+  background: color-mix(in srgb, var(--info) 18%, var(--parchment-0));
+  color: var(--info);
+}
+
+.campaign-mission-quest-stars {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--seal-gold);
+  line-height: 1;
+}
+
+.campaign-mission-quest-title,
+.campaign-mission-popover .campaign-phase-preview-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.campaign-mission-quest-rewards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--seal-gold) 28%, var(--panel-border-soft));
+  background: color-mix(in srgb, var(--parchment-1) 88%, var(--seal-gold));
+}
+
+.campaign-mission-quest-section-label {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.campaign-mission-quest-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.campaign-mission-quest-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 26px;
+  padding: 3px 8px 3px 5px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background: color-mix(in srgb, var(--parchment-0) 92%, transparent);
+  color: var(--ink);
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.campaign-mission-quest-pill--gold {
+  border-color: color-mix(in srgb, var(--seal-gold) 45%, transparent);
+}
+
+.campaign-mission-quest-pill--xp {
+  border-color: color-mix(in srgb, var(--info) 40%, transparent);
+}
+
+.campaign-mission-quest-reward-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.campaign-mission-quest-pill-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.campaign-mission-quest-pill-label {
+  color: var(--ink-muted);
+  text-transform: lowercase;
+}
+
+.campaign-mission-quest-pill-hint {
+  margin-left: 2px;
+  font-size: 0.58rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+
+.campaign-mission-quest-bonuses {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.campaign-mission-quest-bonus {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.72rem;
+  color: var(--ink);
+}
+
+.campaign-mission-quest-bonus-kind {
+  flex-shrink: 0;
+  font-family: var(--font-heading);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--seal-gold-dark);
+}
+
+.campaign-mission-quest-bonus-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campaign-mission-quest-threat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campaign-mission-quest-meta,
+.campaign-mission-popover .campaign-phase-preview-meta {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+.campaign-mission-quest-challenge,
+.campaign-mission-popover .campaign-phase-preview-challenge {
+  margin: 0;
+  padding: 5px 7px;
+  border-radius: 8px;
+  border-left: 3px solid color-mix(in srgb, var(--seal-gold) 70%, transparent);
+  background: color-mix(in srgb, var(--parchment-0) 70%, transparent);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.campaign-mission-quest-foes .campaign-mission-enemies {
+  margin-top: 4px;
+}
+
+.campaign-mission-popover .campaign-phase-preview-start,
+.campaign-mission-quest-cta {
   width: 100%;
   min-width: 0;
-  padding: 8px 10px;
+  min-height: 36px;
+  padding: 9px 12px;
   border: 1px solid color-mix(in srgb, var(--forest-hi) 50%, var(--seal-gold));
+  border-radius: 10px;
   background: linear-gradient(180deg, var(--forest-hi) 0%, var(--forest) 100%);
   color: var(--forest-cta-label);
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   box-shadow:
-    0 2px 8px color-mix(in srgb, var(--ink) 24%, transparent),
+    0 3px 10px color-mix(in srgb, var(--ink) 28%, transparent),
     inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent);
 }
 
@@ -12197,7 +12415,7 @@ body.skill-drag-active * {
 }
 
 .campaign-mission-popover .campaign-mission-enemies {
-  margin-top: 6px;
+  margin-top: 0;
 }
 
 .campaign-mission-select-hint {

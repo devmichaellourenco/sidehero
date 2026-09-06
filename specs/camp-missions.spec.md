@@ -2,8 +2,8 @@
 
 ## Status
 
-**Aceite:** 22/22 (100%) · Fases 0–6  
-**Testes obrigatórios:** 11/11
+**Aceite:** 23/23 (100%) · Fases 0–6  
+**Testes obrigatórios:** 18/18
 
 ## Objetivo
 
@@ -65,7 +65,7 @@ Por mapa (`stendra` … `morthaven` no v1), ids alinhados às fases-marco:
 ## Estrelas (1–5)
 
 - Indicam dificuldade e template.
-- UI: preview de waves, monstros e estatísticas dos inimigos **antes** de entrar.
+- UI: preview no pin (quest card) com tipo, ouro esperado, XP na vitória, bônus (item/cena), waves/tier, monstros e CTA **antes** de entrar.
 - Balanceamento: ver `game-balance` (BAL de missões).
 
 ## UI do mapa
@@ -74,11 +74,13 @@ Evoluir o mapa de campanha (`CampaignFlow` / `CampaignModalRenderer`):
 
 1. **Hub:** mapa **embutido** no `battle-field` — **somente** o board com pins e scroll (sem header Stendra/bioma, sem toggle mapa-mundo).
 2. **Expandir:** ícone Mapa abre modal com mapa-mundo/trilha completa; ao clicar numa região no mapa-mundo, fecha o modal e mostra só os pins dessa região no hub.
+3. **Preview do pin:** quest card ancorado no pin — badge de tipo, faixa de recompensas (`expectedGold` / `victoryXp` + item/cena), ameaça (waves/tier/hint), inimigos e CTA Iniciar.
 
 ## Critérios de aceite
 
 - [x] Fim de batalha (vitória ou derrota) mostra CLEAR/DEFEAT, depois tela só de recompensas (sem scroll; Continuar no deck); Continuar → hub com **mapa embutido** no battle-field
 - [x] **Iniciar missão** no mapa → combate imediato (sem overlay START; o CTA já confirma); painel **Estatísticas** abre automaticamente; em campanha unpin, relay para o side panel (`MissionBattleStartRelay`)
+- [x] Preview do pin (quest card) mostra ouro esperado, XP de vitória e bônus (item/cena com nome) quando houver
 - [x] Hub / Acampamento sem reinício via Batalhar (`phaseRestartOnResume: false`); combate só pelo mapa
 - [x] New game inicia no hub do acampamento (`loadoutEditOpen: true`) com **mapa embutido** (sem overlay “Acampamento”)
 - [x] New game: depois da cena de abertura, boas-vindas → mapa aberto automaticamente → tutorial guiado (pinos/tipos de missão, preview do local, Iniciar missão); ver `battle-ui` (`OnboardingPolicy`)
@@ -157,7 +159,8 @@ Ouro de cada fase vem do orçamento `targetGold` (pago via kills). XP vem do or�
 - [x] `ResolveMissionOutcome.test.ts` — domínio: XP na vitória; derrota sem XP; main/side sem recompensa de conclusão
 - [x] `StartMissionUseCase.test.ts` — inicia tentativa / rejeita inválida
 - [x] `GetMissionBoardUseCase.test.ts` — DTO / escopo base
-- [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / popover no pin / tooltip de stats
+- [x] `CampaignMissionMapPresentation.test.ts` — locais clicáveis / tipos / quest card no pin (ouro/XP/bônus) / tooltip de stats
+- [x] `MissionBoardMapper.test.ts` — `expectedGold` / `victoryXp` / nomes de recompensa
 - [x] `EnemyBattlePresentation.test.ts` — tooltip compacto com ícones (~3 por linha)
 - [x] `MissionEnemyPreviewMapper.test.ts` — ficha de combate dos inimigos em destaque
 - [x] `BattleVictoryDetector.test.ts` — vitória com rewards; derrota normal com ouro/XP da tentativa (baseline do START, não só o último tick)

@@ -3323,3 +3323,192 @@ textarea {
 .cs-sweep-row--hard td { background: rgba(248, 113, 113, 0.16); }
 .cs-sweep-row--easy td { background: rgba(251, 191, 36, 0.12); }
 .cs-sweep-row--band td { background: rgba(74, 222, 128, 0.14); }
+
+/* ── Arena visual de batalha (Missões) ── */
+
+.mba-arena {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(40, 36, 28, 0.55), rgba(22, 20, 16, 0.9)),
+    var(--surface-2, #1a1814);
+}
+
+.mba-header h4 {
+  margin: 0 0 2px;
+  font-size: 0.95rem;
+}
+
+.mba-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.mba-speed-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted, #aaa);
+}
+
+.mba-meta {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: var(--muted, #aaa);
+  font-variant-numeric: tabular-nums;
+}
+
+.mba-stage {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: start;
+  min-height: 140px;
+  padding: 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mba-divider {
+  align-self: center;
+  opacity: 0.45;
+  font-size: 1.1rem;
+  padding-top: 24px;
+}
+
+.mba-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mba-side--enemies {
+  align-items: flex-end;
+}
+
+.mba-side--enemies .mba-unit {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.mba-side--enemies .mba-unit-meta {
+  align-items: flex-end;
+}
+
+.mba-unit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  max-width: 100%;
+  transition: opacity 0.2s ease;
+}
+
+.mba-unit--dead {
+  opacity: 0.35;
+  filter: grayscale(0.7);
+}
+
+.mba-unit--boss {
+  outline: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.mba-unit--elite {
+  outline: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.mba-sprite {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: auto;
+  flex: 0 0 auto;
+}
+
+.mba-unit--boss .mba-sprite {
+  width: 56px;
+  height: 56px;
+}
+
+.mba-unit-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.mba-unit-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mba-unit-sub {
+  font-size: 0.72rem;
+  color: var(--muted, #aaa);
+}
+
+.mba-hp {
+  height: 6px;
+  width: 100%;
+  max-width: 160px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.mba-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3d8b5a, #6bcf8a);
+  border-radius: 3px;
+  transition: width 0.12s linear;
+}
+
+.mba-unit--dead .mba-hp-fill {
+  background: #666;
+}
+
+.mba-hp-text {
+  font-size: 0.7rem;
+  color: var(--muted, #aaa);
+  font-variant-numeric: tabular-nums;
+}
+
+.mba-status {
+  margin: 8px 0 0;
+}
+
+@media (max-width: 720px) {
+  .mba-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .mba-divider {
+    display: none;
+  }
+
+  .mba-side--enemies {
+    align-items: stretch;
+  }
+
+  .mba-side--enemies .mba-unit {
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .mba-side--enemies .mba-unit-meta {
+    align-items: flex-start;
+  }
+}

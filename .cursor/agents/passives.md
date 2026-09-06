@@ -8,7 +8,7 @@ Passivas sempre ativas (classe, ascensão, gear, inimigos): catálogo, resolver,
 
 1. `specs/passives.spec.md` — decidir **Decisões abertas** com o usuário se ainda pendentes
 2. `.cursor/skills/passives/SKILL.md`
-3. Não misturar com `unique-effects` nem com skills passivas equipáveis (`PassiveSkillEffects`)
+3. Não misturar com `unique-effects`; skills só-passivas equipáveis não existem (passivas = sempre ativas)
 
 ## Workflow do agente
 

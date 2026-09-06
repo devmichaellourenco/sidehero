@@ -26,8 +26,9 @@ Decisões da spec estão **fechadas** (ver `specs/passives.spec.md`). Implementa
 | Sistema | Quando |
 |---------|--------|
 | **Passivas (esta skill)** | Sempre ativas; cumulativas; classe/ascensão/gear/inimigo |
-| **Skill passiva equipável** | `evasion` / `vitality` / … — precisa de slot (`PassiveSkillEffects`) |
 | **Efeito único** | `unique-effects` — handlers especiais (heal_block, cleanse) |
+
+Skills só-passivas equipáveis **não existem** no `SkillCatalog` (não ocupam slot).
 
 ## Conteúdo v1 (classes)
 

@@ -6,7 +6,6 @@ import {
   getHeroBaseStats,
   resolveHeroStoredBaseStat,
 } from '../combat/HeroBaseStatsCatalog';
-import { passiveVitalityHealthBonus } from '../combat/PassiveSkillEffects';
 import {
   heroPassiveAttackPercent,
   heroPassiveDefensePercent,
@@ -152,12 +151,10 @@ export class Hero {
   get maxHealth(): number {
     const gearBonus = this.sumGear((g) => g.healthBonus);
     const attrBonus = this.totalAttributes.str * 2;
-    const vitalityBonus = passiveVitalityHealthBonus(this);
     const raw =
       resolveHeroStoredBaseStat(this.heroClass, this.baseMaxHealth, 'health') +
       gearBonus +
-      attrBonus +
-      vitalityBonus;
+      attrBonus;
     const percent = this.sumGear((g) => g.healthPercentBonus) + heroPassiveMaxHealthPercent(this);
     return Math.max(1, Math.floor(raw * (1 + percent / 100)));
   }

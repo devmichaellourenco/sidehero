@@ -8,9 +8,8 @@ function heroWithSkills(equippedSkillIds: string[], skillRanks: Record<string, n
   const ranks = {
     [BASIC_ATTACK_SKILL_ID]: 1,
     power_attack: 1,
-    evasion: 1,
+    thrust: 1,
     arcane_touch: 1,
-    vitality: 1,
     ...skillRanks,
   };
 
@@ -39,8 +38,8 @@ describe('Hero.activateSkill', () => {
   it('substitui skill existente no slot escolhido', () => {
     let hero = heroWithSkills(['basic_attack', 'power_attack']);
 
-    hero = hero.assignSkillToSlot('evasion', 1, 3);
-    expect(hero.toProps().equippedSkillIds).toEqual(['basic_attack', 'evasion']);
+    hero = hero.assignSkillToSlot('thrust', 1, 3);
+    expect(hero.toProps().equippedSkillIds).toEqual(['basic_attack', 'thrust']);
   });
 
   it('rejeita skill além do limite de slots desbloqueados', () => {
@@ -50,7 +49,7 @@ describe('Hero.activateSkill', () => {
   });
 
   it('rejeita a 4ª skill ativa', () => {
-    const hero = heroWithSkills(['basic_attack', 'power_attack', 'evasion']);
+    const hero = heroWithSkills(['basic_attack', 'power_attack', 'thrust']);
 
     expect(() => hero.activateSkill('arcane_touch', 3)).toThrow(
       `Limite de ${MAX_ACTIVE_BATTLE_SKILLS} skills ativas na batalha`,

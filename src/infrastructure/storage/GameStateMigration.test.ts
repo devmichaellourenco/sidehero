@@ -295,6 +295,24 @@ describe('migrateHero — progressão', () => {
     expect(hero.toProps().ascensionId).toBe('knight_military_guerreiro');
   });
 
+  it('remove skills só-passivas e devolve pontos ao pool de aprimoramento', () => {
+    const hero = migrateHero({
+      id: 'h1',
+      name: 'Galneon',
+      heroClass: 'knight',
+      unspentImprovementPoints: 1,
+      skillRanks: { basic_attack: 1, thrust: 1, evasion: 2, iron_skin: 1 },
+      equippedSkillIds: ['basic_attack', 'evasion', 'thrust'],
+    });
+
+    const props = hero.toProps();
+    expect(props.skillRanks.evasion).toBeUndefined();
+    expect(props.skillRanks.iron_skin).toBeUndefined();
+    expect(props.skillRanks.thrust).toBe(1);
+    expect(props.equippedSkillIds).toEqual(['basic_attack', 'thrust']);
+    expect(props.unspentImprovementPoints).toBe(4);
+  });
+
   it('migra gear chaos_* equipado no herói', () => {
     const hero = migrateHero({
       id: 'h1',

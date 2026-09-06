@@ -17,8 +17,6 @@ export interface CombatantDerivedStatInput {
   attackPercent?: number;
   defensePercent?: number;
   healthPercent?: number;
-  /** Bônus flat de passiva de vitalidade (herói). */
-  vitalityHealthFlat?: number;
 }
 
 /**
@@ -47,8 +45,7 @@ export function deriveCombatMaxHealth(input: CombatantDerivedStatInput): number 
   const gearBonus = input.gearHealth ?? 0;
   const levelBonus = (Math.max(1, input.level) - 1) * input.healthPerLevel;
   const attrBonus = input.attributes.str * 2;
-  const vitalityBonus = input.vitalityHealthFlat ?? 0;
-  const raw = (input.baseMaxHealth ?? 0) + gearBonus + levelBonus + attrBonus + vitalityBonus;
+  const raw = (input.baseMaxHealth ?? 0) + gearBonus + levelBonus + attrBonus;
   const percent = input.healthPercent ?? 0;
   return Math.max(1, Math.floor(raw * (1 + percent / 100)));
 }

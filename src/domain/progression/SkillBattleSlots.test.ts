@@ -31,14 +31,14 @@ describe('SkillBattleSlots', () => {
 
   it('mantém ataque básico ao aparar skills equipadas', () => {
     expect(
-      trimEquippedSkillIds(['basic_attack', 'power_attack', 'evasion'], 1),
+      trimEquippedSkillIds(['basic_attack', 'power_attack', 'thrust'], 1),
     ).toEqual(['basic_attack']);
   });
 
   it('substitui skill em slot específico', () => {
     const layout = toSkillSlotLayout(['basic_attack', 'power_attack'], 3);
-    const next = assignSkillToLayout(layout, 'evasion', 1);
+    const next = assignSkillToLayout(layout, 'thrust', 1);
 
-    expect(next).toEqual(['basic_attack', 'evasion', null]);
+    expect(next).toEqual(['basic_attack', 'thrust', null]);
   });
 });

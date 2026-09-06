@@ -15,8 +15,10 @@ import {
   buildPhaseState,
   buildAdHocState,
   countTotalEnemies,
+  materializeSimDraftPhase,
   resolveSimTier,
 } from './CombatSimulatorBuilders';
+import { withLabSimDraftPhase } from './LabSimDraftPhase';
 import type { SimHeroLoadoutSpec } from './SimHeroLoadout';
 import {
   resolveSimProfileSpec,
@@ -36,6 +38,21 @@ export interface SimAdHocSlot {
   role: EnemyRole;
   count: number;
   level?: number;
+  displayName?: string;
+}
+
+export interface SimDraftWave {
+  id?: string;
+  goldMultiplier?: number;
+  slots: SimAdHocSlot[];
+}
+
+/** Composição de fase ainda não salva — usada pelo Balance Lab. */
+export interface SimDraftPhase {
+  displayName?: string;
+  difficultyTier?: number;
+  statMultiplier?: number;
+  waves: SimDraftWave[];
 }
 
 export interface SimRequest {
@@ -48,8 +65,15 @@ export interface SimRequest {
   waveIndex?: number;
   /** Encontro ad-hoc sem fase de campanha. */
   slots?: SimAdHocSlot[];
+  /**
+   * Waves/stats do editor (sem Save). Exige `phaseId` para metadados/ID;
+   * injeta override temporário em `resolvePhase` durante a simulação.
+   */
+  draftPhase?: SimDraftPhase;
   maxSeconds?: number;
   seed?: number;
+  /** A cada quantos ticks gravar snapshot no playback (default 1). */
+  snapshotEveryTicks?: number;
 }
 
 export interface HeroSimResult {
@@ -86,6 +110,33 @@ export interface BatchSimulationResult {
   perRun: EncounterSimulationResult[];
 }
 
+export interface SimUnitSnapshot {
+  id: string;
+  name: string;
+  kind: 'hero' | 'enemy';
+  classOrType: string;
+  role?: EnemyRole;
+  level: number;
+  hp: number;
+  maxHp: number;
+  alive: boolean;
+}
+
+export interface CombatSimSnapshot {
+  tick: number;
+  combatTime: number;
+  waveIndex: number;
+  waveCount: number;
+  heroes: SimUnitSnapshot[];
+  enemies: SimUnitSnapshot[];
+  intermission: string | null;
+}
+
+export interface EncounterPlaybackResult {
+  snapshots: CombatSimSnapshot[];
+  result: EncounterSimulationResult;
+}
+
 // ── RNG semeável (mulberry32) ──────────────────────────────────────────────────
 
 function mulberry32(seed: number): () => number {
@@ -116,7 +167,6 @@ function withSeededRng<T>(rng: (() => number) | undefined, fn: () => T): T {
 // ── Construção de resultado ────────────────────────────────────────────────────
 
 const DEFAULT_MAX_SECONDS = 600;
-const turnPhase = new CombatTurnPhase();
 
 function buildResult(
   outcome: SimOutcome,
@@ -139,23 +189,82 @@ function buildResult(
   return { outcome, combatTime: ticks * COMBAT_DELTA_SECONDS, ticks, wavesCleared, enemiesKilled, totalEnemies, heroes, avgHpPercent };
 }
 
+function captureSnapshot(state: GameState, ticks: number): CombatSimSnapshot {
+  const meta = state.combat?.encounterMeta;
+  const heroes: SimUnitSnapshot[] = state.activeHeroes().map((hero) => ({
+    id: hero.id,
+    name: hero.name,
+    kind: 'hero',
+    classOrType: hero.heroClass as string,
+    level: hero.level,
+    hp: Math.max(0, hero.currentHealth),
+    maxHp: Math.max(1, hero.maxHealth),
+    alive: hero.currentHealth > 0,
+  }));
+  const enemies: SimUnitSnapshot[] = (state.combat?.enemies ?? []).map((enemy) => ({
+    id: enemy.id,
+    name: enemy.name,
+    kind: 'enemy',
+    classOrType: enemy.enemyType as string,
+    role: enemy.role,
+    level: enemy.level,
+    hp: Math.max(0, enemy.stats.currentHealth),
+    maxHp: Math.max(1, enemy.maxHealth),
+    alive: enemy.isAlive(),
+  }));
+
+  return {
+    tick: ticks,
+    combatTime: ticks * COMBAT_DELTA_SECONDS,
+    waveIndex: state.phaseRun?.waveIndex ?? meta?.waveIndex ?? 0,
+    waveCount: meta?.waveCount ?? 1,
+    heroes,
+    enemies,
+    intermission: state.combatIntermission?.variant ?? null,
+  };
+}
+
 // ── Loop de simulação ──────────────────────────────────────────────────────────
 
-function runSingleSim(request: SimRequest, initialState: GameState, seed: number | undefined): EncounterSimulationResult {
+interface RunSimOptions {
+  recordSnapshots?: boolean;
+  snapshotEveryTicks?: number;
+}
+
+interface RunSimOutput {
+  result: EncounterSimulationResult;
+  snapshots: CombatSimSnapshot[];
+}
+
+function runSingleSim(
+  request: SimRequest,
+  initialState: GameState,
+  turnPhase: CombatTurnPhase,
+  options: RunSimOptions = {},
+): RunSimOutput {
   const maxSeconds = request.maxSeconds ?? DEFAULT_MAX_SECONDS;
   const maxTicks = Math.ceil(maxSeconds / COMBAT_DELTA_SECONDS);
   const totalEnemies = countTotalEnemies(request);
   const stopAfterFirstClear = request.waveIndex !== undefined && !request.slots;
-  const rng = seed !== undefined ? mulberry32(seed) : undefined;
+  const every = Math.max(1, Math.floor(options.snapshotEveryTicks ?? request.snapshotEveryTicks ?? 1));
+  const snapshots: CombatSimSnapshot[] = [];
 
   let state = initialState;
   let ticks = 0;
   let wavesCleared = 0;
   let enemiesKilled = 0;
 
+  if (options.recordSnapshots) {
+    snapshots.push(captureSnapshot(state, ticks));
+  }
+
   while (ticks < maxTicks) {
-    state = withSeededRng(rng, () => turnPhase.execute(state)).state;
+    state = turnPhase.execute(state).state;
     ticks++;
+
+    if (options.recordSnapshots && (ticks % every === 0 || state.combatIntermission)) {
+      snapshots.push(captureSnapshot(state, ticks));
+    }
 
     const intermission = state.combatIntermission;
     if (!intermission) continue;
@@ -163,22 +272,43 @@ function runSingleSim(request: SimRequest, initialState: GameState, seed: number
     const { variant } = intermission;
 
     if (variant === 'defeat') {
-      return buildResult('wipe', state, ticks, wavesCleared, enemiesKilled, totalEnemies);
+      const result = buildResult('wipe', state, ticks, wavesCleared, enemiesKilled, totalEnemies);
+      return { result, snapshots };
     }
 
     // wave-clear, boss-approach ou phase-clear
     wavesCleared += 1;
-    enemiesKilled += state.combat?.enemies.length ?? 0;
+    const defeatedNow = state.combat?.enemies.length ?? 0;
+    if (defeatedNow > 0) {
+      enemiesKilled += defeatedNow;
+    } else {
+      // Vitória de boss / limpeza zera o combate — credita o restante da request
+      enemiesKilled = Math.max(enemiesKilled, totalEnemies);
+    }
 
     if (variant === 'phase-clear' || stopAfterFirstClear) {
-      return buildResult('victory', state, ticks, wavesCleared, enemiesKilled, totalEnemies);
+      return {
+        result: buildResult('victory', state, ticks, wavesCleared, enemiesKilled, totalEnemies),
+        snapshots,
+      };
     }
 
     state = state.withCombatIntermission(null);
   }
 
   const partialKills = state.combat?.enemies.filter((e) => !e.isAlive()).length ?? 0;
-  return buildResult('timeout', state, ticks, wavesCleared, enemiesKilled + partialKills, totalEnemies);
+  const result = buildResult(
+    'timeout',
+    state,
+    ticks,
+    wavesCleared,
+    enemiesKilled + partialKills,
+    totalEnemies,
+  );
+  if (options.recordSnapshots) {
+    snapshots.push(captureSnapshot(state, ticks));
+  }
+  return { result, snapshots };
 }
 
 /** O que o membro declarou vence o perfil; o perfil só preenche as lacunas. */
@@ -197,41 +327,79 @@ function buildInitialState(request: SimRequest, party: SimPartyMember[]): GameSt
     buildSimHero(withProfileDefaults(spec, request.profile, tier), i, tier),
   );
   if (request.slots) return buildAdHocState(heroes, request.slots);
-  if (request.phaseId) return buildPhaseState(heroes, request.phaseId, request.waveIndex ?? 0);
+  if (request.phaseId || request.draftPhase) {
+    return buildPhaseState(heroes, request.phaseId ?? SENTINEL_PHASE, request.waveIndex ?? 0);
+  }
   return buildPhaseState(heroes, SENTINEL_PHASE, 0);
+}
+
+function withRequestDraft<T>(request: SimRequest, fn: () => T): T {
+  if (!request.draftPhase || request.slots) return fn();
+  const phaseId = (request.phaseId ?? SENTINEL_PHASE) as PhaseId;
+  const phase = materializeSimDraftPhase(phaseId, request.draftPhase);
+  return withLabSimDraftPhase(phase, fn);
+}
+
+function runSeededEncounter(
+  request: SimRequest,
+  party: SimPartyMember[],
+  seed: number | undefined,
+  options: RunSimOptions = {},
+): RunSimOutput {
+  const rng = seed !== undefined ? mulberry32(seed) : undefined;
+  return withSeededRng(rng, () => {
+    // Novo motor por run: SkillTargetResolver captura Math.random no construtor.
+    const turnPhase = new CombatTurnPhase();
+    return runSingleSim(request, buildInitialState(request, party), turnPhase, options);
+  });
 }
 
 // ── API pública ────────────────────────────────────────────────────────────────
 
 export function simulateEncounter(request: SimRequest): EncounterSimulationResult {
-  const party = (request.party?.length ?? 0) > 0 ? request.party! : FALLBACK_PARTY;
-  return runSingleSim(request, buildInitialState(request, party), request.seed);
+  return withRequestDraft(request, () => {
+    const party = (request.party?.length ?? 0) > 0 ? request.party! : FALLBACK_PARTY;
+    return runSeededEncounter(request, party, request.seed).result;
+  });
 }
 
 export function simulateEncounterBatch(request: SimRequest, runs: number): BatchSimulationResult {
-  const safeRuns = Math.max(1, Math.floor(runs));
-  const party = (request.party?.length ?? 0) > 0 ? request.party! : FALLBACK_PARTY;
-  const perRun: EncounterSimulationResult[] = [];
+  return withRequestDraft(request, () => {
+    const safeRuns = Math.max(1, Math.floor(runs));
+    const party = (request.party?.length ?? 0) > 0 ? request.party! : FALLBACK_PARTY;
+    const perRun: EncounterSimulationResult[] = [];
 
-  for (let i = 0; i < safeRuns; i++) {
-    const seed = request.seed !== undefined ? request.seed + i : undefined;
-    perRun.push(runSingleSim(request, buildInitialState(request, party), seed));
-  }
+    for (let i = 0; i < safeRuns; i++) {
+      const seed = request.seed !== undefined ? request.seed + i : undefined;
+      perRun.push(runSeededEncounter(request, party, seed).result);
+    }
 
-  const victories = perRun.filter((r) => r.outcome === 'victory').length;
-  const wipes = perRun.filter((r) => r.outcome === 'wipe').length;
-  const times = perRun.map((r) => r.combatTime);
+    const victories = perRun.filter((r) => r.outcome === 'victory').length;
+    const wipes = perRun.filter((r) => r.outcome === 'wipe').length;
+    const times = perRun.map((r) => r.combatTime);
 
-  return {
-    runs: safeRuns,
-    winRate: victories / safeRuns,
-    wipeRate: wipes / safeRuns,
-    timeoutRate: (safeRuns - victories - wipes) / safeRuns,
-    avgCombatTime: times.reduce((a, b) => a + b, 0) / safeRuns,
-    minCombatTime: Math.min(...times),
-    maxCombatTime: Math.max(...times),
-    avgHpPercent: perRun.reduce((a, r) => a + r.avgHpPercent, 0) / safeRuns,
-    avgWavesCleared: perRun.reduce((a, r) => a + r.wavesCleared, 0) / safeRuns,
-    perRun,
-  };
+    return {
+      runs: safeRuns,
+      winRate: victories / safeRuns,
+      wipeRate: wipes / safeRuns,
+      timeoutRate: (safeRuns - victories - wipes) / safeRuns,
+      avgCombatTime: times.reduce((a, b) => a + b, 0) / safeRuns,
+      minCombatTime: Math.min(...times),
+      maxCombatTime: Math.max(...times),
+      avgHpPercent: perRun.reduce((a, r) => a + r.avgHpPercent, 0) / safeRuns,
+      avgWavesCleared: perRun.reduce((a, r) => a + r.wavesCleared, 0) / safeRuns,
+      perRun,
+    };
+  });
+}
+
+/** Simulação única com snapshots tick a tick para a arena visual do lab. */
+export function simulateEncounterPlayback(request: SimRequest): EncounterPlaybackResult {
+  return withRequestDraft(request, () => {
+    const party = (request.party?.length ?? 0) > 0 ? request.party! : FALLBACK_PARTY;
+    const { result, snapshots } = runSeededEncounter(request, party, request.seed, {
+      recordSnapshots: true,
+    });
+    return { snapshots, result };
+  });
 }

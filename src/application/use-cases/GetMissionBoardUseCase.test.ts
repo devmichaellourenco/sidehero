@@ -31,6 +31,8 @@ describe('GetMissionBoardUseCase', () => {
 
     expect(result.board.mapId).toBe('stendra');
     expect(result.board.main?.id).toBe(mainMissionId('1-1'));
+    expect(result.board.main?.expectedGold).toBeGreaterThan(0);
+    expect(result.board.main?.victoryXp).toBeGreaterThan(0);
     expect(result.board.normals.length).toBeGreaterThanOrEqual(2);
     expect(result.board.normals.length).toBeLessThanOrEqual(4);
   });

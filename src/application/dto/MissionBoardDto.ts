@@ -15,6 +15,10 @@ export interface MissionPreviewDto {
   stars: number | null;
   waveCount: number;
   difficultyTier: number;
+  /** Ouro esperado da fase (orçamento via kills). */
+  expectedGold: number;
+  /** XP pago na vitória (lump sum). */
+  victoryXp: number;
   /** @deprecated Preferir featuredEnemies para tooltips com stats. */
   featuredEnemyTypes: string[];
   /** Inimigos em destaque com ficha de combate para preview/tooltip. */
@@ -22,6 +26,10 @@ export interface MissionPreviewDto {
   challengeLabel?: string;
   challengeHint?: string;
   rewards: MissionRewardDto | null;
+  /** Nome legível do item exclusivo, se houver. */
+  rewardItemName: string | null;
+  /** Título legível da cena exclusiva, se houver. */
+  rewardSceneTitle: string | null;
   selected: boolean;
 }
 

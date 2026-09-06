@@ -3,18 +3,9 @@ import { Gear } from '../entities/Gear';
 import { Hero } from '../entities/Hero';
 import { defensiveMitigationForHero } from './HeroDefensiveStatsProvider';
 
-function heroWithSkills(equippedSkillIds: string[], skillRanks: Record<string, number> = {}): Hero {
-  const base = Hero.createStarter('hero-1', 'knight', 'Test');
-  return Hero.restore({
-    ...base.toProps(),
-    skillRanks: { basic_attack: 1, ...skillRanks },
-    equippedSkillIds,
-  });
-}
-
 describe('HeroDefensiveStatsProvider', () => {
-  it('soma dodge de gear e passiva de evasão equipada', () => {
-    let hero = heroWithSkills(['evasion', 'basic_attack'], { evasion: 2 });
+  it('soma dodge de gear com base de DEX', () => {
+    let hero = Hero.createStarter('hero-1', 'knight', 'Test');
     hero = hero.equip(
       Gear.create({
         id: 'boots',
@@ -33,11 +24,21 @@ describe('HeroDefensiveStatsProvider', () => {
     expect(stats.blockChance).toBe(0);
   });
 
-  it('iron_skin e mana_shield contribuem quando equipadas', () => {
-    const hero = heroWithSkills(['iron_skin', 'mana_shield', 'basic_attack'], {
-      iron_skin: 2,
-      mana_shield: 1,
-    });
+  it('redução e bloqueio vêm do equipamento (sem skills só-passivas)', () => {
+    let hero = Hero.createStarter('hero-2', 'knight', 'Test');
+    hero = hero.equip(
+      Gear.create({
+        id: 'shield',
+        name: 'Escudo',
+        slot: 'accessory',
+        rarity: 'rare',
+        attackBonus: 0,
+        defenseBonus: 4,
+        healthBonus: 0,
+        blockChanceBonus: 0.03,
+        damageReductionBonus: 0.08,
+      }),
+    );
 
     const stats = defensiveMitigationForHero(hero);
     expect(stats.damageReduction).toBeCloseTo(0.08);

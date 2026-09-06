@@ -206,6 +206,6 @@ describe('SkillVfxCatalog', () => {
   });
 
   it('retorna null para skills sem VFX', () => {
-    expect(getSkillVfxDefinition('mana_shield')).toBeNull();
+    expect(getSkillVfxDefinition('unknown_skill_without_vfx')).toBeNull();
   });
 });

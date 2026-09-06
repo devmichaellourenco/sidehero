@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { simulateEncounter, simulateEncounterBatch } from './CombatEncounterSimulator';
+import {
+  simulateEncounter,
+  simulateEncounterBatch,
+  simulateEncounterPlayback,
+} from './CombatEncounterSimulator';
 
 /**
  * Fases válidas (mapas 1–4, liberadas no perfil 'base').
@@ -140,6 +144,62 @@ describe('CombatEncounterSimulator', () => {
     it('perRun.length === runs', () => {
       const batch = simulateEncounterBatch({ phaseId: EASY_PHASE, seed: 99 }, 7);
       expect(batch.perRun).toHaveLength(7);
+    });
+  });
+
+  describe('draftPhase', () => {
+    it('simula multi-wave do rascunho sem depender do override salvo', () => {
+      const request = {
+        phaseId: EASY_PHASE,
+        seed: 7,
+        party: [
+          { heroClass: 'sorcerer', level: 20 },
+          { heroClass: 'knight', level: 20 },
+          { heroClass: 'priest', level: 20 },
+        ],
+        draftPhase: {
+          displayName: 'Draft Lab',
+          difficultyTier: 1,
+          statMultiplier: 1,
+          waves: [
+            {
+              id: 'w1',
+              slots: [{ enemyType: 'goblin_raider', role: 'trash' as const, count: 1, level: 1 }],
+            },
+            {
+              id: 'w2',
+              slots: [{ enemyType: 'goblin_raider', role: 'boss' as const, count: 1, level: 1 }],
+            },
+          ],
+        },
+      };
+      const result = simulateEncounter(request);
+      expect(result.outcome).toBe('victory');
+      expect(result.wavesCleared).toBe(2);
+      expect(result.totalEnemies).toBe(2);
+    });
+  });
+
+  describe('simulateEncounterPlayback', () => {
+    it('termina com o mesmo outcome que simulateEncounter', () => {
+      const request = {
+        phaseId: EASY_PHASE,
+        seed: 11,
+        draftPhase: {
+          waves: [
+            {
+              slots: [{ enemyType: 'goblin_raider', role: 'trash' as const, count: 1, level: 1 }],
+            },
+          ],
+        },
+        party: [{ heroClass: 'knight', level: 15 }],
+      };
+      const plain = simulateEncounter(request);
+      const playback = simulateEncounterPlayback(request);
+      expect(playback.result.outcome).toBe(plain.outcome);
+      expect(playback.result.ticks).toBe(plain.ticks);
+      expect(playback.snapshots.length).toBeGreaterThan(0);
+      expect(playback.snapshots[playback.snapshots.length - 1]?.intermission).toBeTruthy();
     });
   });
 });

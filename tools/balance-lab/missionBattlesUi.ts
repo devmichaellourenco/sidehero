@@ -29,6 +29,12 @@ import {
   fetchCombatSim,
   renderSimResult,
 } from './combatSimUi';
+import {
+  bindArenaControls,
+  disposeArenaPlayback,
+  renderArenaShellHtml,
+  type ArenaDraftPayload,
+} from './missionBattleArenaUi';
 import { renderSweepPanelHtml, bindSweepPanel } from './combatSweepUi';
 import {
   buildChapterTrack,
@@ -1103,6 +1109,7 @@ function renderEditor(): string {
         <button type="button" class="lab-btn--info" id="mb-load-combat-sim">▶️ Simular combate (real)</button>
       </div>
     </div>
+    ${renderArenaShellHtml()}
   `;
 }
 
@@ -1263,7 +1270,8 @@ function bindEditor(root: HTMLElement): void {
 
   root.querySelector('#mb-load-combat-sim')?.addEventListener('click', () => {
     const phaseId = selectedMission?.phaseTemplateId;
-    if (!phaseId) return;
+    if (!phaseId || !draft) return;
+    touchDraft();
     const container = root.querySelector<HTMLElement>('#mb-wave-power');
     const resultsId = 'mb-combat-sim-results';
     let resultsEl = root.querySelector<HTMLElement>(`#${resultsId}`);
@@ -1275,9 +1283,36 @@ function bindEditor(root: HTMLElement): void {
     resultsEl.innerHTML = '<p class="lab-hint">Simulando…</p>';
     const runs = readRunsSelect(root, 'mb-sim-runs');
     const profile = readProfileSelect(root, 'mb-sim-profile');
-    void fetchCombatSim({ phaseId, party: getRefPartyForApi(), profile, runs, seed: 1 })
+    void fetchCombatSim({
+      phaseId,
+      draftPhase: {
+        displayName: draft.displayName,
+        statMultiplier: draft.statMultiplier,
+        waves: draft.waves,
+      },
+      party: getRefPartyForApi(),
+      profile,
+      runs,
+      seed: 1,
+    })
       .then((data) => { if (resultsEl) renderSimResult(resultsEl, data, runs, phaseId); })
       .catch((err: Error) => { if (resultsEl) resultsEl.innerHTML = `<p class="lab-hint is-error">Erro: ${err.message}</p>`; });
+  });
+
+  bindArenaControls(root, (): ArenaDraftPayload | null => {
+    if (!selectedMission || !draft) return null;
+    touchDraft();
+    return {
+      phaseId: selectedMission.phaseTemplateId,
+      draftPhase: {
+        displayName: draft.displayName,
+        statMultiplier: draft.statMultiplier,
+        waves: draft.waves,
+      },
+      party: getRefPartyForApi(),
+      profile: readProfileSelect(root, 'mb-sim-profile'),
+      seed: 1,
+    };
   });
 
   // Abrir primeiro inimigo de cada wave no Simulador
@@ -1377,6 +1412,7 @@ export function renderMissionsEditor(): void {
 }
 
 function renderMissionsEditorInto(host: HTMLElement): void {
+  disposeArenaPlayback();
   const mapOptions = maps.length > 0 ? maps : [...new Set(missions.map((m) => m.mapId))].sort();
 
   const backupOptions =

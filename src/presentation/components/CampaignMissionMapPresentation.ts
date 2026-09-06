@@ -235,31 +235,87 @@ function renderFeaturedEnemies(mission: MissionPreviewDto): string {
     })
     .join('');
 
-  return `<ul class="campaign-mission-enemies" aria-label="Inimigos em destaque">${items}</ul>`;
+  return `
+    <div class="campaign-mission-quest-foes">
+      <p class="campaign-mission-quest-section-label">Inimigos</p>
+      <ul class="campaign-mission-enemies" aria-label="Inimigos em destaque">${items}</ul>
+    </div>
+  `;
+}
+
+function renderRewardPills(mission: MissionPreviewDto): string {
+  const goldIcon = imgTag(getAssetUrl(ASSETS.ui.gold), 'Ouro', 'campaign-mission-quest-reward-icon');
+  const xpIcon = imgTag(getAssetUrl(ASSETS.ui.xp), 'XP', 'campaign-mission-quest-reward-icon');
+
+  const bonusRows: string[] = [];
+  if (mission.rewards?.itemId) {
+    const label = mission.rewardItemName ?? 'Item exclusivo';
+    bonusRows.push(`
+      <li class="campaign-mission-quest-bonus">
+        <span class="campaign-mission-quest-bonus-kind">Item</span>
+        <span class="campaign-mission-quest-bonus-name">${escapeMissionHtml(label)}</span>
+      </li>
+    `);
+  }
+  if (mission.rewards?.sceneId) {
+    const label = mission.rewardSceneTitle ?? 'Cena';
+    bonusRows.push(`
+      <li class="campaign-mission-quest-bonus">
+        <span class="campaign-mission-quest-bonus-kind">Cena</span>
+        <span class="campaign-mission-quest-bonus-name">${escapeMissionHtml(label)}</span>
+      </li>
+    `);
+  }
+
+  return `
+    <section class="campaign-mission-quest-rewards" aria-label="Recompensas">
+      <p class="campaign-mission-quest-section-label">Recompensas</p>
+      <ul class="campaign-mission-quest-pills">
+        <li class="campaign-mission-quest-pill campaign-mission-quest-pill--gold" title="Ouro obtido ao derrotar inimigos">
+          ${goldIcon}
+          <span class="campaign-mission-quest-pill-value">${mission.expectedGold}</span>
+          <span class="campaign-mission-quest-pill-label">ouro</span>
+        </li>
+        <li class="campaign-mission-quest-pill campaign-mission-quest-pill--xp" title="XP concedido ao vencer a missão">
+          ${xpIcon}
+          <span class="campaign-mission-quest-pill-value">${mission.victoryXp}</span>
+          <span class="campaign-mission-quest-pill-label">XP</span>
+          <span class="campaign-mission-quest-pill-hint">na vitória</span>
+        </li>
+      </ul>
+      ${
+        bonusRows.length > 0
+          ? `<ul class="campaign-mission-quest-bonuses" aria-label="Bônus de conclusão">${bonusRows.join('')}</ul>`
+          : ''
+      }
+    </section>
+  `;
 }
 
 function renderMissionPreviewBody(mission: MissionPreviewDto): string {
-  const rewardBits: string[] = [];
-  if (mission.rewards?.itemId) rewardBits.push('item exclusivo');
-  if (mission.rewards?.sceneId) rewardBits.push('cena');
+  const stars =
+    mission.stars && mission.stars > 0
+      ? `<span class="campaign-mission-quest-stars" aria-label="${mission.stars} estrelas">${'★'.repeat(mission.stars)}</span>`
+      : '';
 
   return `
-    <div class="campaign-mission-popover-copy">
-      <p class="campaign-phase-preview-eyebrow">${escapeMissionHtml(kindLabel(mission.kind))}${
-        mission.stars ? ` · ${mission.stars}★` : ''
-      }</p>
-      <h4 class="campaign-phase-preview-title">${escapeMissionHtml(mission.name)}</h4>
-      <p class="campaign-phase-preview-meta">${mission.waveCount} waves · Tier ${mission.difficultyTier}</p>
-      ${
-        mission.challengeHint
-          ? `<p class="campaign-phase-preview-challenge">${escapeMissionHtml(mission.challengeHint)}</p>`
-          : ''
-      }
-      ${
-        rewardBits.length > 0
-          ? `<p class="campaign-mission-rewards">${escapeMissionHtml(rewardBits.join(' · '))}</p>`
-          : ''
-      }
+    <div class="campaign-mission-quest-body campaign-mission-popover-copy">
+      <header class="campaign-mission-quest-header">
+        <div class="campaign-mission-quest-badges">
+          <span class="campaign-mission-quest-kind campaign-mission-quest-kind--${escapeMissionHtml(mission.kind)}">${escapeMissionHtml(kindLabel(mission.kind))}</span>
+          ${stars}
+        </div>
+        <h4 class="campaign-mission-quest-title campaign-phase-preview-title">${escapeMissionHtml(mission.name)}</h4>
+      </header>
+      ${renderRewardPills(mission)}
+      <div class="campaign-mission-quest-threat">
+        <p class="campaign-mission-quest-meta campaign-phase-preview-meta">${mission.waveCount} waves · Tier ${mission.difficultyTier}</p>
+        ${
+          mission.challengeHint
+            ? `<p class="campaign-mission-quest-challenge campaign-phase-preview-challenge">${escapeMissionHtml(mission.challengeHint)}</p>`
+            : ''
+        }
+      </div>
       ${renderFeaturedEnemies(mission)}
     </div>
   `;
@@ -271,7 +327,7 @@ export function renderMissionPinPopover(
 ): string {
   return `
     <div
-      class="campaign-mission-popover"
+      class="campaign-mission-popover campaign-mission-quest campaign-mission-quest--${escapeMissionHtml(mission.kind)}"
       data-campaign-mission-preview
       data-placement="above"
       style="${styleForPoint(point)}"
@@ -281,7 +337,7 @@ export function renderMissionPinPopover(
       ${renderMissionPreviewBody(mission)}
       <button
         type="button"
-        class="campaign-phase-preview-start"
+        class="campaign-phase-preview-start campaign-mission-quest-cta"
         data-campaign-start-mission="${escapeMissionHtml(mission.id)}"
       >
         Iniciar missão

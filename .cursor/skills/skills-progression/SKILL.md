@@ -30,8 +30,7 @@ description: Skills, ranks, slots de batalha e ascensão de classe no Side Hero.
 - Aba Skills: carregar `GET_HERO_SKILL_TREE` **e** `GET_HERO_ASCENSION_TREE` (skills de evolução vivem aqui)
 - Aba Skills: sem hints de texto; slots interativos + highlight no tap-to-assign; tooltip no ícone (detalhes) e nos círculos (ganho do level)
 - Lista de skills: linha com nome, ícone à esquerda e círculos de level à direita; equipada = fundo verde; próximo level = círculo tracejado clicável; hover em **qualquer** círculo mostra o ganho daquele ponto (mesmo futuro/bloqueado)
-- Passivas equipadas (`evasion`, `vitality`, `iron_skin`, `mana_shield`): efeito numérico na seção **Na batalha** do tooltip via `PassiveSkillBattleStatsMapper`
-- Passivas **sempre ativas** de classe/ascensão/gear: ver skill `passives` / `specs/passives.spec.md` (sistema separado)
+- Passivas **sempre ativas** de classe/ascensão/gear: ver skill `passives` / `specs/passives.spec.md` (não ocupam slot; skills só-passivas não existem no catálogo)
 - Cards de ascensão: requisitos/CTA no tooltip; clique no card disponível abre confirmação; `+N Aprim.` (não pool separado)
 - Ascensão libera skills/passivas do caminho e concede Aprimoramento (`pointsGranted`); skills `pointType: 'ascension'` gastam o mesmo saldo até rank 3
 - Aba Classe: sem retrato/classe atual (vai no header); banner + cards temáticos (`HeroClassAscensionPresentation`) — sem lista de skills
